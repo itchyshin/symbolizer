@@ -132,21 +132,28 @@ the result prints.
 ``` r
 
 equations(sym, notation = "both")
-#> 
-#> ── Equations ──
-#> 
-#> distribution
-#>   index:  W_i \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2)
-#>   matrix: \mathbf{w} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2))
-#> mu_linear_predictor
-#>   index:  \mu_i = \beta_{0} + \beta_{1} \, T_i + \beta_{2} \, \mathrm{log}(F_i) + \beta_{3} \, [sex = \mathrm{male}] + u_{site(i)}
-#>   matrix: \boldsymbol{\mu} = \mathbf{X} \boldsymbol{\beta} + \mathbf{u}
-#> sigma_linear_predictor
-#>   index:  \log(\sigma_i) = \gamma_{0} + \gamma_{1} \, T_i + \gamma_{2} \, [sex = \mathrm{male}]
-#>   matrix: \log(\boldsymbol{\sigma}) = \mathbf{Z} \boldsymbol{\gamma}
-#> mu_random_intercept_site
-#>   index:  u_{site} \sim \mathcal{N}(0,\, \sigma_{site}^2)
-#>   matrix: \mathbf{u}_{site} \sim \mathcal{N}(\mathbf{0},\, \sigma_{site}^2 \mathbf{I}_{8})
+```
+
+**Index form:**
+
+``` math
+\begin{aligned}
+W_i \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
+\mu_i = \beta_{0} + \beta_{1} \, T_i + \beta_{2} \, \mathrm{log}(F_i) + \beta_{3} \, [sex = \mathrm{male}] + u_{site(i)} \\
+\log(\sigma_i) = \gamma_{0} + \gamma_{1} \, T_i + \gamma_{2} \, [sex = \mathrm{male}] \\
+u_{site} \sim \mathcal{N}(0,\, \sigma_{site}^2)
+\end{aligned}
+```
+
+**Matrix form:**
+
+``` math
+\begin{aligned}
+\mathbf{w} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2)) \\
+\boldsymbol{\mu} = \mathbf{X} \boldsymbol{\beta} + \mathbf{u} \\
+\log(\boldsymbol{\sigma}) = \mathbf{Z} \boldsymbol{\gamma} \\
+\mathbf{u}_{site} \sim \mathcal{N}(\mathbf{0},\, \sigma_{site}^2 \mathbf{I}_{8})
+\end{aligned}
 ```
 
 Reading the mu row line by line:
@@ -203,12 +210,22 @@ linear-predictor row:
 
 eq <- equations(sym, notation = "both")
 eq[eq$submodel == "sigma" & eq$kind == "linear_predictor", ]
-#> 
-#> ── Equations ──
-#> 
-#> sigma_linear_predictor
-#>   index:  \log(\sigma_i) = \gamma_{0} + \gamma_{1} \, T_i + \gamma_{2} \, [sex = \mathrm{male}]
-#>   matrix: \log(\boldsymbol{\sigma}) = \mathbf{Z} \boldsymbol{\gamma}
+```
+
+**Index form:**
+
+``` math
+\begin{aligned}
+\log(\sigma_i) = \gamma_{0} + \gamma_{1} \, T_i + \gamma_{2} \, [sex = \mathrm{male}]
+\end{aligned}
+```
+
+**Matrix form:**
+
+``` math
+\begin{aligned}
+\log(\boldsymbol{\sigma}) = \mathbf{Z} \boldsymbol{\gamma}
+\end{aligned}
 ```
 
 Two features deserve attention.
@@ -240,74 +257,22 @@ concrete columns now show real numbers, not just placeholders.
 ``` r
 
 symbol_table(sym)
-#> 
-#> ── Symbol dictionary ("both") ──
-#> 
-#> body_mass [response]
-#> index: `W_i`
-#> matrix: `\mathbf{w}`
-#> units: "g"
-#> dimension: `\mathbb{R}^n` (= `\mathbb{R}^{200}`)
-#> response variable
-#> temperature [predictor]
-#> index: `T_i`
-#> matrix: `(no matrix form)`
-#> units: "C"
-#> dimension: `column of design matrix` (= `column of \mathbf{X} (length 200)`)
-#> continuous predictor
-#> food [transformation]
-#> index: `F_i`
-#> matrix: `(no matrix form)`
-#> units: "g/day"
-#> dimension: `column of design matrix` (= `column of \mathbf{X} (length 200)`)
-#> predictor (log-transformed)
-#> sex [factor]
-#> index: `S_i`
-#> matrix: `(no matrix form)`
-#> dimension: `column of design matrix` (= `column of \mathbf{X} (length 200)`)
-#> factor (female, male)
-#> (parameter)
-#> index: `\mu_i`
-#> matrix: `\boldsymbol{\mu}`
-#> dimension: `\mathbb{R}^n` (= `\mathbb{R}^{200}`)
-#> conditional mu of body_mass
-#> (parameter)
-#> index: `\sigma_i`
-#> matrix: `\boldsymbol{\sigma}`
-#> dimension: `\mathbb{R}^n` (= `\mathbb{R}^{200}`)
-#> conditional sigma of body_mass
-#> (coefficient)
-#> index: `\beta_{0}, \beta_{1}, \beta_{2}, \beta_{3}`
-#> matrix: `\boldsymbol{\beta}`
-#> dimension: `\mathbb{R}^{p_\mu}` (= `\mathbb{R}^{4}`)
-#> mu submodel coefficients
-#> (coefficient)
-#> index: `\gamma_{0}, \gamma_{1}, \gamma_{2}`
-#> matrix: `\boldsymbol{\gamma}`
-#> dimension: `\mathbb{R}^{p_\sigma}` (= `\mathbb{R}^{3}`)
-#> sigma submodel coefficients
-#> (design_matrix)
-#> index: `(no index form)`
-#> matrix: `\mathbf{X}`
-#> dimension: `\mathbb{R}^{n \times p_\mu}` (= `\mathbb{R}^{200 \times 4}`)
-#> mu submodel design matrix
-#> (design_matrix)
-#> index: `(no index form)`
-#> matrix: `\mathbf{Z}`
-#> dimension: `\mathbb{R}^{n \times p_\sigma}` (= `\mathbb{R}^{200 \times 3}`)
-#> sigma submodel design matrix
-#> site [random_intercept]
-#> index: `u_{site(i)}`
-#> matrix: `\mathbf{u}_{site}`
-#> dimension: `scalar; \mathbb{R}^{G_{site}} in matrix form` (= `scalar;
-#> \mathbb{R}^{8} in matrix form`)
-#> random intercept by site
-#> (variance_component)
-#> index: `\sigma_{site}`
-#> matrix: `\sigma_{site}`
-#> dimension: `scalar` (= `scalar`)
-#> between-site standard deviation
 ```
+
+| index | matrix | variable | units | role | shape | concrete | description |
+|:---|:---|:---|:---|:---|:---|:---|:---|
+| $`W_i`$ | $`\mathbf{w}`$ | body_mass | g | response | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ | response variable |
+| $`T_i`$ | — | temperature | C | predictor | column of design matrix | column of X (length 200) | continuous predictor |
+| $`F_i`$ | — | food | g/day | transformation | column of design matrix | column of X (length 200) | predictor (log-transformed) |
+| $`S_i`$ | — | sex | NA | factor | column of design matrix | column of X (length 200) | factor (female, male) |
+| $`\mu_i`$ | $`\boldsymbol{\mu}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ | conditional mu of body_mass |
+| $`\sigma_i`$ | $`\boldsymbol{\sigma}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ | conditional sigma of body_mass |
+| $`\beta_{0}, \beta_{1}, \beta_{2}, \beta_{3}`$ | $`\boldsymbol{\beta}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\mu}`$ | $`\mathbb{R}^{4}`$ | mu submodel coefficients |
+| $`\gamma_{0}, \gamma_{1}, \gamma_{2}`$ | $`\boldsymbol{\gamma}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\sigma}`$ | $`\mathbb{R}^{3}`$ | sigma submodel coefficients |
+| — | $`\mathbf{X}`$ | NA | NA | design_matrix | $`\mathbb{R}^{n \times p_\mu}`$ | $`\mathbb{R}^{200 \times 4}`$ | mu submodel design matrix |
+| — | $`\mathbf{Z}`$ | NA | NA | design_matrix | $`\mathbb{R}^{n \times p_\sigma}`$ | $`\mathbb{R}^{200 \times 3}`$ | sigma submodel design matrix |
+| $`u_{site(i)}`$ | $`\mathbf{u}_{site}`$ | site | NA | random_intercept | $`scalar; \mathbb{R}^{G_{site}} in matrix form`$ | $`scalar; \mathbb{R}^{8} in matrix form`$ | random intercept by site |
+| $`\sigma_{site}`$ | $`\sigma_{site}`$ | NA | NA | variance_component | scalar | scalar | between-site standard deviation |
 
 Notice the design matrix rows: `\mathbf{X}` is
 `\mathbb{R}^{n \times p_\mu}` abstractly, `\mathbb{R}^{200 \times 4}`
@@ -330,38 +295,16 @@ on the user’s plate: missing-at-random).
 ``` r
 
 assumption_table(sym)
-#> 
-#> ── Assumptions ──
-#> 
-#> conditional_distribution
-#> expression: `W_i \mid \mu_i\, \sigma_i \sim \mathrm{Normal}(\mu_i\,
-#> \sigma_i^2)`
-#> meaning: body_mass varies normally around its expected value
-#> status: ["stated"]
-#> linear_predictor (mu)
-#> expression: `\mu_i = \beta_0 + \sum_k \beta_k X_{ki}`
-#> meaning: Expected body_mass is a linear combination of the mean-model
-#> predictors
-#> status: ["stated"]
-#> linear_predictor (sigma)
-#> expression: `\log(\sigma_i) = \gamma_0 + \sum_k \gamma_k Z_{ki}`
-#> meaning: Log residual SD of body_mass is a linear combination of the
-#> scale-model predictors
-#> status: ["stated"]
-#> independence
-#> expression: `W_i \perp W_j \mid X \text{ for } i \ne j`
-#> meaning: Observations are conditionally independent given the predictors
-#> status: ["implied"]
-#> positivity (sigma)
-#> expression: `\sigma_i > 0`
-#> meaning: Residual SD is constrained positive via the log link
-#> status: ["implied"]
-#> no_missing_at_random
-#> expression: `—`
-#> meaning: Observations are assumed not missing in a way that depends on the
-#> unobserved response
-#> status: ["not_checked"]
 ```
+
+| assumption | expression | biological meaning | status |
+|:---|:---|:---|:---|
+| conditional_distribution | $`W_i \mid \mu_i\, \sigma_i \sim \mathrm{Normal}(\mu_i\, \sigma_i^2)`$ | body_mass varies normally around its expected value | stated |
+| linear_predictor | $`\mu_i = \beta_0 + \sum_k \beta_k X_{ki}`$ | Expected body_mass is a linear combination of the mean-model predictors | stated |
+| linear_predictor | $`\log(\sigma_i) = \gamma_0 + \sum_k \gamma_k Z_{ki}`$ | Log residual SD of body_mass is a linear combination of the scale-model predictors | stated |
+| independence_given_random_effects | $`W_i \perp W_j \mid X\, \mathbf{u} \text{ for } i \ne j`$ | Observations are conditionally independent given the predictors and the random effects | stated |
+| positivity | $`\sigma_i > 0`$ | Residual SD is constrained positive via the log link | implied |
+| no_missing_at_random | — | Observations are assumed not missing in a way that depends on the unobserved response | not_checked |
 
 One known limitation: the `independence` row reads “Observations are
 conditionally independent given the predictors”. When a random intercept
@@ -383,45 +326,17 @@ variance-scale reading (sigma only), and a biological reading.
 ``` r
 
 parameter_interpretation(sym)
-#> 
-#> ── Parameter interpretation ("all") ──
-#> 
-#> ── submodel: mu
-#> (Intercept) ["intercept"] estimate = "5.55"
-#> link: Expected body_mass at the reference
-#> natural: Expected body_mass for the reference case
-#> variance: —
-#> biological: Baseline body_mass in the reference condition
-#> temperature ["slope"] estimate = "0.531"
-#> link: Linear change in expected body_mass per unit of temperature
-#> natural: Expected body_mass changes by 0.531 per unit of temperature
-#> variance: —
-#> biological: A unit change in temperature shifts the expected body_mass by 0.531
-#> sex ["factor_contrast"] estimate = "2.52"
-#> link: Difference in expected body_mass for male versus the reference
-#> natural: Expected body_mass for male differs from the reference by 2.52
-#> variance: —
-#> biological: Average body_mass differs between male and the reference
-#> 
-#> ── submodel: sigma
-#> (Intercept) ["intercept"] estimate = "0.221"
-#> link: Log residual SD at the reference (SD = exp(0.221))
-#> natural: Residual SD = exp(0.221) at the reference
-#> variance: Residual variance = exp(2*0.221)
-#> biological: Baseline level of unexplained individual variation in body_mass
-#> temperature ["slope"] estimate = "0.0546"
-#> link: Log residual SD changes by 0.0546 per unit of temperature
-#> natural: Residual SD multiplied by exp(0.0546) per unit of temperature
-#> variance: Residual variance multiplied by exp(2*0.0546) per unit
-#> biological: A unit change in temperature multiplies the unexplained variability
-#> of body_mass by exp(0.0546)
-#> sex ["factor_contrast"] estimate = "0.0332"
-#> link: Log residual SD differs by 0.0332 for male versus the reference
-#> natural: Residual SD for male = exp(0.0332) times the reference SD
-#> variance: Residual variance for male = exp(2*0.0332) times the reference
-#> biological: Individual-level variation differs between male and the reference
-#> by a factor of exp(0.0332)
 ```
+
+| submodel | term_label | coefficient_role | estimate | link_scale_reading | natural_scale_reading | variance_scale_reading | biological_reading |
+|:---|:---|:---|:---|:---|:---|:---|:---|
+| mu | (Intercept) | intercept | 5.55 | Expected body_mass at the reference | Expected body_mass for the reference case | — | Baseline body_mass in the reference condition |
+| mu | temperature | slope | 0.531 | Linear change in expected body_mass per unit of temperature | Expected body_mass changes by 0.531 per unit of temperature | — | A unit change in temperature shifts the expected body_mass by 0.531 |
+| mu | log(food) | transformation | 1.75 | Linear change in expected body_mass per unit of log(food) | Expected body_mass changes by 1.75 per unit of log(food) | — | A unit change in log(food) shifts the expected body_mass by 1.75 |
+| mu | sex | factor_contrast | 2.52 | Difference in expected body_mass for male versus the reference | Expected body_mass for male differs from the reference by 2.52 | — | Average body_mass differs between male and the reference |
+| sigma | (Intercept) | intercept | 0.221 | Log residual SD at the reference (SD = exp(0.221)) | Residual SD = exp(0.221) at the reference | Residual variance = exp(2\*0.221) | Baseline level of unexplained individual variation in body_mass |
+| sigma | temperature | slope | 0.0546 | Log residual SD changes by 0.0546 per unit of temperature | Residual SD multiplied by exp(0.0546) per unit of temperature | Residual variance multiplied by exp(2\*0.0546) per unit | A unit change in temperature multiplies the unexplained variability of body_mass by exp(0.0546) |
+| sigma | sex | factor_contrast | 0.0332 | Log residual SD differs by 0.0332 for male versus the reference | Residual SD for male = exp(0.0332) times the reference SD | Residual variance for male = exp(2\*0.0332) times the reference | Individual-level variation differs between male and the reference by a factor of exp(0.0332) |
 
 For this fit, the most informative comparison is the `temperature` slope
 on each submodel.
@@ -457,23 +372,12 @@ mathematics. Two rows, both notations.
 ``` r
 
 formula_bridge(sym)
-#> 
-#> ── Formula bridge ("both") ──
-#> 
-#> mu
-#> R: `body_mass ~ temperature + log(food) + sex + (1 | site)`
-#> meaning: Expected body_mass is a linear function of the mean-model predictors
-#> math: `\mu_i = \beta_{0} + \beta_{1} \, T_i + \beta_{2} \, \mathrm{log}(F_i) +
-#> \beta_{3} \, [sex = \mathrm{male}] + u_{site(i)}`
-#> matrix: `\boldsymbol{\mu} = \mathbf{X} \boldsymbol{\beta} + \mathbf{u}`
-#> sigma
-#> R: `sigma ~ temperature + sex`
-#> meaning: Log residual SD of body_mass is a linear function of the scale-model
-#> predictors
-#> math: `\log(\sigma_i) = \gamma_{0} + \gamma_{1} \, T_i + \gamma_{2} \, [sex =
-#> \mathrm{male}]`
-#> matrix: `\log(\boldsymbol{\sigma}) = \mathbf{Z} \boldsymbol{\gamma}`
 ```
+
+| submodel | R syntax | meaning | math (index) | math (matrix) |
+|:---|:---|:---|:---|:---|
+| mu | `body_mass ~ temperature + log(food) + sex + (1 &#124; site)` | Expected body_mass is a linear function of the mean-model predictors | $`\mu_i = \beta_{0} + \beta_{1} \, T_i + \beta_{2} \, \mathrm{log}(F_i) + \beta_{3} \, [sex = \mathrm{male}] + u_{site(i)}`$ | $`\boldsymbol{\mu} = \mathbf{X} \boldsymbol{\beta} + \mathbf{u}`$ |
+| sigma | `sigma ~ temperature + sex` | Log residual SD of body_mass is a linear function of the scale-model predictors | $`\log(\sigma_i) = \gamma_{0} + \gamma_{1} \, T_i + \gamma_{2} \, [sex = \mathrm{male}]`$ | $`\log(\boldsymbol{\sigma}) = \mathbf{Z} \boldsymbol{\gamma}`$ |
 
 For the mu submodel, the R syntax
 `body_mass ~ temperature + log(food) + sex + (1 | site)` maps to the
@@ -496,62 +400,22 @@ its index form with its matrix form and tags both shapes.
 ``` r
 
 notation_bridge(sym)
-#> 
-#> ── Notation bridge ──
-#> 
-#> conditional_distribution
-#> index: `W_i \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2)`
-#> matrix: `\mathbf{w} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} \sim
-#> \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2))`
-#> dimension: `\mathbb{R}^n` (= `\mathbb{R}^{200}`)
-#> mu_linear_predictor
-#> index: `\mu_i = \beta_{0} + \beta_{1} \, T_i + \beta_{2} \, \mathrm{log}(F_i) +
-#> \beta_{3} \, [sex = \mathrm{male}] + u_{site(i)}`
-#> matrix: `\boldsymbol{\mu} = \mathbf{X} \boldsymbol{\beta} + \mathbf{u}`
-#> dimension: `\mathbb{R}^n` (= `\mathbb{R}^{200}`)
-#> sigma_linear_predictor
-#> index: `\log(\sigma_i) = \gamma_{0} + \gamma_{1} \, T_i + \gamma_{2} \, [sex =
-#> \mathrm{male}]`
-#> matrix: `\log(\boldsymbol{\sigma}) = \mathbf{Z} \boldsymbol{\gamma}`
-#> dimension: `\mathbb{R}^n` (= `\mathbb{R}^{200}`)
-#> body_mass
-#> index: `W_i`
-#> matrix: `\mathbf{w}`
-#> dimension: `\mathbb{R}^n` (= `\mathbb{R}^{200}`)
-#> parameter
-#> index: `\mu_i`
-#> matrix: `\boldsymbol{\mu}`
-#> dimension: `\mathbb{R}^n` (= `\mathbb{R}^{200}`)
-#> parameter
-#> index: `\sigma_i`
-#> matrix: `\boldsymbol{\sigma}`
-#> dimension: `\mathbb{R}^n` (= `\mathbb{R}^{200}`)
-#> coefficient
-#> index: `\beta_{0}, \beta_{1}, \beta_{2}, \beta_{3}`
-#> matrix: `\boldsymbol{\beta}`
-#> dimension: `\mathbb{R}^{p_\mu}` (= `\mathbb{R}^{4}`)
-#> coefficient
-#> index: `\gamma_{0}, \gamma_{1}, \gamma_{2}`
-#> matrix: `\boldsymbol{\gamma}`
-#> dimension: `\mathbb{R}^{p_\sigma}` (= `\mathbb{R}^{3}`)
-#> design_matrix
-#> index: `--`
-#> matrix: `\mathbf{X}`
-#> dimension: `\mathbb{R}^{n \times p_\mu}` (= `\mathbb{R}^{200 \times 4}`)
-#> design_matrix
-#> index: `--`
-#> matrix: `\mathbf{Z}`
-#> dimension: `\mathbb{R}^{n \times p_\sigma}` (= `\mathbb{R}^{200 \times 3}`)
-#> site
-#> index: `u_{site(i)}`
-#> matrix: `\mathbf{u}_{site}`
-#> dimension: `scalar; \mathbb{R}^{G_{site}} in matrix form` (= `scalar;
-#> \mathbb{R}^{8} in matrix form`)
-#> variance_component
-#> index: `\sigma_{site}`
-#> matrix: `\sigma_{site}`
-#> dimension: `scalar` (= `scalar`)
 ```
+
+| concept | index | matrix | shape | concrete |
+|:---|:---|:---|:---|:---|
+| conditional_distribution | $`W_i \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2)`$ | $`\mathbf{w} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2))`$ | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ |
+| mu_linear_predictor | $`\mu_i = \beta_{0} + \beta_{1} \, T_i + \beta_{2} \, \mathrm{log}(F_i) + \beta_{3} \, [sex = \mathrm{male}] + u_{site(i)}`$ | $`\boldsymbol{\mu} = \mathbf{X} \boldsymbol{\beta} + \mathbf{u}`$ | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ |
+| sigma_linear_predictor | $`\log(\sigma_i) = \gamma_{0} + \gamma_{1} \, T_i + \gamma_{2} \, [sex = \mathrm{male}]`$ | $`\log(\boldsymbol{\sigma}) = \mathbf{Z} \boldsymbol{\gamma}`$ | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ |
+| body_mass | $`W_i`$ | $`\mathbf{w}`$ | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ |
+| parameter | $`\mu_i`$ | $`\boldsymbol{\mu}`$ | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ |
+| parameter | $`\sigma_i`$ | $`\boldsymbol{\sigma}`$ | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ |
+| coefficient | $`\beta_{0}, \beta_{1}, \beta_{2}, \beta_{3}`$ | $`\boldsymbol{\beta}`$ | $`\mathbb{R}^{p_\mu}`$ | $`\mathbb{R}^{4}`$ |
+| coefficient | $`\gamma_{0}, \gamma_{1}, \gamma_{2}`$ | $`\boldsymbol{\gamma}`$ | $`\mathbb{R}^{p_\sigma}`$ | $`\mathbb{R}^{3}`$ |
+| design_matrix | — | $`\mathbf{X}`$ | $`\mathbb{R}^{n \times p_\mu}`$ | $`\mathbb{R}^{200 \times 4}`$ |
+| design_matrix | — | $`\mathbf{Z}`$ | $`\mathbb{R}^{n \times p_\sigma}`$ | $`\mathbb{R}^{200 \times 3}`$ |
+| site | $`u_{site(i)}`$ | $`\mathbf{u}_{site}`$ | $`scalar; \mathbb{R}^{G_{site}} in matrix form`$ | $`scalar; \mathbb{R}^{8} in matrix form`$ |
+| variance_component | $`\sigma_{site}`$ | $`\sigma_{site}`$ | scalar | scalar |
 
 The `dimension` column carries the shape rule (`\mathbb{R}^n`,
 `\mathbb{R}^{n \times p_\mu}`). The `dimension_concrete` column plugs in

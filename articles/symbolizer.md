@@ -78,15 +78,14 @@ result prints.
 ``` r
 
 equations(sym)
-#> 
-#> ── Equations ──
-#> 
-#> distribution
-#>   index:  W_i \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2)
-#> mu_linear_predictor
-#>   index:  \mu_i = \beta_{0} + \beta_{1} \, T_i
-#> sigma_linear_predictor
-#>   index:  \log(\sigma_i) = \gamma_{0} + \gamma_{1} \, T_i
+```
+
+``` math
+\begin{aligned}
+W_i \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
+\mu_i = \beta_{0} + \beta_{1} \, T_i \\
+\log(\sigma_i) = \gamma_{0} + \gamma_{1} \, T_i
+\end{aligned}
 ```
 
 [`as_latex()`](https://itchyshin.github.io/symbolizer/reference/as_latex.md)
@@ -145,51 +144,20 @@ its counterpart in the other notation and tags the shape:
 ``` r
 
 notation_bridge(sym)
-#> 
-#> ── Notation bridge ──
-#> 
-#> conditional_distribution
-#> index: `W_i \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2)`
-#> matrix: `\mathbf{w} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} \sim
-#> \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2))`
-#> dimension: `\mathbb{R}^n` (= `\mathbb{R}^{80}`)
-#> mu_linear_predictor
-#> index: `\mu_i = \beta_{0} + \beta_{1} \, T_i`
-#> matrix: `\boldsymbol{\mu} = \mathbf{X} \boldsymbol{\beta}`
-#> dimension: `\mathbb{R}^n` (= `\mathbb{R}^{80}`)
-#> sigma_linear_predictor
-#> index: `\log(\sigma_i) = \gamma_{0} + \gamma_{1} \, T_i`
-#> matrix: `\log(\boldsymbol{\sigma}) = \mathbf{Z} \boldsymbol{\gamma}`
-#> dimension: `\mathbb{R}^n` (= `\mathbb{R}^{80}`)
-#> body_mass
-#> index: `W_i`
-#> matrix: `\mathbf{w}`
-#> dimension: `\mathbb{R}^n` (= `\mathbb{R}^{80}`)
-#> parameter
-#> index: `\mu_i`
-#> matrix: `\boldsymbol{\mu}`
-#> dimension: `\mathbb{R}^n` (= `\mathbb{R}^{80}`)
-#> parameter
-#> index: `\sigma_i`
-#> matrix: `\boldsymbol{\sigma}`
-#> dimension: `\mathbb{R}^n` (= `\mathbb{R}^{80}`)
-#> coefficient
-#> index: `\beta_{0}, \beta_{1}`
-#> matrix: `\boldsymbol{\beta}`
-#> dimension: `\mathbb{R}^{p_\mu}` (= `\mathbb{R}^{2}`)
-#> coefficient
-#> index: `\gamma_{0}, \gamma_{1}`
-#> matrix: `\boldsymbol{\gamma}`
-#> dimension: `\mathbb{R}^{p_\sigma}` (= `\mathbb{R}^{2}`)
-#> design_matrix
-#> index: `--`
-#> matrix: `\mathbf{X}`
-#> dimension: `\mathbb{R}^{n \times p_\mu}` (= `\mathbb{R}^{80 \times 2}`)
-#> design_matrix
-#> index: `--`
-#> matrix: `\mathbf{Z}`
-#> dimension: `\mathbb{R}^{n \times p_\sigma}` (= `\mathbb{R}^{80 \times 2}`)
 ```
+
+| concept | index | matrix | shape | concrete |
+|:---|:---|:---|:---|:---|
+| conditional_distribution | $`W_i \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2)`$ | $`\mathbf{w} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2))`$ | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ |
+| mu_linear_predictor | $`\mu_i = \beta_{0} + \beta_{1} \, T_i`$ | $`\boldsymbol{\mu} = \mathbf{X} \boldsymbol{\beta}`$ | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ |
+| sigma_linear_predictor | $`\log(\sigma_i) = \gamma_{0} + \gamma_{1} \, T_i`$ | $`\log(\boldsymbol{\sigma}) = \mathbf{Z} \boldsymbol{\gamma}`$ | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ |
+| body_mass | $`W_i`$ | $`\mathbf{w}`$ | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ |
+| parameter | $`\mu_i`$ | $`\boldsymbol{\mu}`$ | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ |
+| parameter | $`\sigma_i`$ | $`\boldsymbol{\sigma}`$ | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ |
+| coefficient | $`\beta_{0}, \beta_{1}`$ | $`\boldsymbol{\beta}`$ | $`\mathbb{R}^{p_\mu}`$ | $`\mathbb{R}^{2}`$ |
+| coefficient | $`\gamma_{0}, \gamma_{1}`$ | $`\boldsymbol{\gamma}`$ | $`\mathbb{R}^{p_\sigma}`$ | $`\mathbb{R}^{2}`$ |
+| design_matrix | — | $`\mathbf{X}`$ | $`\mathbb{R}^{n \times p_\mu}`$ | $`\mathbb{R}^{80 \times 2}`$ |
+| design_matrix | — | $`\mathbf{Z}`$ | $`\mathbb{R}^{n \times p_\sigma}`$ | $`\mathbb{R}^{80 \times 2}`$ |
 
 Read it as follows: the `dimension` column is the shape rule
 (`\mathbb{R}^n`, `\mathbb{R}^{n \times p_\mu}`), and the
@@ -294,52 +262,18 @@ and concrete forms.
 ``` r
 
 symbol_table(sym)
-#> 
-#> ── Symbol dictionary ("both") ──
-#> 
-#> body_mass [response]
-#> index: `W_i`
-#> matrix: `\mathbf{w}`
-#> units: "g"
-#> dimension: `\mathbb{R}^n` (= `\mathbb{R}^{80}`)
-#> response variable
-#> temperature [predictor]
-#> index: `T_i`
-#> matrix: `(no matrix form)`
-#> units: "C"
-#> dimension: `column of design matrix` (= `column of \mathbf{X} (length 80)`)
-#> continuous predictor
-#> (parameter)
-#> index: `\mu_i`
-#> matrix: `\boldsymbol{\mu}`
-#> dimension: `\mathbb{R}^n` (= `\mathbb{R}^{80}`)
-#> conditional mu of body_mass
-#> (parameter)
-#> index: `\sigma_i`
-#> matrix: `\boldsymbol{\sigma}`
-#> dimension: `\mathbb{R}^n` (= `\mathbb{R}^{80}`)
-#> conditional sigma of body_mass
-#> (coefficient)
-#> index: `\beta_{0}, \beta_{1}`
-#> matrix: `\boldsymbol{\beta}`
-#> dimension: `\mathbb{R}^{p_\mu}` (= `\mathbb{R}^{2}`)
-#> mu submodel coefficients
-#> (coefficient)
-#> index: `\gamma_{0}, \gamma_{1}`
-#> matrix: `\boldsymbol{\gamma}`
-#> dimension: `\mathbb{R}^{p_\sigma}` (= `\mathbb{R}^{2}`)
-#> sigma submodel coefficients
-#> (design_matrix)
-#> index: `(no index form)`
-#> matrix: `\mathbf{X}`
-#> dimension: `\mathbb{R}^{n \times p_\mu}` (= `\mathbb{R}^{80 \times 2}`)
-#> mu submodel design matrix
-#> (design_matrix)
-#> index: `(no index form)`
-#> matrix: `\mathbf{Z}`
-#> dimension: `\mathbb{R}^{n \times p_\sigma}` (= `\mathbb{R}^{80 \times 2}`)
-#> sigma submodel design matrix
 ```
+
+| index | matrix | variable | units | role | shape | concrete | description |
+|:---|:---|:---|:---|:---|:---|:---|:---|
+| $`W_i`$ | $`\mathbf{w}`$ | body_mass | g | response | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | response variable |
+| $`T_i`$ | — | temperature | C | predictor | column of design matrix | column of X (length 80) | continuous predictor |
+| $`\mu_i`$ | $`\boldsymbol{\mu}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | conditional mu of body_mass |
+| $`\sigma_i`$ | $`\boldsymbol{\sigma}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | conditional sigma of body_mass |
+| $`\beta_{0}, \beta_{1}`$ | $`\boldsymbol{\beta}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\mu}`$ | $`\mathbb{R}^{2}`$ | mu submodel coefficients |
+| $`\gamma_{0}, \gamma_{1}`$ | $`\boldsymbol{\gamma}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\sigma}`$ | $`\mathbb{R}^{2}`$ | sigma submodel coefficients |
+| — | $`\mathbf{X}`$ | NA | NA | design_matrix | $`\mathbb{R}^{n \times p_\mu}`$ | $`\mathbb{R}^{80 \times 2}`$ | mu submodel design matrix |
+| — | $`\mathbf{Z}`$ | NA | NA | design_matrix | $`\mathbb{R}^{n \times p_\sigma}`$ | $`\mathbb{R}^{80 \times 2}`$ | sigma submodel design matrix |
 
 [`assumption_table()`](https://itchyshin.github.io/symbolizer/reference/assumption_table.md)
 distinguishes three statuses: **stated** assumptions are in the formula
@@ -351,38 +285,16 @@ responsibility (missing-at-random).
 ``` r
 
 assumption_table(sym)
-#> 
-#> ── Assumptions ──
-#> 
-#> conditional_distribution
-#> expression: `W_i \mid \mu_i\, \sigma_i \sim \mathrm{Normal}(\mu_i\,
-#> \sigma_i^2)`
-#> meaning: body_mass varies normally around its expected value
-#> status: ["stated"]
-#> linear_predictor (mu)
-#> expression: `\mu_i = \beta_0 + \sum_k \beta_k X_{ki}`
-#> meaning: Expected body_mass is a linear combination of the mean-model
-#> predictors
-#> status: ["stated"]
-#> linear_predictor (sigma)
-#> expression: `\log(\sigma_i) = \gamma_0 + \sum_k \gamma_k Z_{ki}`
-#> meaning: Log residual SD of body_mass is a linear combination of the
-#> scale-model predictors
-#> status: ["stated"]
-#> independence
-#> expression: `W_i \perp W_j \mid X \text{ for } i \ne j`
-#> meaning: Observations are conditionally independent given the predictors
-#> status: ["implied"]
-#> positivity (sigma)
-#> expression: `\sigma_i > 0`
-#> meaning: Residual SD is constrained positive via the log link
-#> status: ["implied"]
-#> no_missing_at_random
-#> expression: `—`
-#> meaning: Observations are assumed not missing in a way that depends on the
-#> unobserved response
-#> status: ["not_checked"]
 ```
+
+| assumption | expression | biological meaning | status |
+|:---|:---|:---|:---|
+| conditional_distribution | $`W_i \mid \mu_i\, \sigma_i \sim \mathrm{Normal}(\mu_i\, \sigma_i^2)`$ | body_mass varies normally around its expected value | stated |
+| linear_predictor | $`\mu_i = \beta_0 + \sum_k \beta_k X_{ki}`$ | Expected body_mass is a linear combination of the mean-model predictors | stated |
+| linear_predictor | $`\log(\sigma_i) = \gamma_0 + \sum_k \gamma_k Z_{ki}`$ | Log residual SD of body_mass is a linear combination of the scale-model predictors | stated |
+| independence | $`W_i \perp W_j \mid X \text{ for } i \ne j`$ | Observations are conditionally independent given the predictors | implied |
+| positivity | $`\sigma_i > 0`$ | Residual SD is constrained positive via the log link | implied |
+| no_missing_at_random | — | Observations are assumed not missing in a way that depends on the unobserved response | not_checked |
 
 [`formula_bridge()`](https://itchyshin.github.io/symbolizer/reference/formula_bridge.md)
 translates R syntax to mathematics. Each submodel has its R formula on
@@ -392,21 +304,12 @@ notations.
 ``` r
 
 formula_bridge(sym)
-#> 
-#> ── Formula bridge ("both") ──
-#> 
-#> mu
-#> R: `body_mass ~ temperature`
-#> meaning: Expected body_mass is a linear function of the mean-model predictors
-#> math: `\mu_i = \beta_{0} + \beta_{1} \, T_i`
-#> matrix: `\boldsymbol{\mu} = \mathbf{X} \boldsymbol{\beta}`
-#> sigma
-#> R: `sigma ~ temperature`
-#> meaning: Log residual SD of body_mass is a linear function of the scale-model
-#> predictors
-#> math: `\log(\sigma_i) = \gamma_{0} + \gamma_{1} \, T_i`
-#> matrix: `\log(\boldsymbol{\sigma}) = \mathbf{Z} \boldsymbol{\gamma}`
 ```
+
+| submodel | R syntax | meaning | math (index) | math (matrix) |
+|:---|:---|:---|:---|:---|
+| mu | `body_mass ~ temperature` | Expected body_mass is a linear function of the mean-model predictors | $`\mu_i = \beta_{0} + \beta_{1} \, T_i`$ | $`\boldsymbol{\mu} = \mathbf{X} \boldsymbol{\beta}`$ |
+| sigma | `sigma ~ temperature` | Log residual SD of body_mass is a linear function of the scale-model predictors | $`\log(\sigma_i) = \gamma_{0} + \gamma_{1} \, T_i`$ | $`\log(\boldsymbol{\sigma}) = \mathbf{Z} \boldsymbol{\gamma}`$ |
 
 **Takeaway.** What the model says, what it assumes, and how its R syntax
 maps to math live in three separate tables — so reviewers can audit each
@@ -422,34 +325,14 @@ coefficients), and biological readings together:
 ``` r
 
 parameter_interpretation(sym)
-#> 
-#> ── Parameter interpretation ("all") ──
-#> 
-#> ── submodel: mu
-#> (Intercept) ["intercept"] estimate = "29.6"
-#> link: Expected body_mass at the reference
-#> natural: Expected body_mass for the reference case
-#> variance: —
-#> biological: Baseline body_mass in the reference condition
-#> temperature ["slope"] estimate = "0.492"
-#> link: Linear change in expected body_mass per unit of temperature
-#> natural: Expected body_mass changes by 0.492 per unit of temperature
-#> variance: —
-#> biological: A unit change in temperature shifts the expected body_mass by 0.492
-#> 
-#> ── submodel: sigma
-#> (Intercept) ["intercept"] estimate = "0.485"
-#> link: Log residual SD at the reference (SD = exp(0.485))
-#> natural: Residual SD = exp(0.485) at the reference
-#> variance: Residual variance = exp(2*0.485)
-#> biological: Baseline level of unexplained individual variation in body_mass
-#> temperature ["slope"] estimate = "0.0936"
-#> link: Log residual SD changes by 0.0936 per unit of temperature
-#> natural: Residual SD multiplied by exp(0.0936) per unit of temperature
-#> variance: Residual variance multiplied by exp(2*0.0936) per unit
-#> biological: A unit change in temperature multiplies the unexplained variability
-#> of body_mass by exp(0.0936)
 ```
+
+| submodel | term_label | coefficient_role | estimate | link_scale_reading | natural_scale_reading | variance_scale_reading | biological_reading |
+|:---|:---|:---|:---|:---|:---|:---|:---|
+| mu | (Intercept) | intercept | 29.6 | Expected body_mass at the reference | Expected body_mass for the reference case | — | Baseline body_mass in the reference condition |
+| mu | temperature | slope | 0.492 | Linear change in expected body_mass per unit of temperature | Expected body_mass changes by 0.492 per unit of temperature | — | A unit change in temperature shifts the expected body_mass by 0.492 |
+| sigma | (Intercept) | intercept | 0.485 | Log residual SD at the reference (SD = exp(0.485)) | Residual SD = exp(0.485) at the reference | Residual variance = exp(2\*0.485) | Baseline level of unexplained individual variation in body_mass |
+| sigma | temperature | slope | 0.0936 | Log residual SD changes by 0.0936 per unit of temperature | Residual SD multiplied by exp(0.0936) per unit of temperature | Residual variance multiplied by exp(2\*0.0936) per unit | A unit change in temperature multiplies the unexplained variability of body_mass by exp(0.0936) |
 
 The `scale` argument filters to a single reading. The `"biological"`
 scale is the one that goes in a results paragraph:
@@ -457,22 +340,14 @@ scale is the one that goes in a results paragraph:
 ``` r
 
 parameter_interpretation(sym, scale = "biological")
-#> 
-#> ── Parameter interpretation ("biological") ──
-#> 
-#> ── submodel: mu
-#> (Intercept) ["intercept"] estimate = "29.6"
-#> biological: Baseline body_mass in the reference condition
-#> temperature ["slope"] estimate = "0.492"
-#> biological: A unit change in temperature shifts the expected body_mass by 0.492
-#> 
-#> ── submodel: sigma
-#> (Intercept) ["intercept"] estimate = "0.485"
-#> biological: Baseline level of unexplained individual variation in body_mass
-#> temperature ["slope"] estimate = "0.0936"
-#> biological: A unit change in temperature multiplies the unexplained variability
-#> of body_mass by exp(0.0936)
 ```
+
+| submodel | term_label | coefficient_role | estimate | biological_reading |
+|:---|:---|:---|:---|:---|
+| mu | (Intercept) | intercept | 29.6 | Baseline body_mass in the reference condition |
+| mu | temperature | slope | 0.492 | A unit change in temperature shifts the expected body_mass by 0.492 |
+| sigma | (Intercept) | intercept | 0.485 | Baseline level of unexplained individual variation in body_mass |
+| sigma | temperature | slope | 0.0936 | A unit change in temperature multiplies the unexplained variability of body_mass by exp(0.0936) |
 
 **Takeaway.** Every coefficient has an interpretation on every scale
 that makes sense for its submodel; the package writes them so you do not
@@ -524,17 +399,15 @@ distributional row appears for the random intercepts:
 ``` r
 
 equations(sym_re)
-#> 
-#> ── Equations ──
-#> 
-#> distribution
-#>   index:  W_i \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2)
-#> mu_linear_predictor
-#>   index:  \mu_i = \beta_{0} + \beta_{1} \, T_i + u_{group(i)}
-#> sigma_linear_predictor
-#>   index:  \log(\sigma_i) = \gamma_{0} + \gamma_{1} \, T_i
-#> mu_random_intercept_group
-#>   index:  u_{group} \sim \mathcal{N}(0,\, \sigma_{group}^2)
+```
+
+``` math
+\begin{aligned}
+W_i \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
+\mu_i = \beta_{0} + \beta_{1} \, T_i + u_{group(i)} \\
+\log(\sigma_i) = \gamma_{0} + \gamma_{1} \, T_i \\
+u_{group} \sim \mathcal{N}(0,\, \sigma_{group}^2)
+\end{aligned}
 ```
 
 ``` r
