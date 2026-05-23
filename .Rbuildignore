@@ -14,5 +14,6 @@
 ^revdep$
 ^\.claude$
 ^\.memory$
+^README\.Rmd$
 ^doc$
 ^Meta$

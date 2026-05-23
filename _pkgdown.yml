@@ -30,6 +30,7 @@ articles:
     contents:
       - symbolizer
       - symbolizer-large
+      - symbolizer-vs-others
 
 reference:
   - title: "Package"

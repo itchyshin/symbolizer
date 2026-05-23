@@ -87,6 +87,26 @@ test_that("assumptions templates substitute response and response_symbol", {
   expect_match(meaning_cd, "body_mass")
 })
 
+test_that("assumptions without RE use plain conditional independence", {
+  fit <- fit_drm_location_scale()
+  sym <- symbolize(fit, symbols = c(body_mass = "W_i"))
+  a <- sym$assumptions
+  expect_true("independence" %in% a$assumption)
+  expect_false("independence_given_random_effects" %in% a$assumption)
+})
+
+test_that("assumptions with RE swap in independence_given_random_effects", {
+  fit_re <- fit_drm_with_re()
+  sym <- symbolize(fit_re, symbols = c(body_mass = "W_i"))
+  a <- sym$assumptions
+  expect_true("independence_given_random_effects" %in% a$assumption)
+  expect_false("independence" %in% a$assumption)
+  meaning <- a$biological_meaning[a$assumption == "independence_given_random_effects"]
+  expect_match(meaning, "random effects")
+  expr <- a$expression_latex[a$assumption == "independence_given_random_effects"]
+  expect_match(expr, "\\\\mathbf\\{u\\}")
+})
+
 test_that("interpretation has one row per coefficient with templated readings", {
   fit <- fit_drm_location_scale()
   sym <- symbolize(fit, symbols = c(body_mass = "W_i", temperature = "T_i"))

@@ -92,7 +92,7 @@ symbolize.drmTMB <- function(fit, symbols = NULL, units = NULL,
     terms_tbl, response, response_symbol, response_symbol_matrix,
     response_units, family, submodels, units, data, n_obs, re_tbl
   )
-  assumptions  <- drm_build_assumptions(family, response, response_symbol)
+  assumptions  <- drm_build_assumptions(family, response, response_symbol, re_tbl)
   interp       <- drm_build_interpretation(fixed_eff, family, response, data)
   bridge       <- drm_build_formula_bridge(entries, components, response)
   expanded     <- drm_build_expanded(fit, re_per_entry, has_re)
@@ -607,7 +607,7 @@ drm_build_symbol_dictionary <- function(terms_tbl, response, response_symbol,
     dim_con <- if (identical(p$role, "offset")) {
       sprintf("\\mathbb{R}^{%d}", n_obs)
     } else {
-      sprintf("column of \\mathbf{X} (length %d)", n_obs)
+      sprintf("column of X (length %d)", n_obs)
     }
     rows[[length(rows) + 1L]] <- tibble::tibble(
       symbol = p$symbol,
@@ -699,12 +699,16 @@ drm_build_symbol_dictionary <- function(terms_tbl, response, response_symbol,
   do.call(rbind, rows)
 }
 
-drm_build_assumptions <- function(family, response, response_symbol) {
+drm_build_assumptions <- function(family, response, response_symbol,
+                                  re_tbl = NULL) {
   tbl <- load_template("assumption-templates")
   rows <- tbl[tbl$family == family, , drop = FALSE]
   if (nrow(rows) == 0L) {
     cli::cli_abort("No assumption template rows for family {.val {family}}.")
   }
+  has_re <- !is.null(re_tbl) && nrow(re_tbl) > 0L
+  drop_assumption <- if (has_re) "independence" else "independence_given_random_effects"
+  rows <- rows[rows$assumption != drop_assumption, , drop = FALSE]
   mapping <- list(
     response = response,
     response_symbol = response_symbol,
@@ -730,7 +734,8 @@ drm_role_to_interp <- function(role) {
     intercept = "intercept",
     predictor = "slope",
     factor_contrast = "factor_contrast",
-    NA_character_  # interactions, transformations, offsets: no v0.1 template
+    transformation = "transformation",
+    NA_character_  # interactions, offsets: no v0.1 template
   )
 }
 
@@ -762,11 +767,13 @@ drm_build_interpretation <- function(fixed_eff, family, response, data) {
     if (nrow(template) == 0L) next
     predictor <- if (is.na(r$variable)) "" else r$variable
     level <- if (is.na(r$contrast_level)) "" else r$contrast_level
+    transform <- if (is.na(r$transform)) "" else r$transform
     coef_str <- drm_format_estimate(r$estimate)
     mapping <- list(
       response = response,
       predictor = predictor,
       level = level,
+      transform = transform,
       coef = coef_str %||% ""
     )
     rows[[length(rows) + 1L]] <- tibble::tibble(

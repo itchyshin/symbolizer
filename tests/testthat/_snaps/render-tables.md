@@ -16,7 +16,7 @@
       index: `T_i`
       matrix: `(no matrix form)`
       units: "C"
-      dimension: `column of design matrix` (= `column of \mathbf{X} (length 80)`)
+      dimension: `column of design matrix` (= `column of X (length 80)`)
       continuous predictor
       (parameter)
       index: `\mu_i`
