@@ -3,12 +3,19 @@
 <url><loc>https://itchyshin.github.io/symbolizer/AGENTS.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/CLAUDE.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/CONTRIBUTING.html</loc></url>
+<url><loc>https://itchyshin.github.io/symbolizer/articles/index.html</loc></url>
+<url><loc>https://itchyshin.github.io/symbolizer/articles/symbolizer.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/authors.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/index.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/news/index.html</loc></url>
+<url><loc>https://itchyshin.github.io/symbolizer/reference/align_at.html</loc></url>
+<url><loc>https://itchyshin.github.io/symbolizer/reference/as_latex.html</loc></url>
+<url><loc>https://itchyshin.github.io/symbolizer/reference/assumption_table.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/reference/capability_check.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/reference/clear_template_cache.html</loc></url>
+<url><loc>https://itchyshin.github.io/symbolizer/reference/equations.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/reference/extract_terms.html</loc></url>
+<url><loc>https://itchyshin.github.io/symbolizer/reference/formula_bridge.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/reference/formula_lhs.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/reference/formula_rhs.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/reference/formula_vars.html</loc></url>
@@ -16,10 +23,15 @@
 <url><loc>https://itchyshin.github.io/symbolizer/reference/index.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/reference/load_template.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/reference/new_symbolized_model.html</loc></url>
+<url><loc>https://itchyshin.github.io/symbolizer/reference/notation_bridge.html</loc></url>
+<url><loc>https://itchyshin.github.io/symbolizer/reference/parameter_interpretation.html</loc></url>
+<url><loc>https://itchyshin.github.io/symbolizer/reference/symbol_table.html</loc></url>
+<url><loc>https://itchyshin.github.io/symbolizer/reference/symbolize.drmTMB.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/reference/symbolize.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/reference/symbolizer-package.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/reference/symbolizer_capabilities.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/reference/validate_symbolized_model.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/reference/wrap_aligned.html</loc></url>
+<url><loc>https://itchyshin.github.io/symbolizer/reference/wrap_env.html</loc></url>
 </urlset>
 

@@ -3,8 +3,8 @@
 `new_symbolized_model()` is the internal S3 constructor. It validates
 field presence and types and returns an object of class
 `"symbolized_model"`. Tier-specific extractors such as
-`symbolize.drmTMB()` call this constructor to wrap the fields they have
-populated.
+[`symbolize.drmTMB()`](https://itchyshin.github.io/symbolizer/reference/symbolize.drmTMB.md)
+call this constructor to wrap the fields they have populated.
 
 ## Usage
 

@@ -15,7 +15,9 @@
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/symbolizer.html">Get started</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/index.html">Articles</a></li>
+<li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -34,9 +36,42 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.0.0.9000" id="symbolizer-0009000">symbolizer 0.0.0.9000<a class="anchor" aria-label="anchor" href="#symbolizer-0009000"></a></h2>
-<ul><li>Initial development. v0.1 targets <code>drmTMB</code> Gaussian location-scale models with structured symbolic specification, LaTeX rendering, symbol dictionary, component table, formula bridge, assumption table, and parameter interpretation. See the README capability matrix.</li>
+<ul><li>Initial development. v0.1 targets <code>drmTMB</code> Gaussian location-scale models with structured symbolic specification, LaTeX rendering, symbol dictionary, component table, formula bridge, assumption table, parameter interpretation, and a notation bridge teaching surface.</li>
+</ul><div class="section level3">
+<h3 id="v01-surface-stable-0-0-0-9000">v0.1 surface (Stable)<a class="anchor" aria-label="anchor" href="#v01-surface-stable-0-0-0-9000"></a></h3>
+<ul><li>
+<code><a href="../reference/symbolize.drmTMB.html">symbolize.drmTMB()</a></code> builds a structured <code>symbolized_model</code> from a fitted <code>drmTMB</code> Gaussian location-scale model with fixed effects in both the mu and sigma submodels. Reads <code>fit$formula$entries</code>, <code>fit$family</code>, <code>fit$coefficients</code>, and <code><a href="https://itchyshin.github.io/drmTMB/reference/fixef.html" class="external-link">drmTMB::fixef()</a></code> per dpar.</li>
+<li>
+<code><a href="../reference/extract_terms.html">extract_terms()</a></code> is the term-grammar / model-matrix bridge: every renderer consumes this layer and never re-parses formulas.</li>
+<li>Capability registry (<code><a href="../reference/symbolizer_capabilities.html">symbolizer_capabilities()</a></code>) gates <code><a href="../reference/symbolize.html">symbolize()</a></code> with the five-level status vocabulary borrowed from drmTMB.</li>
 </ul></div>
-  </main></div>
+<div class="section level3">
+<h3 id="dual-notation-index--matrix-0-0-0-9000">Dual notation (index ↔︎ matrix)<a class="anchor" aria-label="anchor" href="#dual-notation-index--matrix-0-0-0-9000"></a></h3>
+<ul><li>Every component carries both index-form and matrix-form LaTeX, with lowercase bold for vectors (<code>\mathbf{w}</code>, <code>\boldsymbol{\beta}</code>) and uppercase bold for matrices (<code>\mathbf{X}</code>, <code>\mathbf{Z}</code>).</li>
+<li>Symbol dictionary carries two dimension columns: abstract (<code>\mathbb{R}^n</code>) and concrete (e.g. <code>\mathbb{R}^{80}</code>).</li>
+<li>
+<code><a href="../reference/notation_bridge.html">notation_bridge()</a></code> returns an educator-facing translation table that pairs each model piece across both notations with its dimension.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="renderers-0-0-0-9000">Renderers<a class="anchor" aria-label="anchor" href="#renderers-0-0-0-9000"></a></h3>
+<ul><li>
+<code>equations(sym, notation)</code> returns the per-row LaTeX in either or both forms.</li>
+<li>
+<code>as_latex(sym, notation, env)</code> returns a single string ready to splice into a LaTeX document; stacks both forms when <code>notation = "both"</code>.</li>
+<li>
+<code>symbol_table(sym, notation)</code>, <code>assumption_table(sym)</code>, <code>formula_bridge(sym, notation)</code>.</li>
+<li>
+<code>parameter_interpretation(sym, scale)</code> exposes per-coefficient readings on link / natural / variance / biological scales.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="random-intercepts-first-slice-0-0-0-9000">Random intercepts (First slice)<a class="anchor" aria-label="anchor" href="#random-intercepts-first-slice-0-0-0-9000"></a></h3>
+<ul><li>
+<code>(1 | group)</code> on the mu submodel is supported. The mu linear predictor gains a <code>+ u_{group(i)}</code> term (index) / <code>+ \mathbf{u}</code> (matrix), a new random-effect distribution row appears in <code>components</code>, and the new <code>random_effects</code> and <code>variance_components</code> tibbles register the term.</li>
+<li>Random slopes and random effects on the sigma submodel raise a clear capability error pointing at the registry.</li>
+</ul></div>
+</div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
