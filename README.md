@@ -2,9 +2,24 @@
 
 > **Equations are not enough.** `symbolizer` turns fitted models into equations, assumptions, interpretations, and teachable model stories.
 
-Where [`equatiomatic`](https://datalorax.github.io/equatiomatic/) returns a LaTeX string, `symbolizer` returns a *structured symbolic model* from which you can render the equation, list the assumptions, bridge R syntax to mathematics, interpret each coefficient on its natural scale, and (in later versions) compare two models structurally and explain what the comparison means biologically.
+## Positioning
 
-Built first for the two TMB sister packages — [`drmTMB`](https://itchyshin.github.io/drmTMB/) and [`gllvmTMB`](https://itchyshin.github.io/gllvmTMB/) — then extended across the full GLMM ecosystem used in ecology and evolution: `glmmTMB`, `brms`, `MCMCglmm`, `sdmTMB`, `lme4`, and base `lm`/`glm`.
+`symbolizer` is the complement to [`equatiomatic`](https://datalorax.github.io/equatiomatic/), not a replacement. Reach for `equatiomatic` when you want a clean LaTeX equation for one model. Reach for `symbolizer` when you need to understand the model — its assumptions, what each coefficient means on a natural scale, both notations side by side, and (soon) how your data actually flows through the matrices.
+
+| What you want | `equatiomatic` | `symbolizer` |
+| --- | --- | --- |
+| The equation | `extract_eq(fit)` | `equations(symbolize(fit))` |
+| Substituted coefficients | `extract_eq(fit, use_coefs = TRUE)` | `as_latex(sym)` |
+| Multi-submodel models (μ + σ + RE) | partial | first-class |
+| Stated and implied assumptions | — | `assumption_table(sym)` |
+| Per-coefficient reading | — | `parameter_interpretation(sym)` |
+| Index and matrix notation side by side | — | `equations(sym, notation = "both")`, `notation_bridge(sym)` |
+
+For example, on a Gaussian location-scale fit (`body_mass ~ temperature` + `sigma ~ temperature`, with `(1 | group)` random intercepts), `parameter_interpretation(sym)` reads the temperature slope on σ as:
+
+> *"A unit change in temperature multiplies the unexplained variability of body_mass by $e^{0.08} \approx 1.08$."*
+
+Built first for the two TMB sister packages — [`drmTMB`](https://itchyshin.github.io/drmTMB/) and [`gllvmTMB`](https://itchyshin.github.io/gllvmTMB/) — and extended across the GLMM ecosystem used in ecology and evolution: `glmmTMB`, `brms`, `MCMCglmm`, `sdmTMB`, `lme4`, and base `lm`/`glm`.
 
 ## Install
 
