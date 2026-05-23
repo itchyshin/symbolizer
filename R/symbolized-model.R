@@ -16,6 +16,9 @@
 #' @param random_effects A tibble or `NULL`.
 #' @param variance_components A tibble or `NULL`.
 #' @param covariance_components A tibble or `NULL`.
+#' @param loadings A tibble of latent-factor loadings (rows: one per
+#'   `(submodel, trait, axis)` entry of a loading matrix) or `NULL`. Populated
+#'   by extractors for reduced-rank latent-variable models such as gllvmTMB.
 #' @param symbol_dictionary A tibble of `(symbol, variable, units, role, description)`.
 #' @param assumptions A tibble of stated/implied assumptions.
 #' @param components A tibble: one row per renderable block.
@@ -42,6 +45,7 @@ new_symbolized_model <- function(
   random_effects = NULL,
   variance_components = NULL,
   covariance_components = NULL,
+  loadings = NULL,
   symbol_dictionary,
   assumptions,
   components,
@@ -63,6 +67,7 @@ new_symbolized_model <- function(
     random_effects = random_effects,
     variance_components = variance_components,
     covariance_components = covariance_components,
+    loadings = loadings,
     symbol_dictionary = symbol_dictionary,
     assumptions = assumptions,
     components = components,
@@ -101,7 +106,8 @@ validate_symbolized_model <- function(x) {
     "interpretation", "formula_bridge"
   )
   optional_tibble <- c("random_effects", "variance_components",
-                       "covariance_components", "warnings_registry")
+                       "covariance_components", "loadings",
+                       "warnings_registry")
   for (f in required_list) {
     if (!is.list(x[[f]]) || length(x[[f]]) == 0L) {
       cli::cli_abort(c(
@@ -133,6 +139,9 @@ validate_symbolized_model <- function(x) {
 
 #' @export
 print.symbolized_model <- function(x, ...) {
+  cli::cli_text(
+    "{.cls symbolized_model} -- call {.fn summary} for a plain-English walkthrough, or {.fn explain} in one step from your fit."
+  )
   cli::cli_h1("<symbolized_model>")
   cli::cli_text("Class: {.cls {x$model$class}}  ({x$model$package})")
   cli::cli_text("Family: {.val {x$model$family}}")
@@ -171,5 +180,127 @@ print.symbolized_model <- function(x, ...) {
       )
     }
   }
+  if (!is.null(x$loadings) && nrow(x$loadings) > 0L) {
+    cli::cli_h2("Loadings")
+    n_traits <- length(unique(x$loadings$trait))
+    n_axes <- length(unique(x$loadings$axis))
+    cli::cli_text(
+      "  {.code {unique(x$loadings$matrix)}}: {n_traits} trait{?s} x {n_axes} axis/axes"
+    )
+  }
+  invisible(x)
+}
+
+#' Plain-English summary of a symbolized model
+#'
+#' @description
+#' `summary()` walks the reader through a [`symbolized_model`][new_symbolized_model]
+#' in plain English. It opens with one paragraph describing the model in
+#' prose (class, family, response, sample size, submodels and links, fitting
+#' approach), then prints the same reader tables that [`explain()`] returns:
+#' equations, the symbol dictionary, assumptions, the formula bridge, the
+#' per-coefficient interpretations, and the notation bridge.
+#'
+#' Unlike [`explain()`], `summary()` does not re-run [`symbolize()`]; it
+#' simply renders the object you already have.
+#'
+#' @param object A [`symbolized_model`][new_symbolized_model].
+#' @param ... Reserved for future use.
+#'
+#' @return Invisibly returns a `summary.symbolized_model` object (a list with
+#'   the rendered pieces). Called for its printed walkthrough.
+#' @export
+summary.symbolized_model <- function(object, ...) {
+  out <- list(
+    model           = object$model,
+    submodels       = object$submodels,
+    metadata        = object$metadata,
+    equations       = equations(object, notation = "both"),
+    symbols         = symbol_table(object, notation = "both"),
+    assumptions     = assumption_table(object),
+    bridge          = formula_bridge(object, notation = "both"),
+    interpretation  = parameter_interpretation(object, scale = "all"),
+    notation_bridge = notation_bridge(object)
+  )
+  class(out) <- c("summary.symbolized_model", "list")
+  print(out)
+  invisible(out)
+}
+
+# Build the leading plain-English paragraph for summary() and explain().
+# Reads only `model`, `submodels`, and `metadata` -- never parses formulas
+# itself. Returns a single character string.
+sym_overview_paragraph <- function(model, submodels, metadata) {
+  fam <- model$family
+  resp <- model$response
+  n <- model$n_obs
+  n_sub <- nrow(submodels)
+  pieces <- vapply(seq_len(n_sub), function(i) {
+    sm <- submodels[i, , drop = FALSE]
+    sprintf("%s explains the %s (using a %s link)",
+            sm$parameter[[1L]],
+            sym_submodel_meaning(sm$parameter[[1L]]),
+            sm$link[[1L]])
+  }, character(1L))
+  joined <- if (length(pieces) == 1L) {
+    pieces
+  } else if (length(pieces) == 2L) {
+    paste(pieces, collapse = ", and ")
+  } else {
+    paste(c(paste(pieces[-length(pieces)], collapse = ", "),
+            pieces[[length(pieces)]]),
+          collapse = ", and ")
+  }
+  fitter <- sym_fitter_phrase(model$package)
+  sprintf(
+    "This is a %s model of `%s` (n = %d) with %d submodel%s: %s. Coefficients are fit by %s.",
+    fam, resp, n, n_sub, if (n_sub == 1L) "" else "s", joined, fitter
+  )
+}
+
+sym_submodel_meaning <- function(dpar) {
+  switch(
+    dpar,
+    mu    = "mean",
+    sigma = "residual standard deviation",
+    nu    = "degrees of freedom",
+    sprintf("%s submodel", dpar)
+  )
+}
+
+sym_fitter_phrase <- function(pkg) {
+  pkg <- pkg %||% ""
+  if (!nzchar(pkg)) return("maximum likelihood")
+  switch(
+    pkg,
+    drmTMB   = "maximum likelihood via drmTMB",
+    gllvmTMB = "maximum likelihood via gllvmTMB",
+    sprintf("maximum likelihood via %s", pkg)
+  )
+}
+
+#' @export
+print.summary.symbolized_model <- function(x, ...) {
+  cli::cli_h1("Summary of <symbolized_model>")
+  cli::cli_text(sym_overview_paragraph(x$model, x$submodels, x$metadata))
+
+  cli::cli_h2("Equations (index and matrix notation)")
+  print(x$equations)
+
+  cli::cli_h2("Symbols")
+  print(x$symbols)
+
+  cli::cli_h2("What's assumed")
+  print(x$assumptions)
+
+  cli::cli_h2("R syntax to mathematics")
+  print(x$bridge)
+
+  cli::cli_h2("What each coefficient means")
+  print(x$interpretation)
+
+  cli::cli_h2("Index vs matrix notation bridge")
+  print(x$notation_bridge)
+
   invisible(x)
 }

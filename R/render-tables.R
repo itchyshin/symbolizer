@@ -133,6 +133,31 @@ assumption_table.symbolized_model <- function(x, ...) {
   out
 }
 
+#' Map an assumption-status key to a friendlier display label
+#'
+#' @description
+#' Translates the CSV keys (`stated`, `implied`, `not_checked`) used in
+#' `inst/extdata/assumption-templates.csv` to plain-language labels for
+#' display in `print()` and `knit_print()` methods. The underlying data
+#' column keeps the original key; only the user-visible rendering changes.
+#'
+#' @param status Character vector of status keys.
+#'
+#' @return Character vector of the same length carrying the friendlier label.
+#'   Unknown keys pass through unchanged.
+#' @keywords internal
+friendly_status <- function(status) {
+  map <- c(
+    stated      = "explicit",
+    implied     = "follows from the formula",
+    not_checked = "your responsibility"
+  )
+  out <- map[status]
+  unknown <- is.na(out)
+  out[unknown] <- status[unknown]
+  unname(out)
+}
+
 #' @export
 print.symbolizer_assumption_table <- function(x, ...) {
   cli::cli_h2("Assumptions")
@@ -147,7 +172,7 @@ print.symbolizer_assumption_table <- function(x, ...) {
     cli::cli_text("{.strong {head_full}}")
     cli::cli_text("  expression: {.code {x$expression_latex[[i]]}}")
     cli::cli_text("  meaning:    {x$biological_meaning[[i]]}")
-    cli::cli_text("  status:     [{.val {x$status[[i]]}}]")
+    cli::cli_text("  status:     [{.val {friendly_status(x$status[[i]])}}]")
   }
   invisible(x)
 }

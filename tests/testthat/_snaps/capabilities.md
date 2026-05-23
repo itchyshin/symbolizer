@@ -4,8 +4,12 @@
       symbolizer:::capability_check("drmTMB", "gaussian", "zi")
     Condition
       Error in `symbolizer:::capability_check()`:
-      ! `symbolize()` cannot handle class "drmTMB" / family "gaussian" / component "zi": status is "Planned or reserved".
-      i See `symbolizer_capabilities()` or the roadmap at <https://itchyshin.github.io/symbolizer/>.
+      ! `symbolize()` cannot read drmTMB / gaussian / zi yet (status: Planned or reserved).
+      i Today we can read:
+      * drmTMB gaussian: mu, sigma (Stable)
+      * drmTMB gaussian: random_effects (First slice)
+      * gllvmTMB gaussian: Lambda_B, mu, Psi_B, Sigma_B, sigma_eps (First slice)
+      i See `symbolizer_capabilities()` for the full registry.
 
 # capability_check() rejects brmsfit/gaussian/mu via wildcard
 
@@ -13,8 +17,12 @@
       symbolizer:::capability_check("brmsfit", "gaussian", "mu")
     Condition
       Error in `symbolizer:::capability_check()`:
-      ! `symbolize()` cannot handle class "brmsfit" / family "gaussian" / component "mu": status is "Planned or reserved".
-      i See `symbolizer_capabilities()` or the roadmap at <https://itchyshin.github.io/symbolizer/>.
+      ! `symbolize()` cannot read brmsfit / gaussian / mu yet (status: Planned or reserved).
+      i Today we can read:
+      * drmTMB gaussian: mu, sigma (Stable)
+      * drmTMB gaussian: random_effects (First slice)
+      * gllvmTMB gaussian: Lambda_B, mu, Psi_B, Sigma_B, sigma_eps (First slice)
+      i See `symbolizer_capabilities()` for the full registry.
 
 # capability_check() errors when no entry exists at all
 

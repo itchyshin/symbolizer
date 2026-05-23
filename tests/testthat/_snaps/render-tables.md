@@ -61,30 +61,30 @@
       expression: `W_i \mid \mu_i\, \sigma_i \sim \mathrm{Normal}(\mu_i\,
       \sigma_i^2)`
       meaning: body_mass varies normally around its expected value
-      status: ["stated"]
+      status: ["explicit"]
       linear_predictor (mu)
       expression: `\mu_i = \beta_0 + \sum_k \beta_k X_{ki}`
       meaning: Expected body_mass is a linear combination of the mean-model
       predictors
-      status: ["stated"]
+      status: ["explicit"]
       linear_predictor (sigma)
       expression: `\log(\sigma_i) = \gamma_0 + \sum_k \gamma_k Z_{ki}`
       meaning: Log residual SD of body_mass is a linear combination of the
       scale-model predictors
-      status: ["stated"]
+      status: ["explicit"]
       independence
       expression: `W_i \perp W_j \mid X \text{ for } i \ne j`
       meaning: Observations are conditionally independent given the predictors
-      status: ["implied"]
+      status: ["follows from the formula"]
       positivity (sigma)
       expression: `\sigma_i > 0`
       meaning: Residual SD is constrained positive via the log link
-      status: ["implied"]
+      status: ["follows from the formula"]
       no_missing_at_random
       expression: `—`
       meaning: Observations are assumed not missing in a way that depends on the
       unobserved response
-      status: ["not_checked"]
+      status: ["your responsibility"]
 
 # formula_bridge print method is stable
 

@@ -83,6 +83,22 @@ test_that("assumption_table.default points at symbolize()", {
   expect_error(assumption_table(list()), "symbolize")
 })
 
+test_that("assumption_table print uses friendly status labels", {
+  fit <- fit_drm_location_scale()
+  sym <- symbolize(fit, symbols = c(body_mass = "W_i"))
+  at <- assumption_table(sym)
+  out <- withr::with_output_sink(tempfile(), print(at))
+  # CSV keys remain in the data
+  expect_true("stated" %in% at$status)
+  # but the printed output uses friendly labels (asserted by capturing
+  # both stdout and cli messages, then grep'ing for the label)
+  txt <- c(
+    capture.output(print(at)),
+    testthat::capture_messages(print(at))
+  )
+  expect_true(any(grepl("explicit|follows from|your responsibility", txt, ignore.case = TRUE)))
+})
+
 # ---- formula_bridge ---------------------------------------------------------
 
 test_that("formula_bridge() returns both math columns by default", {

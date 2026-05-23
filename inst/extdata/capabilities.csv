@@ -25,9 +25,26 @@ drmTMB,biv_gaussian,mu2,Planned or reserved,,
 drmTMB,biv_gaussian,sigma1,Planned or reserved,,
 drmTMB,biv_gaussian,sigma2,Planned or reserved,,
 drmTMB,biv_gaussian,rho12,Planned or reserved,,
-gllvmTMB,*,Lambda,Planned or reserved,,gllvmTMB extractor targeted for v0.4
-gllvmTMB,*,Psi,Planned or reserved,,
+gllvmTMB,gaussian,mu,First slice,0.1.0,Per-trait intercept submodel via 0 + trait fixed effects.
+gllvmTMB,gaussian,Lambda_B,First slice,0.1.0,Between-unit reduced-rank loading matrix via latent(0 + trait | unit).
+gllvmTMB,gaussian,Sigma_B,First slice,0.1.0,"Implied between-unit covariance Lambda_B Lambda_B^T (+ Psi_B when unique term present)."
+gllvmTMB,gaussian,Psi_B,First slice,0.1.0,Per-trait unique variance via unique(0 + trait | unit).
+gllvmTMB,gaussian,sigma_eps,First slice,0.1.0,Shared row-level residual SD.
+gllvmTMB,*,Lambda_W,Planned or reserved,,Within-unit reduced-rank loadings.
+gllvmTMB,*,Psi_W,Planned or reserved,,Per-trait within-unit unique variance.
+gllvmTMB,*,phylo,Planned or reserved,,Phylogenetic covstructs.
+gllvmTMB,*,spatial,Planned or reserved,,Spatial covstructs.
 gllvmTMB,*,Sigma,Planned or reserved,,
+gllvmTMB,binomial,*,Planned or reserved,,Binomial / Bernoulli families.
+gllvmTMB,poisson,*,Planned or reserved,,Poisson family.
+gllvmTMB,nbinom2,*,Planned or reserved,,Negative binomial family.
+gllvmTMB,Gamma,*,Planned or reserved,,Gamma family.
+gllvmTMB,lognormal,*,Planned or reserved,,Lognormal family.
+gllvmTMB,Beta,*,Planned or reserved,,Beta family.
+gllvmTMB,betabinomial,*,Planned or reserved,,Beta-binomial family.
+gllvmTMB,tweedie,*,Planned or reserved,,Tweedie family.
+gllvmTMB,student,*,Planned or reserved,,Student-t family.
+gllvmTMB,ordinal_probit,*,Planned or reserved,,Ordinal probit family.
 glmmTMB,*,*,Planned or reserved,,Targeted for v0.6
 brmsfit,*,*,Planned or reserved,,Targeted for v0.7
 MCMCglmm,*,*,Planned or reserved,,Targeted for v0.8

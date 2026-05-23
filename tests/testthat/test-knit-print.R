@@ -54,6 +54,21 @@ test_that("knit_print.symbolizer_assumption_table never emits bare \\mu_i", {
   expect_false(grepl("\\mu_i", stripped, fixed = TRUE))
 })
 
+test_that("knit_print.symbolizer_assumption_table uses friendly status labels", {
+  sym <- make_kp_sym()
+  at <- assumption_table(sym)
+  rendered <- as.character(knitr::knit_print(at))
+  # Friendly labels appear in the rendered markdown.
+  expect_true(any(grepl("explicit", rendered, fixed = TRUE)))
+  expect_true(any(grepl("follows from the formula", rendered, fixed = TRUE)))
+  expect_true(any(grepl("your responsibility", rendered, fixed = TRUE)))
+  # Raw CSV keys do NOT appear in the rendered markdown.
+  expect_false(grepl("not_checked", rendered, fixed = TRUE))
+  # Underlying data column keeps the CSV keys.
+  expect_true("stated" %in% at$status)
+  expect_true("not_checked" %in% at$status)
+})
+
 # ---- knit_print.symbolizer_formula_bridge -----------------------------------
 
 test_that("knit_print.symbolizer_formula_bridge keeps both math columns by default", {

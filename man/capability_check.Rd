@@ -23,5 +23,9 @@ if the status is \strong{Planned or reserved} or \strong{Unsupported or blocked}
 \details{
 Wildcards: a row with value \code{"*"} in \code{class}, \code{family}, or \code{component}
 matches any value in that slot.
+
+When the check fails, the error message also lists the currently-readable
+tuples (status: Stable or First slice) so the user immediately sees what
+they \emph{can} do today.
 }
 \keyword{internal}

@@ -63,6 +63,7 @@ knit_print.symbolizer_symbol_table <- function(x, ...) {
 knit_print.symbolizer_assumption_table <- function(x, ...) {
   df <- as.data.frame(x, stringsAsFactors = FALSE)
   if ("expression_latex" %in% names(df)) df$expression_latex <- sym_dollar(df$expression_latex)
+  if ("status" %in% names(df))           df$status <- friendly_status(df$status)
   cols <- intersect(
     c("assumption", "expression_latex", "biological_meaning", "status"),
     names(df)
