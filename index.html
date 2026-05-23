@@ -56,8 +56,62 @@
 <blockquote>
 <p><strong>Equations are not enough.</strong> <code>symbolizer</code> turns fitted models into equations, assumptions, interpretations, and teachable model stories.</p>
 </blockquote>
-<p>Where <a href="https://datalorax.github.io/equatiomatic/" class="external-link"><code>equatiomatic</code></a> returns a LaTeX string, <code>symbolizer</code> returns a <em>structured symbolic model</em> from which you can render the equation, list the assumptions, bridge R syntax to mathematics, interpret each coefficient on its natural scale, and (in later versions) compare two models structurally and explain what the comparison means biologically.</p>
-<p>Built first for the two TMB sister packages — <a href="https://itchyshin.github.io/drmTMB/" class="external-link"><code>drmTMB</code></a> and <a href="https://itchyshin.github.io/gllvmTMB/" class="external-link"><code>gllvmTMB</code></a> — then extended across the full GLMM ecosystem used in ecology and evolution: <code>glmmTMB</code>, <code>brms</code>, <code>MCMCglmm</code>, <code>sdmTMB</code>, <code>lme4</code>, and base <code>lm</code>/<code>glm</code>.</p>
+<div class="section level2">
+<h2 id="positioning">Positioning<a class="anchor" aria-label="anchor" href="#positioning"></a>
+</h2>
+<p><code>symbolizer</code> is the complement to <a href="https://datalorax.github.io/equatiomatic/" class="external-link"><code>equatiomatic</code></a>, not a replacement. Reach for <code>equatiomatic</code> when you want a clean LaTeX equation for one model. Reach for <code>symbolizer</code> when you need to understand the model — its assumptions, what each coefficient means on a natural scale, both notations side by side, and (soon) how your data actually flows through the matrices.</p>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr>
+<th>What you want</th>
+<th><code>equatiomatic</code></th>
+<th><code>symbolizer</code></th>
+</tr></thead>
+<tbody>
+<tr>
+<td>The equation</td>
+<td><code>extract_eq(fit)</code></td>
+<td><code>equations(symbolize(fit))</code></td>
+</tr>
+<tr>
+<td>Substituted coefficients</td>
+<td><code>extract_eq(fit, use_coefs = TRUE)</code></td>
+<td><code>as_latex(sym)</code></td>
+</tr>
+<tr>
+<td>Multi-submodel models (μ + σ + RE)</td>
+<td>partial</td>
+<td>first-class</td>
+</tr>
+<tr>
+<td>Stated and implied assumptions</td>
+<td>—</td>
+<td><code>assumption_table(sym)</code></td>
+</tr>
+<tr>
+<td>Per-coefficient reading</td>
+<td>—</td>
+<td><code>parameter_interpretation(sym)</code></td>
+</tr>
+<tr>
+<td>Index and matrix notation side by side</td>
+<td>—</td>
+<td>
+<code>equations(sym, notation = "both")</code>, <code>notation_bridge(sym)</code>
+</td>
+</tr>
+</tbody>
+</table>
+<p>For example, on a Gaussian location-scale fit (<code>body_mass ~ temperature</code> + <code>sigma ~ temperature</code>, with <code>(1 | group)</code> random intercepts), <code>parameter_interpretation(sym)</code> reads the temperature slope on σ as:</p>
+<blockquote>
+<p><em>“A unit change in temperature multiplies the unexplained variability of body_mass by <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>e</mi><mn>0.08</mn></msup><mo>≈</mo><mn>1.08</mn></mrow><annotation encoding="application/x-tex">e^{0.08} \approx 1.08</annotation></semantics></math>.”</em></p>
+</blockquote>
+<p>Built first for the two TMB sister packages — <a href="https://itchyshin.github.io/drmTMB/" class="external-link"><code>drmTMB</code></a> and <a href="https://itchyshin.github.io/gllvmTMB/" class="external-link"><code>gllvmTMB</code></a> — and extended across the GLMM ecosystem used in ecology and evolution: <code>glmmTMB</code>, <code>brms</code>, <code>MCMCglmm</code>, <code>sdmTMB</code>, <code>lme4</code>, and base <code>lm</code>/<code>glm</code>.</p>
+</div>
 <div class="section level2">
 <h2 id="install">Install<a class="anchor" aria-label="anchor" href="#install"></a>
 </h2>
