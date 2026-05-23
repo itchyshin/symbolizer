@@ -1,0 +1,298 @@
+---
+title: "A worked example: structured body-size model"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{A worked example: structured body-size model}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+has_drmTMB <- requireNamespace("drmTMB", quietly = TRUE)
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment  = "#>",
+  eval     = has_drmTMB
+)
+```
+
+The "Get started" vignette walks the surface on a deliberately small fit
+(`n = 80`, one continuous predictor, one random intercept). This article
+exercises more of the renderer machinery on a model an ecologist would
+actually run: a Gaussian location-scale fit with a continuous predictor, a
+log-transformed predictor, a two-level factor contrast, and a random
+intercept on the mean submodel.
+
+The goal is not to teach you `drmTMB`; it is to show what each
+`symbolize()` surface returns when the inputs are richer.
+
+## 1. Setup and fit
+
+We simulate a body-size dataset with `temperature` (continuous),
+`food` (continuous, lognormal so `log(food)` is the natural scale), `sex`
+(two-level factor), and `site` (eight-level grouping). The fitted model
+has the mean depending on all four predictors and the residual standard
+deviation depending on `temperature` and `sex`.
+
+```{r fit}
+library(symbolizer)
+library(drmTMB)
+
+set.seed(20260523)
+n           <- 200
+temperature <- runif(n, 8, 30)
+food        <- rlnorm(n, meanlog = 1.5, sdlog = 0.6)
+sex         <- factor(sample(c("female", "male"), n, replace = TRUE))
+site        <- factor(sample(letters[1:8], n, replace = TRUE))
+
+site_re <- rnorm(8, sd = 1.5)
+mu      <- 5 + 0.5 * temperature + 2 * log(food) +
+             3 * (sex == "male") + site_re[site]
+sigma   <- exp(0.3 + 0.05 * temperature + 0.1 * (sex == "male"))
+
+dat <- data.frame(
+  body_mass   = rnorm(n, mu, sigma),
+  temperature = temperature,
+  food        = food,
+  sex         = sex,
+  site        = site
+)
+
+fit <- drmTMB(
+  drm_formula(
+    body_mass ~ temperature + log(food) + sex + (1 | site),
+    sigma ~ temperature + sex
+  ),
+  family = gaussian(),
+  data   = dat
+)
+```
+
+`symbolize()` is the single entry point. We pass biologically meaningful
+symbols (`W_i` for body mass, `T_i` for temperature, `F_i` for food, `S_i`
+for sex) and units; the rendered equations carry these instead of the raw
+R names.
+
+```{r symbolize}
+sym <- symbolize(
+  fit,
+  symbols = c(body_mass = "W_i", temperature = "T_i",
+              food      = "F_i", sex         = "S_i"),
+  units   = c(body_mass = "g",   temperature = "C",
+              food      = "g/day"),
+  context = "structured body-size location-scale model"
+)
+sym
+```
+
+**Takeaway.** One call to `symbolize()` produces the structured object;
+every later section is a renderer pulling rows from it.
+
+## 2. The mean structure
+
+`equations()` returns one row per renderable block (the conditional
+distribution, each linear predictor, and any random-effect distribution).
+Both notations always live in their own columns; `notation = "both"`
+controls only how the result prints.
+
+```{r equations}
+equations(sym, notation = "both")
+```
+
+Reading the mu row line by line:
+
+- `\log(F_i)` shows up as the transformed predictor. The bridge
+  recognises `log(food)` as a transformation role and renders the
+  transformation in math, not as a plain symbol.
+- The sex contrast renders as `\beta_{3} \, [sex = \mathrm{male}]`. The
+  bracket notation is the contrast convention: the coefficient applies
+  whenever `sex = male`, and the female baseline is folded into the
+  intercept.
+- The random-intercept term `u_{site(i)}` is appended to the mu predictor,
+  flagged by its subscript that it depends on which `site` observation
+  `i` belongs to.
+
+Spliced into a math-aware renderer (the pkgdown site emits MathML through
+pandoc; Quarto and most LaTeX renderers use KaTeX or MathJax), the
+two-notation block looks like this:
+
+```{r equations-latex, results = 'asis'}
+cat("$$", as_latex(sym, notation = "both"), "$$", sep = "\n")
+```
+
+**Takeaway.** The mu line carries four predictors with different roles
+(intercept, slope, transformation, factor contrast) plus a random
+intercept, all rendered from the same `symbolize()` call.
+
+## 3. The scale structure
+
+The sigma submodel does its own work. Pulling just the `sigma`
+linear-predictor row:
+
+```{r sigma-row}
+eq <- equations(sym, notation = "both")
+eq[eq$submodel == "sigma" & eq$kind == "linear_predictor", ]
+```
+
+Two features deserve attention.
+
+First, the sigma submodel has its own predictors: residual variability
+changes with `temperature` and with `sex`. This is the location-scale
+part — the model lets the spread depend on covariates, not just the
+mean.
+
+Second, the link on sigma is `log`, which `drmTMB` locks in. The
+biological reading is multiplicative: a unit change in `temperature`
+multiplies the residual standard deviation by `\exp(\gamma_{1})`, and the
+male contrast multiplies it by `\exp(\gamma_{2})` relative to females.
+
+**Takeaway.** The residual SD is not constant; it varies on the
+log-scale with the same kind of linear-predictor grammar as the mean.
+
+## 4. What the symbols mean
+
+`symbol_table()` lists every symbol used in the equations, together with
+its abstract dimension (the shape rule) and its concrete dimension (the
+actual sizes from this fit). With `n = 200` observations, four mu
+coefficients (intercept + `temperature` + `log(food)` + sex contrast),
+and three sigma coefficients (intercept + `temperature` + sex contrast),
+the concrete columns now show real numbers, not just placeholders.
+
+```{r symbol-table}
+symbol_table(sym)
+```
+
+Notice the design matrix rows: `\mathbf{X}` is `\mathbb{R}^{n \times
+p_\mu}` abstractly, `\mathbb{R}^{200 \times 4}` concretely; `\mathbf{Z}`
+is the sigma submodel's design matrix at `\mathbb{R}^{200 \times 3}`.
+The random-intercept row carries `\mathbb{R}^{8}` because `site` has
+eight levels.
+
+**Takeaway.** The symbol table is the page a reader uses to look up what
+each glyph in the equations actually means and how big it is.
+
+## 5. What is assumed
+
+`assumption_table()` separates **stated** assumptions (those baked into
+the formula: distribution, link, linear predictor), **implied**
+assumptions (those that follow from the parameterisation: positivity of
+`\sigma_i`, conditional independence), and **not_checked** assumptions
+(those still on the user's plate: missing-at-random).
+
+```{r assumption-table}
+assumption_table(sym)
+```
+
+One known limitation: the `independence` row reads "Observations are
+conditionally independent given the predictors". When a random intercept
+is present, the cleaner statement is "conditionally independent given
+the predictors **and** the random effects". The v0.1 assumption template
+uses the unconditional wording in both cases; treat it as a known item
+to fix rather than a claim about your fit.
+
+**Takeaway.** Stated, implied, not_checked is the audit lens: the model
+guarantees the first two; the third is your responsibility.
+
+## 6. Reading each coefficient
+
+`parameter_interpretation()` reads each fixed-effect estimate on every
+scale that makes sense for its submodel: a link-scale reading, a
+natural-scale reading, a variance-scale reading (sigma only), and a
+biological reading.
+
+```{r parameter-interpretation}
+parameter_interpretation(sym)
+```
+
+For this fit, the most informative comparison is the `temperature` slope
+on each submodel.
+
+On mu, `\beta_{1}` is additive on the response: a unit change in
+`temperature` shifts the expected body mass by the coefficient value,
+because the mu link is identity.
+
+On sigma, `\gamma_{1}` is additive on the log scale, which means a unit
+change in `temperature` *multiplies* the residual SD by
+`\exp(\gamma_{1})`. The biological reading expresses this directly: a
+unit change in temperature multiplies the unexplained variability of
+`body_mass` by `\exp(\gamma_{1})`. Two coefficients on the same
+predictor, two genuinely different scales.
+
+One rough edge worth flagging: the `log(food)` predictor does not appear
+in this table. v0.1 only ships interpretation templates for the
+`intercept`, `slope`, and `factor_contrast` roles. A
+`log()`-transformed predictor takes the `transformation` role and
+currently has no template, so its row is silently dropped. The
+coefficient is still in `sym$fixed_effects` and rendered in the
+equations; it just does not yet get an English reading.
+
+**Takeaway.** Templates exist for the simple roles in v0.1.
+Transformations and interactions are on the roadmap.
+
+## 7. R syntax to math, both directions
+
+`formula_bridge()` is the educator-facing translation table from R
+formula syntax to mathematics. Two rows, both notations.
+
+```{r formula-bridge}
+formula_bridge(sym)
+```
+
+For the mu submodel, the R syntax
+`body_mass ~ temperature + log(food) + sex + (1 | site)` maps to the
+indexed equation in the `mathematics` column and to
+`\boldsymbol{\mu} = \mathbf{X} \boldsymbol{\beta} + \mathbf{u}` in the
+`mathematics_matrix` column. The random-intercept piece appears as
+`+ \mathbf{u}` in the matrix form and as `+ u_{site(i)}` in the indexed
+form. A reader can compare the two columns and learn the translation
+without doing it by hand.
+
+**Takeaway.** R syntax on the left, math on the right, both notations
+side by side.
+
+## 8. The notation bridge for educators
+
+`notation_bridge()` is the deeper teaching surface: every symbol *and*
+every equation pairs its index form with its matrix form and tags both
+shapes.
+
+```{r notation-bridge}
+notation_bridge(sym)
+```
+
+The `dimension` column carries the shape rule
+(`\mathbb{R}^n`, `\mathbb{R}^{n \times p_\mu}`). The
+`dimension_concrete` column plugs in the actual numbers from this fit
+(`\mathbb{R}^{200}`, `\mathbb{R}^{200 \times 4}`). A reader learning
+matrix notation can stare at this table and see, in one place, that the
+`\boldsymbol{\mu}` vector has 200 entries, the `\boldsymbol{\beta}`
+vector has four, and `\mathbf{X}` is the 200 by 4 matrix that connects
+them.
+
+**Takeaway.** Abstract shape rules on one side, concrete numbers from
+this fit on the other. That is the bridge.
+
+## 9. Roadmap and capabilities
+
+`symbolizer_capabilities()` is the single source of truth for what
+`symbolize()` knows how to render. Each row carries one of five status
+words: **Stable**, **First slice**, **Opt-in control**, **Planned or
+reserved**, or **Unsupported or blocked**.
+
+```{r capabilities}
+symbolizer_capabilities()
+```
+
+For the model fit in this vignette, the relevant rows are:
+
+- `drmTMB / gaussian / mu` — **Stable**
+- `drmTMB / gaussian / sigma` — **Stable**
+- `drmTMB / gaussian / random_effects` — **First slice** (intercept-only
+  `(1 | group)`; other RE structures still error)
+
+Everything else in the table is **Planned or reserved**. If
+`symbolize()` errors with a capability message, the registry tells you
+which version is scheduled to lift the restriction.
+
+**Takeaway.** Read the status word before designing around a tuple. The
+registry, not the prose, decides what `symbolize()` accepts.

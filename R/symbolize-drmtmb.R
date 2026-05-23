@@ -95,6 +95,7 @@ symbolize.drmTMB <- function(fit, symbols = NULL, units = NULL,
   assumptions  <- drm_build_assumptions(family, response, response_symbol)
   interp       <- drm_build_interpretation(fixed_eff, family, response, data)
   bridge       <- drm_build_formula_bridge(entries, components, response)
+  expanded     <- drm_build_expanded(fit, re_per_entry, has_re)
 
   metadata <- list(
     call = fit$call,
@@ -121,6 +122,7 @@ symbolize.drmTMB <- function(fit, symbols = NULL, units = NULL,
     components          = components,
     interpretation      = interp,
     formula_bridge      = bridge,
+    expanded            = expanded,
     metadata            = metadata
   )
 }
@@ -394,6 +396,50 @@ drm_build_fixed_effects <- function(terms_tbl, fit) {
     latex_term = terms_tbl$latex_term,
     estimate = estimate,
     std_error = rep(NA_real_, nrow(terms_tbl))
+  )
+}
+
+drm_build_expanded <- function(fit, re_per_entry, has_re) {
+  y       <- fit$model$y
+  X       <- fit$model$X$mu
+  X_sigma <- fit$model$X$sigma
+  beta    <- fit$coefficients$mu
+  gamma   <- fit$coefficients$sigma
+  mu_hat <- if (!is.null(X) && !is.null(beta)) drop(X %*% beta) else NULL
+  sigma_hat <- if (!is.null(X_sigma) && !is.null(gamma)) {
+    exp(drop(X_sigma %*% gamma))
+  } else NULL
+  e <- tryCatch(as.numeric(stats::residuals(fit)), error = function(...) NULL)
+  Z_g <- NULL; u <- NULL
+  if (any(has_re)) {
+    re_info <- re_per_entry[[which(has_re)[1L]]]
+    if (!is.null(re_info) && nrow(re_info) > 0L) {
+      g_var <- re_info$group_var[[1L]]
+      term_label <- re_info$term_label[[1L]]
+      if (g_var %in% names(fit$data)) {
+        levels_g <- levels(factor(fit$data[[g_var]]))
+        Z_g <- stats::model.matrix(stats::reformulate(paste0("0+", g_var)),
+                                   data = fit$data)
+        # rename columns from `<g_var><level>` to bare level if possible
+        cn <- colnames(Z_g)
+        bare <- sub(paste0("^", g_var), "", cn)
+        if (length(bare) == length(levels_g)) colnames(Z_g) <- bare
+      }
+      blups <- fit$random_effects$mu$terms[[term_label]]
+      if (!is.null(blups)) u <- as.numeric(blups)
+    }
+  }
+  list(
+    y         = y,
+    X         = X,
+    beta      = if (is.null(beta)) NULL else as.numeric(beta),
+    X_sigma   = X_sigma,
+    gamma     = if (is.null(gamma)) NULL else as.numeric(gamma),
+    Z_g       = Z_g,
+    u         = u,
+    e         = e,
+    mu_hat    = mu_hat,
+    sigma_hat = sigma_hat
   )
 }
 

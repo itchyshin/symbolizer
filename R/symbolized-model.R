@@ -23,6 +23,10 @@
 #' @param formula_bridge A tibble: R syntax to statistical meaning to mathematics.
 #' @param warnings_registry A tibble or `NULL`.
 #' @param graph A list or `NULL`.
+#' @param expanded A list of actual numeric arrays (response vector, design
+#'   matrices, coefficient vectors, random-effect BLUPs, residuals, fitted
+#'   mu/sigma) or `NULL`. Populated by extractors that have access to the
+#'   original fit; consumed by `expand()` and the three-views renderer.
 #' @param metadata A list with at least `call`, `context`, `package_versions`, `created_by`.
 #'
 #' @return A `symbolized_model` S3 object.
@@ -45,6 +49,7 @@ new_symbolized_model <- function(
   formula_bridge,
   warnings_registry = NULL,
   graph = NULL,
+  expanded = NULL,
   metadata
 ) {
   obj <- list(
@@ -65,6 +70,7 @@ new_symbolized_model <- function(
     formula_bridge = formula_bridge,
     warnings_registry = warnings_registry,
     graph = graph,
+    expanded = expanded,
     metadata = metadata
   )
   class(obj) <- "symbolized_model"

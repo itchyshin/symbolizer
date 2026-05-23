@@ -118,6 +118,28 @@ column plugs in the actual sizes from this fit (`\mathbb{R}^{80}`,
 **Takeaway.** Both notations always coexist; the bridge teaches the reader to
 move between them without translating by hand.
 
+## Three views of your model
+
+The dual-notation equations cover *what shape* the model has. To see *what
+numbers* actually flow through that shape, call `as_html_three_views(sym)`:
+a single self-contained HTML widget with three tabs over the same fit.
+
+```{r three-views, results = 'asis'}
+as_html_three_views(sym, head = 5, tail = 2)
+```
+
+Tab 1 (Equation) is the structural contract -- $\mathbf{y}$, $\boldsymbol{\mu}$,
+$\boldsymbol{\beta}$, $\mathbf{X}$ -- with no indices. Tab 2 (Index) drops to
+per-observation form: $y_i$, $\mu_i$, $\beta_0$, $\beta_1$, $T_i$. Tab 3 (Matrix
+with data) actually stacks the numeric arrays: the response column, the rows
+of the design matrix, the coefficient vector, fitted $\hat{\boldsymbol{\mu}}$
+and $\hat{\boldsymbol{\sigma}}$. The accessor that returns those numeric arrays
+without the HTML wrapping is `expand(sym)`.
+
+**Takeaway.** Three views, one fit. A biologist can flip between *the shape of
+the model*, *what happens per observation*, and *the data the computer is
+actually multiplying*.
+
 ## Symbols, assumptions, formula bridge
 
 `symbol_table()` lists every symbol that appears in the equations together

@@ -22,6 +22,7 @@ new_symbolized_model(
   formula_bridge,
   warnings_registry = NULL,
   graph = NULL,
+  expanded = NULL,
   metadata
 )
 }
@@ -59,6 +60,11 @@ new_symbolized_model(
 \item{warnings_registry}{A tibble or \code{NULL}.}
 
 \item{graph}{A list or \code{NULL}.}
+
+\item{expanded}{A list of actual numeric arrays (response vector, design
+matrices, coefficient vectors, random-effect BLUPs, residuals, fitted
+mu/sigma) or \code{NULL}. Populated by extractors that have access to the
+original fit; consumed by \code{expand()} and the three-views renderer.}
 
 \item{metadata}{A list with at least \code{call}, \code{context}, \code{package_versions}, \code{created_by}.}
 }

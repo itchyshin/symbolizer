@@ -2,7 +2,7 @@
 % Please edit documentation in R/notation-bridge.R
 \name{notation_bridge}
 \alias{notation_bridge}
-\title{Index ↔ matrix notation bridge}
+\title{Index vs matrix notation bridge}
 \usage{
 notation_bridge(x, ...)
 }

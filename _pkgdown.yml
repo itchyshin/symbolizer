@@ -29,6 +29,7 @@ articles:
   - title: "Get started"
     contents:
       - symbolizer
+      - symbolizer-large
 
 reference:
   - title: "Package"
@@ -45,6 +46,11 @@ reference:
     desc: "Educator-facing bridge between index and matrix forms."
     contents:
       - notation_bridge
+  - title: "See the data flow"
+    desc: "Numeric arrays behind the symbols, and the three-views HTML widget."
+    contents:
+      - expand
+      - as_html_three_views
   - title: "Render the equations"
     desc: "LaTeX surface. Lines come from the symbolized_model; renderers only choose the layout."
     contents:
