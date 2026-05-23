@@ -4,7 +4,15 @@ template:
   bootstrap: 5
   bootswatch: flatly
   bslib:
-    primary: "#0f7887"
+    # Reddish / brick primary so symbolizer is visually distinct from its
+    # teal-themed sister packages (drmTMB, gllvmTMB use #0f7887).
+    primary:    "#a0282b"
+    secondary:  "#7a2a2a"
+    success:    "#2d6a4f"
+    info:       "#5b6770"
+    code-color: "#7a2a2a"
+    link-color: "#a0282b"
+    headings-color: "#5a1819"
 
 home:
   title: symbolizer
@@ -17,10 +25,61 @@ navbar:
     left:  [intro, articles, reference, news]
     right: [search, github]
 
+articles:
+  - title: "Get started"
+    contents:
+      - symbolizer
+
 reference:
+  - title: "Package"
+    contents:
+      - symbolizer-package
   - title: "Build the structured symbolic object"
     desc: "The product. Renderers consume it; users override symbols, units, context here."
     contents:
       - symbolize
+      - symbolize.drmTMB
       - validate_symbolized_model
       - symbolizer_capabilities
+  - title: "Read both notations"
+    desc: "Educator-facing bridge between index and matrix forms."
+    contents:
+      - notation_bridge
+  - title: "Render the equations"
+    desc: "LaTeX surface. Lines come from the symbolized_model; renderers only choose the layout."
+    contents:
+      - equations
+      - as_latex
+  - title: "Render the tables"
+    desc: "Symbols (with dimensions), assumptions (stated / implied / not checked), R-syntax-to-math bridge."
+    contents:
+      - symbol_table
+      - assumption_table
+      - formula_bridge
+  - title: "Interpret the coefficients"
+    desc: "Per-parameter readings on link, natural, variance, and biological scales."
+    contents:
+      - parameter_interpretation
+  - title: "Internal: term-grammar bridge"
+    desc: "The R formula <-> model matrix <-> biological symbol layer that every renderer reads."
+    contents:
+      - extract_terms
+      - get_parameterization
+  - title: "Internal: capability registry"
+    contents:
+      - capability_check
+  - title: "Internal: template loader"
+    contents:
+      - load_template
+      - clear_template_cache
+  - title: "Internal: formula helpers"
+    contents:
+      - formula_lhs
+      - formula_rhs
+      - formula_vars
+      - wrap_aligned
+      - align_at
+      - wrap_env
+  - title: "Internal: object construction"
+    contents:
+      - new_symbolized_model

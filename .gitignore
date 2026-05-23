@@ -12,3 +12,7 @@ docs/
 pkgdown/
 revdep/
 useful_skills/
+.claude/
+.memory/
+/doc/
+/Meta/

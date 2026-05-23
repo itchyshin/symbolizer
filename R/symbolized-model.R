@@ -149,11 +149,21 @@ print.symbolized_model <- function(x, ...) {
   }
   cli::cli_h2("Symbols")
   d <- x$symbol_dictionary
-  width <- max(nchar(d$symbol), 4L)
+  sym_text <- ifelse(is.na(d$symbol), "--", d$symbol)
+  width <- max(c(nchar(sym_text), 4L), na.rm = TRUE)
   for (i in seq_len(nrow(d))) {
     cli::cli_verbatim(
-      sprintf("  %-*s  %s", width, d$symbol[i], d$description[i])
+      sprintf("  %-*s  %s", width, sym_text[i], d$description[i])
     )
+  }
+  if (!is.null(x$random_effects) && nrow(x$random_effects) > 0L) {
+    cli::cli_h2("Random effects")
+    for (i in seq_len(nrow(x$random_effects))) {
+      r <- x$random_effects[i, , drop = FALSE]
+      cli::cli_text(
+        "  {.code {r$term_label}}  on submodel {.val {r$submodel}}  ({r$n_levels} levels)"
+      )
+    }
   }
   invisible(x)
 }

@@ -1,0 +1,250 @@
+---
+title: "Get started with symbolizer"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Get started with symbolizer}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+has_drmTMB <- requireNamespace("drmTMB", quietly = TRUE)
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment  = "#>",
+  eval     = has_drmTMB
+)
+```
+
+## Why structured symbolic models
+
+[`equatiomatic`](https://datalorax.github.io/equatiomatic/) renders a fitted
+model as a LaTeX string. That is enough when the only goal is a publishable
+equation. `symbolizer` returns a richer object: a *structured symbolic model*
+that other renderers can read. From the same object you can pull the equation,
+the symbol dictionary, the assumption table, the formula-to-math bridge, and
+the per-coefficient interpretation on link, natural, variance, and biological
+scales.
+
+The package is educator-first. It exposes equations in both index (scalar) and
+matrix notation side by side, and it labels every assumption as *stated*,
+*implied*, or *not checked* so a reader can see what the fit guarantees and
+what it does not.
+
+**Takeaway.** The product is the `symbolized_model` object; everything else is
+a renderer of that object.
+
+## A first `symbolize()` call
+
+The canonical v0.1 example is a Gaussian location-scale model fit with
+[`drmTMB`](https://itchyshin.github.io/drmTMB/): one submodel for the mean
+(`mu`), one for the residual standard deviation (`sigma`).
+
+```{r fit}
+library(symbolizer)
+library(drmTMB)
+
+set.seed(1)
+n <- 80
+temperature <- runif(n, 10, 25)
+dat <- data.frame(
+  body_mass   = rnorm(n, 30 + 0.4 * temperature, exp(0.5 + 0.1 * temperature)),
+  temperature = temperature
+)
+
+fit <- drmTMB(
+  drm_formula(body_mass ~ temperature, sigma ~ temperature),
+  family = gaussian(),
+  data   = dat
+)
+```
+
+`symbolize()` is the single entry point. Pass user-facing symbols and units so
+the rendered equations carry biological meaning rather than R variable names:
+
+```{r symbolize}
+sym <- symbolize(
+  fit,
+  symbols = c(body_mass = "W_i", temperature = "T_i"),
+  units   = c(body_mass = "g",   temperature = "C"),
+  context = "avian body-size location-scale model"
+)
+```
+
+**Takeaway.** One call gives you the structured object; the next sections
+unpack what it carries.
+
+## Equations in both notations
+
+`equations()` returns one row per renderable block (conditional distribution,
+each linear predictor, and any random-effect distribution). It always carries
+both notations as columns; the `notation` argument only controls how the
+result prints.
+
+```{r equations}
+equations(sym)
+```
+
+`as_latex()` produces the LaTeX string ready to splice into a document. With
+`notation = "both"` the index and matrix forms are stacked in two `aligned`
+blocks. Pasting the output into a math-aware renderer (the pkgdown site
+emits MathML through pandoc; Quarto and most LaTeX renderers use KaTeX or
+MathJax) shows them as proper math:
+
+```{r as-latex-print}
+cat(as_latex(sym, notation = "both"))
+```
+
+```{r as-latex-math, results = 'asis'}
+cat("$$", as_latex(sym, notation = "both"), "$$", sep = "\n")
+```
+
+The matrix form follows a simple convention: bold lowercase is a vector
+($\boldsymbol{\mu}$, $\boldsymbol{\beta}$), bold uppercase is a matrix
+($\mathbf{X}$, $\mathbf{Z}$), and Greek vectors keep their Greek glyph.
+
+`notation_bridge()` is the educator-facing table that pairs every piece of the
+model with its counterpart in the other notation and tags the shape:
+
+```{r notation-bridge}
+notation_bridge(sym)
+```
+
+Read it as follows: the `dimension` column is the shape rule
+(`\mathbb{R}^n`, `\mathbb{R}^{n \times p_\mu}`), and the `dimension_concrete`
+column plugs in the actual sizes from this fit (`\mathbb{R}^{80}`,
+`\mathbb{R}^{80 \times 2}`).
+
+**Takeaway.** Both notations always coexist; the bridge teaches the reader to
+move between them without translating by hand.
+
+## Symbols, assumptions, formula bridge
+
+`symbol_table()` lists every symbol that appears in the equations together
+with its role, units, dimension, and description. Dimensions appear in both
+abstract and concrete forms.
+
+```{r symbol-table}
+symbol_table(sym)
+```
+
+`assumption_table()` distinguishes three statuses: **stated** assumptions are
+in the formula (distribution, link, linear predictor); **implied** assumptions
+follow from the parameterisation (positivity of $\sigma$, conditional
+independence); **not_checked** assumptions are still the user's responsibility
+(missing-at-random).
+
+```{r assumption-table}
+assumption_table(sym)
+```
+
+`formula_bridge()` translates R syntax to mathematics. Each submodel has its
+R formula on the left, a plain-English meaning, and the corresponding math in
+both notations.
+
+```{r formula-bridge}
+formula_bridge(sym)
+```
+
+**Takeaway.** What the model says, what it assumes, and how its R syntax maps
+to math live in three separate tables — so reviewers can audit each one
+independently.
+
+## Parameter interpretation
+
+`parameter_interpretation()` reads each fixed-effect estimate on multiple
+scales. By default (`scale = "all"`) it shows link, natural, variance (for
+$\sigma$ coefficients), and biological readings together:
+
+```{r parameter-interpretation}
+parameter_interpretation(sym)
+```
+
+The `scale` argument filters to a single reading. The `"biological"` scale is
+the one that goes in a results paragraph:
+
+```{r parameter-interpretation-biological}
+parameter_interpretation(sym, scale = "biological")
+```
+
+**Takeaway.** Every coefficient has an interpretation on every scale that
+makes sense for its submodel; the package writes them so you do not have to.
+
+## Random intercepts (first slice)
+
+v0.1 supports Gaussian random intercepts of the form `(1 | group)` as a *first
+slice*. The same `symbolize()` call works; the equation set picks up the
+random-intercept term and a new distribution row, and the structured object
+gains a `random_effects` and `variance_components` tibble.
+
+```{r re-fit}
+set.seed(2)
+n        <- 80
+n_groups <- 6
+group    <- factor(rep(letters[seq_len(n_groups)], length.out = n))
+temperature <- runif(n, 10, 25)
+re <- rnorm(n_groups, sd = 1)
+dat_re <- data.frame(
+  body_mass = rnorm(
+    n,
+    30 + 0.4 * temperature + re[as.integer(group)],
+    exp(0.5 + 0.05 * temperature)
+  ),
+  temperature = temperature,
+  group       = group
+)
+
+fit_re <- drmTMB(
+  drm_formula(body_mass ~ temperature + (1 | group), sigma ~ temperature),
+  family = gaussian(),
+  data   = dat_re
+)
+
+sym_re <- symbolize(
+  fit_re,
+  symbols = c(body_mass = "W_i", temperature = "T_i"),
+  units   = c(body_mass = "g",   temperature = "C")
+)
+```
+
+The mu linear predictor now carries a $+ u_{group(i)}$ term, and a new
+distributional row appears for the random intercepts:
+
+```{r re-equations}
+equations(sym_re)
+```
+
+```{r re-latex, results = 'asis'}
+cat("$$", as_latex(sym_re, notation = "both"), "$$", sep = "\n")
+```
+
+The grouping structure is exposed as tidy tibbles, ready to feed into reports
+or other renderers:
+
+```{r re-tables}
+sym_re$random_effects
+sym_re$variance_components
+```
+
+**Takeaway.** The same object carries everything a reader needs to discuss
+random structure — what is grouped, how many levels, and which variance
+component goes with which submodel.
+
+## What's supported, what's planned
+
+`symbolizer_capabilities()` is the registry that gates `symbolize()`. Each row
+carries one of five status words: **Stable**, **First slice**, **Opt-in
+control**, **Planned or reserved**, or **Unsupported**. v0.1 marks
+`drmTMB` Gaussian `mu` and `sigma` as Stable, Gaussian `random_effects` as
+First slice, and reserves the rest of the matrix for later versions.
+
+```{r capabilities}
+symbolizer_capabilities()
+```
+
+The roadmap in `README.md` lists the planned version per family / package. If
+`symbolize()` errors with a capability message, the registry will tell you
+which version is scheduled to lift it.
+
+**Takeaway.** The registry is the single source of truth for "what works".
+Read the status word before designing around an unsupported tuple.

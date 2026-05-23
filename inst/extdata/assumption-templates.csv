@@ -1,7 +1,7 @@
 family,submodel,assumption,expression_latex,biological_meaning,status
-gaussian,,conditional_distribution,{response_symbol}_i \mid \mu_i\,\sigma_i \sim \mathrm{Normal}(\mu_i\,\sigma_i^2),{response} varies normally around its expected value,stated
+gaussian,,conditional_distribution,"{response_symbol} \mid \mu_i\, \sigma_i \sim \mathrm{Normal}(\mu_i\, \sigma_i^2)",{response} varies normally around its expected value,stated
 gaussian,mu,linear_predictor,\mu_i = \beta_0 + \sum_k \beta_k X_{ki},Expected {response} is a linear combination of the mean-model predictors,stated
 gaussian,sigma,linear_predictor,\log(\sigma_i) = \gamma_0 + \sum_k \gamma_k Z_{ki},Log residual SD of {response} is a linear combination of the scale-model predictors,stated
-gaussian,,independence,{response_symbol}_i \perp {response_symbol}_j \mid X for i \ne j,Observations are conditionally independent given the predictors,implied
+gaussian,,independence,{response_symbol} \perp {response_symbol_j} \mid X \text{ for } i \ne j,Observations are conditionally independent given the predictors,implied
 gaussian,sigma,positivity,\sigma_i > 0,Residual SD is constrained positive via the log link,implied
 gaussian,,no_missing_at_random,—,Observations are assumed not missing in a way that depends on the unobserved response,not_checked
