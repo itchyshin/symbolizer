@@ -1,0 +1,38 @@
+class,family,component,status,since,notes
+drmTMB,gaussian,mu,Stable,0.1.0,Univariate location submodel with identity link.
+drmTMB,gaussian,sigma,Stable,0.1.0,Univariate scale submodel with log link.
+drmTMB,gaussian,random_effects,First slice,0.1.0,Gaussian random intercepts (1|group) only.
+drmTMB,gaussian,zi,Planned or reserved,,Zero-inflation submodel.
+drmTMB,gaussian,hu,Planned or reserved,,Hurdle submodel.
+drmTMB,gaussian,rho12,Planned or reserved,,Bivariate residual correlation.
+drmTMB,student,mu,Planned or reserved,,
+drmTMB,student,sigma,Planned or reserved,,
+drmTMB,student,nu,Planned or reserved,,
+drmTMB,lognormal,mu,Planned or reserved,,
+drmTMB,lognormal,sigma,Planned or reserved,,
+drmTMB,gamma,mu,Planned or reserved,,
+drmTMB,gamma,sigma,Planned or reserved,,
+drmTMB,beta,mu,Planned or reserved,,
+drmTMB,beta,sigma,Planned or reserved,,
+drmTMB,beta_binomial,mu,Planned or reserved,,
+drmTMB,beta_binomial,sigma,Planned or reserved,,
+drmTMB,poisson,mu,Planned or reserved,,
+drmTMB,nbinom2,mu,Planned or reserved,,
+drmTMB,nbinom2,sigma,Planned or reserved,,
+drmTMB,cumulative_logit,mu,Planned or reserved,,
+drmTMB,biv_gaussian,mu1,Planned or reserved,,
+drmTMB,biv_gaussian,mu2,Planned or reserved,,
+drmTMB,biv_gaussian,sigma1,Planned or reserved,,
+drmTMB,biv_gaussian,sigma2,Planned or reserved,,
+drmTMB,biv_gaussian,rho12,Planned or reserved,,
+gllvmTMB,*,Lambda,Planned or reserved,,gllvmTMB extractor targeted for v0.4
+gllvmTMB,*,Psi,Planned or reserved,,
+gllvmTMB,*,Sigma,Planned or reserved,,
+glmmTMB,*,*,Planned or reserved,,Targeted for v0.6
+brmsfit,*,*,Planned or reserved,,Targeted for v0.7
+MCMCglmm,*,*,Planned or reserved,,Targeted for v0.8
+sdmTMB,*,*,Planned or reserved,,Targeted for v0.9
+lmerMod,*,*,Planned or reserved,,Targeted for v0.10
+glmerMod,*,*,Planned or reserved,,Targeted for v0.10
+lm,*,*,Planned or reserved,,Targeted for v0.10
+glm,*,*,Planned or reserved,,Targeted for v0.10

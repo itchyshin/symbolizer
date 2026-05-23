@@ -1,0 +1,2 @@
+family,response_distribution,scale_parameter,scale_meaning,link_mu,link_sigma,variance_expression,natural_sd_ratio,natural_variance_ratio,notes
+gaussian,Normal,sigma,residual standard deviation,identity,log,\sigma_i^2,exp(beta),exp(2*beta),drmTMB convention: larger sigma always means larger modelled variability.

@@ -1,0 +1,40 @@
+url: https://itchyshin.github.io/symbolizer/
+
+template:
+  bootstrap: 5
+  bootswatch: flatly
+  bslib:
+    primary: "#0f7887"
+
+home:
+  title: symbolizer
+  description: >
+    Structured symbolic specifications, interpretations, and teachable stories
+    for modern statistical models in ecology and evolution.
+
+navbar:
+  structure:
+    left:  [intro, articles, reference, news]
+    right: [search, github]
+
+reference:
+  - title: "Build the structured symbolic object"
+    desc: "The product. Renderers consume it; users override symbols, units, context here."
+    contents:
+      - symbolize
+      - validate_symbolized_model
+      - symbolizer_capabilities
+  - title: "Render"
+    desc: "Standard outputs derived from `symbolized_model`."
+    contents:
+      - as_latex
+      - equations
+      - component_table
+      - symbol_table
+  - title: "Educational extras"
+    desc: "Layered explanations that go beyond the equation."
+    contents:
+      - formula_bridge
+      - assumption_table
+      - parameter_interpretation
+      - interpret_parameter

@@ -1,0 +1,40 @@
+Package: symbolizer
+Title: Structured Symbolic Specifications, Interpretations, and Teachable Stories for Modern Statistical Models
+Version: 0.0.0.9000
+Authors@R: c(
+    person("Shinichi", "Nakagawa", email = "itchyshin@gmail.com",
+           role = c("aut", "cre", "cph"),
+           comment = c(ORCID = "0000-0002-7765-5182"))
+  )
+Description: Turns fitted distributional, multivariate, latent-variable, and
+    spatial regression models into structured symbolic specifications that
+    render as publication-ready LaTeX equations, assumption tables, formula
+    bridges, parameter interpretations, and (later) structural model
+    comparisons, methods text, simulation recipes, and model graphs.
+    Companion to 'drmTMB' and 'gllvmTMB'; complementary to 'equatiomatic'
+    for one-formula models.
+License: GPL-3
+URL: https://itchyshin.github.io/symbolizer/, https://github.com/itchyshin/symbolizer
+BugReports: https://github.com/itchyshin/symbolizer/issues
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+Depends:
+    R (>= 4.1.0)
+Imports:
+    cli,
+    stats,
+    tibble,
+    utils
+Suggests:
+    drmTMB,
+    gllvmTMB,
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0),
+    withr
+Remotes:
+    itchyshin/drmTMB,
+    itchyshin/gllvmTMB
+Config/testthat/edition: 3
+VignetteBuilder: knitr
+Config/roxygen2/version: 8.0.0

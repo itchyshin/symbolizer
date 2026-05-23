@@ -1,0 +1,7 @@
+family,submodel,coefficient_role,link_scale_reading,natural_scale_reading,variance_scale_reading,biological_reading
+gaussian,mu,intercept,Expected {response} at the reference,Expected {response} for the reference case,—,Baseline {response} in the reference condition
+gaussian,mu,slope,Linear change in expected {response} per unit of {predictor},Expected {response} changes by {coef} per unit of {predictor},—,A unit change in {predictor} shifts the expected {response} by {coef}
+gaussian,mu,factor_contrast,Difference in expected {response} for {level} versus the reference,Expected {response} for {level} differs from the reference by {coef},—,Average {response} differs between {level} and the reference
+gaussian,sigma,intercept,Log residual SD at the reference (SD = exp({coef})),Residual SD = exp({coef}) at the reference,Residual variance = exp(2*{coef}),Baseline level of unexplained individual variation in {response}
+gaussian,sigma,slope,Log residual SD changes by {coef} per unit of {predictor},Residual SD multiplied by exp({coef}) per unit of {predictor},Residual variance multiplied by exp(2*{coef}) per unit,A unit change in {predictor} multiplies the unexplained variability of {response} by exp({coef})
+gaussian,sigma,factor_contrast,Log residual SD differs by {coef} for {level} versus the reference,Residual SD for {level} = exp({coef}) times the reference SD,Residual variance for {level} = exp(2*{coef}) times the reference,Individual-level variation differs between {level} and the reference by a factor of exp({coef})

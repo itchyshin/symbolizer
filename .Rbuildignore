@@ -1,0 +1,14 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^useful_skills$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^\.github$
+^CLAUDE\.md$
+^AGENTS\.md$
+^CONTRIBUTING\.md$
+^cran-comments\.md$
+^\.DS_Store$
+^codecov\.yml$
+^revdep$
