@@ -27,6 +27,7 @@ new_symbolized_model(
   formula_bridge,
   warnings_registry = NULL,
   graph = NULL,
+  expanded = NULL,
   metadata
 )
 ```
@@ -102,6 +103,15 @@ new_symbolized_model(
 - graph:
 
   A list or `NULL`.
+
+- expanded:
+
+  A list of actual numeric arrays (response vector, design matrices,
+  coefficient vectors, random-effect BLUPs, residuals, fitted mu/sigma)
+  or `NULL`. Populated by extractors that have access to the original
+  fit; consumed by
+  [`expand()`](https://itchyshin.github.io/symbolizer/reference/expand.md)
+  and the three-views renderer.
 
 - metadata:
 

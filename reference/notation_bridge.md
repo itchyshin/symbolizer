@@ -1,4 +1,4 @@
-# Index ↔ matrix notation bridge
+# Index vs matrix notation bridge
 
 Returns the educator-facing translation table that pairs each piece of
 the model in index (scalar / element-wise) notation with its matrix-form

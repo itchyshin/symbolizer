@@ -68,6 +68,7 @@ to wrap the fields they have populated.</p>
 <span>  <span class="va">formula_bridge</span>,</span>
 <span>  warnings_registry <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  graph <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  expanded <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">metadata</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -142,6 +143,13 @@ to wrap the fields they have populated.</p>
 
 <dt id="arg-graph">graph<a class="anchor" aria-label="anchor" href="#arg-graph"></a></dt>
 <dd><p>A list or <code>NULL</code>.</p></dd>
+
+
+<dt id="arg-expanded">expanded<a class="anchor" aria-label="anchor" href="#arg-expanded"></a></dt>
+<dd><p>A list of actual numeric arrays (response vector, design
+matrices, coefficient vectors, random-effect BLUPs, residuals, fitted
+mu/sigma) or <code>NULL</code>. Populated by extractors that have access to the
+original fit; consumed by <code><a href="expand.html">expand()</a></code> and the three-views renderer.</p></dd>
 
 
 <dt id="arg-metadata">metadata<a class="anchor" aria-label="anchor" href="#arg-metadata"></a></dt>

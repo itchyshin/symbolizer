@@ -199,6 +199,91 @@ Read it as follows: the `dimension` column is the shape rule
 **Takeaway.** Both notations always coexist; the bridge teaches the
 reader to move between them without translating by hand.
 
+## Three views of your model
+
+The dual-notation equations cover *what shape* the model has. To see
+*what numbers* actually flow through that shape, call
+`as_html_three_views(sym)`: a single self-contained HTML widget with
+three tabs over the same fit.
+
+``` r
+
+as_html_three_views(sym, head = 5, tail = 2)
+```
+
+    <div class="sym-tab sym-active" data-tab="eq">1. Equation</div>
+    <div class="sym-tab"            data-tab="idx">2. Index</div>
+    <div class="sym-tab"            data-tab="mat">3. Matrix (with data)</div>
+
+The structural contract. No indices, no numbers – the shape of the
+model.
+
+``` math
+\begin{aligned}
+\mathbf{w} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} & \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2)) \\
+\boldsymbol{\mu} & = \mathbf{X} \boldsymbol{\beta} \\
+\log(\boldsymbol{\sigma}) & = \mathbf{Z} \boldsymbol{\gamma}
+\end{aligned}
+```
+
+What happens for each observation *i*.
+
+``` math
+\begin{aligned}
+W_i \mid \mu_i,\, \sigma_i & \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
+\mu_i & = \beta_{0} + \beta_{1} \, T_i \\
+\log(\sigma_i) & = \gamma_{0} + \gamma_{1} \, T_i
+\end{aligned}
+```
+
+The actual numbers stacked – what the computer is multiplying. Showing
+first 5 and last 2 rows of n = 80.
+
+``` sym-matrix
+
+  y                   X                          beta
+  y_1 = 34.5          1.00  14.0              
+  y_2 = 34.2          1.00  15.6              
+  y_3 = 44.8          1.00  18.6              
+  y_4 = 49.2          1.00  23.6              
+  y_5 = 31.0          1.00  13.0              
+  ...               ...                   
+  y_79 = 45.8         1.00  21.7              
+  y_80 = 36.4         1.00  24.4              
+
+  Coefficients (beta, mu):
+    beta_0 = 29.6
+    beta_1 = 0.492
+
+  X_sigma                       gamma
+  1.00  14.0                    
+  1.00  15.6                    
+  1.00  18.6                    
+  1.00  23.6                    
+  1.00  13.0                    
+  ...                         
+  1.00  21.7                    
+  1.00  24.4                    
+    gamma_0 = 0.485
+    gamma_1 = 0.0936
+
+  Fitted mu_hat (first 5): 36.4  37.2  38.7  41.2  36.0
+  Fitted sigma_hat (first 5): 6.01  6.98  9.26  14.8  5.50
+```
+
+Tab 1 (Equation) is the structural contract – $`\mathbf{y}`$,
+$`\boldsymbol{\mu}`$, $`\boldsymbol{\beta}`$, $`\mathbf{X}`$ – with no
+indices. Tab 2 (Index) drops to per-observation form: $`y_i`$,
+$`\mu_i`$, $`\beta_0`$, $`\beta_1`$, $`T_i`$. Tab 3 (Matrix with data)
+actually stacks the numeric arrays: the response column, the rows of the
+design matrix, the coefficient vector, fitted $`\hat{\boldsymbol{\mu}}`$
+and $`\hat{\boldsymbol{\sigma}}`$. The accessor that returns those
+numeric arrays without the HTML wrapping is `expand(sym)`.
+
+**Takeaway.** Three views, one fit. A biologist can flip between *the
+shape of the model*, *what happens per observation*, and *the data the
+computer is actually multiplying*.
+
 ## Symbols, assumptions, formula bridge
 
 [`symbol_table()`](https://itchyshin.github.io/symbolizer/reference/symbol_table.md)

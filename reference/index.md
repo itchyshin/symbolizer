@@ -26,7 +26,16 @@ context here.
 Educator-facing bridge between index and matrix forms.
 
 - [`notation_bridge()`](https://itchyshin.github.io/symbolizer/reference/notation_bridge.md)
-  : Index ↔ matrix notation bridge
+  : Index vs matrix notation bridge
+
+## See the data flow
+
+Numeric arrays behind the symbols, and the three-views HTML widget.
+
+- [`expand()`](https://itchyshin.github.io/symbolizer/reference/expand.md)
+  : Expand a symbolized_model to its underlying numeric arrays
+- [`as_html_three_views()`](https://itchyshin.github.io/symbolizer/reference/as_html_three_views.md)
+  : Three-views HTML rendering of a symbolized_model
 
 ## Render the equations
 
