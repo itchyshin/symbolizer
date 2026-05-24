@@ -111,6 +111,14 @@ template-based, never LLM).
 - [`methods_text()`](https://itchyshin.github.io/symbolizer/reference/methods_text.md)
   : Methods-section paragraph from a symbolized model
 
+## Per-fit warnings
+
+Conditions symbolize() flagged when building the object (e.g., Wald CI
+with few RE groups). Templated from inst/extdata/warning-templates.csv.
+
+- [`warning_table()`](https://itchyshin.github.io/symbolizer/reference/warning_table.md)
+  : Per-fit prose warnings for a symbolized model
+
 ## Internal: term-grammar bridge
 
 The R formula \<-\> model matrix \<-\> biological symbol layer that
