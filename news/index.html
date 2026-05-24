@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,6 +33,22 @@
       <small>Source: <a href="https://github.com/itchyshin/symbolizer/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.6.0" id="symbolizer-060">symbolizer 0.6.0<a class="anchor" aria-label="anchor" href="#symbolizer-060"></a></h2>
+<div class="section level3">
+<h3 id="v06--model-diagrams-0-6-0">v0.6 — model diagrams<a class="anchor" aria-label="anchor" href="#v06--model-diagrams-0-6-0"></a></h3>
+<ul><li>New: <code>as_dag(sym)</code> returns a structural DAG of the fitted model with three slots: <code>nodes</code> (tibble — response, parameters, predictors, groups, random effects), <code>edges</code> (tibble — predictor→parameter edges, parameter→response distribution edges, group→random-effect edges, random-effect→parameter contributions), and <code>dot</code> (a single GraphViz / DOT-language string).</li>
+<li>The S3 class is <code>symbolic_dag</code>. <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> summarises the node and edge counts and emits the DOT string with a copy/paste pointer to GraphvizOnline; <code>knit_print()</code> wraps the DOT inside a fenced <code>dot</code> code block so Quarto / Markdown engines that support DOT rendering pick it up automatically.</li>
+<li>Nodes are styled by kind:
+<ul><li>response → double circle, salmon fill</li>
+<li>parameter (μ, σ, ν, …) → ellipse, cream fill</li>
+<li>predictor → box, green fill</li>
+<li>group variable → house shape, lavender fill</li>
+<li>random effect → circle, orange fill Edges are styled by relationship: distribution edges are bold red; linear-predictor edges are solid; group / random-contribution edges are dashed.</li>
+</ul></li>
+<li>No new hard dependencies. To render the DAG live: paste the <code>$dot</code> string into <a href="https://dreampuf.github.io/GraphvizOnline/" class="external-link uri">https://dreampuf.github.io/GraphvizOnline/</a>, or pass it to <code>DiagrammeR::grViz()</code> (DiagrammeR is not a symbolizer dependency).</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.5.0" id="symbolizer-050">symbolizer 0.5.0<a class="anchor" aria-label="anchor" href="#symbolizer-050"></a></h2>
 <div class="section level3">

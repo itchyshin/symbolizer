@@ -402,6 +402,15 @@ with few RE groups). Templated from inst/extdata/warning-templates.csv.
 - [`warning_table()`](https://itchyshin.github.io/symbolizer/reference/warning_table.md)
   : Per-fit prose warnings for a symbolized model
 
+## Model diagram
+
+Render the structural model as a DAG (nodes for response, parameters,
+predictors, groups, random effects). Returns a list with the DOT
+representation ready for GraphvizOnline or DiagrammeR.
+
+- [`as_dag()`](https://itchyshin.github.io/symbolizer/reference/as_dag.md)
+  : Model diagram for a symbolized model
+
 ## Internal: term-grammar bridge
 
 The R formula \<-\> model matrix \<-\> biological symbol layer that

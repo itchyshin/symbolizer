@@ -1,5 +1,33 @@
 # Changelog
 
+## symbolizer 0.6.0
+
+### v0.6 — model diagrams
+
+- New: `as_dag(sym)` returns a structural DAG of the fitted model with
+  three slots: `nodes` (tibble — response, parameters, predictors,
+  groups, random effects), `edges` (tibble — predictor→parameter edges,
+  parameter→response distribution edges, group→random-effect edges,
+  random-effect→parameter contributions), and `dot` (a single GraphViz /
+  DOT-language string).
+- The S3 class is `symbolic_dag`.
+  [`print()`](https://rdrr.io/r/base/print.html) summarises the node and
+  edge counts and emits the DOT string with a copy/paste pointer to
+  GraphvizOnline; `knit_print()` wraps the DOT inside a fenced `dot`
+  code block so Quarto / Markdown engines that support DOT rendering
+  pick it up automatically.
+- Nodes are styled by kind:
+  - response → double circle, salmon fill
+  - parameter (μ, σ, ν, …) → ellipse, cream fill
+  - predictor → box, green fill
+  - group variable → house shape, lavender fill
+  - random effect → circle, orange fill Edges are styled by
+    relationship: distribution edges are bold red; linear-predictor
+    edges are solid; group / random-contribution edges are dashed.
+- No new hard dependencies. To render the DAG live: paste the `$dot`
+  string into <https://dreampuf.github.io/GraphvizOnline/>, or pass it
+  to `DiagrammeR::grViz()` (DiagrammeR is not a symbolizer dependency).
+
 ## symbolizer 0.5.0
 
 ### v0.5 — gllvmTMB binomial (first non-Gaussian latent-variable family)
