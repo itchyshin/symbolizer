@@ -189,6 +189,13 @@ methods_slots_for <- function(sym) {
         methods_predictors_clause(sym, "sigma")
       )
     } else ""
+  } else if (identical(family, "gaussian") && identical(cls, "brmsfit")) {
+    slots$response             <- sym$model$response %||% "the response"
+    slots$response_units_clause <- methods_units_clause(sym, slots$response)
+    slots$mu_predictors_clause    <- methods_predictors_clause(sym, "mu")
+    # brms templates don't carry {ci_method}; the band is always
+    # credible. Strip it so leftover placeholders aren't flagged.
+    slots$ci_method <- NULL
   }
 
   slots

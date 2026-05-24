@@ -1,6 +1,6 @@
 Package: symbolizer
 Title: Structured Symbolic Specifications, Interpretations, and Teachable Stories for Modern Statistical Models
-Version: 0.7.1
+Version: 0.8.0
 Authors@R: c(
     person("Shinichi", "Nakagawa", email = "itchyshin@gmail.com",
            role = c("aut", "cre", "cph"),
@@ -26,6 +26,7 @@ Imports:
     tibble,
     utils
 Suggests:
+    brms,
     drmTMB,
     emmeans,
     gllvmTMB,

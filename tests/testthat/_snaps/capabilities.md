@@ -6,6 +6,7 @@
       Error in `symbolizer:::capability_check()`:
       ! `symbolize()` cannot read drmTMB / gaussian / zi yet (status: Planned or reserved).
       i Today we can read:
+      * brmsfit gaussian: mu, random_effects (First slice)
       * drmTMB gaussian: mu, sigma (Stable)
       * drmTMB beta: mu, sigma (First slice)
       * drmTMB beta_binomial: mu, sigma (First slice)
@@ -23,14 +24,15 @@
       * glmmTMB gaussian: mu, random_effects, sigma (First slice)
       i See `symbolizer_capabilities()` for the full registry.
 
-# capability_check() rejects brmsfit/gaussian/mu via wildcard
+# capability_check() rejects brmsfit/gaussian/sigma_distributional (Planned)
 
     Code
-      symbolizer:::capability_check("brmsfit", "gaussian", "mu")
+      symbolizer:::capability_check("brmsfit", "gaussian", "sigma_distributional")
     Condition
       Error in `symbolizer:::capability_check()`:
-      ! `symbolize()` cannot read brmsfit / gaussian / mu yet (status: Planned or reserved).
+      ! `symbolize()` cannot read brmsfit / gaussian / sigma_distributional yet (status: Planned or reserved).
       i Today we can read:
+      * brmsfit gaussian: mu, random_effects (First slice)
       * drmTMB gaussian: mu, sigma (Stable)
       * drmTMB beta: mu, sigma (First slice)
       * drmTMB beta_binomial: mu, sigma (First slice)

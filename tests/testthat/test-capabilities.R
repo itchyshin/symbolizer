@@ -36,10 +36,10 @@ test_that("capability_check() rejects drmTMB/gaussian/zi (Planned)", {
   )
 })
 
-test_that("capability_check() rejects brmsfit/gaussian/mu via wildcard", {
+test_that("capability_check() rejects brmsfit/gaussian/sigma_distributional (Planned)", {
   expect_snapshot(
     error = TRUE,
-    symbolizer:::capability_check("brmsfit", "gaussian", "mu")
+    symbolizer:::capability_check("brmsfit", "gaussian", "sigma_distributional")
   )
 })
 

@@ -113,7 +113,7 @@ test_that("print(sym) leads with a pointer to summary() / explain()", {
 
 test_that("capability_check() lists 'Today we can read' on planned tuples", {
   err <- tryCatch(
-    symbolizer:::capability_check("brmsfit", "gaussian", "mu"),
+    symbolizer:::capability_check("brmsfit", "gaussian", "sigma_distributional"),
     error = identity
   )
   expect_s3_class(err, "error")
@@ -125,7 +125,7 @@ test_that("capability_check() lists 'Today we can read' on planned tuples", {
 
 test_that("capability_check() error names the rejected status word", {
   err <- tryCatch(
-    symbolizer:::capability_check("brmsfit", "gaussian", "mu"),
+    symbolizer:::capability_check("brmsfit", "gaussian", "sigma_distributional"),
     error = identity
   )
   msg <- conditionMessage(err)
