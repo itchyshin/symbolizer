@@ -26,6 +26,12 @@
 #' a factor: the coefficient table shows contrasts (differences from the
 #' reference level); `group_means()` shows each group's expected response.
 #'
+#' Not supported on bivariate Gaussian (`biv_gaussian`) fits — a marginal
+#' mean in a bivariate fit is a joint 2-vector `(mu1, mu2)`, not a scalar,
+#' so the emmeans abstraction does not apply. Use
+#' [`drmTMB::predict_parameters()`] on the fit directly, or refit each
+#' response as a univariate Gaussian and call `group_means()` on each.
+#'
 #' @param x A [`symbolized_model`][new_symbolized_model] whose underlying fit
 #'   is retained on `x$metadata$fit`.
 #' @param by Optional character vector of factor names to marginalize over.
@@ -57,6 +63,7 @@ group_means.default <- function(x, by = NULL, ci_method = NULL, ...) {
 #' @export
 group_means.symbolized_model <- function(x, by = NULL, ci_method = NULL, ...) {
   marg_require_emmeans()
+  marg_check_family_supported(x, "group_means")
   fit <- marg_require_fit(x, "group_means")
   factors <- marg_factors(x)
   if (length(factors) == 0L) {
@@ -101,6 +108,10 @@ group_means.symbolized_model <- function(x, by = NULL, ci_method = NULL, ...) {
 #' coefficient table reports contrast slopes (differences from the reference
 #' group's slope); `group_slopes()` reports each group's slope directly.
 #'
+#' Not supported on bivariate Gaussian (`biv_gaussian`) fits — see
+#' [`group_means()`] for the same limitation and the recommended
+#' alternatives.
+#'
 #' @param x A [`symbolized_model`][new_symbolized_model] whose underlying fit
 #'   is retained on `x$metadata$fit`.
 #' @param continuous Name of the continuous predictor whose slope is wanted.
@@ -136,6 +147,7 @@ group_slopes.default <- function(x, continuous, at = NULL, ci_method = NULL,
 group_slopes.symbolized_model <- function(x, continuous, at = NULL,
                                           ci_method = NULL, ...) {
   marg_require_emmeans()
+  marg_check_family_supported(x, "group_slopes")
   if (missing(continuous) || !is.character(continuous) ||
       length(continuous) != 1L || !nzchar(continuous)) {
     cli::cli_abort("{.arg continuous} must be a single non-empty character string.")
@@ -187,6 +199,30 @@ marg_require_fit <- function(x, fn_name) {
     ))
   }
   fit
+}
+
+# Gate fits whose family doesn't fit the marginal-means abstraction. Today
+# this is just biv_gaussian: a "marginal mean" in a bivariate fit is a joint
+# 2-vector prediction, not a scalar, and emmeans does not (today) provide a
+# basis for biv_gaussian. We catch this upfront with a symbolizer-layer
+# message rather than letting drmTMB's emmeans preflight raise a less
+# explanatory error downstream.
+marg_check_family_supported <- function(x, fn_name) {
+  fam <- x$model$family %||% NA_character_
+  unsupported <- c("biv_gaussian")
+  if (fam %in% unsupported) {
+    cli::cli_abort(c(
+      "{.fn {fn_name}} does not currently support {.val {fam}} fits.",
+      i = "A {.emph marginal mean} in a bivariate fit is a joint 2-vector
+           prediction {.code (mu1_i, mu2_i)}, not a scalar, so the
+           {.pkg emmeans} marginal abstraction does not apply.",
+      i = "For per-response predictions on a bivariate fit, use
+           {.fn drmTMB::predict_parameters} on the fit directly.",
+      i = "Alternatively, refit each response as a univariate Gaussian and
+           call {.fn {fn_name}} on each."
+    ))
+  }
+  invisible(TRUE)
 }
 
 # Factors detected from the symbol_dictionary (role == "factor").

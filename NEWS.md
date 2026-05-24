@@ -1,3 +1,17 @@
+# symbolizer 0.2.0.9000 (development)
+
+## v0.2.1 (in progress)
+
+* `group_means()` and `group_slopes()` now gate `biv_gaussian` fits at
+  the symbolizer layer with a friendly explanation, instead of letting
+  drmTMB's emmeans preflight surface a less explanatory error. A
+  marginal mean in a bivariate fit is a joint 2-vector prediction
+  `(mu1, mu2)`, not a scalar, so the emmeans abstraction does not
+  apply. The gate's message points at
+  `drmTMB::predict_parameters()` and at the fit-each-response-as-
+  univariate alternative. Documented in the roxygen for both
+  functions.
+
 # symbolizer 0.2.0
 
 ## v0.2 — bivariate Gaussian, structural comparison, article tidy

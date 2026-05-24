@@ -37,4 +37,10 @@ confidence band, and an \code{excludes_zero} indicator.
 Use this alongside \code{\link[=parameter_interpretation]{parameter_interpretation()}} for any fit that contains
 a factor: the coefficient table shows contrasts (differences from the
 reference level); \code{group_means()} shows each group's expected response.
+
+Not supported on bivariate Gaussian (\code{biv_gaussian}) fits — a marginal
+mean in a bivariate fit is a joint 2-vector \verb{(mu1, mu2)}, not a scalar,
+so the emmeans abstraction does not apply. Use
+\code{\link[drmTMB:predict_parameters]{drmTMB::predict_parameters()}} on the fit directly, or refit each
+response as a univariate Gaussian and call \code{group_means()} on each.
 }

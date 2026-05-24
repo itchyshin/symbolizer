@@ -43,4 +43,8 @@ Use this alongside \code{\link[=parameter_interpretation]{parameter_interpretati
 continuous-by-categorical interaction (or continuous-by-continuous): the
 coefficient table reports contrast slopes (differences from the reference
 group's slope); \code{group_slopes()} reports each group's slope directly.
+
+Not supported on bivariate Gaussian (\code{biv_gaussian}) fits — see
+\code{\link[=group_means]{group_means()}} for the same limitation and the recommended
+alternatives.
 }

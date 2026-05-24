@@ -149,3 +149,31 @@ test_that("model_card$marginal_slopes is NULL with no interaction", {
   expect_null(card$marginal_slopes)
   expect_s3_class(card$marginal_means, "symbolizer_group_means")
 })
+
+test_that("group_means errors helpfully on biv_gaussian fits", {
+  skip_if_no_marg_deps()
+  fit_bv <- fit_drm_biv_gaussian()
+  sym_bv <- symbolize(fit_bv)
+  expect_error(
+    group_means(sym_bv),
+    "does not currently support"
+  )
+  expect_error(
+    group_means(sym_bv),
+    "biv_gaussian"
+  )
+})
+
+test_that("group_slopes errors helpfully on biv_gaussian fits", {
+  skip_if_no_marg_deps()
+  fit_bv <- fit_drm_biv_gaussian()
+  sym_bv <- symbolize(fit_bv)
+  expect_error(
+    group_slopes(sym_bv, continuous = "x1"),
+    "does not currently support"
+  )
+  expect_error(
+    group_slopes(sym_bv, continuous = "x1"),
+    "biv_gaussian"
+  )
+})
