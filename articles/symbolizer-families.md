@@ -1,0 +1,273 @@
+# A tour of non-Gaussian families
+
+> *Eight distribution families ship today. The biology of each one is
+> different. This vignette walks each in turn — what kind of response it
+> fits, what the link does, and how to read the `mu` coefficient.*
+
+The seven non-Gaussian families covered here all use the same
+`symbolize(fit)` interface. The differences are in the LaTeX, the
+biological reading on each coefficient, and the assumption table. Every
+phrase you see below is templated from `inst/extdata/*.csv` — no LLM at
+runtime.
+
+For Gaussian and bivariate Gaussian, see
+[`vignette("symbolizer-drmtmb")`](https://itchyshin.github.io/symbolizer/articles/symbolizer-drmtmb.md).
+For the matching pedagogy on factors and interactions, see
+[`vignette("symbolizer-factors")`](https://itchyshin.github.io/symbolizer/articles/symbolizer-factors.md).
+
+``` r
+
+library(symbolizer)
+library(drmTMB)
+#> 
+#> Attaching package: 'drmTMB'
+#> The following object is masked from 'package:base':
+#> 
+#>     beta
+```
+
+## Continuous responses
+
+### Student-t — robust regression
+
+A heavier-tailed Gaussian alternative. The `nu` parameter controls tail
+heaviness: `nu` large means almost Gaussian, `nu` small means heavy
+outliers tolerated. drmTMB parameterises `nu` on the `log(nu - 2)` scale
+so the variance is always finite.
+
+``` r
+
+set.seed(1); n <- 100
+dat <- data.frame(
+  y = rt(n, df = 5) * 2 + 10 + 0.5 * rnorm(n),
+  x = rnorm(n)
+)
+fit <- drmTMB(drm_formula(y ~ x, sigma ~ 1, nu ~ 1),
+              family = student(), data = dat)
+sym <- symbolize(fit)
+cat(sym$distribution$latex, "\n")
+#> y_i \mid \mu_i,\, \sigma_i,\, \nu_i \sim \mathrm{Student\text{-}t}(\mu_i,\, \sigma_i,\, \nu_i)
+```
+
+**Coefficient reading on mu:** identical to Gaussian — a slope on the
+response scale.
+
+### Lognormal — positive continuous, right-skewed
+
+`Y > 0`, and `log(Y)` is Gaussian. Coefficients on `mu` live on the
+log-response scale, so `exp(beta)` is the multiplicative effect on the
+**geometric mean** of `Y`.
+
+``` r
+
+set.seed(1); n <- 100
+dat <- data.frame(y = exp(rnorm(n, 2 + 0.3 * rnorm(n), 0.4)),
+                  x = rnorm(n))
+fit <- drmTMB(drm_formula(y ~ x, sigma ~ 1),
+              family = lognormal(), data = dat)
+sym <- symbolize(fit)
+print(parameter_interpretation(sym, scale = "biological"))
+#> 
+#> ── Parameter interpretation ("biological") ──
+#> 
+#> ── submodel: mu
+#> (Intercept) ["intercept"] estimate = "2.02"
+#> biological: Baseline geometric mean of y in the reference condition is
+#> exp(2.02)
+#> x ["slope"] estimate = "-0.0136"
+#> biological: A unit change in x multiplies the geometric mean of y by
+#> exp(-0.0136)
+#> 
+#> ── submodel: sigma
+#> (Intercept) ["intercept"] estimate = "-0.764"
+#> biological: Baseline level of unexplained variability on the log scale
+```
+
+**Coefficient reading on mu:** a unit change in `x` multiplies the
+geometric mean by `exp(beta)`.
+
+### Gamma — positive continuous, skewed
+
+`Y > 0`, log link by convention (`stats::Gamma(link = "log")`).
+Coefficients are multiplicative on the mean response, like lognormal —
+but the variance scales as `mu^2 * sigma^2`, not `log(Y)`.
+
+``` r
+
+set.seed(1); n <- 100
+dat <- data.frame(y = rgamma(n, shape = 2, rate = 0.5),
+                  x = rnorm(n))
+fit <- drmTMB(drm_formula(y ~ x, sigma ~ 1),
+              family = stats::Gamma(link = "log"), data = dat)
+sym <- symbolize(fit)
+cat(sym$distribution$latex, "\n")
+#> y_i \mid \mu_i,\, \sigma_i \sim \mathrm{Gamma}(\mathrm{shape} = 1/\sigma_i^2,\, \mathrm{scale} = \mu_i \sigma_i^2)
+```
+
+**When to choose Gamma over lognormal?** Gamma is a member of the
+exponential family (it has nice GLM properties — link, canonical form).
+Lognormal is fully implied by `log(Y) ~ Normal`, which makes some
+predictive plots simpler but loses the GLM toolkit.
+
+## Proportion responses
+
+### Beta — proportions in (0, 1)
+
+`Y` is strictly between 0 and 1. Mean via logit link, precision via log
+link (large `sigma` means a *tighter* distribution around the mean).
+
+``` r
+
+set.seed(1); n <- 100
+dat <- data.frame(y = rbeta(n, 2, 5),
+                  x = rnorm(n))
+fit <- drmTMB(drm_formula(y ~ x, sigma ~ 1),
+              family = beta(), data = dat)
+sym <- symbolize(fit)
+cat(sym$distribution$latex, "\n")
+#> y_i \mid \mu_i,\, \sigma_i \sim \mathrm{Beta}(\mu_i \sigma_i,\, (1 - \mu_i) \sigma_i)
+```
+
+**Coefficient reading on mu:** `exp(beta)` is the *odds ratio* of the
+success probability. A coefficient of `0.3` means a unit increase in `x`
+multiplies the odds by `exp(0.3) ≈ 1.35`.
+
+### Beta-binomial — overdispersed binomial counts
+
+`Y` is the count of successes out of `N_i` trials. Specify via
+`cbind(successes, failures)`. `sigma` controls overdispersion: large
+`sigma` approaches binomial (no overdispersion), small `sigma` means
+strong overdispersion.
+
+``` r
+
+set.seed(1); n <- 80
+trials <- sample(5:20, n, replace = TRUE)
+p <- plogis(0.5 + 0.5 * rnorm(n))
+dat <- data.frame(
+  successes = rbinom(n, trials, p),
+  failures  = trials - rbinom(n, trials, p),
+  x         = rnorm(n)
+)
+fit <- drmTMB(drm_formula(cbind(successes, failures) ~ x, sigma ~ 1),
+              family = beta_binomial(), data = dat)
+#> Warning in sqrt(diag(cov)): NaNs produced
+sym <- symbolize(fit)
+cat(sym$distribution$latex, "\n")
+#> cbind(successes, failures)_i \mid N_i,\, \mu_i,\, \sigma_i \sim \mathrm{BetaBinomial}(N_i,\, \mu_i,\, \sigma_i); \mathbb{E}[cbind(successes, failures)_i] = N_i \mu_i
+```
+
+**Coefficient reading on mu:** same logit reading as Beta — `exp(beta)`
+is the odds ratio for the success probability.
+
+## Count responses
+
+### Poisson — counts with no dispersion parameter
+
+`Y in {0, 1, 2, ...}`, log link on the mean count rate. The Poisson
+family forces `variance = mean`; if your data show overdispersion
+(variance \> mean), prefer `nbinom2`.
+
+``` r
+
+set.seed(1); n <- 100
+dat <- data.frame(y = rpois(n, lambda = exp(1 + 0.3 * rnorm(n))),
+                  x = rnorm(n))
+fit <- drmTMB(drm_formula(y ~ x),
+              family = stats::poisson(), data = dat)
+sym <- symbolize(fit)
+cat(sym$distribution$latex, "\n")
+#> y_i \mid \mu_i \sim \mathrm{Poisson}(\mu_i)
+```
+
+**Coefficient reading on mu:** `exp(beta)` is the *rate ratio* — a
+multiplicative effect on the expected count.
+
+### Negative binomial (nbinom2) — counts with overdispersion
+
+`Y in {0, 1, 2, ...}`, log link on the mean count rate. `sigma`
+parameterises overdispersion: `size = exp(sigma)`. Small `size` means
+highly overdispersed (much higher variance than mean); large `size`
+approaches Poisson.
+
+``` r
+
+set.seed(1); n <- 100
+dat <- data.frame(y = rnbinom(n, size = 3, mu = exp(1 + 0.3 * rnorm(n))),
+                  x = rnorm(n))
+fit <- drmTMB(drm_formula(y ~ x, sigma ~ 1),
+              family = nbinom2(), data = dat)
+sym <- symbolize(fit)
+cat(sym$distribution$latex, "\n")
+#> y_i \mid \mu_i,\, \sigma_i \sim \mathrm{NegBin}(\mu_i,\, \mathrm{size} = \exp(\sigma_i)); \mathrm{Var}(y_i) = \mu_i + \mu_i^2 / \exp(\sigma_i)
+```
+
+**Coefficient reading on mu:** same as Poisson — `exp(beta)` is the rate
+ratio.
+
+### Zero-truncated nbinom2 — counts that are never zero
+
+`Y in {1, 2, 3, ...}`. The truncation is built into the likelihood, not
+a data filter. The modelled `mu` is the mean of the *underlying
+untruncated* distribution; the observed truncated mean is larger.
+
+``` r
+
+set.seed(1); n <- 100
+dat <- data.frame(
+  y = pmax(1L, rnbinom(n, size = 2, mu = exp(1 + 0.3 * rnorm(n)))),
+  x = rnorm(n)
+)
+fit <- drmTMB(drm_formula(y ~ x, sigma ~ 1),
+              family = truncated_nbinom2(), data = dat)
+sym <- symbolize(fit)
+cat(sym$distribution$latex, "\n")
+#> y_i \mid \mu_i,\, \sigma_i \sim \mathrm{NegBin}^{+}(\mu_i,\, \mathrm{size}=\exp(\sigma_i)); y_i \in \{1, 2, 3, \ldots\}
+```
+
+**Coefficient reading on mu:** `exp(beta)` is the rate ratio on the
+untruncated mean. The observed (truncated) mean has a different
+expression that depends on `size`.
+
+## Bivariate Gaussian — two responses jointly
+
+For paired continuous responses with a residual correlation between
+them, see
+[`vignette("symbolizer-drmtmb")`](https://itchyshin.github.io/symbolizer/articles/symbolizer-drmtmb.md)
+Section 7. The bivariate Gaussian shape is structurally different — five
+submodels (`mu1`, `mu2`, `sigma1`, `sigma2`, `rho12`) instead of two or
+three — and has its own dedicated section in the drmTMB vignette.
+
+## Picking a family
+
+Six rules of thumb:
+
+1.  **Continuous, roughly symmetric, fixed scale** → `gaussian`.
+2.  **Continuous, symmetric, heavier tails (outliers tolerated)** →
+    `student`.
+3.  **Continuous, positive, right-skewed** → `lognormal` or `Gamma`. Use
+    lognormal when interpretation is naturally on the `log(Y)` scale
+    (e.g., body mass, lifespan). Use Gamma when the GLM framework
+    matters (e.g., for diagnostics).
+4.  **Proportion in (0, 1)** → `beta`. **Count of successes out of a
+    known number of trials** → `beta_binomial`.
+5.  **Counts with variance = mean** → `poisson`. **Counts with variance
+    \> mean** → `nbinom2`.
+6.  **Counts that are structurally non-zero** → `truncated_nbinom2`.
+
+If none of these fit, check
+[`symbolizer_capabilities()`](https://itchyshin.github.io/symbolizer/reference/symbolizer_capabilities.md)
+—
+[`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
+will refuse with a clear message naming what’s not yet supported.
+
+## Where to read next
+
+- [`vignette("symbolizer-drmtmb")`](https://itchyshin.github.io/symbolizer/articles/symbolizer-drmtmb.md)
+  — the deep drmTMB tour (Gaussian + bivariate Gaussian + random
+  effects).
+- [`vignette("symbolizer-factors")`](https://itchyshin.github.io/symbolizer/articles/symbolizer-factors.md)
+  — categorical pedagogy (works the same way for any family).
+- [`vignette("symbolizer-compare")`](https://itchyshin.github.io/symbolizer/articles/symbolizer-compare.md)
+  — comparing two fits with
+  [`compare_symbolic()`](https://itchyshin.github.io/symbolizer/reference/compare_symbolic.md).

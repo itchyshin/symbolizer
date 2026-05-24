@@ -22,6 +22,12 @@
 - `methods_text` univariate-family list grows to include both new
   families so the response / sigma / RE substitutions fire without
   `[unfilled: ...]` markers.
+- New vignette `symbolizer-families` — a tour of the seven non- Gaussian
+  families currently shipping. One small fit and one key surface per
+  family (distribution latex, biological reading on mu, or methods_text
+  excerpt), plus six rules of thumb for picking a family. Bivariate
+  Gaussian is cross-referenced rather than repeated since it has its own
+  section in the drmTMB tour.
 
 ## symbolizer 0.3.1
 
