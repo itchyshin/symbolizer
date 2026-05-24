@@ -449,65 +449,73 @@ drm_build_distribution <- function(family, response_symbol,
                                    response_symbol_matrix,
                                    response_symbol_1 = NULL,
                                    response_symbol_2 = NULL) {
-  if (identical(family, "gaussian")) {
-    return(tibble::tibble(
-      family = family,
-      response_symbol = response_symbol,
-      response_symbol_matrix = response_symbol_matrix,
-      parameters = "mu, sigma",
-      latex = sprintf(
-        "%s \\mid \\mu_i,\\, \\sigma_i \\sim \\mathrm{Normal}(\\mu_i,\\, \\sigma_i^2)",
-        response_symbol
-      ),
-      latex_matrix = sprintf(
-        "%s \\mid \\boldsymbol{\\mu},\\, \\boldsymbol{\\sigma} \\sim \\mathcal{N}(\\boldsymbol{\\mu},\\, \\mathrm{diag}(\\boldsymbol{\\sigma}^2))",
-        response_symbol_matrix
-      )
+  tex <- drm_distribution_template(
+    family,
+    response_symbol = response_symbol,
+    response_symbol_matrix = response_symbol_matrix,
+    response_symbol_1 = response_symbol_1,
+    response_symbol_2 = response_symbol_2
+  )
+  tibble::tibble(
+    family = family,
+    response_symbol = response_symbol,
+    response_symbol_matrix = response_symbol_matrix,
+    parameters = drm_distribution_parameters(family),
+    latex = tex$index_latex,
+    latex_matrix = tex$matrix_latex
+  )
+}
+
+# Look up the distribution-row LaTeX for a family from
+# inst/extdata/family-distributions.csv and substitute the response symbols.
+# Adding a new univariate family is a CSV-only operation; structural-shape
+# families (biv_gaussian etc.) get their existing rows and the substitution
+# layer handles the extra placeholders.
+drm_distribution_template <- function(family, response_symbol,
+                                      response_symbol_matrix,
+                                      response_symbol_1 = NULL,
+                                      response_symbol_2 = NULL) {
+  tbl <- load_template("family-distributions")
+  hit <- tbl[tbl$family == family, , drop = FALSE]
+  if (nrow(hit) == 0L) {
+    cli::cli_abort(c(
+      "No distribution-row template for family {.val {family}}.",
+      i = "Add a row to {.file inst/extdata/family-distributions.csv}."
     ))
   }
-  if (identical(family, "student")) {
-    return(tibble::tibble(
-      family = family,
-      response_symbol = response_symbol,
-      response_symbol_matrix = response_symbol_matrix,
-      parameters = "mu, sigma, nu",
-      latex = sprintf(
-        "%s \\mid \\mu_i,\\, \\sigma_i,\\, \\nu_i \\sim \\mathrm{Student\\text{-}t}(\\mu_i,\\, \\sigma_i,\\, \\nu_i)",
-        response_symbol
-      ),
-      latex_matrix = sprintf(
-        "%s \\mid \\boldsymbol{\\mu},\\, \\boldsymbol{\\sigma},\\, \\boldsymbol{\\nu} \\sim \\mathrm{Student\\text{-}t}(\\boldsymbol{\\mu},\\, \\boldsymbol{\\sigma},\\, \\boldsymbol{\\nu})",
-        response_symbol_matrix
-      )
-    ))
+  if (identical(family, "biv_gaussian") &&
+      (is.null(response_symbol_1) || is.null(response_symbol_2))) {
+    cli::cli_abort("biv_gaussian distribution row requires both response symbols.")
   }
-  if (identical(family, "biv_gaussian")) {
-    if (is.null(response_symbol_1) || is.null(response_symbol_2)) {
-      cli::cli_abort("biv_gaussian distribution row requires both response symbols.")
-    }
-    return(tibble::tibble(
-      family = family,
-      response_symbol = response_symbol,
-      response_symbol_matrix = response_symbol_matrix,
-      parameters = "mu1, mu2, sigma1, sigma2, rho12",
-      latex = sprintf(
-        paste0(
-          "(%s, %s) \\mid \\mu_{1i},\\, \\mu_{2i},\\, ",
-          "\\sigma_{1i},\\, \\sigma_{2i},\\, \\rho_{12,i} \\sim ",
-          "\\mathcal{N}_2\\!\\left((\\mu_{1i}, \\mu_{2i}),\\, \\Sigma_i\\right)"
-        ),
-        response_symbol_1, response_symbol_2
-      ),
-      latex_matrix = sprintf(
-        paste0(
-          "%s \\mid \\mathbf{M},\\, \\mathbf{S},\\, \\boldsymbol{\\rho}_{12} ",
-          "\\sim \\mathcal{N}_2(\\mathbf{M},\\, \\boldsymbol{\\Sigma})"
-        ),
-        response_symbol_matrix
-      )
-    ))
-  }
-  cli::cli_abort("Distribution row not implemented for family {.val {family}}.")
+  mapping <- list(
+    response_symbol        = response_symbol,
+    response_symbol_matrix = response_symbol_matrix,
+    response_symbol_1      = response_symbol_1 %||% "",
+    response_symbol_2      = response_symbol_2 %||% ""
+  )
+  list(
+    index_latex  = drm_substitute(hit$index_latex[[1L]],  mapping),
+    matrix_latex = drm_substitute(hit$matrix_latex[[1L]], mapping)
+  )
+}
+
+# Map family -> the parameters string used in sym$distribution$parameters.
+# This is informational only (small) and stays in code since it is a fixed
+# property of the family rather than user-facing prose.
+drm_distribution_parameters <- function(family) {
+  switch(
+    family,
+    gaussian     = "mu, sigma",
+    student      = "mu, sigma, nu",
+    biv_gaussian = "mu1, mu2, sigma1, sigma2, rho12",
+    lognormal    = "mu, sigma",
+    gamma        = "mu, sigma",
+    beta         = "mu, sigma",
+    poisson      = "mu",
+    nbinom2      = "mu, sigma",
+    # Fall back: let it stay empty; the LaTeX row is the canonical truth.
+    ""
+  )
 }
 
 drm_build_submodels <- function(entries, fit, param) {
@@ -745,61 +753,24 @@ drm_build_components <- function(submodels, terms_tbl, re_tbl, response_symbol,
                                   response_symbol_1 = NULL,
                                   response_symbol_2 = NULL) {
   is_biv <- identical(family, "biv_gaussian")
-  is_student <- identical(family, "student")
+  # Distribution row LaTeX is templated from family-distributions.csv,
+  # not branched per family. Adding a univariate family is a CSV-only op.
+  tex <- drm_distribution_template(
+    family,
+    response_symbol        = response_symbol,
+    response_symbol_matrix = response_symbol_matrix,
+    response_symbol_1      = response_symbol_1,
+    response_symbol_2      = response_symbol_2
+  )
   rows <- list()
-  if (is_biv) {
-    rows[[1L]] <- tibble::tibble(
-      name = "distribution",
-      kind = "distribution",
-      submodel = NA_character_,
-      equation = sprintf(
-        paste0(
-          "(%s, %s) \\mid \\mu_{1i},\\, \\mu_{2i},\\, ",
-          "\\sigma_{1i},\\, \\sigma_{2i},\\, \\rho_{12,i} \\sim ",
-          "\\mathcal{N}_2\\!\\left((\\mu_{1i}, \\mu_{2i}),\\, \\Sigma_i\\right)"
-        ),
-        response_symbol_1, response_symbol_2
-      ),
-      equation_matrix = sprintf(
-        paste0(
-          "%s \\mid \\mathbf{M},\\, \\mathbf{S},\\, \\boldsymbol{\\rho}_{12} ",
-          "\\sim \\mathcal{N}_2(\\mathbf{M},\\, \\boldsymbol{\\Sigma})"
-        ),
-        response_symbol_matrix
-      ),
-      status = "stated"
-    )
-  } else if (is_student) {
-    rows[[1L]] <- tibble::tibble(
-      name = "distribution",
-      kind = "distribution",
-      submodel = NA_character_,
-      equation = sprintf(
-        "%s \\mid \\mu_i,\\, \\sigma_i,\\, \\nu_i \\sim \\mathrm{Student\\text{-}t}(\\mu_i,\\, \\sigma_i,\\, \\nu_i)",
-        response_symbol
-      ),
-      equation_matrix = sprintf(
-        "%s \\mid \\boldsymbol{\\mu},\\, \\boldsymbol{\\sigma},\\, \\boldsymbol{\\nu} \\sim \\mathrm{Student\\text{-}t}(\\boldsymbol{\\mu},\\, \\boldsymbol{\\sigma},\\, \\boldsymbol{\\nu})",
-        response_symbol_matrix
-      ),
-      status = "stated"
-    )
-  } else {
-    rows[[1L]] <- tibble::tibble(
-      name = "distribution",
-      kind = "distribution",
-      submodel = NA_character_,
-      equation = sprintf(
-        "%s \\mid \\mu_i,\\, \\sigma_i \\sim \\mathrm{Normal}(\\mu_i,\\, \\sigma_i^2)",
-        response_symbol
-      ),
-      equation_matrix = sprintf(
-        "%s \\mid \\boldsymbol{\\mu},\\, \\boldsymbol{\\sigma} \\sim \\mathcal{N}(\\boldsymbol{\\mu},\\, \\mathrm{diag}(\\boldsymbol{\\sigma}^2))",
-        response_symbol_matrix
-      ),
-      status = "stated"
-    )
-  }
+  rows[[1L]] <- tibble::tibble(
+    name            = "distribution",
+    kind            = "distribution",
+    submodel        = NA_character_,
+    equation        = tex$index_latex,
+    equation_matrix = tex$matrix_latex,
+    status          = "stated"
+  )
   for (i in seq_len(nrow(submodels))) {
     dpar <- submodels$parameter[[i]]
     link <- submodels$link[[i]]

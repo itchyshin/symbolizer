@@ -1,0 +1,4 @@
+family,index_latex,matrix_latex
+gaussian,"{response_symbol} \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2)","{response_symbol_matrix} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2))"
+student,"{response_symbol} \mid \mu_i,\, \sigma_i,\, \nu_i \sim \mathrm{Student\text{-}t}(\mu_i,\, \sigma_i,\, \nu_i)","{response_symbol_matrix} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma},\, \boldsymbol{\nu} \sim \mathrm{Student\text{-}t}(\boldsymbol{\mu},\, \boldsymbol{\sigma},\, \boldsymbol{\nu})"
+biv_gaussian,"({response_symbol_1}, {response_symbol_2}) \mid \mu_{1i},\, \mu_{2i},\, \sigma_{1i},\, \sigma_{2i},\, \rho_{12,i} \sim \mathcal{N}_2\!\left((\mu_{1i}, \mu_{2i}),\, \Sigma_i\right)","{response_symbol_matrix} \mid \mathbf{M},\, \mathbf{S},\, \boldsymbol{\rho}_{12} \sim \mathcal{N}_2(\mathbf{M},\, \boldsymbol{\Sigma})"
