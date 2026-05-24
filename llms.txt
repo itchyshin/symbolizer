@@ -189,15 +189,17 @@ Pre-release. Read status words consistently:
 | Planned or reserved | Public grammar may exist, but [`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md) should reject it as design-only. |
 | Unsupported | Do not use as analysis syntax; fit the nearest implemented model. |
 
-### v0.1 capability matrix
+### Capability matrix (v0.1 – v0.2)
 
 | Surface | Status |
 |----|----|
 | `drmTMB` Gaussian location-scale, fixed effects (μ + σ submodels) | Stable |
 | `drmTMB` Gaussian random intercepts `(1 \| group)` | First slice |
+| `drmTMB` bivariate Gaussian (`mu1`, `mu2`, `sigma1`, `sigma2`, `rho12`) | First slice (v0.2) |
 | `gllvmTMB` Gaussian latent variables (mu, Λ_B, Σ_B, Ψ_B, σ_eps) | First slice |
 | [`model_card()`](https://itchyshin.github.io/symbolizer/reference/model_card.md) teaching bundle (equation + assumptions + readings + extraction calls) | First slice |
-| `drmTMB` bivariate Gaussian (`rho12` / coscale) | Planned (next slice) |
+| [`parameter_interpretation()`](https://itchyshin.github.io/symbolizer/reference/parameter_interpretation.md) confidence bands (Wald / profile) | First slice (v0.1.1) |
+| [`group_means()`](https://itchyshin.github.io/symbolizer/reference/group_means.md), [`group_slopes()`](https://itchyshin.github.io/symbolizer/reference/group_slopes.md) via `emmeans` | First slice (v0.1.1) |
 | `drmTMB` non-Gaussian families, ZI, hurdle | Planned |
 | `gllvmTMB` non-Gaussian families, within-unit decompositions, phylo / spatial | Planned |
 | `glmmTMB`, `brms`, `MCMCglmm`, `sdmTMB`, `lme4`, `lm`/`glm` | Planned (see roadmap) |
@@ -214,8 +216,9 @@ refused by
 
 | Version | Theme |
 |----|----|
-| v0.1 (current) | drmTMB Gaussian location-scale + (1 \| group); gllvmTMB Gaussian latent variables (First slice); [`explain()`](https://itchyshin.github.io/symbolizer/reference/explain.md) / [`model_card()`](https://itchyshin.github.io/symbolizer/reference/model_card.md) / dual notation |
-| v0.2 | Bivariate Gaussian `rho12` / coscale (drmTMB) and structural model comparison (`compare_symbolic`) |
+| v0.1 (released) | drmTMB Gaussian location-scale + (1 \| group); gllvmTMB Gaussian latent variables (First slice); [`explain()`](https://itchyshin.github.io/symbolizer/reference/explain.md) / [`model_card()`](https://itchyshin.github.io/symbolizer/reference/model_card.md) / dual notation |
+| v0.1.1 (released) | Confidence bands via `drmTMB::confint`; marginal estimates via `emmeans` wrappers (`group_means`, `group_slopes`); intercept-less pedagogy; factors-vignette enrichment |
+| v0.2 (current) | Bivariate Gaussian `rho12` / coscale extractor (drmTMB) — landed; structural model comparison (`compare_symbolic`) — in progress |
 | v0.3 | Teaching and writing layer (`methods_text`, warnings, family sheets) |
 | v0.4 | Non-Gaussian drmTMB families (Student-t, lognormal, gamma, beta, beta-binomial, Poisson, nbinom2, cumulative_logit) |
 | v0.5 | gllvmTMB non-Gaussian families and `gllvmTMB_multi` |

@@ -449,7 +449,7 @@ W_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 </tbody>
 </table>
 <div class="section level3">
-<h3 id="v01-capability-matrix">v0.1 capability matrix<a class="anchor" aria-label="anchor" href="#v01-capability-matrix"></a>
+<h3 id="capability-matrix-v01--v02">Capability matrix (v0.1 – v0.2)<a class="anchor" aria-label="anchor" href="#capability-matrix-v01--v02"></a>
 </h3>
 <table class="table">
 <colgroup>
@@ -474,6 +474,11 @@ W_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 </tr>
 <tr>
 <td>
+<code>drmTMB</code> bivariate Gaussian (<code>mu1</code>, <code>mu2</code>, <code>sigma1</code>, <code>sigma2</code>, <code>rho12</code>)</td>
+<td>First slice (v0.2)</td>
+</tr>
+<tr>
+<td>
 <code>gllvmTMB</code> Gaussian latent variables (mu, Λ_B, Σ_B, Ψ_B, σ_eps)</td>
 <td>First slice</td>
 </tr>
@@ -484,8 +489,14 @@ W_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 </tr>
 <tr>
 <td>
-<code>drmTMB</code> bivariate Gaussian (<code>rho12</code> / coscale)</td>
-<td>Planned (next slice)</td>
+<code><a href="reference/parameter_interpretation.html">parameter_interpretation()</a></code> confidence bands (Wald / profile)</td>
+<td>First slice (v0.1.1)</td>
+</tr>
+<tr>
+<td>
+<code><a href="reference/group_means.html">group_means()</a></code>, <code><a href="reference/group_slopes.html">group_slopes()</a></code> via <code>emmeans</code>
+</td>
+<td>First slice (v0.1.1)</td>
 </tr>
 <tr>
 <td>
@@ -527,12 +538,16 @@ W_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 </tr></thead>
 <tbody>
 <tr>
-<td>v0.1 (current)</td>
+<td>v0.1 (released)</td>
 <td>drmTMB Gaussian location-scale + (1 | group); gllvmTMB Gaussian latent variables (First slice); <code><a href="reference/explain.html">explain()</a></code> / <code><a href="reference/model_card.html">model_card()</a></code> / dual notation</td>
 </tr>
 <tr>
-<td>v0.2</td>
-<td>Bivariate Gaussian <code>rho12</code> / coscale (drmTMB) and structural model comparison (<code>compare_symbolic</code>)</td>
+<td>v0.1.1 (released)</td>
+<td>Confidence bands via <code>drmTMB::confint</code>; marginal estimates via <code>emmeans</code> wrappers (<code>group_means</code>, <code>group_slopes</code>); intercept-less pedagogy; factors-vignette enrichment</td>
+</tr>
+<tr>
+<td>v0.2 (current)</td>
+<td>Bivariate Gaussian <code>rho12</code> / coscale extractor (drmTMB) — landed; structural model comparison (<code>compare_symbolic</code>) — in progress</td>
 </tr>
 <tr>
 <td>v0.3</td>

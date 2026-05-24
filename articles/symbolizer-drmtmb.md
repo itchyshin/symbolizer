@@ -15,8 +15,9 @@ If you want a richer worked example with multiple predictor types, read
 
 ## 1. Why distributional models need a structured story
 
-`drmTMB` fits Gaussian location-scale models (and, on the roadmap,
-Student-t, lognormal, gamma, beta, and bivariate Gaussian). A
+`drmTMB` fits Gaussian location-scale models — and, since v0.2,
+bivariate Gaussian location-scale-correlation models (Student-t,
+lognormal, gamma, and beta remain on the roadmap). A univariate
 location-scale fit has *two* linear predictors: one for the mean `mu`,
 one for the residual standard deviation `sigma`. Both depend on
 covariates. Both have a link function. Both have their own coefficient
@@ -371,7 +372,138 @@ reports it as $`\sigma_{\mathrm{site}}`$.
 independence assumption from unconditional to conditional. The audit
 trail is built into the template, not into prose.
 
-## 6. What to inspect next
+## 6. Two responses at once: bivariate Gaussian
+
+When you measure two responses on the same subject — paired growth and
+reproduction, two morphometric traits, a behaviour and its physiological
+correlate — a univariate fit fits each response in isolation and ignores
+the residual correlation between them. `drmTMB`’s
+[`biv_gaussian()`](https://itchyshin.github.io/drmTMB/reference/biv_gaussian.html)
+family models both responses jointly, with a residual correlation
+$`\rho_{12}`$ that itself can depend on covariates.
+
+``` r
+
+set.seed(20260524)
+nb <- 80
+x1 <- rnorm(nb)
+x2 <- rnorm(nb)
+# Cholesky factorisation for two correlated standard normals (rho = 0.6),
+# no extra package needed:
+e1 <- rnorm(nb)
+e2 <- 0.6 * e1 + sqrt(1 - 0.6^2) * rnorm(nb)
+dat_biv <- data.frame(
+  growth = 30 + 1.5 * x1 + e1,
+  repro  = 10 + 0.8 * x2 + e2,
+  x1     = x1,
+  x2     = x2
+)
+
+fit_biv <- drmTMB(
+  drm_formula(
+    mu1    = growth ~ x1,
+    mu2    = repro  ~ x2,
+    sigma1 = ~ 1,
+    sigma2 = ~ 1,
+    rho12  = ~ 1
+  ),
+  family = biv_gaussian(),
+  data   = dat_biv
+)
+
+sym_biv <- symbolize(fit_biv)
+```
+
+The `symbolized_model` carries five submodels instead of two. Each
+appears in
+[`formula_bridge()`](https://itchyshin.github.io/symbolizer/reference/formula_bridge.md)
+with its own R syntax, statistical meaning, and symbolic form:
+
+``` r
+
+formula_bridge(sym_biv)
+```
+
+| submodel | R syntax | meaning | math (index) | math (matrix) |
+|:---|:---|:---|:---|:---|
+| mu1 | `growth ~ x1` | Expected growth is a linear function of the first mean-model predictors | $`\mu_{1i} = \beta_{1,0} + \beta_{1,1} \, x1_i`$ | $`\boldsymbol{\mu}_{1} = \mathbf{X}_{1} \boldsymbol{\beta}_{1}`$ |
+| mu2 | `repro ~ x2` | Expected repro is a linear function of the second mean-model predictors | $`\mu_{2i} = \beta_{2,0} + \beta_{2,1} \, x2_i`$ | $`\boldsymbol{\mu}_{2} = \mathbf{X}_{2} \boldsymbol{\beta}_{2}`$ |
+| sigma1 | `~1` | Log residual SD of growth is a linear function of the first scale-model predictors | $`\log(\sigma_{1i}) = \gamma_{1,0}`$ | $`\log(\boldsymbol{\sigma}_{1}) = \mathbf{Z}_{1} \boldsymbol{\gamma}_{1}`$ |
+| sigma2 | `~1` | Log residual SD of repro is a linear function of the second scale-model predictors | $`\log(\sigma_{2i}) = \gamma_{2,0}`$ | $`\log(\boldsymbol{\sigma}_{2}) = \mathbf{Z}_{2} \boldsymbol{\gamma}_{2}`$ |
+| rho12 | `~1` | Fisher-z residual correlation between growth and repro is a linear function of the correlation-model predictors | $`\mathrm{tanh}^{-1}(\rho_{12,i}) = \rho_{0}`$ | $`\mathrm{tanh}^{-1}(\boldsymbol{\rho}_{12}) = \mathbf{W} \boldsymbol{\rho}`$ |
+
+`mu1`, `mu2` are the two mean predictors; `sigma1`, `sigma2` are the two
+log-SD predictors (one residual SD per response); `rho12` is the
+residual correlation on the Fisher-z scale (so the linear predictor can
+range over all of $`\mathbb{R}`$ while the correlation stays in
+$`(-1, 1)`$).
+
+The joint conditional distribution is rendered in both index and matrix
+forms:
+
+``` r
+
+equations(sym_biv, notation = "both")
+```
+
+**Index form:**
+
+``` math
+\begin{aligned}
+(Y_{1i}, Y_{2i}) \mid \mu_{1i},\, \mu_{2i},\, \sigma_{1i},\, \sigma_{2i},\, \rho_{12,i} \sim \mathcal{N}_2\!\left((\mu_{1i}, \mu_{2i}),\, \Sigma_i\right) \\
+\mu_{1i} = \beta_{1,0} + \beta_{1,1} \, x1_i \\
+\mu_{2i} = \beta_{2,0} + \beta_{2,1} \, x2_i \\
+\log(\sigma_{1i}) = \gamma_{1,0} \\
+\log(\sigma_{2i}) = \gamma_{2,0} \\
+\mathrm{tanh}^{-1}(\rho_{12,i}) = \rho_{0} \\
+\Sigma_i = \begin{pmatrix}\sigma_{1i}^2 & \rho_{12,i}\sigma_{1i}\sigma_{2i} \\ \rho_{12,i}\sigma_{1i}\sigma_{2i} & \sigma_{2i}^2\end{pmatrix}
+\end{aligned}
+```
+
+**Matrix form:**
+
+``` math
+\begin{aligned}
+\mathbf{Y} \mid \mathbf{M},\, \mathbf{S},\, \boldsymbol{\rho}_{12} \sim \mathcal{N}_2(\mathbf{M},\, \boldsymbol{\Sigma}) \\
+\boldsymbol{\mu}_{1} = \mathbf{X}_{1} \boldsymbol{\beta}_{1} \\
+\boldsymbol{\mu}_{2} = \mathbf{X}_{2} \boldsymbol{\beta}_{2} \\
+\log(\boldsymbol{\sigma}_{1}) = \mathbf{Z}_{1} \boldsymbol{\gamma}_{1} \\
+\log(\boldsymbol{\sigma}_{2}) = \mathbf{Z}_{2} \boldsymbol{\gamma}_{2} \\
+\mathrm{tanh}^{-1}(\boldsymbol{\rho}_{12}) = \mathbf{W} \boldsymbol{\rho} \\
+\boldsymbol{\Sigma} = \mathrm{diag}(\boldsymbol{\sigma}_{1}) \mathbf{R}(\boldsymbol{\rho}_{12}) \mathrm{diag}(\boldsymbol{\sigma}_{2})
+\end{aligned}
+```
+
+The matrix form is the cleaner reading: $`\mathbf{Y}`$ is the
+$`n \times 2`$ response matrix, $`\mathbf{M}`$ stacks the
+per-observation mean vectors, and $`\boldsymbol{\Sigma}`$ is the
+per-observation $`2 \times 2`$ covariance matrix with
+$`\sigma_{1,i}\,\sigma_{2,i}\,\rho_{12,i}`$ on the off-diagonal.
+
+The rho12 coefficient gets the same multi-scale treatment as every other
+coefficient. The reading row points the reader at the Fisher-z scale
+(where the coefficient lives), the natural correlation scale
+([`tanh()`](https://rdrr.io/r/base/Hyperbolic.html) of the link), and
+the biological meaning (residual co-variation between the two
+responses):
+
+``` r
+
+rho_rows <- parameter_interpretation(sym_biv)
+rho_rows[rho_rows$submodel == "rho12", ]
+```
+
+| submodel | term_label | coefficient_role | estimate | link_scale_reading | natural_scale_reading | variance_scale_reading | biological_reading |
+|:---|:---|:---|:---|:---|:---|:---|:---|
+| rho12 | (Intercept) | intercept | 0.674 | Fisher-z residual correlation at the reference: tanh^{-1}(0.674) | Residual correlation rho12 = tanh(0.674) at the reference | Residual covariance at the reference is tanh(0.674) \* sigma_1 \* sigma_2 | Two responses share co-variation with baseline correlation tanh(0.674) |
+
+**Takeaway.** The same `symbolized_model` interface scales from two
+submodels to five. `formula_bridge` shows the new submodels, the joint
+distribution exposes $`\boldsymbol{\Sigma}`$, and
+`parameter_interpretation` gives the rho12 row the same multi-scale
+reading as every other coefficient.
+
+## 7. What to inspect next
 
 The point of the structured object is not just to render equations; it
 is to tell the reader *what to look at next*. `model_card(sym)` packages
@@ -446,7 +578,7 @@ recipes name the plot the reader should make next.
 **Takeaway.** Diagnostics before coefficients. The extraction-calls list
 is the order a reader should work through the fit.
 
-## 7. The capability gate
+## 8. The capability gate
 
 [`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
 does not silently dispatch on every `drmTMB` fit. The capability
@@ -474,14 +606,14 @@ caps[caps$class == "drmTMB", ]
 #> # ℹ 16 more rows
 ```
 
-For v0.1 the relevant rows are:
+The relevant rows are:
 
 - `drmTMB / gaussian / mu` — **Stable**
 - `drmTMB / gaussian / sigma` — **Stable**
 - `drmTMB / gaussian / random_effects` — **First slice** (intercept-only
   `(1 | group)`)
-- `drmTMB / gaussian / rho12` — **Planned or reserved** (bivariate
-  residual correlation; next on the roadmap)
+- `drmTMB / biv_gaussian / mu1`, `mu2`, `sigma1`, `sigma2`, `rho12` —
+  **First slice** (see Section 6)
 - All non-Gaussian families — **Planned or reserved**
 
 If you call
@@ -493,18 +625,12 @@ not the prose, decides what
 accepts; check the status word before designing a workflow around a
 tuple.
 
-The roadmap beyond `mu` and `sigma` is the **coscale** surface: the
-bivariate Gaussian family in `drmTMB` carries two means
-($`\mu_1, \mu_2`$), two scales ($`\sigma_1, \sigma_2`$), and a residual
-correlation $`\rho_{12}`$. The corresponding symbolizer surface will
-render the sigma-correlation block alongside the per-trait submodels,
-with assumptions and readings to match.
-
 **Takeaway.** The capability registry is the single source of truth.
 v0.1 ships Gaussian `mu`, `sigma`, and intercept-only random effects;
-the rest is on the published roadmap.
+v0.2 added the full bivariate Gaussian surface (`mu1`, `mu2`, `sigma1`,
+`sigma2`, `rho12`); the rest of the roadmap is non-Gaussian families.
 
-## 8. Where to read next
+## 9. Where to read next
 
 - [`vignette("symbolizer")`](https://itchyshin.github.io/symbolizer/articles/symbolizer.md)
   — the package-wide Get Started tour.
