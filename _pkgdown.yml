@@ -30,17 +30,24 @@ articles:
     contents:
       - symbolizer
       - symbolizer-large
+      - symbolizer-gllvm
       - symbolizer-vs-others
 
 reference:
   - title: "Package"
     contents:
       - symbolizer-package
+  - title: "First-time entry"
+    desc: "One call that does it all, plus the plain-English summary of a symbolized_model."
+    contents:
+      - explain
+      - summary.symbolized_model
   - title: "Build the structured symbolic object"
     desc: "The product. Renderers consume it; users override symbols, units, context here."
     contents:
       - symbolize
       - symbolize.drmTMB
+      - symbolize.gllvmTMB
       - validate_symbolized_model
       - symbolizer_capabilities
   - title: "Read both notations"

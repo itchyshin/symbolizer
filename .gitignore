@@ -9,10 +9,12 @@
 *.Rcheck/
 
 docs/
-pkgdown/
+pkgdown/*
+!pkgdown/favicon/
 revdep/
 useful_skills/
 .claude/
 .memory/
+README.html
 /doc/
 /Meta/
