@@ -281,6 +281,86 @@ test_that("default method still errors for unsupported classes", {
                "no method")
 })
 
+test_that("S3: interaction templates point at group_slopes / group_means", {
+  set.seed(1); n <- 120
+  dat <- data.frame(
+    body_mass = rnorm(n, 30),
+    sex = factor(rep(c("female", "male"), length.out = n)),
+    site = factor(rep(letters[1:3], length.out = n)),
+    body_size = rnorm(n)
+  )
+  # cont x factor
+  fit_cf <- drmTMB::drmTMB(
+    drmTMB::drm_formula(body_mass ~ sex * body_size, sigma ~ 1),
+    family = stats::gaussian(), data = dat
+  )
+  sym_cf <- symbolize(fit_cf)
+  cf_row <- sym_cf$interpretation[
+    sym_cf$interpretation$coefficient_role == "interaction_cont_factor", ,
+    drop = FALSE
+  ]
+  expect_match(cf_row$biological_reading[[1L]], "group_slopes", fixed = TRUE)
+  # factor x factor
+  fit_ff <- drmTMB::drmTMB(
+    drmTMB::drm_formula(body_mass ~ site * sex, sigma ~ 1),
+    family = stats::gaussian(), data = dat
+  )
+  sym_ff <- symbolize(fit_ff)
+  ff_row <- sym_ff$interpretation[
+    sym_ff$interpretation$coefficient_role == "interaction_factor_factor", ,
+    drop = FALSE
+  ]
+  expect_match(ff_row$biological_reading[[1L]], "group_means", fixed = TRUE)
+})
+
+test_that("S4: intercept-less factor fit gets cell-means description + cell_mean reading", {
+  set.seed(1); n <- 80
+  dat <- data.frame(
+    body_mass = rnorm(n, 30),
+    sex = factor(rep(c("female", "male"), length.out = n))
+  )
+  fit <- drmTMB::drmTMB(
+    drmTMB::drm_formula(body_mass ~ 0 + sex, sigma ~ 1),
+    family = stats::gaussian(), data = dat
+  )
+  sym <- symbolize(fit)
+  # symbol_table marks the factor row as cell-means rather than [reference]
+  sex_row <- sym$symbol_dictionary[
+    sym$symbol_dictionary$variable == "sex" &
+      !is.na(sym$symbol_dictionary$variable), , drop = FALSE
+  ]
+  expect_match(sex_row$description, "cell-means")
+  expect_false(grepl("[reference]", sex_row$description, fixed = TRUE))
+  # interpretation rows for the factor use cell_mean coefficient_role
+  cm_rows <- sym$interpretation[
+    sym$interpretation$coefficient_role == "cell_mean", , drop = FALSE
+  ]
+  expect_equal(nrow(cm_rows), 2L)
+  expect_match(cm_rows$natural_scale_reading[[1L]], "Expected body_mass")
+  expect_match(cm_rows$biological_reading[[1L]], "cell-means")
+})
+
+test_that("S4: intercept-FULL fit still uses factor_contrast role and [reference] marker", {
+  set.seed(1); n <- 80
+  dat <- data.frame(
+    body_mass = rnorm(n, 30),
+    sex = factor(rep(c("female", "male"), length.out = n))
+  )
+  fit <- drmTMB::drmTMB(
+    drmTMB::drm_formula(body_mass ~ sex, sigma ~ 1),
+    family = stats::gaussian(), data = dat
+  )
+  sym <- symbolize(fit)
+  sex_row <- sym$symbol_dictionary[
+    sym$symbol_dictionary$variable == "sex" &
+      !is.na(sym$symbol_dictionary$variable), , drop = FALSE
+  ]
+  expect_match(sex_row$description, "\\[reference\\]")
+  expect_false(grepl("cell-means", sex_row$description, fixed = TRUE))
+  expect_true(any(sym$interpretation$coefficient_role == "factor_contrast"))
+  expect_false(any(sym$interpretation$coefficient_role == "cell_mean"))
+})
+
 test_that("factor_contrast interpretation surfaces the reference level by name", {
   set.seed(1); n <- 80
   dat <- data.frame(

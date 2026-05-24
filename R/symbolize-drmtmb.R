@@ -669,18 +669,29 @@ drm_build_symbol_dictionary <- function(terms_tbl, response, response_symbol,
     , drop = FALSE
   ]
   predictors <- predictors[!duplicated(predictors$variable), , drop = FALSE]
+  # Per-submodel: does it have an intercept row in terms_tbl? If not, the
+  # factor's k columns are cell-means columns, not contrasts.
+  has_intercept <- function(dpar) {
+    any(terms_tbl$submodel == dpar & terms_tbl$role == "intercept")
+  }
   for (i in seq_len(nrow(predictors))) {
     p <- predictors[i, , drop = FALSE]
     var <- p$variable
     cls <- if (var %in% names(data)) class(data[[var]])[[1L]] else NA_character_
+    intercept_less <- !has_intercept(p$submodel)
     desc <- switch(
       p$role,
       factor_contrast = if (!is.na(cls)) {
         lvls <- levels(factor(data[[var]]))
-        if (length(lvls) >= 1L) {
-          lvls[1L] <- paste0(lvls[1L], " [reference]")
+        if (intercept_less) {
+          sprintf("factor (%s) - cell-means parameterisation",
+                  paste(lvls, collapse = ", "))
+        } else {
+          if (length(lvls) >= 1L) {
+            lvls[1L] <- paste0(lvls[1L], " [reference]")
+          }
+          sprintf("factor (%s)", paste(lvls, collapse = ", "))
         }
-        sprintf("factor (%s)", paste(lvls, collapse = ", "))
       } else "factor",
       offset = "offset (no coefficient)",
       transformation = sprintf("predictor (%s-transformed)", p$transform),
@@ -836,12 +847,16 @@ drm_interaction_sub_role <- function(row, data) {
   else                     "interaction_factor_factor"
 }
 
-drm_role_to_interp <- function(role, row = NULL, data = NULL) {
+drm_role_to_interp <- function(role, row = NULL, data = NULL,
+                                intercept_less = FALSE) {
   switch(
     role,
     intercept       = "intercept",
     predictor       = "slope",
-    factor_contrast = "factor_contrast",
+    # When the submodel has no intercept, the factor's k columns are
+    # cell-means columns (not contrasts), so route to the cell_mean
+    # template which reads as "expected {response} for {variable} = {level}".
+    factor_contrast = if (isTRUE(intercept_less)) "cell_mean" else "factor_contrast",
     transformation  = "transformation",
     interaction     = if (!is.null(row) && !is.null(data)) {
       drm_interaction_sub_role(row, data)
@@ -911,10 +926,24 @@ drm_build_interpretation <- function(fixed_eff, family, response, data) {
   )
   if (nrow(fixed_eff) == 0L) return(empty)
   tbl <- load_template("interpretation-templates")
+  # Which submodels are intercept-less? A submodel is intercept-less when
+  # fixed_eff has factor_contrast / predictor rows for it but no intercept
+  # row. The cell_mean interpretation template fires for those.
+  intercept_less_submodels <- {
+    has_int <- tapply(
+      fixed_eff$role == "intercept", fixed_eff$submodel, any,
+      default = FALSE
+    )
+    names(has_int)[!has_int]
+  }
   rows <- list()
   for (i in seq_len(nrow(fixed_eff))) {
     r <- fixed_eff[i, , drop = FALSE]
-    cr <- drm_role_to_interp(r$role, row = r, data = data)
+    cr <- drm_role_to_interp(
+      r$role,
+      row = r, data = data,
+      intercept_less = r$submodel %in% intercept_less_submodels
+    )
     if (is.na(cr)) next
     template <- tbl[
       tbl$family == family &
