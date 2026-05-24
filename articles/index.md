@@ -10,7 +10,5 @@
   interactions](https://itchyshin.github.io/symbolizer/articles/symbolizer-factors.md):
 - [Latent variables in ecology: a gllvmTMB worked
   example](https://itchyshin.github.io/symbolizer/articles/symbolizer-gllvm.md):
-- [What a symbolized GLLVM should
-  explain](https://itchyshin.github.io/symbolizer/articles/symbolizer-gllvm-design.md):
 - [How symbolizer compares to equatiomatic, gtsummary, and
   friends](https://itchyshin.github.io/symbolizer/articles/symbolizer-vs-others.md):

@@ -395,7 +395,62 @@ shared structure; trait-trait correlations show the syndrome blocks
 directly.</p>
 </div>
 <div class="section level2">
-<h2 id="where-the-symbolized-story-helps">7. Where the symbolized story helps<a class="anchor" aria-label="anchor" href="#where-the-symbolized-story-helps"></a>
+<h2 id="identifiability-gotchas-rotation-and-sign-of-boldsymbollambda_b">7. Identifiability gotchas: rotation and sign of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝚲</mi><mi>B</mi></msub><annotation encoding="application/x-tex">\boldsymbol{\Lambda}_B</annotation></semantics></math><a class="anchor" aria-label="anchor" href="#identifiability-gotchas-rotation-and-sign-of-boldsymbollambda_b"></a>
+</h2>
+<p>The loading matrix
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝚲</mi><mi>B</mi></msub><annotation encoding="application/x-tex">\boldsymbol{\Lambda}_B</annotation></semantics></math>
+is identified only up to <strong>rotation</strong> and
+<strong>sign</strong> when
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mi>B</mi></msub><mo>&gt;</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">d_B &gt; 1</annotation></semantics></math>.
+Two fits that produce indistinguishable likelihoods can have entirely
+different-looking
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝚲</mi><mi>B</mi></msub><annotation encoding="application/x-tex">\boldsymbol{\Lambda}_B</annotation></semantics></math>.
+This is the classical factor-analysis identifiability problem. The
+implied between-unit covariance
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>𝚺</mi><mi>B</mi></msub><mo>=</mo><msub><mi>𝚲</mi><mi>B</mi></msub><msubsup><mi>𝚲</mi><mi>B</mi><mi>⊤</mi></msubsup><mo>+</mo><msub><mi>𝚿</mi><mi>B</mi></msub></mrow><annotation encoding="application/x-tex">\boldsymbol{\Sigma}_B = \boldsymbol{\Lambda}_B \boldsymbol{\Lambda}_B^\top
++ \boldsymbol{\Psi}_B</annotation></semantics></math> is invariant under
+rotation;
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝚲</mi><mi>B</mi></msub><annotation encoding="application/x-tex">\boldsymbol{\Lambda}_B</annotation></semantics></math>
+itself is not. The biologist’s task is to read the <em>block
+structure</em> of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝚲</mi><mi>B</mi></msub><annotation encoding="application/x-tex">\boldsymbol{\Lambda}_B</annotation></semantics></math>,
+not the specific numbers in any one cell.</p>
+<p>A symbolizer surface is explicit about this. Two practical
+conventions exist, both surfaced in
+<code>assumption_table(sym)</code>:</p>
+<ul>
+<li>
+<strong>Lower-triangular
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝚲</mi><mi>B</mi></msub><annotation encoding="application/x-tex">\boldsymbol{\Lambda}_B</annotation></semantics></math></strong>
+for <em>confirmatory</em> use — pin the upper triangle to zero so each
+column has a designated leading trait. This is the default
+identification gllvmTMB uses on fitting. It produces a unique solution
+but its columns are not maximally interpretable.</li>
+<li>
+<strong>Varimax-rotated
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝚲</mi><mi>B</mi></msub><annotation encoding="application/x-tex">\boldsymbol{\Lambda}_B</annotation></semantics></math></strong>
+for <em>interpretation</em> — rotate the fitted loadings so each axis
+loads strongly on a small set of traits and near zero on the rest. The
+rotation is applied <em>after</em> fitting and preserves
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝚺</mi><mi>B</mi></msub><annotation encoding="application/x-tex">\boldsymbol{\Sigma}_B</annotation></semantics></math>.
+The column labels may reorder under rotation; the block structure is
+what the reader interprets.</li>
+</ul>
+<p><code><a href="../reference/symbolize.gllvmTMB.html">symbolize.gllvmTMB()</a></code> returns the as-fit
+(lower-triangular)
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝚲</mi><mi>B</mi></msub><annotation encoding="application/x-tex">\boldsymbol{\Lambda}_B</annotation></semantics></math>
+in <code>sym$loadings</code>. The assumption rows for the fit carry a
+sentence each on the rotation and sign conventions so a reader does not
+mistake non-uniqueness for non-replicability. The varimax-rotated matrix
+shown earlier in Section 6 is the reader-facing presentation; the
+lower-triangular form is what the likelihood actually identifies.</p>
+<p><strong>Takeaway.</strong> Rotation and sign ambiguity are <em>stated
+assumptions</em>, not bugs. The implied covariance is invariant; the
+loadings are not. Read the block structure, not the cell values.</p>
+</div>
+<div class="section level2">
+<h2 id="where-the-symbolized-story-helps">8. Where the symbolized story helps<a class="anchor" aria-label="anchor" href="#where-the-symbolized-story-helps"></a>
 </h2>
 <p>With five traits and two latents, the per-element index form
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><msub><mi>μ</mi><mi>j</mi></msub><mo>+</mo><msub><mo>∑</mo><mi>k</mi></msub><msub><mi>λ</mi><mrow><mi>j</mi><mi>k</mi></mrow></msub><msub><mi>z</mi><mrow><mi>i</mi><mi>k</mi></mrow></msub><mo>+</mo><msub><mi>ϵ</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow><annotation encoding="application/x-tex">y_{ij} = \mu_j + \sum_{k} \lambda_{jk} z_{ik} + \epsilon_{ij}</annotation></semantics></math>
@@ -424,46 +479,67 @@ matrix form scales like one block. For GLLVMs the matrix form is the
 reader-friendly one.</p>
 </div>
 <div class="section level2">
-<h2 id="what-v0-4-unlocks">8. What v0.4 unlocks<a class="anchor" aria-label="anchor" href="#what-v0-4-unlocks"></a>
+<h2 id="whats-available-now-whats-next">9. What’s available now, what’s next<a class="anchor" aria-label="anchor" href="#whats-available-now-whats-next"></a>
 </h2>
-<p>The accessors in section 6 — <code><a href="https://itchyshin.github.io/gllvmTMB/reference/getLoadings.html" class="external-link">getLoadings()</a></code>,
+<p>The accessors in Section 6 — <code><a href="https://itchyshin.github.io/gllvmTMB/reference/getLoadings.html" class="external-link">getLoadings()</a></code>,
 <code><a href="https://itchyshin.github.io/gllvmTMB/reference/extract_communality.html" class="external-link">extract_communality()</a></code>, <code><a href="https://itchyshin.github.io/gllvmTMB/reference/extract_correlations.html" class="external-link">extract_correlations()</a></code>
-— are gllvmTMB-side. v0.4 wraps them in the symbolizer surface so the
-same code that builds the Methods section of a location-scale paper also
-builds the Methods section of a latent-variable paper. Three concrete
-payoffs:</p>
-<ol style="list-style-type: decimal">
+— are gllvmTMB-side. The symbolizer surface wraps the Gaussian
+latent-variable case as a <strong>First slice</strong>: every piece
+walked above is shipped today, and the matrix-form story is fully
+populated.</p>
+<p><strong>Shipped today (v0.2):</strong></p>
+<ul>
 <li>
-<strong>Two-model comparison.</strong>
-<code>compare_symbolic(fit_d1, fit_d2)</code> will diff the structural
+<code><a href="../reference/symbolize.gllvmTMB.html">symbolize.gllvmTMB()</a></code> for Gaussian latent variables with
+mu,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝚲</mi><mi>B</mi></msub><annotation encoding="application/x-tex">\boldsymbol{\Lambda}_B</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝚺</mi><mi>B</mi></msub><annotation encoding="application/x-tex">\boldsymbol{\Sigma}_B</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝚿</mi><mi>B</mi></msub><annotation encoding="application/x-tex">\boldsymbol{\Psi}_B</annotation></semantics></math>,
+and the within-unit residual SD
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>ε</mi></msub><annotation encoding="application/x-tex">\sigma_\varepsilon</annotation></semantics></math>.</li>
+<li>
+<code>compare_symbolic(fit_d1, fit_d2)</code> — diffs the structural
 specifications of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mi>B</mi></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">d_B = 1</annotation></semantics></math>
 versus
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mi>B</mi></msub><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">d_B = 2</annotation></semantics></math>
-side by side — which lines change, which symbols change, which
-assumption rows change — so a reader can audit the model choice.</li>
+side by side (which lines change, which assumption rows change), and
+with <code>metrics = TRUE</code> also returns AIC / BIC / log-likelihood
+/ df with the delta. See <code>vignette("symbolizer-compare")</code> for
+the worked example.</li>
+</ul>
+<p><strong>On the roadmap:</strong></p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Non-Gaussian gllvmTMB families (v0.5).</strong> binomial,
+count, beta-binomial — each adds a link to the linear predictor and
+reshapes the loadings interpretation.</li>
 <li>
 <strong>Automated syndromes reading.</strong>
-<code>parameter_interpretation(sym, scale = "biological")</code> will
-produce one row per (trait, axis) pair, reading each
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>λ</mi><mrow><mi>j</mi><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">\lambda_{jk}</annotation></semantics></math>
-on the natural scale of trait
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>.</li>
+<code>parameter_interpretation(sym, scale = "biological")</code>
+produces one row per (trait, axis) pair today; v0.5+ adds the
+natural-scale reading for non-Gaussian families.</li>
 <li>
 <strong>Uncertainty on
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝚲</mi><annotation encoding="application/x-tex">\boldsymbol{\Lambda}</annotation></semantics></math>.</strong>
-<code><a href="https://itchyshin.github.io/gllvmTMB/reference/bootstrap_Sigma.html" class="external-link">bootstrap_Sigma()</a></code> from gllvmTMB already returns
-parametric-bootstrap draws of the loading matrix; v0.4 surfaces them
-through <code><a href="../reference/symbolize.html">symbolize()</a></code> so the <code><a href="../reference/symbol_table.html">symbol_table()</a></code> rows
-for
+<code><a href="https://itchyshin.github.io/gllvmTMB/reference/bootstrap_Sigma.html" class="external-link">bootstrap_Sigma()</a></code> from gllvmTMB returns
+parametric-bootstrap draws of the loading matrix; a future slice will
+surface these through <code><a href="../reference/symbolize.html">symbolize()</a></code> so the
+<code><a href="../reference/symbol_table.html">symbol_table()</a></code> rows for
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝚲</mi><annotation encoding="application/x-tex">\boldsymbol{\Lambda}</annotation></semantics></math>
 and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝚺</mi><mi>B</mi></msub><annotation encoding="application/x-tex">\boldsymbol{\Sigma}_B</annotation></semantics></math>
 carry confidence regions, not just point estimates.</li>
+<li>
+<strong>Within-unit decomposition</strong>
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝚺</mi><mi>W</mi></msub><annotation encoding="application/x-tex">\boldsymbol{\Sigma}_W</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝚲</mi><mi>W</mi></msub><annotation encoding="application/x-tex">\boldsymbol{\Lambda}_W</annotation></semantics></math>)
+for repeated-measures behaviour / trait data —
+<code>gllvmTMB_multi</code>.</li>
 </ol>
-<p><strong>Takeaway.</strong> v0.4 is the slice that makes
-latent-variable models first-class in symbolizer; the gllvmTMB side
-already returns the structural pieces.</p>
+<p><strong>Takeaway.</strong> v0.2 ships the latent-variable Gaussian
+case end-to-end; further families and uncertainty surfaces come in
+v0.5+.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
