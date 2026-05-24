@@ -313,6 +313,29 @@ test_that("continuous x factor interaction gets a biological reading", {
   expect_match(interaction_rows$biological_reading[[1L]], "differs by")
 })
 
+test_that("interaction-row estimate is looked up correctly and matches drmTMB::fixef", {
+  # Regression test for a previous bug: drm_build_fixed_effects() looked up
+  # interaction rows by term_label ("sex:body_size") but drmTMB names the
+  # column with the contrast level appended ("sexmale:body_size"). Fixed in
+  # 387ca84. This test pins that the lookup stays correct.
+  set.seed(2); n <- 120
+  dat <- data.frame(
+    body_mass = rnorm(n, 30),
+    sex = factor(rep(c("female", "male"), length.out = n)),
+    body_size = rnorm(n)
+  )
+  fit <- drmTMB::drmTMB(
+    drmTMB::drm_formula(body_mass ~ sex * body_size, sigma ~ 1),
+    family = stats::gaussian(), data = dat
+  )
+  sym <- symbolize(fit)
+  ir <- sym$fixed_effects[sym$fixed_effects$role == "interaction", , drop = FALSE]
+  expect_equal(nrow(ir), 1L)
+  expect_false(is.na(ir$estimate))
+  expected <- unname(drmTMB::fixef(fit, dpar = "mu")["sexmale:body_size"])
+  expect_equal(ir$estimate, expected)
+})
+
 test_that("factor x factor interaction gets a difference-of-differences reading", {
   set.seed(3); n <- 120
   site <- factor(rep(letters[1:3], length.out = n))
