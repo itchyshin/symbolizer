@@ -1,3 +1,31 @@
+# symbolizer 0.5.0
+
+## v0.5 — gllvmTMB binomial (first non-Gaussian latent-variable family)
+
+* `symbolize.gllvmTMB()` now reads binomial latent-variable models
+  end-to-end. The conditional distribution renders as
+  `y_{ij} | mu_{t(j)}, Lambda_B, z_{B,i} ~ Bernoulli(logit^{-1}(mu_{t(j)} + (Lambda_B z_{B,i})_{t(j)}))`,
+  trait intercepts read as logit baseline success probabilities
+  (e.g. "plogis(mu_t)"), and loadings on `Lambda_B` are noted as
+  living on the logit scale (an odds-ratio per unit of `z`).
+* `glm_build_distribution()` and the assumption / interpretation
+  template lookups are now family-aware: each gllvm family slug
+  (`gllvm_gaussian`, `gllvm_binomial`, ...) selects its own rows.
+  Added `gllvm_template_family()` helper that maps an upstream
+  family name to the slug.
+* The sigma_eps capability check now fires only for Gaussian gllvm
+  fits. drmTMB's binomial / Poisson / etc. carry a placeholder
+  `fit$report$sigma_eps` that previously triggered a spurious
+  capability error.
+* Capability rows flipped to First slice for `gllvmTMB / binomial /
+  mu`, `Lambda_B`, `Sigma_B`, `Psi_B`.
+
+The other gllvm families (Poisson, nbinom2, Gamma, lognormal,
+ordinal, ...) stay Planned or reserved. The pattern is now
+straightforward: add a CSV slug, mirror the gllvm_gaussian rows
+with family-appropriate wording, and add a branch in
+`glm_build_distribution()`.
+
 # symbolizer 0.4.0
 
 ## v0.4 — ordinal + zero-inflation + hurdle

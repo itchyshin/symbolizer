@@ -74,3 +74,19 @@ fit_gllvm_poisson <- function(seed = 1L) {
     )
   ))
 }
+
+fit_gllvm_binomial <- function(seed = 1L) {
+  testthat::skip_if_not_installed("gllvmTMB")
+  set.seed(seed)
+  sim <- gllvmTMB::simulate_site_trait(
+    n_sites = 30, n_species = 5, n_traits = 3,
+    mean_species_per_site = 3, n_predictors = 1,
+    Lambda_B = matrix(c(0.5, 0.3, -0.2), nrow = 3)
+  )
+  sim$data$pres <- as.integer(sim$data$value > 0)
+  gllvmTMB::gllvmTMB(
+    pres ~ 0 + trait + latent(0 + trait | site, d = 1),
+    data = sim$data, family = stats::binomial(),
+    trait = "trait", unit = "site", silent = TRUE
+  )
+}

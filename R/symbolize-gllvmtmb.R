@@ -69,7 +69,12 @@ symbolize.gllvmTMB <- function(fit, symbols = NULL, units = NULL,
                                                  fit$unit_col)
     capability_check("gllvmTMB", family, cap_for_kind)
   }
-  if (!is.null(fit$report$sigma_eps)) {
+  # sigma_eps is a meaningful row-level residual SD only for Gaussian
+  # latent-variable models. For Bernoulli / Poisson / binomial etc. the
+  # response distribution is determined by mu and there is no separate
+  # residual-SD parameter even though fit$report$sigma_eps may exist as
+  # a placeholder.
+  if (identical(family, "gaussian") && !is.null(fit$report$sigma_eps)) {
     capability_check("gllvmTMB", family, "sigma_eps")
   }
 
@@ -91,7 +96,10 @@ symbolize.gllvmTMB <- function(fit, symbols = NULL, units = NULL,
   response_symbol_scalar <- "y_{ij}"
   response_units <- glm_resolve_units(response, units)
 
-  param <- get_parameterization("gllvm_gaussian")
+  # Map the upstream family ("gaussian", "binomial", ...) to a template
+  # family name used by the assumption / interpretation CSVs.
+  tpl_family <- gllvm_template_family(family)
+  param <- get_parameterization(tpl_family)
   index <- list(observation = "j", unit = "i", trait = "t", latent = "k")
 
   model <- list(
@@ -105,7 +113,9 @@ symbolize.gllvmTMB <- function(fit, symbols = NULL, units = NULL,
   )
 
   distribution <- glm_build_distribution(response_symbol_scalar,
-                                         response_symbol_matrix)
+                                         response_symbol_matrix,
+                                         tpl_family = tpl_family,
+                                         link = fit$family$link %||% "identity")
   submodels    <- glm_build_submodels(d_B)
   terms_tbl    <- glm_build_terms(fit, data, symbols, trait_levels)
   fixed_eff    <- glm_build_fixed_effects(terms_tbl, fit, trait_levels)
@@ -119,8 +129,10 @@ symbolize.gllvmTMB <- function(fit, symbols = NULL, units = NULL,
     response_units, n_obs, n_traits, n_sites, d_B, units, data, fit
   )
   assumptions  <- glm_build_assumptions(response, response_symbol_scalar,
+                                        tpl_family = tpl_family,
                                         response_symbol_matrix, fit)
-  interp       <- glm_build_interpretation(fixed_eff, loadings_tbl, response)
+  interp       <- glm_build_interpretation(fixed_eff, loadings_tbl, response,
+                                            tpl_family = tpl_family)
   bridge       <- glm_build_formula_bridge(fit, response, response_symbol_matrix,
                                            d_B)
   expanded     <- glm_build_expanded(fit, trait_levels)
@@ -209,9 +221,32 @@ glm_has_unique_unit <- function(fit) {
 
 # ---- builders ---------------------------------------------------------------
 
-glm_build_distribution <- function(response_symbol, response_symbol_matrix) {
+glm_build_distribution <- function(response_symbol, response_symbol_matrix,
+                                   tpl_family = "gllvm_gaussian",
+                                   link = "identity") {
+  if (identical(tpl_family, "gllvm_binomial")) {
+    return(tibble::tibble(
+      family = tpl_family,
+      response_symbol = response_symbol,
+      response_symbol_matrix = response_symbol_matrix,
+      parameters = "mu, Lambda_B, (Psi_B)",
+      latex = paste0(
+        response_symbol,
+        " \\mid \\mu_{t(j)}, \\boldsymbol{\\Lambda}_B, \\mathbf{z}_{B,i} ",
+        "\\sim \\mathrm{Bernoulli}(\\mathrm{logit}^{-1}(\\mu_{t(j)} + ",
+        "(\\boldsymbol{\\Lambda}_B \\mathbf{z}_{B,i})_{t(j)}))"
+      ),
+      latex_matrix = paste0(
+        response_symbol_matrix,
+        " \\mid \\boldsymbol{\\mu}, \\boldsymbol{\\Lambda}_B, \\mathbf{Z}_B ",
+        "\\sim \\mathrm{Bernoulli}(\\mathrm{logit}^{-1}(",
+        "\\mathbf{1}_n \\boldsymbol{\\mu}^\\top + \\mathbf{Z}_B \\boldsymbol{\\Lambda}_B^\\top))"
+      )
+    ))
+  }
+  # Default: gllvm_gaussian shape.
   tibble::tibble(
-    family = "gllvm_gaussian",
+    family = tpl_family,
     response_symbol = response_symbol,
     response_symbol_matrix = response_symbol_matrix,
     parameters = "mu, Lambda_B, sigma_eps, (Psi_B)",
@@ -229,6 +264,20 @@ glm_build_distribution <- function(response_symbol, response_symbol_matrix) {
       "\\mathcal{MN}(\\mathbf{1}_n \\boldsymbol{\\mu}^\\top + \\mathbf{Z}_B \\boldsymbol{\\Lambda}_B^\\top,",
       " \\sigma_\\epsilon^2 \\mathbf{I}_n, \\mathbf{I}_T)"
     )
+  )
+}
+
+# Map an upstream gllvmTMB family name (the string that gllvmTMB stores in
+# fit$family$family) to the template-family slug used by the CSVs.
+gllvm_template_family <- function(family) {
+  switch(
+    family,
+    gaussian = "gllvm_gaussian",
+    binomial = "gllvm_binomial",
+    # Anything else falls through to gllvm_gaussian — but the capability
+    # check earlier in symbolize.gllvmTMB will have errored already if the
+    # family is not registered. Defensive default only.
+    "gllvm_gaussian"
   )
 }
 
@@ -607,11 +656,12 @@ glm_build_symbol_dictionary <- function(terms_tbl, response, response_symbol,
 }
 
 glm_build_assumptions <- function(response, response_symbol_scalar,
-                                  response_symbol_matrix, fit) {
+                                  response_symbol_matrix, fit,
+                                  tpl_family = "gllvm_gaussian") {
   tbl <- load_template("assumption-templates")
-  rows <- tbl[tbl$family == "gllvm_gaussian", , drop = FALSE]
+  rows <- tbl[tbl$family == tpl_family, , drop = FALSE]
   if (nrow(rows) == 0L) {
-    cli::cli_abort("No assumption template rows for family {.val gllvm_gaussian}.")
+    cli::cli_abort("No assumption template rows for family {.val {tpl_family}}.")
   }
   # If there is no unique() term on the unit, drop the Psi-bearing rows only
   # if they explicitly depend on Psi -- the implied_between_unit_covariance row
@@ -648,11 +698,12 @@ glm_response_symbol_root <- function(response_symbol) {
   s
 }
 
-glm_build_interpretation <- function(fixed_eff, loadings_tbl, response) {
+glm_build_interpretation <- function(fixed_eff, loadings_tbl, response,
+                                     tpl_family = "gllvm_gaussian") {
   tbl <- load_template("interpretation-templates")
   rows <- list()
   if (nrow(fixed_eff) > 0L) {
-    tpl_mu <- tbl[tbl$family == "gllvm_gaussian" &
+    tpl_mu <- tbl[tbl$family == tpl_family &
                     tbl$submodel == "mu" &
                     tbl$coefficient_role == "trait_intercept", , drop = FALSE]
     if (nrow(tpl_mu) > 0L) {
@@ -678,7 +729,7 @@ glm_build_interpretation <- function(fixed_eff, loadings_tbl, response) {
     }
   }
   if (!is.null(loadings_tbl) && nrow(loadings_tbl) > 0L) {
-    tpl_l <- tbl[tbl$family == "gllvm_gaussian" &
+    tpl_l <- tbl[tbl$family == tpl_family &
                    tbl$submodel == "Lambda_B" &
                    tbl$coefficient_role == "loading", , drop = FALSE]
     if (nrow(tpl_l) > 0L) {

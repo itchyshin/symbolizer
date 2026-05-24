@@ -40,7 +40,10 @@ gllvmTMB,*,Psi_W,Planned or reserved,,Per-trait within-unit unique variance.
 gllvmTMB,*,phylo,Planned or reserved,,Phylogenetic covstructs.
 gllvmTMB,*,spatial,Planned or reserved,,Spatial covstructs.
 gllvmTMB,*,Sigma,Planned or reserved,,
-gllvmTMB,binomial,*,Planned or reserved,,Binomial / Bernoulli families.
+gllvmTMB,binomial,mu,First slice,0.5.0,Per-trait intercept submodel on the logit scale via 0 + trait fixed effects.
+gllvmTMB,binomial,Lambda_B,First slice,0.5.0,Between-unit reduced-rank loading matrix for binomial latent variables.
+gllvmTMB,binomial,Sigma_B,First slice,0.5.0,"Implied between-unit covariance (on the logit scale) Lambda_B Lambda_B^T (+ Psi_B when unique term present)."
+gllvmTMB,binomial,Psi_B,First slice,0.5.0,Per-trait unique variance (on the logit scale) via unique(0 + trait | unit).
 gllvmTMB,poisson,*,Planned or reserved,,Poisson family.
 gllvmTMB,nbinom2,*,Planned or reserved,,Negative binomial family.
 gllvmTMB,Gamma,*,Planned or reserved,,Gamma family.
