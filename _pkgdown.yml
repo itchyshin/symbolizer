@@ -31,6 +31,7 @@ articles:
       - symbolizer
       - symbolizer-drmtmb
       - symbolizer-factors
+      - symbolizer-families
       - symbolizer-gllvm
       - symbolizer-compare
 
