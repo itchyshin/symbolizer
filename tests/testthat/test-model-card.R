@@ -13,7 +13,8 @@ test_that("model_card returns the full bundle for drmTMB", {
     names(card),
     c("meta", "equation", "symbols", "assumptions", "bridge",
       "formula_bridge", "interpretation",
-      "extraction_calls", "recommended_plots")
+      "extraction_calls", "recommended_plots",
+      "marginal_means", "marginal_slopes")
   )
   expect_true(any(grepl("drmTMB::fixef", card$extraction_calls, fixed = TRUE)))
   expect_true(any(grepl("Residuals vs fitted", names(card$recommended_plots), fixed = TRUE)))

@@ -115,6 +115,11 @@ symbolize.drmTMB <- function(fit, symbols = NULL, units = NULL,
     call = fit$call,
     context = context %||% "",
     ci_method = ci_method,
+    # The fit is retained by reference so downstream accessors that need to
+    # re-query the original object (e.g. group_means / group_slopes via
+    # emmeans) can do so without round-tripping through the call. R's
+    # reference semantics keep this cheap: no copy is made.
+    fit = fit,
     package_versions = list(
       symbolizer = utils::packageVersion("symbolizer"),
       drmTMB     = utils::packageVersion("drmTMB")

@@ -34,7 +34,9 @@
 #' @return A `symbolizer_model_card` (a list) with elements:
 #'   `meta`, `equation`, `symbols`, `assumptions`, `bridge`,
 #'   `formula_bridge`, `interpretation`, `extraction_calls`,
-#'   `recommended_plots`.
+#'   `recommended_plots`, `marginal_means` (NULL when the model has no
+#'   factors), `marginal_slopes` (NULL when no continuous-by-* interaction
+#'   is present).
 #' @export
 model_card <- function(x, ...) {
   UseMethod("model_card")
@@ -67,10 +69,50 @@ model_card.symbolized_model <- function(x, ...) {
     formula_bridge    = formula_bridge(x, notation = "both"),
     interpretation    = parameter_interpretation(x, scale = "all"),
     extraction_calls  = model_card_extraction_calls(x),
-    recommended_plots = model_card_recommended_plots(x)
+    recommended_plots = model_card_recommended_plots(x),
+    marginal_means    = model_card_marginal_means(x),
+    marginal_slopes   = model_card_marginal_slopes(x)
   )
   class(out) <- c("symbolizer_model_card", "list")
   out
+}
+
+# Pre-render group means when the model has factors and emmeans is
+# available. Returns NULL on either count, or on any extraction error.
+model_card_marginal_means <- function(x) {
+  if (!requireNamespace("emmeans", quietly = TRUE)) return(NULL)
+  d <- x$symbol_dictionary
+  if (is.null(d) || !any(d$role == "factor", na.rm = TRUE)) return(NULL)
+  tryCatch(group_means(x), error = function(e) NULL)
+}
+
+# Pre-render group slopes when the model has a continuous-by-* interaction
+# and emmeans is available. Picks the first continuous predictor appearing
+# in any interaction; returns NULL when there is none.
+model_card_marginal_slopes <- function(x) {
+  if (!requireNamespace("emmeans", quietly = TRUE)) return(NULL)
+  terms_tbl <- x$terms
+  if (is.null(terms_tbl) || nrow(terms_tbl) == 0L) return(NULL)
+  inter <- terms_tbl[terms_tbl$role == "interaction", , drop = FALSE]
+  if (nrow(inter) == 0L) return(NULL)
+  # The set of continuous predictors anywhere in the terms table: a
+  # variable with at least one "predictor" / "transformation" row in this
+  # model.
+  cont_predictors <- unique(terms_tbl$variable[
+    terms_tbl$role %in% c("predictor", "transformation") &
+      !is.na(terms_tbl$variable)
+  ])
+  if (length(cont_predictors) == 0L) return(NULL)
+  # Pick the first continuous predictor that actually appears in an
+  # interaction; emtrends needs that variable as `var`.
+  in_interaction <- vapply(cont_predictors, function(v) {
+    any(vapply(inter$variable, function(iv) {
+      v %in% strsplit(iv, ":", fixed = TRUE)[[1L]]
+    }, logical(1L)))
+  }, logical(1L))
+  if (!any(in_interaction)) return(NULL)
+  pick <- cont_predictors[in_interaction][[1L]]
+  tryCatch(group_slopes(x, continuous = pick), error = function(e) NULL)
 }
 
 # Class-specific extraction calls. Returns a named character vector of R
@@ -93,7 +135,9 @@ model_card_extraction_calls <- function(x) {
       "Fixed effects (sigma)"    = "drmTMB::fixef(fit, dpar = \"sigma\")",
       "Random effects (BLUPs)"   = "drmTMB::ranef(fit)",
       "Symbolic story"           = "symbolizer::symbolize(fit)",
-      "Teaching bundle"          = "symbolizer::model_card(symbolizer::symbolize(fit))"
+      "Teaching bundle"          = "symbolizer::model_card(symbolizer::symbolize(fit))",
+      "Group means (alongside contrasts)"        = "symbolizer::group_means(sym)",
+      "Per-group slopes (alongside interactions)" = "symbolizer::group_slopes(sym, continuous = <one of your continuous predictors>)"
     ),
     gllvmTMB = c(
       "Loading matrix Lambda_B"        = "gllvmTMB::getLoadings(fit)",
@@ -175,6 +219,17 @@ print.symbolizer_model_card <- function(x, ...) {
   cli::cli_h2("Parameter interpretation")
   cli::cli_text("{.emph What each fitted coefficient says, in plain English.}")
   print(x$interpretation)
+
+  if (!is.null(x$marginal_means)) {
+    cli::cli_h2("Group means")
+    cli::cli_text("{.emph Per-level marginal means alongside the factor contrasts above.}")
+    print(x$marginal_means)
+  }
+  if (!is.null(x$marginal_slopes)) {
+    cli::cli_h2("Group slopes")
+    cli::cli_text("{.emph Per-group slopes alongside the interaction contrasts above.}")
+    print(x$marginal_slopes)
+  }
 
   cli::cli_h2("Extraction calls")
   cli::cli_text("{.emph R code to pull out blocks of the fit.}")

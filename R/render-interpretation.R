@@ -82,10 +82,11 @@ print.symbolizer_interpretation <- function(x, ...) {
   for (sm in submodels) {
     cli::cli_h3("{.strong submodel: {sm}}")
     rows <- which(x$submodel == sm)
+    has_excludes_zero <- "excludes_zero" %in% names(x)
     for (i in rows) {
       est <- formatC(x$estimate[[i]], digits = 3L, format = "fg", flag = "#")
       ci_str <- interp_ci_str(x, i)
-      marker <- if (isTRUE(x$excludes_zero[[i]] %||% FALSE)) " *" else ""
+      marker <- if (has_excludes_zero && isTRUE(x$excludes_zero[[i]])) " *" else ""
       cli::cli_text(
         "{.emph {x$term_label[[i]]}} [{.val {x$coefficient_role[[i]]}}]  estimate = {.val {est}}{ci_str}{marker}"
       )

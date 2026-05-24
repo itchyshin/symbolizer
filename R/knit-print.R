@@ -134,6 +134,57 @@ knit_print.symbolizer_interpretation <- function(x, ...) {
   knitr::asis_output(paste(c("", kab, "", footer, ""), collapse = "\n"))
 }
 
+#' @exportS3Method knitr::knit_print
+knit_print.symbolizer_group_means <- function(x, ...) {
+  marg_kable(x, predictor = NULL)
+}
+
+#' @exportS3Method knitr::knit_print
+knit_print.symbolizer_group_slopes <- function(x, ...) {
+  predictor <- if ("predictor" %in% names(x) && nrow(x) >= 1L) {
+    x$predictor[[1L]]
+  } else NA_character_
+  marg_kable(x, predictor = predictor)
+}
+
+# Shared kable renderer for both group_means and group_slopes tibbles.
+#' @keywords internal
+marg_kable <- function(x, predictor = NULL) {
+  df <- as.data.frame(x, stringsAsFactors = FALSE)
+  fmt <- function(v) formatC(v, digits = 3, format = "fg", flag = "#")
+  if ("estimate" %in% names(df)) df$estimate <- fmt(df$estimate)
+  if (all(c("confint_low", "confint_high") %in% names(df))) {
+    has_ci <- !is.na(df$confint_low) & !is.na(df$confint_high)
+    band <- ifelse(
+      has_ci,
+      paste0(fmt(df$confint_low), ", ", fmt(df$confint_high)),
+      "--"
+    )
+    if ("excludes_zero" %in% names(df)) {
+      band <- ifelse(isTRUE_vec(df$excludes_zero), paste0(band, " *"), band)
+    }
+    df$`95% CI` <- band
+  }
+  drop_cols <- c("confint_low", "confint_high", "excludes_zero", "ci_method",
+                 "std_error")
+  cols <- setdiff(names(df), drop_cols)
+  kab <- sym_kable(df[, cols, drop = FALSE])
+  header <- if (!is.null(predictor) && !is.na(predictor) && nzchar(predictor)) {
+    sprintf("**Group slopes for `%s`**", predictor)
+  } else "**Group means**"
+  footer <- if ("ci_method" %in% names(x)) {
+    m <- unique(x$ci_method[!is.na(x$ci_method)])
+    if (length(m) == 1L) {
+      paste0(
+        "*Rows marked `*` have a 95% confidence interval that excludes zero",
+        " (CI method: `", m, "`).*"
+      )
+    } else ""
+  } else ""
+  knitr::asis_output(paste(c("", header, "", kab, "", footer, ""),
+                           collapse = "\n"))
+}
+
 #' @keywords internal
 isTRUE_vec <- function(x) {
   if (is.null(x)) return(logical(0))
@@ -181,6 +232,14 @@ knit_print.symbolizer_model_card <- function(x, ...) {
     list(title = "Formula bridge (R syntax to math)",      obj = x$formula_bridge),
     list(title = "Parameter interpretation",               obj = x$interpretation)
   )
+  if (!is.null(x$marginal_means)) {
+    sections <- c(sections, list(list(title = "Group means",
+                                      obj = x$marginal_means)))
+  }
+  if (!is.null(x$marginal_slopes)) {
+    sections <- c(sections, list(list(title = "Group slopes",
+                                      obj = x$marginal_slopes)))
+  }
   parts <- c(header, context, "")
   for (s in sections) {
     rendered <- knitr::knit_print(s$obj)

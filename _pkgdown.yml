@@ -81,6 +81,11 @@ reference:
     desc: "Per-parameter readings on link, natural, variance, and biological scales."
     contents:
       - parameter_interpretation
+  - title: "Marginal estimates"
+    desc: "Per-group means and per-group slopes via emmeans, alongside the contrast rows."
+    contents:
+      - group_means
+      - group_slopes
   - title: "Internal: term-grammar bridge"
     desc: "The R formula <-> model matrix <-> biological symbol layer that every renderer reads."
     contents:

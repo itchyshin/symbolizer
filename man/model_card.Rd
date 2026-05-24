@@ -16,7 +16,9 @@ model_card(x, ...)
 A \code{symbolizer_model_card} (a list) with elements:
 \code{meta}, \code{equation}, \code{symbols}, \code{assumptions}, \code{bridge},
 \code{formula_bridge}, \code{interpretation}, \code{extraction_calls},
-\code{recommended_plots}.
+\code{recommended_plots}, \code{marginal_means} (NULL when the model has no
+factors), \code{marginal_slopes} (NULL when no continuous-by-* interaction
+is present).
 }
 \description{
 \code{model_card()} returns the entire teachable package for a symbolized
