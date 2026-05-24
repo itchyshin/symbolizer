@@ -66,3 +66,17 @@ fit_drm_with_re <- function(seed = 2L, n = 80L, n_groups = 6L) {
     data   = dat
   )
 }
+
+fit_drm_student <- function(seed = 20260524L, n = 80L) {
+  testthat::skip_if_not_installed("drmTMB")
+  set.seed(seed)
+  dat <- data.frame(
+    y = rt(n, df = 5) * 2 + 10 + 0.5 * rnorm(n),
+    x = rnorm(n)
+  )
+  drmTMB::drmTMB(
+    drmTMB::drm_formula(y ~ x, sigma ~ x, nu ~ 1),
+    family = drmTMB::student(),
+    data   = dat
+  )
+}

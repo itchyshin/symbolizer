@@ -30,3 +30,12 @@ biv_gaussian,rho12,residual_correlation_range,"\rho_{12} \in (-1, 1)","The resid
 biv_gaussian,,residual_decomposition,"\Sigma_i = \begin{pmatrix}\sigma_{1i}^2 & \rho_{12,i}\sigma_{1i}\sigma_{2i} \\ \rho_{12,i}\sigma_{1i}\sigma_{2i} & \sigma_{2i}^2\end{pmatrix}","The 2x2 residual covariance is built from the two SDs and their correlation",stated
 biv_gaussian,,independence_across_observations,"(Y_{1i}, Y_{2i}) \perp (Y_{1j}, Y_{2j}) \mid X \text{ for } i \ne j",Pairs of observations are conditionally independent given the predictors,implied
 biv_gaussian,,no_missing_at_random,—,Observations are assumed not missing in a way that depends on the unobserved responses,not_checked
+student,,conditional_distribution,"{response_symbol} \mid \mu_i\, \sigma_i\, \nu_i \sim \mathrm{Student\text{-}t}(\mu_i\, \sigma_i\, \nu_i)",{response} follows a Student-t distribution around its expected value with heavier tails than Gaussian when nu is small,stated
+student,mu,linear_predictor,\mu_i = \beta_0 + \sum_k \beta_k X_{ki},Expected {response} is a linear combination of the mean-model predictors,stated
+student,sigma,linear_predictor,\log(\sigma_i) = \gamma_0 + \sum_k \gamma_k Z_{ki},Log residual scale of {response} is a linear combination of the scale-model predictors,stated
+student,nu,linear_predictor,\log(\nu_i - 2) = \delta_0 + \sum_k \delta_k V_{ki},"Log of (degrees of freedom minus 2) is a linear combination of the nu-model predictors; the predictor lives on the log(nu - 2) scale so that nu > 2 is always enforced",stated
+student,,independence,{response_symbol} \perp {response_symbol_j} \mid X \text{ for } i \ne j,Observations are conditionally independent given the predictors,implied
+student,,independence_given_random_effects,"{response_symbol} \perp {response_symbol_j} \mid X\, \mathbf{u} \text{ for } i \ne j",Observations are conditionally independent given the predictors and the random effects,stated
+student,sigma,positivity,\sigma_i > 0,Residual scale is constrained positive via the log link,implied
+student,nu,positivity_and_finite_variance,\nu_i > 2,"Degrees of freedom > 2 is enforced via the log(nu - 2) link; this in turn guarantees that the modelled variance nu/(nu - 2) * sigma^2 is finite",implied
+student,,no_missing_at_random,—,Observations are assumed not missing in a way that depends on the unobserved response,not_checked

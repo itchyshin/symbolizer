@@ -306,10 +306,21 @@ drm_coef_family_for <- function(dpar) {
 }
 
 drm_link_for <- function(family, dpar, family_link, family_links = NULL) {
-  if (identical(family, "biv_gaussian") && !is.null(family_links) &&
-      dpar %in% names(family_links)) {
-    return(unname(family_links[[dpar]]))
+  # For multi-dpar families (biv_gaussian, student, and future families that
+  # carry one link per dpar), drmTMB exposes the per-dpar lookup as a named
+  # vector on either `fit$family$link` or `fit$family$links`. Use whichever
+  # exists, indexed by the current dpar.
+  lookup <- if (!is.null(family_links) && !is.null(names(family_links))) {
+    family_links
+  } else if (is.character(family_link) && length(family_link) > 1L &&
+             !is.null(names(family_link))) {
+    family_link
+  } else NULL
+  if (!is.null(lookup) && dpar %in% names(lookup)) {
+    return(unname(lookup[[dpar]]))
   }
+  # Univariate Gaussian / other single-dpar families: fall back to the
+  # historical hardcoded mapping.
   if (dpar == "mu") return(family_link)
   if (dpar == "sigma") return("log")
   family_link
@@ -450,6 +461,22 @@ drm_build_distribution <- function(family, response_symbol,
       ),
       latex_matrix = sprintf(
         "%s \\mid \\boldsymbol{\\mu},\\, \\boldsymbol{\\sigma} \\sim \\mathcal{N}(\\boldsymbol{\\mu},\\, \\mathrm{diag}(\\boldsymbol{\\sigma}^2))",
+        response_symbol_matrix
+      )
+    ))
+  }
+  if (identical(family, "student")) {
+    return(tibble::tibble(
+      family = family,
+      response_symbol = response_symbol,
+      response_symbol_matrix = response_symbol_matrix,
+      parameters = "mu, sigma, nu",
+      latex = sprintf(
+        "%s \\mid \\mu_i,\\, \\sigma_i,\\, \\nu_i \\sim \\mathrm{Student\\text{-}t}(\\mu_i,\\, \\sigma_i,\\, \\nu_i)",
+        response_symbol
+      ),
+      latex_matrix = sprintf(
+        "%s \\mid \\boldsymbol{\\mu},\\, \\boldsymbol{\\sigma},\\, \\boldsymbol{\\nu} \\sim \\mathrm{Student\\text{-}t}(\\boldsymbol{\\mu},\\, \\boldsymbol{\\sigma},\\, \\boldsymbol{\\nu})",
         response_symbol_matrix
       )
     ))
@@ -718,6 +745,7 @@ drm_build_components <- function(submodels, terms_tbl, re_tbl, response_symbol,
                                   response_symbol_1 = NULL,
                                   response_symbol_2 = NULL) {
   is_biv <- identical(family, "biv_gaussian")
+  is_student <- identical(family, "student")
   rows <- list()
   if (is_biv) {
     rows[[1L]] <- tibble::tibble(
@@ -737,6 +765,21 @@ drm_build_components <- function(submodels, terms_tbl, re_tbl, response_symbol,
           "%s \\mid \\mathbf{M},\\, \\mathbf{S},\\, \\boldsymbol{\\rho}_{12} ",
           "\\sim \\mathcal{N}_2(\\mathbf{M},\\, \\boldsymbol{\\Sigma})"
         ),
+        response_symbol_matrix
+      ),
+      status = "stated"
+    )
+  } else if (is_student) {
+    rows[[1L]] <- tibble::tibble(
+      name = "distribution",
+      kind = "distribution",
+      submodel = NA_character_,
+      equation = sprintf(
+        "%s \\mid \\mu_i,\\, \\sigma_i,\\, \\nu_i \\sim \\mathrm{Student\\text{-}t}(\\mu_i,\\, \\sigma_i,\\, \\nu_i)",
+        response_symbol
+      ),
+      equation_matrix = sprintf(
+        "%s \\mid \\boldsymbol{\\mu},\\, \\boldsymbol{\\sigma},\\, \\boldsymbol{\\nu} \\sim \\mathrm{Student\\text{-}t}(\\boldsymbol{\\mu},\\, \\boldsymbol{\\sigma},\\, \\boldsymbol{\\nu})",
         response_symbol_matrix
       ),
       status = "stated"

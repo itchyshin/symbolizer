@@ -5,9 +5,9 @@ drmTMB,gaussian,random_effects,First slice,0.1.0,Gaussian random intercepts (1|g
 drmTMB,gaussian,zi,Planned or reserved,,Zero-inflation submodel.
 drmTMB,gaussian,hu,Planned or reserved,,Hurdle submodel.
 drmTMB,gaussian,rho12,Planned or reserved,,Bivariate residual correlation.
-drmTMB,student,mu,Planned or reserved,,
-drmTMB,student,sigma,Planned or reserved,,
-drmTMB,student,nu,Planned or reserved,,
+drmTMB,student,mu,First slice,0.2.2,Student-t location submodel with identity link.
+drmTMB,student,sigma,First slice,0.2.2,Student-t scale submodel with log link.
+drmTMB,student,nu,First slice,0.2.2,"Student-t degrees-of-freedom submodel with log(nu - 2) link; nu > 2 required for finite variance."
 drmTMB,lognormal,mu,Planned or reserved,,
 drmTMB,lognormal,sigma,Planned or reserved,,
 drmTMB,gamma,mu,Planned or reserved,,
