@@ -127,6 +127,21 @@ methods_slots_for <- function(sym) {
     if (identical(family, "student")) {
       slots$nu_predictors_clause <- methods_predictors_clause(sym, "nu")
     }
+    # Optional zero-inflation / hurdle clauses (Poisson / nbinom2 only).
+    # The template carries {zi_extra_clause} / {hu_extra_clause} placeholders
+    # that default to empty when the corresponding submodel is absent.
+    slots$zi_extra_clause <- if ("zi" %in% sym$submodels$parameter) {
+      sprintf(
+        " A zero-inflation component modelled the probability of a structural zero on the logit scale as a function of %s; the conditional distribution is a mixture P(Y=0) = pi_zi + (1 - pi_zi) * f(0 | mu, ...).",
+        methods_predictors_clause(sym, "zi")
+      )
+    } else ""
+    slots$hu_extra_clause <- if ("hu" %in% sym$submodels$parameter) {
+      sprintf(
+        " A hurdle component modelled the probability of a zero on the logit scale as a function of %s; positives were drawn from the zero-truncated form of the count distribution.",
+        methods_predictors_clause(sym, "hu")
+      )
+    } else ""
   } else if (identical(family, "biv_gaussian") && identical(cls, "drmTMB")) {
     responses <- sym$model$responses %||%
                  strsplit(sym$model$response %||% ", ",

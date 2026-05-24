@@ -14,10 +14,10 @@
       * drmTMB Gamma: mu, sigma (First slice)
       * drmTMB gaussian: random_effects (First slice)
       * drmTMB lognormal: mu, sigma (First slice)
-      * drmTMB nbinom2: mu, sigma (First slice)
-      * drmTMB poisson: mu (First slice)
+      * drmTMB nbinom2: mu, sigma, zi (First slice)
+      * drmTMB poisson: mu, zi (First slice)
       * drmTMB student: mu, nu, sigma (First slice)
-      * drmTMB truncated_nbinom2: mu, sigma (First slice)
+      * drmTMB truncated_nbinom2: hu, mu, sigma (First slice)
       * gllvmTMB gaussian: Lambda_B, mu, Psi_B, Sigma_B, sigma_eps (First slice)
       i See `symbolizer_capabilities()` for the full registry.
 
@@ -37,10 +37,10 @@
       * drmTMB Gamma: mu, sigma (First slice)
       * drmTMB gaussian: random_effects (First slice)
       * drmTMB lognormal: mu, sigma (First slice)
-      * drmTMB nbinom2: mu, sigma (First slice)
-      * drmTMB poisson: mu (First slice)
+      * drmTMB nbinom2: mu, sigma, zi (First slice)
+      * drmTMB poisson: mu, zi (First slice)
       * drmTMB student: mu, nu, sigma (First slice)
-      * drmTMB truncated_nbinom2: mu, sigma (First slice)
+      * drmTMB truncated_nbinom2: hu, mu, sigma (First slice)
       * gllvmTMB gaussian: Lambda_B, mu, Psi_B, Sigma_B, sigma_eps (First slice)
       i See `symbolizer_capabilities()` for the full registry.
 

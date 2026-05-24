@@ -198,3 +198,29 @@ fit_drm_cumulative_logit <- function(seed = 20260524L, n = 200L) {
     data   = data.frame(y = y, x = x)
   )
 }
+
+fit_drm_poisson_zi <- function(seed = 20260524L, n = 200L) {
+  testthat::skip_if_not_installed("drmTMB")
+  set.seed(seed)
+  y <- ifelse(runif(n) < 0.3, 0L,
+              rpois(n, lambda = exp(1 + 0.3 * rnorm(n))))
+  dat <- data.frame(y = y, x = rnorm(n))
+  drmTMB::drmTMB(
+    drmTMB::drm_formula(y ~ x, zi ~ 1),
+    family = stats::poisson(),
+    data   = dat
+  )
+}
+
+fit_drm_truncated_nbinom2_hu <- function(seed = 20260524L, n = 200L) {
+  testthat::skip_if_not_installed("drmTMB")
+  set.seed(seed)
+  y <- ifelse(runif(n) < 0.3, 0L,
+              pmax(1L, rpois(n, 4)))
+  dat <- data.frame(y = y, x = rnorm(n))
+  drmTMB::drmTMB(
+    drmTMB::drm_formula(y ~ x, sigma ~ 1, hu ~ 1),
+    family = drmTMB::truncated_nbinom2(),
+    data   = dat
+  )
+}

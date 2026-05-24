@@ -361,6 +361,8 @@ drm_coef_family_for <- function(dpar) {
     sigma2  = "gamma_{2}",
     rho12   = "rho",
     nu      = "nu",
+    zi      = "alpha",  # zero-inflation submodel; logit link
+    hu      = "delta",  # hurdle submodel; logit link
     cli::cli_abort("No coefficient symbol family defined for dpar {.val {dpar}}.")
   )
 }
@@ -383,6 +385,11 @@ drm_link_for <- function(family, dpar, family_link, family_links = NULL) {
   # historical hardcoded mapping.
   if (dpar == "mu") return(family_link)
   if (dpar == "sigma") return("log")
+  # Zero-inflation and hurdle submodels both use the logit link by drmTMB
+  # convention (probability of structural zero / probability of being
+  # above the hurdle).
+  if (dpar == "zi") return("logit")
+  if (dpar == "hu") return("logit")
   family_link
 }
 
@@ -397,6 +404,8 @@ drm_param_greek <- function(dpar) {
     sigma2 = "\\sigma_{2}",
     rho12  = "\\rho_{12}",
     nu     = "\\nu",
+    zi     = "\\pi_{\\mathrm{zi}}",  # zero-inflation probability
+    hu     = "\\pi_{\\mathrm{hu}}",  # hurdle probability
     paste0("\\", dpar)
   )
 }
@@ -425,6 +434,8 @@ drm_design_matrix_symbol <- function(dpar) {
     sigma1 = "\\mathbf{Z}_{1}",
     sigma2 = "\\mathbf{Z}_{2}",
     rho12  = "\\mathbf{W}",
+    zi     = "\\mathbf{X}_{\\mathrm{zi}}",
+    hu     = "\\mathbf{X}_{\\mathrm{hu}}",
     paste0("\\mathbf{X}_{", dpar, "}")
   )
 }
@@ -1149,12 +1160,19 @@ drm_coef_scalar_indices <- function(coef_family, n_coef) {
 
 drm_param_index_form <- function(dpar, greek) {
   # Index form: "\\mu_i" for `mu`, "\\mu_{1i}" for `mu1`, "\\rho_{12,i}" for
-  # `rho12` (two-digit subscript gets a comma before i to keep readability).
-  m <- regmatches(greek, regexec("^(.*)_\\{([0-9]+)\\}$", greek))[[1L]]
-  if (length(m) == 3L && nzchar(m[[2L]]) && nzchar(m[[3L]])) {
-    sub_digits <- m[[3L]]
+  # `rho12` (two-digit subscript gets a comma before i to keep readability),
+  # "\\pi_{\\mathrm{zi},i}" for `zi` (non-digit subscript: insert ", i"
+  # inside the existing subscript braces).
+  m_digits <- regmatches(greek, regexec("^(.*)_\\{([0-9]+)\\}$", greek))[[1L]]
+  if (length(m_digits) == 3L && nzchar(m_digits[[2L]]) && nzchar(m_digits[[3L]])) {
+    sub_digits <- m_digits[[3L]]
     sep <- if (nchar(sub_digits) >= 2L) "," else ""
-    return(paste0(m[[2L]], "_{", sub_digits, sep, "i}"))
+    return(paste0(m_digits[[2L]], "_{", sub_digits, sep, "i}"))
+  }
+  # Non-digit subscript: insert ", i" before the closing brace.
+  m_sub <- regmatches(greek, regexec("^(.*)_\\{(.+)\\}$", greek))[[1L]]
+  if (length(m_sub) == 3L && nzchar(m_sub[[2L]]) && nzchar(m_sub[[3L]])) {
+    return(paste0(m_sub[[2L]], "_{", m_sub[[3L]], ",\\, i}"))
   }
   paste0(greek, "_i")
 }
