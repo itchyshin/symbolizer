@@ -244,10 +244,54 @@ methods_re_clause <- function(sym) {
   if (is.na(col)) return("")
   groups <- unique(re[[col]][!is.na(re[[col]]) & nzchar(re[[col]])])
   if (length(groups) == 0L) return("")
-  paste0(
-    " A random intercept was included for ",
-    methods_oxford_list(groups), "."
-  )
+
+  # If the random_effects tibble lacks a `component` column (e.g. an older
+  # extractor or a different model class), fall back to the historic
+  # intercept-only wording.
+  has_component <- "component" %in% names(re)
+  if (!has_component) {
+    return(paste0(" A random intercept was included for ",
+                  methods_oxford_list(groups), "."))
+  }
+
+  # Per-group description. Each group can have a random intercept, random
+  # slope(s), or both.
+  per_group <- vapply(groups, function(gv) {
+    sel <- re[[col]] == gv
+    comps <- re$component[sel]
+    has_int <- "(Intercept)" %in% comps
+    slopes  <- comps[comps != "(Intercept)" & !is.na(comps)]
+    if (length(slopes) == 0L && has_int) {
+      sprintf("a random intercept for `%s`", gv)
+    } else if (length(slopes) >= 1L && has_int) {
+      slope_part <- if (length(slopes) == 1L) {
+        sprintf("a random slope on `%s`", slopes[[1L]])
+      } else {
+        sprintf("random slopes on %s", methods_oxford_list(slopes))
+      }
+      sprintf("a random intercept and %s for `%s`", slope_part, gv)
+    } else if (length(slopes) >= 1L) {
+      slope_part <- if (length(slopes) == 1L) {
+        sprintf("a random slope on `%s`", slopes[[1L]])
+      } else {
+        sprintf("random slopes on %s", methods_oxford_list(slopes))
+      }
+      sprintf("%s for `%s`", slope_part, gv)
+    } else ""
+  }, character(1L))
+  per_group <- per_group[nzchar(per_group)]
+  if (length(per_group) == 0L) return("")
+
+  # Capitalize the first letter of the first clause; join multi-group
+  # descriptions with semicolons. Verb agreement: singular "was" when
+  # there's just one group with just one component; plural "were"
+  # otherwise.
+  per_group[[1L]] <- paste0(toupper(substring(per_group[[1L]], 1L, 1L)),
+                            substring(per_group[[1L]], 2L))
+  joined <- paste(per_group, collapse = "; ")
+  total_components <- nrow(re)
+  verb <- if (total_components == 1L) "was" else "were"
+  paste0(" ", joined, " ", verb, " included in the model.")
 }
 
 # Oxford-comma list: c("a") -> "a"; c("a","b") -> "a and b"; c("a","b","c")

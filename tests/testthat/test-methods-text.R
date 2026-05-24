@@ -43,8 +43,27 @@ test_that("methods_text mentions random effects when present", {
   mt <- methods_text(sym)
   expect_match(mt$text, "random intercept", fixed = TRUE)
   expect_match(mt$text, "group", fixed = TRUE)
+  expect_match(mt$text, "was included in the model", fixed = TRUE)
   # And the reminders block calls it out:
   expect_true(any(grepl("Random-effect", mt$reminders, fixed = TRUE)))
+})
+
+test_that("methods_text for (1 + x | g) mentions both intercept and slope with the right verb agreement", {
+  set.seed(20260524); n <- 200; n_g <- 8
+  g <- factor(rep(letters[1:n_g], length.out = n))
+  x <- rnorm(n)
+  dat <- data.frame(
+    y = 5 + 0.5 * x + rnorm(n_g, sd = 1.5)[g] + rnorm(n_g, sd = 0.4)[g] * x + rnorm(n),
+    x = x, g = g
+  )
+  fit <- drmTMB::drmTMB(drmTMB::drm_formula(y ~ x + (1 + x | g), sigma ~ 1),
+                        family = stats::gaussian(), data = dat)
+  sym <- symbolize(fit)
+  mt <- methods_text(sym)
+  # The polished clause names both pieces and uses plural "were":
+  expect_match(mt$text, "random intercept and a random slope on .x.", fixed = FALSE)
+  expect_match(mt$text, "were included in the model",                 fixed = TRUE)
+  expect_false(grepl("on `x` for `g` was",  mt$text, fixed = TRUE))
 })
 
 test_that("methods_text for drmTMB biv_gaussian mentions both responses and rho12", {
