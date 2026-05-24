@@ -1,3 +1,28 @@
+# symbolizer 0.3.0.9000 (development)
+
+## v0.3.1 (in progress)
+
+* `group_means()` and `group_slopes()` gain a `scale` argument
+  (`"response"` (default) or `"link"`) and return a new `scale` column.
+  Before this release, both functions returned emmeans output on the
+  *link* scale for non-identity-link families — a Poisson "group mean"
+  was reported as the log of the count rate, a Beta mean was reported
+  as a log-odds, a Gamma mean as a log of the response, and so on.
+  That was easy to misread as the response-scale value. The default is
+  now `"response"`: the back-transformed mean (count rate for Poisson,
+  proportion for Beta, response-scale mean for Gamma, geometric mean
+  for lognormal, response-scale mean for nbinom2, mean for Gaussian and
+  Student-t). Pass `scale = "link"` to get the linear-predictor scale
+  used by the coefficient table.
+* For `lognormal` fits drmTMB exposes mu on the identity link (because
+  mu represents `log(Y)`), so emmeans's automatic back-transform doesn't
+  fire. `group_means()` now tells emmeans about the implicit log
+  transformation via `stats::update(emm, tran = "log")` so the
+  response-scale output is the geometric mean with delta-method CI.
+* `print.symbolizer_group_means()` and
+  `print.symbolizer_group_slopes()` name the scale in their footer
+  ("Scale: response. CI method: wald.").
+
 # symbolizer 0.3.0
 
 ## v0.3 — non-Gaussian drmTMB families, polished methods_text

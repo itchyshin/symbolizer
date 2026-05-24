@@ -177,3 +177,98 @@ test_that("group_slopes errors helpfully on biv_gaussian fits", {
     "biv_gaussian"
   )
 })
+
+# --- Response- vs link-scale handling for non-Gaussian families --------------
+
+test_that("group_means defaults to response scale on Poisson", {
+  skip_if_no_marg_deps()
+  set.seed(1); n <- 80
+  sex <- factor(rep(c("F", "M"), length.out = n))
+  dat <- data.frame(y = rpois(n, ifelse(sex == "F", 3, 6)), sex = sex)
+  fit <- drmTMB::drmTMB(drmTMB::drm_formula(y ~ sex),
+                        family = stats::poisson(), data = dat)
+  sym <- symbolize(fit)
+  gm_response <- group_means(sym)
+  # On the response scale these are count rates; sex=F should be near 3 and
+  # sex=M near 6 (the simulated truth) — far above the link-scale numbers.
+  expect_true(all(gm_response$scale == "response"))
+  expect_gt(gm_response$estimate[gm_response$sex == "M"], 4)
+  # Link scale is log(rate); the M row should be near log(6) ~ 1.8.
+  gm_link <- group_means(sym, scale = "link")
+  expect_true(all(gm_link$scale == "link"))
+  expect_lt(gm_link$estimate[gm_link$sex == "M"], 3)
+})
+
+test_that("group_means defaults to response scale on beta", {
+  skip_if_no_marg_deps()
+  set.seed(1); n <- 80
+  sex <- factor(rep(c("F", "M"), length.out = n))
+  dat <- data.frame(y = rbeta(n, ifelse(sex == "F", 2, 5), 5), sex = sex)
+  fit <- drmTMB::drmTMB(drmTMB::drm_formula(y ~ sex, sigma ~ 1),
+                        family = drmTMB::beta(), data = dat)
+  sym <- symbolize(fit)
+  gm <- group_means(sym)
+  expect_true(all(gm$scale == "response"))
+  # All estimates should be in (0, 1) since beta supports proportions.
+  expect_true(all(gm$estimate > 0 & gm$estimate < 1))
+})
+
+test_that("group_means lognormal back-transforms to the geometric-mean response", {
+  skip_if_no_marg_deps()
+  set.seed(1); n <- 80
+  sex <- factor(rep(c("F", "M"), length.out = n))
+  dat <- data.frame(y = exp(rnorm(n, ifelse(sex == "F", 2, 3), 0.3)), sex = sex)
+  fit <- drmTMB::drmTMB(drmTMB::drm_formula(y ~ sex, sigma ~ 1),
+                        family = drmTMB::lognormal(), data = dat)
+  sym <- symbolize(fit)
+  gm <- group_means(sym)
+  expect_true(all(gm$scale == "response"))
+  # Geometric means: sex=F ~ exp(2) = 7.4, sex=M ~ exp(3) = 20.
+  expect_gt(gm$estimate[gm$sex == "M"], 10)
+  expect_lt(gm$estimate[gm$sex == "F"], 10)
+})
+
+test_that("group_means on Gaussian is unchanged by the scale argument", {
+  skip_if_no_marg_deps()
+  set.seed(1); n <- 80
+  sex <- factor(rep(c("F", "M"), length.out = n))
+  dat <- data.frame(y = rnorm(n, ifelse(sex == "F", 10, 15)), sex = sex)
+  fit <- drmTMB::drmTMB(drmTMB::drm_formula(y ~ sex, sigma ~ 1),
+                        family = stats::gaussian(), data = dat)
+  sym <- symbolize(fit)
+  resp <- group_means(sym, scale = "response")
+  link <- group_means(sym, scale = "link")
+  expect_equal(resp$estimate, link$estimate)
+})
+
+test_that("group_slopes accepts a scale argument and defaults to response", {
+  skip_if_no_marg_deps()
+  set.seed(1); n <- 80
+  sex <- factor(rep(c("F", "M"), length.out = n))
+  dat <- data.frame(
+    y = rpois(n, exp(0.5 + 0.3 * (sex == "M")) + 0.5 * rnorm(n)),
+    sex = sex,
+    x   = rnorm(n)
+  )
+  # cont x cat fit so emtrends has something to stratify on
+  dat$y <- rpois(n, exp(0.5 + 0.3 * dat$x + 0.2 * (sex == "M")))
+  fit <- drmTMB::drmTMB(drmTMB::drm_formula(y ~ x * sex),
+                        family = stats::poisson(), data = dat)
+  sym <- symbolize(fit)
+  gs <- group_slopes(sym, continuous = "x")
+  expect_true("scale" %in% names(gs))
+  expect_true(all(gs$scale == "response"))
+})
+
+test_that("print method names the scale", {
+  skip_if_no_marg_deps()
+  set.seed(1); n <- 80
+  sex <- factor(rep(c("F", "M"), length.out = n))
+  dat <- data.frame(y = rpois(n, 3), sex = sex)
+  fit <- drmTMB::drmTMB(drmTMB::drm_formula(y ~ sex),
+                        family = stats::poisson(), data = dat)
+  sym <- symbolize(fit)
+  msgs <- testthat::capture_messages(print(group_means(sym)))
+  out <- paste(msgs, collapse = "")
+  expect_match(out, "Scale: response", fixed = TRUE)
+})

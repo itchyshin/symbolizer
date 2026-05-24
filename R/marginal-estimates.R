@@ -36,6 +36,13 @@
 #'   is retained on `x$metadata$fit`.
 #' @param by Optional character vector of factor names to marginalize over.
 #'   Defaults to all factors in the model.
+#' @param scale One of `"response"` (default) or `"link"`. Controls the
+#'   scale of the returned estimate and confidence band. For families with
+#'   identity link on the mean (Gaussian, Student-t), the two are
+#'   equivalent. For log-link families (Gamma, lognormal, Poisson, nbinom2)
+#'   `"response"` reports back-transformed means; `"link"` reports the
+#'   log-scale linear predictor. For the logit-link Beta family,
+#'   `"response"` reports proportions and `"link"` reports log-odds.
 #' @param ci_method Confidence-interval method. Defaults to the `ci_method`
 #'   stored on `x$metadata$ci_method` so the band matches the symbolize()
 #'   call. emmeans currently produces asymptotic Wald-style intervals
@@ -46,14 +53,16 @@
 #' @return A tibble (S3 class `symbolizer_group_means`) with one row per
 #'   level combination. Columns: `level_combo`, one column per factor in
 #'   `by`, `estimate`, `std_error`, `confint_low`, `confint_high`,
-#'   `excludes_zero`, `ci_method`.
+#'   `excludes_zero`, `ci_method`, `scale`.
 #' @export
-group_means <- function(x, by = NULL, ci_method = NULL, ...) {
+group_means <- function(x, by = NULL, scale = c("response", "link"),
+                        ci_method = NULL, ...) {
   UseMethod("group_means")
 }
 
 #' @export
-group_means.default <- function(x, by = NULL, ci_method = NULL, ...) {
+group_means.default <- function(x, by = NULL, scale = c("response", "link"),
+                                ci_method = NULL, ...) {
   cli::cli_abort(c(
     "{.fn group_means} has no method for objects of class {.cls {class(x)[1L]}}.",
     i = "Pass the output of {.fn symbolize}."
@@ -61,7 +70,10 @@ group_means.default <- function(x, by = NULL, ci_method = NULL, ...) {
 }
 
 #' @export
-group_means.symbolized_model <- function(x, by = NULL, ci_method = NULL, ...) {
+group_means.symbolized_model <- function(x, by = NULL,
+                                         scale = c("response", "link"),
+                                         ci_method = NULL, ...) {
+  scale <- match.arg(scale)
   marg_require_emmeans()
   marg_check_family_supported(x, "group_means")
   fit <- marg_require_fit(x, "group_means")
@@ -90,8 +102,20 @@ group_means.symbolized_model <- function(x, by = NULL, ci_method = NULL, ...) {
   rhs <- paste(by, collapse = " * ")
   spec <- stats::as.formula(paste("~", rhs))
   emm <- emmeans::emmeans(fit, spec)
-  df <- as.data.frame(emm)
-  marg_tibble_means(df, by = by, ci_method = ci_method)
+  # Lognormal special case: drmTMB exposes mu on the IDENTITY link
+  # because mu represents log(Y), so emmeans's automatic back-transform
+  # on type = "response" is a no-op (it can't see the implicit log). Tell
+  # emmeans about the transformation explicitly so the response-scale
+  # estimate is the geometric mean exp(mu) with delta-method CI.
+  if (identical(x$model$family, "lognormal") && scale == "response") {
+    emm <- stats::update(emm, tran = "log")
+  }
+  # Back-transform to the response scale when requested (the default).
+  # For identity-link families this is a no-op and gives the same numbers
+  # as the link-scale path. For log / logit / logm2 links the user sees
+  # rates / proportions / etc. instead of the raw linear-predictor scale.
+  df <- as.data.frame(emm, type = if (scale == "response") "response" else "link")
+  marg_tibble_means(df, by = by, ci_method = ci_method, scale = scale)
 }
 
 #' Per-group slopes for a continuous predictor
@@ -121,6 +145,13 @@ group_means.symbolized_model <- function(x, by = NULL, ci_method = NULL, ...) {
 #'   * A character vector of factor names: stratify by those factors' levels.
 #'   * A named list (e.g. `list(z = c(-1, 0, 1))`): for continuous-by-
 #'     continuous interactions, get the slope at those values of `z`.
+#' @param scale One of `"response"` (default) or `"link"`. For
+#'   identity-link families the two are equivalent. For other families
+#'   the slope is reported on the requested scale: `"link"` gives the
+#'   linear-predictor slope (which is what the coefficient table shows),
+#'   `"response"` gives the slope after back-transformation. Note that
+#'   for non-identity links the response-scale slope depends on the
+#'   level of the predictor.
 #' @param ci_method Confidence-interval method. Defaults to
 #'   `x$metadata$ci_method`. See [group_means()] for details.
 #' @param ... Reserved for future use.
@@ -128,15 +159,18 @@ group_means.symbolized_model <- function(x, by = NULL, ci_method = NULL, ...) {
 #' @return A tibble (S3 class `symbolizer_group_slopes`) with one row per
 #'   stratum. Columns: `predictor`, `level_combo`, one column per stratifying
 #'   variable, `estimate`, `std_error`, `confint_low`, `confint_high`,
-#'   `excludes_zero`, `ci_method`.
+#'   `excludes_zero`, `ci_method`, `scale`.
 #' @export
-group_slopes <- function(x, continuous, at = NULL, ci_method = NULL, ...) {
+group_slopes <- function(x, continuous, at = NULL,
+                         scale = c("response", "link"),
+                         ci_method = NULL, ...) {
   UseMethod("group_slopes")
 }
 
 #' @export
-group_slopes.default <- function(x, continuous, at = NULL, ci_method = NULL,
-                                 ...) {
+group_slopes.default <- function(x, continuous, at = NULL,
+                                 scale = c("response", "link"),
+                                 ci_method = NULL, ...) {
   cli::cli_abort(c(
     "{.fn group_slopes} has no method for objects of class {.cls {class(x)[1L]}}.",
     i = "Pass the output of {.fn symbolize}."
@@ -145,7 +179,9 @@ group_slopes.default <- function(x, continuous, at = NULL, ci_method = NULL,
 
 #' @export
 group_slopes.symbolized_model <- function(x, continuous, at = NULL,
+                                          scale = c("response", "link"),
                                           ci_method = NULL, ...) {
+  scale <- match.arg(scale)
   marg_require_emmeans()
   marg_check_family_supported(x, "group_slopes")
   if (missing(continuous) || !is.character(continuous) ||
@@ -173,9 +209,10 @@ group_slopes.symbolized_model <- function(x, continuous, at = NULL,
   } else {
     emmeans::emtrends(fit, spec, var = continuous)
   }
-  df <- as.data.frame(emm)
+  df <- as.data.frame(emm,
+                      type = if (scale == "response") "response" else "link")
   marg_tibble_slopes(df, by_vars = by_vars, predictor = continuous,
-                     ci_method = ci_method)
+                     ci_method = ci_method, scale = scale)
 }
 
 # ---- internals --------------------------------------------------------------
@@ -270,16 +307,24 @@ marg_resolve_at <- function(at, continuous, x, factors) {
 }
 
 # Build the symbolizer_group_means tibble from emmeans output.
-marg_tibble_means <- function(df, by, ci_method) {
-  est_col <- "emmean"
-  marg_finalize(df, by = by, ci_method = ci_method,
+# When emmeans is called with `type = "response"` the estimate column is
+# renamed from "emmean" to "response" (Gaussian / identity-link families
+# keep "emmean" because no back-transform was performed). Try both.
+marg_tibble_means <- function(df, by, ci_method, scale = "response") {
+  est_col <- if ("response" %in% names(df)) "response" else
+             if ("emmean" %in% names(df))   "emmean"   else
+             setdiff(names(df), c(by, "SE", "df", "asymp.LCL", "asymp.UCL",
+                                  "lower.CL", "upper.CL"))[[1L]]
+  marg_finalize(df, by = by, ci_method = ci_method, scale = scale,
                 est_col = est_col, klass = "symbolizer_group_means",
                 predictor = NULL)
 }
 
 # Build the symbolizer_group_slopes tibble from emtrends output.
-marg_tibble_slopes <- function(df, by_vars, predictor, ci_method) {
-  # emtrends names the slope column "<var>.trend".
+marg_tibble_slopes <- function(df, by_vars, predictor, ci_method,
+                               scale = "response") {
+  # emtrends names the slope column "<var>.trend"; with type = "response"
+  # it may be just "trend" or back-transformed differently. Try a few.
   est_col <- paste0(predictor, ".trend")
   if (!est_col %in% names(df)) {
     # Fallback: pick the column emmeans actually emitted (it may rename
@@ -288,13 +333,13 @@ marg_tibble_slopes <- function(df, by_vars, predictor, ci_method) {
                                   "asymp.UCL", "lower.CL", "upper.CL"))
     if (length(cands) >= 1L) est_col <- cands[[1L]]
   }
-  marg_finalize(df, by = by_vars, ci_method = ci_method,
+  marg_finalize(df, by = by_vars, ci_method = ci_method, scale = scale,
                 est_col = est_col, klass = "symbolizer_group_slopes",
                 predictor = predictor)
 }
 
 # Shared assembly: emmeans data frame -> symbolizer tibble.
-marg_finalize <- function(df, by, ci_method, est_col, klass, predictor) {
+marg_finalize <- function(df, by, ci_method, scale, est_col, klass, predictor) {
   estimate  <- df[[est_col]]
   se_col    <- if ("SE" %in% names(df)) "SE" else NA_character_
   lo_col    <- marg_first_present(df, c("asymp.LCL", "lower.CL", "LCL"))
@@ -315,6 +360,7 @@ marg_finalize <- function(df, by, ci_method, est_col, klass, predictor) {
   out$confint_high  <- as.numeric(hi)
   out$excludes_zero <- excl_zero
   out$ci_method     <- rep(ci_method, nrow(out))
+  out$scale         <- rep(scale, nrow(out))
   if (!is.null(predictor)) {
     out <- tibble::add_column(out, predictor = rep(predictor, nrow(out)),
                               .before = 1L)
@@ -381,9 +427,13 @@ marg_print_rows <- function(x, predictor = NULL) {
     )
   }
   ci_methods <- unique(x$ci_method[!is.na(x$ci_method)])
+  scales     <- if ("scale" %in% names(x)) unique(x$scale[!is.na(x$scale)]) else character(0L)
+  scale_note <- if (length(scales) == 1L) {
+    sprintf("Scale: %s. ", scales)
+  } else ""
   if (length(ci_methods) == 1L) {
     cli::cli_text(
-      "{.emph CI method: {ci_methods}. Rows marked {.code *} have a 95% interval that excludes zero.}"
+      "{.emph {scale_note}CI method: {ci_methods}. Rows marked {.code *} have a 95% interval that excludes zero.}"
     )
   }
 }

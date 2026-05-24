@@ -4,7 +4,7 @@
 \alias{group_means}
 \title{Per-group marginal means for a symbolized model}
 \usage{
-group_means(x, by = NULL, ci_method = NULL, ...)
+group_means(x, by = NULL, scale = c("response", "link"), ci_method = NULL, ...)
 }
 \arguments{
 \item{x}{A \code{\link[=new_symbolized_model]{symbolized_model}} whose underlying fit
@@ -12,6 +12,14 @@ is retained on \code{x$metadata$fit}.}
 
 \item{by}{Optional character vector of factor names to marginalize over.
 Defaults to all factors in the model.}
+
+\item{scale}{One of \code{"response"} (default) or \code{"link"}. Controls the
+scale of the returned estimate and confidence band. For families with
+identity link on the mean (Gaussian, Student-t), the two are
+equivalent. For log-link families (Gamma, lognormal, Poisson, nbinom2)
+\code{"response"} reports back-transformed means; \code{"link"} reports the
+log-scale linear predictor. For the logit-link Beta family,
+\code{"response"} reports proportions and \code{"link"} reports log-odds.}
 
 \item{ci_method}{Confidence-interval method. Defaults to the \code{ci_method}
 stored on \code{x$metadata$ci_method} so the band matches the symbolize()
@@ -25,7 +33,7 @@ consistency with \code{\link[=parameter_interpretation]{parameter_interpretation
 A tibble (S3 class \code{symbolizer_group_means}) with one row per
 level combination. Columns: \code{level_combo}, one column per factor in
 \code{by}, \code{estimate}, \code{std_error}, \code{confint_low}, \code{confint_high},
-\code{excludes_zero}, \code{ci_method}.
+\code{excludes_zero}, \code{ci_method}, \code{scale}.
 }
 \description{
 \code{group_means()} returns categorical marginal means for the factors in a

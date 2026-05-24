@@ -4,7 +4,14 @@
 \alias{group_slopes}
 \title{Per-group slopes for a continuous predictor}
 \usage{
-group_slopes(x, continuous, at = NULL, ci_method = NULL, ...)
+group_slopes(
+  x,
+  continuous,
+  at = NULL,
+  scale = c("response", "link"),
+  ci_method = NULL,
+  ...
+)
 }
 \arguments{
 \item{x}{A \code{\link[=new_symbolized_model]{symbolized_model}} whose underlying fit
@@ -21,6 +28,14 @@ is retained on \code{x$metadata$fit}.}
 continuous interactions, get the slope at those values of \code{z}.
 }}
 
+\item{scale}{One of \code{"response"} (default) or \code{"link"}. For
+identity-link families the two are equivalent. For other families
+the slope is reported on the requested scale: \code{"link"} gives the
+linear-predictor slope (which is what the coefficient table shows),
+\code{"response"} gives the slope after back-transformation. Note that
+for non-identity links the response-scale slope depends on the
+level of the predictor.}
+
 \item{ci_method}{Confidence-interval method. Defaults to
 \code{x$metadata$ci_method}. See \code{\link[=group_means]{group_means()}} for details.}
 
@@ -30,7 +45,7 @@ continuous interactions, get the slope at those values of \code{z}.
 A tibble (S3 class \code{symbolizer_group_slopes}) with one row per
 stratum. Columns: \code{predictor}, \code{level_combo}, one column per stratifying
 variable, \code{estimate}, \code{std_error}, \code{confint_low}, \code{confint_high},
-\code{excludes_zero}, \code{ci_method}.
+\code{excludes_zero}, \code{ci_method}, \code{scale}.
 }
 \description{
 \code{group_slopes()} returns the slope of a continuous predictor stratified by
