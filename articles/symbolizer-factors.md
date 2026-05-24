@@ -445,7 +445,7 @@ parameter_interpretation(sym4, scale = "biological")
 | mu | (Intercept) | intercept | 30.9 | Baseline body_mass in the reference condition |
 | mu | sex | factor_contrast | 3.04 | Average body_mass differs between male and female by 3.04 |
 | mu | body_size | slope | 0.198 | A unit change in body_size shifts the expected body_mass by 0.198 |
-| mu | sex:body_size | interaction_cont_factor | 0.0669 | The effect of body_size on body_mass differs by 0.0669 between male and female |
+| mu | sex:body_size | interaction_cont_factor | 0.0669 | The effect of body_size on body_mass differs by 0.0669 between male and female. Call `group_slopes(sym, continuous = "body_size")` to see each group’s slope on the response scale, with confidence intervals. |
 | sigma | (Intercept) | intercept | 1.11 | Baseline level of unexplained individual variation in body_mass |
 
 Read the prose above in place of a templated row. The interaction is
@@ -579,9 +579,9 @@ parameter_interpretation(sym5, scale = "biological")
 | mu | site | factor_contrast | 3.77 | Average body_mass differs between C and A by 3.77 |
 | mu | site | factor_contrast | -3.72 | Average body_mass differs between D and A by -3.72 |
 | mu | sex | factor_contrast | 3.42 | Average body_mass differs between male and female by 3.42 |
-| mu | site:sex | interaction_factor_factor | 4.75 | The site effect on body_mass differs by 4.75 between sex = male and sex = female |
-| mu | site:sex | interaction_factor_factor | 0.355 | The site effect on body_mass differs by 0.355 between sex = male and sex = female |
-| mu | site:sex | interaction_factor_factor | 5.26 | The site effect on body_mass differs by 5.26 between sex = male and sex = female |
+| mu | site:sex | interaction_factor_factor | 4.75 | The site effect on body_mass differs by 4.75 between sex = male and sex = female. Call `group_means(sym, by = c("site", "sex"))` to see each cell’s expected response with confidence intervals. |
+| mu | site:sex | interaction_factor_factor | 0.355 | The site effect on body_mass differs by 0.355 between sex = male and sex = female. Call `group_means(sym, by = c("site", "sex"))` to see each cell’s expected response with confidence intervals. |
+| mu | site:sex | interaction_factor_factor | 5.26 | The site effect on body_mass differs by 5.26 between sex = male and sex = female. Call `group_means(sym, by = c("site", "sex"))` to see each cell’s expected response with confidence intervals. |
 | sigma | (Intercept) | intercept | 1.04 | Baseline level of unexplained individual variation in body_mass |
 
 Three interaction rows are again silent. Read the cell-mean translations
