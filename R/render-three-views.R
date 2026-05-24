@@ -40,16 +40,26 @@ as_html_three_views.symbolized_model <- function(x, head = 5L, tail = 2L,
                                                   id = "sym", ...) {
   eq_lines  <- x$components$equation_matrix
   idx_lines <- x$components$equation
-  matrix_block <- three_views_matrix_block(x, head = head, tail = tail)
+  has_re <- !is.null(x$expanded) && !is.null(x$expanded$Z_g)
+  matrix_block   <- three_views_matrix_block(x, head = head, tail = tail)
+  matrix_summary <- three_views_matrix_summary(has_re)
 
   uid <- paste0("sym-", gsub("[^a-zA-Z0-9]", "", id), "-",
                 as.integer(Sys.time()))
+  tab_eq  <- paste0(uid, "-tab-eq")
+  tab_idx <- paste0(uid, "-tab-idx")
+  tab_mat <- paste0(uid, "-tab-mat")
+  pan_eq  <- paste0(uid, "-panel-eq")
+  pan_idx <- paste0(uid, "-panel-idx")
+  pan_mat <- paste0(uid, "-panel-mat")
+  end_id  <- paste0(uid, "-end")
 
   css <- three_views_css()
   js  <- three_views_js(uid)
 
   eq_panel <- paste0(
-    "<div class=\"sym-panel sym-active\" data-panel=\"eq\">\n",
+    "<div class=\"sym-panel sym-active\" role=\"tabpanel\" id=\"", pan_eq,
+    "\" aria-labelledby=\"", tab_eq, "\" data-panel=\"eq\" tabindex=\"0\">\n",
     "  <p class=\"sym-caption\">The structural contract. No indices, no numbers -- the shape of the model.</p>\n",
     "  <div class=\"sym-eq\">$$\\begin{aligned}\n",
     paste0(vapply(eq_lines, align_at, character(1L)), collapse = " \\\\\n"),
@@ -57,7 +67,8 @@ as_html_three_views.symbolized_model <- function(x, head = 5L, tail = 2L,
     "</div>\n"
   )
   idx_panel <- paste0(
-    "<div class=\"sym-panel\" data-panel=\"idx\">\n",
+    "<div class=\"sym-panel\" role=\"tabpanel\" id=\"", pan_idx,
+    "\" aria-labelledby=\"", tab_idx, "\" data-panel=\"idx\" hidden tabindex=\"0\">\n",
     "  <p class=\"sym-caption\">What happens for each observation <em>i</em>.</p>\n",
     "  <div class=\"sym-eq\">$$\\begin{aligned}\n",
     paste0(vapply(idx_lines, align_at, character(1L)), collapse = " \\\\\n"),
@@ -65,26 +76,56 @@ as_html_three_views.symbolized_model <- function(x, head = 5L, tail = 2L,
     "</div>\n"
   )
   mat_panel <- paste0(
-    "<div class=\"sym-panel\" data-panel=\"mat\">\n",
+    "<div class=\"sym-panel\" role=\"tabpanel\" id=\"", pan_mat,
+    "\" aria-labelledby=\"", tab_mat, "\" data-panel=\"mat\" hidden tabindex=\"0\">\n",
     "  <p class=\"sym-caption\">The actual numbers stacked -- what the computer is multiplying. Showing first ", head, " and last ", tail, " rows of n = ", x$model$n_obs, ".</p>\n",
+    "  <span class=\"sym-sr-only\">", matrix_summary, "</span>\n",
     matrix_block,
     "</div>\n"
   )
 
+  marker <- "<span class=\"sym-tab-marker\" aria-hidden=\"true\">&#9656;</span>"
   html <- paste0(
     "<style>", css, "</style>\n",
     "<div class=\"sym-tabs\" id=\"", uid, "\">\n",
-    "  <div class=\"sym-tablist\" role=\"tablist\">\n",
-    "    <div class=\"sym-tab sym-active\" data-tab=\"eq\">1. Equation</div>\n",
-    "    <div class=\"sym-tab\"            data-tab=\"idx\">2. Index</div>\n",
-    "    <div class=\"sym-tab\"            data-tab=\"mat\">3. Matrix (with data)</div>\n",
+    "  <a class=\"sym-skip\" href=\"#", end_id, "\">Skip three-views widget</a>\n",
+    "  <div class=\"sym-tablist\" role=\"tablist\" aria-label=\"Three views of the model\">\n",
+    "    <button type=\"button\" class=\"sym-tab sym-active\" role=\"tab\"",
+    " id=\"", tab_eq, "\" aria-controls=\"", pan_eq, "\"",
+    " aria-selected=\"true\" tabindex=\"0\" data-tab=\"eq\">",
+    marker, "1. Equation</button>\n",
+    "    <button type=\"button\" class=\"sym-tab\" role=\"tab\"",
+    " id=\"", tab_idx, "\" aria-controls=\"", pan_idx, "\"",
+    " aria-selected=\"false\" tabindex=\"-1\" data-tab=\"idx\">",
+    marker, "2. Index</button>\n",
+    "    <button type=\"button\" class=\"sym-tab\" role=\"tab\"",
+    " id=\"", tab_mat, "\" aria-controls=\"", pan_mat, "\"",
+    " aria-selected=\"false\" tabindex=\"-1\" data-tab=\"mat\">",
+    marker, "3. Matrix (with data)</button>\n",
     "  </div>\n",
     eq_panel, idx_panel, mat_panel,
     "</div>\n",
+    "<span id=\"", end_id, "\" tabindex=\"-1\"></span>\n",
     "<script>", js, "</script>\n"
   )
   cat(html)
   invisible(html)
+}
+
+three_views_matrix_summary <- function(has_re) {
+  base <- paste0(
+    "Matrix-form expansion of the model. Each row shows the response y_i ",
+    "and the corresponding row of the design matrix X (showing head and ",
+    "tail rows of the n total observations), with the coefficient vector ",
+    "beta listed below."
+  )
+  if (has_re) {
+    paste0(base,
+           " A random-effect indicator matrix Z_g and the predicted BLUPs u ",
+           "are also shown.")
+  } else {
+    base
+  }
 }
 
 three_views_matrix_block <- function(x, head = 5L, tail = 2L) {
@@ -188,21 +229,32 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L) {
   )
   # Replace ASCII "vdots" placeholders with a proper vertical dots glyph row.
   block <- gsub("vdots", "...", block, fixed = TRUE)
-  block
+  # The visually-stacked pre is read linearly by screen readers, which is
+  # confusing. Hide it from assistive tech; the sym-sr-only summary above
+  # carries the announcement.
+  sub("<pre class=\"sym-matrix\">",
+      "<pre class=\"sym-matrix\" aria-hidden=\"true\">",
+      block, fixed = TRUE)
 }
 
 three_views_css <- function() {
-'.sym-tabs { border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; margin: 1em 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+'.sym-tabs { position: relative; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; margin: 1em 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
 .sym-tablist { display: flex; background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
-.sym-tab { flex: 1; text-align: center; padding: 0.6rem 0.5rem; cursor: pointer; font-weight: 600; color: #6b7280; border-right: 1px solid #e5e7eb; user-select: none; font-size: 0.92rem; }
+.sym-tab { flex: 1; text-align: center; padding: 0.6rem 0.5rem; cursor: pointer; font-weight: 600; color: #6b7280; border: 0; border-right: 1px solid #e5e7eb; background: transparent; user-select: none; font-size: 0.92rem; font-family: inherit; }
 .sym-tab:last-child { border-right: 0; }
 .sym-tab:hover { background: #fbe7e7; color: #7a2a2a; }
-.sym-tab.sym-active { background: #fff; color: #7a2a2a; box-shadow: inset 0 -3px 0 #a0282b; }
-.sym-panel { padding: 1rem 1.1rem 1.2rem; display: none; }
-.sym-panel.sym-active { display: block; }
+.sym-tab.sym-active { background: #fff; color: #8a1f22; box-shadow: inset 0 -3px 0 #a0282b; }
+.sym-tab:focus-visible { outline: 2px solid #a0282b; outline-offset: -2px; }
+.sym-tab-marker { display: inline-block; margin-right: 0.35em; opacity: 0; transition: opacity 0.1s; }
+.sym-tab.sym-active .sym-tab-marker { opacity: 1; }
+.sym-panel { padding: 1rem 1.1rem 1.2rem; }
+.sym-panel[hidden] { display: none; }
 .sym-eq { background: #fbe7e7; border: 1px solid #a0282b; border-radius: 6px; padding: 0.7rem 1rem; margin: 0.4rem 0; text-align: center; }
 .sym-caption { color: #6b7280; font-size: 0.85rem; margin: 0.2rem 0 0.4rem; }
-.sym-matrix { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.78rem; line-height: 1.35; white-space: pre; overflow-x: auto; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 0.6rem 0.8rem; margin: 0.3rem 0; }'
+.sym-matrix { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.78rem; line-height: 1.35; white-space: pre; overflow-x: auto; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 0.6rem 0.8rem; margin: 0.3rem 0; }
+.sym-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.sym-skip { position: absolute; top: -100px; left: 0; padding: 0.4rem 0.7rem; background: #8a1f22; color: #fff; text-decoration: none; font-size: 0.85rem; z-index: 5; }
+.sym-skip:focus { top: 0; }'
 }
 
 three_views_js <- function(uid) {
@@ -210,15 +262,36 @@ three_views_js <- function(uid) {
 '(function() {
   var root = document.getElementById("%s");
   if (!root) return;
-  root.querySelectorAll(".sym-tab").forEach(function(t) {
-    t.addEventListener("click", function() {
-      var id = t.dataset.tab;
-      root.querySelectorAll(".sym-tab").forEach(function(x) {
-        x.classList.toggle("sym-active", x.dataset.tab === id);
-      });
-      root.querySelectorAll(".sym-panel").forEach(function(p) {
-        p.classList.toggle("sym-active", p.dataset.panel === id);
-      });
+  var tabs   = Array.prototype.slice.call(root.querySelectorAll("[role=\"tab\"]"));
+  var panels = Array.prototype.slice.call(root.querySelectorAll("[role=\"tabpanel\"]"));
+  function activate(idx) {
+    tabs.forEach(function(t, i) {
+      var on = (i === idx);
+      t.classList.toggle("sym-active", on);
+      t.setAttribute("aria-selected", on ? "true" : "false");
+      t.setAttribute("tabindex", on ? "0" : "-1");
+    });
+    panels.forEach(function(p, i) {
+      var on = (i === idx);
+      p.classList.toggle("sym-active", on);
+      if (on) { p.removeAttribute("hidden"); } else { p.setAttribute("hidden", ""); }
+    });
+    if (typeof window.MathJax !== "undefined" && window.MathJax.typesetPromise) {
+      try { window.MathJax.typesetPromise([panels[idx]]); } catch (e) {}
+    }
+  }
+  tabs.forEach(function(t, idx) {
+    t.addEventListener("click", function() { activate(idx); t.focus(); });
+    t.addEventListener("keydown", function(e) {
+      var k = e.key;
+      var n = tabs.length;
+      var next = null;
+      if (k === "ArrowRight") next = (idx + 1) %% n;
+      else if (k === "ArrowLeft") next = (idx - 1 + n) %% n;
+      else if (k === "Home") next = 0;
+      else if (k === "End") next = n - 1;
+      else if (k === "Enter" || k === " ") { activate(idx); e.preventDefault(); return; }
+      if (next !== null) { activate(next); tabs[next].focus(); e.preventDefault(); }
     });
   });
 })();', uid)

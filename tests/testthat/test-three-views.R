@@ -63,3 +63,76 @@ test_that("CSS and JS are embedded inline", {
   expect_match(html, "<script>")
   expect_match(html, "\\.sym-tab")
 })
+
+test_that("widget exposes WAI-ARIA tabs roles", {
+  fit <- fit_drm_location_scale()
+  sym <- symbolize(fit)
+  html <- withr::with_output_sink(tempfile(), as_html_three_views(sym))
+  expect_match(html, "role=\"tablist\"", fixed = TRUE)
+  expect_match(html, "role=\"tab\"", fixed = TRUE)
+  expect_match(html, "role=\"tabpanel\"", fixed = TRUE)
+  expect_match(html, "aria-controls=", fixed = TRUE)
+  expect_match(html, "aria-labelledby=", fixed = TRUE)
+})
+
+test_that("exactly one tab is aria-selected=true and the rest are false", {
+  fit <- fit_drm_location_scale()
+  sym <- symbolize(fit)
+  html <- withr::with_output_sink(tempfile(), as_html_three_views(sym))
+  count_true  <- length(gregexpr("aria-selected=\"true\"", html, fixed = TRUE)[[1L]])
+  count_false <- length(gregexpr("aria-selected=\"false\"", html, fixed = TRUE)[[1L]])
+  expect_equal(count_true, 1L)
+  expect_equal(count_false, 2L)
+})
+
+test_that("tabs use buttons with a roving tabindex", {
+  fit <- fit_drm_location_scale()
+  sym <- symbolize(fit)
+  html <- withr::with_output_sink(tempfile(), as_html_three_views(sym))
+  expect_match(html, "<button[^>]*role=\"tab\"")
+  count_tabindex0  <- length(gregexpr("tabindex=\"0\"",  html, fixed = TRUE)[[1L]])
+  count_tabindexm1 <- length(gregexpr("tabindex=\"-1\"", html, fixed = TRUE)[[1L]])
+  expect_gte(count_tabindex0, 1L)
+  expect_gte(count_tabindexm1, 2L)
+})
+
+test_that("widget includes a keyboard skip-link", {
+  fit <- fit_drm_location_scale()
+  sym <- symbolize(fit)
+  html <- withr::with_output_sink(tempfile(), as_html_three_views(sym))
+  expect_match(html, "class=\"sym-skip\"", fixed = TRUE)
+  expect_match(html, "Skip three-views widget", fixed = TRUE)
+})
+
+test_that("active-tab signal is not color-only (marker glyph present)", {
+  fit <- fit_drm_location_scale()
+  sym <- symbolize(fit)
+  html <- withr::with_output_sink(tempfile(), as_html_three_views(sym))
+  expect_match(html, "sym-tab-marker", fixed = TRUE)
+  expect_match(html, "&#9656;", fixed = TRUE)
+})
+
+test_that("matrix panel includes a screen-reader summary, pre is aria-hidden", {
+  fit <- fit_drm_location_scale()
+  sym <- symbolize(fit)
+  html <- withr::with_output_sink(tempfile(), as_html_three_views(sym))
+  expect_match(html, "class=\"sym-sr-only\"", fixed = TRUE)
+  expect_match(html, "Matrix-form expansion", fixed = TRUE)
+  expect_match(html, "<pre class=\"sym-matrix\" aria-hidden=\"true\"", fixed = TRUE)
+})
+
+test_that("matrix summary mentions Z_g only when RE is present", {
+  fit_re <- fit_drm_with_re()
+  sym_re <- symbolize(fit_re, symbols = c(body_mass = "W_i"))
+  html_re <- withr::with_output_sink(tempfile(), as_html_three_views(sym_re))
+  expect_match(html_re, "Z_g", fixed = TRUE)
+
+  fit_fe <- fit_drm_location_scale()
+  sym_fe <- symbolize(fit_fe)
+  html_fe <- withr::with_output_sink(tempfile(), as_html_three_views(sym_fe))
+  sr_block <- regmatches(
+    html_fe,
+    regexpr("class=\"sym-sr-only\">[^<]*</span>", html_fe)
+  )
+  expect_false(grepl("Z_g", sr_block, fixed = TRUE))
+})
