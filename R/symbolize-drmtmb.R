@@ -367,18 +367,29 @@ drm_build_fixed_effects <- function(terms_tbl, fit) {
     cf <- coef_for(row$submodel)
     if (row$term_label == "(Intercept)") {
       hit <- "(Intercept)"
-    } else {
-      # Match by model-matrix column name reconstructed from term_label.
-      hit <- if (!is.na(row$contrast_level) && nzchar(row$contrast_level)) {
-        # Single-factor contrast: variable + level
-        if (row$role == "factor_contrast") {
-          paste0(row$variable, row$contrast_level)
-        } else {
-          row$term_label
-        }
-      } else {
-        row$term_label
+    } else if (row$role == "factor_contrast" &&
+               !is.na(row$contrast_level) && nzchar(row$contrast_level)) {
+      # Single-factor contrast: variable + level (e.g. sex + male = "sexmale").
+      hit <- paste0(row$variable, row$contrast_level)
+    } else if (row$role == "interaction" &&
+               !is.na(row$contrast_level) && nzchar(row$contrast_level)) {
+      # Interaction columns: each piece gets its contrast level (if a factor)
+      # spliced in. e.g., term_label "sex:body_size" with contrast_level "male:-"
+      # becomes "sexmale:body_size"; term_label "site:sex" with contrast_level
+      # "B:male" becomes "siteB:sexmale".
+      pieces <- strsplit(row$term_label,    ":", fixed = TRUE)[[1L]]
+      levels <- strsplit(row$contrast_level, ":", fixed = TRUE)[[1L]]
+      if (length(levels) < length(pieces)) {
+        levels <- c(levels, rep("", length(pieces) - length(levels)))
       }
+      mm <- vapply(seq_along(pieces), function(k) {
+        lv <- levels[[k]]
+        if (is.na(lv) || !nzchar(lv) || identical(lv, "-")) pieces[[k]]
+        else paste0(pieces[[k]], lv)
+      }, character(1L))
+      hit <- paste(mm, collapse = ":")
+    } else {
+      hit <- row$term_label
     }
     if (!is.null(cf) && hit %in% names(cf)) {
       estimate[i] <- unname(cf[hit])
@@ -732,15 +743,82 @@ drm_build_assumptions <- function(family, response, response_symbol,
   )
 }
 
-drm_role_to_interp <- function(role) {
+ref_for_var <- function(var, data) {
+  if (is.null(var) || is.na(var) || !var %in% names(data)) return("")
+  lvls <- levels(factor(data[[var]]))
+  if (length(lvls) == 0L) return("")
+  lvls[1L]
+}
+
+drm_interaction_sub_role <- function(row, data) {
+  # `row` is a single fixed_effects row whose role == "interaction".
+  # Inspect the pieces of `variable` (split on ":") and their factor-ness.
+  pieces <- strsplit(row$variable, ":", fixed = TRUE)[[1L]]
+  is_factor <- vapply(pieces, function(p) {
+    p %in% names(data) &&
+      class(data[[p]])[1L] %in% c("factor", "ordered", "character")
+  }, logical(1L))
+  n_fact <- sum(is_factor)
+  if (n_fact == 0L)        "interaction_cont_cont"
+  else if (n_fact == 1L)   "interaction_cont_factor"
+  else                     "interaction_factor_factor"
+}
+
+drm_role_to_interp <- function(role, row = NULL, data = NULL) {
   switch(
     role,
-    intercept = "intercept",
-    predictor = "slope",
+    intercept       = "intercept",
+    predictor       = "slope",
     factor_contrast = "factor_contrast",
-    transformation = "transformation",
-    NA_character_  # interactions, offsets: no v0.1 template
+    transformation  = "transformation",
+    interaction     = if (!is.null(row) && !is.null(data)) {
+      drm_interaction_sub_role(row, data)
+    } else NA_character_,
+    offset          = NA_character_,
+    NA_character_
   )
+}
+
+# Build interaction-specific substitution keys from an interaction row.
+drm_interaction_subs <- function(row, data) {
+  pieces <- strsplit(row$variable, ":", fixed = TRUE)[[1L]]
+  if (length(pieces) != 2L) return(list())
+  is_fact <- vapply(pieces, function(p) {
+    p %in% names(data) &&
+      class(data[[p]])[1L] %in% c("factor", "ordered", "character")
+  }, logical(1L))
+  # Parse contrast_level. Cont:factor rows look like "-:male", factor:factor
+  # rows look like "a2:b2". Continuous-only rows have NA contrast_level.
+  cl <- if (!is.na(row$contrast_level) && nzchar(row$contrast_level)) {
+    strsplit(row$contrast_level, ":", fixed = TRUE)[[1L]]
+  } else c("", "")
+  if (length(cl) == 1L) cl <- c(cl, "")
+  if (sum(is_fact) == 1L) {
+    # Continuous x factor: the factor side is the one whose contrast level
+    # piece is non-empty and not the placeholder "-".
+    factor_side <- if (nzchar(cl[[1L]]) && cl[[1L]] != "-") 1L else 2L
+    cont_side <- 3L - factor_side
+    list(
+      predictor       = pieces[[cont_side]],
+      variable        = pieces[[factor_side]],
+      level           = cl[[factor_side]],
+      reference_level = ref_for_var(pieces[[factor_side]], data)
+    )
+  } else if (sum(is_fact) == 2L) {
+    list(
+      factor_a          = pieces[[1L]],
+      factor_b          = pieces[[2L]],
+      level_a           = cl[[1L]],
+      level_b           = cl[[2L]],
+      reference_level_a = ref_for_var(pieces[[1L]], data),
+      reference_level_b = ref_for_var(pieces[[2L]], data)
+    )
+  } else {
+    list(
+      predictor_a = pieces[[1L]],
+      predictor_b = pieces[[2L]]
+    )
+  }
 }
 
 drm_build_interpretation <- function(fixed_eff, family, response, data) {
@@ -760,7 +838,7 @@ drm_build_interpretation <- function(fixed_eff, family, response, data) {
   rows <- list()
   for (i in seq_len(nrow(fixed_eff))) {
     r <- fixed_eff[i, , drop = FALSE]
-    cr <- drm_role_to_interp(r$role)
+    cr <- drm_role_to_interp(r$role, row = r, data = data)
     if (is.na(cr)) next
     template <- tbl[
       tbl$family == family &
@@ -769,17 +847,23 @@ drm_build_interpretation <- function(fixed_eff, family, response, data) {
       , drop = FALSE
     ]
     if (nrow(template) == 0L) next
-    predictor <- if (is.na(r$variable)) "" else r$variable
+    variable <- if (is.na(r$variable)) "" else r$variable
     level <- if (is.na(r$contrast_level)) "" else r$contrast_level
     transform <- if (is.na(r$transform)) "" else r$transform
     coef_str <- drm_format_estimate(r$estimate)
+    if (is.na(coef_str)) coef_str <- ""
     mapping <- list(
-      response = response,
-      predictor = predictor,
-      level = level,
-      transform = transform,
-      coef = coef_str %||% ""
+      response        = response,
+      predictor       = variable,   # default; interaction rows override below
+      variable        = variable,
+      level           = level,
+      transform       = transform,
+      coef            = coef_str,
+      reference_level = ref_for_var(r$variable, data)
     )
+    if (r$role == "interaction") {
+      mapping <- utils::modifyList(mapping, drm_interaction_subs(r, data))
+    }
     rows[[length(rows) + 1L]] <- tibble::tibble(
       submodel = r$submodel,
       term_label = r$term_label,

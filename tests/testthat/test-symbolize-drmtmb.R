@@ -280,3 +280,51 @@ test_that("default method still errors for unsupported classes", {
   expect_error(symbolize(structure(list(), class = "no_method")),
                "no method")
 })
+
+test_that("factor_contrast interpretation surfaces the reference level by name", {
+  set.seed(1); n <- 80
+  dat <- data.frame(
+    body_mass = rnorm(n, 30),
+    sex = factor(rep(c("female", "male"), length.out = n))
+  )
+  fit <- drmTMB::drmTMB(
+    drmTMB::drm_formula(body_mass ~ sex, sigma ~ 1),
+    family = stats::gaussian(), data = dat
+  )
+  sym <- symbolize(fit)
+  fc <- sym$interpretation[sym$interpretation$coefficient_role == "factor_contrast", , drop = FALSE]
+  expect_true(nrow(fc) >= 1L)
+  expect_match(fc$biological_reading[[1L]], "female", fixed = TRUE)
+})
+
+test_that("continuous x factor interaction gets a biological reading", {
+  set.seed(2); n <- 120
+  body_size <- rnorm(n)
+  sex <- factor(rep(c("female", "male"), length.out = n))
+  body_mass <- 30 + 2 * body_size + 3 * (sex == "male") + 1.5 * body_size * (sex == "male") + rnorm(n)
+  dat <- data.frame(body_mass = body_mass, sex = sex, body_size = body_size)
+  fit <- drmTMB::drmTMB(
+    drmTMB::drm_formula(body_mass ~ sex * body_size, sigma ~ 1),
+    family = stats::gaussian(), data = dat
+  )
+  sym <- symbolize(fit)
+  interaction_rows <- sym$interpretation[sym$interpretation$coefficient_role == "interaction_cont_factor", , drop = FALSE]
+  expect_true(nrow(interaction_rows) >= 1L)
+  expect_match(interaction_rows$biological_reading[[1L]], "differs by")
+})
+
+test_that("factor x factor interaction gets a difference-of-differences reading", {
+  set.seed(3); n <- 120
+  site <- factor(rep(letters[1:3], length.out = n))
+  sex <- factor(rep(c("female", "male"), length.out = n))
+  body_mass <- rnorm(n, 30)
+  dat <- data.frame(body_mass = body_mass, site = site, sex = sex)
+  fit <- drmTMB::drmTMB(
+    drmTMB::drm_formula(body_mass ~ site * sex, sigma ~ 1),
+    family = stats::gaussian(), data = dat
+  )
+  sym <- symbolize(fit)
+  ff <- sym$interpretation[sym$interpretation$coefficient_role == "interaction_factor_factor", , drop = FALSE]
+  expect_true(nrow(ff) >= 1L)
+  expect_match(ff$biological_reading[[1L]], "differs by")
+})

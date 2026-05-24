@@ -1,0 +1,481 @@
+---
+title: "Reading factors, dummies, and interactions"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Reading factors, dummies, and interactions}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+has_drmTMB <- requireNamespace("drmTMB", quietly = TRUE)
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment  = "#>",
+  eval     = has_drmTMB
+)
+set.seed(20260524)
+```
+
+A biologist sees `body_mass ~ sex + temperature` and the model fits. The
+output table lists a coefficient for `sexmale`. The obvious reading is
+"average male body mass" — and the obvious reading is wrong. The
+`sexmale` coefficient is something else. This vignette unpacks the
+something else, then builds up to interactions, where the unpacking
+becomes essential.
+
+We walk through five steps that build on each other. Each step fits a
+small `drmTMB` model, looks at the first few rows of the design matrix,
+and asks `symbolize()` to read each coefficient on the biological scale.
+The point is to make the dummy-variable, contrast, and interaction
+machinery concrete enough that a reader can apply the same logic to
+their own fits.
+
+```{r libs}
+library(symbolizer)
+library(drmTMB)
+```
+
+## Step 1: A binary factor (`body_mass ~ sex`)
+
+Two-level factor, no other predictors. `sex` is `female` or `male`. We
+simulate `n = 120` observations with female mass centred at 30 g and
+male mass centred at 35 g, then fit:
+
+```{r step1-fit}
+n <- 120
+sex <- factor(sample(c("female", "male"), n, replace = TRUE))
+dat1 <- data.frame(
+  body_mass = rnorm(n, 30 + 5 * (sex == "male"), 3),
+  sex       = sex
+)
+
+fit1 <- drmTMB(
+  drm_formula(body_mass ~ sex, sigma ~ 1),
+  family = gaussian(),
+  data   = dat1
+)
+
+sym1 <- symbolize(
+  fit1,
+  symbols = c(body_mass = "W_i"),
+  units   = c(body_mass = "g"),
+  context = "binary factor: sex on body mass"
+)
+```
+
+`expand(sym1)$X` is the design matrix the computer actually multiplies
+against the coefficient vector. The first five rows tell the whole
+story:
+
+```{r step1-X}
+head(expand(sym1)$X, 5)
+```
+
+Two columns. The `(Intercept)` column is all 1s, by design. The
+`sexmale` column is 0 for females and 1 for males. There is no `sexfemale`
+column — `female` is the **reference level**, absorbed into the
+intercept.
+
+The symbol dictionary marks the reference level explicitly:
+
+```{r step1-symbols}
+symbol_table(sym1)
+```
+
+Look at the `sex [factor]` row's description: `factor (female
+[reference], male)`. That `[reference]` marker is the single most
+important piece of context for reading every coefficient that follows.
+
+Now the readings:
+
+```{r step1-interp}
+parameter_interpretation(sym1, scale = "biological")
+```
+
+Two coefficients on the mu submodel:
+
+- The **intercept** estimate (`r round(sym1$fixed_effects$estimate[1], 2)`) is the expected `body_mass` for the **reference level**,
+  i.e. females. It is *not* the overall mean of `body_mass` — if the
+  sexes were unbalanced the overall mean would differ from the female
+  mean.
+- The **`sexmale` contrast** estimate (`r round(sym1$fixed_effects$estimate[2], 2)`) is the **difference** between male
+  and female means. It is *not* the male mean. To get the male mean you
+  add: `intercept + sexmale = r round(sum(sym1$fixed_effects$estimate[1:2]), 2)`.
+
+The biological reading in the table — *"Average body_mass differs
+between male and the reference"* — is the same statement in templated
+prose.
+
+This is the rule the rest of the vignette builds on. Write it down.
+
+**Takeaway.** A binary factor turns into one 0/1 dummy column. The
+intercept is the reference-level mean; the contrast coefficient is the
+*difference* from the reference, not the other group's mean.
+
+## Step 2: A multi-level factor (`body_mass ~ site`)
+
+`sex` had two levels and produced one dummy column. What happens with
+four levels? `site` runs `A`, `B`, `C`, `D`:
+
+```{r step2-fit}
+site <- factor(sample(c("A", "B", "C", "D"), n, replace = TRUE))
+site_mean <- c(A = 30, B = 32, C = 34, D = 27)
+dat2 <- data.frame(
+  body_mass = rnorm(n, site_mean[site], 3),
+  site      = site
+)
+
+fit2 <- drmTMB(
+  drm_formula(body_mass ~ site, sigma ~ 1),
+  family = gaussian(),
+  data   = dat2
+)
+
+sym2 <- symbolize(
+  fit2,
+  symbols = c(body_mass = "W_i"),
+  units   = c(body_mass = "g"),
+  context = "four-level factor: site on body mass"
+)
+```
+
+The design matrix:
+
+```{r step2-X}
+head(expand(sym2)$X, 5)
+```
+
+Four levels, three dummy columns: `siteB`, `siteC`, `siteD`. Reference
+is `A`, absorbed into the intercept. The pattern is mechanical: each
+row has a 1 in the column matching its level, or zeros everywhere if it
+is at the reference.
+
+The symbol dictionary again carries the reference marker:
+
+```{r step2-symbols}
+symbol_table(sym2)
+```
+
+The `site [factor]` row reads `factor (A [reference], B, C, D)`. And
+the coefficients are:
+
+```{r step2-interp}
+parameter_interpretation(sym2, scale = "biological")
+```
+
+Reading the table by hand:
+
+- **Intercept** = mean of site `A`.
+- **`siteB`** = mean of site `B` minus mean of site `A`.
+- **`siteC`** = mean of site `C` minus mean of site `A`.
+- **`siteD`** = mean of site `D` minus mean of site `A`.
+
+None of the contrast coefficients are group means. Every one is a
+*difference from the reference*. If you want the mean of site `C`, you
+add `intercept + siteC`. If you want the difference between sites `B`
+and `C`, you compute `siteC - siteB` by hand; the table does not give
+it directly.
+
+The rule generalises: **`k` levels become `k − 1` dummy columns, which
+become `k − 1` contrasts, all measured against the reference**. A
+factor with twelve levels would produce eleven dummies — never one per
+level.
+
+**Takeaway.** A `k`-level factor becomes `k − 1` dummy columns. Each
+non-reference contrast is a *difference from the reference*, not a
+group mean.
+
+## Step 3: Factor plus continuous predictor (`body_mass ~ sex + body_size`)
+
+Adding a continuous predictor changes what the intercept means. We
+re-use `sex` and add `body_size`:
+
+```{r step3-fit}
+body_size <- runif(n, 50, 150)
+dat3 <- data.frame(
+  body_mass = rnorm(n, 30 + 5 * (sex == "male") + 0.2 * body_size, 3),
+  sex       = sex,
+  body_size = body_size
+)
+
+fit3 <- drmTMB(
+  drm_formula(body_mass ~ sex + body_size, sigma ~ 1),
+  family = gaussian(),
+  data   = dat3
+)
+
+sym3 <- symbolize(
+  fit3,
+  symbols = c(body_mass = "W_i", body_size = "L_i"),
+  units   = c(body_mass = "g",   body_size = "mm"),
+  context = "additive: sex contrast + body_size slope"
+)
+```
+
+Design matrix:
+
+```{r step3-X}
+head(expand(sym3)$X, 5)
+```
+
+Three coefficient columns: `(Intercept)`, `sexmale`, `body_size`. The
+shape rule for `X` is now `R^{120 x 3}`. The symbol table makes that
+concrete in its design-matrix row:
+
+```{r step3-symbols}
+symbol_table(sym3)
+```
+
+Look for the `(design_matrix)` row at the bottom: `dimension:
+R^{n × p_mu}  (= R^{120 × 3})`. Three coefficients, three columns.
+
+The coefficient readings:
+
+```{r step3-interp}
+parameter_interpretation(sym3, scale = "biological")
+```
+
+The single most important shift from Step 1 is what the intercept now
+means. In Step 1 it was *the mean of females*. In Step 3 it is **the
+expected `body_mass` for a female at `body_size = 0`**. The intercept
+is the reference cell anchored to *both* the reference factor level
+*and* the zero of every continuous predictor.
+
+For this fit, `body_size = 0` is not biologically meaningful (no animal
+has zero body size), which is why centring continuous predictors is
+common practice. After centring, the intercept becomes "expected female
+mass at average body size", which usually is meaningful.
+
+The `sexmale` reading is unchanged in form — *"Average body_mass
+differs between male and the reference"* — but its arithmetic is now
+"at the same `body_size`". The contrast is a *vertical shift* of the
+female regression line: the male line has the same slope but a
+different intercept.
+
+**Takeaway.** Adding a continuous predictor shifts what the intercept
+means: it is now the expected response at the reference factor level
+*and* at zero of every continuous predictor. The factor contrast is
+still a difference from the reference, now read "at the same level of
+the continuous predictor(s)".
+
+## Step 4: Continuous-by-factor interaction (`body_mass ~ sex * body_size`)
+
+Step 3 forced the male and female regression lines to be parallel.
+Adding an interaction lets them have different slopes:
+
+```{r step4-fit}
+dat4 <- data.frame(
+  body_mass = rnorm(
+    n,
+    30 + 5 * (sex == "male") + 0.2 * body_size +
+      0.05 * (sex == "male") * body_size,
+    3
+  ),
+  sex       = sex,
+  body_size = body_size
+)
+
+fit4 <- drmTMB(
+  drm_formula(body_mass ~ sex * body_size, sigma ~ 1),
+  family = gaussian(),
+  data   = dat4
+)
+
+sym4 <- symbolize(
+  fit4,
+  symbols = c(body_mass = "W_i", body_size = "L_i"),
+  units   = c(body_mass = "g",   body_size = "mm"),
+  context = "interaction: sex slope on body_size"
+)
+```
+
+`sex * body_size` expands to `sex + body_size + sex:body_size`. The
+design matrix gains a fourth column for the interaction:
+
+```{r step4-X}
+head(expand(sym4)$X, 5)
+```
+
+Four columns: `(Intercept)`, `sexmale`, `body_size`, `sexmale:body_size`.
+The interaction column is the **product** of the `sexmale` dummy and
+the continuous `body_size` — it is zero for every female (because the
+`sexmale` dummy is zero), and equals `body_size` for every male.
+
+The coefficient table:
+
+```{r step4-fixed}
+sym4$fixed_effects[, c("term_label", "role", "contrast_level", "estimate")]
+```
+
+Four coefficients to read. Let us call them
+$\beta_0$ (intercept), $\beta_1$ (`sexmale`), $\beta_2$ (`body_size`),
+$\beta_3$ (`sexmale:body_size`). The model is
+
+$$\mathrm{E}(W_i) = \beta_0 + \beta_1 \cdot \mathrm{male}_i + \beta_2 \cdot L_i + \beta_3 \cdot \mathrm{male}_i \cdot L_i.$$
+
+Split it into the two regression lines by setting the `sexmale` dummy
+to 0 or 1:
+
+- **Females** (`sexmale = 0`): $\mathrm{E}(W_i) = \beta_0 + \beta_2 L_i$.
+  Intercept $\beta_0$, slope $\beta_2$.
+- **Males** (`sexmale = 1`): $\mathrm{E}(W_i) = (\beta_0 + \beta_1) +
+  (\beta_2 + \beta_3) L_i$. Intercept $\beta_0 + \beta_1$, slope
+  $\beta_2 + \beta_3$.
+
+So:
+
+- $\beta_2$ is the **female slope on `body_size`**.
+- $\beta_2 + \beta_3$ is the **male slope**.
+- $\beta_3$ — the interaction coefficient — is the **difference between
+  the two slopes**, not the male slope itself.
+- $\beta_1$ — the `sexmale` contrast — is the **difference in
+  intercepts** at `body_size = 0`. It is no longer "the average male
+  mass" *or* "the male-female mass difference at average body size".
+
+`parameter_interpretation()` reads the three templated rows it knows
+about, but v0.1 does not yet ship an interaction template, so the
+interaction row is silent:
+
+```{r step4-interp}
+parameter_interpretation(sym4, scale = "biological")
+```
+
+Read the prose above in place of a templated row. The interaction is
+ecologically the most interesting coefficient in the fit — the slope
+of `body_mass` on `body_size` *depends on* `sex`, which is exactly what
+"interaction" means.
+
+**Takeaway.** A continuous-by-factor interaction lets each factor level
+have its own slope. The interaction coefficient is the *difference in
+slopes* between the non-reference level and the reference. The bare
+factor contrast is now the difference in intercepts at zero of the
+continuous predictor.
+
+## Step 5: Factor-by-factor interaction (`body_mass ~ site * sex`)
+
+The hardest case: two factors interacting. `site` has four levels and
+`sex` has two, so the fitted-cell table has `4 × 2 = 8` entries. We
+generate data with site-specific male offsets so the interaction is not
+zero:
+
+```{r step5-fit}
+site_offset_male <- c(A = 0, B = 1.5, C = -1.0, D = 2.5)
+dat5 <- data.frame(
+  body_mass = rnorm(
+    n,
+    30 + site_mean[site] - 30 + 5 * (sex == "male") +
+      site_offset_male[site] * (sex == "male"),
+    3
+  ),
+  site = site,
+  sex  = sex
+)
+
+fit5 <- drmTMB(
+  drm_formula(body_mass ~ site * sex, sigma ~ 1),
+  family = gaussian(),
+  data   = dat5
+)
+
+sym5 <- symbolize(
+  fit5,
+  symbols = c(body_mass = "W_i"),
+  units   = c(body_mass = "g"),
+  context = "two factors interacting: site and sex"
+)
+```
+
+`site * sex` expands to `site + sex + site:sex` and produces eight
+coefficient columns. The first five rows:
+
+```{r step5-X}
+head(expand(sym5)$X, 5)
+```
+
+Eight columns: `(Intercept)`, `siteB`, `siteC`, `siteD`, `sexmale`,
+`siteB:sexmale`, `siteC:sexmale`, `siteD:sexmale`. Two references —
+`A` for site, `female` for sex — are absorbed into the intercept. The
+interaction columns are products of the site dummy and the `sexmale`
+dummy: a `B-male` row has 1s in both `siteB` and `siteB:sexmale`.
+
+The coefficient table:
+
+```{r step5-fixed}
+sym5$fixed_effects[, c("term_label", "role", "contrast_level", "estimate")]
+```
+
+Reading the eight coefficients in cell terms (write
+$\bar W_{s,x}$ for the population mean at site `s`, sex `x`):
+
+- **Intercept** = $\bar W_{A,\mathrm{female}}$ — site `A`, female.
+- **`siteB`**, **`siteC`**, **`siteD`** = site mean minus site `A` mean,
+  *for females*: $\bar W_{B,\mathrm{female}} - \bar W_{A,\mathrm{female}}$, and so on.
+- **`sexmale`** = male minus female *at site `A`*: $\bar W_{A,\mathrm{male}} -
+  \bar W_{A,\mathrm{female}}$.
+- **`siteB:sexmale`** is the part that needs the most care. It is
+  $(\bar W_{B,\mathrm{male}} - \bar W_{B,\mathrm{female}}) -
+   (\bar W_{A,\mathrm{male}} - \bar W_{A,\mathrm{female}})$.
+
+That last line is the *difference of two differences*. The male-female
+gap at site `B`, minus the male-female gap at site `A`. If
+`siteB:sexmale > 0`, the male advantage is *bigger* at site `B` than
+at site `A`. If it is negative, the male advantage is *smaller* (or
+reversed) at `B` compared to `A`.
+
+This is what "the effect of sex depends on site" means in coefficients.
+It is also why a factor-by-factor interaction is hard to read off a
+summary table without the cell-mean translation.
+
+The biological readings v0.1 carries cover only intercept and
+non-interaction contrasts:
+
+```{r step5-interp}
+parameter_interpretation(sym5, scale = "biological")
+```
+
+Three interaction rows are again silent. Read the cell-mean translations
+above in their place.
+
+**Takeaway.** A factor-by-factor interaction coefficient is a
+*difference of differences*: how much the gap between two non-reference
+cells differs from the corresponding gap in the reference rows. The
+bare factor contrasts now apply *only* at the other factor's reference
+level.
+
+## Closing: a checklist for reading any model with factors
+
+When you see a coefficient table from a model that contains factors,
+apply this three-step audit before you interpret anything.
+
+1. **Identify the reference levels.** Run `symbol_table(sym)` and look
+   for the `[reference]` marker in each factor's `description`. By
+   default R uses the alphabetically-first level, but
+   `relevel()` or `contrasts()` can shift that without changing the
+   apparent variable name. The reference level is the silent half of
+   every contrast.
+
+2. **The intercept is the reference cell.** It is the expected response
+   when every factor sits at its reference level *and* every continuous
+   predictor sits at zero. Centring continuous predictors makes the
+   intercept biologically meaningful; until then it is the cell at
+   `body_size = 0`, `temperature = 0`, and so on.
+
+3. **Every contrast and interaction coefficient is a difference from a
+   reference.**
+   - A bare factor contrast is a difference between two cells of
+     *that* factor, at the reference levels of every other factor.
+   - An interaction coefficient is a *difference of differences*: the
+     gap at the non-reference combination, minus the gap in the
+     reference rows.
+
+   No coefficient (except possibly the intercept after centring) is a
+   group mean by itself. To get a group mean, add the relevant
+   intercept-plus-contrast(s) by hand.
+
+The point of `symbolize()` is to make every layer of this translation
+visible: the design matrix shows the dummies, the symbol table marks
+the references, and `parameter_interpretation()` reads each templated
+coefficient on the biological scale. The interaction layer is on the
+template roadmap; until it lands, the cell-mean translation in this
+vignette is the manual fallback.
