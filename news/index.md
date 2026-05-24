@@ -1,8 +1,8 @@
 # Changelog
 
-## symbolizer 0.2.0.9000 (development)
+## symbolizer 0.2.1
 
-### v0.2.1 (in progress)
+### v0.2.1 — methods_text, per-fit warnings, biv_gaussian gate
 
 - New: `warning_table(sym)` returns the tibble of conditions that
   [`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
