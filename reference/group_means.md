@@ -14,6 +14,13 @@ for any fit that contains a factor: the coefficient table shows
 contrasts (differences from the reference level); `group_means()` shows
 each group's expected response.
 
+Not supported on bivariate Gaussian (`biv_gaussian`) fits — a marginal
+mean in a bivariate fit is a joint 2-vector `(mu1, mu2)`, not a scalar,
+so the emmeans abstraction does not apply. Use
+[`drmTMB::predict_parameters()`](https://itchyshin.github.io/drmTMB/reference/predict_parameters.html)
+on the fit directly, or refit each response as a univariate Gaussian and
+call `group_means()` on each.
+
 ## Usage
 
 ``` r

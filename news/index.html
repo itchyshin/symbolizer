@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,6 +33,14 @@
       <small>Source: <a href="https://github.com/itchyshin/symbolizer/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.2.0.9000" id="symbolizer-0209000-development">symbolizer 0.2.0.9000 (development)<a class="anchor" aria-label="anchor" href="#symbolizer-0209000-development"></a></h2>
+<div class="section level3">
+<h3 id="v021-in-progress-0-2-0-9000">v0.2.1 (in progress)<a class="anchor" aria-label="anchor" href="#v021-in-progress-0-2-0-9000"></a></h3>
+<ul><li>
+<code><a href="../reference/group_means.html">group_means()</a></code> and <code><a href="../reference/group_slopes.html">group_slopes()</a></code> now gate <code>biv_gaussian</code> fits at the symbolizer layer with a friendly explanation, instead of letting drmTMB’s emmeans preflight surface a less explanatory error. A marginal mean in a bivariate fit is a joint 2-vector prediction <code>(mu1, mu2)</code>, not a scalar, so the emmeans abstraction does not apply. The gate’s message points at <code><a href="https://itchyshin.github.io/drmTMB/reference/predict_parameters.html" class="external-link">drmTMB::predict_parameters()</a></code> and at the fit-each-response-as- univariate alternative. Documented in the roxygen for both functions.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.0" id="symbolizer-020">symbolizer 0.2.0<a class="anchor" aria-label="anchor" href="#symbolizer-020"></a></h2>
 <div class="section level3">

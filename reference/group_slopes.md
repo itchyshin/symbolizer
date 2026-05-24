@@ -14,6 +14,10 @@ continuous-by-continuous): the coefficient table reports contrast slopes
 (differences from the reference group's slope); `group_slopes()` reports
 each group's slope directly.
 
+Not supported on bivariate Gaussian (`biv_gaussian`) fits — see
+[`group_means()`](https://itchyshin.github.io/symbolizer/reference/group_means.md)
+for the same limitation and the recommended alternatives.
+
 ## Usage
 
 ``` r

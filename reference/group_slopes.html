@@ -7,7 +7,10 @@ excludes_zero indicator.
 Use this alongside parameter_interpretation() for any fit with a
 continuous-by-categorical interaction (or continuous-by-continuous): the
 coefficient table reports contrast slopes (differences from the reference
-group's slope); group_slopes() reports each group's slope directly."><meta property="og:description" content="group_slopes() returns the slope of a continuous predictor stratified by
+group's slope); group_slopes() reports each group's slope directly.
+Not supported on bivariate Gaussian (biv_gaussian) fits — see
+group_means() for the same limitation and the recommended
+alternatives."><meta property="og:description" content="group_slopes() returns the slope of a continuous predictor stratified by
 one or more factors (or by values of another continuous predictor),
 delegating to emmeans::emtrends(). Each row is one stratum with a
 point estimate, standard error, 95% confidence band, and an
@@ -15,7 +18,10 @@ excludes_zero indicator.
 Use this alongside parameter_interpretation() for any fit with a
 continuous-by-categorical interaction (or continuous-by-continuous): the
 coefficient table reports contrast slopes (differences from the reference
-group's slope); group_slopes() reports each group's slope directly."><meta property="og:image" content="https://itchyshin.github.io/symbolizer/logo.svg"></head><body>
+group's slope); group_slopes() reports each group's slope directly.
+Not supported on bivariate Gaussian (biv_gaussian) fits — see
+group_means() for the same limitation and the recommended
+alternatives."><meta property="og:image" content="https://itchyshin.github.io/symbolizer/logo.svg"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -23,7 +29,7 @@ group's slope); group_slopes() reports each group's slope directly."><meta prope
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,6 +66,9 @@ point estimate, standard error, 95% confidence band, and an
 continuous-by-categorical interaction (or continuous-by-continuous): the
 coefficient table reports contrast slopes (differences from the reference
 group's slope); <code>group_slopes()</code> reports each group's slope directly.</p>
+<p>Not supported on bivariate Gaussian (<code>biv_gaussian</code>) fits — see
+<code><a href="group_means.html">group_means()</a></code> for the same limitation and the recommended
+alternatives.</p>
     </div>
 
     <div class="section level2">
