@@ -12,7 +12,7 @@ test_that("model_card returns the full bundle for drmTMB", {
   expect_setequal(
     names(card),
     c("meta", "equation", "symbols", "assumptions", "bridge",
-      "formula_bridge", "interpretation",
+      "formula_bridge", "interpretation", "warnings",
       "extraction_calls", "recommended_plots",
       "marginal_means", "marginal_slopes")
   )

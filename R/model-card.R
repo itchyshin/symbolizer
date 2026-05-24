@@ -68,6 +68,7 @@ model_card.symbolized_model <- function(x, ...) {
     bridge            = notation_bridge(x),
     formula_bridge    = formula_bridge(x, notation = "both"),
     interpretation    = parameter_interpretation(x, scale = "all"),
+    warnings          = warning_table(x),
     extraction_calls  = model_card_extraction_calls(x),
     recommended_plots = model_card_recommended_plots(x),
     marginal_means    = model_card_marginal_means(x),
@@ -219,6 +220,12 @@ print.symbolizer_model_card <- function(x, ...) {
   cli::cli_h2("Parameter interpretation")
   cli::cli_text("{.emph What each fitted coefficient says, in plain English.}")
   print(x$interpretation)
+
+  if (!is.null(x$warnings) && nrow(x$warnings) > 0L) {
+    cli::cli_h2("Warnings")
+    cli::cli_text("{.emph Conditions {.fn symbolize} flagged for this fit.}")
+    print(x$warnings)
+  }
 
   if (!is.null(x$marginal_means)) {
     cli::cli_h2("Group means")

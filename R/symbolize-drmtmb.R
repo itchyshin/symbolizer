@@ -195,6 +195,14 @@ symbolize.drmTMB <- function(fit, symbols = NULL, units = NULL,
     created_by = "symbolize.drmTMB"
   )
 
+  # Build a stub object first so the warnings detector can inspect it.
+  sym_stub <- list(
+    model = model,
+    metadata = metadata,
+    random_effects = re_tbl
+  )
+  warnings_tbl <- drm_build_warnings(fit, sym_stub)
+
   new_symbolized_model(
     model               = model,
     index               = index,
@@ -210,6 +218,7 @@ symbolize.drmTMB <- function(fit, symbols = NULL, units = NULL,
     components          = components,
     interpretation      = interp,
     formula_bridge      = bridge,
+    warnings_registry   = warnings_tbl,
     expanded            = expanded,
     metadata            = metadata
   )

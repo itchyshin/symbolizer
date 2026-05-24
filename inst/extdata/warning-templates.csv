@@ -1,0 +1,3 @@
+code,severity,template
+few_groups_wald,warn,"Wald 95% confidence intervals can be too narrow when the random-effect group has few levels (this fit: `{group_name}` has {n_groups} levels, below the ~10-level rule of thumb). Consider `symbolize(fit, ci_method = ""profile"")` for honest asymmetric intervals, or wait on Satterthwaite / Kenward-Roger support in drmTMB (see drmTMB issue #317)."
+small_n_wald,info,"Wald confidence intervals are an asymptotic approximation. With n = {n_obs} observations the approximation is usually fine, but consider `ci_method = ""profile""` if any band looks suspicious."

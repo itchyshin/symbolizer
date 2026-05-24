@@ -232,6 +232,10 @@ knit_print.symbolizer_model_card <- function(x, ...) {
     list(title = "Formula bridge (R syntax to math)",      obj = x$formula_bridge),
     list(title = "Parameter interpretation",               obj = x$interpretation)
   )
+  if (!is.null(x$warnings) && nrow(x$warnings) > 0L) {
+    sections <- c(sections, list(list(title = "Warnings",
+                                      obj = x$warnings)))
+  }
   if (!is.null(x$marginal_means)) {
     sections <- c(sections, list(list(title = "Group means",
                                       obj = x$marginal_means)))

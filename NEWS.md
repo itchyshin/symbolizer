@@ -2,6 +2,16 @@
 
 ## v0.2.1 (in progress)
 
+* New: `warning_table(sym)` returns the tibble of conditions that
+  `symbolize()` flagged when building the model object. Each row is one
+  warning with a `code`, `severity` (`info` / `warn` / `error`),
+  templated `message`, and a `context` string. Prose is templated from
+  `inst/extdata/warning-templates.csv`. Today the system ships one
+  active check: `few_groups_wald` (warn) — Wald 95% CI used with a
+  random-effect group of fewer than ~10 levels. The check is suppressed
+  when the user passes `ci_method = "profile"` to `symbolize()`.
+  `model_card(sym)` surfaces the warnings table when it's non-empty; the
+  field also lives on `sym$warnings_registry` for raw access.
 * New: `methods_text(sym)` returns a draft Methods-section paragraph
   for a fitted model — the kind of paragraph a biologist would
   otherwise write by hand into a paper. The prose is composed from a

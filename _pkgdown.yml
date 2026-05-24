@@ -91,6 +91,10 @@ reference:
     desc: "Turn a symbolized_model into a draft Methods-section paragraph (opt-in, template-based, never LLM)."
     contents:
       - methods_text
+  - title: "Per-fit warnings"
+    desc: "Conditions symbolize() flagged when building the object (e.g., Wald CI with few RE groups). Templated from inst/extdata/warning-templates.csv."
+    contents:
+      - warning_table
   - title: "Internal: term-grammar bridge"
     desc: "The R formula <-> model matrix <-> biological symbol layer that every renderer reads."
     contents:
