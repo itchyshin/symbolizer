@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -227,16 +227,18 @@ every relevant scale at once:</p>
 <col width="3%">
 <col width="5%">
 <col width="2%">
-<col width="18%">
-<col width="19%">
+<col width="4%">
 <col width="17%">
-<col width="30%">
+<col width="18%">
+<col width="16%">
+<col width="28%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">submodel</th>
 <th align="left">term_label</th>
 <th align="left">coefficient_role</th>
 <th align="left">estimate</th>
+<th align="left">95% CI</th>
 <th align="left">link_scale_reading</th>
 <th align="left">natural_scale_reading</th>
 <th align="left">variance_scale_reading</th>
@@ -248,6 +250,7 @@ every relevant scale at once:</p>
 <td align="left">(Intercept)</td>
 <td align="left">intercept</td>
 <td align="left">31.3</td>
+<td align="left">27.1, 35.4 *</td>
 <td align="left">Expected body_mass at the reference</td>
 <td align="left">Expected body_mass for the reference case</td>
 <td align="left">—</td>
@@ -258,6 +261,7 @@ every relevant scale at once:</p>
 <td align="left">temperature</td>
 <td align="left">slope</td>
 <td align="left">0.311</td>
+<td align="left">0.0337, 0.588 *</td>
 <td align="left">Linear change in expected body_mass per unit of
 temperature</td>
 <td align="left">Expected body_mass changes by 0.311 per unit of
@@ -271,6 +275,7 @@ body_mass by 0.311</td>
 <td align="left">(Intercept)</td>
 <td align="left">intercept</td>
 <td align="left">0.222</td>
+<td align="left">-0.285, 0.729</td>
 <td align="left">Log residual SD at the reference (SD = exp(0.222))</td>
 <td align="left">Residual SD = exp(0.222) at the reference</td>
 <td align="left">Residual variance = exp(2*0.222)</td>
@@ -282,6 +287,7 @@ body_mass</td>
 <td align="left">temperature</td>
 <td align="left">slope</td>
 <td align="left">0.0940</td>
+<td align="left">0.0662, 0.122 *</td>
 <td align="left">Log residual SD changes by 0.0940 per unit of
 temperature</td>
 <td align="left">Residual SD multiplied by exp(0.0940) per unit of
@@ -293,6 +299,8 @@ variability of body_mass by exp(0.0940)</td>
 </tr>
 </tbody>
 </table>
+<p><em>Rows marked <code>*</code> have a 95% confidence interval that
+excludes zero (CI method: <code>wald</code>).</em></p>
 <p>The <code>variance_scale_reading</code> column is the one that does
 the work for sigma coefficients: it states the multiplicative effect on
 the residual SD itself, with the fitted value of
@@ -922,22 +930,24 @@ co-variation between the two responses):</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rho_rows</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/parameter_interpretation.html">parameter_interpretation</a></span><span class="op">(</span><span class="va">sym_biv</span><span class="op">)</span></span>
 <span><span class="va">rho_rows</span><span class="op">[</span><span class="va">rho_rows</span><span class="op">$</span><span class="va">submodel</span> <span class="op">==</span> <span class="st">"rho12"</span>, <span class="op">]</span></span></code></pre></div>
-<table class="table">
+<table style="width:100%;" class="table">
 <colgroup>
 <col width="2%">
 <col width="3%">
 <col width="5%">
 <col width="2%">
-<col width="20%">
-<col width="18%">
-<col width="23%">
-<col width="22%">
+<col width="4%">
+<col width="19%">
+<col width="17%">
+<col width="21%">
+<col width="21%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">submodel</th>
 <th align="left">term_label</th>
 <th align="left">coefficient_role</th>
 <th align="left">estimate</th>
+<th align="left">95% CI</th>
 <th align="left">link_scale_reading</th>
 <th align="left">natural_scale_reading</th>
 <th align="left">variance_scale_reading</th>
@@ -948,6 +958,7 @@ co-variation between the two responses):</p>
 <td align="left">(Intercept)</td>
 <td align="left">intercept</td>
 <td align="left">0.674</td>
+<td align="left">0.454, 0.894 *</td>
 <td align="left">Fisher-z residual correlation at the reference:
 tanh^{-1}(0.674)</td>
 <td align="left">Residual correlation rho12 = tanh(0.674) at the
@@ -958,6 +969,8 @@ sigma_1 * sigma_2</td>
 correlation tanh(0.674)</td>
 </tr></tbody>
 </table>
+<p><em>Rows marked <code>*</code> have a 95% confidence interval that
+excludes zero (CI method: <code>wald</code>).</em></p>
 <p><strong>Takeaway.</strong> The same <code>symbolized_model</code>
 interface scales from two submodels to five. <code>formula_bridge</code>
 shows the new submodels, the joint distribution exposes

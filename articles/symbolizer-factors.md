@@ -107,11 +107,14 @@ Now the readings:
 parameter_interpretation(sym1, scale = "biological")
 ```
 
-| submodel | term_label | coefficient_role | estimate | biological_reading |
-|:---|:---|:---|:---|:---|
-| mu | (Intercept) | intercept | 29.8 | Baseline body_mass in the reference condition |
-| mu | sex | factor_contrast | 4.99 | Average body_mass differs between male and female by 4.99 |
-| sigma | (Intercept) | intercept | 0.898 | Baseline level of unexplained individual variation in body_mass |
+| submodel | term_label | coefficient_role | estimate | 95% CI | biological_reading |
+|:---|:---|:---|:---|:---|:---|
+| mu | (Intercept) | intercept | 29.8 | 29.2, 30.4 \* | Baseline body_mass in the reference condition |
+| mu | sex | factor_contrast | 4.99 | 4.11, 5.87 \* | Average body_mass differs between male and female by 4.99 |
+| sigma | (Intercept) | intercept | 0.898 | 0.771, 1.02 \* | Baseline level of unexplained individual variation in body_mass |
+
+*Rows marked `*` have a 95% confidence interval that excludes zero (CI
+method: `wald`).*
 
 Two coefficients on the mu submodel:
 
@@ -206,13 +209,16 @@ coefficients are:
 parameter_interpretation(sym2, scale = "biological")
 ```
 
-| submodel | term_label | coefficient_role | estimate | biological_reading |
-|:---|:---|:---|:---|:---|
-| mu | (Intercept) | intercept | 30.5 | Baseline body_mass in the reference condition |
-| mu | site | factor_contrast | 1.91 | Average body_mass differs between B and A by 1.91 |
-| mu | site | factor_contrast | 3.41 | Average body_mass differs between C and A by 3.41 |
-| mu | site | factor_contrast | -3.68 | Average body_mass differs between D and A by -3.68 |
-| sigma | (Intercept) | intercept | 0.933 | Baseline level of unexplained individual variation in body_mass |
+| submodel | term_label | coefficient_role | estimate | 95% CI | biological_reading |
+|:---|:---|:---|:---|:---|:---|
+| mu | (Intercept) | intercept | 30.5 | 29.6, 31.4 \* | Baseline body_mass in the reference condition |
+| mu | site | factor_contrast | 1.91 | 0.394, 3.42 \* | Average body_mass differs between B and A by 1.91 |
+| mu | site | factor_contrast | 3.41 | 2.20, 4.61 \* | Average body_mass differs between C and A by 3.41 |
+| mu | site | factor_contrast | -3.68 | -4.93, -2.42 \* | Average body_mass differs between D and A by -3.68 |
+| sigma | (Intercept) | intercept | 0.933 | 0.806, 1.06 \* | Baseline level of unexplained individual variation in body_mass |
+
+*Rows marked `*` have a 95% confidence interval that excludes zero (CI
+method: `wald`).*
 
 Reading the table by hand:
 
@@ -308,12 +314,15 @@ The coefficient readings:
 parameter_interpretation(sym3, scale = "biological")
 ```
 
-| submodel | term_label | coefficient_role | estimate | biological_reading |
-|:---|:---|:---|:---|:---|
-| mu | (Intercept) | intercept | 29.9 | Baseline body_mass in the reference condition |
-| mu | sex | factor_contrast | 5.26 | Average body_mass differs between male and female by 5.26 |
-| mu | body_size | slope | 0.197 | A unit change in body_size shifts the expected body_mass by 0.197 |
-| sigma | (Intercept) | intercept | 1.17 | Baseline level of unexplained individual variation in body_mass |
+| submodel | term_label | coefficient_role | estimate | 95% CI | biological_reading |
+|:---|:---|:---|:---|:---|:---|
+| mu | (Intercept) | intercept | 29.9 | 27.9, 32.0 \* | Baseline body_mass in the reference condition |
+| mu | sex | factor_contrast | 5.26 | 4.11, 6.42 \* | Average body_mass differs between male and female by 5.26 |
+| mu | body_size | slope | 0.197 | 0.177, 0.216 \* | A unit change in body_size shifts the expected body_mass by 0.197 |
+| sigma | (Intercept) | intercept | 1.17 | 1.04, 1.29 \* | Baseline level of unexplained individual variation in body_mass |
+
+*Rows marked `*` have a 95% confidence interval that excludes zero (CI
+method: `wald`).*
 
 The single most important shift from Step 1 is what the intercept now
 means. In Step 1 it was *the mean of females*. In Step 3 it is **the
@@ -442,13 +451,16 @@ ship an interaction template, so the interaction row is silent:
 parameter_interpretation(sym4, scale = "biological")
 ```
 
-| submodel | term_label | coefficient_role | estimate | biological_reading |
-|:---|:---|:---|:---|:---|
-| mu | (Intercept) | intercept | 30.9 | Baseline body_mass in the reference condition |
-| mu | sex | factor_contrast | 3.04 | Average body_mass differs between male and female by 3.04 |
-| mu | body_size | slope | 0.198 | A unit change in body_size shifts the expected body_mass by 0.198 |
-| mu | sex:body_size | interaction_cont_factor | 0.0669 | The effect of body_size on body_mass differs by 0.0669 between male and female. Call `group_slopes(sym, continuous = "body_size")` to see each group’s slope on the response scale, with confidence intervals. |
-| sigma | (Intercept) | intercept | 1.11 | Baseline level of unexplained individual variation in body_mass |
+| submodel | term_label | coefficient_role | estimate | 95% CI | biological_reading |
+|:---|:---|:---|:---|:---|:---|
+| mu | (Intercept) | intercept | 30.9 | 28.3, 33.5 \* | Baseline body_mass in the reference condition |
+| mu | sex | factor_contrast | 3.04 | -0.801, 6.87 | Average body_mass differs between male and female by 3.04 |
+| mu | body_size | slope | 0.198 | 0.173, 0.223 \* | A unit change in body_size shifts the expected body_mass by 0.198 |
+| mu | sex:body_size | interaction_cont_factor | 0.0669 | 0.0303, 0.104 \* | The effect of body_size on body_mass differs by 0.0669 between male and female. Call `group_slopes(sym, continuous = "body_size")` to see each group’s slope on the response scale, with confidence intervals. |
+| sigma | (Intercept) | intercept | 1.11 | 0.979, 1.23 \* | Baseline level of unexplained individual variation in body_mass |
+
+*Rows marked `*` have a 95% confidence interval that excludes zero (CI
+method: `wald`).*
 
 Read the prose above in place of a templated row. The interaction is
 ecologically the most interesting coefficient in the fit — the slope of
@@ -697,17 +709,20 @@ non-interaction contrasts:
 parameter_interpretation(sym5, scale = "biological")
 ```
 
-| submodel | term_label | coefficient_role | estimate | biological_reading |
-|:---|:---|:---|:---|:---|
-| mu | (Intercept) | intercept | 29.7 | Baseline body_mass in the reference condition |
-| mu | site | factor_contrast | 3.66 | Average body_mass differs between B and A by 3.66 |
-| mu | site | factor_contrast | 4.44 | Average body_mass differs between C and A by 4.44 |
-| mu | site | factor_contrast | -2.62 | Average body_mass differs between D and A by -2.62 |
-| mu | sex | factor_contrast | 4.94 | Average body_mass differs between male and female by 4.94 |
-| mu | site:sex | interaction_factor_factor | 0.276 | The site effect on body_mass differs by 0.276 between sex = male and sex = female. Call `group_means(sym, by = c("site", "sex"))` to see each cell’s expected response with confidence intervals. |
-| mu | site:sex | interaction_factor_factor | -2.13 | The site effect on body_mass differs by -2.13 between sex = male and sex = female. Call `group_means(sym, by = c("site", "sex"))` to see each cell’s expected response with confidence intervals. |
-| mu | site:sex | interaction_factor_factor | 3.16 | The site effect on body_mass differs by 3.16 between sex = male and sex = female. Call `group_means(sym, by = c("site", "sex"))` to see each cell’s expected response with confidence intervals. |
-| sigma | (Intercept) | intercept | 1.03 | Baseline level of unexplained individual variation in body_mass |
+| submodel | term_label | coefficient_role | estimate | 95% CI | biological_reading |
+|:---|:---|:---|:---|:---|:---|
+| mu | (Intercept) | intercept | 29.7 | 28.4, 31.1 \* | Baseline body_mass in the reference condition |
+| mu | site | factor_contrast | 3.66 | 1.16, 6.15 \* | Average body_mass differs between B and A by 3.66 |
+| mu | site | factor_contrast | 4.44 | 2.55, 6.33 \* | Average body_mass differs between C and A by 4.44 |
+| mu | site | factor_contrast | -2.62 | -4.51, -0.730 \* | Average body_mass differs between D and A by -2.62 |
+| mu | sex | factor_contrast | 4.94 | 2.92, 6.95 \* | Average body_mass differs between male and female by 4.94 |
+| mu | site:sex | interaction_factor_factor | 0.276 | -3.10, 3.65 | The site effect on body_mass differs by 0.276 between sex = male and sex = female. Call `group_means(sym, by = c("site", "sex"))` to see each cell’s expected response with confidence intervals. |
+| mu | site:sex | interaction_factor_factor | -2.13 | -4.80, 0.534 | The site effect on body_mass differs by -2.13 between sex = male and sex = female. Call `group_means(sym, by = c("site", "sex"))` to see each cell’s expected response with confidence intervals. |
+| mu | site:sex | interaction_factor_factor | 3.16 | 0.380, 5.95 \* | The site effect on body_mass differs by 3.16 between sex = male and sex = female. Call `group_means(sym, by = c("site", "sex"))` to see each cell’s expected response with confidence intervals. |
+| sigma | (Intercept) | intercept | 1.03 | 0.905, 1.16 \* | Baseline level of unexplained individual variation in body_mass |
+
+*Rows marked `*` have a 95% confidence interval that excludes zero (CI
+method: `wald`).*
 
 Three interaction rows are again silent. Read the cell-mean translations
 above in their place.

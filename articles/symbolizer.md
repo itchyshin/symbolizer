@@ -228,11 +228,11 @@ three tabs over the same fit.
 as_html_three_views(sym, head = 5, tail = 2)
 ```
 
-[Skip three-views widget](#sym-sym-1779657792-end)
+[Skip three-views widget](#sym-sym-1779661090-end)
 
-    <button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779657792-tab-eq" aria-controls="sym-sym-1779657792-panel-eq" aria-selected="true" tabindex="0" data-tab="eq"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>1. Equation</button>
-    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779657792-tab-idx" aria-controls="sym-sym-1779657792-panel-idx" aria-selected="false" tabindex="-1" data-tab="idx"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>2. Index</button>
-    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779657792-tab-mat" aria-controls="sym-sym-1779657792-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>3. Matrix (with data)</button>
+    <button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779661090-tab-eq" aria-controls="sym-sym-1779661090-panel-eq" aria-selected="true" tabindex="0" data-tab="eq"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>1. Equation</button>
+    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779661090-tab-idx" aria-controls="sym-sym-1779661090-panel-idx" aria-selected="false" tabindex="-1" data-tab="idx"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>2. Index</button>
+    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779661090-tab-mat" aria-controls="sym-sym-1779661090-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>3. Matrix (with data)</button>
 
 The structural contract. No indices, no numbers – the shape of the
 model.
@@ -388,12 +388,15 @@ coefficients), and biological readings together:
 parameter_interpretation(sym)
 ```
 
-| submodel | term_label | coefficient_role | estimate | link_scale_reading | natural_scale_reading | variance_scale_reading | biological_reading |
-|:---|:---|:---|:---|:---|:---|:---|:---|
-| mu | (Intercept) | intercept | 29.6 | Expected body_mass at the reference | Expected body_mass for the reference case | — | Baseline body_mass in the reference condition |
-| mu | temperature | slope | 0.492 | Linear change in expected body_mass per unit of temperature | Expected body_mass changes by 0.492 per unit of temperature | — | A unit change in temperature shifts the expected body_mass by 0.492 |
-| sigma | (Intercept) | intercept | 0.485 | Log residual SD at the reference (SD = exp(0.485)) | Residual SD = exp(0.485) at the reference | Residual variance = exp(2\*0.485) | Baseline level of unexplained individual variation in body_mass |
-| sigma | temperature | slope | 0.0936 | Log residual SD changes by 0.0936 per unit of temperature | Residual SD multiplied by exp(0.0936) per unit of temperature | Residual variance multiplied by exp(2\*0.0936) per unit | A unit change in temperature multiplies the unexplained variability of body_mass by exp(0.0936) |
+| submodel | term_label | coefficient_role | estimate | 95% CI | link_scale_reading | natural_scale_reading | variance_scale_reading | biological_reading |
+|:---|:---|:---|:---|:---|:---|:---|:---|:---|
+| mu | (Intercept) | intercept | 29.6 | 22.4, 36.7 \* | Expected body_mass at the reference | Expected body_mass for the reference case | — | Baseline body_mass in the reference condition |
+| mu | temperature | slope | 0.492 | 0.0317, 0.952 \* | Linear change in expected body_mass per unit of temperature | Expected body_mass changes by 0.492 per unit of temperature | — | A unit change in temperature shifts the expected body_mass by 0.492 |
+| sigma | (Intercept) | intercept | 0.485 | -0.169, 1.14 | Log residual SD at the reference (SD = exp(0.485)) | Residual SD = exp(0.485) at the reference | Residual variance = exp(2\*0.485) | Baseline level of unexplained individual variation in body_mass |
+| sigma | temperature | slope | 0.0936 | 0.0581, 0.129 \* | Log residual SD changes by 0.0936 per unit of temperature | Residual SD multiplied by exp(0.0936) per unit of temperature | Residual variance multiplied by exp(2\*0.0936) per unit | A unit change in temperature multiplies the unexplained variability of body_mass by exp(0.0936) |
+
+*Rows marked `*` have a 95% confidence interval that excludes zero (CI
+method: `wald`).*
 
 The `scale` argument filters to a single reading. The `"biological"`
 scale is the one that goes in a results paragraph:
@@ -403,12 +406,15 @@ scale is the one that goes in a results paragraph:
 parameter_interpretation(sym, scale = "biological")
 ```
 
-| submodel | term_label | coefficient_role | estimate | biological_reading |
-|:---|:---|:---|:---|:---|
-| mu | (Intercept) | intercept | 29.6 | Baseline body_mass in the reference condition |
-| mu | temperature | slope | 0.492 | A unit change in temperature shifts the expected body_mass by 0.492 |
-| sigma | (Intercept) | intercept | 0.485 | Baseline level of unexplained individual variation in body_mass |
-| sigma | temperature | slope | 0.0936 | A unit change in temperature multiplies the unexplained variability of body_mass by exp(0.0936) |
+| submodel | term_label | coefficient_role | estimate | 95% CI | biological_reading |
+|:---|:---|:---|:---|:---|:---|
+| mu | (Intercept) | intercept | 29.6 | 22.4, 36.7 \* | Baseline body_mass in the reference condition |
+| mu | temperature | slope | 0.492 | 0.0317, 0.952 \* | A unit change in temperature shifts the expected body_mass by 0.492 |
+| sigma | (Intercept) | intercept | 0.485 | -0.169, 1.14 | Baseline level of unexplained individual variation in body_mass |
+| sigma | temperature | slope | 0.0936 | 0.0581, 0.129 \* | A unit change in temperature multiplies the unexplained variability of body_mass by exp(0.0936) |
+
+*Rows marked `*` have a 95% confidence interval that excludes zero (CI
+method: `wald`).*
 
 **Takeaway.** Every coefficient has an interpretation on every scale
 that makes sense for its submodel; the package writes them so you do not
@@ -530,7 +536,7 @@ later versions.
 ``` r
 
 symbolizer_capabilities()
-#> # A tibble: 62 × 6
+#> # A tibble: 66 × 6
 #>    class  family            component      status              since notes      
 #>    <chr>  <chr>             <chr>          <chr>               <chr> <chr>      
 #>  1 drmTMB gaussian          mu             Stable              0.1.0 Univariate…
@@ -543,7 +549,7 @@ symbolizer_capabilities()
 #>  8 drmTMB truncated_nbinom2 hu             First slice         0.4.0 Hurdle sub…
 #>  9 drmTMB gaussian          rho12          Planned or reserved NA    Bivariate …
 #> 10 drmTMB student           mu             First slice         0.2.2 Student-t …
-#> # ℹ 52 more rows
+#> # ℹ 56 more rows
 ```
 
 The roadmap in `README.md` lists the planned version per family /

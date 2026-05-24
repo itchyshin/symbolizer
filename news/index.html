@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,6 +33,20 @@
       <small>Source: <a href="https://github.com/itchyshin/symbolizer/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.7.0" id="symbolizer-070">symbolizer 0.7.0<a class="anchor" aria-label="anchor" href="#symbolizer-070"></a></h2>
+<div class="section level3">
+<h3 id="v07--glmmtmb-0-7-0">v0.7 — glmmTMB<a class="anchor" aria-label="anchor" href="#v07--glmmtmb-0-7-0"></a></h3>
+<ul><li>New: <code><a href="../reference/symbolize.glmmTMB.html">symbolize.glmmTMB()</a></code> (first slice). Builds a <code>symbolized_model</code> from a <code>glmmTMB</code> fit for the Gaussian conditional submodel (identity link), with optional <code>(1 | g)</code> random intercepts and an optional <code>dispformula = ~ z</code> distributional sigma submodel. Non-Gaussian families and zero-inflation are routed through the capability registry as “Planned or reserved” for now.</li>
+<li>The new extractor reuses the prose layer (assumption / interpretation / symbol-dictionary / formula-bridge builders) by producing the same tibble shapes as <code><a href="../reference/symbolize.drmTMB.html">symbolize.drmTMB()</a></code>. Family-keyed CSVs in <code>inst/extdata/</code> drive prose, so a Gaussian glmmTMB fit produces the same teachable readings as the drmTMB equivalent.</li>
+<li>Confidence intervals come from <code>glmmTMB::confint(fit, parm = "beta_", method = ci_method)</code>. Default <code>ci_method = "wald"</code>; <code>"profile"</code> and <code>"uniroot"</code> available.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="fixes-0-7-0">Fixes<a class="anchor" aria-label="anchor" href="#fixes-0-7-0"></a></h3>
+<ul><li>
+<code>parameter_interpretation(sym, scale = ...)</code> now carries the confidence-band columns (<code>std_error</code>, <code>confint_low</code>, <code>confint_high</code>, <code>excludes_zero</code>, <code>ci_method</code>) on every scale, not just <code>scale = "all"</code>. Previously these were dropped when the user picked a specific scale, so the rendered Markdown / pkgdown table omitted the CI band even though the underlying interpretation tibble had it.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.6.0" id="symbolizer-060">symbolizer 0.6.0<a class="anchor" aria-label="anchor" href="#symbolizer-060"></a></h2>
 <div class="section level3">

@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -247,17 +247,19 @@ context for reading every coefficient that follows.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/parameter_interpretation.html">parameter_interpretation</a></span><span class="op">(</span><span class="va">sym1</span>, scale <span class="op">=</span> <span class="st">"biological"</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <colgroup>
-<col width="8%">
-<col width="10%">
-<col width="15%">
-<col width="8%">
-<col width="57%">
+<col width="7%">
+<col width="9%">
+<col width="13%">
+<col width="7%">
+<col width="11%">
+<col width="51%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">submodel</th>
 <th align="left">term_label</th>
 <th align="left">coefficient_role</th>
 <th align="left">estimate</th>
+<th align="left">95% CI</th>
 <th align="left">biological_reading</th>
 </tr></thead>
 <tbody>
@@ -266,6 +268,7 @@ context for reading every coefficient that follows.</p>
 <td align="left">(Intercept)</td>
 <td align="left">intercept</td>
 <td align="left">29.8</td>
+<td align="left">29.2, 30.4 *</td>
 <td align="left">Baseline body_mass in the reference condition</td>
 </tr>
 <tr class="even">
@@ -273,6 +276,7 @@ context for reading every coefficient that follows.</p>
 <td align="left">sex</td>
 <td align="left">factor_contrast</td>
 <td align="left">4.99</td>
+<td align="left">4.11, 5.87 *</td>
 <td align="left">Average body_mass differs between male and female by
 4.99</td>
 </tr>
@@ -281,11 +285,14 @@ context for reading every coefficient that follows.</p>
 <td align="left">(Intercept)</td>
 <td align="left">intercept</td>
 <td align="left">0.898</td>
+<td align="left">0.771, 1.02 *</td>
 <td align="left">Baseline level of unexplained individual variation in
 body_mass</td>
 </tr>
 </tbody>
 </table>
+<p><em>Rows marked <code>*</code> have a 95% confidence interval that
+excludes zero (CI method: <code>wald</code>).</em></p>
 <p>Two coefficients on the mu submodel:</p>
 <ul>
 <li>The <strong>intercept</strong> estimate (29.81) is the expected
@@ -462,17 +469,19 @@ are:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/parameter_interpretation.html">parameter_interpretation</a></span><span class="op">(</span><span class="va">sym2</span>, scale <span class="op">=</span> <span class="st">"biological"</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <colgroup>
-<col width="8%">
-<col width="10%">
-<col width="15%">
-<col width="8%">
-<col width="57%">
+<col width="7%">
+<col width="9%">
+<col width="13%">
+<col width="7%">
+<col width="11%">
+<col width="50%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">submodel</th>
 <th align="left">term_label</th>
 <th align="left">coefficient_role</th>
 <th align="left">estimate</th>
+<th align="left">95% CI</th>
 <th align="left">biological_reading</th>
 </tr></thead>
 <tbody>
@@ -481,6 +490,7 @@ are:</p>
 <td align="left">(Intercept)</td>
 <td align="left">intercept</td>
 <td align="left">30.5</td>
+<td align="left">29.6, 31.4 *</td>
 <td align="left">Baseline body_mass in the reference condition</td>
 </tr>
 <tr class="even">
@@ -488,6 +498,7 @@ are:</p>
 <td align="left">site</td>
 <td align="left">factor_contrast</td>
 <td align="left">1.91</td>
+<td align="left">0.394, 3.42 *</td>
 <td align="left">Average body_mass differs between B and A by 1.91</td>
 </tr>
 <tr class="odd">
@@ -495,6 +506,7 @@ are:</p>
 <td align="left">site</td>
 <td align="left">factor_contrast</td>
 <td align="left">3.41</td>
+<td align="left">2.20, 4.61 *</td>
 <td align="left">Average body_mass differs between C and A by 3.41</td>
 </tr>
 <tr class="even">
@@ -502,6 +514,7 @@ are:</p>
 <td align="left">site</td>
 <td align="left">factor_contrast</td>
 <td align="left">-3.68</td>
+<td align="left">-4.93, -2.42 *</td>
 <td align="left">Average body_mass differs between D and A by -3.68</td>
 </tr>
 <tr class="odd">
@@ -509,11 +522,14 @@ are:</p>
 <td align="left">(Intercept)</td>
 <td align="left">intercept</td>
 <td align="left">0.933</td>
+<td align="left">0.806, 1.06 *</td>
 <td align="left">Baseline level of unexplained individual variation in
 body_mass</td>
 </tr>
 </tbody>
 </table>
+<p><em>Rows marked <code>*</code> have a 95% confidence interval that
+excludes zero (CI method: <code>wald</code>).</em></p>
 <p>Reading the table by hand:</p>
 <ul>
 <li>
@@ -706,16 +722,18 @@ coefficients, three columns.</p>
 <table class="table">
 <colgroup>
 <col width="7%">
-<col width="10%">
-<col width="15%">
+<col width="9%">
+<col width="13%">
 <col width="7%">
-<col width="58%">
+<col width="11%">
+<col width="51%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">submodel</th>
 <th align="left">term_label</th>
 <th align="left">coefficient_role</th>
 <th align="left">estimate</th>
+<th align="left">95% CI</th>
 <th align="left">biological_reading</th>
 </tr></thead>
 <tbody>
@@ -724,6 +742,7 @@ coefficients, three columns.</p>
 <td align="left">(Intercept)</td>
 <td align="left">intercept</td>
 <td align="left">29.9</td>
+<td align="left">27.9, 32.0 *</td>
 <td align="left">Baseline body_mass in the reference condition</td>
 </tr>
 <tr class="even">
@@ -731,6 +750,7 @@ coefficients, three columns.</p>
 <td align="left">sex</td>
 <td align="left">factor_contrast</td>
 <td align="left">5.26</td>
+<td align="left">4.11, 6.42 *</td>
 <td align="left">Average body_mass differs between male and female by
 5.26</td>
 </tr>
@@ -739,6 +759,7 @@ coefficients, three columns.</p>
 <td align="left">body_size</td>
 <td align="left">slope</td>
 <td align="left">0.197</td>
+<td align="left">0.177, 0.216 *</td>
 <td align="left">A unit change in body_size shifts the expected
 body_mass by 0.197</td>
 </tr>
@@ -747,11 +768,14 @@ body_mass by 0.197</td>
 <td align="left">(Intercept)</td>
 <td align="left">intercept</td>
 <td align="left">1.17</td>
+<td align="left">1.04, 1.29 *</td>
 <td align="left">Baseline level of unexplained individual variation in
 body_mass</td>
 </tr>
 </tbody>
 </table>
+<p><em>Rows marked <code>*</code> have a 95% confidence interval that
+excludes zero (CI method: <code>wald</code>).</em></p>
 <p>The single most important shift from Step 1 is what the intercept now
 means. In Step 1 it was <em>the mean of females</em>. In Step 3 it is
 <strong>the expected <code>body_mass</code> for a female at
@@ -888,15 +912,17 @@ so the interaction row is silent:</p>
 <colgroup>
 <col width="3%">
 <col width="5%">
-<col width="9%">
+<col width="8%">
 <col width="3%">
-<col width="78%">
+<col width="5%">
+<col width="74%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">submodel</th>
 <th align="left">term_label</th>
 <th align="left">coefficient_role</th>
 <th align="left">estimate</th>
+<th align="left">95% CI</th>
 <th align="left">biological_reading</th>
 </tr></thead>
 <tbody>
@@ -905,6 +931,7 @@ so the interaction row is silent:</p>
 <td align="left">(Intercept)</td>
 <td align="left">intercept</td>
 <td align="left">30.9</td>
+<td align="left">28.3, 33.5 *</td>
 <td align="left">Baseline body_mass in the reference condition</td>
 </tr>
 <tr class="even">
@@ -912,6 +939,7 @@ so the interaction row is silent:</p>
 <td align="left">sex</td>
 <td align="left">factor_contrast</td>
 <td align="left">3.04</td>
+<td align="left">-0.801, 6.87</td>
 <td align="left">Average body_mass differs between male and female by
 3.04</td>
 </tr>
@@ -920,6 +948,7 @@ so the interaction row is silent:</p>
 <td align="left">body_size</td>
 <td align="left">slope</td>
 <td align="left">0.198</td>
+<td align="left">0.173, 0.223 *</td>
 <td align="left">A unit change in body_size shifts the expected
 body_mass by 0.198</td>
 </tr>
@@ -928,6 +957,7 @@ body_mass by 0.198</td>
 <td align="left">sex:body_size</td>
 <td align="left">interaction_cont_factor</td>
 <td align="left">0.0669</td>
+<td align="left">0.0303, 0.104 *</td>
 <td align="left">The effect of body_size on body_mass differs by 0.0669
 between male and female. Call
 <code>group_slopes(sym, continuous = "body_size")</code> to see each
@@ -938,11 +968,14 @@ group’s slope on the response scale, with confidence intervals.</td>
 <td align="left">(Intercept)</td>
 <td align="left">intercept</td>
 <td align="left">1.11</td>
+<td align="left">0.979, 1.23 *</td>
 <td align="left">Baseline level of unexplained individual variation in
 body_mass</td>
 </tr>
 </tbody>
 </table>
+<p><em>Rows marked <code>*</code> have a 95% confidence interval that
+excludes zero (CI method: <code>wald</code>).</em></p>
 <p>Read the prose above in place of a templated row. The interaction is
 ecologically the most interesting coefficient in the fit — the slope of
 <code>body_mass</code> on <code>body_size</code> <em>depends on</em>
@@ -1224,15 +1257,17 @@ non-interaction contrasts:</p>
 <colgroup>
 <col width="3%">
 <col width="4%">
-<col width="10%">
+<col width="9%">
 <col width="3%">
-<col width="77%">
+<col width="6%">
+<col width="72%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">submodel</th>
 <th align="left">term_label</th>
 <th align="left">coefficient_role</th>
 <th align="left">estimate</th>
+<th align="left">95% CI</th>
 <th align="left">biological_reading</th>
 </tr></thead>
 <tbody>
@@ -1241,6 +1276,7 @@ non-interaction contrasts:</p>
 <td align="left">(Intercept)</td>
 <td align="left">intercept</td>
 <td align="left">29.7</td>
+<td align="left">28.4, 31.1 *</td>
 <td align="left">Baseline body_mass in the reference condition</td>
 </tr>
 <tr class="even">
@@ -1248,6 +1284,7 @@ non-interaction contrasts:</p>
 <td align="left">site</td>
 <td align="left">factor_contrast</td>
 <td align="left">3.66</td>
+<td align="left">1.16, 6.15 *</td>
 <td align="left">Average body_mass differs between B and A by 3.66</td>
 </tr>
 <tr class="odd">
@@ -1255,6 +1292,7 @@ non-interaction contrasts:</p>
 <td align="left">site</td>
 <td align="left">factor_contrast</td>
 <td align="left">4.44</td>
+<td align="left">2.55, 6.33 *</td>
 <td align="left">Average body_mass differs between C and A by 4.44</td>
 </tr>
 <tr class="even">
@@ -1262,6 +1300,7 @@ non-interaction contrasts:</p>
 <td align="left">site</td>
 <td align="left">factor_contrast</td>
 <td align="left">-2.62</td>
+<td align="left">-4.51, -0.730 *</td>
 <td align="left">Average body_mass differs between D and A by -2.62</td>
 </tr>
 <tr class="odd">
@@ -1269,6 +1308,7 @@ non-interaction contrasts:</p>
 <td align="left">sex</td>
 <td align="left">factor_contrast</td>
 <td align="left">4.94</td>
+<td align="left">2.92, 6.95 *</td>
 <td align="left">Average body_mass differs between male and female by
 4.94</td>
 </tr>
@@ -1277,6 +1317,7 @@ non-interaction contrasts:</p>
 <td align="left">site:sex</td>
 <td align="left">interaction_factor_factor</td>
 <td align="left">0.276</td>
+<td align="left">-3.10, 3.65</td>
 <td align="left">The site effect on body_mass differs by 0.276 between
 sex = male and sex = female. Call
 <code>group_means(sym, by = c("site", "sex"))</code> to see each cell’s
@@ -1287,6 +1328,7 @@ expected response with confidence intervals.</td>
 <td align="left">site:sex</td>
 <td align="left">interaction_factor_factor</td>
 <td align="left">-2.13</td>
+<td align="left">-4.80, 0.534</td>
 <td align="left">The site effect on body_mass differs by -2.13 between
 sex = male and sex = female. Call
 <code>group_means(sym, by = c("site", "sex"))</code> to see each cell’s
@@ -1297,6 +1339,7 @@ expected response with confidence intervals.</td>
 <td align="left">site:sex</td>
 <td align="left">interaction_factor_factor</td>
 <td align="left">3.16</td>
+<td align="left">0.380, 5.95 *</td>
 <td align="left">The site effect on body_mass differs by 3.16 between
 sex = male and sex = female. Call
 <code>group_means(sym, by = c("site", "sex"))</code> to see each cell’s
@@ -1307,11 +1350,14 @@ expected response with confidence intervals.</td>
 <td align="left">(Intercept)</td>
 <td align="left">intercept</td>
 <td align="left">1.03</td>
+<td align="left">0.905, 1.16 *</td>
 <td align="left">Baseline level of unexplained individual variation in
 body_mass</td>
 </tr>
 </tbody>
 </table>
+<p><em>Rows marked <code>*</code> have a 95% confidence interval that
+excludes zero (CI method: <code>wald</code>).</em></p>
 <p>Three interaction rows are again silent. Read the cell-mean
 translations above in their place.</p>
 <p><strong>Takeaway.</strong> A factor-by-factor interaction coefficient

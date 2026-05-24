@@ -71,15 +71,15 @@ print(parameter_interpretation(sym, scale = "biological"))
 #> ── Parameter interpretation ("biological") ──
 #> 
 #> ── submodel: mu
-#> (Intercept) ["intercept"] estimate = "2.02"
+#> (Intercept) ["intercept"] estimate = "2.02" (1.93, 2.11) *
 #> biological: Baseline geometric mean of y in the reference condition is
 #> exp(2.02)
-#> x ["slope"] estimate = "-0.0136"
+#> x ["slope"] estimate = "-0.0136" (-0.102, 0.0751)
 #> biological: A unit change in x multiplies the geometric mean of y by
 #> exp(-0.0136)
 #> 
 #> ── submodel: sigma
-#> (Intercept) ["intercept"] estimate = "-0.764"
+#> (Intercept) ["intercept"] estimate = "-0.764" (-0.903, -0.626) *
 #> biological: Baseline level of unexplained variability on the log scale
 ```
 

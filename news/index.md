@@ -1,5 +1,37 @@
 # Changelog
 
+## symbolizer 0.7.0
+
+### v0.7 — glmmTMB
+
+- New:
+  [`symbolize.glmmTMB()`](https://itchyshin.github.io/symbolizer/reference/symbolize.glmmTMB.md)
+  (first slice). Builds a `symbolized_model` from a `glmmTMB` fit for
+  the Gaussian conditional submodel (identity link), with optional
+  `(1 | g)` random intercepts and an optional `dispformula = ~ z`
+  distributional sigma submodel. Non-Gaussian families and
+  zero-inflation are routed through the capability registry as “Planned
+  or reserved” for now.
+- The new extractor reuses the prose layer (assumption / interpretation
+  / symbol-dictionary / formula-bridge builders) by producing the same
+  tibble shapes as
+  [`symbolize.drmTMB()`](https://itchyshin.github.io/symbolizer/reference/symbolize.drmTMB.md).
+  Family-keyed CSVs in `inst/extdata/` drive prose, so a Gaussian
+  glmmTMB fit produces the same teachable readings as the drmTMB
+  equivalent.
+- Confidence intervals come from
+  `glmmTMB::confint(fit, parm = "beta_", method = ci_method)`. Default
+  `ci_method = "wald"`; `"profile"` and `"uniroot"` available.
+
+### Fixes
+
+- `parameter_interpretation(sym, scale = ...)` now carries the
+  confidence-band columns (`std_error`, `confint_low`, `confint_high`,
+  `excludes_zero`, `ci_method`) on every scale, not just
+  `scale = "all"`. Previously these were dropped when the user picked a
+  specific scale, so the rendered Markdown / pkgdown table omitted the
+  CI band even though the underlying interpretation tibble had it.
+
 ## symbolizer 0.6.0
 
 ### v0.6 — model diagrams

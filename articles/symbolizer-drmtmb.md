@@ -184,12 +184,15 @@ reads each coefficient on every relevant scale at once:
 parameter_interpretation(sym)
 ```
 
-| submodel | term_label | coefficient_role | estimate | link_scale_reading | natural_scale_reading | variance_scale_reading | biological_reading |
-|:---|:---|:---|:---|:---|:---|:---|:---|
-| mu | (Intercept) | intercept | 31.3 | Expected body_mass at the reference | Expected body_mass for the reference case | — | Baseline body_mass in the reference condition |
-| mu | temperature | slope | 0.311 | Linear change in expected body_mass per unit of temperature | Expected body_mass changes by 0.311 per unit of temperature | — | A unit change in temperature shifts the expected body_mass by 0.311 |
-| sigma | (Intercept) | intercept | 0.222 | Log residual SD at the reference (SD = exp(0.222)) | Residual SD = exp(0.222) at the reference | Residual variance = exp(2\*0.222) | Baseline level of unexplained individual variation in body_mass |
-| sigma | temperature | slope | 0.0940 | Log residual SD changes by 0.0940 per unit of temperature | Residual SD multiplied by exp(0.0940) per unit of temperature | Residual variance multiplied by exp(2\*0.0940) per unit | A unit change in temperature multiplies the unexplained variability of body_mass by exp(0.0940) |
+| submodel | term_label | coefficient_role | estimate | 95% CI | link_scale_reading | natural_scale_reading | variance_scale_reading | biological_reading |
+|:---|:---|:---|:---|:---|:---|:---|:---|:---|
+| mu | (Intercept) | intercept | 31.3 | 27.1, 35.4 \* | Expected body_mass at the reference | Expected body_mass for the reference case | — | Baseline body_mass in the reference condition |
+| mu | temperature | slope | 0.311 | 0.0337, 0.588 \* | Linear change in expected body_mass per unit of temperature | Expected body_mass changes by 0.311 per unit of temperature | — | A unit change in temperature shifts the expected body_mass by 0.311 |
+| sigma | (Intercept) | intercept | 0.222 | -0.285, 0.729 | Log residual SD at the reference (SD = exp(0.222)) | Residual SD = exp(0.222) at the reference | Residual variance = exp(2\*0.222) | Baseline level of unexplained individual variation in body_mass |
+| sigma | temperature | slope | 0.0940 | 0.0662, 0.122 \* | Log residual SD changes by 0.0940 per unit of temperature | Residual SD multiplied by exp(0.0940) per unit of temperature | Residual variance multiplied by exp(2\*0.0940) per unit | A unit change in temperature multiplies the unexplained variability of body_mass by exp(0.0940) |
+
+*Rows marked `*` have a 95% confidence interval that excludes zero (CI
+method: `wald`).*
 
 The `variance_scale_reading` column is the one that does the work for
 sigma coefficients: it states the multiplicative effect on the residual
@@ -601,9 +604,12 @@ rho_rows <- parameter_interpretation(sym_biv)
 rho_rows[rho_rows$submodel == "rho12", ]
 ```
 
-| submodel | term_label | coefficient_role | estimate | link_scale_reading | natural_scale_reading | variance_scale_reading | biological_reading |
-|:---|:---|:---|:---|:---|:---|:---|:---|
-| rho12 | (Intercept) | intercept | 0.674 | Fisher-z residual correlation at the reference: tanh^{-1}(0.674) | Residual correlation rho12 = tanh(0.674) at the reference | Residual covariance at the reference is tanh(0.674) \* sigma_1 \* sigma_2 | Two responses share co-variation with baseline correlation tanh(0.674) |
+| submodel | term_label | coefficient_role | estimate | 95% CI | link_scale_reading | natural_scale_reading | variance_scale_reading | biological_reading |
+|:---|:---|:---|:---|:---|:---|:---|:---|:---|
+| rho12 | (Intercept) | intercept | 0.674 | 0.454, 0.894 \* | Fisher-z residual correlation at the reference: tanh^{-1}(0.674) | Residual correlation rho12 = tanh(0.674) at the reference | Residual covariance at the reference is tanh(0.674) \* sigma_1 \* sigma_2 | Two responses share co-variation with baseline correlation tanh(0.674) |
+
+*Rows marked `*` have a 95% confidence interval that excludes zero (CI
+method: `wald`).*
 
 **Takeaway.** The same `symbolized_model` interface scales from two
 submodels to five. `formula_bridge` shows the new submodels, the joint
