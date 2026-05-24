@@ -296,7 +296,47 @@ across-syndrome pairs are smaller.
 communalities tell you which traits live in the shared structure;
 trait-trait correlations show the syndrome blocks directly.
 
-## 7. Where the symbolized story helps
+## 7. Identifiability gotchas: rotation and sign of $\boldsymbol{\Lambda}_B$
+
+The loading matrix $\boldsymbol{\Lambda}_B$ is identified only up to
+**rotation** and **sign** when $d_B > 1$. Two fits that produce
+indistinguishable likelihoods can have entirely different-looking
+$\boldsymbol{\Lambda}_B$. This is the classical factor-analysis
+identifiability problem. The implied between-unit covariance
+$\boldsymbol{\Sigma}_B = \boldsymbol{\Lambda}_B \boldsymbol{\Lambda}_B^\top
++ \boldsymbol{\Psi}_B$ is invariant under rotation;
+$\boldsymbol{\Lambda}_B$ itself is not. The biologist's task is to
+read the *block structure* of $\boldsymbol{\Lambda}_B$, not the
+specific numbers in any one cell.
+
+A symbolizer surface is explicit about this. Two practical
+conventions exist, both surfaced in `assumption_table(sym)`:
+
+- **Lower-triangular $\boldsymbol{\Lambda}_B$** for *confirmatory* use
+  — pin the upper triangle to zero so each column has a designated
+  leading trait. This is the default identification gllvmTMB uses on
+  fitting. It produces a unique solution but its columns are not
+  maximally interpretable.
+- **Varimax-rotated $\boldsymbol{\Lambda}_B$** for *interpretation* —
+  rotate the fitted loadings so each axis loads strongly on a small
+  set of traits and near zero on the rest. The rotation is applied
+  *after* fitting and preserves $\boldsymbol{\Sigma}_B$. The column
+  labels may reorder under rotation; the block structure is what the
+  reader interprets.
+
+`symbolize.gllvmTMB()` returns the as-fit (lower-triangular)
+$\boldsymbol{\Lambda}_B$ in `sym$loadings`. The assumption rows for
+the fit carry a sentence each on the rotation and sign conventions
+so a reader does not mistake non-uniqueness for non-replicability.
+The varimax-rotated matrix shown earlier in Section 6 is the
+reader-facing presentation; the lower-triangular form is what the
+likelihood actually identifies.
+
+**Takeaway.** Rotation and sign ambiguity are *stated assumptions*,
+not bugs. The implied covariance is invariant; the loadings are not.
+Read the block structure, not the cell values.
+
+## 8. Where the symbolized story helps
 
 With five traits and two latents, the per-element index form
 $y_{ij} = \mu_j + \sum_{k} \lambda_{jk} z_{ik} + \epsilon_{ij}$ requires
@@ -321,29 +361,45 @@ readable one, that bridge is where the package earns its keep.
 **Takeaway.** Index form scales like $n \times T$; matrix form scales
 like one block. For GLLVMs the matrix form is the reader-friendly one.
 
-## 8. What v0.4 unlocks
+## 9. What's available now, what's next
 
-The accessors in section 6 — `getLoadings()`, `extract_communality()`,
-`extract_correlations()` — are gllvmTMB-side. v0.4 wraps them in the
-symbolizer surface so the same code that builds the Methods section
-of a location-scale paper also builds the Methods section of a
-latent-variable paper. Three concrete payoffs:
+The accessors in Section 6 — `getLoadings()`, `extract_communality()`,
+`extract_correlations()` — are gllvmTMB-side. The symbolizer surface
+wraps the Gaussian latent-variable case as a **First slice**: every
+piece walked above is shipped today, and the matrix-form story is
+fully populated.
 
-1. **Two-model comparison.** `compare_symbolic(fit_d1, fit_d2)` will
-   diff the structural specifications of $d_B = 1$ versus $d_B = 2$
-   side by side — which lines change, which symbols change, which
-   assumption rows change — so a reader can audit the model choice.
+**Shipped today (v0.2):**
+
+- `symbolize.gllvmTMB()` for Gaussian latent variables with mu,
+  $\boldsymbol{\Lambda}_B$, $\boldsymbol{\Sigma}_B$,
+  $\boldsymbol{\Psi}_B$, and the within-unit residual SD
+  $\sigma_\varepsilon$.
+- `compare_symbolic(fit_d1, fit_d2)` — diffs the structural
+  specifications of $d_B = 1$ versus $d_B = 2$ side by side
+  (which lines change, which assumption rows change), and with
+  `metrics = TRUE` also returns AIC / BIC / log-likelihood / df
+  with the delta. See `vignette("symbolizer-compare")` for the
+  worked example.
+
+**On the roadmap:**
+
+1. **Non-Gaussian gllvmTMB families (v0.5).** binomial, count,
+   beta-binomial — each adds a link to the linear predictor and
+   reshapes the loadings interpretation.
 2. **Automated syndromes reading.**
-   `parameter_interpretation(sym, scale = "biological")` will produce
-   one row per (trait, axis) pair, reading each $\lambda_{jk}$ on the
-   natural scale of trait $j$.
-3. **Uncertainty on $\boldsymbol{\Lambda}$.** `bootstrap_Sigma()` from
-   gllvmTMB already returns parametric-bootstrap draws of the loading
-   matrix; v0.4 surfaces them through `symbolize()` so the
-   `symbol_table()` rows for $\boldsymbol{\Lambda}$ and
-   $\boldsymbol{\Sigma}_B$ carry confidence regions, not just point
-   estimates.
+   `parameter_interpretation(sym, scale = "biological")` produces
+   one row per (trait, axis) pair today; v0.5+ adds the
+   natural-scale reading for non-Gaussian families.
+3. **Uncertainty on $\boldsymbol{\Lambda}$.** `bootstrap_Sigma()`
+   from gllvmTMB returns parametric-bootstrap draws of the loading
+   matrix; a future slice will surface these through `symbolize()`
+   so the `symbol_table()` rows for $\boldsymbol{\Lambda}$ and
+   $\boldsymbol{\Sigma}_B$ carry confidence regions, not just
+   point estimates.
+4. **Within-unit decomposition** ($\boldsymbol{\Sigma}_W$,
+   $\boldsymbol{\Lambda}_W$) for repeated-measures behaviour /
+   trait data — `gllvmTMB_multi`.
 
-**Takeaway.** v0.4 is the slice that makes latent-variable models
-first-class in symbolizer; the gllvmTMB side already returns the
-structural pieces.
+**Takeaway.** v0.2 ships the latent-variable Gaussian case
+end-to-end; further families and uncertainty surfaces come in v0.5+.
