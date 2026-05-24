@@ -189,21 +189,27 @@ Pre-release. Read status words consistently:
 | Planned or reserved | Public grammar may exist, but [`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md) should reject it as design-only. |
 | Unsupported | Do not use as analysis syntax; fit the nearest implemented model. |
 
-### Capability matrix (v0.1 – v0.2)
+### Capability matrix (v0.1 – v0.3)
 
 | Surface | Status |
 |----|----|
 | `drmTMB` Gaussian location-scale, fixed effects (μ + σ submodels) | Stable |
-| `drmTMB` Gaussian random intercepts `(1 \| group)` | First slice |
+| `drmTMB` Gaussian random intercepts `(1 \| group)` and random slopes `(1 + x \| group)` on μ | First slice (v0.3.1) |
 | `drmTMB` bivariate Gaussian (`mu1`, `mu2`, `sigma1`, `sigma2`, `rho12`) | First slice (v0.2) |
+| `drmTMB` Student-t (`mu`, `sigma`, `nu` via `log(nu-2)` link) | First slice (v0.3) |
+| `drmTMB` lognormal, Gamma | First slice (v0.3) |
+| `drmTMB` beta, beta_binomial | First slice (v0.3) |
+| `drmTMB` Poisson, nbinom2, truncated_nbinom2 | First slice (v0.3) |
 | `gllvmTMB` Gaussian latent variables (mu, Λ_B, Σ_B, Ψ_B, σ_eps) | First slice |
 | [`model_card()`](https://itchyshin.github.io/symbolizer/reference/model_card.md) teaching bundle (equation + assumptions + readings + extraction calls) | First slice |
 | [`parameter_interpretation()`](https://itchyshin.github.io/symbolizer/reference/parameter_interpretation.md) confidence bands (Wald / profile) | First slice (v0.1.1) |
-| [`group_means()`](https://itchyshin.github.io/symbolizer/reference/group_means.md), [`group_slopes()`](https://itchyshin.github.io/symbolizer/reference/group_slopes.md) via `emmeans` | First slice (v0.1.1) |
-| `drmTMB` non-Gaussian families, ZI, hurdle | Planned |
+| [`group_means()`](https://itchyshin.github.io/symbolizer/reference/group_means.md), [`group_slopes()`](https://itchyshin.github.io/symbolizer/reference/group_slopes.md) via `emmeans` (response- and link-scale) | First slice (v0.1.1, response default in v0.3.1) |
+| [`compare_symbolic()`](https://itchyshin.github.io/symbolizer/reference/compare_symbolic.md) structural diff + optional AIC/BIC metrics | First slice (v0.2) |
+| [`methods_text()`](https://itchyshin.github.io/symbolizer/reference/methods_text.md) draft Methods-section paragraph (template-based) | First slice (v0.2.1) |
+| [`warning_table()`](https://itchyshin.github.io/symbolizer/reference/warning_table.md) per-fit prose warnings | First slice (v0.2.1) |
+| `drmTMB` zero-inflation, hurdle, cumulative_logit | Planned |
 | `gllvmTMB` non-Gaussian families, within-unit decompositions, phylo / spatial | Planned |
 | `glmmTMB`, `brms`, `MCMCglmm`, `sdmTMB`, `lme4`, `lm`/`glm` | Planned (see roadmap) |
-| [`compare_symbolic()`](https://itchyshin.github.io/symbolizer/reference/compare_symbolic.md), [`methods_text()`](https://itchyshin.github.io/symbolizer/reference/methods_text.md), model diagrams | Planned (v0.2 to v0.5) |
 
 See
 [`symbolizer_capabilities()`](https://itchyshin.github.io/symbolizer/reference/symbolizer_capabilities.md)
@@ -218,12 +224,15 @@ refused by
 |----|----|
 | v0.1 (released) | drmTMB Gaussian location-scale + (1 \| group); gllvmTMB Gaussian latent variables (First slice); [`explain()`](https://itchyshin.github.io/symbolizer/reference/explain.md) / [`model_card()`](https://itchyshin.github.io/symbolizer/reference/model_card.md) / dual notation |
 | v0.1.1 (released) | Confidence bands via `drmTMB::confint`; marginal estimates via `emmeans` wrappers (`group_means`, `group_slopes`); intercept-less pedagogy; factors-vignette enrichment |
-| v0.2 (current) | Bivariate Gaussian `rho12` / coscale extractor (drmTMB) — landed; structural model comparison (`compare_symbolic`) — in progress |
-| v0.3 | Teaching and writing layer (`methods_text`, warnings, family sheets) |
-| v0.4 | Non-Gaussian drmTMB families (Student-t, lognormal, gamma, beta, beta-binomial, Poisson, nbinom2, cumulative_logit) |
+| v0.2 (released) | Bivariate Gaussian `rho12` / coscale extractor; [`compare_symbolic()`](https://itchyshin.github.io/symbolizer/reference/compare_symbolic.md) structural diff (+ optional AIC/BIC) |
+| v0.2.1 (released) | [`methods_text()`](https://itchyshin.github.io/symbolizer/reference/methods_text.md) draft Methods paragraphs; [`warning_table()`](https://itchyshin.github.io/symbolizer/reference/warning_table.md) per-fit prose warnings; biv_gaussian gate on `group_means` |
+| v0.3 (released) | Seven non-Gaussian drmTMB families (Student-t, lognormal, Gamma, beta, beta_binomial, Poisson, nbinom2, truncated_nbinom2); families-distributions CSV refactor so future families are CSV-only |
+| v0.3.1 (released) | Random slopes `(1 + x \| group)` on μ; response-scale default for `group_means` / `group_slopes`; bigger pkgdown hex |
+| v0.3.2 (current) | More CSV-only families (beta_binomial, truncated_nbinom2) + non-Gaussian families tour vignette |
+| v0.4 | `drmTMB` zero-inflation / hurdle / cumulative_logit; multi-slope correlated RE if drmTMB supports it |
 | v0.5 | gllvmTMB non-Gaussian families and `gllvmTMB_multi` |
 | v0.6 | Diagrams and notebooks |
-| v0.7 | `glmmTMB` |
+| v0.7 | `glmmTMB` (including nested random effects via `(1 \| site/transect)`) |
 | v0.8 | `brms` |
 | v0.9 | `MCMCglmm` |
 | v0.10 | `sdmTMB`, `lme4`, `lm`, `glm` |

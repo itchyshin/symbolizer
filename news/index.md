@@ -1,8 +1,8 @@
 # Changelog
 
-## symbolizer 0.3.1.9000 (development)
+## symbolizer 0.3.2
 
-### v0.3.2 (in progress)
+### v0.3.2 — two more families, families-tour vignette, README refresh
 
 - Two more non-Gaussian families ship via the CSV-only path:
   - **beta_binomial**
