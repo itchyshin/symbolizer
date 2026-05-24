@@ -1,8 +1,8 @@
 # Changelog
 
-## symbolizer 0.3.0.9000 (development)
+## symbolizer 0.3.1
 
-### v0.3.1 (in progress)
+### v0.3.1 — random slopes, response-scale group_means, bigger hex
 
 - Random slopes now work:
   [`symbolize.drmTMB()`](https://itchyshin.github.io/symbolizer/reference/symbolize.drmTMB.md)
