@@ -354,16 +354,17 @@ tibbles, ready for downstream renderers:
 ``` r
 
 sym_re$random_effects
-#> # A tibble: 1 × 8
-#>   submodel term_label lhs_expr group_var n_levels u_symbol_index u_symbol_matrix
-#>   <chr>    <chr>      <chr>    <chr>        <int> <chr>          <chr>          
-#> 1 mu       (1 | site) 1        site             6 u_{site(i)}    "\\mathbf{u}"  
-#> # ℹ 1 more variable: sigma_symbol <chr>
+#> # A tibble: 1 × 11
+#>   submodel term_label lhs_expr group_var component   n_levels component_index
+#>   <chr>    <chr>      <chr>    <chr>     <chr>          <int>           <int>
+#> 1 mu       (1 | site) 1        site      (Intercept)        6               0
+#> # ℹ 4 more variables: u_symbol_index <chr>, u_symbol_matrix <chr>,
+#> #   sigma_symbol <chr>, predictor_factor <chr>
 sym_re$variance_components
-#> # A tibble: 1 × 6
-#>   submodel group_var parameter  symbol           n_levels description           
-#>   <chr>    <chr>     <chr>      <chr>               <int> <chr>                 
-#> 1 mu       site      sigma_site "\\sigma_{site}"        6 between-site standard…
+#> # A tibble: 1 × 7
+#>   submodel group_var component   parameter    symbol        n_levels description
+#>   <chr>    <chr>     <chr>       <chr>        <chr>            <int> <chr>      
+#> 1 mu       site      (Intercept) sigma_site_0 "\\sigma_{si…        6 between-si…
 ```
 
 `sd(site)` is the between-site standard deviation; the symbol table
@@ -797,7 +798,7 @@ caps[caps$class == "drmTMB", ]
 #>    <chr>  <chr>     <chr>          <chr>               <chr> <chr>              
 #>  1 drmTMB gaussian  mu             Stable              0.1.0 Univariate locatio…
 #>  2 drmTMB gaussian  sigma          Stable              0.1.0 Univariate scale s…
-#>  3 drmTMB gaussian  random_effects First slice         0.1.0 Gaussian random in…
+#>  3 drmTMB gaussian  random_effects First slice         0.3.1 Random intercepts …
 #>  4 drmTMB gaussian  zi             Planned or reserved NA    Zero-inflation sub…
 #>  5 drmTMB gaussian  hu             Planned or reserved NA    Hurdle submodel.   
 #>  6 drmTMB gaussian  rho12          Planned or reserved NA    Bivariate residual…

@@ -521,16 +521,17 @@ predictors and the random effects</td>
 tidy tibbles, ready for downstream renderers:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sym_re</span><span class="op">$</span><span class="va">random_effects</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 8</span></span></span>
-<span><span class="co">#&gt;   submodel term_label lhs_expr group_var n_levels u_symbol_index u_symbol_matrix</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> mu       (1 | site) 1        site             6 u_{site(i)}    <span style="color: #949494;">"</span>\\mathbf{u}<span style="color: #949494;">"</span>  </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: sigma_symbol &lt;chr&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 11</span></span></span>
+<span><span class="co">#&gt;   submodel term_label lhs_expr group_var component   n_levels component_index</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> mu       (1 | site) 1        site      (Intercept)        6               0</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4 more variables: u_symbol_index &lt;chr&gt;, u_symbol_matrix &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   sigma_symbol &lt;chr&gt;, predictor_factor &lt;chr&gt;</span></span></span>
 <span><span class="va">sym_re</span><span class="op">$</span><span class="va">variance_components</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 6</span></span></span>
-<span><span class="co">#&gt;   submodel group_var parameter  symbol           n_levels description           </span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> mu       site      sigma_site <span style="color: #949494;">"</span>\\sigma_{site}<span style="color: #949494;">"</span>        6 between-site standard…</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 7</span></span></span>
+<span><span class="co">#&gt;   submodel group_var component   parameter    symbol        n_levels description</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> mu       site      (Intercept) sigma_site_0 <span style="color: #949494;">"</span>\\sigma_{si…        6 between-si…</span></span></code></pre></div>
 <p><code>sd(site)</code> is the between-site standard deviation; the
 symbol table reports it as
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mrow><mi mathvariant="normal">s</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">e</mi></mrow></msub><annotation encoding="application/x-tex">\sigma_{\mathrm{site}}</annotation></semantics></math>.</p>
@@ -1145,7 +1146,7 @@ words: <strong>Stable</strong>, <strong>First slice</strong>,
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> drmTMB gaussian  mu             Stable              0.1.0 Univariate locatio…</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> drmTMB gaussian  sigma          Stable              0.1.0 Univariate scale s…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> drmTMB gaussian  random_effects First slice         0.1.0 Gaussian random in…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> drmTMB gaussian  random_effects First slice         0.3.1 Random intercepts …</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> drmTMB gaussian  zi             Planned or reserved <span style="color: #BB0000;">NA</span>    Zero-inflation sub…</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> drmTMB gaussian  hu             Planned or reserved <span style="color: #BB0000;">NA</span>    Hurdle submodel.   </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> drmTMB gaussian  rho12          Planned or reserved <span style="color: #BB0000;">NA</span>    Bivariate residual…</span></span>

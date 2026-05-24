@@ -228,11 +228,11 @@ three tabs over the same fit.
 as_html_three_views(sym, head = 5, tail = 2)
 ```
 
-[Skip three-views widget](#sym-sym-1779650000-end)
+[Skip three-views widget](#sym-sym-1779652986-end)
 
-    <button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779650000-tab-eq" aria-controls="sym-sym-1779650000-panel-eq" aria-selected="true" tabindex="0" data-tab="eq"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>1. Equation</button>
-    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779650000-tab-idx" aria-controls="sym-sym-1779650000-panel-idx" aria-selected="false" tabindex="-1" data-tab="idx"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>2. Index</button>
-    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779650000-tab-mat" aria-controls="sym-sym-1779650000-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>3. Matrix (with data)</button>
+    <button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779652986-tab-eq" aria-controls="sym-sym-1779652986-panel-eq" aria-selected="true" tabindex="0" data-tab="eq"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>1. Equation</button>
+    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779652986-tab-idx" aria-controls="sym-sym-1779652986-panel-idx" aria-selected="false" tabindex="-1" data-tab="idx"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>2. Index</button>
+    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779652986-tab-mat" aria-controls="sym-sym-1779652986-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>3. Matrix (with data)</button>
 
 The structural contract. No indices, no numbers – the shape of the
 model.
@@ -499,16 +499,17 @@ reports or other renderers:
 ``` r
 
 sym_re$random_effects
-#> # A tibble: 1 × 8
-#>   submodel term_label lhs_expr group_var n_levels u_symbol_index u_symbol_matrix
-#>   <chr>    <chr>      <chr>    <chr>        <int> <chr>          <chr>          
-#> 1 mu       (1 | grou… 1        group            6 u_{group(i)}   "\\mathbf{u}"  
-#> # ℹ 1 more variable: sigma_symbol <chr>
+#> # A tibble: 1 × 11
+#>   submodel term_label  lhs_expr group_var component   n_levels component_index
+#>   <chr>    <chr>       <chr>    <chr>     <chr>          <int>           <int>
+#> 1 mu       (1 | group) 1        group     (Intercept)        6               0
+#> # ℹ 4 more variables: u_symbol_index <chr>, u_symbol_matrix <chr>,
+#> #   sigma_symbol <chr>, predictor_factor <chr>
 sym_re$variance_components
-#> # A tibble: 1 × 6
-#>   submodel group_var parameter   symbol            n_levels description         
-#>   <chr>    <chr>     <chr>       <chr>                <int> <chr>               
-#> 1 mu       group     sigma_group "\\sigma_{group}"        6 between-group stand…
+#> # A tibble: 1 × 7
+#>   submodel group_var component   parameter     symbol       n_levels description
+#>   <chr>    <chr>     <chr>       <chr>         <chr>           <int> <chr>      
+#> 1 mu       group     (Intercept) sigma_group_0 "\\sigma_{g…        6 between-gr…
 ```
 
 **Takeaway.** The same object carries everything a reader needs to
@@ -534,7 +535,7 @@ symbolizer_capabilities()
 #>    <chr>  <chr>     <chr>          <chr>               <chr> <chr>              
 #>  1 drmTMB gaussian  mu             Stable              0.1.0 Univariate locatio…
 #>  2 drmTMB gaussian  sigma          Stable              0.1.0 Univariate scale s…
-#>  3 drmTMB gaussian  random_effects First slice         0.1.0 Gaussian random in…
+#>  3 drmTMB gaussian  random_effects First slice         0.3.1 Random intercepts …
 #>  4 drmTMB gaussian  zi             Planned or reserved NA    Zero-inflation sub…
 #>  5 drmTMB gaussian  hu             Planned or reserved NA    Hurdle submodel.   
 #>  6 drmTMB gaussian  rho12          Planned or reserved NA    Bivariate residual…

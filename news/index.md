@@ -4,6 +4,28 @@
 
 ### v0.3.1 (in progress)
 
+- Random slopes now work:
+  [`symbolize.drmTMB()`](https://itchyshin.github.io/symbolizer/reference/symbolize.drmTMB.md)
+  reads `(1 + x | group)` random-effect terms on the mu submodel
+  end-to-end. The mu linear predictor renders the contribution as
+  `+ u_{0, group(i)} + u_{1, group(i)} * x_i` (index form) and
+  `+ Z_group u_group` (matrix form). The joint MVN distribution of the
+  random components is rendered, plus a covariance-decomposition row
+  that spells out the 2x2 (or k x k) Sigma_u in terms of the
+  per-component SDs and the within-group correlation rho.
+- The data shape is extended (forward-compatibly): `random_effects`
+  gains `component`, `component_index`, and `predictor_factor` columns;
+  `variance_components` gains `component`; a new top-level slot
+  `covariance_components` carries the within-group correlations for
+  multi-component groups. The intercept-only case (`(1 | group)`) keeps
+  the historic simpler symbols and an empty `covariance_components`
+  slot, so existing code that assumed the old shape still works.
+- Capability row `drmTMB / gaussian / random_effects` updated to reflect
+  the broader scope; nested / crossed / RE-on-sigma remain Planned or
+  reserved.
+- The friendly capability gate now distinguishes two unsupported shapes:
+  RE on submodels other than mu, and slope-only RE without an intercept
+  (each gets its own error message).
 - [`group_means()`](https://itchyshin.github.io/symbolizer/reference/group_means.md)
   and
   [`group_slopes()`](https://itchyshin.github.io/symbolizer/reference/group_slopes.md)

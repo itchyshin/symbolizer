@@ -439,15 +439,15 @@ widget with three tabs over the same fit.</p>
 .sym-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .sym-skip { position: absolute; top: -100px; left: 0; padding: 0.4rem 0.7rem; background: #8a1f22; color: #fff; text-decoration: none; font-size: 0.85rem; z-index: 5; }
 .sym-skip:focus { top: 0; }</style>
-<div id="sym-sym-1779650000" class="sym-tabs">
-<a class="sym-skip" href="#sym-sym-1779650000-end">Skip three-views
+<div id="sym-sym-1779652986" class="sym-tabs">
+<a class="sym-skip" href="#sym-sym-1779652986-end">Skip three-views
 widget</a>
 <div class="sym-tablist" role="tablist" aria-label="Three views of the model">
-<pre><code>&lt;button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779650000-tab-eq" aria-controls="sym-sym-1779650000-panel-eq" aria-selected="true" tabindex="0" data-tab="eq"&gt;&lt;span class="sym-tab-marker" aria-hidden="true"&gt;&amp;#9656;&lt;/span&gt;1. Equation&lt;/button&gt;
-&lt;button type="button" class="sym-tab" role="tab" id="sym-sym-1779650000-tab-idx" aria-controls="sym-sym-1779650000-panel-idx" aria-selected="false" tabindex="-1" data-tab="idx"&gt;&lt;span class="sym-tab-marker" aria-hidden="true"&gt;&amp;#9656;&lt;/span&gt;2. Index&lt;/button&gt;
-&lt;button type="button" class="sym-tab" role="tab" id="sym-sym-1779650000-tab-mat" aria-controls="sym-sym-1779650000-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat"&gt;&lt;span class="sym-tab-marker" aria-hidden="true"&gt;&amp;#9656;&lt;/span&gt;3. Matrix (with data)&lt;/button&gt;</code></pre>
+<pre><code>&lt;button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779652986-tab-eq" aria-controls="sym-sym-1779652986-panel-eq" aria-selected="true" tabindex="0" data-tab="eq"&gt;&lt;span class="sym-tab-marker" aria-hidden="true"&gt;&amp;#9656;&lt;/span&gt;1. Equation&lt;/button&gt;
+&lt;button type="button" class="sym-tab" role="tab" id="sym-sym-1779652986-tab-idx" aria-controls="sym-sym-1779652986-panel-idx" aria-selected="false" tabindex="-1" data-tab="idx"&gt;&lt;span class="sym-tab-marker" aria-hidden="true"&gt;&amp;#9656;&lt;/span&gt;2. Index&lt;/button&gt;
+&lt;button type="button" class="sym-tab" role="tab" id="sym-sym-1779652986-tab-mat" aria-controls="sym-sym-1779652986-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat"&gt;&lt;span class="sym-tab-marker" aria-hidden="true"&gt;&amp;#9656;&lt;/span&gt;3. Matrix (with data)&lt;/button&gt;</code></pre>
 </div>
-<div id="sym-sym-1779650000-panel-eq" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-sym-1779650000-tab-eq" data-panel="eq" tabindex="0">
+<div id="sym-sym-1779652986-panel-eq" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-sym-1779652986-tab-eq" data-panel="eq" tabindex="0">
 <p class="sym-caption">
 The structural contract. No indices, no numbers – the shape of the
 model.
@@ -460,7 +460,7 @@ model.
 \end{aligned}</annotation></semantics></math>
 </div>
 </div>
-<div id="sym-sym-1779650000-panel-idx" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1779650000-tab-idx" data-panel="idx" hidden="" tabindex="0">
+<div id="sym-sym-1779652986-panel-idx" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1779652986-tab-idx" data-panel="idx" hidden="" tabindex="0">
 <p class="sym-caption">
 What happens for each observation <em>i</em>.
 </p>
@@ -472,7 +472,7 @@ W_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 \end{aligned}</annotation></semantics></math>
 </div>
 </div>
-<div id="sym-sym-1779650000-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1779650000-tab-mat" data-panel="mat" hidden="" tabindex="0">
+<div id="sym-sym-1779652986-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1779652986-tab-mat" data-panel="mat" hidden="" tabindex="0">
 <p class="sym-caption">
 The actual numbers stacked – what the computer is multiplying. Showing
 first 5 and last 2 rows of n = 80.
@@ -513,9 +513,9 @@ coefficient vector beta listed below.</span>
 </pre>
 </div>
 </div>
-<span id="sym-sym-1779650000-end" tabindex="-1"></span>
+<span id="sym-sym-1779652986-end" tabindex="-1"></span>
 <script>(function() {
-  var root = document.getElementById("sym-sym-1779650000");
+  var root = document.getElementById("sym-sym-1779652986");
   if (!root) return;
   var tabs   = Array.prototype.slice.call(root.querySelectorAll("[role="tab"]"));
   var panels = Array.prototype.slice.call(root.querySelectorAll("[role="tabpanel"]"));
@@ -1013,16 +1013,17 @@ u_{group} &amp; \sim \mathcal{N}(0,\, \sigma_{group}^2)
 reports or other renderers:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sym_re</span><span class="op">$</span><span class="va">random_effects</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 8</span></span></span>
-<span><span class="co">#&gt;   submodel term_label lhs_expr group_var n_levels u_symbol_index u_symbol_matrix</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> mu       (1 | grou… 1        group            6 u_{group(i)}   <span style="color: #949494;">"</span>\\mathbf{u}<span style="color: #949494;">"</span>  </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: sigma_symbol &lt;chr&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 11</span></span></span>
+<span><span class="co">#&gt;   submodel term_label  lhs_expr group_var component   n_levels component_index</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> mu       (1 | group) 1        group     (Intercept)        6               0</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4 more variables: u_symbol_index &lt;chr&gt;, u_symbol_matrix &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   sigma_symbol &lt;chr&gt;, predictor_factor &lt;chr&gt;</span></span></span>
 <span><span class="va">sym_re</span><span class="op">$</span><span class="va">variance_components</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 6</span></span></span>
-<span><span class="co">#&gt;   submodel group_var parameter   symbol            n_levels description         </span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> mu       group     sigma_group <span style="color: #949494;">"</span>\\sigma_{group}<span style="color: #949494;">"</span>        6 between-group stand…</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 7</span></span></span>
+<span><span class="co">#&gt;   submodel group_var component   parameter     symbol       n_levels description</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> mu       group     (Intercept) sigma_group_0 <span style="color: #949494;">"</span>\\sigma_{g…        6 between-gr…</span></span></code></pre></div>
 <p><strong>Takeaway.</strong> The same object carries everything a
 reader needs to discuss random structure — what is grouped, how many
 levels, and which between-group SD (<code>sd(group)</code>) goes with
@@ -1046,7 +1047,7 @@ matrix for later versions.</p>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> drmTMB gaussian  mu             Stable              0.1.0 Univariate locatio…</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> drmTMB gaussian  sigma          Stable              0.1.0 Univariate scale s…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> drmTMB gaussian  random_effects First slice         0.1.0 Gaussian random in…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> drmTMB gaussian  random_effects First slice         0.3.1 Random intercepts …</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> drmTMB gaussian  zi             Planned or reserved <span style="color: #BB0000;">NA</span>    Zero-inflation sub…</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> drmTMB gaussian  hu             Planned or reserved <span style="color: #BB0000;">NA</span>    Hurdle submodel.   </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> drmTMB gaussian  rho12          Planned or reserved <span style="color: #BB0000;">NA</span>    Bivariate residual…</span></span>
