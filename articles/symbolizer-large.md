@@ -345,10 +345,10 @@ parameter_interpretation(sym)
 | mu | (Intercept) | intercept | 5.55 | Expected body_mass at the reference | Expected body_mass for the reference case | — | Baseline body_mass in the reference condition |
 | mu | temperature | slope | 0.531 | Linear change in expected body_mass per unit of temperature | Expected body_mass changes by 0.531 per unit of temperature | — | A unit change in temperature shifts the expected body_mass by 0.531 |
 | mu | log(food) | transformation | 1.75 | Linear change in expected body_mass per unit of log(food) | Expected body_mass changes by 1.75 per unit of log(food) | — | A unit change in log(food) shifts the expected body_mass by 1.75 |
-| mu | sex | factor_contrast | 2.52 | Difference in expected body_mass for male versus the reference | Expected body_mass for male differs from the reference by 2.52 | — | Average body_mass differs between male and the reference |
+| mu | sex | factor_contrast | 2.52 | Difference in expected body_mass between sex = male and the reference (female) | Expected body_mass for sex = male differs from sex = female by 2.52 | — | Average body_mass differs between male and female by 2.52 |
 | sigma | (Intercept) | intercept | 0.221 | Log residual SD at the reference (SD = exp(0.221)) | Residual SD = exp(0.221) at the reference | Residual variance = exp(2\*0.221) | Baseline level of unexplained individual variation in body_mass |
 | sigma | temperature | slope | 0.0546 | Log residual SD changes by 0.0546 per unit of temperature | Residual SD multiplied by exp(0.0546) per unit of temperature | Residual variance multiplied by exp(2\*0.0546) per unit | A unit change in temperature multiplies the unexplained variability of body_mass by exp(0.0546) |
-| sigma | sex | factor_contrast | 0.0332 | Log residual SD differs by 0.0332 for male versus the reference | Residual SD for male = exp(0.0332) times the reference SD | Residual variance for male = exp(2\*0.0332) times the reference | Individual-level variation differs between male and the reference by a factor of exp(0.0332) |
+| sigma | sex | factor_contrast | 0.0332 | Log residual SD differs by 0.0332 between sex = male and sex = female | Residual SD for male is exp(0.0332) times the SD for female | Residual variance for male is exp(2\*0.0332) times the variance for female | Unexplained variation in body_mass differs between male and female by a factor of exp(0.0332) |
 
 For this fit, the most informative comparison is the `temperature` slope
 on each submodel.

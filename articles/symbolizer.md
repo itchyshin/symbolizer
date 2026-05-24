@@ -37,6 +37,33 @@ quickest possible map of what each word means in a biology context.
 | latent variable | an unmeasured axis the model uses to explain shared variation in multiple traits or species. (Used in gllvmTMB.) |
 | loading | how strongly a single trait or species responds to a latent axis. |
 
+### How a factor becomes 0/1 columns
+
+When you put a factor like `sex` (with levels `female`, `male`) in a
+formula, R automatically encodes the non-reference levels as **dummy
+variables**: 0/1 columns the model can multiply by coefficients.
+
+| Observation | sex    | sexmale (dummy column) |
+|-------------|--------|------------------------|
+| 1           | female | 0                      |
+| 2           | male   | 1                      |
+| 3           | female | 0                      |
+
+For a `k`-level factor, R makes `k-1` dummy columns. The first level
+(alphabetical by default) is the **reference**: it doesn’t get a column
+of its own and lives inside the intercept.
+[`symbol_table()`](https://itchyshin.github.io/symbolizer/reference/symbol_table.md)
+marks the reference explicitly – look for the `[reference]` tag in the
+description.
+
+The `sexmale` coefficient is the *difference* between male and female
+means at the reference values of any other predictors, not the male mean
+itself.
+
+**Takeaway.** A k-level factor produces k-1 dummy columns. The reference
+level lives inside the intercept; each contrast coefficient is a
+*difference* from the reference.
+
 **Takeaway.** If a word above is unfamiliar, treat the next section as a
 hands-on definition by example.
 
@@ -201,11 +228,11 @@ three tabs over the same fit.
 as_html_three_views(sym, head = 5, tail = 2)
 ```
 
-[Skip three-views widget](#sym-sym-1779583543-end)
+[Skip three-views widget](#sym-sym-1779584434-end)
 
-    <button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779583543-tab-eq" aria-controls="sym-sym-1779583543-panel-eq" aria-selected="true" tabindex="0" data-tab="eq"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>1. Equation</button>
-    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779583543-tab-idx" aria-controls="sym-sym-1779583543-panel-idx" aria-selected="false" tabindex="-1" data-tab="idx"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>2. Index</button>
-    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779583543-tab-mat" aria-controls="sym-sym-1779583543-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>3. Matrix (with data)</button>
+    <button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779584434-tab-eq" aria-controls="sym-sym-1779584434-panel-eq" aria-selected="true" tabindex="0" data-tab="eq"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>1. Equation</button>
+    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779584434-tab-idx" aria-controls="sym-sym-1779584434-panel-idx" aria-selected="false" tabindex="-1" data-tab="idx"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>2. Index</button>
+    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779584434-tab-mat" aria-controls="sym-sym-1779584434-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>3. Matrix (with data)</button>
 
 The structural contract. No indices, no numbers – the shape of the
 model.
