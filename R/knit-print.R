@@ -128,6 +128,80 @@ knit_print.notation_bridge <- function(x, ...) {
 }
 
 #' @exportS3Method knitr::knit_print
+knit_print.symbolizer_model_card <- function(x, ...) {
+  if (!requireNamespace("knitr", quietly = TRUE)) {
+    return(print(x))
+  }
+  meta <- x$meta
+  header <- sprintf(
+    "## Model card: `%s` model\n\n%s (`%s`) -- family `%s` -- response `%s` (n = %d).",
+    meta$class, meta$class, meta$package, meta$family,
+    meta$response, meta$n_obs
+  )
+  context <- if (!is.null(meta$context) && nzchar(meta$context)) {
+    sprintf("\nContext: *%s*", meta$context)
+  } else ""
+  sections <- list(
+    list(title = "Equations",                              obj = x$equation),
+    list(title = "Symbols",                                obj = x$symbols),
+    list(title = "Assumptions",                            obj = x$assumptions),
+    list(title = "Notation bridge (index vs matrix)",      obj = x$bridge),
+    list(title = "Formula bridge (R syntax to math)",      obj = x$formula_bridge),
+    list(title = "Parameter interpretation",               obj = x$interpretation)
+  )
+  parts <- c(header, context, "")
+  for (s in sections) {
+    rendered <- knitr::knit_print(s$obj)
+    parts <- c(
+      parts,
+      sprintf("### %s", s$title),
+      "",
+      as.character(rendered),
+      ""
+    )
+  }
+  ec <- x$extraction_calls
+  parts <- c(parts, "### Extraction calls", "")
+  if (length(ec) == 0L) {
+    parts <- c(parts,
+               sprintf("*No extraction calls registered for class `%s`.*",
+                       meta$class),
+               "")
+  } else {
+    rows <- vapply(seq_along(ec), function(i) {
+      sprintf("| %s | `%s` |", names(ec)[[i]], ec[[i]])
+    }, character(1L))
+    parts <- c(
+      parts,
+      "| What you want | R code |",
+      "|---|---|",
+      rows,
+      ""
+    )
+  }
+  rp <- x$recommended_plots
+  parts <- c(parts, "### Recommended plots", "")
+  if (length(rp) == 0L) {
+    parts <- c(parts,
+               sprintf("*No plot recipes registered for class `%s`.*",
+                       meta$class),
+               "")
+  } else {
+    rows <- vapply(seq_along(rp), function(i) {
+      sprintf("| %s | %s |", names(rp)[[i]], rp[[i]])
+    }, character(1L))
+    parts <- c(
+      parts,
+      "| Plot | Recipe |",
+      "|---|---|",
+      rows,
+      ""
+    )
+  }
+  knitr::asis_output(paste(parts, collapse = "\n"))
+}
+
+#' @exportS3Method knitr::knit_print
 knit_print.symbolizer_equations <- function(x, ...) {
   notation <- attr(x, "notation", exact = TRUE) %||% "both"
   df <- as.data.frame(x, stringsAsFactors = FALSE)

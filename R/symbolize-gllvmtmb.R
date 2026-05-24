@@ -616,10 +616,13 @@ glm_build_assumptions <- function(response, response_symbol_scalar,
   # If there is no unique() term on the unit, drop the Psi-bearing rows only
   # if they explicitly depend on Psi -- the implied_between_unit_covariance row
   # already handles Psi_B = 0 in its prose, so we leave it.
+  root <- glm_response_symbol_root(response_symbol_scalar)
   mapping <- list(
     response = response,
     response_symbol = response_symbol_scalar,
-    response_symbol_matrix = response_symbol_matrix
+    response_symbol_matrix = response_symbol_matrix,
+    response_symbol_t = paste0(root, "_t"),
+    `response_symbol_t'` = paste0(root, "_{t'}")
   )
   drm_substitute <- get("drm_substitute", envir = asNamespace("symbolizer"))
   expr <- vapply(rows$expression_latex, drm_substitute,
@@ -634,6 +637,15 @@ glm_build_assumptions <- function(response, response_symbol_scalar,
     biological_meaning = meaning,
     status = rows$status
   )
+}
+
+# Strip the row-level subscript (e.g. "_{ij}" or "_i") from a response symbol
+# to recover the underlying root, used when forming per-trait variants like
+# y_t and y_{t'} for cross-trait assumption expressions.
+glm_response_symbol_root <- function(response_symbol) {
+  s <- sub("_\\{[^}]*\\}$", "", response_symbol)
+  s <- sub("_[A-Za-z0-9]+$", "", s)
+  s
 }
 
 glm_build_interpretation <- function(fixed_eff, loadings_tbl, response) {

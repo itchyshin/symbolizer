@@ -31,6 +31,7 @@ articles:
       - symbolizer
       - symbolizer-large
       - symbolizer-gllvm
+      - symbolizer-gllvm-design
       - symbolizer-vs-others
 
 reference:
@@ -42,6 +43,10 @@ reference:
     contents:
       - explain
       - summary.symbolized_model
+  - title: "Teaching bundle (one-call)"
+    desc: "model_card collects equation, assumptions, readings, extraction calls, recommended plots in one S3 object."
+    contents:
+      - model_card
   - title: "Build the structured symbolic object"
     desc: "The product. Renderers consume it; users override symbols, units, context here."
     contents:

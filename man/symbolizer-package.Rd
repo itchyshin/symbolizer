@@ -6,6 +6,8 @@
 \alias{symbolizer-package}
 \title{symbolizer: Structured Symbolic Specifications, Interpretations, and Teachable Stories for Modern Statistical Models}
 \description{
+\if{html}{\figure{logo.svg}{options: style='float: right' alt='logo' width='120'}}
+
 Turns fitted distributional, multivariate, latent-variable, and spatial regression models into structured symbolic specifications that render as publication-ready LaTeX equations, assumption tables, formula bridges, parameter interpretations, and (later) structural model comparisons, methods text, simulation recipes, and model graphs. Companion to 'drmTMB' and 'gllvmTMB'; complementary to 'equatiomatic' for one-formula models.
 }
 \seealso{

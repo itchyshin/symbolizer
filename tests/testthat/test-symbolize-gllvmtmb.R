@@ -124,6 +124,17 @@ test_that("assumptions are loaded from the gllvm_gaussian template family", {
   expect_match(rd, "value")
 })
 
+test_that("Gaussian gllvm assumption table includes covariance decomposition and identifiability", {
+  fit <- fit_gllvm_basic()
+  sym <- symbolize(fit)
+  at <- sym$assumptions
+  expect_true(any(at$assumption == "covariance_decomposition"))
+  expect_true(any(at$assumption == "loading_rotation_ambiguity"))
+  expect_true(any(at$assumption == "latent_score_distribution"))
+  expect_true(any(at$assumption == "conditional_independence_given_z"))
+  expect_true(any(at$assumption == "missing_response_cells"))
+})
+
 test_that("interpretation contains rows for trait intercepts and loadings", {
   fit <- fit_gllvm_basic()
   sym <- symbolize(fit)
