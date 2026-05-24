@@ -103,6 +103,14 @@ which terms, which assumption statuses differ.
 - [`compare_symbolic()`](https://itchyshin.github.io/symbolizer/reference/compare_symbolic.md)
   : Structural comparison of two symbolized models
 
+## Draft a Methods paragraph
+
+Turn a symbolized_model into a draft Methods-section paragraph (opt-in,
+template-based, never LLM).
+
+- [`methods_text()`](https://itchyshin.github.io/symbolizer/reference/methods_text.md)
+  : Methods-section paragraph from a symbolized model
+
 ## Internal: term-grammar bridge
 
 The R formula \<-\> model matrix \<-\> biological symbol layer that

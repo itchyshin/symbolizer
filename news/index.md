@@ -4,6 +4,18 @@
 
 ### v0.2.1 (in progress)
 
+- New: `methods_text(sym)` returns a draft Methods-section paragraph for
+  a fitted model — the kind of paragraph a biologist would otherwise
+  write by hand into a paper. The prose is composed from a CSV template
+  (`inst/extdata/methods-templates.csv`) using slots filled from the
+  `symbolized_model`. No LLM is involved at runtime; every phrase traces
+  to a template row plus the substituted slots. Returns a
+  `symbolizer_methods_text` S3 object with three slots: `text` (the
+  assembled paragraph), `slots` (the named substitutions), and
+  `reminders` (editorial reminders for the author). Templates ship for
+  `drmTMB / gaussian`, `drmTMB / biv_gaussian`, and
+  `gllvmTMB / gaussian`. Treat the output as a draft; the print method
+  appends a reminder to that effect.
 - [`group_means()`](https://itchyshin.github.io/symbolizer/reference/group_means.md)
   and
   [`group_slopes()`](https://itchyshin.github.io/symbolizer/reference/group_slopes.md)
