@@ -1,5 +1,30 @@
 # Changelog
 
+## symbolizer 0.1.1.9000 (development)
+
+### v0.2 (in progress) — bivariate Gaussian and structural comparison
+
+- [`symbolize.drmTMB()`](https://itchyshin.github.io/symbolizer/reference/symbolize.drmTMB.md)
+  reads bivariate Gaussian fits — the `biv_gaussian(y2 ~ ...)` family
+  from drmTMB — through the same structured surface used for univariate
+  fits. The response becomes a 2-vector `(Y_{1i}, Y_{2i})`, the
+  conditional distribution becomes `MVN_2((mu_{1i}, mu_{2i}), Sigma_i)`,
+  and the symbolic story now carries five submodels (`mu1`, `mu2`,
+  `sigma1`, `sigma2`, `rho12`).
+- New capability rows:
+  `drmTMB,biv_gaussian,{mu1,mu2,sigma1,sigma2,rho12}` flip from “Planned
+  or reserved” to “First slice”.
+- Per-submodel response handling: `interpretation` rows for `mu1` /
+  `sigma1` substitute `response_1`; `mu2` / `sigma2` substitute
+  `response_2`; `rho12` rows reference both.
+- `formula_bridge` carries one row per submodel including the new `mu1`,
+  `mu2`, `sigma1`, `sigma2`, `rho12` parts; the `rho12` meaning reads as
+  “Fisher-z residual correlation between {response_1} and {response_2}
+  is a linear function of the correlation-model predictors”.
+- Interpretation templates and assumption templates gain `biv_gaussian`
+  rows (`inst/extdata/interpretation-templates.csv` and
+  `inst/extdata/assumption-templates.csv`).
+
 ## symbolizer 0.1.1
 
 ### v0.1.1 — confidence bands, marginal estimates, and categorical pedagogy

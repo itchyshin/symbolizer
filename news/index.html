@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,6 +33,19 @@
       <small>Source: <a href="https://github.com/itchyshin/symbolizer/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.1.9000" id="symbolizer-0119000-development">symbolizer 0.1.1.9000 (development)<a class="anchor" aria-label="anchor" href="#symbolizer-0119000-development"></a></h2>
+<div class="section level3">
+<h3 id="v02-in-progress--bivariate-gaussian-and-structural-comparison-0-1-1-9000">v0.2 (in progress) — bivariate Gaussian and structural comparison<a class="anchor" aria-label="anchor" href="#v02-in-progress--bivariate-gaussian-and-structural-comparison-0-1-1-9000"></a></h3>
+<ul><li>
+<code><a href="../reference/symbolize.drmTMB.html">symbolize.drmTMB()</a></code> reads bivariate Gaussian fits — the <code>biv_gaussian(y2 ~ ...)</code> family from drmTMB — through the same structured surface used for univariate fits. The response becomes a 2-vector <code>(Y_{1i}, Y_{2i})</code>, the conditional distribution becomes <code>MVN_2((mu_{1i}, mu_{2i}), Sigma_i)</code>, and the symbolic story now carries five submodels (<code>mu1</code>, <code>mu2</code>, <code>sigma1</code>, <code>sigma2</code>, <code>rho12</code>).</li>
+<li>New capability rows: <code>drmTMB,biv_gaussian,{mu1,mu2,sigma1,sigma2,rho12}</code> flip from “Planned or reserved” to “First slice”.</li>
+<li>Per-submodel response handling: <code>interpretation</code> rows for <code>mu1</code> / <code>sigma1</code> substitute <code>response_1</code>; <code>mu2</code> / <code>sigma2</code> substitute <code>response_2</code>; <code>rho12</code> rows reference both.</li>
+<li>
+<code>formula_bridge</code> carries one row per submodel including the new <code>mu1</code>, <code>mu2</code>, <code>sigma1</code>, <code>sigma2</code>, <code>rho12</code> parts; the <code>rho12</code> meaning reads as “Fisher-z residual correlation between {response_1} and {response_2} is a linear function of the correlation-model predictors”.</li>
+<li>Interpretation templates and assumption templates gain <code>biv_gaussian</code> rows (<code>inst/extdata/interpretation-templates.csv</code> and <code>inst/extdata/assumption-templates.csv</code>).</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.1" id="symbolizer-011">symbolizer 0.1.1<a class="anchor" aria-label="anchor" href="#symbolizer-011"></a></h2>
 <div class="section level3">

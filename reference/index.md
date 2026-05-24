@@ -33,7 +33,7 @@ context here.
 - [`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
   : Symbolize a fitted statistical model
 - [`symbolize(`*`<drmTMB>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.drmTMB.md)
-  : Symbolize a drmTMB fit (Gaussian location-scale, v0.1)
+  : Symbolize a drmTMB fit (Gaussian and bivariate Gaussian, v0.1)
 - [`symbolize(`*`<gllvmTMB>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.gllvmTMB.md)
   : Symbolize a gllvmTMB fit (Gaussian latent-variable, v0.1)
 - [`symbolizer_capabilities()`](https://itchyshin.github.io/symbolizer/reference/symbolizer_capabilities.md)

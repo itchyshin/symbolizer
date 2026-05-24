@@ -1,10 +1,13 @@
-# Symbolize a drmTMB fit (Gaussian location-scale, v0.1)
+# Symbolize a drmTMB fit (Gaussian and bivariate Gaussian, v0.1)
 
 Builds a
 [`symbolized_model`](https://itchyshin.github.io/symbolizer/reference/new_symbolized_model.md)
 from a `drmTMB` fit. v0.1 covers the Gaussian location-scale
-fixed-effects path; other families and components return capability
-errors via
+fixed-effects path (with optional `(1 | group)` random intercepts on
+`mu`) and the bivariate Gaussian
+([`biv_gaussian()`](https://itchyshin.github.io/drmTMB/reference/biv_gaussian.html))
+location-scale-correlation path. Other families and components return
+capability errors via
 [`capability_check()`](https://itchyshin.github.io/symbolizer/reference/capability_check.md).
 
 ## Usage
