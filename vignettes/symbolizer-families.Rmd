@@ -14,6 +14,13 @@ knitr::opts_chunk$set(
   comment  = "#>",
   eval     = has_drmTMB
 )
+
+# Render a single LaTeX string as a display-math block. Use this for the
+# distribution line on each family. The returned value is asis_output, so
+# it must be the last expression in the chunk.
+render_math <- function(x) {
+  knitr::asis_output(paste0("\n$$\n", x, "\n$$\n"))
+}
 ```
 
 > *Eight distribution families ship today. The biology of each one is
@@ -53,7 +60,7 @@ dat <- data.frame(
 fit <- drmTMB(drm_formula(y ~ x, sigma ~ 1, nu ~ 1),
               family = student(), data = dat)
 sym <- symbolize(fit)
-cat(sym$distribution$latex, "\n")
+render_math(sym$distribution$latex)
 ```
 
 **Coefficient reading on mu:** identical to Gaussian — a slope on
@@ -92,7 +99,7 @@ dat <- data.frame(y = rgamma(n, shape = 2, rate = 0.5),
 fit <- drmTMB(drm_formula(y ~ x, sigma ~ 1),
               family = stats::Gamma(link = "log"), data = dat)
 sym <- symbolize(fit)
-cat(sym$distribution$latex, "\n")
+render_math(sym$distribution$latex)
 ```
 
 **When to choose Gamma over lognormal?** Gamma is a member of the
@@ -115,7 +122,7 @@ dat <- data.frame(y = rbeta(n, 2, 5),
 fit <- drmTMB(drm_formula(y ~ x, sigma ~ 1),
               family = beta(), data = dat)
 sym <- symbolize(fit)
-cat(sym$distribution$latex, "\n")
+render_math(sym$distribution$latex)
 ```
 
 **Coefficient reading on mu:** `exp(beta)` is the *odds ratio* of
@@ -141,7 +148,7 @@ dat <- data.frame(
 fit <- drmTMB(drm_formula(cbind(successes, failures) ~ x, sigma ~ 1),
               family = beta_binomial(), data = dat)
 sym <- symbolize(fit)
-cat(sym$distribution$latex, "\n")
+render_math(sym$distribution$latex)
 ```
 
 **Coefficient reading on mu:** same logit reading as Beta —
@@ -162,7 +169,7 @@ dat <- data.frame(y = rpois(n, lambda = exp(1 + 0.3 * rnorm(n))),
 fit <- drmTMB(drm_formula(y ~ x),
               family = stats::poisson(), data = dat)
 sym <- symbolize(fit)
-cat(sym$distribution$latex, "\n")
+render_math(sym$distribution$latex)
 ```
 
 **Coefficient reading on mu:** `exp(beta)` is the *rate ratio* — a
@@ -182,7 +189,7 @@ dat <- data.frame(y = rnbinom(n, size = 3, mu = exp(1 + 0.3 * rnorm(n))),
 fit <- drmTMB(drm_formula(y ~ x, sigma ~ 1),
               family = nbinom2(), data = dat)
 sym <- symbolize(fit)
-cat(sym$distribution$latex, "\n")
+render_math(sym$distribution$latex)
 ```
 
 **Coefficient reading on mu:** same as Poisson — `exp(beta)` is
@@ -203,7 +210,7 @@ dat <- data.frame(
 fit <- drmTMB(drm_formula(y ~ x, sigma ~ 1),
               family = truncated_nbinom2(), data = dat)
 sym <- symbolize(fit)
-cat(sym$distribution$latex, "\n")
+render_math(sym$distribution$latex)
 ```
 
 **Coefficient reading on mu:** `exp(beta)` is the rate ratio on

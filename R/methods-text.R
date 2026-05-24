@@ -69,10 +69,13 @@ methods_template_for <- function(cls, family) {
   tbl <- load_template("methods-templates")
   hit <- tbl[tbl$class == cls & tbl$family == family, , drop = FALSE]
   if (nrow(hit) == 0L) {
+    # Build the list of supported combos from the CSV itself so the
+    # message never drifts out of sync with reality.
+    combos <- sprintf("%s / %s", tbl$class, tbl$family)
+    combos_chr <- paste(sort(unique(combos)), collapse = ", ")
     cli::cli_abort(c(
       "No {.fn methods_text} template for class {.val {cls}} / family {.val {family}}.",
-      i = "Today this surface ships templates for {.code drmTMB / gaussian},
-           {.code drmTMB / biv_gaussian}, and {.code gllvmTMB / gaussian}.",
+      i = "Templates ship today for: {combos_chr}.",
       i = "Open an issue if you need a different combination."
     ))
   }
@@ -174,6 +177,18 @@ methods_slots_for <- function(sym) {
     slots$n_units    <- format(nu)
     slots$unit_word  <- "unit"
     slots$axes_word  <- if (identical(nl, 1L)) "axis" else "axes"
+  } else if (identical(family, "gaussian") && identical(cls, "glmmTMB")) {
+    slots$response             <- sym$model$response %||% "the response"
+    slots$response_units_clause <- methods_units_clause(sym, slots$response)
+    slots$mu_predictors_clause    <- methods_predictors_clause(sym, "mu")
+    # The sigma submodel is present only when the user fit
+    # dispformula = ~ z. When absent, drop the sentence entirely.
+    slots$sigma_extra_clause <- if ("sigma" %in% sym$submodels$parameter) {
+      sprintf(
+        " The residual standard deviation was modelled on the log scale as a function of %s.",
+        methods_predictors_clause(sym, "sigma")
+      )
+    } else ""
   }
 
   slots

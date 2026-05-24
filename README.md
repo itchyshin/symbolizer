@@ -160,12 +160,15 @@ fit:
 parameter_interpretation(sym, scale = "biological")
 ```
 
-| submodel | term_label | coefficient_role | estimate | biological_reading |
-|:---|:---|:---|:---|:---|
-| mu | (Intercept) | intercept | 30.4 | Baseline body_mass in the reference condition |
-| mu | temperature | slope | 0.371 | A unit change in temperature shifts the expected body_mass by 0.371 |
-| sigma | (Intercept) | intercept | 0.799 | Baseline level of unexplained individual variation in body_mass |
-| sigma | temperature | slope | 0.0825 | A unit change in temperature multiplies the unexplained variability of body_mass by exp(0.0825) |
+| submodel | term_label | coefficient_role | estimate | 95% CI | biological_reading |
+|:---|:---|:---|:---|:---|:---|
+| mu | (Intercept) | intercept | 30.4 | 25.3, 35.6 \* | Baseline body_mass in the reference condition |
+| mu | temperature | slope | 0.371 | 0.0427, 0.699 \* | A unit change in temperature shifts the expected body_mass by 0.371 |
+| sigma | (Intercept) | intercept | 0.799 | 0.361, 1.24 \* | Baseline level of unexplained individual variation in body_mass |
+| sigma | temperature | slope | 0.0825 | 0.0584, 0.106 \* | A unit change in temperature multiplies the unexplained variability of body_mass by exp(0.0825) |
+
+*Rows marked `*` have a 95% confidence interval that excludes zero (CI
+method: `wald`).*
 
 ### Three views of the same fit
 
@@ -190,7 +193,7 @@ Pre-release. Read status words consistently:
 | Planned or reserved | Public grammar may exist, but `symbolize()` should reject it as design-only. |
 | Unsupported | Do not use as analysis syntax; fit the nearest implemented model. |
 
-### Capability matrix (v0.1 – v0.3)
+### Capability matrix (v0.1 – v0.7)
 
 | Surface | Status |
 |----|----|
@@ -201,16 +204,20 @@ Pre-release. Read status words consistently:
 | `drmTMB` lognormal, Gamma | First slice (v0.3) |
 | `drmTMB` beta, beta_binomial | First slice (v0.3) |
 | `drmTMB` Poisson, nbinom2, truncated_nbinom2 | First slice (v0.3) |
+| `drmTMB` zero-inflation (`zi`), hurdle (`hu`), cumulative_logit | First slice (v0.4) |
 | `gllvmTMB` Gaussian latent variables (mu, Λ_B, Σ_B, Ψ_B, σ_eps) | First slice |
+| `gllvmTMB` binomial (first non-Gaussian latent-variable family) | First slice (v0.5) |
+| `glmmTMB` Gaussian conditional + optional `dispformula = ~ z` + `(1 \| g)` random intercepts | First slice (v0.7) |
+| `as_dag()` structural model diagram (nodes / edges / DOT string) | First slice (v0.6) |
 | `model_card()` teaching bundle (equation + assumptions + readings + extraction calls) | First slice |
 | `parameter_interpretation()` confidence bands (Wald / profile) | First slice (v0.1.1) |
 | `group_means()`, `group_slopes()` via `emmeans` (response- and link-scale) | First slice (v0.1.1, response default in v0.3.1) |
 | `compare_symbolic()` structural diff + optional AIC/BIC metrics | First slice (v0.2) |
 | `methods_text()` draft Methods-section paragraph (template-based) | First slice (v0.2.1) |
 | `warning_table()` per-fit prose warnings | First slice (v0.2.1) |
-| `drmTMB` zero-inflation, hurdle, cumulative_logit | Planned |
-| `gllvmTMB` non-Gaussian families, within-unit decompositions, phylo / spatial | Planned |
-| `glmmTMB`, `brms`, `MCMCglmm`, `sdmTMB`, `lme4`, `lm`/`glm` | Planned (see roadmap) |
+| `gllvmTMB` other non-Gaussian families, within-unit decompositions, phylo / spatial | Planned |
+| `glmmTMB` non-Gaussian families and zero-inflation | Planned (v0.7.x) |
+| `brms`, `MCMCglmm`, `sdmTMB`, `lme4`, `lm`/`glm` | Planned (see roadmap) |
 
 See `symbolizer_capabilities()` for the full registry — that table is
 the source of truth; any class / family / component not marked Stable or
@@ -226,11 +233,11 @@ First slice there will be refused by `symbolize()`.
 | v0.2.1 (released) | `methods_text()` draft Methods paragraphs; `warning_table()` per-fit prose warnings; biv_gaussian gate on `group_means` |
 | v0.3 (released) | Seven non-Gaussian drmTMB families (Student-t, lognormal, Gamma, beta, beta_binomial, Poisson, nbinom2, truncated_nbinom2); families-distributions CSV refactor so future families are CSV-only |
 | v0.3.1 (released) | Random slopes `(1 + x \| group)` on μ; response-scale default for `group_means` / `group_slopes`; bigger pkgdown hex |
-| v0.3.2 (current) | More CSV-only families (beta_binomial, truncated_nbinom2) + non-Gaussian families tour vignette |
-| v0.4 | `drmTMB` zero-inflation / hurdle / cumulative_logit; multi-slope correlated RE if drmTMB supports it |
-| v0.5 | gllvmTMB non-Gaussian families and `gllvmTMB_multi` |
-| v0.6 | Diagrams and notebooks |
-| v0.7 | `glmmTMB` (including nested random effects via `(1 \| site/transect)`) |
+| v0.3.2 (released) | More CSV-only families (beta_binomial, truncated_nbinom2) + non-Gaussian families tour vignette |
+| v0.4 (released) | `drmTMB` zero-inflation / hurdle / cumulative_logit |
+| v0.5 (released) | gllvmTMB binomial (first non-Gaussian latent-variable family) |
+| v0.6 (released) | `as_dag(sym)` structural model diagram (DOT-language string) |
+| v0.7 (current) | `glmmTMB` Gaussian conditional submodel + `(1 \| g)` + `dispformula = ~ z`; CI band visible at all reading scales |
 | v0.8 | `brms` |
 | v0.9 | `MCMCglmm` |
 | v0.10 | `sdmTMB`, `lme4`, `lm`, `glm` |

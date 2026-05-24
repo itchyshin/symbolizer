@@ -1,3 +1,27 @@
+# symbolizer 0.7.1
+
+## v0.7 audit pass
+
+* `vignettes/symbolizer-families.Rmd` rendered seven distribution
+  lines as raw LaTeX text instead of math. The chunks now use a
+  small `render_math()` helper (defined in the vignette's setup
+  chunk) that wraps the LaTeX string in `$$...$$` via
+  `knitr::asis_output()`, so KaTeX / MathJax / pandoc pick it up and
+  render proper display math.
+* `methods_text()` now has a template for `glmmTMB / gaussian`.
+  Previously the function errored "no template" on every glmmTMB
+  fit; the new template covers both the bare conditional submodel
+  and the `dispformula = ~ z` case (the residual-SD sentence is
+  conditional).
+* The "no template" error message now lists supported `class /
+  family` combinations from the CSV itself, so it can't drift out
+  of sync with reality the way it had (it was still naming three
+  combos when 13 existed).
+* `README.Rmd` capability matrix and roadmap updated to reflect
+  v0.4 (zi / hu / cumulative_logit), v0.5 (gllvmTMB binomial),
+  v0.6 (`as_dag()`), and v0.7 (glmmTMB) — previously they stopped
+  at v0.3.
+
 # symbolizer 0.7.0
 
 ## v0.7 — glmmTMB
