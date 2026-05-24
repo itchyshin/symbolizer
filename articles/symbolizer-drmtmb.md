@@ -10,8 +10,9 @@ fit on the table and you want to know exactly what it claims, what it
 assumes, and what to look at next. If you want the package-wide tour
 first, read
 [`vignette("symbolizer")`](https://itchyshin.github.io/symbolizer/articles/symbolizer.md).
-If you want a richer worked example with multiple predictor types, read
-[`vignette("symbolizer-large")`](https://itchyshin.github.io/symbolizer/articles/symbolizer-large.md).
+The richer worked example with factors, transformations, and a
+multi-level random intercept now lives in Section 6 of this same
+vignette.
 
 ## 1. Why distributional models need a structured story
 
@@ -372,7 +373,113 @@ reports it as $`\sigma_{\mathrm{site}}`$.
 independence assumption from unconditional to conditional. The audit
 trail is built into the template, not into prose.
 
-## 6. Two responses at once: bivariate Gaussian
+## 6. A richer worked example: four predictor roles in one fit
+
+The previous sections walked the basics on a simple two-predictor fit. A
+real model an ecologist would run usually has more going on: continuous
+predictors, log-transformed predictors, factor contrasts, and a random
+intercept on the mean. This section shows that the same
+[`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
+surfaces scale up — with two educator-facing surfaces (`formula_bridge`
+and `notation_bridge`) that get more interesting when the fit is more
+interesting.
+
+``` r
+
+set.seed(20260523)
+nr           <- 200
+temperature  <- runif(nr, 8, 30)
+food         <- rlnorm(nr, meanlog = 1.5, sdlog = 0.6)
+sex          <- factor(sample(c("female", "male"), nr, replace = TRUE))
+site         <- factor(sample(letters[1:8], nr, replace = TRUE))
+
+site_re <- rnorm(8, sd = 1.5)
+mu_r    <- 5 + 0.5 * temperature + 2 * log(food) +
+             3 * (sex == "male") + site_re[site]
+sg_r    <- exp(0.3 + 0.05 * temperature + 0.1 * (sex == "male"))
+dat_r   <- data.frame(
+  body_mass = rnorm(nr, mu_r, sg_r),
+  temperature = temperature, food = food, sex = sex, site = site
+)
+
+fit_rich <- drmTMB(
+  drm_formula(
+    body_mass ~ temperature + log(food) + sex + (1 | site),
+    sigma ~ temperature + sex
+  ),
+  family = gaussian(),
+  data   = dat_r
+)
+sym_rich <- symbolize(
+  fit_rich,
+  symbols = c(body_mass = "W_i", temperature = "T_i",
+              food      = "F_i", sex         = "S_i"),
+  units   = c(body_mass = "g",   temperature = "C", food = "g/day"),
+  context = "structured body-size location-scale model"
+)
+```
+
+[`formula_bridge()`](https://itchyshin.github.io/symbolizer/reference/formula_bridge.md)
+is the educator-facing translation table from R formula syntax to
+mathematics. Two rows (one per submodel), in both notations:
+
+``` r
+
+formula_bridge(sym_rich)
+```
+
+| submodel | R syntax | meaning | math (index) | math (matrix) |
+|:---|:---|:---|:---|:---|
+| mu | `body_mass ~ temperature + log(food) + sex + (1 &#124; site)` | Expected body_mass is a linear function of the mean-model predictors | $`\mu_i = \beta_{0} + \beta_{1} \, T_i + \beta_{2} \, \mathrm{log}(F_i) + \beta_{3} \, [sex = \mathrm{male}] + u_{site(i)}`$ | $`\boldsymbol{\mu} = \mathbf{X} \boldsymbol{\beta} + \mathbf{u}`$ |
+| sigma | `sigma ~ temperature + sex` | Log residual SD of body_mass is a linear function of the scale-model predictors | $`\log(\sigma_i) = \gamma_{0} + \gamma_{1} \, T_i + \gamma_{2} \, [sex = \mathrm{male}]`$ | $`\log(\boldsymbol{\sigma}) = \mathbf{Z} \boldsymbol{\gamma}`$ |
+
+For the mu submodel, the R syntax
+`body_mass ~ temperature + log(food) + sex + (1 | site)` maps to the
+indexed equation in the `mathematics` column and to
+$`\boldsymbol{\mu} = \mathbf{X} \boldsymbol{\beta} + \mathbf{u}`$ in the
+`mathematics_matrix` column. The random-intercept piece appears as
+$`+ \mathbf{u}`$ in the matrix form and as $`+ u_{\mathrm{site}(i)}`$ in
+the indexed form. A reader can compare the two columns and learn the
+translation without doing it by hand.
+
+[`notation_bridge()`](https://itchyshin.github.io/symbolizer/reference/notation_bridge.md)
+is the deeper teaching surface: every symbol *and* every equation pairs
+its index form with its matrix form and tags both shapes:
+
+``` r
+
+notation_bridge(sym_rich)
+```
+
+| concept | index | matrix | shape | concrete |
+|:---|:---|:---|:---|:---|
+| conditional_distribution | $`W_i \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2)`$ | $`\mathbf{w} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2))`$ | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ |
+| mu_linear_predictor | $`\mu_i = \beta_{0} + \beta_{1} \, T_i + \beta_{2} \, \mathrm{log}(F_i) + \beta_{3} \, [sex = \mathrm{male}] + u_{site(i)}`$ | $`\boldsymbol{\mu} = \mathbf{X} \boldsymbol{\beta} + \mathbf{u}`$ | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ |
+| sigma_linear_predictor | $`\log(\sigma_i) = \gamma_{0} + \gamma_{1} \, T_i + \gamma_{2} \, [sex = \mathrm{male}]`$ | $`\log(\boldsymbol{\sigma}) = \mathbf{Z} \boldsymbol{\gamma}`$ | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ |
+| body_mass | $`W_i`$ | $`\mathbf{w}`$ | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ |
+| parameter | $`\mu_i`$ | $`\boldsymbol{\mu}`$ | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ |
+| parameter | $`\sigma_i`$ | $`\boldsymbol{\sigma}`$ | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ |
+| coefficient | $`\beta_{0}, \beta_{1}, \beta_{2}, \beta_{3}`$ | $`\boldsymbol{\beta}`$ | $`\mathbb{R}^{p_\mu}`$ | $`\mathbb{R}^{4}`$ |
+| coefficient | $`\gamma_{0}, \gamma_{1}, \gamma_{2}`$ | $`\boldsymbol{\gamma}`$ | $`\mathbb{R}^{p_\sigma}`$ | $`\mathbb{R}^{3}`$ |
+| design_matrix | — | $`\mathbf{X}`$ | $`\mathbb{R}^{n \times p_\mu}`$ | $`\mathbb{R}^{200 \times 4}`$ |
+| design_matrix | — | $`\mathbf{Z}`$ | $`\mathbb{R}^{n \times p_\sigma}`$ | $`\mathbb{R}^{200 \times 3}`$ |
+| site | $`u_{site(i)}`$ | $`\mathbf{u}_{site}`$ | $`scalar; \mathbb{R}^{G_{site}} in matrix form`$ | $`scalar; \mathbb{R}^{8} in matrix form`$ |
+| variance_component | $`\sigma_{site}`$ | $`\sigma_{site}`$ | scalar | scalar |
+
+The `dimension` column carries the shape rule (e.g. $`\mathbb{R}^n`$,
+$`\mathbb{R}^{n \times p_\mu}`$). The `dimension_concrete` column plugs
+in the actual numbers from this fit (e.g. $`\mathbb{R}^{200}`$,
+$`\mathbb{R}^{200 \times 4}`$). A reader learning matrix notation can
+stare at this table and see, in one place, that the $`\boldsymbol{\mu}`$
+vector has 200 entries, the $`\boldsymbol{\beta}`$ vector has four, and
+$`\mathbf{X}`$ is the $`200 \times 4`$ matrix that connects them.
+
+**Takeaway.** The same renderers (`equations`, `formula_bridge`,
+`notation_bridge`) scale from a two-predictor toy fit to a four-role
+mixed model. Abstract shape rules on one side, concrete numbers from
+this fit on the other.
+
+## 7. Two responses at once: bivariate Gaussian
 
 When you measure two responses on the same subject — paired growth and
 reproduction, two morphometric traits, a behaviour and its physiological
@@ -503,7 +610,7 @@ distribution exposes $`\boldsymbol{\Sigma}`$, and
 `parameter_interpretation` gives the rho12 row the same multi-scale
 reading as every other coefficient.
 
-## 7. What to inspect next
+## 8. What to inspect next
 
 The point of the structured object is not just to render equations; it
 is to tell the reader *what to look at next*. `model_card(sym)` packages
@@ -578,7 +685,7 @@ recipes name the plot the reader should make next.
 **Takeaway.** Diagnostics before coefficients. The extraction-calls list
 is the order a reader should work through the fit.
 
-## 8. The capability gate
+## 9. The capability gate
 
 [`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
 does not silently dispatch on every `drmTMB` fit. The capability
@@ -630,14 +737,15 @@ v0.1 ships Gaussian `mu`, `sigma`, and intercept-only random effects;
 v0.2 added the full bivariate Gaussian surface (`mu1`, `mu2`, `sigma1`,
 `sigma2`, `rho12`); the rest of the roadmap is non-Gaussian families.
 
-## 9. Where to read next
+## 10. Where to read next
 
 - [`vignette("symbolizer")`](https://itchyshin.github.io/symbolizer/articles/symbolizer.md)
   — the package-wide Get Started tour.
-- [`vignette("symbolizer-large")`](https://itchyshin.github.io/symbolizer/articles/symbolizer-large.md)
-  — a richer worked example with factors, transformations, and a
-  multi-level random intercept.
+- [`vignette("symbolizer-factors")`](https://itchyshin.github.io/symbolizer/articles/symbolizer-factors.md)
+  — the categorical pedagogy guide: dummies, contrasts, interactions,
+  and six common pitfalls.
 - [`vignette("symbolizer-gllvm")`](https://itchyshin.github.io/symbolizer/articles/symbolizer-gllvm.md)
   — the parallel story for latent-variable models in `gllvmTMB`.
-- [`vignette("symbolizer-gllvm-design")`](https://itchyshin.github.io/symbolizer/articles/symbolizer-gllvm-design.md)
-  — design notes for the in-development GLLVM surface.
+- `vignette("symbolizer-compare")` — comparing two symbolized models
+  with
+  [`compare_symbolic()`](https://itchyshin.github.io/symbolizer/reference/compare_symbolic.md).
