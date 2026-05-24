@@ -31,7 +31,6 @@ articles:
       - symbolizer
       - symbolizer-drmtmb
       - symbolizer-factors
-      - symbolizer-large
       - symbolizer-gllvm
       - symbolizer-gllvm-design
       - symbolizer-vs-others
