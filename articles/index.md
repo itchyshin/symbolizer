@@ -10,3 +10,5 @@
   interactions](https://itchyshin.github.io/symbolizer/articles/symbolizer-factors.md):
 - [Latent variables in ecology: a gllvmTMB worked
   example](https://itchyshin.github.io/symbolizer/articles/symbolizer-gllvm.md):
+- [Comparing two symbolized
+  models](https://itchyshin.github.io/symbolizer/articles/symbolizer-compare.md):

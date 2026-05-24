@@ -746,6 +746,6 @@ v0.2 added the full bivariate Gaussian surface (`mu1`, `mu2`, `sigma1`,
   and six common pitfalls.
 - [`vignette("symbolizer-gllvm")`](https://itchyshin.github.io/symbolizer/articles/symbolizer-gllvm.md)
   — the parallel story for latent-variable models in `gllvmTMB`.
-- `vignette("symbolizer-compare")` — comparing two symbolized models
-  with
+- [`vignette("symbolizer-compare")`](https://itchyshin.github.io/symbolizer/articles/symbolizer-compare.md)
+  — comparing two symbolized models with
   [`compare_symbolic()`](https://itchyshin.github.io/symbolizer/reference/compare_symbolic.md).

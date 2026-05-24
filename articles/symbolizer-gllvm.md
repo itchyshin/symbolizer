@@ -258,11 +258,11 @@ of traits and near zero on the rest.
 
 getLoadings(fit, rotate = "varimax")
 #>                LV1         LV2
-#> trait_1 0.41772304  0.51115670
-#> trait_2 0.94899617 -0.06185149
-#> trait_3 0.60377617  0.35032356
-#> trait_4 0.07808868  0.55425773
-#> trait_5 0.04018411  0.63548458
+#> trait_1 0.41772349  0.51115661
+#> trait_2 0.94899615 -0.06185129
+#> trait_3 0.60377586  0.35032338
+#> trait_4 0.07808923  0.55425840
+#> trait_5 0.04018403  0.63548464
 ```
 
 Reading down the columns of the rotated loading matrix, the first axis
@@ -279,7 +279,7 @@ variance that the shared axes capture:
 
 extract_communality(fit)
 #>   trait_1   trait_2   trait_3   trait_4   trait_5 
-#> 0.4346916 0.9999998 0.4802252 0.3698218 0.8354094
+#> 0.4346919 0.9999998 0.4802250 0.3698222 0.8354092
 ```
 
 Traits with communality near 1 are well-explained by the shared axes;
@@ -296,16 +296,16 @@ co <- extract_correlations(fit)
 co_B <- co[co$tier == "B", c("trait_i", "trait_j", "correlation", "lower", "upper")]
 co_B
 #>    trait_i trait_j  correlation       lower     upper
-#> 1  trait_1 trait_2  0.383117590  0.08131245 0.6205657
-#> 2  trait_1 trait_3  0.427619562  0.13395387 0.6522450
-#> 3  trait_2 trait_3  0.575506327  0.32166337 0.7521700
-#> 4  trait_1 trait_4  0.342823160  0.03505772 0.5911970
-#> 5  trait_2 trait_4  0.045496546 -0.26983710 0.3520169
-#> 6  trait_3 trait_4  0.260280784 -0.05574866 0.5289065
-#> 7  trait_1 trait_5  0.489755175  0.21033527 0.6952022
-#> 8  trait_2 trait_5 -0.001767607 -0.31310455 0.3099124
-#> 9  trait_3 trait_5  0.351814509  0.04526602 0.5978080
-#> 10 trait_4 trait_5  0.554195857  0.29332538 0.7382549
+#> 1  trait_1 trait_2  0.383118140  0.08131309 0.6205661
+#> 2  trait_1 trait_3  0.427619667  0.13395400 0.6522451
+#> 3  trait_2 trait_3  0.575506262  0.32166329 0.7521699
+#> 4  trait_1 trait_4  0.342823480  0.03505808 0.5911973
+#> 5  trait_2 trait_4  0.045497188 -0.26983650 0.3520175
+#> 6  trait_3 trait_4  0.260281128 -0.05574829 0.5289067
+#> 7  trait_1 trait_5  0.489754989  0.21033504 0.6952020
+#> 8  trait_2 trait_5 -0.001767542 -0.31310449 0.3099124
+#> 9  trait_3 trait_5  0.351814309  0.04526579 0.5978078
+#> 10 trait_4 trait_5  0.554196054  0.29332564 0.7382551
 ```
 
 The two within-syndrome correlations (traits 1-2-3 among themselves and
@@ -403,7 +403,8 @@ shipped today, and the matrix-form story is fully populated.
   specifications of $`d_B = 1`$ versus $`d_B = 2`$ side by side (which
   lines change, which assumption rows change), and with `metrics = TRUE`
   also returns AIC / BIC / log-likelihood / df with the delta. See
-  `vignette("symbolizer-compare")` for the worked example.
+  [`vignette("symbolizer-compare")`](https://itchyshin.github.io/symbolizer/articles/symbolizer-compare.md)
+  for the worked example.
 
 **On the roadmap:**
 
