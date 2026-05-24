@@ -153,6 +153,14 @@ symbolize.drmTMB <- function(fit, symbols = NULL, units = NULL,
                                          response_symbol_2 = response_symbol_2)
   submodels    <- drm_build_submodels(entries, fit, param)
   terms_tbl    <- drm_build_terms(entries_fe, data, symbols)
+  # cumulative_logit has no intercept on the linear predictor (the K-1
+  # cutpoints theta_k replace it). drmTMB's fit$coefficients reflects this
+  # but R's formula parsing assumes an implicit intercept; strip it so
+  # downstream tables and LaTeX stay honest.
+  if (identical(family, "cumulative_logit")) {
+    terms_tbl <- terms_tbl[!(terms_tbl$submodel == "mu" &
+                             terms_tbl$role == "intercept"), , drop = FALSE]
+  }
   fixed_eff    <- drm_build_fixed_effects(terms_tbl, fit, ci_method = ci_method)
   re_tbl       <- drm_build_random_effects(re_per_entry)
   vc_tbl       <- drm_build_variance_components(re_per_entry)

@@ -21,7 +21,7 @@ drmTMB,nbinom2,mu,First slice,0.2.2,"Negative binomial (type 2) count submodel w
 drmTMB,nbinom2,sigma,First slice,0.2.2,"Negative binomial overdispersion submodel; variance = mu + mu^2/exp(sigma)."
 drmTMB,truncated_nbinom2,mu,First slice,0.3.2,"Zero-truncated negative binomial (type 2) count submodel with log link; response Y >= 1."
 drmTMB,truncated_nbinom2,sigma,First slice,0.3.2,"Zero-truncated nbinom2 overdispersion submodel on the log scale."
-drmTMB,cumulative_logit,mu,Planned or reserved,,
+drmTMB,cumulative_logit,mu,First slice,0.4.0,"Cumulative logit (proportional-odds) model for ordered categorical response; K-1 thresholds plus a shared slope vector."
 drmTMB,biv_gaussian,mu1,First slice,0.1.0,Bivariate Gaussian location submodel for the first response.
 drmTMB,biv_gaussian,mu2,First slice,0.1.0,Bivariate Gaussian location submodel for the second response.
 drmTMB,biv_gaussian,sigma1,First slice,0.1.0,Bivariate Gaussian scale submodel for the first response (log link).

@@ -182,3 +182,19 @@ fit_drm_truncated_nbinom2 <- function(seed = 20260524L, n = 80L) {
     data   = dat
   )
 }
+
+fit_drm_cumulative_logit <- function(seed = 20260524L, n = 200L) {
+  testthat::skip_if_not_installed("drmTMB")
+  set.seed(seed)
+  x <- rnorm(n)
+  y <- factor(
+    cut(0.5 * x + rnorm(n), c(-Inf, -0.5, 0.5, Inf),
+        labels = c("low", "mid", "high")),
+    ordered = TRUE
+  )
+  drmTMB::drmTMB(
+    drmTMB::drm_formula(y ~ x),
+    family = drmTMB::cumulative_logit(),
+    data   = data.frame(y = y, x = x)
+  )
+}
