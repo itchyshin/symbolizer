@@ -328,6 +328,8 @@ context here.
   : Symbolize a gllvmTMB fit (Gaussian latent-variable, v0.1)
 - [`symbolize(`*`<glmmTMB>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.glmmTMB.md)
   : Symbolize a glmmTMB fit (Gaussian, v0.7 first slice)
+- [`symbolize(`*`<brmsfit>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.brmsfit.md)
+  : Symbolize a brms fit (Gaussian, v0.8 first slice)
 - [`symbolizer_capabilities()`](https://itchyshin.github.io/symbolizer/reference/symbolizer_capabilities.md)
   : Symbolizer capability registry
 

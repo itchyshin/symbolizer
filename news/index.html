@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,6 +33,17 @@
       <small>Source: <a href="https://github.com/itchyshin/symbolizer/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.8.0" id="symbolizer-080">symbolizer 0.8.0<a class="anchor" aria-label="anchor" href="#symbolizer-080"></a></h2>
+<div class="section level3">
+<h3 id="v08--brms-0-8-0">v0.8 – brms<a class="anchor" aria-label="anchor" href="#v08--brms-0-8-0"></a></h3>
+<ul><li>New: <code><a href="../reference/symbolize.brmsfit.html">symbolize.brmsfit()</a></code> (first slice). Builds a <code>symbolized_model</code> from a <code>brmsfit</code> for the Gaussian conditional submodel (identity link) with optional <code>(1 | g)</code> random intercepts.</li>
+<li>Bayesian-aware CI band: instead of frequentist Wald / profile, the extractor uses the posterior 2.5% / 97.5% quantiles from <code>brms::fixef(fit)</code> as the credible interval. <code>ci_method</code> is set to <code>"credible"</code> so downstream renderers can label the band correctly.</li>
+<li>
+<code><a href="../reference/methods_text.html">methods_text()</a></code> template for <code>brmsfit / gaussian</code> mentions Hamiltonian Monte Carlo via Stan, weakly-informative default priors, and credible (not confidence) intervals.</li>
+<li>brms’s distributional-parameter formulas (<code>sigma ~ z</code>, etc.) and non-Gaussian families are routed through the capability registry as “Planned or reserved” for v0.8.x.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.7.1" id="symbolizer-071">symbolizer 0.7.1<a class="anchor" aria-label="anchor" href="#symbolizer-071"></a></h2>
 <div class="section level3">

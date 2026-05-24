@@ -1,5 +1,26 @@
 # Changelog
 
+## symbolizer 0.8.0
+
+### v0.8 – brms
+
+- New:
+  [`symbolize.brmsfit()`](https://itchyshin.github.io/symbolizer/reference/symbolize.brmsfit.md)
+  (first slice). Builds a `symbolized_model` from a `brmsfit` for the
+  Gaussian conditional submodel (identity link) with optional `(1 | g)`
+  random intercepts.
+- Bayesian-aware CI band: instead of frequentist Wald / profile, the
+  extractor uses the posterior 2.5% / 97.5% quantiles from
+  `brms::fixef(fit)` as the credible interval. `ci_method` is set to
+  `"credible"` so downstream renderers can label the band correctly.
+- [`methods_text()`](https://itchyshin.github.io/symbolizer/reference/methods_text.md)
+  template for `brmsfit / gaussian` mentions Hamiltonian Monte Carlo via
+  Stan, weakly-informative default priors, and credible (not confidence)
+  intervals.
+- brms’s distributional-parameter formulas (`sigma ~ z`, etc.) and
+  non-Gaussian families are routed through the capability registry as
+  “Planned or reserved” for v0.8.x.
+
 ## symbolizer 0.7.1
 
 ### v0.7 audit pass
