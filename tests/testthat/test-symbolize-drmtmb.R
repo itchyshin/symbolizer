@@ -7,7 +7,7 @@ test_that("symbolize.drmTMB returns a valid symbolized_model", {
     context = "avian body-size location-scale model"
   )
   expect_s3_class(sym, "symbolized_model")
-  expect_silent(validate_symbolized_model(sym))
+  expect_silent(symbolizer:::validate_symbolized_model(sym))
 })
 
 test_that("model metadata captures class, package, family, response, n_obs", {

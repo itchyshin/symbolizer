@@ -86,15 +86,14 @@ new_symbolized_model <- function(
 #' Validate a symbolized_model object
 #'
 #' Checks that required fields are present and have the expected shape. Used
-#' internally by [`new_symbolized_model()`] but exported for advanced users who
-#' construct or modify objects manually.
+#' internally by [`new_symbolized_model()`]. Reachable as
+#' `symbolizer:::validate_symbolized_model()` for advanced users who construct
+#' or modify objects by hand.
 #'
 #' @param x A `symbolized_model`.
 #'
 #' @return Invisibly returns `x`. Errors via [`cli::cli_abort()`] if invalid.
-#' @export
-#' @examples
-#' # validate_symbolized_model(symbolize(fit))
+#' @keywords internal
 validate_symbolized_model <- function(x) {
   if (!inherits(x, "symbolized_model")) {
     cli::cli_abort("{.arg x} must be a {.cls symbolized_model} object.")

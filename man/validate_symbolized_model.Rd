@@ -14,9 +14,8 @@ Invisibly returns \code{x}. Errors via \code{\link[cli:cli_abort]{cli::cli_abort
 }
 \description{
 Checks that required fields are present and have the expected shape. Used
-internally by \code{\link[=new_symbolized_model]{new_symbolized_model()}} but exported for advanced users who
-construct or modify objects manually.
+internally by \code{\link[=new_symbolized_model]{new_symbolized_model()}}. Reachable as
+\code{symbolizer:::validate_symbolized_model()} for advanced users who construct
+or modify objects by hand.
 }
-\examples{
-# validate_symbolized_model(symbolize(fit))
-}
+\keyword{internal}
