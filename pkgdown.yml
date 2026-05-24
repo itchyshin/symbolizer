@@ -7,7 +7,7 @@ articles:
   symbolizer-factors: symbolizer-factors.html
   symbolizer-gllvm: symbolizer-gllvm.html
   symbolizer: symbolizer.html
-last_built: 2026-05-24T20:04Z
+last_built: 2026-05-24T20:06Z
 urls:
   reference: https://itchyshin.github.io/symbolizer/reference
   article: https://itchyshin.github.io/symbolizer/articles
