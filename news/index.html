@@ -35,9 +35,19 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.0.0.9000" id="symbolizer-0009000">symbolizer 0.0.0.9000<a class="anchor" aria-label="anchor" href="#symbolizer-0009000"></a></h2>
-<ul><li>Initial development. v0.1 targets <code>drmTMB</code> Gaussian location-scale models with structured symbolic specification, LaTeX rendering, symbol dictionary, component table, formula bridge, assumption table, parameter interpretation, and a notation bridge teaching surface.</li>
-</ul><div class="section level3">
+<div class="section level3">
+<h3 id="v011-in-progress--confidence-bands-and-marginal-estimates-0-0-0-9000">v0.1.1 (in progress) — confidence bands and marginal estimates<a class="anchor" aria-label="anchor" href="#v011-in-progress--confidence-bands-and-marginal-estimates-0-0-0-9000"></a></h3>
+<ul><li>
+<code><a href="../reference/symbolize.drmTMB.html">symbolize.drmTMB()</a></code> gains a <code>ci_method = "wald"</code> argument and populates five new columns on <code>fixed_effects</code> and <code>interpretation</code>: <code>std_error</code>, <code>confint_low</code>, <code>confint_high</code>, <code>excludes_zero</code>, <code>ci_method</code>. Existing callers see additive columns only. Confidence bands come from <code>stats::confint(fit, parm, method, level)</code> dispatched on <code>confint.drmTMB</code>; passing <code>ci_method = "profile"</code> is honest (asymmetric) but slow. Satterthwaite / Kenward-Roger corrections wait on drmTMB.</li>
+<li>
+<code>print(parameter_interpretation(sym))</code> shows the band as <code>(lo, hi)</code> with a trailing <code>*</code> marker on rows whose 95% interval excludes zero; <code>knit_print()</code> adds a <code>95% CI</code> column to the rendered table and a footer naming the CI method. Renderers consume <code>metadata$ci_method</code>.</li>
+</ul></div>
+<div class="section level3">
 <h3 id="v01-surface-stable-0-0-0-9000">v0.1 surface (Stable)<a class="anchor" aria-label="anchor" href="#v01-surface-stable-0-0-0-9000"></a></h3>
+<ul><li>Initial development. v0.1 targets <code>drmTMB</code> Gaussian location-scale models with structured symbolic specification, LaTeX rendering, symbol dictionary, component table, formula bridge, assumption table, parameter interpretation, and a notation bridge teaching surface.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="v01-surface-stable-0-0-0-9000-1">v0.1 surface (Stable)<a class="anchor" aria-label="anchor" href="#v01-surface-stable-0-0-0-9000-1"></a></h3>
 <ul><li>
 <code><a href="../reference/symbolize.drmTMB.html">symbolize.drmTMB()</a></code> builds a structured <code>symbolized_model</code> from a fitted <code>drmTMB</code> Gaussian location-scale model with fixed effects in both the mu and sigma submodels. Reads <code>fit$formula$entries</code>, <code>fit$family</code>, <code>fit$coefficients</code>, and <code><a href="https://itchyshin.github.io/drmTMB/reference/fixef.html" class="external-link">drmTMB::fixef()</a></code> per dpar.</li>
 <li>
