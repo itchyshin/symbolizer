@@ -29,6 +29,7 @@ articles:
   - title: "Get started"
     contents:
       - symbolizer
+      - symbolizer-drmtmb
       - symbolizer-large
       - symbolizer-gllvm
       - symbolizer-gllvm-design

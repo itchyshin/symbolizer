@@ -183,12 +183,17 @@ assumptions (those that follow from the parameterisation: positivity of
 assumption_table(sym)
 ```
 
-One known limitation: the `independence` row reads "Observations are
-conditionally independent given the predictors". When a random intercept
-is present, the cleaner statement is "conditionally independent given
-the predictors **and** the random effects". The v0.1 assumption template
-uses the unconditional wording in both cases; treat it as a known item
-to fix rather than a claim about your fit.
+Because this fit carries a random intercept, the table swaps in the
+RE-conditional independence row automatically: observations are
+conditionally independent **given the predictors and the random
+effects**. We can verify it directly from `sym$assumptions`:
+
+```{r assumption-re-swap}
+sym$assumptions$assumption
+```
+
+The plain `independence` row is absent; `independence_given_random_effects`
+appears in its place. A fixed-effects-only fit would show the reverse.
 
 **Takeaway.** Stated, implied, not_checked is the audit lens: the model
 guarantees the first two; the third is your responsibility.
@@ -218,16 +223,20 @@ unit change in temperature multiplies the unexplained variability of
 `body_mass` by `\exp(\gamma_{1})`. Two coefficients on the same
 predictor, two genuinely different scales.
 
-One rough edge worth flagging: the `log(food)` predictor does not appear
-in this table. v0.1 only ships interpretation templates for the
-`intercept`, `slope`, and `factor_contrast` roles. A
-`log()`-transformed predictor takes the `transformation` role and
-currently has no template, so its row is silently dropped. The
-coefficient is still in `sym$fixed_effects` and rendered in the
-equations; it just does not yet get an English reading.
+The `log(food)` row deserves a closer look: a transformed predictor
+takes the `transformation` role and gets its own templated readings on
+the link, natural, and biological scales. The natural-scale reading
+reports the slope per unit of `log(food)`, not per raw unit of `food` —
+the mathematics in `equations()` and the English in this table now
+agree about which scale the coefficient lives on.
 
-**Takeaway.** Templates exist for the simple roles in v0.1.
-Transformations and interactions are on the roadmap.
+```{r transformation-row}
+sym$interpretation[sym$interpretation$term_label == "log(food)", , drop = FALSE]
+```
+
+**Takeaway.** v0.1 ships interpretation templates for `intercept`,
+`slope`, `factor_contrast`, and `transformation` roles on both mu and
+sigma. Interactions remain on the roadmap.
 
 ## 7. R syntax to math, both directions
 

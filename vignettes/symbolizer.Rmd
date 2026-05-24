@@ -287,8 +287,8 @@ sym_re$variance_components
 ```
 
 **Takeaway.** The same object carries everything a reader needs to discuss
-random structure — what is grouped, how many levels, and which variance
-component goes with which submodel.
+random structure — what is grouped, how many levels, and which
+between-group SD (`sd(group)`) goes with which submodel.
 
 ## What's supported, what's planned
 

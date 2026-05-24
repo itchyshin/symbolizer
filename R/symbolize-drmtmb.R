@@ -593,7 +593,11 @@ drm_build_symbol_dictionary <- function(terms_tbl, response, response_symbol,
     desc <- switch(
       p$role,
       factor_contrast = if (!is.na(cls)) {
-        sprintf("factor (%s)", paste(levels(factor(data[[var]])), collapse = ", "))
+        lvls <- levels(factor(data[[var]]))
+        if (length(lvls) >= 1L) {
+          lvls[1L] <- paste0(lvls[1L], " [reference]")
+        }
+        sprintf("factor (%s)", paste(lvls, collapse = ", "))
       } else "factor",
       offset = "offset (no coefficient)",
       transformation = sprintf("predictor (%s-transformed)", p$transform),

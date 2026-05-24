@@ -65,6 +65,27 @@ test_that("symbol_dictionary includes response, predictors, parameters, coeffici
   expect_equal(d$units[d$variable %in% "temperature"], "C")
 })
 
+test_that("factor rows in symbol_table mark the reference level", {
+  set.seed(1)
+  n <- 60
+  dat <- data.frame(
+    body_mass = rnorm(n, 30),
+    sex = factor(rep(c("female", "male"), length.out = n)),
+    site = factor(rep(letters[1:3], length.out = n))
+  )
+  fit <- drmTMB::drmTMB(
+    drmTMB::drm_formula(body_mass ~ sex + site, sigma ~ 1),
+    family = stats::gaussian(), data = dat
+  )
+  sym <- symbolize(fit)
+  d <- sym$symbol_dictionary
+  sex_row <- d[d$variable == "sex" & !is.na(d$variable), , drop = FALSE]
+  expect_match(sex_row$description, "female \\[reference\\]")
+  site_row <- d[d$variable == "site" & !is.na(d$variable), , drop = FALSE]
+  expect_match(site_row$description, "a \\[reference\\]")
+  expect_match(site_row$description, "b, c")
+})
+
 test_that("components has distribution + one linear predictor per submodel", {
   fit <- fit_drm_location_scale()
   sym <- symbolize(fit, symbols = c(body_mass = "W_i", temperature = "T_i"))
@@ -118,6 +139,34 @@ test_that("interpretation has one row per coefficient with templated readings", 
   expect_match(slope_mu$natural_scale_reading, "temperature")
   slope_sg <- interp[interp$submodel == "sigma" & interp$coefficient_role == "slope", , drop = FALSE]
   expect_match(slope_sg$variance_scale_reading, "exp\\(2\\*")
+})
+
+test_that("transformation predictors get interpretation rows on mu", {
+  testthat::skip_if_not_installed("drmTMB")
+  set.seed(42L)
+  n <- 80L
+  temperature <- runif(n, 10, 25)
+  food <- rlnorm(n, log(5), 0.4)
+  dat <- data.frame(
+    body_mass = rnorm(n, 5 + 0.4 * temperature + 2 * log(food), 1),
+    temperature = temperature,
+    food = food
+  )
+  fit <- drmTMB::drmTMB(
+    drmTMB::drm_formula(body_mass ~ temperature + log(food),
+                        sigma ~ temperature),
+    family = stats::gaussian(),
+    data   = dat
+  )
+  sym <- symbolize(fit)
+  expect_true(any(sym$interpretation$term_label == "log(food)"))
+  log_row <- sym$interpretation[
+    sym$interpretation$term_label == "log(food)", , drop = FALSE
+  ]
+  expect_equal(log_row$coefficient_role, "transformation")
+  expect_match(log_row$natural_scale_reading, "log\\(food\\)")
+  expect_match(log_row$biological_reading, "log\\(food\\)")
+  expect_match(log_row$link_scale_reading, "log\\(food\\)")
 })
 
 test_that("formula_bridge has one row per submodel mapping R to math", {
