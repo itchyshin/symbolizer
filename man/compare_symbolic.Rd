@@ -4,17 +4,23 @@
 \alias{compare_symbolic}
 \title{Structural comparison of two symbolized models}
 \usage{
-compare_symbolic(sym_a, sym_b, ...)
+compare_symbolic(sym_a, sym_b, metrics = FALSE, ...)
 }
 \arguments{
 \item{sym_a, sym_b}{Two \code{symbolized_model} objects.}
+
+\item{metrics}{Logical, default \code{FALSE}. When \code{TRUE}, joins the AIC /
+BIC / log-likelihood / df from each side as a fifth slot
+\code{diff_metrics} and adds a \code{delta} column. Requires that each side
+carries its fit object on \code{metadata$fit} (this is the default for
+\code{symbolize.drmTMB()} and \code{symbolize.gllvmTMB()}).}
 
 \item{...}{Reserved for future use.}
 }
 \value{
 A list classed \code{c("symbolic_comparison", "list")} with four
-slots: \code{meta} (list of left / right model summaries), \code{diff_submodels}
-(tibble), \code{diff_terms} (tibble), \code{diff_assumptions} (tibble).
+slots (\code{meta}, \code{diff_submodels}, \code{diff_terms}, \code{diff_assumptions}),
+plus a fifth \code{diff_metrics} slot when \code{metrics = TRUE}.
 }
 \description{
 Compares two \code{\link[=new_symbolized_model]{symbolized_model}} objects and
@@ -27,11 +33,20 @@ right, or on both sides.
 on one side or on both.
 \item \strong{assumptions} — for each assumption, the statuses on each side and
 whether they match.
+\item \strong{metrics} \emph{(optional, when \code{metrics = TRUE})} — AIC, BIC, log-
+likelihood, and residual degrees of freedom on each side plus their
+delta. The metrics block refuses to compute deltas when the two fits
+are obviously incomparable (different family, different response,
+different \code{n_obs}) and instead carries a \code{note} column explaining
+why.
 }
 
 Use it to ask questions like "what's different between this fit and the
 previous one?" — a structural answer rather than a numeric one.
 Coefficient values are not compared; this is the structural-symbolic
 diff. For coefficient-level differences, use the
-\code{\link[=parameter_interpretation]{parameter_interpretation()}} tibbles directly.
+\code{\link[=parameter_interpretation]{parameter_interpretation()}} tibbles directly. For fit-level
+identifiability and convergence diagnostics, run \code{drmTMB::check_drm()}
+(or the analogous diagnostic for \code{gllvmTMB}) on each fit before
+interpreting the structural diff.
 }

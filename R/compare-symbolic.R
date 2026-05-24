@@ -11,27 +11,41 @@
 #'   on one side or on both.
 #' - **assumptions** — for each assumption, the statuses on each side and
 #'   whether they match.
+#' - **metrics** *(optional, when `metrics = TRUE`)* — AIC, BIC, log-
+#'   likelihood, and residual degrees of freedom on each side plus their
+#'   delta. The metrics block refuses to compute deltas when the two fits
+#'   are obviously incomparable (different family, different response,
+#'   different `n_obs`) and instead carries a `note` column explaining
+#'   why.
 #'
 #' Use it to ask questions like "what's different between this fit and the
 #' previous one?" — a structural answer rather than a numeric one.
 #' Coefficient values are not compared; this is the structural-symbolic
 #' diff. For coefficient-level differences, use the
-#' [parameter_interpretation()] tibbles directly.
+#' [parameter_interpretation()] tibbles directly. For fit-level
+#' identifiability and convergence diagnostics, run `drmTMB::check_drm()`
+#' (or the analogous diagnostic for `gllvmTMB`) on each fit before
+#' interpreting the structural diff.
 #'
 #' @param sym_a,sym_b Two `symbolized_model` objects.
+#' @param metrics Logical, default `FALSE`. When `TRUE`, joins the AIC /
+#'   BIC / log-likelihood / df from each side as a fifth slot
+#'   `diff_metrics` and adds a `delta` column. Requires that each side
+#'   carries its fit object on `metadata$fit` (this is the default for
+#'   `symbolize.drmTMB()` and `symbolize.gllvmTMB()`).
 #' @param ... Reserved for future use.
 #'
 #' @return A list classed `c("symbolic_comparison", "list")` with four
-#'   slots: `meta` (list of left / right model summaries), `diff_submodels`
-#'   (tibble), `diff_terms` (tibble), `diff_assumptions` (tibble).
+#'   slots (`meta`, `diff_submodels`, `diff_terms`, `diff_assumptions`),
+#'   plus a fifth `diff_metrics` slot when `metrics = TRUE`.
 #'
 #' @export
-compare_symbolic <- function(sym_a, sym_b, ...) {
+compare_symbolic <- function(sym_a, sym_b, metrics = FALSE, ...) {
   UseMethod("compare_symbolic")
 }
 
 #' @export
-compare_symbolic.default <- function(sym_a, sym_b, ...) {
+compare_symbolic.default <- function(sym_a, sym_b, metrics = FALSE, ...) {
   cli::cli_abort(c(
     "{.fn compare_symbolic} has no method for {.cls {class(sym_a)[1L]}}.",
     i = "Pass two outputs of {.fn symbolize}."
@@ -39,7 +53,8 @@ compare_symbolic.default <- function(sym_a, sym_b, ...) {
 }
 
 #' @export
-compare_symbolic.symbolized_model <- function(sym_a, sym_b, ...) {
+compare_symbolic.symbolized_model <- function(sym_a, sym_b,
+                                              metrics = FALSE, ...) {
   if (!inherits(sym_b, "symbolized_model")) {
     cli::cli_abort(c(
       "{.arg sym_b} must also be a {.cls symbolized_model}.",
@@ -56,6 +71,9 @@ compare_symbolic.symbolized_model <- function(sym_a, sym_b, ...) {
     diff_terms       = diff_terms(sym_a, sym_b),
     diff_assumptions = diff_assumptions(sym_a, sym_b)
   )
+  if (isTRUE(metrics)) {
+    out$diff_metrics <- diff_metrics(sym_a, sym_b)
+  }
   class(out) <- c("symbolic_comparison", "list")
   out
 }
@@ -140,6 +158,76 @@ diff_assumptions <- function(sym_a, sym_b) {
   )
 }
 
+# Compute AIC / BIC / logLik / df for each side. When the two fits are
+# obviously incomparable on the same likelihood scale (different family,
+# response, or n_obs) the function refuses to compute deltas and stores a
+# `comparable` attribute = FALSE plus a `note` attribute explaining why.
+diff_metrics <- function(sym_a, sym_b) {
+  comp_note <- check_metric_comparability(sym_a, sym_b)
+  comparable <- is.na(comp_note)
+  m_a <- safe_fit_metrics(sym_a$metadata$fit)
+  m_b <- safe_fit_metrics(sym_b$metadata$fit)
+  out <- tibble::tibble(
+    metric = c("AIC", "BIC", "logLik", "df"),
+    left   = c(m_a$AIC, m_a$BIC, m_a$logLik, m_a$df),
+    right  = c(m_b$AIC, m_b$BIC, m_b$logLik, m_b$df)
+  )
+  if (comparable) {
+    out$delta <- out$right - out$left
+  } else {
+    out$delta <- NA_real_
+  }
+  attr(out, "comparable") <- comparable
+  attr(out, "note")       <- comp_note
+  out
+}
+
+# Same family + response + n_obs is the strict ML comparison criterion;
+# returns NA_character_ when comparable, an explanatory string otherwise.
+check_metric_comparability <- function(sym_a, sym_b) {
+  ml <- sym_a$model
+  mr <- sym_b$model
+  if (!identical(ml$n_obs, mr$n_obs)) {
+    return(sprintf(
+      "incomparable: n_obs differs (left = %s, right = %s)",
+      format(ml$n_obs %||% NA), format(mr$n_obs %||% NA)
+    ))
+  }
+  if (!identical(ml$family, mr$family)) {
+    return(sprintf(
+      "incomparable: family differs (left = %s, right = %s)",
+      ml$family %||% NA_character_, mr$family %||% NA_character_
+    ))
+  }
+  if (!identical(ml$response, mr$response)) {
+    return(sprintf(
+      "incomparable: response differs (left = %s, right = %s)",
+      ml$response %||% NA_character_, mr$response %||% NA_character_
+    ))
+  }
+  NA_character_
+}
+
+# Extract AIC / BIC / logLik / df from a fit; on missing fit or error,
+# return NA so the function never breaks the structural diff.
+safe_fit_metrics <- function(fit) {
+  na_result <- list(AIC = NA_real_, BIC = NA_real_,
+                    logLik = NA_real_, df = NA_real_)
+  if (is.null(fit)) return(na_result)
+  tryCatch({
+    aic_v <- stats::AIC(fit)
+    bic_v <- stats::BIC(fit)
+    ll    <- stats::logLik(fit)
+    df_v  <- attr(ll, "df")
+    list(
+      AIC    = as.numeric(aic_v),
+      BIC    = as.numeric(bic_v),
+      logLik = as.numeric(ll),
+      df     = as.numeric(df_v)
+    )
+  }, error = function(e) na_result)
+}
+
 # Shared helper: given a sorted-ish universe of keys plus the left / right
 # vectors, build a tibble with one row per key and a `presence` column whose
 # value is one of "left_only", "right_only", "both".
@@ -207,6 +295,33 @@ print.symbolic_comparison <- function(x, ...) {
       cli::cli_text("  {.field {a}}: left = {.val {ls}}; right = {.val {rs}}{marker}")
     }
   }
+
+  # metrics (only when compare_symbolic was called with metrics = TRUE)
+  if (!is.null(x$diff_metrics)) {
+    cli::cli_h3("Metrics")
+    comp <- attr(x$diff_metrics, "comparable")
+    note <- attr(x$diff_metrics, "note")
+    if (!isTRUE(comp)) {
+      cli::cli_text("{.emph deltas not computed:} {note}")
+    }
+    fmt <- function(v) if (is.na(v)) "NA" else
+                       formatC(v, digits = 4L, format = "fg", flag = "#")
+    for (i in seq_len(nrow(x$diff_metrics))) {
+      m <- x$diff_metrics$metric[[i]]
+      l <- x$diff_metrics$left[[i]]
+      r <- x$diff_metrics$right[[i]]
+      d <- x$diff_metrics$delta[[i]]
+      if (is.na(d)) {
+        cli::cli_text("  {.field {m}}: left = {fmt(l)}; right = {fmt(r)}")
+      } else {
+        sign <- if (d >= 0) "+" else ""
+        cli::cli_text(
+          "  {.field {m}}: left = {fmt(l)}; right = {fmt(r)} (",
+          "{.strong delta = {sign}{fmt(d)}})"
+        )
+      }
+    }
+  }
   invisible(x)
 }
 
@@ -263,12 +378,36 @@ knit_print.symbolic_comparison <- function(x, ...) {
     knitr::kable(x$diff_assumptions, format = "pipe")
   } else "*(no assumptions)*"
 
+  # metrics table (optional)
+  metrics_block <- character(0)
+  if (!is.null(x$diff_metrics)) {
+    comp <- attr(x$diff_metrics, "comparable")
+    note <- attr(x$diff_metrics, "note")
+    fmt <- function(v) if (is.na(v)) "NA" else
+                       formatC(v, digits = 4L, format = "fg", flag = "#")
+    df_show <- data.frame(
+      metric = x$diff_metrics$metric,
+      left   = vapply(x$diff_metrics$left,  fmt, character(1L)),
+      right  = vapply(x$diff_metrics$right, fmt, character(1L)),
+      delta  = vapply(x$diff_metrics$delta, fmt, character(1L)),
+      stringsAsFactors = FALSE
+    )
+    metric_md <- knitr::kable(df_show, format = "pipe")
+    footer <- if (isTRUE(comp)) {
+      "*delta = right - left*"
+    } else {
+      paste0("*Deltas not computed: ", note, "*")
+    }
+    metrics_block <- c("**Metrics**", "", metric_md, "", footer, "")
+  }
+
   out <- paste(
     c("",
       "**Model summaries**", "", meta_md, "",
       "**Submodels**", "", sm_md, "",
       "**Terms**", "", tm_md, "",
-      "**Assumptions**", "", as_md, ""),
+      "**Assumptions**", "", as_md, "",
+      metrics_block),
     collapse = "\n"
   )
   knitr::asis_output(out)
