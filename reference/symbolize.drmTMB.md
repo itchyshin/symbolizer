@@ -11,7 +11,14 @@ errors via
 
 ``` r
 # S3 method for class 'drmTMB'
-symbolize(fit, symbols = NULL, units = NULL, context = NULL, ...)
+symbolize(
+  fit,
+  symbols = NULL,
+  units = NULL,
+  context = NULL,
+  ci_method = "wald",
+  ...
+)
 ```
 
 ## Arguments
@@ -36,6 +43,13 @@ symbolize(fit, symbols = NULL, units = NULL, context = NULL, ...)
   Optional short character description of the model, e.g.
   `"avian body-size location-scale model"`.
 
+- ci_method:
+
+  Confidence-interval method passed to
+  [`drmTMB::confint`](https://itchyshin.github.io/drmTMB/reference/confint.drmTMB.html).
+  One of `"wald"` (default, fast), `"profile"` (slower, more honest), or
+  `"bootstrap"`.
+
 - ...:
 
   Reserved for method-specific extra arguments.
@@ -43,3 +57,16 @@ symbolize(fit, symbols = NULL, units = NULL, context = NULL, ...)
 ## Value
 
 A `symbolized_model` object.
+
+## Confidence intervals
+
+The returned `fixed_effects` and `interpretation` tibbles carry a
+confidence band per coefficient: `confint_low`, `confint_high`,
+`excludes_zero`, plus a `ci_method` column recording which method
+produced them. The default `ci_method = "wald"` is fast and is what
+`drmTMB::confint(fit, method = "wald")` returns by default. Wald
+intervals can be too narrow when group counts are small (finite-df
+situations). For more honest intervals, pass `ci_method = "profile"` —
+slower but profile-likelihood-based. Satterthwaite / Kenward-Roger
+corrections are not implemented; when Wald looks suspicious the
+recommended alternative is `"profile"`.

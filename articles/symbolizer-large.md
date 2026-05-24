@@ -376,11 +376,12 @@ coefficient lives on.
 ``` r
 
 sym$interpretation[sym$interpretation$term_label == "log(food)", , drop = FALSE]
-#> # A tibble: 1 × 8
-#>   submodel term_label coefficient_role estimate link_scale_reading              
-#>   <chr>    <chr>      <chr>               <dbl> <chr>                           
-#> 1 mu       log(food)  transformation       1.75 Linear change in expected body_…
-#> # ℹ 3 more variables: natural_scale_reading <chr>,
+#> # A tibble: 1 × 13
+#>   submodel term_label coefficient_role estimate std_error confint_low
+#>   <chr>    <chr>      <chr>               <dbl>     <dbl>       <dbl>
+#> 1 mu       log(food)  transformation       1.75     0.409       0.944
+#> # ℹ 7 more variables: confint_high <dbl>, excludes_zero <lgl>, ci_method <chr>,
+#> #   link_scale_reading <chr>, natural_scale_reading <chr>,
 #> #   variance_scale_reading <chr>, biological_reading <chr>
 ```
 

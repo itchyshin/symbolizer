@@ -678,11 +678,12 @@ mathematics in <code><a href="../reference/equations.html">equations()</a></code
 now agree about which scale the coefficient lives on.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sym</span><span class="op">$</span><span class="va">interpretation</span><span class="op">[</span><span class="va">sym</span><span class="op">$</span><span class="va">interpretation</span><span class="op">$</span><span class="va">term_label</span> <span class="op">==</span> <span class="st">"log(food)"</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 8</span></span></span>
-<span><span class="co">#&gt;   submodel term_label coefficient_role estimate link_scale_reading              </span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                           </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> mu       log(food)  transformation       1.75 Linear change in expected body_…</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3 more variables: natural_scale_reading &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 13</span></span></span>
+<span><span class="co">#&gt;   submodel term_label coefficient_role estimate std_error confint_low</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> mu       log(food)  transformation       1.75     0.409       0.944</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 7 more variables: confint_high &lt;dbl&gt;, excludes_zero &lt;lgl&gt;, ci_method &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   link_scale_reading &lt;chr&gt;, natural_scale_reading &lt;chr&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   variance_scale_reading &lt;chr&gt;, biological_reading &lt;chr&gt;</span></span></span></code></pre></div>
 <p><strong>Takeaway.</strong> v0.1 ships interpretation templates for
 <code>intercept</code>, <code>slope</code>,
