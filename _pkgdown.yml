@@ -96,6 +96,10 @@ reference:
     desc: "Conditions symbolize() flagged when building the object (e.g., Wald CI with few RE groups). Templated from inst/extdata/warning-templates.csv."
     contents:
       - warning_table
+  - title: "Model diagram"
+    desc: "Render the structural model as a DAG (nodes for response, parameters, predictors, groups, random effects). Returns a list with the DOT representation ready for GraphvizOnline or DiagrammeR."
+    contents:
+      - as_dag
   - title: "Internal: term-grammar bridge"
     desc: "The R formula <-> model matrix <-> biological symbol layer that every renderer reads."
     contents:
