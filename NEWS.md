@@ -1,6 +1,6 @@
-# symbolizer 0.3.0.9000 (development)
+# symbolizer 0.3.1
 
-## v0.3.1 (in progress)
+## v0.3.1 — random slopes, response-scale group_means, bigger hex
 
 * Random slopes now work: `symbolize.drmTMB()` reads
   `(1 + x | group)` random-effect terms on the mu submodel
