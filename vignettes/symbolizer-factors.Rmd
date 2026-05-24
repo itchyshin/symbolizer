@@ -24,12 +24,13 @@ output table lists a coefficient for `sexmale`. The obvious reading is
 something else, then builds up to interactions, where the unpacking
 becomes essential.
 
-We walk through five steps that build on each other. Each step fits a
+We walk through six steps that build on each other. Each step fits a
 small `drmTMB` model, looks at the first few rows of the design matrix,
 and asks `symbolize()` to read each coefficient on the biological scale.
 The point is to make the dummy-variable, contrast, and interaction
 machinery concrete enough that a reader can apply the same logic to
-their own fits.
+their own fits. A closing **Common pitfalls** section catches the
+mistakes biologists most often make when reading these tables.
 
 ```{r libs}
 library(symbolizer)
@@ -352,14 +353,112 @@ slopes* between the non-reference level and the reference. The bare
 factor contrast is now the difference in intercepts at zero of the
 continuous predictor.
 
-## Step 5: Factor-by-factor interaction (`body_mass ~ site * sex`)
+## Step 5: Continuous-by-continuous interaction (`body_mass ~ temperature * body_size`)
+
+A continuous-by-continuous interaction lets the slope of one continuous
+predictor change with the level of another. There are no dummy columns
+here, but the same arithmetic — *the interaction coefficient is a
+difference of slopes* — still applies, just on a sliding rather than a
+group-by-group basis.
+
+```{r step5cc-fit}
+n_cc <- 80
+temperature <- runif(n_cc, 10, 30)
+body_size_cc <- runif(n_cc, 50, 150)
+dat5cc <- data.frame(
+  body_mass   = rnorm(
+    n_cc,
+    20 + 0.1 * temperature + 0.15 * body_size_cc +
+      0.01 * temperature * body_size_cc,
+    3
+  ),
+  temperature = temperature,
+  body_size   = body_size_cc
+)
+
+fit5cc <- drmTMB(
+  drm_formula(body_mass ~ temperature * body_size, sigma ~ 1),
+  family = gaussian(),
+  data   = dat5cc
+)
+
+sym5cc <- symbolize(
+  fit5cc,
+  symbols = c(body_mass = "W_i", temperature = "T_i", body_size = "L_i"),
+  units   = c(body_mass = "g",   temperature = "°C", body_size = "mm"),
+  context = "continuous-by-continuous interaction"
+)
+```
+
+`temperature * body_size` expands to
+`temperature + body_size + temperature:body_size`. The design matrix has
+four coefficient columns — no zeros and ones this time, just two real
+numbers and their product:
+
+```{r step5cc-X}
+head(expand(sym5cc)$X, 5)
+```
+
+The four columns are `(Intercept)`, `temperature`, `body_size`, and
+`temperature:body_size`. The interaction column is literally the product
+of the other two predictor columns.
+
+Call the four coefficients $\beta_0, \beta_1, \beta_2, \beta_3$ in
+column order. The model is
+
+$$\mathrm{E}(W_i) = \beta_0 + \beta_1 T_i + \beta_2 L_i + \beta_3 T_i L_i.$$
+
+Re-arrange to isolate the slope of `temperature`:
+
+$$\mathrm{E}(W_i) = \beta_0 + (\beta_1 + \beta_3 L_i) T_i + \beta_2 L_i.$$
+
+The slope of `temperature` is $\beta_1 + \beta_3 L_i$ — it depends on
+`body_size`. Reading the four coefficients in those terms:
+
+- **$\beta_0$ (intercept)** = expected `body_mass` when
+  `temperature = 0` and `body_size = 0`.
+- **$\beta_1$ (`temperature`)** = the `temperature` slope *at*
+  `body_size = 0`. Not "the temperature slope". The slope at one
+  specific value of `body_size`.
+- **$\beta_2$ (`body_size`)** = the `body_size` slope *at*
+  `temperature = 0`. Same reasoning.
+- **$\beta_3$ (`temperature:body_size`)** = how much the `temperature`
+  slope changes per one-unit increase in `body_size`. Equivalently, how
+  much the `body_size` slope changes per one-unit increase in
+  `temperature`. The two readings are symmetric.
+
+For the cont-by-factor interaction in Step 4 we could call
+`group_slopes(sym, continuous = "body_size")` to see one slope per sex.
+The continuous-by-continuous equivalent asks for the slope of
+`temperature` at *specific values* of `body_size`:
+
+```{r step5cc-group-slopes}
+group_slopes(
+  sym5cc,
+  continuous = "temperature",
+  at = list(body_size = c(50, 100, 150))
+)
+```
+
+Three rows, each the `temperature` slope at a different `body_size`,
+with confidence intervals. The slope rises as `body_size` rises — the
+sign of $\beta_3$ tells you whether the interaction amplifies or
+dampens the `temperature` effect.
+
+**Takeaway.** A continuous-by-continuous interaction means *the slope
+of one continuous predictor changes with the level of another*. Use
+`group_slopes(sym, continuous = ..., at = list(other = ...))` to read
+the slope at specific values, the same way `group_means()` and
+`group_slopes(at = factor)` work for categorical strata.
+
+## Step 6: Factor-by-factor interaction (`body_mass ~ site * sex`)
 
 The hardest case: two factors interacting. `site` has four levels and
 `sex` has two, so the fitted-cell table has `4 × 2 = 8` entries. We
 generate data with site-specific male offsets so the interaction is not
 zero:
 
-```{r step5-fit}
+```{r step6-fit}
 site_offset_male <- c(A = 0, B = 1.5, C = -1.0, D = 2.5)
 dat5 <- data.frame(
   body_mass = rnorm(
@@ -389,7 +488,7 @@ sym5 <- symbolize(
 `site * sex` expands to `site + sex + site:sex` and produces eight
 coefficient columns. The first five rows:
 
-```{r step5-X}
+```{r step6-X}
 head(expand(sym5)$X, 5)
 ```
 
@@ -401,7 +500,7 @@ dummy: a `B-male` row has 1s in both `siteB` and `siteB:sexmale`.
 
 The coefficient table:
 
-```{r step5-fixed}
+```{r step6-fixed}
 sym5$fixed_effects[, c("term_label", "role", "contrast_level", "estimate")]
 ```
 
@@ -430,7 +529,7 @@ summary table without the cell-mean translation.
 The biological readings v0.1 carries cover only intercept and
 non-interaction contrasts:
 
-```{r step5-interp}
+```{r step6-interp}
 parameter_interpretation(sym5, scale = "biological")
 ```
 
@@ -442,6 +541,248 @@ above in their place.
 cells differs from the corresponding gap in the reference rows. The
 bare factor contrasts now apply *only* at the other factor's reference
 level.
+
+## Common pitfalls
+
+The six steps above cover the mechanics. The six pitfalls below cover
+the *readings* — every one is a sentence we have heard a biologist say
+out loud about their own fit. Each pitfall has the same structure:
+**Symptom** (what goes wrong), **Diagnosis** (why), a code block showing
+the wrong reading then the right one, and a one-sentence **Rule of
+thumb** to carry away.
+
+### Pitfall 1: The intercept is not "the average response"
+
+**Symptom.** A reviewer asks what the intercept means; the author
+answers "the average body mass". The number is way off compared to
+`mean(dat$body_mass)`, and now everyone is confused.
+
+**Diagnosis.** With `body_mass ~ sex + body_size`, the intercept is the
+expected response *at the reference level of every factor and at zero on
+every continuous predictor*. For a fit with `sex = factor(female, male)`
+that means "expected `body_mass` for a FEMALE at `body_size = 0`". It is
+not the overall mean unless the sexes are balanced and `body_size` is
+already centred at zero.
+
+```{r pitfall1-fit}
+n_p1 <- 80
+sex_p1 <- factor(sample(c("female", "male"), n_p1, replace = TRUE))
+bs_p1  <- runif(n_p1, 50, 150)
+dat_p1 <- data.frame(
+  body_mass = rnorm(n_p1, 30 + 5 * (sex_p1 == "male") + 0.2 * bs_p1, 3),
+  sex       = sex_p1,
+  body_size = bs_p1
+)
+fit_p1 <- drmTMB(
+  drm_formula(body_mass ~ sex + body_size, sigma ~ 1),
+  family = gaussian(), data = dat_p1
+)
+sym_p1 <- symbolize(fit_p1, context = "intercept reading")
+
+# WRONG: read the intercept as the grand mean.
+#   "the average body mass is 12.0 g" -- it is not.
+# RIGHT: read the intercept as the reference cell.
+#   symbol_table() flags the reference level so this is auditable.
+symbol_table(sym_p1)
+```
+
+**Rule of thumb.** *Read the intercept as the expected response at the
+reference factor level and zero on every continuous predictor.*
+
+### Pitfall 2: A factor contrast is not the group's mean
+
+**Symptom.** A paper sentence says "male body mass is 5 g (sexmale
+coefficient)". A reader checks `mean(body_mass[sex == "male"])` and
+gets ~35 g. The sentence is wrong.
+
+**Diagnosis.** The `sexmale` coefficient is the *difference* between
+the male and female cell means, not the male mean. The male mean is
+`(Intercept) + sexmale`. `group_means(sym, by = "sex")` returns each
+cell mean directly with a confidence band, which is what most readers
+actually wanted.
+
+```{r pitfall2-fit}
+n_p2 <- 80
+sex_p2 <- factor(sample(c("female", "male"), n_p2, replace = TRUE))
+dat_p2 <- data.frame(
+  body_mass = rnorm(n_p2, 30 + 5 * (sex_p2 == "male"), 3),
+  sex       = sex_p2
+)
+fit_p2 <- drmTMB(
+  drm_formula(body_mass ~ sex, sigma ~ 1),
+  family = gaussian(), data = dat_p2
+)
+sym_p2 <- symbolize(fit_p2, context = "contrast vs cell mean")
+
+# WRONG: read the sexmale coefficient as the male mean.
+sym_p2$fixed_effects[, c("term_label", "estimate")]
+
+# RIGHT: ask for the cell means directly.
+group_means(sym_p2, by = "sex")
+```
+
+**Rule of thumb.** *Coefficients on factor levels are differences from
+the reference; use `group_means(sym)` to see the group means
+themselves.*
+
+### Pitfall 3: An interaction is not "the effect of A on B"
+
+**Symptom.** A methods section says "the interaction tests whether sex
+has an effect on body size". That is a category error — sex does not
+*have an effect on* body size; the interaction tests whether the slope
+of one predictor depends on the level of the other.
+
+**Diagnosis.** For `body_mass ~ sex * body_size`, the
+`sexmale:body_size` coefficient is the *difference between the male and
+female slopes of `body_size`*, not "the effect of sex on body_size".
+The honest reading is "the slope of `body_size` is X for females and
+X + Y for males". `group_slopes(sym, continuous = "body_size")`
+returns the per-group slopes directly.
+
+```{r pitfall3-fit}
+n_p3 <- 80
+sex_p3 <- factor(sample(c("female", "male"), n_p3, replace = TRUE))
+bs_p3  <- runif(n_p3, 50, 150)
+dat_p3 <- data.frame(
+  body_mass = rnorm(
+    n_p3,
+    30 + 5 * (sex_p3 == "male") + 0.2 * bs_p3 +
+      0.05 * (sex_p3 == "male") * bs_p3,
+    3
+  ),
+  sex       = sex_p3,
+  body_size = bs_p3
+)
+fit_p3 <- drmTMB(
+  drm_formula(body_mass ~ sex * body_size, sigma ~ 1),
+  family = gaussian(), data = dat_p3
+)
+sym_p3 <- symbolize(fit_p3, context = "interaction wording")
+
+# WRONG: "the sexmale:body_size coefficient is the effect of sex on body_size."
+# RIGHT: it is the difference in body_size slopes between male and female.
+group_slopes(sym_p3, continuous = "body_size")
+```
+
+**Rule of thumb.** *The interaction coefficient is the difference
+between the two effects, not either effect alone; use
+`group_slopes(sym, continuous = ...)` to read each group's slope.*
+
+### Pitfall 4: Wald CIs can be too narrow with few groups
+
+**Symptom.** A fit with `(1 | site)` and only six sites reports very
+tight confidence bands on the fixed effects. The bands look more
+precise than the data could justify, and a reviewer asks how they were
+computed.
+
+**Diagnosis.** drmTMB's default is `ci_method = "wald"`, which uses an
+asymptotic normal approximation. When `sd(site)` is estimated from
+only a handful of groups, the asymptotic regime has not kicked in, and
+Wald intervals over-state precision. Profile-likelihood intervals are
+honest but slower to compute. The flag lives on `symbolize()` so the
+choice is recorded on `x$metadata$ci_method` and propagates to every
+downstream reading.
+
+```{r pitfall4-skeleton, eval = FALSE}
+# WRONG: take the default Wald CI when only a few groups inform sd(site).
+sym_wald <- symbolize(fit, ci_method = "wald")
+
+# RIGHT: ask for a profile CI — slower, but honest.
+sym_prof <- symbolize(fit, ci_method = "profile")
+```
+
+**Rule of thumb.** *When `sd(group)` is estimated from few groups, pass
+`ci_method = "profile"` to `symbolize()` for an honest interval.*
+
+### Pitfall 5: Dropping the intercept doesn't always do what you think
+
+**Symptom.** A user wants every cell mean directly, types
+`y ~ 0 + sex + site` thinking it will give all `sex × site` cell
+means, and then is surprised when the coefficients still look like
+contrasts.
+
+**Diagnosis.** `y ~ 0 + sex` with one factor *does* give cell means
+directly (one coefficient per level). But adding a second predictor,
+e.g. `y ~ 0 + sex + site`, gives "sex cell means PLUS site contrasts
+from the reference site". The non-orthogonality between two factors
+without an intercept is rarely what the reader wanted.
+`group_means(sym, by = c("sex", "site"))` returns every cell mean
+correctly regardless of how the formula was written.
+
+```{r pitfall5-fit}
+n_p5 <- 100
+sex_p5  <- factor(sample(c("female", "male"), n_p5, replace = TRUE))
+site_p5 <- factor(sample(c("A", "B", "C"), n_p5, replace = TRUE))
+dat_p5 <- data.frame(
+  body_mass = rnorm(n_p5, 30 + 5 * (sex_p5 == "male"), 3),
+  sex       = sex_p5,
+  site      = site_p5
+)
+
+# WRONG: drop the intercept and hope to read all 6 cell means off the table.
+fit_p5_wrong <- drmTMB(
+  drm_formula(body_mass ~ 0 + sex + site, sigma ~ 1),
+  family = gaussian(), data = dat_p5
+)
+
+# RIGHT: keep the intercept in, fit ~ sex * site, then use group_means().
+fit_p5_right <- drmTMB(
+  drm_formula(body_mass ~ sex * site, sigma ~ 1),
+  family = gaussian(), data = dat_p5
+)
+sym_p5 <- symbolize(fit_p5_right, context = "all cell means")
+group_means(sym_p5, by = c("sex", "site"))
+```
+
+**Rule of thumb.** *With two or more factors, the safest way to get
+all cell means is `group_means(sym, by = c(...))`, not a hand-built
+intercept-less formula.*
+
+### Pitfall 6: `poly(x, 2)` and `I(x^2)` are not the same
+
+**Symptom.** A paper reports "the slope of body_size was 0.18 g/mm
+(`poly(body_size, 2)1` coefficient)". The number happens to match an
+expected linear slope, so it looks fine — but the column is the *first
+orthogonal polynomial of `body_size`*, not the raw linear term.
+
+**Diagnosis.** `poly(x, 2)` produces two ORTHOGONAL columns: a
+combination of $x$ and $x^2$ scaled so the two columns are
+uncorrelated. The first column is *not* "the slope of $x$". By
+contrast `I(x^2)` puts the literal $x^2$ column into the design matrix
+alongside a separate linear $x$ term, and now the linear coefficient
+*is* the slope at $x = 0$. The two parameterisations carry the same
+information but their coefficient *interpretations* differ. Use
+whichever fits your story.
+
+```{r pitfall6-fit}
+n_p6 <- 80
+bs_p6 <- runif(n_p6, -1, 1)
+dat_p6 <- data.frame(
+  body_mass = rnorm(n_p6, 30 + 0.2 * bs_p6 + 0.5 * bs_p6^2, 1),
+  body_size = bs_p6
+)
+
+# WRONG: read the poly() column as a literal linear slope.
+fit_p6_poly <- drmTMB(
+  drm_formula(body_mass ~ poly(body_size, 2), sigma ~ 1),
+  family = gaussian(), data = dat_p6
+)
+sym_p6_poly <- symbolize(fit_p6_poly, context = "orthogonal polynomial")
+
+# RIGHT: use I(x^2) when you want a literal quadratic reading.
+fit_p6_raw <- drmTMB(
+  drm_formula(body_mass ~ body_size + I(body_size^2), sigma ~ 1),
+  family = gaussian(), data = dat_p6
+)
+sym_p6_raw <- symbolize(fit_p6_raw, context = "raw quadratic")
+
+symbol_table(sym_p6_poly)
+symbol_table(sym_p6_raw)
+```
+
+**Rule of thumb.** *Use `poly(x, 2)` when you want orthogonal columns
+(uncorrelated polynomial terms); use `I(x^2)` when you want a literal
+quadratic interpretation.*
 
 ## Closing: a checklist for reading any model with factors
 
