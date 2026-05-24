@@ -1,6 +1,30 @@
 # Changelog
 
-## symbolizer 0.3.2
+## symbolizer 0.4.0
+
+### v0.4 — ordinal + zero-inflation + hurdle
+
+- `cumulative_logit` — ordered categorical response, proportional-odds
+  model. The conditional distribution renders as
+  `P(Y_i ≤ k | X_i) = logit⁻¹(θ_k − X_i'β)` with K−1 thresholds
+  replacing the intercept. The mu linear predictor is rendered without
+  an intercept term (drmTMB suppresses it; symbolizer matches). Three
+  new assumption rows (`proportional_odds`,
+  `ordered_categorical_response`, `thresholds_ordered`) make the PO
+  assumption explicit and stay-honest about who’s responsible.
+- `zi` (zero-inflation) submodel layered on Poisson and nbinom2.
+  Rendered as an additional `zi_linear_predictor` component with
+  `logit(π_zi,i) = α₀ + ...`, with interpretation rows reading the α
+  coefficients as log-odds of being a structural zero. The
+  conditional-distribution assumption row spells out the mixture
+  `P(Y=0) = π_zi + (1−π_zi)·f(0|μ,...)`.
+- `hu` (hurdle) submodel layered on truncated_nbinom2. Same shape as zi
+  but with δ coefficients, and the assumption row reads as a two-part
+  mixture (`P(Y=0) = π_hu; P(Y=k | Y>0) = NegBin⁺(k; μ, exp(σ))`).
+- `drm_param_index_form()` now handles non-digit subscripts cleanly:
+  `π_{zi}` becomes `π_{zi, i}` rather than the malformed `π_{zi}_i`.
+  This was a latent bug that only surfaced once the zi/hu submodels
+  started using subscripted Greek symbols.
 
 ### v0.3.2 — two more families, families-tour vignette, README refresh
 
