@@ -12,7 +12,7 @@ sym_dollar <- function(x) {
   for (i in seq_along(x)) {
     v <- x[[i]]
     if (is.na(v) || !nzchar(v) || identical(v, "--")) {
-      out[i] <- "—"
+      out[i] <- "\u2014"  # em dash; \u escape keeps R source ASCII-only
     } else if (grepl("\\\\", v) ||
                grepl("\\^\\{|_\\{", v) ||
                grepl("^[A-Za-z]_[ijk]$", v)) {

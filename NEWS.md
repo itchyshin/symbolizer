@@ -1,6 +1,8 @@
-# symbolizer 0.0.0.9000
+# symbolizer 0.1.1
 
-## v0.1.1 (in progress) — confidence bands and marginal estimates
+## v0.1.1 — confidence bands, marginal estimates, and categorical pedagogy
+
+### Inference
 
 * `symbolize.drmTMB()` gains a `ci_method = "wald"` argument and populates
   five new columns on `fixed_effects` and `interpretation`: `std_error`,
@@ -14,12 +16,59 @@
   `knit_print()` adds a `95% CI` column to the rendered table and a footer
   naming the CI method. Renderers consume `metadata$ci_method`.
 
-## v0.1 surface (Stable)
+### Marginal estimates (new)
 
-* Initial development. v0.1 targets `drmTMB` Gaussian location-scale models
-  with structured symbolic specification, LaTeX rendering, symbol dictionary,
-  component table, formula bridge, assumption table, parameter interpretation,
-  and a notation bridge teaching surface.
+* `group_means(sym, by = NULL)` — categorical marginal means via
+  `emmeans::emmeans()`. By default returns one row per combination of
+  factor levels in the model. Returns a tibble classed
+  `symbolizer_group_means` with the same column shape as the
+  interpretation rows (`estimate`, `std_error`, `confint_low`,
+  `confint_high`, `excludes_zero`).
+* `group_slopes(sym, continuous, at = NULL)` — per-group slopes for a
+  continuous predictor via `emmeans::emtrends()`. Handles both
+  cont × factor (one row per factor level) and cont × cont
+  (`at = list(other_predictor = c(...))` returns one row per value).
+* `model_card(sym)` extraction calls and bundle gain `marginal_means`
+  and `marginal_slopes` slots so the teaching bundle includes the
+  derived per-group views alongside the contrasts.
+* Adds `emmeans` to Suggests.
+
+### Categorical pedagogy
+
+* Interaction interpretation templates (`gaussian/mu/interaction_*`) now
+  end with the call hint that takes the reader to the derived per-group
+  view: `group_slopes(sym, continuous = ...)` for cont × factor,
+  `group_means(sym, by = c(...))` for factor × factor,
+  `group_slopes(sym, continuous, at = list(...))` for cont × cont.
+* Intercept-less fits (`y ~ 0 + factor`) now produce cell-means
+  descriptions in `symbol_table`: factor rows say
+  `"factor (level_a, level_b — cell-means parameterisation)"` instead
+  of marking a reference level. The interpretation rows pick a new
+  `cell_mean` role with prose like "Expected {response} for
+  {variable} = {level}".
+* `inst/extdata/interpretation-templates.csv` adds the
+  `gaussian/mu/cell_mean` row.
+* `vignettes/symbolizer-factors.Rmd` grows by +341 lines:
+  a new Step 5 walking through a continuous × continuous interaction
+  end to end, and a new "Common pitfalls" section presenting six
+  pitfalls (intercept ≠ average; contrast ≠ group mean; interaction ≠
+  effect of A on B; Wald CIs can be too narrow; dropping the intercept
+  doesn't always do what you think; `poly(x, 2)` ≠ `I(x^2)`) in the
+  Symptom / Diagnosis / WRONG-vs-RIGHT code / Rule format borrowed
+  from the gllvmTMB pitfalls page.
+
+### API consolidation
+
+* `validate_symbolized_model()` is now `@keywords internal`, removed
+  from the public NAMESPACE, and reachable as
+  `symbolizer:::validate_symbolized_model()` for advanced users
+  hand-building objects. Still listed under the pkgdown reference
+  page's "Internal: object construction" section.
+
+### Documentation
+
+* Adds `VISION.md`: mission, audience priorities, ten core principles,
+  what symbolizer is and is not, long-term direction.
 
 ## v0.1 surface (Stable)
 
