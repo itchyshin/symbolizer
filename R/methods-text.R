@@ -102,17 +102,27 @@ methods_slots_for <- function(sym) {
     re_clause       = methods_re_clause(sym)
   )
 
-  if (identical(family, "gaussian") && identical(cls, "drmTMB")) {
+  # Univariate drmTMB families share a slot shape: a single response, a mu
+  # submodel, and a sigma submodel (Student-t adds nu; Poisson would skip
+  # sigma; etc.). Rather than branching per family, fill the common slots
+  # and add family-specific extras after.
+  univariate_drm_families <- c(
+    "gaussian", "student", "lognormal", "gamma", "beta",
+    "poisson", "nbinom2"
+  )
+  if (identical(cls, "drmTMB") && family %in% univariate_drm_families) {
     slots$response             <- sym$model$response %||% "the response"
     slots$response_units_clause <- methods_units_clause(sym, slots$response)
     slots$mu_predictors_clause    <- methods_predictors_clause(sym, "mu")
-    slots$sigma_predictors_clause <- methods_predictors_clause(sym, "sigma")
-  } else if (identical(family, "student") && identical(cls, "drmTMB")) {
-    slots$response             <- sym$model$response %||% "the response"
-    slots$response_units_clause <- methods_units_clause(sym, slots$response)
-    slots$mu_predictors_clause    <- methods_predictors_clause(sym, "mu")
-    slots$sigma_predictors_clause <- methods_predictors_clause(sym, "sigma")
-    slots$nu_predictors_clause    <- methods_predictors_clause(sym, "nu")
+    # Sigma submodel: exists for every current univariate family except
+    # Poisson. Fill it when the submodel is present in the fit.
+    if ("sigma" %in% sym$submodels$parameter) {
+      slots$sigma_predictors_clause <- methods_predictors_clause(sym, "sigma")
+    }
+    # Student-t-specific extra slot for the nu submodel.
+    if (identical(family, "student")) {
+      slots$nu_predictors_clause <- methods_predictors_clause(sym, "nu")
+    }
   } else if (identical(family, "biv_gaussian") && identical(cls, "drmTMB")) {
     responses <- sym$model$responses %||%
                  strsplit(sym$model$response %||% ", ",

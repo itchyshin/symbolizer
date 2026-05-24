@@ -80,3 +80,17 @@ fit_drm_student <- function(seed = 20260524L, n = 80L) {
     data   = dat
   )
 }
+
+fit_drm_lognormal <- function(seed = 20260524L, n = 80L) {
+  testthat::skip_if_not_installed("drmTMB")
+  set.seed(seed)
+  dat <- data.frame(
+    y = exp(rnorm(n, mean = 2 + 0.5 * rnorm(n), sd = 0.3)),
+    x = rnorm(n)
+  )
+  drmTMB::drmTMB(
+    drmTMB::drm_formula(y ~ x, sigma ~ 1),
+    family = drmTMB::lognormal(),
+    data   = dat
+  )
+}

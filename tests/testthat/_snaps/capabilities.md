@@ -9,6 +9,7 @@
       * drmTMB gaussian: mu, sigma (Stable)
       * drmTMB biv_gaussian: mu1, mu2, rho12, sigma1, sigma2 (First slice)
       * drmTMB gaussian: random_effects (First slice)
+      * drmTMB lognormal: mu, sigma (First slice)
       * drmTMB student: mu, nu, sigma (First slice)
       * gllvmTMB gaussian: Lambda_B, mu, Psi_B, Sigma_B, sigma_eps (First slice)
       i See `symbolizer_capabilities()` for the full registry.
@@ -24,6 +25,7 @@
       * drmTMB gaussian: mu, sigma (Stable)
       * drmTMB biv_gaussian: mu1, mu2, rho12, sigma1, sigma2 (First slice)
       * drmTMB gaussian: random_effects (First slice)
+      * drmTMB lognormal: mu, sigma (First slice)
       * drmTMB student: mu, nu, sigma (First slice)
       * gllvmTMB gaussian: Lambda_B, mu, Psi_B, Sigma_B, sigma_eps (First slice)
       i See `symbolizer_capabilities()` for the full registry.

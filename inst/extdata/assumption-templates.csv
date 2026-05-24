@@ -39,3 +39,11 @@ student,,independence_given_random_effects,"{response_symbol} \perp {response_sy
 student,sigma,positivity,\sigma_i > 0,Residual scale is constrained positive via the log link,implied
 student,nu,positivity_and_finite_variance,\nu_i > 2,"Degrees of freedom > 2 is enforced via the log(nu - 2) link; this in turn guarantees that the modelled variance nu/(nu - 2) * sigma^2 is finite",implied
 student,,no_missing_at_random,—,Observations are assumed not missing in a way that depends on the unobserved response,not_checked
+lognormal,,conditional_distribution,"{response_symbol} \mid \mu_i\, \sigma_i \sim \mathrm{Lognormal}(\mu_i\, \sigma_i^2)","{response} is positive; log({response}) is normally distributed with mean mu_i and SD sigma_i",stated
+lognormal,,positivity_of_response,{response_symbol} > 0,"Response is strictly positive (the lognormal support); a zero or negative {response} value will error at fit time, not at symbolize time",implied
+lognormal,mu,linear_predictor,\mu_i = \beta_0 + \sum_k \beta_k X_{ki},"mu_i is the mean of log({response}); a unit change in a predictor moves log({response}) by beta on the log scale and multiplies the geometric mean of {response} by exp(beta)",stated
+lognormal,sigma,linear_predictor,\log(\sigma_i) = \gamma_0 + \sum_k \gamma_k Z_{ki},"sigma_i is the SD of log({response}); the log link enforces sigma_i > 0",stated
+lognormal,,independence,{response_symbol} \perp {response_symbol_j} \mid X \text{ for } i \ne j,Observations are conditionally independent given the predictors,implied
+lognormal,,independence_given_random_effects,"{response_symbol} \perp {response_symbol_j} \mid X\, \mathbf{u} \text{ for } i \ne j",Observations are conditionally independent given the predictors and the random effects,stated
+lognormal,sigma,positivity,\sigma_i > 0,Residual SD of log({response}) is constrained positive via the log link,implied
+lognormal,,no_missing_at_random,—,Observations are assumed not missing in a way that depends on the unobserved response,not_checked

@@ -25,6 +25,23 @@
   previous biv_gaussian-only branch was extended to recognise any
   family whose links are exposed as a named vector (Student-t today;
   future families can land without further changes here).
+* `symbolize.drmTMB()` reads lognormal fits
+  (`family = drmTMB::lognormal()`) end-to-end. The conditional
+  distribution row reads `Y_i | mu_i, sigma_i ~ Lognormal(mu_i,
+  sigma_i^2) <=> log(Y_i) | mu_i, sigma_i ~ Normal(mu_i, sigma_i^2)`,
+  spelling out the equivalence so the reader sees both views.
+  Interpretation rows on mu speak in terms of the geometric mean of
+  the response — a unit change in a predictor multiplies the
+  geometric mean by `exp(beta)`.
+* **Architectural refactor: distribution LaTeX is now CSV-driven.**
+  `inst/extdata/family-distributions.csv` carries the conditional-
+  distribution row (index + matrix form) for every family. The
+  previous hardcoded family branches in `drm_build_distribution()`
+  and `drm_build_components()` are gone. Adding a future univariate
+  family (gamma, beta, Poisson, nbinom2, Tweedie, …) is now a
+  CSV-only operation. Structural-shape families (biv_gaussian,
+  future GLLVM extensions, ordinal models) still need code because
+  their components-list shape differs.
 
 # symbolizer 0.2.1
 
