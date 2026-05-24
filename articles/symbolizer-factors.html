@@ -71,12 +71,14 @@ model fits. The output table lists a coefficient for
 and the obvious reading is wrong. The <code>sexmale</code> coefficient
 is something else. This vignette unpacks the something else, then builds
 up to interactions, where the unpacking becomes essential.</p>
-<p>We walk through five steps that build on each other. Each step fits a
+<p>We walk through six steps that build on each other. Each step fits a
 small <code>drmTMB</code> model, looks at the first few rows of the
 design matrix, and asks <code><a href="../reference/symbolize.html">symbolize()</a></code> to read each
 coefficient on the biological scale. The point is to make the
 dummy-variable, contrast, and interaction machinery concrete enough that
-a reader can apply the same logic to their own fits.</p>
+a reader can apply the same logic to their own fits. A closing
+<strong>Common pitfalls</strong> section catches the mistakes biologists
+most often make when reading these tables.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://itchyshin.github.io/symbolizer/">symbolizer</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://itchyshin.github.io/drmTMB/" class="external-link">drmTMB</a></span><span class="op">)</span></span>
@@ -951,14 +953,158 @@ reference. The bare factor contrast is now the difference in intercepts
 at zero of the continuous predictor.</p>
 </div>
 <div class="section level2">
-<h2 id="step-5-factor-by-factor-interaction-body_mass-site-sex">Step 5: Factor-by-factor interaction
-(<code>body_mass ~ site * sex</code>)<a class="anchor" aria-label="anchor" href="#step-5-factor-by-factor-interaction-body_mass-site-sex"></a>
+<h2 id="step-5-continuous-by-continuous-interaction-body_mass-temperature-body_size">Step 5: Continuous-by-continuous interaction
+(<code>body_mass ~ temperature * body_size</code>)<a class="anchor" aria-label="anchor" href="#step-5-continuous-by-continuous-interaction-body_mass-temperature-body_size"></a>
+</h2>
+<p>A continuous-by-continuous interaction lets the slope of one
+continuous predictor change with the level of another. There are no
+dummy columns here, but the same arithmetic — <em>the interaction
+coefficient is a difference of slopes</em> — still applies, just on a
+sliding rather than a group-by-group basis.</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">n_cc</span> <span class="op">&lt;-</span> <span class="fl">80</span></span>
+<span><span class="va">temperature</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="va">n_cc</span>, <span class="fl">10</span>, <span class="fl">30</span><span class="op">)</span></span>
+<span><span class="va">body_size_cc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="va">n_cc</span>, <span class="fl">50</span>, <span class="fl">150</span><span class="op">)</span></span>
+<span><span class="va">dat5cc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  body_mass   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span></span>
+<span>    <span class="va">n_cc</span>,</span>
+<span>    <span class="fl">20</span> <span class="op">+</span> <span class="fl">0.1</span> <span class="op">*</span> <span class="va">temperature</span> <span class="op">+</span> <span class="fl">0.15</span> <span class="op">*</span> <span class="va">body_size_cc</span> <span class="op">+</span></span>
+<span>      <span class="fl">0.01</span> <span class="op">*</span> <span class="va">temperature</span> <span class="op">*</span> <span class="va">body_size_cc</span>,</span>
+<span>    <span class="fl">3</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  temperature <span class="op">=</span> <span class="va">temperature</span>,</span>
+<span>  body_size   <span class="op">=</span> <span class="va">body_size_cc</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">fit5cc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://itchyshin.github.io/drmTMB/reference/drmTMB.html" class="external-link">drmTMB</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://itchyshin.github.io/drmTMB/reference/drm_formula.html" class="external-link">drm_formula</a></span><span class="op">(</span><span class="va">body_mass</span> <span class="op">~</span> <span class="va">temperature</span> <span class="op">*</span> <span class="va">body_size</span>, <span class="va">sigma</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  data   <span class="op">=</span> <span class="va">dat5cc</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">sym5cc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/symbolize.html">symbolize</a></span><span class="op">(</span></span>
+<span>  <span class="va">fit5cc</span>,</span>
+<span>  symbols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>body_mass <span class="op">=</span> <span class="st">"W_i"</span>, temperature <span class="op">=</span> <span class="st">"T_i"</span>, body_size <span class="op">=</span> <span class="st">"L_i"</span><span class="op">)</span>,</span>
+<span>  units   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>body_mass <span class="op">=</span> <span class="st">"g"</span>,   temperature <span class="op">=</span> <span class="st">"°C"</span>, body_size <span class="op">=</span> <span class="st">"mm"</span><span class="op">)</span>,</span>
+<span>  context <span class="op">=</span> <span class="st">"continuous-by-continuous interaction"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><code>temperature * body_size</code> expands to
+<code>temperature + body_size + temperature:body_size</code>. The design
+matrix has four coefficient columns — no zeros and ones this time, just
+two real numbers and their product:</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="../reference/expand.html">expand</a></span><span class="op">(</span><span class="va">sym5cc</span><span class="op">)</span><span class="op">$</span><span class="va">X</span>, <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   (Intercept) temperature body_size temperature:body_size</span></span>
+<span><span class="co">#&gt; 1           1    29.16281  86.29011             2516.4624</span></span>
+<span><span class="co">#&gt; 2           1    16.92139  56.04983              948.4407</span></span>
+<span><span class="co">#&gt; 3           1    28.43270 133.12635             3785.1415</span></span>
+<span><span class="co">#&gt; 4           1    15.27872  99.52173             1520.5642</span></span>
+<span><span class="co">#&gt; 5           1    29.48147 140.69294             4147.8343</span></span></code></pre></div>
+<p>The four columns are <code>(Intercept)</code>,
+<code>temperature</code>, <code>body_size</code>, and
+<code>temperature:body_size</code>. The interaction column is literally
+the product of the other two predictor columns.</p>
+<p>Call the four coefficients
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mn>0</mn></msub><mo>,</mo><msub><mi>β</mi><mn>1</mn></msub><mo>,</mo><msub><mi>β</mi><mn>2</mn></msub><mo>,</mo><msub><mi>β</mi><mn>3</mn></msub></mrow><annotation encoding="application/x-tex">\beta_0, \beta_1, \beta_2, \beta_3</annotation></semantics></math>
+in column order. The model is</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">E</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>W</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>β</mi><mn>0</mn></msub><mo>+</mo><msub><mi>β</mi><mn>1</mn></msub><msub><mi>T</mi><mi>i</mi></msub><mo>+</mo><msub><mi>β</mi><mn>2</mn></msub><msub><mi>L</mi><mi>i</mi></msub><mo>+</mo><msub><mi>β</mi><mn>3</mn></msub><msub><mi>T</mi><mi>i</mi></msub><msub><mi>L</mi><mi>i</mi></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">\mathrm{E}(W_i) = \beta_0 + \beta_1 T_i + \beta_2 L_i + \beta_3 T_i L_i.</annotation></semantics></math></p>
+<p>Re-arrange to isolate the slope of <code>temperature</code>:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">E</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>W</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>β</mi><mn>0</mn></msub><mo>+</mo><mo stretchy="false" form="prefix">(</mo><msub><mi>β</mi><mn>1</mn></msub><mo>+</mo><msub><mi>β</mi><mn>3</mn></msub><msub><mi>L</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><msub><mi>T</mi><mi>i</mi></msub><mo>+</mo><msub><mi>β</mi><mn>2</mn></msub><msub><mi>L</mi><mi>i</mi></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">\mathrm{E}(W_i) = \beta_0 + (\beta_1 + \beta_3 L_i) T_i + \beta_2 L_i.</annotation></semantics></math></p>
+<p>The slope of <code>temperature</code> is
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mn>1</mn></msub><mo>+</mo><msub><mi>β</mi><mn>3</mn></msub><msub><mi>L</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">\beta_1 + \beta_3 L_i</annotation></semantics></math>
+— it depends on <code>body_size</code>. Reading the four coefficients in
+those terms:</p>
+<ul>
+<li>
+<strong><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\beta_0</annotation></semantics></math>
+(intercept)</strong> = expected <code>body_mass</code> when
+<code>temperature = 0</code> and <code>body_size = 0</code>.</li>
+<li>
+<strong><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mn>1</mn></msub><annotation encoding="application/x-tex">\beta_1</annotation></semantics></math>
+(<code>temperature</code>)</strong> = the <code>temperature</code> slope
+<em>at</em> <code>body_size = 0</code>. Not “the temperature slope”. The
+slope at one specific value of <code>body_size</code>.</li>
+<li>
+<strong><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mn>2</mn></msub><annotation encoding="application/x-tex">\beta_2</annotation></semantics></math>
+(<code>body_size</code>)</strong> = the <code>body_size</code> slope
+<em>at</em> <code>temperature = 0</code>. Same reasoning.</li>
+<li>
+<strong><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mn>3</mn></msub><annotation encoding="application/x-tex">\beta_3</annotation></semantics></math>
+(<code>temperature:body_size</code>)</strong> = how much the
+<code>temperature</code> slope changes per one-unit increase in
+<code>body_size</code>. Equivalently, how much the
+<code>body_size</code> slope changes per one-unit increase in
+<code>temperature</code>. The two readings are symmetric.</li>
+</ul>
+<p>For the cont-by-factor interaction in Step 4 we could call
+<code>group_slopes(sym, continuous = "body_size")</code> to see one
+slope per sex. The continuous-by-continuous equivalent asks for the
+slope of <code>temperature</code> at <em>specific values</em> of
+<code>body_size</code>:</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/group_slopes.html">group_slopes</a></span><span class="op">(</span></span>
+<span>  <span class="va">sym5cc</span>,</span>
+<span>  continuous <span class="op">=</span> <span class="st">"temperature"</span>,</span>
+<span>  at <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>body_size <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">50</span>, <span class="fl">100</span>, <span class="fl">150</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><strong>Group slopes for <code>temperature</code></strong></p>
+<table class="table">
+<thead><tr class="header">
+<th align="left">predictor</th>
+<th align="left">level_combo</th>
+<th align="right">body_size</th>
+<th align="left">estimate</th>
+<th align="left">95% CI</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">temperature</td>
+<td align="left">body_size=50</td>
+<td align="right">50</td>
+<td align="left">0.671</td>
+<td align="left">0.410, 0.932 *</td>
+</tr>
+<tr class="even">
+<td align="left">temperature</td>
+<td align="left">body_size=100</td>
+<td align="right">100</td>
+<td align="left">1.11</td>
+<td align="left">0.988, 1.23 *</td>
+</tr>
+<tr class="odd">
+<td align="left">temperature</td>
+<td align="left">body_size=150</td>
+<td align="right">150</td>
+<td align="left">1.55</td>
+<td align="left">1.34, 1.75 *</td>
+</tr>
+</tbody>
+</table>
+<p><em>Rows marked <code>*</code> have a 95% confidence interval that
+excludes zero (CI method: <code>wald</code>).</em></p>
+<p>Three rows, each the <code>temperature</code> slope at a different
+<code>body_size</code>, with confidence intervals. The slope rises as
+<code>body_size</code> rises — the sign of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mn>3</mn></msub><annotation encoding="application/x-tex">\beta_3</annotation></semantics></math>
+tells you whether the interaction amplifies or dampens the
+<code>temperature</code> effect.</p>
+<p><strong>Takeaway.</strong> A continuous-by-continuous interaction
+means <em>the slope of one continuous predictor changes with the level
+of another</em>. Use
+<code>group_slopes(sym, continuous = ..., at = list(other = ...))</code>
+to read the slope at specific values, the same way
+<code><a href="../reference/group_means.html">group_means()</a></code> and <code>group_slopes(at = factor)</code>
+work for categorical strata.</p>
+</div>
+<div class="section level2">
+<h2 id="step-6-factor-by-factor-interaction-body_mass-site-sex">Step 6: Factor-by-factor interaction
+(<code>body_mass ~ site * sex</code>)<a class="anchor" aria-label="anchor" href="#step-6-factor-by-factor-interaction-body_mass-site-sex"></a>
 </h2>
 <p>The hardest case: two factors interacting. <code>site</code> has four
 levels and <code>sex</code> has two, so the fitted-cell table has
 <code>4 × 2 = 8</code> entries. We generate data with site-specific male
 offsets so the interaction is not zero:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">site_offset_male</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>A <span class="op">=</span> <span class="fl">0</span>, B <span class="op">=</span> <span class="fl">1.5</span>, C <span class="op">=</span> <span class="op">-</span><span class="fl">1.0</span>, D <span class="op">=</span> <span class="fl">2.5</span><span class="op">)</span></span>
 <span><span class="va">dat5</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  body_mass <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span></span>
@@ -985,7 +1131,7 @@ offsets so the interaction is not zero:</p>
 <span><span class="op">)</span></span></code></pre></div>
 <p><code>site * sex</code> expands to <code>site + sex + site:sex</code>
 and produces eight coefficient columns. The first five rows:</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="../reference/expand.html">expand</a></span><span class="op">(</span><span class="va">sym5</span><span class="op">)</span><span class="op">$</span><span class="va">X</span>, <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   (Intercept) siteB siteC siteD sexmale siteB:sexmale siteC:sexmale</span></span>
 <span><span class="co">#&gt; 1           1     0     0     1       0             0             0</span></span>
@@ -1008,20 +1154,20 @@ interaction columns are products of the site dummy and the
 <code>sexmale</code> dummy: a <code>B-male</code> row has 1s in both
 <code>siteB</code> and <code>siteB:sexmale</code>.</p>
 <p>The coefficient table:</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sym5</span><span class="op">$</span><span class="va">fixed_effects</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"term_label"</span>, <span class="st">"role"</span>, <span class="st">"contrast_level"</span>, <span class="st">"estimate"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 9 × 4</span></span></span>
 <span><span class="co">#&gt;   term_label  role            contrast_level estimate</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> (Intercept) intercept       <span style="color: #BB0000;">NA</span>               30.6  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> site        factor_contrast B                 1.59 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> site        factor_contrast C                 3.77 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> site        factor_contrast D                -<span style="color: #BB0000;">3.72</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> sex         factor_contrast male              3.42 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> site:sex    interaction     B:male            4.75 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> site:sex    interaction     C:male            0.355</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">8</span> site:sex    interaction     D:male            5.26 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">9</span> (Intercept) intercept       <span style="color: #BB0000;">NA</span>                1.04</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> (Intercept) intercept       <span style="color: #BB0000;">NA</span>               29.7  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> site        factor_contrast B                 3.66 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> site        factor_contrast C                 4.44 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> site        factor_contrast D                -<span style="color: #BB0000;">2.62</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> sex         factor_contrast male              4.94 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> site:sex    interaction     B:male            0.276</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> site:sex    interaction     C:male           -<span style="color: #BB0000;">2.13</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">8</span> site:sex    interaction     D:male            3.16 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">9</span> (Intercept) intercept       <span style="color: #BB0000;">NA</span>                1.03</span></span></code></pre></div>
 <p>Reading the eight coefficients in cell terms (write
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>W</mi><mo accent="true">‾</mo></mover><mrow><mi>s</mi><mo>,</mo><mi>x</mi></mrow></msub><annotation encoding="application/x-tex">\bar W_{s,x}</annotation></semantics></math>
 for the population mean at site <code>s</code>, sex <code>x</code>):</p>
@@ -1059,7 +1205,7 @@ coefficients. It is also why a factor-by-factor interaction is hard to
 read off a summary table without the cell-mean translation.</p>
 <p>The biological readings v0.1 carries cover only intercept and
 non-interaction contrasts:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/parameter_interpretation.html">parameter_interpretation</a></span><span class="op">(</span><span class="va">sym5</span>, scale <span class="op">=</span> <span class="st">"biological"</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <colgroup>
@@ -1081,44 +1227,44 @@ non-interaction contrasts:</p>
 <td align="left">mu</td>
 <td align="left">(Intercept)</td>
 <td align="left">intercept</td>
-<td align="left">30.6</td>
+<td align="left">29.7</td>
 <td align="left">Baseline body_mass in the reference condition</td>
 </tr>
 <tr class="even">
 <td align="left">mu</td>
 <td align="left">site</td>
 <td align="left">factor_contrast</td>
-<td align="left">1.59</td>
-<td align="left">Average body_mass differs between B and A by 1.59</td>
+<td align="left">3.66</td>
+<td align="left">Average body_mass differs between B and A by 3.66</td>
 </tr>
 <tr class="odd">
 <td align="left">mu</td>
 <td align="left">site</td>
 <td align="left">factor_contrast</td>
-<td align="left">3.77</td>
-<td align="left">Average body_mass differs between C and A by 3.77</td>
+<td align="left">4.44</td>
+<td align="left">Average body_mass differs between C and A by 4.44</td>
 </tr>
 <tr class="even">
 <td align="left">mu</td>
 <td align="left">site</td>
 <td align="left">factor_contrast</td>
-<td align="left">-3.72</td>
-<td align="left">Average body_mass differs between D and A by -3.72</td>
+<td align="left">-2.62</td>
+<td align="left">Average body_mass differs between D and A by -2.62</td>
 </tr>
 <tr class="odd">
 <td align="left">mu</td>
 <td align="left">sex</td>
 <td align="left">factor_contrast</td>
-<td align="left">3.42</td>
+<td align="left">4.94</td>
 <td align="left">Average body_mass differs between male and female by
-3.42</td>
+4.94</td>
 </tr>
 <tr class="even">
 <td align="left">mu</td>
 <td align="left">site:sex</td>
 <td align="left">interaction_factor_factor</td>
-<td align="left">4.75</td>
-<td align="left">The site effect on body_mass differs by 4.75 between
+<td align="left">0.276</td>
+<td align="left">The site effect on body_mass differs by 0.276 between
 sex = male and sex = female. Call
 <code>group_means(sym, by = c("site", "sex"))</code> to see each cell’s
 expected response with confidence intervals.</td>
@@ -1127,8 +1273,8 @@ expected response with confidence intervals.</td>
 <td align="left">mu</td>
 <td align="left">site:sex</td>
 <td align="left">interaction_factor_factor</td>
-<td align="left">0.355</td>
-<td align="left">The site effect on body_mass differs by 0.355 between
+<td align="left">-2.13</td>
+<td align="left">The site effect on body_mass differs by -2.13 between
 sex = male and sex = female. Call
 <code>group_means(sym, by = c("site", "sex"))</code> to see each cell’s
 expected response with confidence intervals.</td>
@@ -1137,8 +1283,8 @@ expected response with confidence intervals.</td>
 <td align="left">mu</td>
 <td align="left">site:sex</td>
 <td align="left">interaction_factor_factor</td>
-<td align="left">5.26</td>
-<td align="left">The site effect on body_mass differs by 5.26 between
+<td align="left">3.16</td>
+<td align="left">The site effect on body_mass differs by 3.16 between
 sex = male and sex = female. Call
 <code>group_means(sym, by = c("site", "sex"))</code> to see each cell’s
 expected response with confidence intervals.</td>
@@ -1147,7 +1293,7 @@ expected response with confidence intervals.</td>
 <td align="left">sigma</td>
 <td align="left">(Intercept)</td>
 <td align="left">intercept</td>
-<td align="left">1.04</td>
+<td align="left">1.03</td>
 <td align="left">Baseline level of unexplained individual variation in
 body_mass</td>
 </tr>
@@ -1160,6 +1306,707 @@ is a <em>difference of differences</em>: how much the gap between two
 non-reference cells differs from the corresponding gap in the reference
 rows. The bare factor contrasts now apply <em>only</em> at the other
 factor’s reference level.</p>
+</div>
+<div class="section level2">
+<h2 id="common-pitfalls">Common pitfalls<a class="anchor" aria-label="anchor" href="#common-pitfalls"></a>
+</h2>
+<p>The six steps above cover the mechanics. The six pitfalls below cover
+the <em>readings</em> — every one is a sentence we have heard a
+biologist say out loud about their own fit. Each pitfall has the same
+structure: <strong>Symptom</strong> (what goes wrong),
+<strong>Diagnosis</strong> (why), a code block showing the wrong reading
+then the right one, and a one-sentence <strong>Rule of thumb</strong> to
+carry away.</p>
+<div class="section level3">
+<h3 id="pitfall-1-the-intercept-is-not-the-average-response">Pitfall 1: The intercept is not “the average response”<a class="anchor" aria-label="anchor" href="#pitfall-1-the-intercept-is-not-the-average-response"></a>
+</h3>
+<p><strong>Symptom.</strong> A reviewer asks what the intercept means;
+the author answers “the average body mass”. The number is way off
+compared to <code>mean(dat$body_mass)</code>, and now everyone is
+confused.</p>
+<p><strong>Diagnosis.</strong> With
+<code>body_mass ~ sex + body_size</code>, the intercept is the expected
+response <em>at the reference level of every factor and at zero on every
+continuous predictor</em>. For a fit with
+<code>sex = factor(female, male)</code> that means “expected
+<code>body_mass</code> for a FEMALE at <code>body_size = 0</code>”. It
+is not the overall mean unless the sexes are balanced and
+<code>body_size</code> is already centred at zero.</p>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">n_p1</span> <span class="op">&lt;-</span> <span class="fl">80</span></span>
+<span><span class="va">sex_p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"female"</span>, <span class="st">"male"</span><span class="op">)</span>, <span class="va">n_p1</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">bs_p1</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="va">n_p1</span>, <span class="fl">50</span>, <span class="fl">150</span><span class="op">)</span></span>
+<span><span class="va">dat_p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  body_mass <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n_p1</span>, <span class="fl">30</span> <span class="op">+</span> <span class="fl">5</span> <span class="op">*</span> <span class="op">(</span><span class="va">sex_p1</span> <span class="op">==</span> <span class="st">"male"</span><span class="op">)</span> <span class="op">+</span> <span class="fl">0.2</span> <span class="op">*</span> <span class="va">bs_p1</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>  sex       <span class="op">=</span> <span class="va">sex_p1</span>,</span>
+<span>  body_size <span class="op">=</span> <span class="va">bs_p1</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">fit_p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://itchyshin.github.io/drmTMB/reference/drmTMB.html" class="external-link">drmTMB</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://itchyshin.github.io/drmTMB/reference/drm_formula.html" class="external-link">drm_formula</a></span><span class="op">(</span><span class="va">body_mass</span> <span class="op">~</span> <span class="va">sex</span> <span class="op">+</span> <span class="va">body_size</span>, <span class="va">sigma</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">dat_p1</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">sym_p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/symbolize.html">symbolize</a></span><span class="op">(</span><span class="va">fit_p1</span>, context <span class="op">=</span> <span class="st">"intercept reading"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># WRONG: read the intercept as the grand mean.</span></span>
+<span><span class="co">#   "the average body mass is 12.0 g" -- it is not.</span></span>
+<span><span class="co"># RIGHT: read the intercept as the reference cell.</span></span>
+<span><span class="co">#   symbol_table() flags the reference level so this is auditable.</span></span>
+<span><span class="fu"><a href="../reference/symbol_table.html">symbol_table</a></span><span class="op">(</span><span class="va">sym_p1</span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<colgroup>
+<col width="18%">
+<col width="12%">
+<col width="5%">
+<col width="3%">
+<col width="7%">
+<col width="18%">
+<col width="15%">
+<col width="18%">
+</colgroup>
+<thead><tr class="header">
+<th align="left">index</th>
+<th align="left">matrix</th>
+<th align="left">variable</th>
+<th align="left">units</th>
+<th align="left">role</th>
+<th align="left">shape</th>
+<th align="left">concrete</th>
+<th align="left">description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">body_mass_i</td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐛</mi><mi>𝐨</mi><mi>𝐝</mi><msub><mi>𝐲</mi><mi>𝐦</mi></msub><mi>𝐚</mi><mi>𝐬</mi><mi>𝐬</mi></mrow><annotation encoding="application/x-tex">\mathbf{body_mass}</annotation></semantics></math></td>
+<td align="left">body_mass</td>
+<td align="left">NA</td>
+<td align="left">response</td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mi>n</mi></msup><annotation encoding="application/x-tex">\mathbb{R}^n</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>80</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{80}</annotation></semantics></math></td>
+<td align="left">response variable</td>
+</tr>
+<tr class="even">
+<td align="left">sex_i</td>
+<td align="left">—</td>
+<td align="left">sex</td>
+<td align="left">NA</td>
+<td align="left">factor</td>
+<td align="left">column of design matrix</td>
+<td align="left">column of X (length 80)</td>
+<td align="left">factor (female [reference], male)</td>
+</tr>
+<tr class="odd">
+<td align="left">body_size_i</td>
+<td align="left">—</td>
+<td align="left">body_size</td>
+<td align="left">NA</td>
+<td align="left">predictor</td>
+<td align="left">column of design matrix</td>
+<td align="left">column of X (length 80)</td>
+<td align="left">continuous predictor</td>
+</tr>
+<tr class="even">
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>μ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\mu_i</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛍</mi><annotation encoding="application/x-tex">\boldsymbol{\mu}</annotation></semantics></math></td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="left">parameter</td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mi>n</mi></msup><annotation encoding="application/x-tex">\mathbb{R}^n</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>80</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{80}</annotation></semantics></math></td>
+<td align="left">conditional mu of body_mass</td>
+</tr>
+<tr class="odd">
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\sigma_i</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛔</mi><annotation encoding="application/x-tex">\boldsymbol{\sigma}</annotation></semantics></math></td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="left">parameter</td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mi>n</mi></msup><annotation encoding="application/x-tex">\mathbb{R}^n</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>80</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{80}</annotation></semantics></math></td>
+<td align="left">conditional sigma of body_mass</td>
+</tr>
+<tr class="even">
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mn>0</mn></msub><mo>,</mo><msub><mi>β</mi><mn>1</mn></msub><mo>,</mo><msub><mi>β</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">\beta_{0}, \beta_{1}, \beta_{2}</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛃</mi><annotation encoding="application/x-tex">\boldsymbol{\beta}</annotation></semantics></math></td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="left">coefficient</td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><msub><mi>p</mi><mi>μ</mi></msub></msup><annotation encoding="application/x-tex">\mathbb{R}^{p_\mu}</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>3</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{3}</annotation></semantics></math></td>
+<td align="left">mu submodel coefficients</td>
+</tr>
+<tr class="odd">
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>γ</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\gamma_{0}</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛄</mi><annotation encoding="application/x-tex">\boldsymbol{\gamma}</annotation></semantics></math></td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="left">coefficient</td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><msub><mi>p</mi><mi>σ</mi></msub></msup><annotation encoding="application/x-tex">\mathbb{R}^{p_\sigma}</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>1</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{1}</annotation></semantics></math></td>
+<td align="left">sigma submodel coefficients</td>
+</tr>
+<tr class="even">
+<td align="left">—</td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐗</mi><annotation encoding="application/x-tex">\mathbf{X}</annotation></semantics></math></td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="left">design_matrix</td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mi>n</mi><mo>×</mo><msub><mi>p</mi><mi>μ</mi></msub></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{n \times p_\mu}</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mn>80</mn><mo>×</mo><mn>3</mn></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{80 \times 3}</annotation></semantics></math></td>
+<td align="left">mu submodel design matrix</td>
+</tr>
+<tr class="odd">
+<td align="left">—</td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐙</mi><annotation encoding="application/x-tex">\mathbf{Z}</annotation></semantics></math></td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="left">design_matrix</td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mi>n</mi><mo>×</mo><msub><mi>p</mi><mi>σ</mi></msub></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{n \times p_\sigma}</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mn>80</mn><mo>×</mo><mn>1</mn></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{80 \times 1}</annotation></semantics></math></td>
+<td align="left">sigma submodel design matrix</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Rule of thumb.</strong> <em>Read the intercept as the
+expected response at the reference factor level and zero on every
+continuous predictor.</em></p>
+</div>
+<div class="section level3">
+<h3 id="pitfall-2-a-factor-contrast-is-not-the-groups-mean">Pitfall 2: A factor contrast is not the group’s mean<a class="anchor" aria-label="anchor" href="#pitfall-2-a-factor-contrast-is-not-the-groups-mean"></a>
+</h3>
+<p><strong>Symptom.</strong> A paper sentence says “male body mass is 5
+g (sexmale coefficient)”. A reader checks
+<code>mean(body_mass[sex == "male"])</code> and gets ~35 g. The sentence
+is wrong.</p>
+<p><strong>Diagnosis.</strong> The <code>sexmale</code> coefficient is
+the <em>difference</em> between the male and female cell means, not the
+male mean. The male mean is <code>(Intercept) + sexmale</code>.
+<code>group_means(sym, by = "sex")</code> returns each cell mean
+directly with a confidence band, which is what most readers actually
+wanted.</p>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">n_p2</span> <span class="op">&lt;-</span> <span class="fl">80</span></span>
+<span><span class="va">sex_p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"female"</span>, <span class="st">"male"</span><span class="op">)</span>, <span class="va">n_p2</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">dat_p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  body_mass <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n_p2</span>, <span class="fl">30</span> <span class="op">+</span> <span class="fl">5</span> <span class="op">*</span> <span class="op">(</span><span class="va">sex_p2</span> <span class="op">==</span> <span class="st">"male"</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>  sex       <span class="op">=</span> <span class="va">sex_p2</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">fit_p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://itchyshin.github.io/drmTMB/reference/drmTMB.html" class="external-link">drmTMB</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://itchyshin.github.io/drmTMB/reference/drm_formula.html" class="external-link">drm_formula</a></span><span class="op">(</span><span class="va">body_mass</span> <span class="op">~</span> <span class="va">sex</span>, <span class="va">sigma</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">dat_p2</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">sym_p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/symbolize.html">symbolize</a></span><span class="op">(</span><span class="va">fit_p2</span>, context <span class="op">=</span> <span class="st">"contrast vs cell mean"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># WRONG: read the sexmale coefficient as the male mean.</span></span>
+<span><span class="va">sym_p2</span><span class="op">$</span><span class="va">fixed_effects</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"term_label"</span>, <span class="st">"estimate"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 2</span></span></span>
+<span><span class="co">#&gt;   term_label  estimate</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> (Intercept)    30.0 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> sex             5.35</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> (Intercept)     1.02</span></span>
+<span></span>
+<span><span class="co"># RIGHT: ask for the cell means directly.</span></span>
+<span><span class="fu"><a href="../reference/group_means.html">group_means</a></span><span class="op">(</span><span class="va">sym_p2</span>, by <span class="op">=</span> <span class="st">"sex"</span><span class="op">)</span></span></code></pre></div>
+<p><strong>Group means</strong></p>
+<table class="table">
+<thead><tr class="header">
+<th align="left">level_combo</th>
+<th align="left">sex</th>
+<th align="left">estimate</th>
+<th align="left">95% CI</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">sex=female</td>
+<td align="left">female</td>
+<td align="left">30.0</td>
+<td align="left">29.1, 30.9 *</td>
+</tr>
+<tr class="even">
+<td align="left">sex=male</td>
+<td align="left">male</td>
+<td align="left">35.3</td>
+<td align="left">34.5, 36.1 *</td>
+</tr>
+</tbody>
+</table>
+<p><em>Rows marked <code>*</code> have a 95% confidence interval that
+excludes zero (CI method: <code>wald</code>).</em></p>
+<p><strong>Rule of thumb.</strong> <em>Coefficients on factor levels are
+differences from the reference; use <code>group_means(sym)</code> to see
+the group means themselves.</em></p>
+</div>
+<div class="section level3">
+<h3 id="pitfall-3-an-interaction-is-not-the-effect-of-a-on-b">Pitfall 3: An interaction is not “the effect of A on B”<a class="anchor" aria-label="anchor" href="#pitfall-3-an-interaction-is-not-the-effect-of-a-on-b"></a>
+</h3>
+<p><strong>Symptom.</strong> A methods section says “the interaction
+tests whether sex has an effect on body size”. That is a category error
+— sex does not <em>have an effect on</em> body size; the interaction
+tests whether the slope of one predictor depends on the level of the
+other.</p>
+<p><strong>Diagnosis.</strong> For
+<code>body_mass ~ sex * body_size</code>, the
+<code>sexmale:body_size</code> coefficient is the <em>difference between
+the male and female slopes of <code>body_size</code></em>, not “the
+effect of sex on body_size”. The honest reading is “the slope of
+<code>body_size</code> is X for females and X + Y for males”.
+<code>group_slopes(sym, continuous = "body_size")</code> returns the
+per-group slopes directly.</p>
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">n_p3</span> <span class="op">&lt;-</span> <span class="fl">80</span></span>
+<span><span class="va">sex_p3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"female"</span>, <span class="st">"male"</span><span class="op">)</span>, <span class="va">n_p3</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">bs_p3</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="va">n_p3</span>, <span class="fl">50</span>, <span class="fl">150</span><span class="op">)</span></span>
+<span><span class="va">dat_p3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  body_mass <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span></span>
+<span>    <span class="va">n_p3</span>,</span>
+<span>    <span class="fl">30</span> <span class="op">+</span> <span class="fl">5</span> <span class="op">*</span> <span class="op">(</span><span class="va">sex_p3</span> <span class="op">==</span> <span class="st">"male"</span><span class="op">)</span> <span class="op">+</span> <span class="fl">0.2</span> <span class="op">*</span> <span class="va">bs_p3</span> <span class="op">+</span></span>
+<span>      <span class="fl">0.05</span> <span class="op">*</span> <span class="op">(</span><span class="va">sex_p3</span> <span class="op">==</span> <span class="st">"male"</span><span class="op">)</span> <span class="op">*</span> <span class="va">bs_p3</span>,</span>
+<span>    <span class="fl">3</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  sex       <span class="op">=</span> <span class="va">sex_p3</span>,</span>
+<span>  body_size <span class="op">=</span> <span class="va">bs_p3</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">fit_p3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://itchyshin.github.io/drmTMB/reference/drmTMB.html" class="external-link">drmTMB</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://itchyshin.github.io/drmTMB/reference/drm_formula.html" class="external-link">drm_formula</a></span><span class="op">(</span><span class="va">body_mass</span> <span class="op">~</span> <span class="va">sex</span> <span class="op">*</span> <span class="va">body_size</span>, <span class="va">sigma</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">dat_p3</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">sym_p3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/symbolize.html">symbolize</a></span><span class="op">(</span><span class="va">fit_p3</span>, context <span class="op">=</span> <span class="st">"interaction wording"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># WRONG: "the sexmale:body_size coefficient is the effect of sex on body_size."</span></span>
+<span><span class="co"># RIGHT: it is the difference in body_size slopes between male and female.</span></span>
+<span><span class="fu"><a href="../reference/group_slopes.html">group_slopes</a></span><span class="op">(</span><span class="va">sym_p3</span>, continuous <span class="op">=</span> <span class="st">"body_size"</span><span class="op">)</span></span></code></pre></div>
+<p><strong>Group slopes for <code>body_size</code></strong></p>
+<table class="table">
+<thead><tr class="header">
+<th align="left">predictor</th>
+<th align="left">level_combo</th>
+<th align="left">sex</th>
+<th align="left">estimate</th>
+<th align="left">95% CI</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">body_size</td>
+<td align="left">sex=female</td>
+<td align="left">female</td>
+<td align="left">0.192</td>
+<td align="left">0.154, 0.230 *</td>
+</tr>
+<tr class="even">
+<td align="left">body_size</td>
+<td align="left">sex=male</td>
+<td align="left">male</td>
+<td align="left">0.222</td>
+<td align="left">0.180, 0.265 *</td>
+</tr>
+</tbody>
+</table>
+<p><em>Rows marked <code>*</code> have a 95% confidence interval that
+excludes zero (CI method: <code>wald</code>).</em></p>
+<p><strong>Rule of thumb.</strong> <em>The interaction coefficient is
+the difference between the two effects, not either effect alone; use
+<code>group_slopes(sym, continuous = ...)</code> to read each group’s
+slope.</em></p>
+</div>
+<div class="section level3">
+<h3 id="pitfall-4-wald-cis-can-be-too-narrow-with-few-groups">Pitfall 4: Wald CIs can be too narrow with few groups<a class="anchor" aria-label="anchor" href="#pitfall-4-wald-cis-can-be-too-narrow-with-few-groups"></a>
+</h3>
+<p><strong>Symptom.</strong> A fit with <code>(1 | site)</code> and only
+six sites reports very tight confidence bands on the fixed effects. The
+bands look more precise than the data could justify, and a reviewer asks
+how they were computed.</p>
+<p><strong>Diagnosis.</strong> drmTMB’s default is
+<code>ci_method = "wald"</code>, which uses an asymptotic normal
+approximation. When <code>sd(site)</code> is estimated from only a
+handful of groups, the asymptotic regime has not kicked in, and Wald
+intervals over-state precision. Profile-likelihood intervals are honest
+but slower to compute. The flag lives on <code><a href="../reference/symbolize.html">symbolize()</a></code> so the
+choice is recorded on <code>x$metadata$ci_method</code> and propagates
+to every downstream reading.</p>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># WRONG: take the default Wald CI when only a few groups inform sd(site).</span></span>
+<span><span class="va">sym_wald</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/symbolize.html">symbolize</a></span><span class="op">(</span><span class="va">fit</span>, ci_method <span class="op">=</span> <span class="st">"wald"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># RIGHT: ask for a profile CI — slower, but honest.</span></span>
+<span><span class="va">sym_prof</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/symbolize.html">symbolize</a></span><span class="op">(</span><span class="va">fit</span>, ci_method <span class="op">=</span> <span class="st">"profile"</span><span class="op">)</span></span></code></pre></div>
+<p><strong>Rule of thumb.</strong> <em>When <code>sd(group)</code> is
+estimated from few groups, pass <code>ci_method = "profile"</code> to
+<code><a href="../reference/symbolize.html">symbolize()</a></code> for an honest interval.</em></p>
+</div>
+<div class="section level3">
+<h3 id="pitfall-5-dropping-the-intercept-doesnt-always-do-what-you-think">Pitfall 5: Dropping the intercept doesn’t always do what you
+think<a class="anchor" aria-label="anchor" href="#pitfall-5-dropping-the-intercept-doesnt-always-do-what-you-think"></a>
+</h3>
+<p><strong>Symptom.</strong> A user wants every cell mean directly,
+types <code>y ~ 0 + sex + site</code> thinking it will give all
+<code>sex × site</code> cell means, and then is surprised when the
+coefficients still look like contrasts.</p>
+<p><strong>Diagnosis.</strong> <code>y ~ 0 + sex</code> with one factor
+<em>does</em> give cell means directly (one coefficient per level). But
+adding a second predictor, e.g. <code>y ~ 0 + sex + site</code>, gives
+“sex cell means PLUS site contrasts from the reference site”. The
+non-orthogonality between two factors without an intercept is rarely
+what the reader wanted.
+<code>group_means(sym, by = c("sex", "site"))</code> returns every cell
+mean correctly regardless of how the formula was written.</p>
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">n_p5</span> <span class="op">&lt;-</span> <span class="fl">100</span></span>
+<span><span class="va">sex_p5</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"female"</span>, <span class="st">"male"</span><span class="op">)</span>, <span class="va">n_p5</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">site_p5</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span><span class="op">)</span>, <span class="va">n_p5</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">dat_p5</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  body_mass <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n_p5</span>, <span class="fl">30</span> <span class="op">+</span> <span class="fl">5</span> <span class="op">*</span> <span class="op">(</span><span class="va">sex_p5</span> <span class="op">==</span> <span class="st">"male"</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>  sex       <span class="op">=</span> <span class="va">sex_p5</span>,</span>
+<span>  site      <span class="op">=</span> <span class="va">site_p5</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># WRONG: drop the intercept and hope to read all 6 cell means off the table.</span></span>
+<span><span class="va">fit_p5_wrong</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://itchyshin.github.io/drmTMB/reference/drmTMB.html" class="external-link">drmTMB</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://itchyshin.github.io/drmTMB/reference/drm_formula.html" class="external-link">drm_formula</a></span><span class="op">(</span><span class="va">body_mass</span> <span class="op">~</span> <span class="fl">0</span> <span class="op">+</span> <span class="va">sex</span> <span class="op">+</span> <span class="va">site</span>, <span class="va">sigma</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">dat_p5</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># RIGHT: keep the intercept in, fit ~ sex * site, then use group_means().</span></span>
+<span><span class="va">fit_p5_right</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://itchyshin.github.io/drmTMB/reference/drmTMB.html" class="external-link">drmTMB</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://itchyshin.github.io/drmTMB/reference/drm_formula.html" class="external-link">drm_formula</a></span><span class="op">(</span><span class="va">body_mass</span> <span class="op">~</span> <span class="va">sex</span> <span class="op">*</span> <span class="va">site</span>, <span class="va">sigma</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">dat_p5</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">sym_p5</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/symbolize.html">symbolize</a></span><span class="op">(</span><span class="va">fit_p5_right</span>, context <span class="op">=</span> <span class="st">"all cell means"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/group_means.html">group_means</a></span><span class="op">(</span><span class="va">sym_p5</span>, by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sex"</span>, <span class="st">"site"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><strong>Group means</strong></p>
+<table class="table">
+<thead><tr class="header">
+<th align="left">level_combo</th>
+<th align="left">sex</th>
+<th align="left">site</th>
+<th align="left">estimate</th>
+<th align="left">95% CI</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">sex=female, site=A</td>
+<td align="left">female</td>
+<td align="left">A</td>
+<td align="left">29.7</td>
+<td align="left">28.4, 31.0 *</td>
+</tr>
+<tr class="even">
+<td align="left">sex=male , site=A</td>
+<td align="left">male</td>
+<td align="left">A</td>
+<td align="left">36.2</td>
+<td align="left">34.8, 37.7 *</td>
+</tr>
+<tr class="odd">
+<td align="left">sex=female, site=B</td>
+<td align="left">female</td>
+<td align="left">B</td>
+<td align="left">29.0</td>
+<td align="left">27.3, 30.6 *</td>
+</tr>
+<tr class="even">
+<td align="left">sex=male , site=B</td>
+<td align="left">male</td>
+<td align="left">B</td>
+<td align="left">35.6</td>
+<td align="left">34.1, 37.0 *</td>
+</tr>
+<tr class="odd">
+<td align="left">sex=female, site=C</td>
+<td align="left">female</td>
+<td align="left">C</td>
+<td align="left">30.4</td>
+<td align="left">28.9, 31.9 *</td>
+</tr>
+<tr class="even">
+<td align="left">sex=male , site=C</td>
+<td align="left">male</td>
+<td align="left">C</td>
+<td align="left">34.9</td>
+<td align="left">33.2, 36.6 *</td>
+</tr>
+</tbody>
+</table>
+<p><em>Rows marked <code>*</code> have a 95% confidence interval that
+excludes zero (CI method: <code>wald</code>).</em></p>
+<p><strong>Rule of thumb.</strong> <em>With two or more factors, the
+safest way to get all cell means is
+<code>group_means(sym, by = c(...))</code>, not a hand-built
+intercept-less formula.</em></p>
+</div>
+<div class="section level3">
+<h3 id="pitfall-6-polyx-2-and-ix2-are-not-the-same">Pitfall 6: <code>poly(x, 2)</code> and <code>I(x^2)</code> are not
+the same<a class="anchor" aria-label="anchor" href="#pitfall-6-polyx-2-and-ix2-are-not-the-same"></a>
+</h3>
+<p><strong>Symptom.</strong> A paper reports “the slope of body_size was
+0.18 g/mm (<code>poly(body_size, 2)1</code> coefficient)”. The number
+happens to match an expected linear slope, so it looks fine — but the
+column is the <em>first orthogonal polynomial of
+<code>body_size</code></em>, not the raw linear term.</p>
+<p><strong>Diagnosis.</strong> <code>poly(x, 2)</code> produces two
+ORTHOGONAL columns: a combination of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>x</mi><mn>2</mn></msup><annotation encoding="application/x-tex">x^2</annotation></semantics></math>
+scaled so the two columns are uncorrelated. The first column is
+<em>not</em> “the slope of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>”.
+By contrast <code>I(x^2)</code> puts the literal
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>x</mi><mn>2</mn></msup><annotation encoding="application/x-tex">x^2</annotation></semantics></math>
+column into the design matrix alongside a separate linear
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>
+term, and now the linear coefficient <em>is</em> the slope at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">x = 0</annotation></semantics></math>.
+The two parameterisations carry the same information but their
+coefficient <em>interpretations</em> differ. Use whichever fits your
+story.</p>
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">n_p6</span> <span class="op">&lt;-</span> <span class="fl">80</span></span>
+<span><span class="va">bs_p6</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="va">n_p6</span>, <span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">dat_p6</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  body_mass <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n_p6</span>, <span class="fl">30</span> <span class="op">+</span> <span class="fl">0.2</span> <span class="op">*</span> <span class="va">bs_p6</span> <span class="op">+</span> <span class="fl">0.5</span> <span class="op">*</span> <span class="va">bs_p6</span><span class="op">^</span><span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  body_size <span class="op">=</span> <span class="va">bs_p6</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># WRONG: read the poly() column as a literal linear slope.</span></span>
+<span><span class="va">fit_p6_poly</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://itchyshin.github.io/drmTMB/reference/drmTMB.html" class="external-link">drmTMB</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://itchyshin.github.io/drmTMB/reference/drm_formula.html" class="external-link">drm_formula</a></span><span class="op">(</span><span class="va">body_mass</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/stats/poly.html" class="external-link">poly</a></span><span class="op">(</span><span class="va">body_size</span>, <span class="fl">2</span><span class="op">)</span>, <span class="va">sigma</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">dat_p6</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">sym_p6_poly</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/symbolize.html">symbolize</a></span><span class="op">(</span><span class="va">fit_p6_poly</span>, context <span class="op">=</span> <span class="st">"orthogonal polynomial"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># RIGHT: use I(x^2) when you want a literal quadratic reading.</span></span>
+<span><span class="va">fit_p6_raw</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://itchyshin.github.io/drmTMB/reference/drmTMB.html" class="external-link">drmTMB</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://itchyshin.github.io/drmTMB/reference/drm_formula.html" class="external-link">drm_formula</a></span><span class="op">(</span><span class="va">body_mass</span> <span class="op">~</span> <span class="va">body_size</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/AsIs.html" class="external-link">I</a></span><span class="op">(</span><span class="va">body_size</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span>, <span class="va">sigma</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">gaussian</a></span><span class="op">(</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">dat_p6</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">sym_p6_raw</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/symbolize.html">symbolize</a></span><span class="op">(</span><span class="va">fit_p6_raw</span>, context <span class="op">=</span> <span class="st">"raw quadratic"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/symbol_table.html">symbol_table</a></span><span class="op">(</span><span class="va">sym_p6_poly</span><span class="op">)</span></span></code></pre></div>
+<table style="width:100%;" class="table">
+<colgroup>
+<col width="18%">
+<col width="12%">
+<col width="7%">
+<col width="3%">
+<col width="8%">
+<col width="18%">
+<col width="14%">
+<col width="17%">
+</colgroup>
+<thead><tr class="header">
+<th align="left">index</th>
+<th align="left">matrix</th>
+<th align="left">variable</th>
+<th align="left">units</th>
+<th align="left">role</th>
+<th align="left">shape</th>
+<th align="left">concrete</th>
+<th align="left">description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">body_mass_i</td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐛</mi><mi>𝐨</mi><mi>𝐝</mi><msub><mi>𝐲</mi><mi>𝐦</mi></msub><mi>𝐚</mi><mi>𝐬</mi><mi>𝐬</mi></mrow><annotation encoding="application/x-tex">\mathbf{body_mass}</annotation></semantics></math></td>
+<td align="left">body_mass</td>
+<td align="left">NA</td>
+<td align="left">response</td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mi>n</mi></msup><annotation encoding="application/x-tex">\mathbb{R}^n</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>80</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{80}</annotation></semantics></math></td>
+<td align="left">response variable</td>
+</tr>
+<tr class="even">
+<td align="left">body_size, 2_i</td>
+<td align="left">—</td>
+<td align="left">body_size, 2</td>
+<td align="left">NA</td>
+<td align="left">transformation</td>
+<td align="left">column of design matrix</td>
+<td align="left">column of X (length 80)</td>
+<td align="left">predictor (poly-transformed)</td>
+</tr>
+<tr class="odd">
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>μ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\mu_i</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛍</mi><annotation encoding="application/x-tex">\boldsymbol{\mu}</annotation></semantics></math></td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="left">parameter</td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mi>n</mi></msup><annotation encoding="application/x-tex">\mathbb{R}^n</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>80</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{80}</annotation></semantics></math></td>
+<td align="left">conditional mu of body_mass</td>
+</tr>
+<tr class="even">
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\sigma_i</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛔</mi><annotation encoding="application/x-tex">\boldsymbol{\sigma}</annotation></semantics></math></td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="left">parameter</td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mi>n</mi></msup><annotation encoding="application/x-tex">\mathbb{R}^n</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>80</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{80}</annotation></semantics></math></td>
+<td align="left">conditional sigma of body_mass</td>
+</tr>
+<tr class="odd">
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mn>0</mn></msub><mo>,</mo><msub><mi>β</mi><mn>1</mn></msub><mo>,</mo><msub><mi>β</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">\beta_{0}, \beta_{1}, \beta_{2}</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛃</mi><annotation encoding="application/x-tex">\boldsymbol{\beta}</annotation></semantics></math></td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="left">coefficient</td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><msub><mi>p</mi><mi>μ</mi></msub></msup><annotation encoding="application/x-tex">\mathbb{R}^{p_\mu}</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>3</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{3}</annotation></semantics></math></td>
+<td align="left">mu submodel coefficients</td>
+</tr>
+<tr class="even">
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>γ</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\gamma_{0}</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛄</mi><annotation encoding="application/x-tex">\boldsymbol{\gamma}</annotation></semantics></math></td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="left">coefficient</td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><msub><mi>p</mi><mi>σ</mi></msub></msup><annotation encoding="application/x-tex">\mathbb{R}^{p_\sigma}</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>1</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{1}</annotation></semantics></math></td>
+<td align="left">sigma submodel coefficients</td>
+</tr>
+<tr class="odd">
+<td align="left">—</td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐗</mi><annotation encoding="application/x-tex">\mathbf{X}</annotation></semantics></math></td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="left">design_matrix</td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mi>n</mi><mo>×</mo><msub><mi>p</mi><mi>μ</mi></msub></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{n \times p_\mu}</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mn>80</mn><mo>×</mo><mn>3</mn></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{80 \times 3}</annotation></semantics></math></td>
+<td align="left">mu submodel design matrix</td>
+</tr>
+<tr class="even">
+<td align="left">—</td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐙</mi><annotation encoding="application/x-tex">\mathbf{Z}</annotation></semantics></math></td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="left">design_matrix</td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mi>n</mi><mo>×</mo><msub><mi>p</mi><mi>σ</mi></msub></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{n \times p_\sigma}</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mn>80</mn><mo>×</mo><mn>1</mn></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{80 \times 1}</annotation></semantics></math></td>
+<td align="left">sigma submodel design matrix</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/symbol_table.html">symbol_table</a></span><span class="op">(</span><span class="va">sym_p6_raw</span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<colgroup>
+<col width="18%">
+<col width="12%">
+<col width="6%">
+<col width="3%">
+<col width="8%">
+<col width="18%">
+<col width="15%">
+<col width="17%">
+</colgroup>
+<thead><tr class="header">
+<th align="left">index</th>
+<th align="left">matrix</th>
+<th align="left">variable</th>
+<th align="left">units</th>
+<th align="left">role</th>
+<th align="left">shape</th>
+<th align="left">concrete</th>
+<th align="left">description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">body_mass_i</td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐛</mi><mi>𝐨</mi><mi>𝐝</mi><msub><mi>𝐲</mi><mi>𝐦</mi></msub><mi>𝐚</mi><mi>𝐬</mi><mi>𝐬</mi></mrow><annotation encoding="application/x-tex">\mathbf{body_mass}</annotation></semantics></math></td>
+<td align="left">body_mass</td>
+<td align="left">NA</td>
+<td align="left">response</td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mi>n</mi></msup><annotation encoding="application/x-tex">\mathbb{R}^n</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>80</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{80}</annotation></semantics></math></td>
+<td align="left">response variable</td>
+</tr>
+<tr class="even">
+<td align="left">body_size_i</td>
+<td align="left">—</td>
+<td align="left">body_size</td>
+<td align="left">NA</td>
+<td align="left">predictor</td>
+<td align="left">column of design matrix</td>
+<td align="left">column of X (length 80)</td>
+<td align="left">continuous predictor</td>
+</tr>
+<tr class="odd">
+<td align="left">body_size^2_i</td>
+<td align="left">—</td>
+<td align="left">body_size^2</td>
+<td align="left">NA</td>
+<td align="left">transformation</td>
+<td align="left">column of design matrix</td>
+<td align="left">column of X (length 80)</td>
+<td align="left">predictor (I-transformed)</td>
+</tr>
+<tr class="even">
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>μ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\mu_i</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛍</mi><annotation encoding="application/x-tex">\boldsymbol{\mu}</annotation></semantics></math></td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="left">parameter</td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mi>n</mi></msup><annotation encoding="application/x-tex">\mathbb{R}^n</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>80</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{80}</annotation></semantics></math></td>
+<td align="left">conditional mu of body_mass</td>
+</tr>
+<tr class="odd">
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\sigma_i</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛔</mi><annotation encoding="application/x-tex">\boldsymbol{\sigma}</annotation></semantics></math></td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="left">parameter</td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mi>n</mi></msup><annotation encoding="application/x-tex">\mathbb{R}^n</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>80</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{80}</annotation></semantics></math></td>
+<td align="left">conditional sigma of body_mass</td>
+</tr>
+<tr class="even">
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mn>0</mn></msub><mo>,</mo><msub><mi>β</mi><mn>1</mn></msub><mo>,</mo><msub><mi>β</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">\beta_{0}, \beta_{1}, \beta_{2}</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛃</mi><annotation encoding="application/x-tex">\boldsymbol{\beta}</annotation></semantics></math></td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="left">coefficient</td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><msub><mi>p</mi><mi>μ</mi></msub></msup><annotation encoding="application/x-tex">\mathbb{R}^{p_\mu}</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>3</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{3}</annotation></semantics></math></td>
+<td align="left">mu submodel coefficients</td>
+</tr>
+<tr class="odd">
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>γ</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\gamma_{0}</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛄</mi><annotation encoding="application/x-tex">\boldsymbol{\gamma}</annotation></semantics></math></td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="left">coefficient</td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><msub><mi>p</mi><mi>σ</mi></msub></msup><annotation encoding="application/x-tex">\mathbb{R}^{p_\sigma}</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>1</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{1}</annotation></semantics></math></td>
+<td align="left">sigma submodel coefficients</td>
+</tr>
+<tr class="even">
+<td align="left">—</td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐗</mi><annotation encoding="application/x-tex">\mathbf{X}</annotation></semantics></math></td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="left">design_matrix</td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mi>n</mi><mo>×</mo><msub><mi>p</mi><mi>μ</mi></msub></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{n \times p_\mu}</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mn>80</mn><mo>×</mo><mn>3</mn></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{80 \times 3}</annotation></semantics></math></td>
+<td align="left">mu submodel design matrix</td>
+</tr>
+<tr class="odd">
+<td align="left">—</td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐙</mi><annotation encoding="application/x-tex">\mathbf{Z}</annotation></semantics></math></td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="left">design_matrix</td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mi>n</mi><mo>×</mo><msub><mi>p</mi><mi>σ</mi></msub></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{n \times p_\sigma}</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mn>80</mn><mo>×</mo><mn>1</mn></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{80 \times 1}</annotation></semantics></math></td>
+<td align="left">sigma submodel design matrix</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Rule of thumb.</strong> <em>Use <code>poly(x, 2)</code> when
+you want orthogonal columns (uncorrelated polynomial terms); use
+<code>I(x^2)</code> when you want a literal quadratic
+interpretation.</em></p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="closing-a-checklist-for-reading-any-model-with-factors">Closing: a checklist for reading any model with factors<a class="anchor" aria-label="anchor" href="#closing-a-checklist-for-reading-any-model-with-factors"></a>

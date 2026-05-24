@@ -7,13 +7,15 @@ output table lists a coefficient for `sexmale`. The obvious reading is
 something else, then builds up to interactions, where the unpacking
 becomes essential.
 
-We walk through five steps that build on each other. Each step fits a
+We walk through six steps that build on each other. Each step fits a
 small `drmTMB` model, looks at the first few rows of the design matrix,
 and asks
 [`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
 to read each coefficient on the biological scale. The point is to make
 the dummy-variable, contrast, and interaction machinery concrete enough
-that a reader can apply the same logic to their own fits.
+that a reader can apply the same logic to their own fits. A closing
+**Common pitfalls** section catches the mistakes biologists most often
+make when reading these tables.
 
 ``` r
 
@@ -459,7 +461,130 @@ slopes* between the non-reference level and the reference. The bare
 factor contrast is now the difference in intercepts at zero of the
 continuous predictor.
 
-## Step 5: Factor-by-factor interaction (`body_mass ~ site * sex`)
+## Step 5: Continuous-by-continuous interaction (`body_mass ~ temperature * body_size`)
+
+A continuous-by-continuous interaction lets the slope of one continuous
+predictor change with the level of another. There are no dummy columns
+here, but the same arithmetic — *the interaction coefficient is a
+difference of slopes* — still applies, just on a sliding rather than a
+group-by-group basis.
+
+``` r
+
+n_cc <- 80
+temperature <- runif(n_cc, 10, 30)
+body_size_cc <- runif(n_cc, 50, 150)
+dat5cc <- data.frame(
+  body_mass   = rnorm(
+    n_cc,
+    20 + 0.1 * temperature + 0.15 * body_size_cc +
+      0.01 * temperature * body_size_cc,
+    3
+  ),
+  temperature = temperature,
+  body_size   = body_size_cc
+)
+
+fit5cc <- drmTMB(
+  drm_formula(body_mass ~ temperature * body_size, sigma ~ 1),
+  family = gaussian(),
+  data   = dat5cc
+)
+
+sym5cc <- symbolize(
+  fit5cc,
+  symbols = c(body_mass = "W_i", temperature = "T_i", body_size = "L_i"),
+  units   = c(body_mass = "g",   temperature = "°C", body_size = "mm"),
+  context = "continuous-by-continuous interaction"
+)
+```
+
+`temperature * body_size` expands to
+`temperature + body_size + temperature:body_size`. The design matrix has
+four coefficient columns — no zeros and ones this time, just two real
+numbers and their product:
+
+``` r
+
+head(expand(sym5cc)$X, 5)
+#>   (Intercept) temperature body_size temperature:body_size
+#> 1           1    29.16281  86.29011             2516.4624
+#> 2           1    16.92139  56.04983              948.4407
+#> 3           1    28.43270 133.12635             3785.1415
+#> 4           1    15.27872  99.52173             1520.5642
+#> 5           1    29.48147 140.69294             4147.8343
+```
+
+The four columns are `(Intercept)`, `temperature`, `body_size`, and
+`temperature:body_size`. The interaction column is literally the product
+of the other two predictor columns.
+
+Call the four coefficients $`\beta_0, \beta_1, \beta_2, \beta_3`$ in
+column order. The model is
+
+``` math
+\mathrm{E}(W_i) = \beta_0 + \beta_1 T_i + \beta_2 L_i + \beta_3 T_i L_i.
+```
+
+Re-arrange to isolate the slope of `temperature`:
+
+``` math
+\mathrm{E}(W_i) = \beta_0 + (\beta_1 + \beta_3 L_i) T_i + \beta_2 L_i.
+```
+
+The slope of `temperature` is $`\beta_1 + \beta_3 L_i`$ — it depends on
+`body_size`. Reading the four coefficients in those terms:
+
+- **$`\beta_0`$ (intercept)** = expected `body_mass` when
+  `temperature = 0` and `body_size = 0`.
+- **$`\beta_1`$ (`temperature`)** = the `temperature` slope *at*
+  `body_size = 0`. Not “the temperature slope”. The slope at one
+  specific value of `body_size`.
+- **$`\beta_2`$ (`body_size`)** = the `body_size` slope *at*
+  `temperature = 0`. Same reasoning.
+- **$`\beta_3`$ (`temperature:body_size`)** = how much the `temperature`
+  slope changes per one-unit increase in `body_size`. Equivalently, how
+  much the `body_size` slope changes per one-unit increase in
+  `temperature`. The two readings are symmetric.
+
+For the cont-by-factor interaction in Step 4 we could call
+`group_slopes(sym, continuous = "body_size")` to see one slope per sex.
+The continuous-by-continuous equivalent asks for the slope of
+`temperature` at *specific values* of `body_size`:
+
+``` r
+
+group_slopes(
+  sym5cc,
+  continuous = "temperature",
+  at = list(body_size = c(50, 100, 150))
+)
+```
+
+**Group slopes for `temperature`**
+
+| predictor   | level_combo   | body_size | estimate | 95% CI          |
+|:------------|:--------------|----------:|:---------|:----------------|
+| temperature | body_size=50  |        50 | 0.671    | 0.410, 0.932 \* |
+| temperature | body_size=100 |       100 | 1.11     | 0.988, 1.23 \*  |
+| temperature | body_size=150 |       150 | 1.55     | 1.34, 1.75 \*   |
+
+*Rows marked `*` have a 95% confidence interval that excludes zero (CI
+method: `wald`).*
+
+Three rows, each the `temperature` slope at a different `body_size`,
+with confidence intervals. The slope rises as `body_size` rises — the
+sign of $`\beta_3`$ tells you whether the interaction amplifies or
+dampens the `temperature` effect.
+
+**Takeaway.** A continuous-by-continuous interaction means *the slope of
+one continuous predictor changes with the level of another*. Use
+`group_slopes(sym, continuous = ..., at = list(other = ...))` to read
+the slope at specific values, the same way
+[`group_means()`](https://itchyshin.github.io/symbolizer/reference/group_means.md)
+and `group_slopes(at = factor)` work for categorical strata.
+
+## Step 6: Factor-by-factor interaction (`body_mass ~ site * sex`)
 
 The hardest case: two factors interacting. `site` has four levels and
 `sex` has two, so the fitted-cell table has `4 × 2 = 8` entries. We
@@ -528,15 +653,15 @@ sym5$fixed_effects[, c("term_label", "role", "contrast_level", "estimate")]
 #> # A tibble: 9 × 4
 #>   term_label  role            contrast_level estimate
 #>   <chr>       <chr>           <chr>             <dbl>
-#> 1 (Intercept) intercept       NA               30.6  
-#> 2 site        factor_contrast B                 1.59 
-#> 3 site        factor_contrast C                 3.77 
-#> 4 site        factor_contrast D                -3.72 
-#> 5 sex         factor_contrast male              3.42 
-#> 6 site:sex    interaction     B:male            4.75 
-#> 7 site:sex    interaction     C:male            0.355
-#> 8 site:sex    interaction     D:male            5.26 
-#> 9 (Intercept) intercept       NA                1.04
+#> 1 (Intercept) intercept       NA               29.7  
+#> 2 site        factor_contrast B                 3.66 
+#> 3 site        factor_contrast C                 4.44 
+#> 4 site        factor_contrast D                -2.62 
+#> 5 sex         factor_contrast male              4.94 
+#> 6 site:sex    interaction     B:male            0.276
+#> 7 site:sex    interaction     C:male           -2.13 
+#> 8 site:sex    interaction     D:male            3.16 
+#> 9 (Intercept) intercept       NA                1.03
 ```
 
 Reading the eight coefficients in cell terms (write $`\bar W_{s,x}`$ for
@@ -574,15 +699,15 @@ parameter_interpretation(sym5, scale = "biological")
 
 | submodel | term_label | coefficient_role | estimate | biological_reading |
 |:---|:---|:---|:---|:---|
-| mu | (Intercept) | intercept | 30.6 | Baseline body_mass in the reference condition |
-| mu | site | factor_contrast | 1.59 | Average body_mass differs between B and A by 1.59 |
-| mu | site | factor_contrast | 3.77 | Average body_mass differs between C and A by 3.77 |
-| mu | site | factor_contrast | -3.72 | Average body_mass differs between D and A by -3.72 |
-| mu | sex | factor_contrast | 3.42 | Average body_mass differs between male and female by 3.42 |
-| mu | site:sex | interaction_factor_factor | 4.75 | The site effect on body_mass differs by 4.75 between sex = male and sex = female. Call `group_means(sym, by = c("site", "sex"))` to see each cell’s expected response with confidence intervals. |
-| mu | site:sex | interaction_factor_factor | 0.355 | The site effect on body_mass differs by 0.355 between sex = male and sex = female. Call `group_means(sym, by = c("site", "sex"))` to see each cell’s expected response with confidence intervals. |
-| mu | site:sex | interaction_factor_factor | 5.26 | The site effect on body_mass differs by 5.26 between sex = male and sex = female. Call `group_means(sym, by = c("site", "sex"))` to see each cell’s expected response with confidence intervals. |
-| sigma | (Intercept) | intercept | 1.04 | Baseline level of unexplained individual variation in body_mass |
+| mu | (Intercept) | intercept | 29.7 | Baseline body_mass in the reference condition |
+| mu | site | factor_contrast | 3.66 | Average body_mass differs between B and A by 3.66 |
+| mu | site | factor_contrast | 4.44 | Average body_mass differs between C and A by 4.44 |
+| mu | site | factor_contrast | -2.62 | Average body_mass differs between D and A by -2.62 |
+| mu | sex | factor_contrast | 4.94 | Average body_mass differs between male and female by 4.94 |
+| mu | site:sex | interaction_factor_factor | 0.276 | The site effect on body_mass differs by 0.276 between sex = male and sex = female. Call `group_means(sym, by = c("site", "sex"))` to see each cell’s expected response with confidence intervals. |
+| mu | site:sex | interaction_factor_factor | -2.13 | The site effect on body_mass differs by -2.13 between sex = male and sex = female. Call `group_means(sym, by = c("site", "sex"))` to see each cell’s expected response with confidence intervals. |
+| mu | site:sex | interaction_factor_factor | 3.16 | The site effect on body_mass differs by 3.16 between sex = male and sex = female. Call `group_means(sym, by = c("site", "sex"))` to see each cell’s expected response with confidence intervals. |
+| sigma | (Intercept) | intercept | 1.03 | Baseline level of unexplained individual variation in body_mass |
 
 Three interaction rows are again silent. Read the cell-mean translations
 above in their place.
@@ -591,6 +716,334 @@ above in their place.
 *difference of differences*: how much the gap between two non-reference
 cells differs from the corresponding gap in the reference rows. The bare
 factor contrasts now apply *only* at the other factor’s reference level.
+
+## Common pitfalls
+
+The six steps above cover the mechanics. The six pitfalls below cover
+the *readings* — every one is a sentence we have heard a biologist say
+out loud about their own fit. Each pitfall has the same structure:
+**Symptom** (what goes wrong), **Diagnosis** (why), a code block showing
+the wrong reading then the right one, and a one-sentence **Rule of
+thumb** to carry away.
+
+### Pitfall 1: The intercept is not “the average response”
+
+**Symptom.** A reviewer asks what the intercept means; the author
+answers “the average body mass”. The number is way off compared to
+`mean(dat$body_mass)`, and now everyone is confused.
+
+**Diagnosis.** With `body_mass ~ sex + body_size`, the intercept is the
+expected response *at the reference level of every factor and at zero on
+every continuous predictor*. For a fit with `sex = factor(female, male)`
+that means “expected `body_mass` for a FEMALE at `body_size = 0`”. It is
+not the overall mean unless the sexes are balanced and `body_size` is
+already centred at zero.
+
+``` r
+
+n_p1 <- 80
+sex_p1 <- factor(sample(c("female", "male"), n_p1, replace = TRUE))
+bs_p1  <- runif(n_p1, 50, 150)
+dat_p1 <- data.frame(
+  body_mass = rnorm(n_p1, 30 + 5 * (sex_p1 == "male") + 0.2 * bs_p1, 3),
+  sex       = sex_p1,
+  body_size = bs_p1
+)
+fit_p1 <- drmTMB(
+  drm_formula(body_mass ~ sex + body_size, sigma ~ 1),
+  family = gaussian(), data = dat_p1
+)
+sym_p1 <- symbolize(fit_p1, context = "intercept reading")
+
+# WRONG: read the intercept as the grand mean.
+#   "the average body mass is 12.0 g" -- it is not.
+# RIGHT: read the intercept as the reference cell.
+#   symbol_table() flags the reference level so this is auditable.
+symbol_table(sym_p1)
+```
+
+| index | matrix | variable | units | role | shape | concrete | description |
+|:---|:---|:---|:---|:---|:---|:---|:---|
+| body_mass_i | $`\mathbf{body_mass}`$ | body_mass | NA | response | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | response variable |
+| sex_i | — | sex | NA | factor | column of design matrix | column of X (length 80) | factor (female \[reference\], male) |
+| body_size_i | — | body_size | NA | predictor | column of design matrix | column of X (length 80) | continuous predictor |
+| $`\mu_i`$ | $`\boldsymbol{\mu}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | conditional mu of body_mass |
+| $`\sigma_i`$ | $`\boldsymbol{\sigma}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | conditional sigma of body_mass |
+| $`\beta_{0}, \beta_{1}, \beta_{2}`$ | $`\boldsymbol{\beta}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\mu}`$ | $`\mathbb{R}^{3}`$ | mu submodel coefficients |
+| $`\gamma_{0}`$ | $`\boldsymbol{\gamma}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\sigma}`$ | $`\mathbb{R}^{1}`$ | sigma submodel coefficients |
+| — | $`\mathbf{X}`$ | NA | NA | design_matrix | $`\mathbb{R}^{n \times p_\mu}`$ | $`\mathbb{R}^{80 \times 3}`$ | mu submodel design matrix |
+| — | $`\mathbf{Z}`$ | NA | NA | design_matrix | $`\mathbb{R}^{n \times p_\sigma}`$ | $`\mathbb{R}^{80 \times 1}`$ | sigma submodel design matrix |
+
+**Rule of thumb.** *Read the intercept as the expected response at the
+reference factor level and zero on every continuous predictor.*
+
+### Pitfall 2: A factor contrast is not the group’s mean
+
+**Symptom.** A paper sentence says “male body mass is 5 g (sexmale
+coefficient)”. A reader checks `mean(body_mass[sex == "male"])` and gets
+~35 g. The sentence is wrong.
+
+**Diagnosis.** The `sexmale` coefficient is the *difference* between the
+male and female cell means, not the male mean. The male mean is
+`(Intercept) + sexmale`. `group_means(sym, by = "sex")` returns each
+cell mean directly with a confidence band, which is what most readers
+actually wanted.
+
+``` r
+
+n_p2 <- 80
+sex_p2 <- factor(sample(c("female", "male"), n_p2, replace = TRUE))
+dat_p2 <- data.frame(
+  body_mass = rnorm(n_p2, 30 + 5 * (sex_p2 == "male"), 3),
+  sex       = sex_p2
+)
+fit_p2 <- drmTMB(
+  drm_formula(body_mass ~ sex, sigma ~ 1),
+  family = gaussian(), data = dat_p2
+)
+sym_p2 <- symbolize(fit_p2, context = "contrast vs cell mean")
+
+# WRONG: read the sexmale coefficient as the male mean.
+sym_p2$fixed_effects[, c("term_label", "estimate")]
+#> # A tibble: 3 × 2
+#>   term_label  estimate
+#>   <chr>          <dbl>
+#> 1 (Intercept)    30.0 
+#> 2 sex             5.35
+#> 3 (Intercept)     1.02
+
+# RIGHT: ask for the cell means directly.
+group_means(sym_p2, by = "sex")
+```
+
+**Group means**
+
+| level_combo | sex    | estimate | 95% CI        |
+|:------------|:-------|:---------|:--------------|
+| sex=female  | female | 30.0     | 29.1, 30.9 \* |
+| sex=male    | male   | 35.3     | 34.5, 36.1 \* |
+
+*Rows marked `*` have a 95% confidence interval that excludes zero (CI
+method: `wald`).*
+
+**Rule of thumb.** *Coefficients on factor levels are differences from
+the reference; use `group_means(sym)` to see the group means
+themselves.*
+
+### Pitfall 3: An interaction is not “the effect of A on B”
+
+**Symptom.** A methods section says “the interaction tests whether sex
+has an effect on body size”. That is a category error — sex does not
+*have an effect on* body size; the interaction tests whether the slope
+of one predictor depends on the level of the other.
+
+**Diagnosis.** For `body_mass ~ sex * body_size`, the
+`sexmale:body_size` coefficient is the *difference between the male and
+female slopes of `body_size`*, not “the effect of sex on body_size”. The
+honest reading is “the slope of `body_size` is X for females and X + Y
+for males”. `group_slopes(sym, continuous = "body_size")` returns the
+per-group slopes directly.
+
+``` r
+
+n_p3 <- 80
+sex_p3 <- factor(sample(c("female", "male"), n_p3, replace = TRUE))
+bs_p3  <- runif(n_p3, 50, 150)
+dat_p3 <- data.frame(
+  body_mass = rnorm(
+    n_p3,
+    30 + 5 * (sex_p3 == "male") + 0.2 * bs_p3 +
+      0.05 * (sex_p3 == "male") * bs_p3,
+    3
+  ),
+  sex       = sex_p3,
+  body_size = bs_p3
+)
+fit_p3 <- drmTMB(
+  drm_formula(body_mass ~ sex * body_size, sigma ~ 1),
+  family = gaussian(), data = dat_p3
+)
+sym_p3 <- symbolize(fit_p3, context = "interaction wording")
+
+# WRONG: "the sexmale:body_size coefficient is the effect of sex on body_size."
+# RIGHT: it is the difference in body_size slopes between male and female.
+group_slopes(sym_p3, continuous = "body_size")
+```
+
+**Group slopes for `body_size`**
+
+| predictor | level_combo | sex    | estimate | 95% CI          |
+|:----------|:------------|:-------|:---------|:----------------|
+| body_size | sex=female  | female | 0.192    | 0.154, 0.230 \* |
+| body_size | sex=male    | male   | 0.222    | 0.180, 0.265 \* |
+
+*Rows marked `*` have a 95% confidence interval that excludes zero (CI
+method: `wald`).*
+
+**Rule of thumb.** *The interaction coefficient is the difference
+between the two effects, not either effect alone; use
+`group_slopes(sym, continuous = ...)` to read each group’s slope.*
+
+### Pitfall 4: Wald CIs can be too narrow with few groups
+
+**Symptom.** A fit with `(1 | site)` and only six sites reports very
+tight confidence bands on the fixed effects. The bands look more precise
+than the data could justify, and a reviewer asks how they were computed.
+
+**Diagnosis.** drmTMB’s default is `ci_method = "wald"`, which uses an
+asymptotic normal approximation. When `sd(site)` is estimated from only
+a handful of groups, the asymptotic regime has not kicked in, and Wald
+intervals over-state precision. Profile-likelihood intervals are honest
+but slower to compute. The flag lives on
+[`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
+so the choice is recorded on `x$metadata$ci_method` and propagates to
+every downstream reading.
+
+``` r
+
+# WRONG: take the default Wald CI when only a few groups inform sd(site).
+sym_wald <- symbolize(fit, ci_method = "wald")
+
+# RIGHT: ask for a profile CI — slower, but honest.
+sym_prof <- symbolize(fit, ci_method = "profile")
+```
+
+**Rule of thumb.** *When `sd(group)` is estimated from few groups, pass
+`ci_method = "profile"` to
+[`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
+for an honest interval.*
+
+### Pitfall 5: Dropping the intercept doesn’t always do what you think
+
+**Symptom.** A user wants every cell mean directly, types
+`y ~ 0 + sex + site` thinking it will give all `sex × site` cell means,
+and then is surprised when the coefficients still look like contrasts.
+
+**Diagnosis.** `y ~ 0 + sex` with one factor *does* give cell means
+directly (one coefficient per level). But adding a second predictor,
+e.g. `y ~ 0 + sex + site`, gives “sex cell means PLUS site contrasts
+from the reference site”. The non-orthogonality between two factors
+without an intercept is rarely what the reader wanted.
+`group_means(sym, by = c("sex", "site"))` returns every cell mean
+correctly regardless of how the formula was written.
+
+``` r
+
+n_p5 <- 100
+sex_p5  <- factor(sample(c("female", "male"), n_p5, replace = TRUE))
+site_p5 <- factor(sample(c("A", "B", "C"), n_p5, replace = TRUE))
+dat_p5 <- data.frame(
+  body_mass = rnorm(n_p5, 30 + 5 * (sex_p5 == "male"), 3),
+  sex       = sex_p5,
+  site      = site_p5
+)
+
+# WRONG: drop the intercept and hope to read all 6 cell means off the table.
+fit_p5_wrong <- drmTMB(
+  drm_formula(body_mass ~ 0 + sex + site, sigma ~ 1),
+  family = gaussian(), data = dat_p5
+)
+
+# RIGHT: keep the intercept in, fit ~ sex * site, then use group_means().
+fit_p5_right <- drmTMB(
+  drm_formula(body_mass ~ sex * site, sigma ~ 1),
+  family = gaussian(), data = dat_p5
+)
+sym_p5 <- symbolize(fit_p5_right, context = "all cell means")
+group_means(sym_p5, by = c("sex", "site"))
+```
+
+**Group means**
+
+| level_combo        | sex    | site | estimate | 95% CI        |
+|:-------------------|:-------|:-----|:---------|:--------------|
+| sex=female, site=A | female | A    | 29.7     | 28.4, 31.0 \* |
+| sex=male , site=A  | male   | A    | 36.2     | 34.8, 37.7 \* |
+| sex=female, site=B | female | B    | 29.0     | 27.3, 30.6 \* |
+| sex=male , site=B  | male   | B    | 35.6     | 34.1, 37.0 \* |
+| sex=female, site=C | female | C    | 30.4     | 28.9, 31.9 \* |
+| sex=male , site=C  | male   | C    | 34.9     | 33.2, 36.6 \* |
+
+*Rows marked `*` have a 95% confidence interval that excludes zero (CI
+method: `wald`).*
+
+**Rule of thumb.** *With two or more factors, the safest way to get all
+cell means is `group_means(sym, by = c(...))`, not a hand-built
+intercept-less formula.*
+
+### Pitfall 6: `poly(x, 2)` and `I(x^2)` are not the same
+
+**Symptom.** A paper reports “the slope of body_size was 0.18 g/mm
+(`poly(body_size, 2)1` coefficient)”. The number happens to match an
+expected linear slope, so it looks fine — but the column is the *first
+orthogonal polynomial of `body_size`*, not the raw linear term.
+
+**Diagnosis.** `poly(x, 2)` produces two ORTHOGONAL columns: a
+combination of $`x`$ and $`x^2`$ scaled so the two columns are
+uncorrelated. The first column is *not* “the slope of $`x`$”. By
+contrast `I(x^2)` puts the literal $`x^2`$ column into the design matrix
+alongside a separate linear $`x`$ term, and now the linear coefficient
+*is* the slope at $`x = 0`$. The two parameterisations carry the same
+information but their coefficient *interpretations* differ. Use
+whichever fits your story.
+
+``` r
+
+n_p6 <- 80
+bs_p6 <- runif(n_p6, -1, 1)
+dat_p6 <- data.frame(
+  body_mass = rnorm(n_p6, 30 + 0.2 * bs_p6 + 0.5 * bs_p6^2, 1),
+  body_size = bs_p6
+)
+
+# WRONG: read the poly() column as a literal linear slope.
+fit_p6_poly <- drmTMB(
+  drm_formula(body_mass ~ poly(body_size, 2), sigma ~ 1),
+  family = gaussian(), data = dat_p6
+)
+sym_p6_poly <- symbolize(fit_p6_poly, context = "orthogonal polynomial")
+
+# RIGHT: use I(x^2) when you want a literal quadratic reading.
+fit_p6_raw <- drmTMB(
+  drm_formula(body_mass ~ body_size + I(body_size^2), sigma ~ 1),
+  family = gaussian(), data = dat_p6
+)
+sym_p6_raw <- symbolize(fit_p6_raw, context = "raw quadratic")
+
+symbol_table(sym_p6_poly)
+```
+
+| index | matrix | variable | units | role | shape | concrete | description |
+|:---|:---|:---|:---|:---|:---|:---|:---|
+| body_mass_i | $`\mathbf{body_mass}`$ | body_mass | NA | response | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | response variable |
+| body_size, 2_i | — | body_size, 2 | NA | transformation | column of design matrix | column of X (length 80) | predictor (poly-transformed) |
+| $`\mu_i`$ | $`\boldsymbol{\mu}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | conditional mu of body_mass |
+| $`\sigma_i`$ | $`\boldsymbol{\sigma}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | conditional sigma of body_mass |
+| $`\beta_{0}, \beta_{1}, \beta_{2}`$ | $`\boldsymbol{\beta}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\mu}`$ | $`\mathbb{R}^{3}`$ | mu submodel coefficients |
+| $`\gamma_{0}`$ | $`\boldsymbol{\gamma}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\sigma}`$ | $`\mathbb{R}^{1}`$ | sigma submodel coefficients |
+| — | $`\mathbf{X}`$ | NA | NA | design_matrix | $`\mathbb{R}^{n \times p_\mu}`$ | $`\mathbb{R}^{80 \times 3}`$ | mu submodel design matrix |
+| — | $`\mathbf{Z}`$ | NA | NA | design_matrix | $`\mathbb{R}^{n \times p_\sigma}`$ | $`\mathbb{R}^{80 \times 1}`$ | sigma submodel design matrix |
+
+``` r
+
+symbol_table(sym_p6_raw)
+```
+
+| index | matrix | variable | units | role | shape | concrete | description |
+|:---|:---|:---|:---|:---|:---|:---|:---|
+| body_mass_i | $`\mathbf{body_mass}`$ | body_mass | NA | response | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | response variable |
+| body_size_i | — | body_size | NA | predictor | column of design matrix | column of X (length 80) | continuous predictor |
+| body_size^2_i | — | body_size^2 | NA | transformation | column of design matrix | column of X (length 80) | predictor (I-transformed) |
+| $`\mu_i`$ | $`\boldsymbol{\mu}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | conditional mu of body_mass |
+| $`\sigma_i`$ | $`\boldsymbol{\sigma}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | conditional sigma of body_mass |
+| $`\beta_{0}, \beta_{1}, \beta_{2}`$ | $`\boldsymbol{\beta}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\mu}`$ | $`\mathbb{R}^{3}`$ | mu submodel coefficients |
+| $`\gamma_{0}`$ | $`\boldsymbol{\gamma}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\sigma}`$ | $`\mathbb{R}^{1}`$ | sigma submodel coefficients |
+| — | $`\mathbf{X}`$ | NA | NA | design_matrix | $`\mathbb{R}^{n \times p_\mu}`$ | $`\mathbb{R}^{80 \times 3}`$ | mu submodel design matrix |
+| — | $`\mathbf{Z}`$ | NA | NA | design_matrix | $`\mathbb{R}^{n \times p_\sigma}`$ | $`\mathbb{R}^{80 \times 1}`$ | sigma submodel design matrix |
+
+**Rule of thumb.** *Use `poly(x, 2)` when you want orthogonal columns
+(uncorrelated polynomial terms); use `I(x^2)` when you want a literal
+quadratic interpretation.*
 
 ## Closing: a checklist for reading any model with factors
 
