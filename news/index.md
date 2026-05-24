@@ -1,5 +1,28 @@
 # Changelog
 
+## symbolizer 0.3.1.9000 (development)
+
+### v0.3.2 (in progress)
+
+- Two more non-Gaussian families ship via the CSV-only path:
+  - **beta_binomial**
+    ([`drmTMB::beta_binomial()`](https://itchyshin.github.io/drmTMB/reference/beta_binomial.html))
+    — overdispersed binomial counts. Response specified as
+    `cbind(successes, failures)`; mean success probability via the logit
+    link, precision (inverse-overdispersion) via the log link.
+    Coefficients on mu read as odds ratios; the methods_text paragraph
+    names the trial count requirement.
+  - **truncated_nbinom2**
+    ([`drmTMB::truncated_nbinom2()`](https://itchyshin.github.io/drmTMB/reference/truncated_nbinom2.html))
+    — zero-truncated counts. The distribution latex flags the truncation
+    via `\mathrm{NegBin}^{+}` and the support `y in {1, 2, 3, ...}`. The
+    methods_text and assumption rows are explicit that mu is the mean of
+    the *underlying untruncated* distribution; the observed mean is
+    larger.
+- `methods_text` univariate-family list grows to include both new
+  families so the response / sigma / RE substitutions fire without
+  `[unfilled: ...]` markers.
+
 ## symbolizer 0.3.1
 
 ### v0.3.1 — random slopes, response-scale group_means, bigger hex

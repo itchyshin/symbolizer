@@ -793,7 +793,7 @@ or reserved**, **Unsupported or blocked**.
 
 caps <- symbolizer_capabilities()
 caps[caps$class == "drmTMB", ]
-#> # A tibble: 26 × 6
+#> # A tibble: 28 × 6
 #>    class  family    component      status              since notes              
 #>    <chr>  <chr>     <chr>          <chr>               <chr> <chr>              
 #>  1 drmTMB gaussian  mu             Stable              0.1.0 Univariate locatio…
@@ -806,7 +806,7 @@ caps[caps$class == "drmTMB", ]
 #>  8 drmTMB student   sigma          First slice         0.2.2 Student-t scale su…
 #>  9 drmTMB student   nu             First slice         0.2.2 Student-t degrees-…
 #> 10 drmTMB lognormal mu             First slice         0.2.2 Lognormal location…
-#> # ℹ 16 more rows
+#> # ℹ 18 more rows
 ```
 
 The relevant rows are:
