@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -1050,11 +1050,20 @@ slope of <code>temperature</code> at <em>specific values</em> of
 <span><span class="op">)</span></span></code></pre></div>
 <p><strong>Group slopes for <code>temperature</code></strong></p>
 <table class="table">
+<colgroup>
+<col width="17%">
+<col width="20%">
+<col width="14%">
+<col width="13%">
+<col width="13%">
+<col width="21%">
+</colgroup>
 <thead><tr class="header">
 <th align="left">predictor</th>
 <th align="left">level_combo</th>
 <th align="right">body_size</th>
 <th align="left">estimate</th>
+<th align="left">scale</th>
 <th align="left">95% CI</th>
 </tr></thead>
 <tbody>
@@ -1063,6 +1072,7 @@ slope of <code>temperature</code> at <em>specific values</em> of
 <td align="left">body_size=50</td>
 <td align="right">50</td>
 <td align="left">0.671</td>
+<td align="left">response</td>
 <td align="left">0.410, 0.932 *</td>
 </tr>
 <tr class="even">
@@ -1070,6 +1080,7 @@ slope of <code>temperature</code> at <em>specific values</em> of
 <td align="left">body_size=100</td>
 <td align="right">100</td>
 <td align="left">1.11</td>
+<td align="left">response</td>
 <td align="left">0.988, 1.23 *</td>
 </tr>
 <tr class="odd">
@@ -1077,6 +1088,7 @@ slope of <code>temperature</code> at <em>specific values</em> of
 <td align="left">body_size=150</td>
 <td align="right">150</td>
 <td align="left">1.55</td>
+<td align="left">response</td>
 <td align="left">1.34, 1.75 *</td>
 </tr>
 </tbody>
@@ -1514,6 +1526,7 @@ wanted.</p>
 <th align="left">level_combo</th>
 <th align="left">sex</th>
 <th align="left">estimate</th>
+<th align="left">scale</th>
 <th align="left">95% CI</th>
 </tr></thead>
 <tbody>
@@ -1521,12 +1534,14 @@ wanted.</p>
 <td align="left">sex=female</td>
 <td align="left">female</td>
 <td align="left">30.0</td>
+<td align="left">response</td>
 <td align="left">29.1, 30.9 *</td>
 </tr>
 <tr class="even">
 <td align="left">sex=male</td>
 <td align="left">male</td>
 <td align="left">35.3</td>
+<td align="left">response</td>
 <td align="left">34.5, 36.1 *</td>
 </tr>
 </tbody>
@@ -1583,6 +1598,7 @@ per-group slopes directly.</p>
 <th align="left">level_combo</th>
 <th align="left">sex</th>
 <th align="left">estimate</th>
+<th align="left">scale</th>
 <th align="left">95% CI</th>
 </tr></thead>
 <tbody>
@@ -1591,6 +1607,7 @@ per-group slopes directly.</p>
 <td align="left">sex=female</td>
 <td align="left">female</td>
 <td align="left">0.192</td>
+<td align="left">response</td>
 <td align="left">0.154, 0.230 *</td>
 </tr>
 <tr class="even">
@@ -1598,6 +1615,7 @@ per-group slopes directly.</p>
 <td align="left">sex=male</td>
 <td align="left">male</td>
 <td align="left">0.222</td>
+<td align="left">response</td>
 <td align="left">0.180, 0.265 *</td>
 </tr>
 </tbody>
@@ -1680,6 +1698,7 @@ mean correctly regardless of how the formula was written.</p>
 <th align="left">sex</th>
 <th align="left">site</th>
 <th align="left">estimate</th>
+<th align="left">scale</th>
 <th align="left">95% CI</th>
 </tr></thead>
 <tbody>
@@ -1688,6 +1707,7 @@ mean correctly regardless of how the formula was written.</p>
 <td align="left">female</td>
 <td align="left">A</td>
 <td align="left">29.7</td>
+<td align="left">response</td>
 <td align="left">28.4, 31.0 *</td>
 </tr>
 <tr class="even">
@@ -1695,6 +1715,7 @@ mean correctly regardless of how the formula was written.</p>
 <td align="left">male</td>
 <td align="left">A</td>
 <td align="left">36.2</td>
+<td align="left">response</td>
 <td align="left">34.8, 37.7 *</td>
 </tr>
 <tr class="odd">
@@ -1702,6 +1723,7 @@ mean correctly regardless of how the formula was written.</p>
 <td align="left">female</td>
 <td align="left">B</td>
 <td align="left">29.0</td>
+<td align="left">response</td>
 <td align="left">27.3, 30.6 *</td>
 </tr>
 <tr class="even">
@@ -1709,6 +1731,7 @@ mean correctly regardless of how the formula was written.</p>
 <td align="left">male</td>
 <td align="left">B</td>
 <td align="left">35.6</td>
+<td align="left">response</td>
 <td align="left">34.1, 37.0 *</td>
 </tr>
 <tr class="odd">
@@ -1716,6 +1739,7 @@ mean correctly regardless of how the formula was written.</p>
 <td align="left">female</td>
 <td align="left">C</td>
 <td align="left">30.4</td>
+<td align="left">response</td>
 <td align="left">28.9, 31.9 *</td>
 </tr>
 <tr class="even">
@@ -1723,6 +1747,7 @@ mean correctly regardless of how the formula was written.</p>
 <td align="left">male</td>
 <td align="left">C</td>
 <td align="left">34.9</td>
+<td align="left">response</td>
 <td align="left">33.2, 36.6 *</td>
 </tr>
 </tbody>

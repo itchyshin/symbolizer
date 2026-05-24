@@ -563,11 +563,11 @@ group_slopes(
 
 **Group slopes for `temperature`**
 
-| predictor   | level_combo   | body_size | estimate | 95% CI          |
-|:------------|:--------------|----------:|:---------|:----------------|
-| temperature | body_size=50  |        50 | 0.671    | 0.410, 0.932 \* |
-| temperature | body_size=100 |       100 | 1.11     | 0.988, 1.23 \*  |
-| temperature | body_size=150 |       150 | 1.55     | 1.34, 1.75 \*   |
+| predictor   | level_combo   | body_size | estimate | scale    | 95% CI          |
+|:------------|:--------------|----------:|:---------|:---------|:----------------|
+| temperature | body_size=50  |        50 | 0.671    | response | 0.410, 0.932 \* |
+| temperature | body_size=100 |       100 | 1.11     | response | 0.988, 1.23 \*  |
+| temperature | body_size=150 |       150 | 1.55     | response | 1.34, 1.75 \*   |
 
 *Rows marked `*` have a 95% confidence interval that excludes zero (CI
 method: `wald`).*
@@ -818,10 +818,10 @@ group_means(sym_p2, by = "sex")
 
 **Group means**
 
-| level_combo | sex    | estimate | 95% CI        |
-|:------------|:-------|:---------|:--------------|
-| sex=female  | female | 30.0     | 29.1, 30.9 \* |
-| sex=male    | male   | 35.3     | 34.5, 36.1 \* |
+| level_combo | sex    | estimate | scale    | 95% CI        |
+|:------------|:-------|:---------|:---------|:--------------|
+| sex=female  | female | 30.0     | response | 29.1, 30.9 \* |
+| sex=male    | male   | 35.3     | response | 34.5, 36.1 \* |
 
 *Rows marked `*` have a 95% confidence interval that excludes zero (CI
 method: `wald`).*
@@ -872,10 +872,10 @@ group_slopes(sym_p3, continuous = "body_size")
 
 **Group slopes for `body_size`**
 
-| predictor | level_combo | sex    | estimate | 95% CI          |
-|:----------|:------------|:-------|:---------|:----------------|
-| body_size | sex=female  | female | 0.192    | 0.154, 0.230 \* |
-| body_size | sex=male    | male   | 0.222    | 0.180, 0.265 \* |
+| predictor | level_combo | sex    | estimate | scale    | 95% CI          |
+|:----------|:------------|:-------|:---------|:---------|:----------------|
+| body_size | sex=female  | female | 0.192    | response | 0.154, 0.230 \* |
+| body_size | sex=male    | male   | 0.222    | response | 0.180, 0.265 \* |
 
 *Rows marked `*` have a 95% confidence interval that excludes zero (CI
 method: `wald`).*
@@ -955,14 +955,14 @@ group_means(sym_p5, by = c("sex", "site"))
 
 **Group means**
 
-| level_combo        | sex    | site | estimate | 95% CI        |
-|:-------------------|:-------|:-----|:---------|:--------------|
-| sex=female, site=A | female | A    | 29.7     | 28.4, 31.0 \* |
-| sex=male , site=A  | male   | A    | 36.2     | 34.8, 37.7 \* |
-| sex=female, site=B | female | B    | 29.0     | 27.3, 30.6 \* |
-| sex=male , site=B  | male   | B    | 35.6     | 34.1, 37.0 \* |
-| sex=female, site=C | female | C    | 30.4     | 28.9, 31.9 \* |
-| sex=male , site=C  | male   | C    | 34.9     | 33.2, 36.6 \* |
+| level_combo        | sex    | site | estimate | scale    | 95% CI        |
+|:-------------------|:-------|:-----|:---------|:---------|:--------------|
+| sex=female, site=A | female | A    | 29.7     | response | 28.4, 31.0 \* |
+| sex=male , site=A  | male   | A    | 36.2     | response | 34.8, 37.7 \* |
+| sex=female, site=B | female | B    | 29.0     | response | 27.3, 30.6 \* |
+| sex=male , site=B  | male   | B    | 35.6     | response | 34.1, 37.0 \* |
+| sex=female, site=C | female | C    | 30.4     | response | 28.9, 31.9 \* |
+| sex=male , site=C  | male   | C    | 34.9     | response | 33.2, 36.6 \* |
 
 *Rows marked `*` have a 95% confidence interval that excludes zero (CI
 method: `wald`).*

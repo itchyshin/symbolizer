@@ -21,7 +21,14 @@ for the same limitation and the recommended alternatives.
 ## Usage
 
 ``` r
-group_slopes(x, continuous, at = NULL, ci_method = NULL, ...)
+group_slopes(
+  x,
+  continuous,
+  at = NULL,
+  scale = c("response", "link"),
+  ci_method = NULL,
+  ...
+)
 ```
 
 ## Arguments
@@ -49,6 +56,15 @@ group_slopes(x, continuous, at = NULL, ci_method = NULL, ...)
   - A named list (e.g. `list(z = c(-1, 0, 1))`): for continuous-by-
     continuous interactions, get the slope at those values of `z`.
 
+- scale:
+
+  One of `"response"` (default) or `"link"`. For identity-link families
+  the two are equivalent. For other families the slope is reported on
+  the requested scale: `"link"` gives the linear-predictor slope (which
+  is what the coefficient table shows), `"response"` gives the slope
+  after back-transformation. Note that for non-identity links the
+  response-scale slope depends on the level of the predictor.
+
 - ci_method:
 
   Confidence-interval method. Defaults to `x$metadata$ci_method`. See
@@ -64,4 +80,4 @@ group_slopes(x, continuous, at = NULL, ci_method = NULL, ...)
 A tibble (S3 class `symbolizer_group_slopes`) with one row per stratum.
 Columns: `predictor`, `level_combo`, one column per stratifying
 variable, `estimate`, `std_error`, `confint_low`, `confint_high`,
-`excludes_zero`, `ci_method`.
+`excludes_zero`, `ci_method`, `scale`.

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,6 +33,17 @@
       <small>Source: <a href="https://github.com/itchyshin/symbolizer/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.3.0.9000" id="symbolizer-0309000-development">symbolizer 0.3.0.9000 (development)<a class="anchor" aria-label="anchor" href="#symbolizer-0309000-development"></a></h2>
+<div class="section level3">
+<h3 id="v031-in-progress-0-3-0-9000">v0.3.1 (in progress)<a class="anchor" aria-label="anchor" href="#v031-in-progress-0-3-0-9000"></a></h3>
+<ul><li>
+<code><a href="../reference/group_means.html">group_means()</a></code> and <code><a href="../reference/group_slopes.html">group_slopes()</a></code> gain a <code>scale</code> argument (<code>"response"</code> (default) or <code>"link"</code>) and return a new <code>scale</code> column. Before this release, both functions returned emmeans output on the <em>link</em> scale for non-identity-link families — a Poisson “group mean” was reported as the log of the count rate, a Beta mean was reported as a log-odds, a Gamma mean as a log of the response, and so on. That was easy to misread as the response-scale value. The default is now <code>"response"</code>: the back-transformed mean (count rate for Poisson, proportion for Beta, response-scale mean for Gamma, geometric mean for lognormal, response-scale mean for nbinom2, mean for Gaussian and Student-t). Pass <code>scale = "link"</code> to get the linear-predictor scale used by the coefficient table.</li>
+<li>For <code>lognormal</code> fits drmTMB exposes mu on the identity link (because mu represents <code>log(Y)</code>), so emmeans’s automatic back-transform doesn’t fire. <code><a href="../reference/group_means.html">group_means()</a></code> now tells emmeans about the implicit log transformation via <code>stats::update(emm, tran = "log")</code> so the response-scale output is the geometric mean with delta-method CI.</li>
+<li>
+<code>print.symbolizer_group_means()</code> and <code>print.symbolizer_group_slopes()</code> name the scale in their footer (“Scale: response. CI method: wald.”).</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.3.0" id="symbolizer-030">symbolizer 0.3.0<a class="anchor" aria-label="anchor" href="#symbolizer-030"></a></h2>
 <div class="section level3">

@@ -24,7 +24,7 @@ call `group_means()` on each.
 ## Usage
 
 ``` r
-group_means(x, by = NULL, ci_method = NULL, ...)
+group_means(x, by = NULL, scale = c("response", "link"), ci_method = NULL, ...)
 ```
 
 ## Arguments
@@ -39,6 +39,16 @@ group_means(x, by = NULL, ci_method = NULL, ...)
 
   Optional character vector of factor names to marginalize over.
   Defaults to all factors in the model.
+
+- scale:
+
+  One of `"response"` (default) or `"link"`. Controls the scale of the
+  returned estimate and confidence band. For families with identity link
+  on the mean (Gaussian, Student-t), the two are equivalent. For
+  log-link families (Gamma, lognormal, Poisson, nbinom2) `"response"`
+  reports back-transformed means; `"link"` reports the log-scale linear
+  predictor. For the logit-link Beta family, `"response"` reports
+  proportions and `"link"` reports log-odds.
 
 - ci_method:
 
@@ -57,4 +67,4 @@ group_means(x, by = NULL, ci_method = NULL, ...)
 A tibble (S3 class `symbolizer_group_means`) with one row per level
 combination. Columns: `level_combo`, one column per factor in `by`,
 `estimate`, `std_error`, `confint_low`, `confint_high`, `excludes_zero`,
-`ci_method`.
+`ci_method`, `scale`.
