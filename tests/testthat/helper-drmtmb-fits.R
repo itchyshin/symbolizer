@@ -94,3 +94,59 @@ fit_drm_lognormal <- function(seed = 20260524L, n = 80L) {
     data   = dat
   )
 }
+
+fit_drm_gamma <- function(seed = 20260524L, n = 80L) {
+  testthat::skip_if_not_installed("drmTMB")
+  set.seed(seed)
+  dat <- data.frame(
+    y = rgamma(n, shape = 2, rate = 0.5),
+    x = rnorm(n)
+  )
+  drmTMB::drmTMB(
+    drmTMB::drm_formula(y ~ x, sigma ~ 1),
+    family = stats::Gamma(link = "log"),
+    data   = dat
+  )
+}
+
+fit_drm_beta <- function(seed = 20260524L, n = 80L) {
+  testthat::skip_if_not_installed("drmTMB")
+  set.seed(seed)
+  dat <- data.frame(
+    y = rbeta(n, 2, 5),
+    x = rnorm(n)
+  )
+  drmTMB::drmTMB(
+    drmTMB::drm_formula(y ~ x, sigma ~ 1),
+    family = drmTMB::beta(),
+    data   = dat
+  )
+}
+
+fit_drm_poisson <- function(seed = 20260524L, n = 80L) {
+  testthat::skip_if_not_installed("drmTMB")
+  set.seed(seed)
+  dat <- data.frame(
+    y = rpois(n, lambda = 4),
+    x = rnorm(n)
+  )
+  drmTMB::drmTMB(
+    drmTMB::drm_formula(y ~ x),
+    family = stats::poisson(),
+    data   = dat
+  )
+}
+
+fit_drm_nbinom2 <- function(seed = 20260524L, n = 80L) {
+  testthat::skip_if_not_installed("drmTMB")
+  set.seed(seed)
+  dat <- data.frame(
+    y = rnbinom(n, size = 3, mu = 5),
+    x = rnorm(n)
+  )
+  drmTMB::drmTMB(
+    drmTMB::drm_formula(y ~ x, sigma ~ 1),
+    family = drmTMB::nbinom2(),
+    data   = dat
+  )
+}

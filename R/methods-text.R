@@ -106,8 +106,11 @@ methods_slots_for <- function(sym) {
   # submodel, and a sigma submodel (Student-t adds nu; Poisson would skip
   # sigma; etc.). Rather than branching per family, fill the common slots
   # and add family-specific extras after.
+  # Note: "Gamma" is capitalised because base R's stats::Gamma() registers
+  # the family string as "Gamma" on the fit; the other names are lowercase
+  # as drmTMB's own family() functions write them.
   univariate_drm_families <- c(
-    "gaussian", "student", "lognormal", "gamma", "beta",
+    "gaussian", "student", "lognormal", "Gamma", "beta",
     "poisson", "nbinom2"
   )
   if (identical(cls, "drmTMB") && family %in% univariate_drm_families) {

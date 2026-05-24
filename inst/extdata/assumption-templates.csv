@@ -47,3 +47,34 @@ lognormal,,independence,{response_symbol} \perp {response_symbol_j} \mid X \text
 lognormal,,independence_given_random_effects,"{response_symbol} \perp {response_symbol_j} \mid X\, \mathbf{u} \text{ for } i \ne j",Observations are conditionally independent given the predictors and the random effects,stated
 lognormal,sigma,positivity,\sigma_i > 0,Residual SD of log({response}) is constrained positive via the log link,implied
 lognormal,,no_missing_at_random,—,Observations are assumed not missing in a way that depends on the unobserved response,not_checked
+Gamma,,conditional_distribution,"{response_symbol} \mid \mu_i\, \sigma_i \sim \mathrm{Gamma}(\mathrm{shape}=1/\sigma_i^2\, \mathrm{scale}=\mu_i \sigma_i^2)","{response} is positive continuous and right-skewed; mean is mu_i and the coefficient of variation is roughly sigma_i (when sigma_i is small)",stated
+Gamma,,positivity_of_response,{response_symbol} > 0,"{response} is strictly positive (the Gamma support); zero or negative values will error at fit time, not at symbolize time",implied
+Gamma,mu,linear_predictor,\log(\mu_i) = \beta_0 + \sum_k \beta_k X_{ki},"log link on mu; mu_i is the mean of {response}; a unit change in a predictor multiplies the mean by exp(beta)",stated
+Gamma,sigma,linear_predictor,\log(\sigma_i) = \gamma_0 + \sum_k \gamma_k Z_{ki},"sigma_i is the Gamma dispersion on the log scale; larger sigma means more spread for the same mu",stated
+Gamma,,independence,{response_symbol} \perp {response_symbol_j} \mid X \text{ for } i \ne j,Observations are conditionally independent given the predictors,implied
+Gamma,,independence_given_random_effects,"{response_symbol} \perp {response_symbol_j} \mid X\, \mathbf{u} \text{ for } i \ne j",Observations are conditionally independent given the predictors and the random effects,stated
+Gamma,sigma,positivity,\sigma_i > 0,Dispersion is constrained positive via the log link,implied
+Gamma,,no_missing_at_random,—,Observations are assumed not missing in a way that depends on the unobserved response,not_checked
+beta,,conditional_distribution,"{response_symbol} \mid \mu_i\, \sigma_i \sim \mathrm{Beta}(\mu_i \sigma_i\, (1 - \mu_i) \sigma_i)","{response} is a proportion in (0, 1); mu_i is the mean and sigma_i is the precision (larger sigma -> tighter around mu)",stated
+beta,,support_of_response,{response_symbol} \in (0\, 1),"{response} is strictly between 0 and 1; exact 0 or 1 values will error at fit time, not at symbolize time",implied
+beta,mu,linear_predictor,\mathrm{logit}(\mu_i) = \beta_0 + \sum_k \beta_k X_{ki},"logit link on mu; mu_i is the mean proportion; a unit change in a predictor changes the log-odds of mu by beta and multiplies the odds by exp(beta)",stated
+beta,sigma,linear_predictor,\log(\sigma_i) = \gamma_0 + \sum_k \gamma_k Z_{ki},"sigma_i is the Beta precision on the log scale; larger sigma_i means the distribution is tighter around mu_i",stated
+beta,,independence,{response_symbol} \perp {response_symbol_j} \mid X \text{ for } i \ne j,Observations are conditionally independent given the predictors,implied
+beta,,independence_given_random_effects,"{response_symbol} \perp {response_symbol_j} \mid X\, \mathbf{u} \text{ for } i \ne j",Observations are conditionally independent given the predictors and the random effects,stated
+beta,sigma,positivity,\sigma_i > 0,Precision is constrained positive via the log link,implied
+beta,,no_missing_at_random,—,Observations are assumed not missing in a way that depends on the unobserved response,not_checked
+poisson,,conditional_distribution,"{response_symbol} \mid \mu_i \sim \mathrm{Poisson}(\mu_i)","{response} is a non-negative count; mu_i is the expected count, and the variance also equals mu_i (no dispersion parameter)",stated
+poisson,,non_negative_integer_response,{response_symbol} \in \{0\, 1\, 2\, \ldots\},"{response} is a non-negative integer count; non-integer or negative values will error at fit time, not at symbolize time",implied
+poisson,mu,linear_predictor,\log(\mu_i) = \beta_0 + \sum_k \beta_k X_{ki},"log link on mu; mu_i is the expected count of {response}; a unit change in a predictor multiplies the expected count by exp(beta)",stated
+poisson,,variance_equals_mean,\mathrm{Var}({response_symbol}) = \mu_i,"Poisson has variance equal to its mean; if the data are overdispersed (variance > mean), prefer nbinom2",your_responsibility
+poisson,,independence,{response_symbol} \perp {response_symbol_j} \mid X \text{ for } i \ne j,Observations are conditionally independent given the predictors,implied
+poisson,,independence_given_random_effects,"{response_symbol} \perp {response_symbol_j} \mid X\, \mathbf{u} \text{ for } i \ne j",Observations are conditionally independent given the predictors and the random effects,stated
+poisson,,no_missing_at_random,—,Observations are assumed not missing in a way that depends on the unobserved response,not_checked
+nbinom2,,conditional_distribution,"{response_symbol} \mid \mu_i\, \sigma_i \sim \mathrm{NegBin}(\mu_i\, \mathrm{size}=\exp(\sigma_i))","{response} is a non-negative count with overdispersion; mean = mu_i; Var({response}) = mu_i + mu_i^2 / exp(sigma_i)",stated
+nbinom2,,non_negative_integer_response,{response_symbol} \in \{0\, 1\, 2\, \ldots\},"{response} is a non-negative integer count; non-integer or negative values will error at fit time, not at symbolize time",implied
+nbinom2,mu,linear_predictor,\log(\mu_i) = \beta_0 + \sum_k \beta_k X_{ki},"log link on mu; mu_i is the expected count of {response}; a unit change in a predictor multiplies the expected count by exp(beta)",stated
+nbinom2,sigma,linear_predictor,\log(\sigma_i) = \gamma_0 + \sum_k \gamma_k Z_{ki},"sigma_i parameterises overdispersion on the log scale; small exp(sigma_i) (close to zero) means highly overdispersed, very large exp(sigma_i) approaches Poisson",stated
+nbinom2,,independence,{response_symbol} \perp {response_symbol_j} \mid X \text{ for } i \ne j,Observations are conditionally independent given the predictors,implied
+nbinom2,,independence_given_random_effects,"{response_symbol} \perp {response_symbol_j} \mid X\, \mathbf{u} \text{ for } i \ne j",Observations are conditionally independent given the predictors and the random effects,stated
+nbinom2,sigma,positivity,\sigma_i > 0 \text{ unconstrained on log scale},Sigma_i is unconstrained on the log scale; exp(sigma_i) is the size parameter (> 0),implied
+nbinom2,,no_missing_at_random,—,Observations are assumed not missing in a way that depends on the unobserved response,not_checked

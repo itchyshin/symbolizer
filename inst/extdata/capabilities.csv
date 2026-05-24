@@ -10,15 +10,15 @@ drmTMB,student,sigma,First slice,0.2.2,Student-t scale submodel with log link.
 drmTMB,student,nu,First slice,0.2.2,"Student-t degrees-of-freedom submodel with log(nu - 2) link; nu > 2 required for finite variance."
 drmTMB,lognormal,mu,First slice,0.2.2,"Lognormal location submodel: mu is the mean of log(Y), identity link."
 drmTMB,lognormal,sigma,First slice,0.2.2,"Lognormal scale submodel: sigma is the SD of log(Y), log link."
-drmTMB,gamma,mu,Planned or reserved,,
-drmTMB,gamma,sigma,Planned or reserved,,
-drmTMB,beta,mu,Planned or reserved,,
-drmTMB,beta,sigma,Planned or reserved,,
+drmTMB,Gamma,mu,First slice,0.2.2,"Gamma location submodel (positive continuous response, default log link via stats::Gamma(link = ""log""))."
+drmTMB,Gamma,sigma,First slice,0.2.2,Gamma dispersion submodel on the log scale.
+drmTMB,beta,mu,First slice,0.2.2,"Beta location submodel: mu in (0, 1) via the logit link; response Y in (0, 1)."
+drmTMB,beta,sigma,First slice,0.2.2,Beta precision submodel on the log scale (larger sigma -> tighter distribution around mu).
 drmTMB,beta_binomial,mu,Planned or reserved,,
 drmTMB,beta_binomial,sigma,Planned or reserved,,
-drmTMB,poisson,mu,Planned or reserved,,
-drmTMB,nbinom2,mu,Planned or reserved,,
-drmTMB,nbinom2,sigma,Planned or reserved,,
+drmTMB,poisson,mu,First slice,0.2.2,Poisson count submodel with log link; no dispersion parameter.
+drmTMB,nbinom2,mu,First slice,0.2.2,"Negative binomial (type 2) count submodel with log link."
+drmTMB,nbinom2,sigma,First slice,0.2.2,"Negative binomial overdispersion submodel; variance = mu + mu^2/exp(sigma)."
 drmTMB,cumulative_logit,mu,Planned or reserved,,
 drmTMB,biv_gaussian,mu1,First slice,0.1.0,Bivariate Gaussian location submodel for the first response.
 drmTMB,biv_gaussian,mu2,First slice,0.1.0,Bivariate Gaussian location submodel for the second response.
