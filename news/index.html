@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,10 +34,22 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.2.1.9000" id="symbolizer-0219000-development">symbolizer 0.2.1.9000 (development)<a class="anchor" aria-label="anchor" href="#symbolizer-0219000-development"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.3.0" id="symbolizer-030">symbolizer 0.3.0<a class="anchor" aria-label="anchor" href="#symbolizer-030"></a></h2>
 <div class="section level3">
-<h3 id="v03-in-progress--non-gaussian-drmtmb-families-polished-methods_text-0-2-1-9000">v0.3 (in progress) — non-Gaussian drmTMB families, polished methods_text<a class="anchor" aria-label="anchor" href="#v03-in-progress--non-gaussian-drmtmb-families-polished-methods_text-0-2-1-9000"></a></h3>
-<ul><li><p><code>methods_text(sym)</code> on biv_gaussian fits now reads cleanly when the three secondary submodels (sigma1, sigma2, rho12) are intercept-only. The old output included an awkward parenthesised <code>(an intercept only; an intercept only)</code> clause; the polished version uses dedicated <code>sigma_pair_clause</code> and <code>rho12_clause</code> slots that pick one of three readable phrasings (both intercept-only, mixed, or both with predictors). Templates for univariate families are unaffected; this is biv_gaussian-specific because the three-clause shape is genuinely unique to it.</p></li>
+<h3 id="v03--non-gaussian-drmtmb-families-polished-methods_text-0-3-0">v0.3 — non-Gaussian drmTMB families, polished methods_text<a class="anchor" aria-label="anchor" href="#v03--non-gaussian-drmtmb-families-polished-methods_text-0-3-0"></a></h3>
+<ul><li>
+<p><code><a href="../reference/symbolize.drmTMB.html">symbolize.drmTMB()</a></code> reads four more non-Gaussian families end-to-end via the CSV-driven path:</p>
+<ul><li>
+<strong>Gamma</strong> (<code>stats::Gamma(link = "log")</code>) — positive continuous, multiplicative mean reading on the response scale.</li>
+<li>
+<strong>Beta</strong> (<code><a href="https://itchyshin.github.io/drmTMB/reference/beta.html" class="external-link">drmTMB::beta()</a></code>) — Y in (0, 1) with logit-link mean and log-link precision; mean coefficients render as odds ratios.</li>
+<li>
+<strong>Poisson</strong> (<code><a href="https://rdrr.io/r/stats/family.html" class="external-link">stats::poisson()</a></code>) — counts with no dispersion parameter; mean coefficients render as rate ratios. The <code>variance = mean</code> constraint is called out in both the assumption table and the methods_text paragraph.</li>
+<li>
+<strong>nbinom2</strong> (<code><a href="https://itchyshin.github.io/drmTMB/reference/nbinom2.html" class="external-link">drmTMB::nbinom2()</a></code>) — counts with overdispersion; the size parameter (<code>exp(sigma_i)</code>) controls the Poisson limit. Each family ships its own assumption rows, interpretation rows (per coefficient role on every relevant scale), and methods_text template — no shortcuts, because the biology of each family genuinely differs.</li>
+</ul></li>
+<li><p>Capability registry rows flipped to <code>First slice</code> for <code>drmTMB / Gamma / mu, sigma</code> (note the capital G — base R’s <code><a href="https://rdrr.io/r/stats/family.html" class="external-link">stats::Gamma()</a></code> uses that string), <code>drmTMB / beta / mu, sigma</code>, <code>drmTMB / poisson / mu</code>, and <code>drmTMB / nbinom2 / mu, sigma</code>.</p></li>
+<li><p><code>methods_text(sym)</code> on biv_gaussian fits now reads cleanly when the three secondary submodels (sigma1, sigma2, rho12) are intercept-only. The old output included an awkward parenthesised <code>(an intercept only; an intercept only)</code> clause; the polished version uses dedicated <code>sigma_pair_clause</code> and <code>rho12_clause</code> slots that pick one of three readable phrasings (both intercept-only, mixed, or both with predictors). Templates for univariate families are unaffected; this is biv_gaussian-specific because the three-clause shape is genuinely unique to it.</p></li>
 <li>
 <p><code><a href="../reference/symbolize.drmTMB.html">symbolize.drmTMB()</a></code> reads Student-t fits (<code>family = drmTMB::student()</code>) end-to-end. The Student-t adds a <code>nu</code> (degrees-of-freedom) submodel alongside <code>mu</code> and <code>sigma</code>; drmTMB parameterises <code>nu</code> on the <code>log(nu - 2)</code> scale (the <code>logm2</code> link) so that <code>nu &gt; 2</code> is always enforced and the modelled variance <code>nu / (nu - 2) * sigma^2</code> is finite. The structured symbolic object carries:</p>
 <ul><li>a Student-t distribution row in both index and matrix forms,</li>

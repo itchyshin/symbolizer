@@ -1,8 +1,37 @@
 # Changelog
 
-## symbolizer 0.2.1.9000 (development)
+## symbolizer 0.3.0
 
-### v0.3 (in progress) — non-Gaussian drmTMB families, polished methods_text
+### v0.3 — non-Gaussian drmTMB families, polished methods_text
+
+- [`symbolize.drmTMB()`](https://itchyshin.github.io/symbolizer/reference/symbolize.drmTMB.md)
+  reads four more non-Gaussian families end-to-end via the CSV-driven
+  path:
+
+  - **Gamma** (`stats::Gamma(link = "log")`) — positive continuous,
+    multiplicative mean reading on the response scale.
+  - **Beta**
+    ([`drmTMB::beta()`](https://itchyshin.github.io/drmTMB/reference/beta.html))
+    — Y in (0, 1) with logit-link mean and log-link precision; mean
+    coefficients render as odds ratios.
+  - **Poisson**
+    ([`stats::poisson()`](https://rdrr.io/r/stats/family.html)) — counts
+    with no dispersion parameter; mean coefficients render as rate
+    ratios. The `variance = mean` constraint is called out in both the
+    assumption table and the methods_text paragraph.
+  - **nbinom2**
+    ([`drmTMB::nbinom2()`](https://itchyshin.github.io/drmTMB/reference/nbinom2.html))
+    — counts with overdispersion; the size parameter (`exp(sigma_i)`)
+    controls the Poisson limit. Each family ships its own assumption
+    rows, interpretation rows (per coefficient role on every relevant
+    scale), and methods_text template — no shortcuts, because the
+    biology of each family genuinely differs.
+
+- Capability registry rows flipped to `First slice` for
+  `drmTMB / Gamma / mu, sigma` (note the capital G — base R’s
+  [`stats::Gamma()`](https://rdrr.io/r/stats/family.html) uses that
+  string), `drmTMB / beta / mu, sigma`, `drmTMB / poisson / mu`, and
+  `drmTMB / nbinom2 / mu, sigma`.
 
 - `methods_text(sym)` on biv_gaussian fits now reads cleanly when the
   three secondary submodels (sigma1, sigma2, rho12) are intercept-only.
