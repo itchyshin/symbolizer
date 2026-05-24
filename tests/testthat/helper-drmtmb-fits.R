@@ -150,3 +150,35 @@ fit_drm_nbinom2 <- function(seed = 20260524L, n = 80L) {
     data   = dat
   )
 }
+
+fit_drm_beta_binomial <- function(seed = 20260524L, n = 80L) {
+  testthat::skip_if_not_installed("drmTMB")
+  set.seed(seed)
+  trials <- sample(5:20, n, replace = TRUE)
+  p <- plogis(0.5 + 0.5 * rnorm(n))
+  successes <- rbinom(n, trials, p)
+  dat <- data.frame(
+    successes = successes,
+    failures  = trials - successes,
+    x         = rnorm(n)
+  )
+  drmTMB::drmTMB(
+    drmTMB::drm_formula(cbind(successes, failures) ~ x, sigma ~ 1),
+    family = drmTMB::beta_binomial(),
+    data   = dat
+  )
+}
+
+fit_drm_truncated_nbinom2 <- function(seed = 20260524L, n = 80L) {
+  testthat::skip_if_not_installed("drmTMB")
+  set.seed(seed)
+  dat <- data.frame(
+    y = pmax(1L, rnbinom(n, size = 2, mu = 4)),
+    x = rnorm(n)
+  )
+  drmTMB::drmTMB(
+    drmTMB::drm_formula(y ~ x, sigma ~ 1),
+    family = drmTMB::truncated_nbinom2(),
+    data   = dat
+  )
+}

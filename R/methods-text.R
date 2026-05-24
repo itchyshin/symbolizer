@@ -111,7 +111,7 @@ methods_slots_for <- function(sym) {
   # as drmTMB's own family() functions write them.
   univariate_drm_families <- c(
     "gaussian", "student", "lognormal", "Gamma", "beta",
-    "poisson", "nbinom2"
+    "poisson", "nbinom2", "beta_binomial", "truncated_nbinom2"
   )
   if (identical(cls, "drmTMB") && family %in% univariate_drm_families) {
     slots$response             <- sym$model$response %||% "the response"

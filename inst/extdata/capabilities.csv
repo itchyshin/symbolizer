@@ -14,11 +14,13 @@ drmTMB,Gamma,mu,First slice,0.2.2,"Gamma location submodel (positive continuous 
 drmTMB,Gamma,sigma,First slice,0.2.2,Gamma dispersion submodel on the log scale.
 drmTMB,beta,mu,First slice,0.2.2,"Beta location submodel: mu in (0, 1) via the logit link; response Y in (0, 1)."
 drmTMB,beta,sigma,First slice,0.2.2,Beta precision submodel on the log scale (larger sigma -> tighter distribution around mu).
-drmTMB,beta_binomial,mu,Planned or reserved,,
-drmTMB,beta_binomial,sigma,Planned or reserved,,
+drmTMB,beta_binomial,mu,First slice,0.3.2,"Beta-binomial location submodel: mu in (0, 1) is the mean success probability via the logit link."
+drmTMB,beta_binomial,sigma,First slice,0.3.2,"Beta-binomial precision / overdispersion submodel on the log scale; larger sigma -> distribution tighter around mu (less overdispersion)."
 drmTMB,poisson,mu,First slice,0.2.2,Poisson count submodel with log link; no dispersion parameter.
 drmTMB,nbinom2,mu,First slice,0.2.2,"Negative binomial (type 2) count submodel with log link."
 drmTMB,nbinom2,sigma,First slice,0.2.2,"Negative binomial overdispersion submodel; variance = mu + mu^2/exp(sigma)."
+drmTMB,truncated_nbinom2,mu,First slice,0.3.2,"Zero-truncated negative binomial (type 2) count submodel with log link; response Y >= 1."
+drmTMB,truncated_nbinom2,sigma,First slice,0.3.2,"Zero-truncated nbinom2 overdispersion submodel on the log scale."
 drmTMB,cumulative_logit,mu,Planned or reserved,,
 drmTMB,biv_gaussian,mu1,First slice,0.1.0,Bivariate Gaussian location submodel for the first response.
 drmTMB,biv_gaussian,mu2,First slice,0.1.0,Bivariate Gaussian location submodel for the second response.
