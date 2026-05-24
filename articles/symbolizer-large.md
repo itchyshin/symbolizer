@@ -103,7 +103,7 @@ sym
 #>   W_i                                         response variable
 #>   T_i                                         continuous predictor
 #>   F_i                                         predictor (log-transformed)
-#>   S_i                                         factor (female, male)
+#>   S_i                                         factor (female [reference], male)
 #>   \mu_i                                       conditional mu of body_mass
 #>   \sigma_i                                    conditional sigma of body_mass
 #>   \beta_{0}, \beta_{1}, \beta_{2}, \beta_{3}  mu submodel coefficients
@@ -266,7 +266,7 @@ symbol_table(sym)
 | $`W_i`$ | $`\mathbf{w}`$ | body_mass | g | response | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ | response variable |
 | $`T_i`$ | — | temperature | C | predictor | column of design matrix | column of X (length 200) | continuous predictor |
 | $`F_i`$ | — | food | g/day | transformation | column of design matrix | column of X (length 200) | predictor (log-transformed) |
-| $`S_i`$ | — | sex | NA | factor | column of design matrix | column of X (length 200) | factor (female, male) |
+| $`S_i`$ | — | sex | NA | factor | column of design matrix | column of X (length 200) | factor (female \[reference\], male) |
 | $`\mu_i`$ | $`\boldsymbol{\mu}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ | conditional mu of body_mass |
 | $`\sigma_i`$ | $`\boldsymbol{\sigma}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ | conditional sigma of body_mass |
 | $`\beta_{0}, \beta_{1}, \beta_{2}, \beta_{3}`$ | $`\boldsymbol{\beta}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\mu}`$ | $`\mathbb{R}^{4}`$ | mu submodel coefficients |
@@ -308,12 +308,22 @@ assumption_table(sym)
 | positivity | $`\sigma_i > 0`$ | Residual SD is constrained positive via the log link | follows from the formula |
 | no_missing_at_random | — | Observations are assumed not missing in a way that depends on the unobserved response | your responsibility |
 
-One known limitation: the `independence` row reads “Observations are
-conditionally independent given the predictors”. When a random intercept
-is present, the cleaner statement is “conditionally independent given
-the predictors **and** the random effects”. The v0.1 assumption template
-uses the unconditional wording in both cases; treat it as a known item
-to fix rather than a claim about your fit.
+Because this fit carries a random intercept, the table swaps in the
+RE-conditional independence row automatically: observations are
+conditionally independent **given the predictors and the random
+effects**. We can verify it directly from `sym$assumptions`:
+
+``` r
+
+sym$assumptions$assumption
+#> [1] "conditional_distribution"          "linear_predictor"                 
+#> [3] "linear_predictor"                  "independence_given_random_effects"
+#> [5] "positivity"                        "no_missing_at_random"
+```
+
+The plain `independence` row is absent;
+`independence_given_random_effects` appears in its place. A
+fixed-effects-only fit would show the reverse.
 
 **Takeaway.** Stated, implied, not_checked is the audit lens: the model
 guarantees the first two; the third is your responsibility.
@@ -354,16 +364,29 @@ unit change in temperature multiplies the unexplained variability of
 `body_mass` by `\exp(\gamma_{1})`. Two coefficients on the same
 predictor, two genuinely different scales.
 
-One rough edge worth flagging: the `log(food)` predictor does not appear
-in this table. v0.1 only ships interpretation templates for the
-`intercept`, `slope`, and `factor_contrast` roles. A
-[`log()`](https://rdrr.io/r/base/Log.html)-transformed predictor takes
-the `transformation` role and currently has no template, so its row is
-silently dropped. The coefficient is still in `sym$fixed_effects` and
-rendered in the equations; it just does not yet get an English reading.
+The `log(food)` row deserves a closer look: a transformed predictor
+takes the `transformation` role and gets its own templated readings on
+the link, natural, and biological scales. The natural-scale reading
+reports the slope per unit of `log(food)`, not per raw unit of `food` —
+the mathematics in
+[`equations()`](https://itchyshin.github.io/symbolizer/reference/equations.md)
+and the English in this table now agree about which scale the
+coefficient lives on.
 
-**Takeaway.** Templates exist for the simple roles in v0.1.
-Transformations and interactions are on the roadmap.
+``` r
+
+sym$interpretation[sym$interpretation$term_label == "log(food)", , drop = FALSE]
+#> # A tibble: 1 × 8
+#>   submodel term_label coefficient_role estimate link_scale_reading              
+#>   <chr>    <chr>      <chr>               <dbl> <chr>                           
+#> 1 mu       log(food)  transformation       1.75 Linear change in expected body_…
+#> # ℹ 3 more variables: natural_scale_reading <chr>,
+#> #   variance_scale_reading <chr>, biological_reading <chr>
+```
+
+**Takeaway.** v0.1 ships interpretation templates for `intercept`,
+`slope`, `factor_contrast`, and `transformation` roles on both mu and
+sigma. Interactions remain on the roadmap.
 
 ## 7. R syntax to math, both directions
 

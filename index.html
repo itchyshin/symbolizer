@@ -67,6 +67,9 @@
 <div class="section level2">
 <h2 id="positioning">Positioning<a class="anchor" aria-label="anchor" href="#positioning"></a>
 </h2>
+<blockquote>
+<p><code>symbolizer</code> does not just print equations for <code>drmTMB</code>; it makes a fitted distributional model auditable by connecting the R formula, symbolic model, parameter scales, assumptions, coefficient readings, and next diagnostic steps.</p>
+</blockquote>
 <p><code>symbolizer</code> is the complement to <a href="https://datalorax.github.io/equatiomatic/" class="external-link"><code>equatiomatic</code></a>, not a replacement. Reach for <code>equatiomatic</code> when you want a clean LaTeX equation for one model. Reach for <code>symbolizer</code> when you need to understand the model — its assumptions, what each coefficient means on a natural scale, both notations side by side, and how your data actually flows through the matrices.</p>
 <table class="table">
 <colgroup>
@@ -121,7 +124,7 @@
 </tr>
 </tbody>
 </table>
-<p>Built first for the two TMB sister packages — <a href="https://itchyshin.github.io/drmTMB/" class="external-link"><code>drmTMB</code></a> and <a href="https://itchyshin.github.io/gllvmTMB/" class="external-link"><code>gllvmTMB</code></a> — and extended across the GLMM ecosystem used in ecology and evolution: <code>glmmTMB</code>, <code>brms</code>, <code>MCMCglmm</code>, <code>sdmTMB</code>, <code>lme4</code>, and base <code>lm</code>/<code>glm</code>.</p>
+<p>Built first for the two TMB sister packages — <a href="https://itchyshin.github.io/drmTMB/" class="external-link"><code>drmTMB</code></a> (Stable: Gaussian location-scale + (1 | group); First slice today) and <a href="https://itchyshin.github.io/gllvmTMB/" class="external-link"><code>gllvmTMB</code></a> (First slice: Gaussian latent-variable models) — with planned extensions across the GLMM ecosystem used in ecology and evolution: <code>glmmTMB</code>, <code>brms</code>, <code>MCMCglmm</code>, <code>sdmTMB</code>, <code>lme4</code>, and base <code>lm</code>/<code>glm</code>. The capability registry (<code><a href="reference/symbolizer_capabilities.html">symbolizer_capabilities()</a></code>) is the source of truth for what’s readable today; any fitted-model class not listed there with a Stable or First slice status will be refused by <code><a href="reference/symbolize.html">symbolize()</a></code>.</p>
 </div>
 <div class="section level2">
 <h2 id="install">Install<a class="anchor" aria-label="anchor" href="#install"></a>
@@ -471,23 +474,43 @@ W_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 </tr>
 <tr>
 <td>
-<code>drmTMB</code> non-Gaussian families, ZI, hurdle, bivariate</td>
+<code>gllvmTMB</code> Gaussian latent variables (mu, Λ_B, Σ_B, Ψ_B, σ_eps)</td>
+<td>First slice</td>
+</tr>
+<tr>
+<td>
+<code><a href="reference/model_card.html">model_card()</a></code> teaching bundle (equation + assumptions + readings + extraction calls)</td>
+<td>First slice</td>
+</tr>
+<tr>
+<td>
+<code>drmTMB</code> bivariate Gaussian (<code>rho12</code> / coscale)</td>
+<td>Planned (next slice)</td>
+</tr>
+<tr>
+<td>
+<code>drmTMB</code> non-Gaussian families, ZI, hurdle</td>
 <td>Planned</td>
 </tr>
 <tr>
 <td>
-<code>gllvmTMB</code>, <code>glmmTMB</code>, <code>brms</code>, <code>MCMCglmm</code>, <code>sdmTMB</code>, <code>lme4</code>, <code>lm</code>/<code>glm</code>
-</td>
-<td>Unsupported in v0.1 (see roadmap)</td>
+<code>gllvmTMB</code> non-Gaussian families, within-unit decompositions, phylo / spatial</td>
+<td>Planned</td>
 </tr>
 <tr>
 <td>
-<code>compare_symbolic()</code>, <code><a href="reference/model_card.html">model_card()</a></code>, <code>methods_text()</code>, model diagrams</td>
+<code>glmmTMB</code>, <code>brms</code>, <code>MCMCglmm</code>, <code>sdmTMB</code>, <code>lme4</code>, <code>lm</code>/<code>glm</code>
+</td>
+<td>Planned (see roadmap)</td>
+</tr>
+<tr>
+<td>
+<code>compare_symbolic()</code>, <code>methods_text()</code>, model diagrams</td>
 <td>Planned (v0.2 to v0.5)</td>
 </tr>
 </tbody>
 </table>
-<p>See <code><a href="reference/symbolizer_capabilities.html">symbolizer_capabilities()</a></code> for the full registry.</p>
+<p>See <code><a href="reference/symbolizer_capabilities.html">symbolizer_capabilities()</a></code> for the full registry — that table is the source of truth; any class / family / component not marked Stable or First slice there will be refused by <code><a href="reference/symbolize.html">symbolize()</a></code>.</p>
 </div>
 </div>
 <div class="section level2">
@@ -504,47 +527,46 @@ W_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 </tr></thead>
 <tbody>
 <tr>
-<td>v0.1</td>
-<td>drmTMB symbolic specification with educational extras</td>
+<td>v0.1 (current)</td>
+<td>drmTMB Gaussian location-scale + (1 | group); gllvmTMB Gaussian latent variables (First slice); <code><a href="reference/explain.html">explain()</a></code> / <code><a href="reference/model_card.html">model_card()</a></code> / dual notation</td>
 </tr>
 <tr>
 <td>v0.2</td>
-<td>Structural model comparison (<code>compare_symbolic</code>)</td>
+<td>Bivariate Gaussian <code>rho12</code> / coscale (drmTMB) and structural model comparison (<code>compare_symbolic</code>)</td>
 </tr>
 <tr>
 <td>v0.3</td>
-<td>Teaching and writing layer (<code>model_card</code>, <code>methods_text</code>, warnings, family sheets)</td>
+<td>Teaching and writing layer (<code>methods_text</code>, warnings, family sheets)</td>
 </tr>
 <tr>
 <td>v0.4</td>
-<td>
-<code>gllvmTMB</code> and <code>gllvmTMB_multi</code>
-</td>
+<td>Non-Gaussian drmTMB families (Student-t, lognormal, gamma, beta, beta-binomial, Poisson, nbinom2, cumulative_logit)</td>
 </tr>
 <tr>
 <td>v0.5</td>
-<td>Diagrams and notebooks</td>
+<td>gllvmTMB non-Gaussian families and <code>gllvmTMB_multi</code>
+</td>
 </tr>
 <tr>
 <td>v0.6</td>
-<td><code>glmmTMB</code></td>
+<td>Diagrams and notebooks</td>
 </tr>
 <tr>
 <td>v0.7</td>
-<td><code>brms</code></td>
+<td><code>glmmTMB</code></td>
 </tr>
 <tr>
 <td>v0.8</td>
-<td><code>MCMCglmm</code></td>
+<td><code>brms</code></td>
 </tr>
 <tr>
 <td>v0.9</td>
-<td><code>sdmTMB</code></td>
+<td><code>MCMCglmm</code></td>
 </tr>
 <tr>
 <td>v0.10</td>
 <td>
-<code>lme4</code>, <code>lm</code>, <code>glm</code>
+<code>sdmTMB</code>, <code>lme4</code>, <code>lm</code>, <code>glm</code>
 </td>
 </tr>
 </tbody>

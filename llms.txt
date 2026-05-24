@@ -5,6 +5,11 @@
 
 ## Positioning
 
+> `symbolizer` does not just print equations for `drmTMB`; it makes a
+> fitted distributional model auditable by connecting the R formula,
+> symbolic model, parameter scales, assumptions, coefficient readings,
+> and next diagnostic steps.
+
 `symbolizer` is the complement to
 [`equatiomatic`](https://datalorax.github.io/equatiomatic/), not a
 replacement. Reach for `equatiomatic` when you want a clean LaTeX
@@ -24,10 +29,17 @@ flows through the matrices.
 | Three views with real data | — | `expand(sym)`, `as_html_three_views(sym)` |
 
 Built first for the two TMB sister packages —
-[`drmTMB`](https://itchyshin.github.io/drmTMB/) and
-[`gllvmTMB`](https://itchyshin.github.io/gllvmTMB/) — and extended
-across the GLMM ecosystem used in ecology and evolution: `glmmTMB`,
-`brms`, `MCMCglmm`, `sdmTMB`, `lme4`, and base `lm`/`glm`.
+[`drmTMB`](https://itchyshin.github.io/drmTMB/) (Stable: Gaussian
+location-scale + (1 \| group); First slice today) and
+[`gllvmTMB`](https://itchyshin.github.io/gllvmTMB/) (First slice:
+Gaussian latent-variable models) — with planned extensions across the
+GLMM ecosystem used in ecology and evolution: `glmmTMB`, `brms`,
+`MCMCglmm`, `sdmTMB`, `lme4`, and base `lm`/`glm`. The capability
+registry
+([`symbolizer_capabilities()`](https://itchyshin.github.io/symbolizer/reference/symbolizer_capabilities.md))
+is the source of truth for what’s readable today; any fitted-model class
+not listed there with a Stable or First slice status will be refused by
+[`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md).
 
 ## Install
 
@@ -183,28 +195,35 @@ Pre-release. Read status words consistently:
 |----|----|
 | `drmTMB` Gaussian location-scale, fixed effects (μ + σ submodels) | Stable |
 | `drmTMB` Gaussian random intercepts `(1 \| group)` | First slice |
-| `drmTMB` non-Gaussian families, ZI, hurdle, bivariate | Planned |
-| `gllvmTMB`, `glmmTMB`, `brms`, `MCMCglmm`, `sdmTMB`, `lme4`, `lm`/`glm` | Unsupported in v0.1 (see roadmap) |
-| `compare_symbolic()`, [`model_card()`](https://itchyshin.github.io/symbolizer/reference/model_card.md), `methods_text()`, model diagrams | Planned (v0.2 to v0.5) |
+| `gllvmTMB` Gaussian latent variables (mu, Λ_B, Σ_B, Ψ_B, σ_eps) | First slice |
+| [`model_card()`](https://itchyshin.github.io/symbolizer/reference/model_card.md) teaching bundle (equation + assumptions + readings + extraction calls) | First slice |
+| `drmTMB` bivariate Gaussian (`rho12` / coscale) | Planned (next slice) |
+| `drmTMB` non-Gaussian families, ZI, hurdle | Planned |
+| `gllvmTMB` non-Gaussian families, within-unit decompositions, phylo / spatial | Planned |
+| `glmmTMB`, `brms`, `MCMCglmm`, `sdmTMB`, `lme4`, `lm`/`glm` | Planned (see roadmap) |
+| `compare_symbolic()`, `methods_text()`, model diagrams | Planned (v0.2 to v0.5) |
 
 See
 [`symbolizer_capabilities()`](https://itchyshin.github.io/symbolizer/reference/symbolizer_capabilities.md)
-for the full registry.
+for the full registry — that table is the source of truth; any class /
+family / component not marked Stable or First slice there will be
+refused by
+[`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md).
 
 ## Roadmap
 
 | Version | Theme |
 |----|----|
-| v0.1 | drmTMB symbolic specification with educational extras |
-| v0.2 | Structural model comparison (`compare_symbolic`) |
-| v0.3 | Teaching and writing layer (`model_card`, `methods_text`, warnings, family sheets) |
-| v0.4 | `gllvmTMB` and `gllvmTMB_multi` |
-| v0.5 | Diagrams and notebooks |
-| v0.6 | `glmmTMB` |
-| v0.7 | `brms` |
-| v0.8 | `MCMCglmm` |
-| v0.9 | `sdmTMB` |
-| v0.10 | `lme4`, `lm`, `glm` |
+| v0.1 (current) | drmTMB Gaussian location-scale + (1 \| group); gllvmTMB Gaussian latent variables (First slice); [`explain()`](https://itchyshin.github.io/symbolizer/reference/explain.md) / [`model_card()`](https://itchyshin.github.io/symbolizer/reference/model_card.md) / dual notation |
+| v0.2 | Bivariate Gaussian `rho12` / coscale (drmTMB) and structural model comparison (`compare_symbolic`) |
+| v0.3 | Teaching and writing layer (`methods_text`, warnings, family sheets) |
+| v0.4 | Non-Gaussian drmTMB families (Student-t, lognormal, gamma, beta, beta-binomial, Poisson, nbinom2, cumulative_logit) |
+| v0.5 | gllvmTMB non-Gaussian families and `gllvmTMB_multi` |
+| v0.6 | Diagrams and notebooks |
+| v0.7 | `glmmTMB` |
+| v0.8 | `brms` |
+| v0.9 | `MCMCglmm` |
+| v0.10 | `sdmTMB`, `lme4`, `lm`, `glm` |
 
 ## License
 
@@ -357,6 +376,8 @@ every renderer reads.
 
 - [Get started with
   symbolizer](https://itchyshin.github.io/symbolizer/articles/symbolizer.md):
+- [Understanding a drmTMB fit with
+  symbolizer](https://itchyshin.github.io/symbolizer/articles/symbolizer-drmtmb.md):
 - [A worked example: structured body-size
   model](https://itchyshin.github.io/symbolizer/articles/symbolizer-large.md):
 - [Latent variables in ecology: a gllvmTMB worked

@@ -163,7 +163,7 @@ instead of the raw R names.</p>
 <span><span class="co">#&gt;   W_i                                         response variable</span></span>
 <span><span class="co">#&gt;   T_i                                         continuous predictor</span></span>
 <span><span class="co">#&gt;   F_i                                         predictor (log-transformed)</span></span>
-<span><span class="co">#&gt;   S_i                                         factor (female, male)</span></span>
+<span><span class="co">#&gt;   S_i                                         factor (female [reference], male)</span></span>
 <span><span class="co">#&gt;   \mu_i                                       conditional mu of body_mass</span></span>
 <span><span class="co">#&gt;   \sigma_i                                    conditional sigma of body_mass</span></span>
 <span><span class="co">#&gt;   \beta_{0}, \beta_{1}, \beta_{2}, \beta_{3}  mu submodel coefficients</span></span>
@@ -297,14 +297,14 @@ columns now show real numbers, not just placeholders.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/symbol_table.html">symbol_table</a></span><span class="op">(</span><span class="va">sym</span><span class="op">)</span></span></code></pre></div>
 <table style="width:100%;" class="table">
 <colgroup>
-<col width="20%">
+<col width="19%">
 <col width="9%">
 <col width="5%">
 <col width="2%">
 <col width="8%">
-<col width="21%">
+<col width="20%">
 <col width="17%">
-<col width="14%">
+<col width="15%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">index</th>
@@ -355,7 +355,7 @@ columns now show real numbers, not just placeholders.</p>
 <td align="left">factor</td>
 <td align="left">column of design matrix</td>
 <td align="left">column of X (length 200)</td>
-<td align="left">factor (female, male)</td>
+<td align="left">factor (female [reference], male)</td>
 </tr>
 <tr class="odd">
 <td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>μ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\mu_i</annotation></semantics></math></td>
@@ -519,13 +519,19 @@ depends on the unobserved response</td>
 </tr>
 </tbody>
 </table>
-<p>One known limitation: the <code>independence</code> row reads
-“Observations are conditionally independent given the predictors”. When
-a random intercept is present, the cleaner statement is “conditionally
-independent given the predictors <strong>and</strong> the random
-effects”. The v0.1 assumption template uses the unconditional wording in
-both cases; treat it as a known item to fix rather than a claim about
-your fit.</p>
+<p>Because this fit carries a random intercept, the table swaps in the
+RE-conditional independence row automatically: observations are
+conditionally independent <strong>given the predictors and the random
+effects</strong>. We can verify it directly from
+<code>sym$assumptions</code>:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sym</span><span class="op">$</span><span class="va">assumptions</span><span class="op">$</span><span class="va">assumption</span></span>
+<span><span class="co">#&gt; [1] "conditional_distribution"          "linear_predictor"                 </span></span>
+<span><span class="co">#&gt; [3] "linear_predictor"                  "independence_given_random_effects"</span></span>
+<span><span class="co">#&gt; [5] "positivity"                        "no_missing_at_random"</span></span></code></pre></div>
+<p>The plain <code>independence</code> row is absent;
+<code>independence_given_random_effects</code> appears in its place. A
+fixed-effects-only fit would show the reverse.</p>
 <p><strong>Takeaway.</strong> Stated, implied, not_checked is the audit
 lens: the model guarantees the first two; the third is your
 responsibility.</p>
@@ -537,7 +543,7 @@ responsibility.</p>
 estimate on every scale that makes sense for its submodel: a link-scale
 reading, a natural-scale reading, a variance-scale reading (sigma only),
 and a biological reading.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/parameter_interpretation.html">parameter_interpretation</a></span><span class="op">(</span><span class="va">sym</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <colgroup>
@@ -663,16 +669,25 @@ expresses this directly: a unit change in temperature multiplies the
 unexplained variability of <code>body_mass</code> by
 <code>\exp(\gamma_{1})</code>. Two coefficients on the same predictor,
 two genuinely different scales.</p>
-<p>One rough edge worth flagging: the <code>log(food)</code> predictor
-does not appear in this table. v0.1 only ships interpretation templates
-for the <code>intercept</code>, <code>slope</code>, and
-<code>factor_contrast</code> roles. A <code><a href="https://rdrr.io/r/base/Log.html" class="external-link">log()</a></code>-transformed
-predictor takes the <code>transformation</code> role and currently has
-no template, so its row is silently dropped. The coefficient is still in
-<code>sym$fixed_effects</code> and rendered in the equations; it just
-does not yet get an English reading.</p>
-<p><strong>Takeaway.</strong> Templates exist for the simple roles in
-v0.1. Transformations and interactions are on the roadmap.</p>
+<p>The <code>log(food)</code> row deserves a closer look: a transformed
+predictor takes the <code>transformation</code> role and gets its own
+templated readings on the link, natural, and biological scales. The
+natural-scale reading reports the slope per unit of
+<code>log(food)</code>, not per raw unit of <code>food</code> — the
+mathematics in <code><a href="../reference/equations.html">equations()</a></code> and the English in this table
+now agree about which scale the coefficient lives on.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sym</span><span class="op">$</span><span class="va">interpretation</span><span class="op">[</span><span class="va">sym</span><span class="op">$</span><span class="va">interpretation</span><span class="op">$</span><span class="va">term_label</span> <span class="op">==</span> <span class="st">"log(food)"</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 8</span></span></span>
+<span><span class="co">#&gt;   submodel term_label coefficient_role estimate link_scale_reading              </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                           </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> mu       log(food)  transformation       1.75 Linear change in expected body_…</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3 more variables: natural_scale_reading &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   variance_scale_reading &lt;chr&gt;, biological_reading &lt;chr&gt;</span></span></span></code></pre></div>
+<p><strong>Takeaway.</strong> v0.1 ships interpretation templates for
+<code>intercept</code>, <code>slope</code>,
+<code>factor_contrast</code>, and <code>transformation</code> roles on
+both mu and sigma. Interactions remain on the roadmap.</p>
 </div>
 <div class="section level2">
 <h2 id="r-syntax-to-math-both-directions">7. R syntax to math, both directions<a class="anchor" aria-label="anchor" href="#r-syntax-to-math-both-directions"></a>
@@ -680,7 +695,7 @@ v0.1. Transformations and interactions are on the roadmap.</p>
 <p><code><a href="../reference/formula_bridge.html">formula_bridge()</a></code> is the educator-facing translation
 table from R formula syntax to mathematics. Two rows, both
 notations.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/formula_bridge.html">formula_bridge</a></span><span class="op">(</span><span class="va">sym</span><span class="op">)</span></span></code></pre></div>
 <table style="width:100%;" class="table">
 <colgroup>
@@ -733,7 +748,7 @@ both notations side by side.</p>
 <p><code><a href="../reference/notation_bridge.html">notation_bridge()</a></code> is the deeper teaching surface: every
 symbol <em>and</em> every equation pairs its index form with its matrix
 form and tags both shapes.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/notation_bridge.html">notation_bridge</a></span><span class="op">(</span><span class="va">sym</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <colgroup>
@@ -857,7 +872,7 @@ for what <code><a href="../reference/symbolize.html">symbolize()</a></code> know
 one of five status words: <strong>Stable</strong>, <strong>First
 slice</strong>, <strong>Opt-in control</strong>, <strong>Planned or
 reserved</strong>, or <strong>Unsupported or blocked</strong>.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/symbolizer_capabilities.html">symbolizer_capabilities</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 54 × 6</span></span></span>
 <span><span class="co">#&gt;    class  family    component      status              since notes              </span></span>

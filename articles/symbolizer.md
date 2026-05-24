@@ -201,11 +201,11 @@ three tabs over the same fit.
 as_html_three_views(sym, head = 5, tail = 2)
 ```
 
-[Skip three-views widget](#sym-sym-1779582712-end)
+[Skip three-views widget](#sym-sym-1779583543-end)
 
-    <button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779582712-tab-eq" aria-controls="sym-sym-1779582712-panel-eq" aria-selected="true" tabindex="0" data-tab="eq"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>1. Equation</button>
-    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779582712-tab-idx" aria-controls="sym-sym-1779582712-panel-idx" aria-selected="false" tabindex="-1" data-tab="idx"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>2. Index</button>
-    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779582712-tab-mat" aria-controls="sym-sym-1779582712-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>3. Matrix (with data)</button>
+    <button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779583543-tab-eq" aria-controls="sym-sym-1779583543-panel-eq" aria-selected="true" tabindex="0" data-tab="eq"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>1. Equation</button>
+    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779583543-tab-idx" aria-controls="sym-sym-1779583543-panel-idx" aria-selected="false" tabindex="-1" data-tab="idx"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>2. Index</button>
+    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779583543-tab-mat" aria-controls="sym-sym-1779583543-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>3. Matrix (with data)</button>
 
 The structural contract. No indices, no numbers – the shape of the
 model.
@@ -486,7 +486,7 @@ sym_re$variance_components
 
 **Takeaway.** The same object carries everything a reader needs to
 discuss random structure — what is grouped, how many levels, and which
-variance component goes with which submodel.
+between-group SD (`sd(group)`) goes with which submodel.
 
 ## What’s supported, what’s planned
 
