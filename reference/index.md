@@ -36,8 +36,6 @@ context here.
   : Symbolize a drmTMB fit (Gaussian location-scale, v0.1)
 - [`symbolize(`*`<gllvmTMB>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.gllvmTMB.md)
   : Symbolize a gllvmTMB fit (Gaussian latent-variable, v0.1)
-- [`validate_symbolized_model()`](https://itchyshin.github.io/symbolizer/reference/validate_symbolized_model.md)
-  : Validate a symbolized_model object
 - [`symbolizer_capabilities()`](https://itchyshin.github.io/symbolizer/reference/symbolizer_capabilities.md)
   : Symbolizer capability registry
 
@@ -145,5 +143,10 @@ every renderer reads.
 
 ## Internal: object construction
 
+S3 constructor and validator. Useful only for advanced users
+hand-building symbolized_model objects.
+
 - [`new_symbolized_model()`](https://itchyshin.github.io/symbolizer/reference/new_symbolized_model.md)
   : Construct a symbolized_model object
+- [`validate_symbolized_model()`](https://itchyshin.github.io/symbolizer/reference/validate_symbolized_model.md)
+  : Validate a symbolized_model object
