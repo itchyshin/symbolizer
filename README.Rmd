@@ -19,6 +19,12 @@ options(crayon.enabled = FALSE)
 
 # symbolizer <img src="man/figures/logo.png" align="right" height="139" alt="symbolizer hex logo: an R to script-L arrow above a small scatter plot pointing at y ~ beta x + epsilon" />
 
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/itchyshin/symbolizer/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/itchyshin/symbolizer/actions/workflows/R-CMD-check.yaml)
+[![pkgdown](https://github.com/itchyshin/symbolizer/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/itchyshin/symbolizer/actions/workflows/pkgdown.yaml)
+[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+<!-- badges: end -->
+
 > **Equations are not enough.** `symbolizer` turns fitted models into equations, assumptions, interpretations, and teachable model stories.
 
 ## Positioning
