@@ -156,6 +156,7 @@ symbolize.drmTMB <- function(fit, symbols = NULL, units = NULL,
   fixed_eff    <- drm_build_fixed_effects(terms_tbl, fit, ci_method = ci_method)
   re_tbl       <- drm_build_random_effects(re_per_entry)
   vc_tbl       <- drm_build_variance_components(re_per_entry)
+  cov_tbl      <- drm_build_covariance_components(re_tbl)
   components   <- drm_build_components(submodels, terms_tbl, re_tbl,
                                        response_symbol, response_symbol_matrix,
                                        family = family,
@@ -213,6 +214,7 @@ symbolize.drmTMB <- function(fit, symbols = NULL, units = NULL,
     fixed_effects       = fixed_eff,
     random_effects      = re_tbl,
     variance_components = vc_tbl,
+    covariance_components = cov_tbl,
     symbol_dictionary   = symbol_dict,
     assumptions         = assumptions,
     components          = components,
@@ -240,40 +242,90 @@ drm_re_terms <- function(fit, dpar) {
   parsed <- lapply(term_labels, drm_parse_re_term)
   group_vars <- vapply(parsed, `[[`, character(1L), "group")
   lhs_expr   <- vapply(parsed, `[[`, character(1L), "lhs")
+  component  <- vapply(parsed, `[[`, character(1L), "component")
   n_levels   <- vapply(re$terms, length, integer(1L), USE.NAMES = FALSE)
   tibble::tibble(
     submodel    = dpar,
     term_label  = term_labels,
     lhs_expr    = lhs_expr,
     group_var   = group_vars,
+    component   = component,
     n_levels    = as.integer(n_levels)
   )
 }
 
+# Parse a random-effect term label from drmTMB. Three shapes are handled
+# today:
+#
+#   "(1 | group)"                  intercept-only; component = "(Intercept)"
+#   "(1 + x | group):(Intercept)"  random intercept piece of a random slope
+#   "(1 + x | group):x"            random slope piece on predictor `x`
+#
+# Returns: list(lhs, group, component). `lhs` is the full RE formula text
+# (e.g. "1 + x"). `component` is the specific coefficient — "(Intercept)"
+# for intercept rows, or the predictor name for slope rows.
 drm_parse_re_term <- function(term_label) {
-  # Expect "(lhs | group)" -- strip outer parens, split on |.
-  inner <- sub("^\\(\\s*", "", term_label)
+  # Split into "(re_expr)" and an optional suffix after the first "):" pair
+  # that closes the parens.
+  split_at <- regexpr("\\)\\s*:", term_label)
+  if (split_at[[1L]] > 0L) {
+    re_part   <- substr(term_label, 1L, split_at[[1L]])           # "(1 + x | g)"
+    suffix    <- substr(term_label, split_at[[1L]] + attr(split_at, "match.length"),
+                        nchar(term_label))                          # "(Intercept)" or "x"
+    # Keep "(Intercept)" with its parens — that's the canonical R name
+    # for the intercept coefficient and how downstream code recognises it.
+    component <- trimws(suffix)
+  } else {
+    re_part   <- term_label
+    component <- "(Intercept)"
+  }
+  # Now re_part is "(lhs | group)"; strip outer parens and split on |.
+  inner <- sub("^\\(\\s*", "", re_part)
   inner <- sub("\\s*\\)$", "", inner)
   parts <- strsplit(inner, "\\|", fixed = FALSE)[[1L]]
   if (length(parts) != 2L) {
     cli::cli_abort("Could not parse random-effect term {.val {term_label}}.")
   }
-  list(lhs = trimws(parts[[1L]]), group = trimws(parts[[2L]]))
+  list(
+    lhs       = trimws(parts[[1L]]),
+    group     = trimws(parts[[2L]]),
+    component = component
+  )
 }
 
+# Validate which RE shapes we render today. Intercept-only and intercept-plus-
+# slope on mu both pass. Random effects on submodels other than mu, or RE
+# formulas that don't include the intercept, still error. The error message
+# names the registry status word so users know what to look for.
 drm_assert_supported_re <- function(re_tbl, dpar) {
-  unsupported <- re_tbl$lhs_expr != "1"
-  if (any(unsupported)) {
-    bad <- paste(re_tbl$term_label[unsupported], collapse = ", ")
-    cli::cli_abort(c(
-      "Random-effect term not yet supported in submodel {.val {dpar}}: {.val {bad}}.",
-      i = "v0.1 First slice handles intercept-only random effects {.code (1 | group)} only."
-    ))
-  }
   if (dpar != "mu") {
     cli::cli_abort(c(
       "Random effects on submodel {.val {dpar}} not yet supported.",
-      i = "v0.1 First slice handles random intercepts on the mu submodel only."
+      i = "Random effects on mu are {.emph First slice}; other submodels are {.emph Planned or reserved}."
+    ))
+  }
+  # Each random-effects group must include an intercept. Slope-only random
+  # effects (e.g. `(temperature | group)`) are uncommon and not supported
+  # in the First slice. We check this per-group: if any group lacks an
+  # "(Intercept)" component, reject.
+  for (gv in unique(re_tbl$group_var)) {
+    sel <- which(re_tbl$group_var == gv)
+    if (!"(Intercept)" %in% re_tbl$component[sel]) {
+      flag <- paste(re_tbl$term_label[sel], collapse = ", ")
+      cli::cli_abort(c(
+        "Random-effect term not yet supported in submodel {.val {dpar}}: {.val {flag}}.",
+        i = "First-slice random effects must include an intercept: {.code (1 | group)} or {.code (1 + x | group)} where {.code x} is a single bare predictor."
+      ))
+    }
+  }
+  # Component names that aren't "(Intercept)" must be bare predictor names.
+  bad <- !(re_tbl$component == "(Intercept)" |
+           grepl("^[A-Za-z._][A-Za-z0-9._]*$", re_tbl$component))
+  if (any(bad)) {
+    flag <- paste(re_tbl$term_label[bad], collapse = ", ")
+    cli::cli_abort(c(
+      "Random-effect term not yet supported in submodel {.val {dpar}}: {.val {flag}}.",
+      i = "First-slice random effects handle {.code (1 | group)} and {.code (1 + x | group)} where {.code x} is a single bare predictor."
     ))
   }
   invisible(re_tbl)
@@ -727,24 +779,112 @@ drm_build_random_effects <- function(re_per_entry) {
   filled <- Filter(Negate(is.null), re_per_entry)
   if (length(filled) == 0L) return(NULL)
   out <- do.call(rbind, filled)
-  out$u_symbol_index <- sprintf("u_{%s(i)}", out$group_var)
-  out$u_symbol_matrix <- "\\mathbf{u}"
-  out$sigma_symbol <- sprintf("\\sigma_{%s}", out$group_var)
+  # Determine per-(submodel, group_var) how many components there are.
+  # Single-component groups (intercept-only) use the historic simple
+  # symbols u_{group(i)} / \sigma_{group}. Multi-component groups use
+  # numbered subscripts: u_{0,group(i)} for the intercept, u_{1,group(i)}
+  # for the first slope, etc.
+  out$component_index <- NA_integer_
+  out$u_symbol_index  <- NA_character_
+  out$u_symbol_matrix <- NA_character_
+  out$sigma_symbol    <- NA_character_
+  out$predictor_factor <- NA_character_  # what multiplies u_k in the linear predictor (NA for intercept)
+  for (sm in unique(out$submodel)) {
+    for (gv in unique(out$group_var[out$submodel == sm])) {
+      sel <- which(out$submodel == sm & out$group_var == gv)
+      n_comp <- length(sel)
+      # Sort so the intercept row is first; slope rows come after in
+      # the order drmTMB emitted them.
+      sel <- sel[order(out$component[sel] != "(Intercept)",
+                       out$component[sel])]
+      for (k in seq_along(sel)) {
+        row <- sel[[k]]
+        idx <- k - 1L  # 0-based index, matches the math convention
+        out$component_index[[row]] <- idx
+        if (n_comp == 1L) {
+          # Intercept-only: keep the historical simple symbols.
+          out$u_symbol_index[[row]]  <- sprintf("u_{%s(i)}", gv)
+          out$u_symbol_matrix[[row]] <- "\\mathbf{u}"
+          out$sigma_symbol[[row]]    <- sprintf("\\sigma_{%s}", gv)
+        } else {
+          # Multi-component: numbered subscripts. Intercept gets 0,
+          # slopes get 1, 2, ...
+          out$u_symbol_index[[row]]  <- sprintf("u_{%d,%s(i)}", idx, gv)
+          out$u_symbol_matrix[[row]] <- sprintf("\\mathbf{u}_{%d}", idx)
+          out$sigma_symbol[[row]]    <- sprintf("\\sigma_{u_{%d,%s}}", idx, gv)
+        }
+        # For non-intercept components, record the predictor that
+        # multiplies u_k in the linear predictor.
+        if (out$component[[row]] != "(Intercept)") {
+          out$predictor_factor[[row]] <- out$component[[row]]
+        }
+      }
+    }
+  }
   out
 }
 
 drm_build_variance_components <- function(re_per_entry) {
   re <- drm_build_random_effects(re_per_entry)
   if (is.null(re)) return(NULL)
+  desc <- vapply(seq_len(nrow(re)), function(i) {
+    if (re$component[[i]] == "(Intercept)") {
+      sprintf("between-%s standard deviation of the random intercept on %s",
+              re$group_var[[i]], re$submodel[[i]])
+    } else {
+      sprintf("between-%s standard deviation of the random slope on %s on the %s submodel",
+              re$group_var[[i]], re$component[[i]], re$submodel[[i]])
+    }
+  }, character(1L))
   tibble::tibble(
-    submodel   = re$submodel,
-    group_var  = re$group_var,
-    parameter  = sprintf("sigma_%s", re$group_var),
-    symbol     = re$sigma_symbol,
-    n_levels   = re$n_levels,
-    description = sprintf("between-%s standard deviation on %s",
-                          re$group_var, re$submodel)
+    submodel    = re$submodel,
+    group_var   = re$group_var,
+    component   = re$component,
+    parameter   = sprintf("sigma_%s_%s", re$group_var,
+                          ifelse(re$component == "(Intercept)", "0",
+                                 re$component)),
+    symbol      = re$sigma_symbol,
+    n_levels    = re$n_levels,
+    description = desc
   )
+}
+
+# Pairwise within-group correlations between random components. For
+# (1 + x | g) this produces one row (intercept x x). For (1 | g) it
+# returns NULL since there's only one component per group.
+drm_build_covariance_components <- function(re_tbl) {
+  if (is.null(re_tbl) || nrow(re_tbl) == 0L) return(NULL)
+  rows <- list()
+  for (sm in unique(re_tbl$submodel)) {
+    for (gv in unique(re_tbl$group_var[re_tbl$submodel == sm])) {
+      sel <- which(re_tbl$submodel == sm & re_tbl$group_var == gv)
+      if (length(sel) < 2L) next
+      comps <- re_tbl$component[sel]
+      for (i in seq_along(comps)) {
+        for (j in seq_along(comps)) {
+          if (j <= i) next
+          rows[[length(rows) + 1L]] <- tibble::tibble(
+            submodel    = sm,
+            group_var   = gv,
+            component_1 = comps[[i]],
+            component_2 = comps[[j]],
+            rho_symbol  = sprintf("\\rho_{u_{%d,%s},\\, u_{%d,%s}}",
+                                  re_tbl$component_index[sel][[i]], gv,
+                                  re_tbl$component_index[sel][[j]], gv),
+            description = sprintf(
+              "within-%s correlation between the random %s and the random %s on %s",
+              gv,
+              if (comps[[i]] == "(Intercept)") "intercept" else paste("slope on", comps[[i]]),
+              if (comps[[j]] == "(Intercept)") "intercept" else paste("slope on", comps[[j]]),
+              sm
+            )
+          )
+        }
+      }
+    }
+  }
+  if (length(rows) == 0L) return(NULL)
+  do.call(rbind, rows)
 }
 
 drm_build_components <- function(submodels, terms_tbl, re_tbl, response_symbol,
@@ -816,9 +956,32 @@ drm_build_components <- function(submodels, terms_tbl, re_tbl, response_symbol,
       re_tbl[re_tbl$submodel == dpar, , drop = FALSE]
     } else NULL
     if (!is.null(re_for_dpar) && nrow(re_for_dpar) > 0L) {
-      re_idx <- paste(re_for_dpar$u_symbol_index, collapse = " + ")
+      # Index form: render each component as its own term. Intercept rows
+      # contribute the bare u_{...} symbol; slope rows multiply by the
+      # predictor variable.
+      idx_terms <- vapply(seq_len(nrow(re_for_dpar)), function(i) {
+        u_sym <- re_for_dpar$u_symbol_index[[i]]
+        pred  <- re_for_dpar$predictor_factor[[i]]
+        if (is.na(pred)) u_sym else
+          sprintf("%s \\, %s_i", u_sym, pred)
+      }, character(1L))
+      re_idx <- paste(idx_terms, collapse = " + ")
       rhs <- if (nzchar(rhs)) paste(rhs, "+", re_idx) else re_idx
-      re_mat <- paste(re_for_dpar$u_symbol_matrix, collapse = " + ")
+      # Matrix form: for intercept-only groups, render the bare \mathbf{u};
+      # for multi-component groups, use \mathbf{Z}_g \mathbf{u}_g per group.
+      groups <- unique(re_for_dpar$group_var)
+      mat_terms <- vapply(groups, function(gv) {
+        sel <- which(re_for_dpar$group_var == gv)
+        if (length(sel) == 1L &&
+            is.na(re_for_dpar$predictor_factor[[sel[[1L]]]])) {
+          # Intercept-only group: bare \mathbf{u} (historic notation).
+          re_for_dpar$u_symbol_matrix[[sel[[1L]]]]
+        } else {
+          # Multi-component (random intercept + slopes): \mathbf{Z}_g \mathbf{u}_g.
+          sprintf("\\mathbf{Z}_{%s}\\, \\mathbf{u}_{%s}", gv, gv)
+        }
+      }, character(1L))
+      re_mat <- paste(mat_terms, collapse = " + ")
       rhs_mat <- if (nzchar(rhs_mat)) paste(rhs_mat, "+", re_mat) else re_mat
     }
     rows[[length(rows) + 1L]] <- tibble::tibble(
@@ -830,22 +993,94 @@ drm_build_components <- function(submodels, terms_tbl, re_tbl, response_symbol,
       status = "stated"
     )
   }
-  # Random-effect distribution row(s).
+  # Random-effect distribution row(s). For each (submodel, group_var) emit:
+  #   - one univariate Normal row when the group has just an intercept
+  #     (historic shape), OR
+  #   - a joint multivariate Normal row plus a covariance-decomposition row
+  #     when the group has multiple components (intercept + slope(s)).
   if (!is.null(re_tbl)) {
-    for (i in seq_len(nrow(re_tbl))) {
-      g <- re_tbl$group_var[[i]]
-      sym <- re_tbl$sigma_symbol[[i]]
-      rows[[length(rows) + 1L]] <- tibble::tibble(
-        name = sprintf("%s_random_intercept_%s", re_tbl$submodel[[i]], g),
-        kind = "random_effect_distribution",
-        submodel = re_tbl$submodel[[i]],
-        equation = sprintf("u_{%s} \\sim \\mathcal{N}(0,\\, %s^2)", g, sym),
-        equation_matrix = sprintf(
-          "\\mathbf{u}_{%s} \\sim \\mathcal{N}(\\mathbf{0},\\, %s^2 \\mathbf{I}_{%d})",
-          g, sym, re_tbl$n_levels[[i]]
-        ),
-        status = "stated"
-      )
+    re_keys <- unique(re_tbl[, c("submodel", "group_var")])
+    for (kk in seq_len(nrow(re_keys))) {
+      sm <- re_keys$submodel[[kk]]
+      g  <- re_keys$group_var[[kk]]
+      sel <- which(re_tbl$submodel == sm & re_tbl$group_var == g)
+      n_comp <- length(sel)
+      n_levels <- re_tbl$n_levels[[sel[[1L]]]]
+      if (n_comp == 1L) {
+        sym <- re_tbl$sigma_symbol[[sel[[1L]]]]
+        rows[[length(rows) + 1L]] <- tibble::tibble(
+          name = sprintf("%s_random_intercept_%s", sm, g),
+          kind = "random_effect_distribution",
+          submodel = sm,
+          equation = sprintf("u_{%s} \\sim \\mathcal{N}(0,\\, %s^2)", g, sym),
+          equation_matrix = sprintf(
+            "\\mathbf{u}_{%s} \\sim \\mathcal{N}(\\mathbf{0},\\, %s^2 \\mathbf{I}_{%d})",
+            g, sym, n_levels
+          ),
+          status = "stated"
+        )
+      } else {
+        # Multi-component (random intercept + slope(s)): joint MVN.
+        idx_vec <- paste0("(",
+          paste(re_tbl$u_symbol_index[sel], collapse = ",\\, "),
+          ")^{\\!\\top}")
+        rows[[length(rows) + 1L]] <- tibble::tibble(
+          name = sprintf("%s_random_effects_%s", sm, g),
+          kind = "random_effect_distribution",
+          submodel = sm,
+          equation = sprintf(
+            "%s \\sim \\mathcal{N}_{%d}(\\mathbf{0},\\, \\boldsymbol{\\Sigma}_{u,%s})",
+            idx_vec, n_comp, g
+          ),
+          equation_matrix = sprintf(
+            "\\mathbf{u}_{%s} \\sim \\mathcal{N}_{%d}(\\mathbf{0},\\, \\boldsymbol{\\Sigma}_{u,%s})",
+            g, n_comp, g
+          ),
+          status = "stated"
+        )
+        # Covariance-matrix decomposition row.
+        sigmas <- re_tbl$sigma_symbol[sel]
+        diag_terms <- sprintf("%s^2", sigmas)
+        # Off-diagonal: rho_{u_i,u_j} * sigma_i * sigma_j. Use the rho
+        # symbols we'd put in covariance_components.
+        off_terms <- list()
+        for (i in seq_len(n_comp)) for (j in seq_len(n_comp)) {
+          if (i == j) next
+          if (i < j) {
+            off_terms[[length(off_terms) + 1L]] <- sprintf(
+              "\\rho_{u_{%d,%s},u_{%d,%s}}\\, %s\\, %s",
+              re_tbl$component_index[sel][[i]], g,
+              re_tbl$component_index[sel][[j]], g,
+              sigmas[[i]], sigmas[[j]]
+            )
+          }
+        }
+        # Build a 2x2 (or larger) matrix in TeX.
+        sigma_mat <- if (n_comp == 2L) {
+          sprintf(
+            "\\boldsymbol{\\Sigma}_{u,%s} = \\begin{pmatrix} %s & %s \\\\ %s & %s \\end{pmatrix}",
+            g,
+            diag_terms[[1L]], off_terms[[1L]],
+            off_terms[[1L]], diag_terms[[2L]]
+          )
+        } else {
+          # For >2 components, write Sigma_u in terms of D and Omega
+          # rather than spelling out the full matrix.
+          sprintf(
+            "\\boldsymbol{\\Sigma}_{u,%s} = \\mathbf{D}_{u,%s}\\, \\boldsymbol{\\Omega}_{u,%s}\\, \\mathbf{D}_{u,%s} \\text{ where } \\mathbf{D}_{u,%s} = \\mathrm{diag}(%s)",
+            g, g, g, g, g,
+            paste(sigmas, collapse = ",\\, ")
+          )
+        }
+        rows[[length(rows) + 1L]] <- tibble::tibble(
+          name = sprintf("%s_random_effects_covariance_%s", sm, g),
+          kind = "covariance_decomposition",
+          submodel = sm,
+          equation = sigma_mat,
+          equation_matrix = sigma_mat,
+          status = "stated"
+        )
+      }
     }
   }
   # biv_gaussian: append the implied 2x2 residual covariance decomposition.

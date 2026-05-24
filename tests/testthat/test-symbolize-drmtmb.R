@@ -242,21 +242,24 @@ test_that("fixed-effects extraction still works correctly with RE present", {
   expect_equal(fe_mu$estimate, expected_mu)
 })
 
-test_that("random slopes still raise a clear error pointing at status", {
-  # We can't easily build a real fit with (x | group) without drmTMB support,
-  # but the parser-level check is unit-testable.
+test_that("slope-only random effects (no intercept) raise a clear error", {
+  # (temperature | group) without "(1 + ...)" is uncommon and not supported.
+  # drmTMB emits the per-coefficient component name; we reject anything that
+  # isn't a bare-name predictor or "(Intercept)". The "1 +" check is enforced
+  # at the lhs_expr level too.
   expect_error(
     symbolizer:::drm_assert_supported_re(
       tibble::tibble(
         submodel = "mu",
-        term_label = "(temperature | group)",
+        term_label = "(temperature | group):temperature",
         lhs_expr = "temperature",
         group_var = "group",
+        component = "temperature",
         n_levels = 6L
       ),
       "mu"
     ),
-    "intercept-only random effects"
+    "single bare predictor"
   )
 })
 
@@ -268,12 +271,91 @@ test_that("RE on sigma submodel raises a clear error", {
         term_label = "(1 | group)",
         lhs_expr = "1",
         group_var = "group",
+        component = "(Intercept)",
         n_levels = 6L
       ),
       "sigma"
     ),
-    "mu submodel only"
+    "not yet supported"
   )
+})
+
+test_that("(1 + x | group) random slopes on mu produce a 2-row random_effects tibble", {
+  set.seed(20260524); n <- 200; n_g <- 8
+  g <- factor(rep(letters[1:n_g], length.out = n))
+  re_int <- rnorm(n_g, sd = 1.5); re_slo <- rnorm(n_g, sd = 0.4)
+  x <- rnorm(n)
+  dat <- data.frame(y = 5 + 0.5 * x + re_int[g] + re_slo[g] * x + rnorm(n),
+                    x = x, g = g)
+  fit <- drmTMB::drmTMB(drmTMB::drm_formula(y ~ x + (1 + x | g), sigma ~ 1),
+                        family = stats::gaussian(), data = dat)
+  sym <- symbolize(fit)
+  re <- sym$random_effects
+  expect_equal(nrow(re), 2L)
+  expect_setequal(re$component, c("(Intercept)", "x"))
+  expect_true(all(re$submodel == "mu"))
+  expect_true(all(re$group_var == "g"))
+  # The component_index column is 0 for the intercept, 1 for the slope:
+  int_row <- re[re$component == "(Intercept)", ]
+  slope_row <- re[re$component == "x", ]
+  expect_equal(int_row$component_index, 0L)
+  expect_equal(slope_row$component_index, 1L)
+  # The slope row carries the predictor name in predictor_factor:
+  expect_equal(slope_row$predictor_factor, "x")
+  expect_true(is.na(int_row$predictor_factor))
+})
+
+test_that("(1 + x | group) renders the joint MVN distribution and covariance", {
+  set.seed(20260524); n <- 200; n_g <- 8
+  g <- factor(rep(letters[1:n_g], length.out = n))
+  re_int <- rnorm(n_g, sd = 1.5); re_slo <- rnorm(n_g, sd = 0.4)
+  x <- rnorm(n)
+  dat <- data.frame(y = 5 + 0.5 * x + re_int[g] + re_slo[g] * x + rnorm(n),
+                    x = x, g = g)
+  fit <- drmTMB::drmTMB(drmTMB::drm_formula(y ~ x + (1 + x | g), sigma ~ 1),
+                        family = stats::gaussian(), data = dat)
+  sym <- symbolize(fit)
+  comps <- sym$components
+  # The mu linear predictor's index form mentions both u_{0,g(i)} and the
+  # slope contribution u_{1,g(i)} * x_i:
+  mu_lp <- comps$equation[comps$name == "mu_linear_predictor"]
+  expect_match(mu_lp, "u_\\{0,g\\(i\\)\\}", fixed = FALSE)
+  expect_match(mu_lp, "u_\\{1,g\\(i\\)\\}", fixed = FALSE)
+  # The random-effect distribution is a joint MVN_2:
+  re_row <- comps$equation[comps$name == "mu_random_effects_g"]
+  expect_match(re_row, "mathcal\\{N\\}_\\{2\\}", fixed = FALSE)
+  # And a covariance-decomposition row spells out Sigma_u:
+  cov_row <- comps$equation[comps$name == "mu_random_effects_covariance_g"]
+  expect_match(cov_row, "Sigma\\}_\\{u,g\\}",  fixed = FALSE)
+  expect_match(cov_row, "rho_\\{u_\\{0,g\\},u_\\{1,g\\}\\}", fixed = FALSE)
+})
+
+test_that("(1 + x | group) covariance_components has one rho row", {
+  set.seed(20260524); n <- 200; n_g <- 8
+  g <- factor(rep(letters[1:n_g], length.out = n))
+  x <- rnorm(n)
+  dat <- data.frame(y = 5 + 0.5 * x + rnorm(n_g, sd = 1)[g] +
+                          rnorm(n_g, sd = 0.3)[g] * x + rnorm(n),
+                    x = x, g = g)
+  fit <- drmTMB::drmTMB(drmTMB::drm_formula(y ~ x + (1 + x | g), sigma ~ 1),
+                        family = stats::gaussian(), data = dat)
+  sym <- symbolize(fit)
+  cov <- sym$covariance_components
+  expect_equal(nrow(cov), 1L)
+  expect_equal(cov$component_1, "(Intercept)")
+  expect_equal(cov$component_2, "x")
+})
+
+test_that("(1 | group) intercept-only fits still produce the simple historical shape", {
+  fit <- fit_drm_with_re()
+  sym <- symbolize(fit)
+  re <- sym$random_effects
+  expect_equal(nrow(re), 1L)
+  expect_equal(re$component, "(Intercept)")
+  # u_symbol_index keeps the simple form u_{group(i)}, NOT u_{0,group(i)}:
+  expect_match(re$u_symbol_index, "^u_\\{[^,]+\\(i\\)\\}$", fixed = FALSE)
+  # No covariance_components since only one component per group:
+  expect_null(sym$covariance_components)
 })
 
 test_that("default method still errors for unsupported classes", {

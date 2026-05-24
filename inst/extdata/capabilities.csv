@@ -1,7 +1,7 @@
 class,family,component,status,since,notes
 drmTMB,gaussian,mu,Stable,0.1.0,Univariate location submodel with identity link.
 drmTMB,gaussian,sigma,Stable,0.1.0,Univariate scale submodel with log link.
-drmTMB,gaussian,random_effects,First slice,0.1.0,Gaussian random intercepts (1|group) only.
+drmTMB,gaussian,random_effects,First slice,0.3.1,"Random intercepts (1 | group) and random intercept + one slope (1 + x | group) on the mu submodel; nested / crossed / RE-on-sigma still planned."
 drmTMB,gaussian,zi,Planned or reserved,,Zero-inflation submodel.
 drmTMB,gaussian,hu,Planned or reserved,,Hurdle submodel.
 drmTMB,gaussian,rho12,Planned or reserved,,Bivariate residual correlation.
