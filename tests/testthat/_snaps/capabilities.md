@@ -20,6 +20,7 @@
       * drmTMB truncated_nbinom2: hu, mu, sigma (First slice)
       * gllvmTMB binomial: Lambda_B, mu, Psi_B, Sigma_B (First slice)
       * gllvmTMB gaussian: Lambda_B, mu, Psi_B, Sigma_B, sigma_eps (First slice)
+      * glmmTMB gaussian: mu, random_effects, sigma (First slice)
       i See `symbolizer_capabilities()` for the full registry.
 
 # capability_check() rejects brmsfit/gaussian/mu via wildcard
@@ -44,6 +45,7 @@
       * drmTMB truncated_nbinom2: hu, mu, sigma (First slice)
       * gllvmTMB binomial: Lambda_B, mu, Psi_B, Sigma_B (First slice)
       * gllvmTMB gaussian: Lambda_B, mu, Psi_B, Sigma_B, sigma_eps (First slice)
+      * glmmTMB gaussian: mu, random_effects, sigma (First slice)
       i See `symbolizer_capabilities()` for the full registry.
 
 # capability_check() errors when no entry exists at all

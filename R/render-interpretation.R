@@ -51,6 +51,14 @@ parameter_interpretation.symbolized_model <- function(x,
   scale <- match.arg(scale)
   interp <- x$interpretation
   id_cols <- c("submodel", "term_label", "coefficient_role", "estimate")
+  # Confidence band columns travel with every scale — they describe the
+  # estimate, not a particular reading scale. Include any that exist on
+  # the underlying interpretation tibble (older symbolize() runs without
+  # `ci_method` won't have them, so we only ask for what's present).
+  ci_cols <- intersect(
+    c("std_error", "confint_low", "confint_high", "excludes_zero", "ci_method"),
+    names(interp)
+  )
   reading_col <- switch(
     scale,
     all        = c("link_scale_reading", "natural_scale_reading",
@@ -60,7 +68,7 @@ parameter_interpretation.symbolized_model <- function(x,
     variance   = "variance_scale_reading",
     biological = "biological_reading"
   )
-  out <- tibble::as_tibble(interp[, c(id_cols, reading_col), drop = FALSE])
+  out <- tibble::as_tibble(interp[, c(id_cols, ci_cols, reading_col), drop = FALSE])
   attr(out, "scale") <- scale
   class(out) <- c("symbolizer_interpretation", class(out))
   out

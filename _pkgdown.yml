@@ -54,6 +54,7 @@ reference:
       - symbolize
       - symbolize.drmTMB
       - symbolize.gllvmTMB
+      - symbolize.glmmTMB
       - symbolizer_capabilities
   - title: "Read both notations"
     desc: "Educator-facing bridge between index and matrix forms."

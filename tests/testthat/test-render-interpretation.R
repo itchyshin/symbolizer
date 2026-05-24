@@ -25,7 +25,8 @@ test_that("parameter_interpretation(scale = 'natural') drops other reading colum
   expect_named(
     out,
     c("submodel", "term_label", "coefficient_role", "estimate",
-      "natural_scale_reading")
+      "std_error", "confint_low", "confint_high", "excludes_zero",
+      "ci_method", "natural_scale_reading")
   )
 })
 
@@ -36,7 +37,8 @@ test_that("parameter_interpretation(scale = 'link') keeps only the link reading"
   expect_named(
     out,
     c("submodel", "term_label", "coefficient_role", "estimate",
-      "link_scale_reading")
+      "std_error", "confint_low", "confint_high", "excludes_zero",
+      "ci_method", "link_scale_reading")
   )
 })
 
@@ -47,7 +49,8 @@ test_that("parameter_interpretation(scale = 'variance') keeps only the variance 
   expect_named(
     out,
     c("submodel", "term_label", "coefficient_role", "estimate",
-      "variance_scale_reading")
+      "std_error", "confint_low", "confint_high", "excludes_zero",
+      "ci_method", "variance_scale_reading")
   )
 })
 
@@ -58,7 +61,8 @@ test_that("parameter_interpretation(scale = 'biological') keeps only the biologi
   expect_named(
     out,
     c("submodel", "term_label", "coefficient_role", "estimate",
-      "biological_reading")
+      "std_error", "confint_low", "confint_high", "excludes_zero",
+      "ci_method", "biological_reading")
   )
 })
 

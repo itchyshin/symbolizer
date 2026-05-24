@@ -53,10 +53,14 @@ gllvmTMB,betabinomial,*,Planned or reserved,,Beta-binomial family.
 gllvmTMB,tweedie,*,Planned or reserved,,Tweedie family.
 gllvmTMB,student,*,Planned or reserved,,Student-t family.
 gllvmTMB,ordinal_probit,*,Planned or reserved,,Ordinal probit family.
-glmmTMB,*,*,Planned or reserved,,Targeted for v0.6
-brmsfit,*,*,Planned or reserved,,Targeted for v0.7
-MCMCglmm,*,*,Planned or reserved,,Targeted for v0.8
-sdmTMB,*,*,Planned or reserved,,Targeted for v0.9
+glmmTMB,gaussian,mu,First slice,0.7.0,Gaussian conditional submodel (identity link).
+glmmTMB,gaussian,sigma,First slice,0.7.0,"Distributional sigma submodel from `dispformula = ~ z` (log link)."
+glmmTMB,gaussian,random_effects,First slice,0.7.0,"Random intercepts (1 | group) on the conditional submodel; nested / crossed / RE-on-sigma still planned."
+glmmTMB,gaussian,zi,Planned or reserved,,Zero-inflation submodel.
+glmmTMB,*,*,Planned or reserved,,Non-Gaussian families targeted for v0.7.x.
+brmsfit,*,*,Planned or reserved,,Targeted for v0.8
+MCMCglmm,*,*,Planned or reserved,,Targeted for v0.9
+sdmTMB,*,*,Planned or reserved,,Targeted for v0.10
 lmerMod,*,*,Planned or reserved,,Targeted for v0.10
 glmerMod,*,*,Planned or reserved,,Targeted for v0.10
 lm,*,*,Planned or reserved,,Targeted for v0.10
