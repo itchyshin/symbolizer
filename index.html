@@ -589,6 +589,76 @@ W_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 </table>
 </div>
 <div class="section level2">
+<h2 id="how-symbolizer-fits-with-related-packages">How symbolizer fits with related packages<a class="anchor" aria-label="anchor" href="#how-symbolizer-fits-with-related-packages"></a>
+</h2>
+<p><code>symbolizer</code> fills the <em>structural and educational</em> slot of the R modelling stack: what the model is, what it assumes, what each coefficient means before you read its number. Other packages fill the <em>summarisation</em>, <em>standardisation</em>, <em>prediction</em>, and <em>auto-narration</em> slots. None of these is competing — most ecology and evolution papers use two or three of them together.</p>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr>
+<th>Package</th>
+<th>Job to be done</th>
+<th>Output</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>symbolizer</strong></td>
+<td>Structured symbolic model: equation, symbols, assumptions, interpretation, compare two fits</td>
+<td>
+<code>symbolized_model</code> object; equations, tables, HTML widget, <code>symbolic_comparison</code>
+</td>
+</tr>
+<tr>
+<td><code>equatiomatic</code></td>
+<td>Render a fitted model as a LaTeX equation</td>
+<td>LaTeX string</td>
+</tr>
+<tr>
+<td><code>gtsummary</code></td>
+<td>Publication-ready regression table</td>
+<td>
+<code>gt</code> / <code>flextable</code> / <code>kable</code> table</td>
+</tr>
+<tr>
+<td><code>modelsummary</code></td>
+<td>Regression and model-comparison tables, many formats</td>
+<td>Word / LaTeX / Markdown table</td>
+</tr>
+<tr>
+<td>
+<code>parameters</code> (easystats)</td>
+<td>Tidy tibble of parameter estimates across many classes</td>
+<td>Tidy tibble</td>
+</tr>
+<tr>
+<td><code>marginaleffects</code></td>
+<td>Predictions, contrasts, slopes, marginal effects</td>
+<td>Tibble + plots</td>
+</tr>
+<tr>
+<td>
+<code>report</code> (easystats)</td>
+<td>Auto-generated prose paragraph describing a fit</td>
+<td>Prose paragraph</td>
+</tr>
+</tbody>
+</table>
+<p>A typical stack for a Gaussian location-scale fit:</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong><code>symbolizer</code></strong> for the equation in the Methods section — both notations spliced via <code>as_latex(sym, notation = "both")</code> — plus the assumption table and per-coefficient biological reading.</li>
+<li>
+<strong><code>gtsummary</code></strong> or <strong><code>modelsummary</code></strong> for the coefficient table in the Results.</li>
+<li>
+<strong><code>marginaleffects</code></strong> for the prediction figure and any marginal-effect contrasts.</li>
+</ol>
+<p>If you also want a quick draft paragraph for the Results, drop in <strong><code>report</code></strong> before you edit. If your downstream code wants tibbles of estimates regardless of model class, <strong><code>parameters</code></strong> harmonises that layer.</p>
+<p>The point: <strong>pick by the job, not by the package</strong>. For most papers, the right answer is two or three of them used together. The <code>symbolizer</code> slot is the one labelled <em>“what the model is and what it assumes”</em> — and that’s the slot the others don’t fill.</p>
+</div>
+<div class="section level2">
 <h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
 </h2>
 <p>GPL-3. Companion to <a href="https://itchyshin.github.io/drmTMB/" class="external-link"><code>drmTMB</code></a> and <a href="https://itchyshin.github.io/gllvmTMB/" class="external-link"><code>gllvmTMB</code></a>.</p>

@@ -228,6 +228,45 @@ refused by
 | v0.9 | `MCMCglmm` |
 | v0.10 | `sdmTMB`, `lme4`, `lm`, `glm` |
 
+## How symbolizer fits with related packages
+
+`symbolizer` fills the *structural and educational* slot of the R
+modelling stack: what the model is, what it assumes, what each
+coefficient means before you read its number. Other packages fill the
+*summarisation*, *standardisation*, *prediction*, and *auto-narration*
+slots. None of these is competing — most ecology and evolution papers
+use two or three of them together.
+
+| Package | Job to be done | Output |
+|----|----|----|
+| **symbolizer** | Structured symbolic model: equation, symbols, assumptions, interpretation, compare two fits | `symbolized_model` object; equations, tables, HTML widget, `symbolic_comparison` |
+| `equatiomatic` | Render a fitted model as a LaTeX equation | LaTeX string |
+| `gtsummary` | Publication-ready regression table | `gt` / `flextable` / `kable` table |
+| `modelsummary` | Regression and model-comparison tables, many formats | Word / LaTeX / Markdown table |
+| `parameters` (easystats) | Tidy tibble of parameter estimates across many classes | Tidy tibble |
+| `marginaleffects` | Predictions, contrasts, slopes, marginal effects | Tibble + plots |
+| `report` (easystats) | Auto-generated prose paragraph describing a fit | Prose paragraph |
+
+A typical stack for a Gaussian location-scale fit:
+
+1.  **`symbolizer`** for the equation in the Methods section — both
+    notations spliced via `as_latex(sym, notation = "both")` — plus the
+    assumption table and per-coefficient biological reading.
+2.  **`gtsummary`** or **`modelsummary`** for the coefficient table in
+    the Results.
+3.  **`marginaleffects`** for the prediction figure and any
+    marginal-effect contrasts.
+
+If you also want a quick draft paragraph for the Results, drop in
+**`report`** before you edit. If your downstream code wants tibbles of
+estimates regardless of model class, **`parameters`** harmonises that
+layer.
+
+The point: **pick by the job, not by the package**. For most papers, the
+right answer is two or three of them used together. The `symbolizer`
+slot is the one labelled *“what the model is and what it assumes”* — and
+that’s the slot the others don’t fill.
+
 ## License
 
 GPL-3. Companion to [`drmTMB`](https://itchyshin.github.io/drmTMB/) and
@@ -406,5 +445,3 @@ hand-building symbolized_model objects.
   interactions](https://itchyshin.github.io/symbolizer/articles/symbolizer-factors.md):
 - [Latent variables in ecology: a gllvmTMB worked
   example](https://itchyshin.github.io/symbolizer/articles/symbolizer-gllvm.md):
-- [How symbolizer compares to equatiomatic, gtsummary, and
-  friends](https://itchyshin.github.io/symbolizer/articles/symbolizer-vs-others.md):
