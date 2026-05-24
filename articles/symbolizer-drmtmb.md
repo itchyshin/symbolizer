@@ -685,7 +685,102 @@ recipes name the plot the reader should make next.
 **Takeaway.** Diagnostics before coefficients. The extraction-calls list
 is the order a reader should work through the fit.
 
-## 9. The capability gate
+## 9. Drafting the Methods paragraph
+
+Once you’ve inspected the fit and you’re ready to write the paper,
+`methods_text(sym)` returns a draft Methods-section paragraph that
+matches what your model actually does. The prose is composed from a CSV
+template plus slots filled from the `symbolized_model` — there’s no LLM
+in the loop, so every phrase traces to the template row.
+
+``` r
+
+methods_text(sym)
+```
+
+We fit a Gaussian location-scale model to 120 observations of body_mass
+(units: g) using the drmTMB package (version 0.1.3.9000) in R. The mean
+of body_mass was modelled as a linear function of `temperature`. The
+residual standard deviation was modelled on the log scale as a function
+of `temperature`. Parameters were estimated by maximum likelihood via
+the Template Model Builder framework. We report 95% Wald confidence
+intervals on the fixed-effect coefficients.
+
+*Reminders:*
+
+- This is a draft. Confirm every claim against your fit before pasting.
+- Package version `0.1.3.9000` was read from the local install; verify
+  it matches what you actually fit with.
+
+Two things to notice in the output:
+
+- The paragraph names the response, the predictors per submodel, the
+  random-effect group (when present), the package and version, the
+  number of observations, and the CI method. Each of those traces back
+  to a slot you can inspect on `methods_text(sym)$slots`.
+- The print method appends *Reminders before you paste* — a short
+  checklist that nudges you to confirm the package version, soften or
+  sharpen the prose, and reword the random-effect sentence if you used a
+  structure more complex than `(1 | group)`.
+
+The same call works for the richer fit from Section 6 (a 4-role
+location-scale model with a random intercept):
+
+``` r
+
+methods_text(sym_rich)
+```
+
+We fit a Gaussian location-scale model to 200 observations of body_mass
+(units: g) using the drmTMB package (version 0.1.3.9000) in R. The mean
+of body_mass was modelled as a linear function of `temperature`, `food`,
+and `sex`. The residual standard deviation was modelled on the log scale
+as a function of `temperature` and `sex`. A random intercept was
+included for `site`. Parameters were estimated by maximum likelihood via
+the Template Model Builder framework. We report 95% Wald confidence
+intervals on the fixed-effect coefficients.
+
+*Reminders:*
+
+- This is a draft. Confirm every claim against your fit before pasting.
+- Package version `0.1.3.9000` was read from the local install; verify
+  it matches what you actually fit with.
+- Random-effect structure described here; if you used a more complex RE
+  structure (random slopes, nested, crossed), reword that sentence.
+
+and for the bivariate-Gaussian fit from Section 7:
+
+``` r
+
+methods_text(sym_biv)
+```
+
+We fit a bivariate Gaussian location-scale-correlation model to 80
+paired observations of growth and repro using the drmTMB package
+(version 0.1.3.9000) in R. The means of the two responses were modelled
+as linear functions of `x1` and `x2` respectively. The residual standard
+deviations of the two responses were modelled on the log scale (an
+intercept only; an intercept only). The residual correlation between the
+two responses was modelled on the Fisher-z scale (an intercept only).
+Parameters were estimated by maximum likelihood via the Template Model
+Builder framework. We report 95% Wald confidence intervals on the
+fixed-effect coefficients.
+
+*Reminders:*
+
+- This is a draft. Confirm every claim against your fit before pasting.
+- Package version `0.1.3.9000` was read from the local install; verify
+  it matches what you actually fit with.
+
+The biv_gaussian template carries dedicated slots for `mu1`, `mu2`,
+`sigma1`, `sigma2`, and `rho12` so the paragraph names both responses
+and reports the Fisher-z scale on the residual correlation.
+
+**Takeaway.** `methods_text(sym)` produces a draft, not a final
+paragraph. Treat the output as starting material to edit; the reminders
+block is the editorial checklist.
+
+## 10. The capability gate
 
 [`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
 does not silently dispatch on every `drmTMB` fit. The capability
@@ -737,7 +832,7 @@ v0.1 ships Gaussian `mu`, `sigma`, and intercept-only random effects;
 v0.2 added the full bivariate Gaussian surface (`mu1`, `mu2`, `sigma1`,
 `sigma2`, `rho12`); the rest of the roadmap is non-Gaussian families.
 
-## 10. Where to read next
+## 11. Where to read next
 
 - [`vignette("symbolizer")`](https://itchyshin.github.io/symbolizer/articles/symbolizer.md)
   — the package-wide Get Started tour.
