@@ -235,12 +235,16 @@ sym_overview_paragraph <- function(model, submodels, metadata) {
   resp <- model$response
   n <- model$n_obs
   n_sub <- nrow(submodels)
+  a_or_an <- function(word) {
+    if (grepl("^[aeiou]", word, ignore.case = TRUE)) "an" else "a"
+  }
   pieces <- vapply(seq_len(n_sub), function(i) {
     sm <- submodels[i, , drop = FALSE]
-    sprintf("%s explains the %s (using a %s link)",
+    link <- sm$link[[1L]]
+    sprintf("%s explains the %s (using %s %s link)",
             sm$parameter[[1L]],
             sym_submodel_meaning(sm$parameter[[1L]]),
-            sm$link[[1L]])
+            a_or_an(link), link)
   }, character(1L))
   joined <- if (length(pieces) == 1L) {
     pieces
