@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,20 +34,47 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.0.0.9000" id="symbolizer-0009000">symbolizer 0.0.0.9000<a class="anchor" aria-label="anchor" href="#symbolizer-0009000"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.1.1" id="symbolizer-011">symbolizer 0.1.1<a class="anchor" aria-label="anchor" href="#symbolizer-011"></a></h2>
 <div class="section level3">
-<h3 id="v011-in-progress--confidence-bands-and-marginal-estimates-0-0-0-9000">v0.1.1 (in progress) — confidence bands and marginal estimates<a class="anchor" aria-label="anchor" href="#v011-in-progress--confidence-bands-and-marginal-estimates-0-0-0-9000"></a></h3>
+<h3 id="v011--confidence-bands-marginal-estimates-and-categorical-pedagogy-0-1-1">v0.1.1 — confidence bands, marginal estimates, and categorical pedagogy<a class="anchor" aria-label="anchor" href="#v011--confidence-bands-marginal-estimates-and-categorical-pedagogy-0-1-1"></a></h3>
+<div class="section level4">
+<h4 id="inference-0-1-1">Inference<a class="anchor" aria-label="anchor" href="#inference-0-1-1"></a></h4>
 <ul><li>
 <code><a href="../reference/symbolize.drmTMB.html">symbolize.drmTMB()</a></code> gains a <code>ci_method = "wald"</code> argument and populates five new columns on <code>fixed_effects</code> and <code>interpretation</code>: <code>std_error</code>, <code>confint_low</code>, <code>confint_high</code>, <code>excludes_zero</code>, <code>ci_method</code>. Existing callers see additive columns only. Confidence bands come from <code>stats::confint(fit, parm, method, level)</code> dispatched on <code>confint.drmTMB</code>; passing <code>ci_method = "profile"</code> is honest (asymmetric) but slow. Satterthwaite / Kenward-Roger corrections wait on drmTMB.</li>
 <li>
 <code>print(parameter_interpretation(sym))</code> shows the band as <code>(lo, hi)</code> with a trailing <code>*</code> marker on rows whose 95% interval excludes zero; <code>knit_print()</code> adds a <code>95% CI</code> column to the rendered table and a footer naming the CI method. Renderers consume <code>metadata$ci_method</code>.</li>
 </ul></div>
-<div class="section level3">
-<h3 id="v01-surface-stable-0-0-0-9000">v0.1 surface (Stable)<a class="anchor" aria-label="anchor" href="#v01-surface-stable-0-0-0-9000"></a></h3>
-<ul><li>Initial development. v0.1 targets <code>drmTMB</code> Gaussian location-scale models with structured symbolic specification, LaTeX rendering, symbol dictionary, component table, formula bridge, assumption table, parameter interpretation, and a notation bridge teaching surface.</li>
+<div class="section level4">
+<h4 id="marginal-estimates-new-0-1-1">Marginal estimates (new)<a class="anchor" aria-label="anchor" href="#marginal-estimates-new-0-1-1"></a></h4>
+<ul><li>
+<code>group_means(sym, by = NULL)</code> — categorical marginal means via <code><a href="https://rvlenth.github.io/emmeans/reference/emmeans.html" class="external-link">emmeans::emmeans()</a></code>. By default returns one row per combination of factor levels in the model. Returns a tibble classed <code>symbolizer_group_means</code> with the same column shape as the interpretation rows (<code>estimate</code>, <code>std_error</code>, <code>confint_low</code>, <code>confint_high</code>, <code>excludes_zero</code>).</li>
+<li>
+<code>group_slopes(sym, continuous, at = NULL)</code> — per-group slopes for a continuous predictor via <code><a href="https://rvlenth.github.io/emmeans/reference/emtrends.html" class="external-link">emmeans::emtrends()</a></code>. Handles both cont × factor (one row per factor level) and cont × cont (<code>at = list(other_predictor = c(...))</code> returns one row per value).</li>
+<li>
+<code>model_card(sym)</code> extraction calls and bundle gain <code>marginal_means</code> and <code>marginal_slopes</code> slots so the teaching bundle includes the derived per-group views alongside the contrasts.</li>
+<li>Adds <code>emmeans</code> to Suggests.</li>
 </ul></div>
+<div class="section level4">
+<h4 id="categorical-pedagogy-0-1-1">Categorical pedagogy<a class="anchor" aria-label="anchor" href="#categorical-pedagogy-0-1-1"></a></h4>
+<ul><li>Interaction interpretation templates (<code>gaussian/mu/interaction_*</code>) now end with the call hint that takes the reader to the derived per-group view: <code>group_slopes(sym, continuous = ...)</code> for cont × factor, <code>group_means(sym, by = c(...))</code> for factor × factor, <code>group_slopes(sym, continuous, at = list(...))</code> for cont × cont.</li>
+<li>Intercept-less fits (<code>y ~ 0 + factor</code>) now produce cell-means descriptions in <code>symbol_table</code>: factor rows say <code>"factor (level_a, level_b — cell-means parameterisation)"</code> instead of marking a reference level. The interpretation rows pick a new <code>cell_mean</code> role with prose like “Expected {response} for {variable} = {level}”.</li>
+<li>
+<code>inst/extdata/interpretation-templates.csv</code> adds the <code>gaussian/mu/cell_mean</code> row.</li>
+<li>
+<code>vignettes/symbolizer-factors.Rmd</code> grows by +341 lines: a new Step 5 walking through a continuous × continuous interaction end to end, and a new “Common pitfalls” section presenting six pitfalls (intercept ≠ average; contrast ≠ group mean; interaction ≠ effect of A on B; Wald CIs can be too narrow; dropping the intercept doesn’t always do what you think; <code>poly(x, 2)</code> ≠ <code>I(x^2)</code>) in the Symptom / Diagnosis / WRONG-vs-RIGHT code / Rule format borrowed from the gllvmTMB pitfalls page.</li>
+</ul></div>
+<div class="section level4">
+<h4 id="api-consolidation-0-1-1">API consolidation<a class="anchor" aria-label="anchor" href="#api-consolidation-0-1-1"></a></h4>
+<ul><li>
+<code><a href="../reference/validate_symbolized_model.html">validate_symbolized_model()</a></code> is now <code>@keywords internal</code>, removed from the public NAMESPACE, and reachable as <code>symbolizer:::validate_symbolized_model()</code> for advanced users hand-building objects. Still listed under the pkgdown reference page’s “Internal: object construction” section.</li>
+</ul></div>
+<div class="section level4">
+<h4 id="documentation-0-1-1">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-1-1"></a></h4>
+<ul><li>Adds <code>VISION.md</code>: mission, audience priorities, ten core principles, what symbolizer is and is not, long-term direction.</li>
+</ul></div>
+</div>
 <div class="section level3">
-<h3 id="v01-surface-stable-0-0-0-9000-1">v0.1 surface (Stable)<a class="anchor" aria-label="anchor" href="#v01-surface-stable-0-0-0-9000-1"></a></h3>
+<h3 id="v01-surface-stable-0-1-1">v0.1 surface (Stable)<a class="anchor" aria-label="anchor" href="#v01-surface-stable-0-1-1"></a></h3>
 <ul><li>
 <code><a href="../reference/symbolize.drmTMB.html">symbolize.drmTMB()</a></code> builds a structured <code>symbolized_model</code> from a fitted <code>drmTMB</code> Gaussian location-scale model with fixed effects in both the mu and sigma submodels. Reads <code>fit$formula$entries</code>, <code>fit$family</code>, <code>fit$coefficients</code>, and <code><a href="https://itchyshin.github.io/drmTMB/reference/fixef.html" class="external-link">drmTMB::fixef()</a></code> per dpar.</li>
 <li>
@@ -55,14 +82,14 @@
 <li>Capability registry (<code><a href="../reference/symbolizer_capabilities.html">symbolizer_capabilities()</a></code>) gates <code><a href="../reference/symbolize.html">symbolize()</a></code> with the five-level status vocabulary borrowed from drmTMB.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="dual-notation-index--matrix-0-0-0-9000">Dual notation (index ↔︎ matrix)<a class="anchor" aria-label="anchor" href="#dual-notation-index--matrix-0-0-0-9000"></a></h3>
+<h3 id="dual-notation-index--matrix-0-1-1">Dual notation (index ↔︎ matrix)<a class="anchor" aria-label="anchor" href="#dual-notation-index--matrix-0-1-1"></a></h3>
 <ul><li>Every component carries both index-form and matrix-form LaTeX, with lowercase bold for vectors (<code>\mathbf{w}</code>, <code>\boldsymbol{\beta}</code>) and uppercase bold for matrices (<code>\mathbf{X}</code>, <code>\mathbf{Z}</code>).</li>
 <li>Symbol dictionary carries two dimension columns: abstract (<code>\mathbb{R}^n</code>) and concrete (e.g. <code>\mathbb{R}^{80}</code>).</li>
 <li>
 <code><a href="../reference/notation_bridge.html">notation_bridge()</a></code> returns an educator-facing translation table that pairs each model piece across both notations with its dimension.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="renderers-0-0-0-9000">Renderers<a class="anchor" aria-label="anchor" href="#renderers-0-0-0-9000"></a></h3>
+<h3 id="renderers-0-1-1">Renderers<a class="anchor" aria-label="anchor" href="#renderers-0-1-1"></a></h3>
 <ul><li>
 <code>equations(sym, notation)</code> returns the per-row LaTeX in either or both forms.</li>
 <li>
@@ -73,7 +100,7 @@
 <code>parameter_interpretation(sym, scale)</code> exposes per-coefficient readings on link / natural / variance / biological scales.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="random-intercepts-first-slice-0-0-0-9000">Random intercepts (First slice)<a class="anchor" aria-label="anchor" href="#random-intercepts-first-slice-0-0-0-9000"></a></h3>
+<h3 id="random-intercepts-first-slice-0-1-1">Random intercepts (First slice)<a class="anchor" aria-label="anchor" href="#random-intercepts-first-slice-0-1-1"></a></h3>
 <ul><li>
 <code>(1 | group)</code> on the mu submodel is supported. The mu linear predictor gains a <code>+ u_{group(i)}</code> term (index) / <code>+ \mathbf{u}</code> (matrix), a new random-effect distribution row appears in <code>components</code>, and the new <code>random_effects</code> and <code>variance_components</code> tibbles register the term.</li>
 <li>Random slopes and random effects on the sigma submodel raise a clear capability error pointing at the registry.</li>
