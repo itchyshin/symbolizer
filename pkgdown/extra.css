@@ -1,0 +1,27 @@
+/* symbolizer pkgdown overrides */
+
+/*
+ * Make the hex logo more visible on the homepage and article-index pages.
+ * pkgdown's default rule is .logo{width:100px;float:right;margin-left:30px},
+ * with responsive variants at 120px and 80px. We bump those up so the hex
+ * has room to breathe alongside the title.
+ */
+.logo {
+  width: 180px;
+  margin-left: 40px;
+}
+
+/* Larger screens: even more room. */
+@media (min-width: 992px) {
+  .logo {
+    width: 200px;
+  }
+}
+
+/* Phones: keep the logo visible but not overwhelming the title. */
+@media (max-width: 575.98px) {
+  .logo {
+    width: 120px;
+    margin-left: 20px;
+  }
+}

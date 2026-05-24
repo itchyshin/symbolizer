@@ -11,6 +11,7 @@
 docs/
 pkgdown/*
 !pkgdown/favicon/
+!pkgdown/extra.css
 revdep/
 useful_skills/
 .claude/

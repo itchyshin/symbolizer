@@ -85,6 +85,10 @@ reference:
     contents:
       - group_means
       - group_slopes
+  - title: "Compare two models"
+    desc: "Structural diff between two symbolized_model objects: which submodels, which terms, which assumption statuses differ."
+    contents:
+      - compare_symbolic
   - title: "Internal: term-grammar bridge"
     desc: "The R formula <-> model matrix <-> biological symbol layer that every renderer reads."
     contents:
