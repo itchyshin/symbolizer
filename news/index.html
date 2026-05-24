@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,9 +34,9 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.1.1.9000" id="symbolizer-0119000-development">symbolizer 0.1.1.9000 (development)<a class="anchor" aria-label="anchor" href="#symbolizer-0119000-development"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.2.0" id="symbolizer-020">symbolizer 0.2.0<a class="anchor" aria-label="anchor" href="#symbolizer-020"></a></h2>
 <div class="section level3">
-<h3 id="v02-in-progress--bivariate-gaussian-and-structural-comparison-0-1-1-9000">v0.2 (in progress) — bivariate Gaussian and structural comparison<a class="anchor" aria-label="anchor" href="#v02-in-progress--bivariate-gaussian-and-structural-comparison-0-1-1-9000"></a></h3>
+<h3 id="v02--bivariate-gaussian-structural-comparison-article-tidy-0-2-0">v0.2 — bivariate Gaussian, structural comparison, article tidy<a class="anchor" aria-label="anchor" href="#v02--bivariate-gaussian-structural-comparison-article-tidy-0-2-0"></a></h3>
 <ul><li>
 <code><a href="../reference/symbolize.drmTMB.html">symbolize.drmTMB()</a></code> reads bivariate Gaussian fits — the <code>biv_gaussian(y2 ~ ...)</code> family from drmTMB — through the same structured surface used for univariate fits. The response becomes a 2-vector <code>(Y_{1i}, Y_{2i})</code>, the conditional distribution becomes <code>MVN_2((mu_{1i}, mu_{2i}), Sigma_i)</code>, and the symbolic story now carries five submodels (<code>mu1</code>, <code>mu2</code>, <code>sigma1</code>, <code>sigma2</code>, <code>rho12</code>).</li>
 <li>New capability rows: <code>drmTMB,biv_gaussian,{mu1,mu2,sigma1,sigma2,rho12}</code> flip from “Planned or reserved” to “First slice”.</li>
