@@ -1,27 +1,28 @@
 /* symbolizer pkgdown overrides */
 
 /*
- * Make the hex logo more visible on the homepage and article-index pages.
- * pkgdown's default rule is .logo{width:100px;float:right;margin-left:30px},
- * with responsive variants at 120px and 80px. We bump those up so the hex
- * has room to breathe alongside the title.
+ * Make the hex logo prominent — matches the visual weight of the drmTMB
+ * and gllvmTMB sister-package pkgdown sites. pkgdown's default rule is
+ * .logo{width:100px;float:right;margin-left:30px}, with responsive
+ * variants at 120px and 80px. We bump those up substantially so the hex
+ * carries the page heading visually.
  */
 .logo {
-  width: 180px;
+  width: 320px;
   margin-left: 40px;
 }
 
-/* Larger screens: even more room. */
+/* Larger screens: full drmTMB-scale presence. */
 @media (min-width: 992px) {
   .logo {
-    width: 200px;
+    width: 400px;
   }
 }
 
 /* Phones: keep the logo visible but not overwhelming the title. */
 @media (max-width: 575.98px) {
   .logo {
-    width: 120px;
+    width: 180px;
     margin-left: 20px;
   }
 }
