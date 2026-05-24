@@ -736,10 +736,10 @@ We fit a Gaussian location-scale model to 200 observations of body_mass
 (units: g) using the drmTMB package (version 0.1.3.9000) in R. The mean
 of body_mass was modelled as a linear function of `temperature`, `food`,
 and `sex`. The residual standard deviation was modelled on the log scale
-as a function of `temperature` and `sex`. A random intercept was
-included for `site`. Parameters were estimated by maximum likelihood via
-the Template Model Builder framework. We report 95% Wald confidence
-intervals on the fixed-effect coefficients.
+as a function of `temperature` and `sex`. A random intercept for `site`
+was included in the model. Parameters were estimated by maximum
+likelihood via the Template Model Builder framework. We report 95% Wald
+confidence intervals on the fixed-effect coefficients.
 
 *Reminders:*
 
