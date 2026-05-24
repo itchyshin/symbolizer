@@ -319,6 +319,16 @@ scales.
 - [`parameter_interpretation()`](https://itchyshin.github.io/symbolizer/reference/parameter_interpretation.md)
   : Per-parameter interpretations for a symbolized model
 
+## Marginal estimates
+
+Per-group means and per-group slopes via emmeans, alongside the contrast
+rows.
+
+- [`group_means()`](https://itchyshin.github.io/symbolizer/reference/group_means.md)
+  : Per-group marginal means for a symbolized model
+- [`group_slopes()`](https://itchyshin.github.io/symbolizer/reference/group_slopes.md)
+  : Per-group slopes for a continuous predictor
+
 ## Internal: term-grammar bridge
 
 The R formula \<-\> model matrix \<-\> biological symbol layer that

@@ -383,22 +383,26 @@ ordered diagnostics-first:
 
 mc <- model_card(sym)
 mc$extraction_calls
-#>                    Convergence and diagnostic checks 
-#>                             "drmTMB::check_drm(fit)" 
-#>                                            Residuals 
-#>                                     "residuals(fit)" 
-#>                                        Fitted values 
-#>                                       "predict(fit)" 
-#>                                   Fixed effects (mu) 
-#>                  "drmTMB::fixef(fit, dpar = \"mu\")" 
-#>                                Fixed effects (sigma) 
-#>               "drmTMB::fixef(fit, dpar = \"sigma\")" 
-#>                               Random effects (BLUPs) 
-#>                                 "drmTMB::ranef(fit)" 
-#>                                       Symbolic story 
-#>                         "symbolizer::symbolize(fit)" 
-#>                                      Teaching bundle 
-#> "symbolizer::model_card(symbolizer::symbolize(fit))"
+#>                                                 Convergence and diagnostic checks 
+#>                                                          "drmTMB::check_drm(fit)" 
+#>                                                                         Residuals 
+#>                                                                  "residuals(fit)" 
+#>                                                                     Fitted values 
+#>                                                                    "predict(fit)" 
+#>                                                                Fixed effects (mu) 
+#>                                               "drmTMB::fixef(fit, dpar = \"mu\")" 
+#>                                                             Fixed effects (sigma) 
+#>                                            "drmTMB::fixef(fit, dpar = \"sigma\")" 
+#>                                                            Random effects (BLUPs) 
+#>                                                              "drmTMB::ranef(fit)" 
+#>                                                                    Symbolic story 
+#>                                                      "symbolizer::symbolize(fit)" 
+#>                                                                   Teaching bundle 
+#>                              "symbolizer::model_card(symbolizer::symbolize(fit))" 
+#>                                                 Group means (alongside contrasts) 
+#>                                                    "symbolizer::group_means(sym)" 
+#>                                         Per-group slopes (alongside interactions) 
+#> "symbolizer::group_slopes(sym, continuous = <one of your continuous predictors>)"
 ```
 
 The ordering is intentional. A reader should know whether the fit is

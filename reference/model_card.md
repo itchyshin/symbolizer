@@ -39,4 +39,6 @@ model_card(x, ...)
 
 A `symbolizer_model_card` (a list) with elements: `meta`, `equation`,
 `symbols`, `assumptions`, `bridge`, `formula_bridge`, `interpretation`,
-`extraction_calls`, `recommended_plots`.
+`extraction_calls`, `recommended_plots`, `marginal_means` (NULL when the
+model has no factors), `marginal_slopes` (NULL when no continuous-by-\*
+interaction is present).

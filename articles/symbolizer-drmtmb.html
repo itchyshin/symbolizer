@@ -549,22 +549,26 @@ diagnostics-first:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/model_card.html">model_card</a></span><span class="op">(</span><span class="va">sym</span><span class="op">)</span></span>
 <span><span class="va">mc</span><span class="op">$</span><span class="va">extraction_calls</span></span>
-<span><span class="co">#&gt;                    Convergence and diagnostic checks </span></span>
-<span><span class="co">#&gt;                             "drmTMB::check_drm(fit)" </span></span>
-<span><span class="co">#&gt;                                            Residuals </span></span>
-<span><span class="co">#&gt;                                     "residuals(fit)" </span></span>
-<span><span class="co">#&gt;                                        Fitted values </span></span>
-<span><span class="co">#&gt;                                       "predict(fit)" </span></span>
-<span><span class="co">#&gt;                                   Fixed effects (mu) </span></span>
-<span><span class="co">#&gt;                  "drmTMB::fixef(fit, dpar = \"mu\")" </span></span>
-<span><span class="co">#&gt;                                Fixed effects (sigma) </span></span>
-<span><span class="co">#&gt;               "drmTMB::fixef(fit, dpar = \"sigma\")" </span></span>
-<span><span class="co">#&gt;                               Random effects (BLUPs) </span></span>
-<span><span class="co">#&gt;                                 "drmTMB::ranef(fit)" </span></span>
-<span><span class="co">#&gt;                                       Symbolic story </span></span>
-<span><span class="co">#&gt;                         "symbolizer::symbolize(fit)" </span></span>
-<span><span class="co">#&gt;                                      Teaching bundle </span></span>
-<span><span class="co">#&gt; "symbolizer::model_card(symbolizer::symbolize(fit))"</span></span></code></pre></div>
+<span><span class="co">#&gt;                                                 Convergence and diagnostic checks </span></span>
+<span><span class="co">#&gt;                                                          "drmTMB::check_drm(fit)" </span></span>
+<span><span class="co">#&gt;                                                                         Residuals </span></span>
+<span><span class="co">#&gt;                                                                  "residuals(fit)" </span></span>
+<span><span class="co">#&gt;                                                                     Fitted values </span></span>
+<span><span class="co">#&gt;                                                                    "predict(fit)" </span></span>
+<span><span class="co">#&gt;                                                                Fixed effects (mu) </span></span>
+<span><span class="co">#&gt;                                               "drmTMB::fixef(fit, dpar = \"mu\")" </span></span>
+<span><span class="co">#&gt;                                                             Fixed effects (sigma) </span></span>
+<span><span class="co">#&gt;                                            "drmTMB::fixef(fit, dpar = \"sigma\")" </span></span>
+<span><span class="co">#&gt;                                                            Random effects (BLUPs) </span></span>
+<span><span class="co">#&gt;                                                              "drmTMB::ranef(fit)" </span></span>
+<span><span class="co">#&gt;                                                                    Symbolic story </span></span>
+<span><span class="co">#&gt;                                                      "symbolizer::symbolize(fit)" </span></span>
+<span><span class="co">#&gt;                                                                   Teaching bundle </span></span>
+<span><span class="co">#&gt;                              "symbolizer::model_card(symbolizer::symbolize(fit))" </span></span>
+<span><span class="co">#&gt;                                                 Group means (alongside contrasts) </span></span>
+<span><span class="co">#&gt;                                                    "symbolizer::group_means(sym)" </span></span>
+<span><span class="co">#&gt;                                         Per-group slopes (alongside interactions) </span></span>
+<span><span class="co">#&gt; "symbolizer::group_slopes(sym, continuous = &lt;one of your continuous predictors&gt;)"</span></span></code></pre></div>
 <p>The ordering is intentional. A reader should know whether the fit is
 trustworthy before they interpret a single coefficient.</p>
 <ol style="list-style-type: decimal">
