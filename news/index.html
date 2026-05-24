@@ -52,6 +52,10 @@
 </ul></li>
 <li>
 <code>drm_link_for()</code> now generalises the multi-dpar link lookup. The previous biv_gaussian-only branch was extended to recognise any family whose links are exposed as a named vector (Student-t today; future families can land without further changes here).</li>
+<li>
+<code><a href="../reference/symbolize.drmTMB.html">symbolize.drmTMB()</a></code> reads lognormal fits (<code>family = drmTMB::lognormal()</code>) end-to-end. The conditional distribution row reads <code>Y_i | mu_i, sigma_i ~ Lognormal(mu_i, sigma_i^2) &lt;=&gt; log(Y_i) | mu_i, sigma_i ~ Normal(mu_i, sigma_i^2)</code>, spelling out the equivalence so the reader sees both views. Interpretation rows on mu speak in terms of the geometric mean of the response — a unit change in a predictor multiplies the geometric mean by <code>exp(beta)</code>.</li>
+<li>
+<strong>Architectural refactor: distribution LaTeX is now CSV-driven.</strong> <code>inst/extdata/family-distributions.csv</code> carries the conditional- distribution row (index + matrix form) for every family. The previous hardcoded family branches in <code>drm_build_distribution()</code> and <code>drm_build_components()</code> are gone. Adding a future univariate family (gamma, beta, Poisson, nbinom2, Tweedie, …) is now a CSV-only operation. Structural-shape families (biv_gaussian, future GLLVM extensions, ordinal models) still need code because their components-list shape differs.</li>
 </ul></div>
 </div>
     <div class="section level2">
