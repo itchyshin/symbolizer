@@ -55,6 +55,33 @@ test_that("methods_text for drmTMB biv_gaussian mentions both responses and rho1
   expect_match(mt$text, "y1", fixed = TRUE)
   expect_match(mt$text, "y2", fixed = TRUE)
   expect_match(mt$text, "Fisher-z", fixed = TRUE)
+  # No bare "(an intercept only; an intercept only)" — the polished pair-clause
+  # collapses it to "both intercept-only" when neither sigma submodel has
+  # predictors. This protects against accidental regression to the awkward
+  # parenthesised wording.
+  expect_false(grepl("an intercept only;", mt$text, fixed = TRUE))
+  expect_match(mt$text, "both intercept-only", fixed = TRUE)
+})
+
+test_that("biv_gaussian methods_text with non-trivial sigma predictors uses the predictor wording", {
+  set.seed(20260524); n <- 80
+  e1 <- rnorm(n); e2 <- 0.6 * e1 + sqrt(1 - 0.6^2) * rnorm(n)
+  dat <- data.frame(
+    y1 = 30 + 1.5 * rnorm(n) + e1,
+    y2 = 10 + 0.8 * rnorm(n) + e2,
+    x1 = rnorm(n), x2 = rnorm(n)
+  )
+  fit <- drmTMB::drmTMB(
+    drmTMB::drm_formula(mu1 = y1 ~ x1, mu2 = y2 ~ x2,
+                        sigma1 = ~ x1, sigma2 = ~ x2, rho12 = ~ 1),
+    family = drmTMB::biv_gaussian(), data = dat
+  )
+  sym <- symbolize(fit)
+  mt <- methods_text(sym)
+  expect_match(mt$text, "the first scale a function of",  fixed = TRUE)
+  expect_match(mt$text, "the second a function of",       fixed = TRUE)
+  # rho12 is intercept-only here -> "with an intercept only on the Fisher-z..."
+  expect_match(mt$text, "with an intercept only on the Fisher-z", fixed = TRUE)
 })
 
 test_that("methods_text errors with a friendly message on an unsupported class/family combo", {

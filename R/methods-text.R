@@ -131,11 +131,19 @@ methods_slots_for <- function(sym) {
     slots$response_2 <- if (length(responses) >= 2L) responses[[2L]] else "response 2"
     slots$response_units_clause <-
       methods_units_clause_biv(sym, slots$response_1, slots$response_2)
+    s1 <- methods_predictors_clause(sym, "sigma1")
+    s2 <- methods_predictors_clause(sym, "sigma2")
+    rh <- methods_predictors_clause(sym, "rho12")
     slots$mu1_predictors_clause    <- methods_predictors_clause(sym, "mu1")
     slots$mu2_predictors_clause    <- methods_predictors_clause(sym, "mu2")
-    slots$sigma1_predictors_clause <- methods_predictors_clause(sym, "sigma1")
-    slots$sigma2_predictors_clause <- methods_predictors_clause(sym, "sigma2")
-    slots$rho12_predictors_clause  <- methods_predictors_clause(sym, "rho12")
+    slots$sigma1_predictors_clause <- s1
+    slots$sigma2_predictors_clause <- s2
+    slots$rho12_predictors_clause  <- rh
+    # Pre-baked phrasing that reads cleanly when the per-submodel clauses
+    # collapse to "an intercept only". Used by the biv_gaussian template
+    # in place of bare `({s1}; {s2})` parens.
+    slots$sigma_pair_clause <- methods_sigma_pair_phrasing(s1, s2)
+    slots$rho12_clause      <- methods_rho12_phrasing(rh)
   } else if (identical(family, "gaussian") && identical(cls, "gllvmTMB")) {
     nt <- nrow(sym$loadings) %||% NA_integer_
     nl <- if (!is.null(sym$loadings$axis)) {
@@ -174,6 +182,35 @@ methods_units_clause <- function(sym, response) {
   hit <- hit[!is.na(hit) & nzchar(hit)]
   if (length(hit) == 0L) return("")
   paste0(" (units: ", hit[[1L]], ")")
+}
+
+# Build the biv_gaussian "sigma pair" prose. The default per-submodel clause
+# `an intercept only` reads badly when concatenated with a semicolon inside
+# parentheses (e.g., `(an intercept only; an intercept only)`). This helper
+# picks a phrase that flows in three cases:
+#
+#   both intercept-only           -> "both intercept-only"
+#   one intercept-only, one not   -> "<response 1> intercept-only; <response 2>
+#                                     as a function of `x`"
+#   both have predictors          -> "<response 1>: a function of `x1`;
+#                                     <response 2>: a function of `x2`"
+#
+# Used by the biv_gaussian methods-template via the {sigma_pair_clause} slot.
+methods_sigma_pair_phrasing <- function(s1, s2) {
+  io1 <- identical(s1, "an intercept only")
+  io2 <- identical(s2, "an intercept only")
+  if (io1 && io2) return("both intercept-only")
+  if (io1 && !io2)  return(sprintf("the first scale intercept-only, the second a function of %s", s2))
+  if (!io1 && io2)  return(sprintf("the first scale a function of %s, the second intercept-only", s1))
+  sprintf("the first scale a function of %s, the second a function of %s", s1, s2)
+}
+
+methods_rho12_phrasing <- function(rh) {
+  if (identical(rh, "an intercept only")) {
+    "with an intercept only on the Fisher-z linear predictor"
+  } else {
+    sprintf("as a function of %s on the Fisher-z linear predictor", rh)
+  }
 }
 
 methods_units_clause_biv <- function(sym, r1, r2) {

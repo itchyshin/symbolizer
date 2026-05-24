@@ -1,6 +1,16 @@
 # symbolizer 0.2.1.9000 (development)
 
-## v0.3 (in progress) — non-Gaussian drmTMB families
+## v0.3 (in progress) — non-Gaussian drmTMB families, polished methods_text
+
+* `methods_text(sym)` on biv_gaussian fits now reads cleanly when the
+  three secondary submodels (sigma1, sigma2, rho12) are intercept-only.
+  The old output included an awkward parenthesised
+  `(an intercept only; an intercept only)` clause; the polished version
+  uses dedicated `sigma_pair_clause` and `rho12_clause` slots that pick
+  one of three readable phrasings (both intercept-only, mixed, or both
+  with predictors). Templates for univariate families are unaffected;
+  this is biv_gaussian-specific because the three-clause shape is
+  genuinely unique to it.
 
 * `symbolize.drmTMB()` reads Student-t fits (`family = drmTMB::student()`)
   end-to-end. The Student-t adds a `nu` (degrees-of-freedom) submodel
