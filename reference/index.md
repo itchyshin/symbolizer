@@ -95,6 +95,14 @@ rows.
 - [`group_slopes()`](https://itchyshin.github.io/symbolizer/reference/group_slopes.md)
   : Per-group slopes for a continuous predictor
 
+## Compare two models
+
+Structural diff between two symbolized_model objects: which submodels,
+which terms, which assumption statuses differ.
+
+- [`compare_symbolic()`](https://itchyshin.github.io/symbolizer/reference/compare_symbolic.md)
+  : Structural comparison of two symbolized models
+
 ## Internal: term-grammar bridge
 
 The R formula \<-\> model matrix \<-\> biological symbol layer that

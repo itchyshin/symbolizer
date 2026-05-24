@@ -24,6 +24,15 @@
 - Interpretation templates and assumption templates gain `biv_gaussian`
   rows (`inst/extdata/interpretation-templates.csv` and
   `inst/extdata/assumption-templates.csv`).
+- New: `compare_symbolic(sym_a, sym_b)` returns a structural diff
+  between two `symbolized_model` objects. Slots: `meta` (left / right
+  model summaries — class, family, response, n_obs), `diff_submodels`
+  (presence per submodel: `left_only` / `right_only` / `both`),
+  `diff_terms` (presence per (submodel, term_label) pair), and
+  `diff_assumptions` (status on each side plus a `same_status` flag). S3
+  class `symbolic_comparison`;
+  [`print()`](https://rdrr.io/r/base/print.html) produces a structured
+  cli block and `knit_print()` produces side-by-side markdown tables.
 
 ## symbolizer 0.1.1
 

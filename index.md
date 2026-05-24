@@ -203,7 +203,7 @@ Pre-release. Read status words consistently:
 | `drmTMB` non-Gaussian families, ZI, hurdle | Planned |
 | `gllvmTMB` non-Gaussian families, within-unit decompositions, phylo / spatial | Planned |
 | `glmmTMB`, `brms`, `MCMCglmm`, `sdmTMB`, `lme4`, `lm`/`glm` | Planned (see roadmap) |
-| `compare_symbolic()`, `methods_text()`, model diagrams | Planned (v0.2 to v0.5) |
+| [`compare_symbolic()`](https://itchyshin.github.io/symbolizer/reference/compare_symbolic.md), `methods_text()`, model diagrams | Planned (v0.2 to v0.5) |
 
 See
 [`symbolizer_capabilities()`](https://itchyshin.github.io/symbolizer/reference/symbolizer_capabilities.md)
