@@ -1,5 +1,21 @@
 # symbolizer 0.0.0.9000
 
+## v0.1.1 (in progress) — confidence bands and marginal estimates
+
+* `symbolize.drmTMB()` gains a `ci_method = "wald"` argument and populates
+  five new columns on `fixed_effects` and `interpretation`: `std_error`,
+  `confint_low`, `confint_high`, `excludes_zero`, `ci_method`. Existing
+  callers see additive columns only. Confidence bands come from
+  `stats::confint(fit, parm, method, level)` dispatched on `confint.drmTMB`;
+  passing `ci_method = "profile"` is honest (asymmetric) but slow.
+  Satterthwaite / Kenward-Roger corrections wait on drmTMB.
+* `print(parameter_interpretation(sym))` shows the band as `(lo, hi)` with
+  a trailing `*` marker on rows whose 95% interval excludes zero;
+  `knit_print()` adds a `95% CI` column to the rendered table and a footer
+  naming the CI method. Renderers consume `metadata$ci_method`.
+
+## v0.1 surface (Stable)
+
 * Initial development. v0.1 targets `drmTMB` Gaussian location-scale models
   with structured symbolic specification, LaTeX rendering, symbol dictionary,
   component table, formula bridge, assumption table, parameter interpretation,
