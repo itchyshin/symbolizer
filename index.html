@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -360,19 +360,21 @@ W_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 <p>The biological reading on each coefficient, with the estimate from the fit:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/parameter_interpretation.html">parameter_interpretation</a></span><span class="op">(</span><span class="va">sym</span>, scale <span class="op">=</span> <span class="st">"biological"</span><span class="op">)</span></span></code></pre></div>
-<table class="table">
+<table style="width:100%;" class="table">
 <colgroup>
-<col width="20%">
-<col width="20%">
-<col width="20%">
-<col width="20%">
-<col width="20%">
+<col width="16%">
+<col width="16%">
+<col width="16%">
+<col width="16%">
+<col width="16%">
+<col width="16%">
 </colgroup>
 <thead><tr>
 <th align="left">submodel</th>
 <th align="left">term_label</th>
 <th align="left">coefficient_role</th>
 <th align="left">estimate</th>
+<th align="left">95% CI</th>
 <th align="left">biological_reading</th>
 </tr></thead>
 <tbody>
@@ -381,6 +383,7 @@ W_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 <td align="left">(Intercept)</td>
 <td align="left">intercept</td>
 <td align="left">30.4</td>
+<td align="left">25.3, 35.6 *</td>
 <td align="left">Baseline body_mass in the reference condition</td>
 </tr>
 <tr>
@@ -388,6 +391,7 @@ W_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 <td align="left">temperature</td>
 <td align="left">slope</td>
 <td align="left">0.371</td>
+<td align="left">0.0427, 0.699 *</td>
 <td align="left">A unit change in temperature shifts the expected body_mass by 0.371</td>
 </tr>
 <tr>
@@ -395,6 +399,7 @@ W_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 <td align="left">(Intercept)</td>
 <td align="left">intercept</td>
 <td align="left">0.799</td>
+<td align="left">0.361, 1.24 *</td>
 <td align="left">Baseline level of unexplained individual variation in body_mass</td>
 </tr>
 <tr>
@@ -402,10 +407,12 @@ W_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 <td align="left">temperature</td>
 <td align="left">slope</td>
 <td align="left">0.0825</td>
+<td align="left">0.0584, 0.106 *</td>
 <td align="left">A unit change in temperature multiplies the unexplained variability of body_mass by exp(0.0825)</td>
 </tr>
 </tbody>
 </table>
+<p><em>Rows marked <code>*</code> have a 95% confidence interval that excludes zero (CI method: <code>wald</code>).</em></p>
 </div>
 <div class="section level3">
 <h3 id="three-views-of-the-same-fit">Three views of the same fit<a class="anchor" aria-label="anchor" href="#three-views-of-the-same-fit"></a>
@@ -452,7 +459,7 @@ W_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 </tbody>
 </table>
 <div class="section level3">
-<h3 id="capability-matrix-v01--v03">Capability matrix (v0.1 – v0.3)<a class="anchor" aria-label="anchor" href="#capability-matrix-v01--v03"></a>
+<h3 id="capability-matrix-v01--v07">Capability matrix (v0.1 – v0.7)<a class="anchor" aria-label="anchor" href="#capability-matrix-v01--v07"></a>
 </h3>
 <table class="table">
 <colgroup>
@@ -501,8 +508,28 @@ W_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 </tr>
 <tr>
 <td>
+<code>drmTMB</code> zero-inflation (<code>zi</code>), hurdle (<code>hu</code>), cumulative_logit</td>
+<td>First slice (v0.4)</td>
+</tr>
+<tr>
+<td>
 <code>gllvmTMB</code> Gaussian latent variables (mu, Λ_B, Σ_B, Ψ_B, σ_eps)</td>
 <td>First slice</td>
+</tr>
+<tr>
+<td>
+<code>gllvmTMB</code> binomial (first non-Gaussian latent-variable family)</td>
+<td>First slice (v0.5)</td>
+</tr>
+<tr>
+<td>
+<code>glmmTMB</code> Gaussian conditional + optional <code>dispformula = ~ z</code> + <code>(1 \| g)</code> random intercepts</td>
+<td>First slice (v0.7)</td>
+</tr>
+<tr>
+<td>
+<code><a href="reference/as_dag.html">as_dag()</a></code> structural model diagram (nodes / edges / DOT string)</td>
+<td>First slice (v0.6)</td>
 </tr>
 <tr>
 <td>
@@ -536,17 +563,17 @@ W_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 </tr>
 <tr>
 <td>
-<code>drmTMB</code> zero-inflation, hurdle, cumulative_logit</td>
+<code>gllvmTMB</code> other non-Gaussian families, within-unit decompositions, phylo / spatial</td>
 <td>Planned</td>
 </tr>
 <tr>
 <td>
-<code>gllvmTMB</code> non-Gaussian families, within-unit decompositions, phylo / spatial</td>
-<td>Planned</td>
+<code>glmmTMB</code> non-Gaussian families and zero-inflation</td>
+<td>Planned (v0.7.x)</td>
 </tr>
 <tr>
 <td>
-<code>glmmTMB</code>, <code>brms</code>, <code>MCMCglmm</code>, <code>sdmTMB</code>, <code>lme4</code>, <code>lm</code>/<code>glm</code>
+<code>brms</code>, <code>MCMCglmm</code>, <code>sdmTMB</code>, <code>lme4</code>, <code>lm</code>/<code>glm</code>
 </td>
 <td>Planned (see roadmap)</td>
 </tr>
@@ -595,27 +622,27 @@ W_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 <td>Random slopes <code>(1 + x \| group)</code> on μ; response-scale default for <code>group_means</code> / <code>group_slopes</code>; bigger pkgdown hex</td>
 </tr>
 <tr>
-<td>v0.3.2 (current)</td>
+<td>v0.3.2 (released)</td>
 <td>More CSV-only families (beta_binomial, truncated_nbinom2) + non-Gaussian families tour vignette</td>
 </tr>
 <tr>
-<td>v0.4</td>
+<td>v0.4 (released)</td>
 <td>
-<code>drmTMB</code> zero-inflation / hurdle / cumulative_logit; multi-slope correlated RE if drmTMB supports it</td>
+<code>drmTMB</code> zero-inflation / hurdle / cumulative_logit</td>
 </tr>
 <tr>
-<td>v0.5</td>
-<td>gllvmTMB non-Gaussian families and <code>gllvmTMB_multi</code>
-</td>
+<td>v0.5 (released)</td>
+<td>gllvmTMB binomial (first non-Gaussian latent-variable family)</td>
 </tr>
 <tr>
-<td>v0.6</td>
-<td>Diagrams and notebooks</td>
-</tr>
-<tr>
-<td>v0.7</td>
+<td>v0.6 (released)</td>
 <td>
-<code>glmmTMB</code> (including nested random effects via <code>(1 \| site/transect)</code>)</td>
+<code>as_dag(sym)</code> structural model diagram (DOT-language string)</td>
+</tr>
+<tr>
+<td>v0.7 (current)</td>
+<td>
+<code>glmmTMB</code> Gaussian conditional submodel + <code>(1 \| g)</code> + <code>dispformula = ~ z</code>; CI band visible at all reading scales</td>
 </tr>
 <tr>
 <td>v0.8</td>

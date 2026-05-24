@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,6 +33,19 @@
       <small>Source: <a href="https://github.com/itchyshin/symbolizer/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.7.1" id="symbolizer-071">symbolizer 0.7.1<a class="anchor" aria-label="anchor" href="#symbolizer-071"></a></h2>
+<div class="section level3">
+<h3 id="v07-audit-pass-0-7-1">v0.7 audit pass<a class="anchor" aria-label="anchor" href="#v07-audit-pass-0-7-1"></a></h3>
+<ul><li>
+<code>vignettes/symbolizer-families.Rmd</code> rendered seven distribution lines as raw LaTeX text instead of math. The chunks now use a small <code>render_math()</code> helper (defined in the vignette’s setup chunk) that wraps the LaTeX string in <code>$$...$$</code> via <code><a href="https://rdrr.io/pkg/knitr/man/asis_output.html" class="external-link">knitr::asis_output()</a></code>, so KaTeX / MathJax / pandoc pick it up and render proper display math.</li>
+<li>
+<code><a href="../reference/methods_text.html">methods_text()</a></code> now has a template for <code>glmmTMB / gaussian</code>. Previously the function errored “no template” on every glmmTMB fit; the new template covers both the bare conditional submodel and the <code>dispformula = ~ z</code> case (the residual-SD sentence is conditional).</li>
+<li>The “no template” error message now lists supported <code>class / family</code> combinations from the CSV itself, so it can’t drift out of sync with reality the way it had (it was still naming three combos when 13 existed).</li>
+<li>
+<code>README.Rmd</code> capability matrix and roadmap updated to reflect v0.4 (zi / hu / cumulative_logit), v0.5 (gllvmTMB binomial), v0.6 (<code><a href="../reference/as_dag.html">as_dag()</a></code>), and v0.7 (glmmTMB) — previously they stopped at v0.3.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.7.0" id="symbolizer-070">symbolizer 0.7.0<a class="anchor" aria-label="anchor" href="#symbolizer-070"></a></h2>
 <div class="section level3">

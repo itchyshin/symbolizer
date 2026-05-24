@@ -45,8 +45,11 @@ dat <- data.frame(
 fit <- drmTMB(drm_formula(y ~ x, sigma ~ 1, nu ~ 1),
               family = student(), data = dat)
 sym <- symbolize(fit)
-cat(sym$distribution$latex, "\n")
-#> y_i \mid \mu_i,\, \sigma_i,\, \nu_i \sim \mathrm{Student\text{-}t}(\mu_i,\, \sigma_i,\, \nu_i)
+render_math(sym$distribution$latex)
+```
+
+``` math
+y_i \mid \mu_i,\, \sigma_i,\, \nu_i \sim \mathrm{Student\text{-}t}(\mu_i,\, \sigma_i,\, \nu_i)
 ```
 
 **Coefficient reading on mu:** identical to Gaussian — a slope on the
@@ -100,8 +103,11 @@ dat <- data.frame(y = rgamma(n, shape = 2, rate = 0.5),
 fit <- drmTMB(drm_formula(y ~ x, sigma ~ 1),
               family = stats::Gamma(link = "log"), data = dat)
 sym <- symbolize(fit)
-cat(sym$distribution$latex, "\n")
-#> y_i \mid \mu_i,\, \sigma_i \sim \mathrm{Gamma}(\mathrm{shape} = 1/\sigma_i^2,\, \mathrm{scale} = \mu_i \sigma_i^2)
+render_math(sym$distribution$latex)
+```
+
+``` math
+y_i \mid \mu_i,\, \sigma_i \sim \mathrm{Gamma}(\mathrm{shape} = 1/\sigma_i^2,\, \mathrm{scale} = \mu_i \sigma_i^2)
 ```
 
 **When to choose Gamma over lognormal?** Gamma is a member of the
@@ -124,8 +130,11 @@ dat <- data.frame(y = rbeta(n, 2, 5),
 fit <- drmTMB(drm_formula(y ~ x, sigma ~ 1),
               family = beta(), data = dat)
 sym <- symbolize(fit)
-cat(sym$distribution$latex, "\n")
-#> y_i \mid \mu_i,\, \sigma_i \sim \mathrm{Beta}(\mu_i \sigma_i,\, (1 - \mu_i) \sigma_i)
+render_math(sym$distribution$latex)
+```
+
+``` math
+y_i \mid \mu_i,\, \sigma_i \sim \mathrm{Beta}(\mu_i \sigma_i,\, (1 - \mu_i) \sigma_i)
 ```
 
 **Coefficient reading on mu:** `exp(beta)` is the *odds ratio* of the
@@ -153,8 +162,11 @@ fit <- drmTMB(drm_formula(cbind(successes, failures) ~ x, sigma ~ 1),
               family = beta_binomial(), data = dat)
 #> Warning in sqrt(diag(cov)): NaNs produced
 sym <- symbolize(fit)
-cat(sym$distribution$latex, "\n")
-#> cbind(successes, failures)_i \mid N_i,\, \mu_i,\, \sigma_i \sim \mathrm{BetaBinomial}(N_i,\, \mu_i,\, \sigma_i); \mathbb{E}[cbind(successes, failures)_i] = N_i \mu_i
+render_math(sym$distribution$latex)
+```
+
+``` math
+cbind(successes, failures)_i \mid N_i,\, \mu_i,\, \sigma_i \sim \mathrm{BetaBinomial}(N_i,\, \mu_i,\, \sigma_i); \mathbb{E}[cbind(successes, failures)_i] = N_i \mu_i
 ```
 
 **Coefficient reading on mu:** same logit reading as Beta — `exp(beta)`
@@ -176,8 +188,11 @@ dat <- data.frame(y = rpois(n, lambda = exp(1 + 0.3 * rnorm(n))),
 fit <- drmTMB(drm_formula(y ~ x),
               family = stats::poisson(), data = dat)
 sym <- symbolize(fit)
-cat(sym$distribution$latex, "\n")
-#> y_i \mid \mu_i \sim \mathrm{Poisson}(\mu_i)
+render_math(sym$distribution$latex)
+```
+
+``` math
+y_i \mid \mu_i \sim \mathrm{Poisson}(\mu_i)
 ```
 
 **Coefficient reading on mu:** `exp(beta)` is the *rate ratio* — a
@@ -198,8 +213,11 @@ dat <- data.frame(y = rnbinom(n, size = 3, mu = exp(1 + 0.3 * rnorm(n))),
 fit <- drmTMB(drm_formula(y ~ x, sigma ~ 1),
               family = nbinom2(), data = dat)
 sym <- symbolize(fit)
-cat(sym$distribution$latex, "\n")
-#> y_i \mid \mu_i,\, \sigma_i \sim \mathrm{NegBin}(\mu_i,\, \mathrm{size} = \exp(\sigma_i)); \mathrm{Var}(y_i) = \mu_i + \mu_i^2 / \exp(\sigma_i)
+render_math(sym$distribution$latex)
+```
+
+``` math
+y_i \mid \mu_i,\, \sigma_i \sim \mathrm{NegBin}(\mu_i,\, \mathrm{size} = \exp(\sigma_i)); \mathrm{Var}(y_i) = \mu_i + \mu_i^2 / \exp(\sigma_i)
 ```
 
 **Coefficient reading on mu:** same as Poisson — `exp(beta)` is the rate
@@ -221,8 +239,11 @@ dat <- data.frame(
 fit <- drmTMB(drm_formula(y ~ x, sigma ~ 1),
               family = truncated_nbinom2(), data = dat)
 sym <- symbolize(fit)
-cat(sym$distribution$latex, "\n")
-#> y_i \mid \mu_i,\, \sigma_i \sim \mathrm{NegBin}^{+}(\mu_i,\, \mathrm{size}=\exp(\sigma_i)); y_i \in \{1, 2, 3, \ldots\}
+render_math(sym$distribution$latex)
+```
+
+``` math
+y_i \mid \mu_i,\, \sigma_i \sim \mathrm{NegBin}^{+}(\mu_i,\, \mathrm{size}=\exp(\sigma_i)); y_i \in \{1, 2, 3, \ldots\}
 ```
 
 **Coefficient reading on mu:** `exp(beta)` is the rate ratio on the
