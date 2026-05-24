@@ -151,7 +151,6 @@ dat <- data.frame(
 )
 fit <- drmTMB(drm_formula(cbind(successes, failures) ~ x, sigma ~ 1),
               family = beta_binomial(), data = dat)
-#> Warning in sqrt(diag(cov)): NaNs produced
 sym <- symbolize(fit)
 cat(sym$distribution$latex, "\n")
 #> cbind(successes, failures)_i \mid N_i,\, \mu_i,\, \sigma_i \sim \mathrm{BetaBinomial}(N_i,\, \mu_i,\, \sigma_i); \mathbb{E}[cbind(successes, failures)_i] = N_i \mu_i

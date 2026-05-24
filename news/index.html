@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,6 +33,19 @@
       <small>Source: <a href="https://github.com/itchyshin/symbolizer/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.5.0" id="symbolizer-050">symbolizer 0.5.0<a class="anchor" aria-label="anchor" href="#symbolizer-050"></a></h2>
+<div class="section level3">
+<h3 id="v05--gllvmtmb-binomial-first-non-gaussian-latent-variable-family-0-5-0">v0.5 — gllvmTMB binomial (first non-Gaussian latent-variable family)<a class="anchor" aria-label="anchor" href="#v05--gllvmtmb-binomial-first-non-gaussian-latent-variable-family-0-5-0"></a></h3>
+<ul><li>
+<code><a href="../reference/symbolize.gllvmTMB.html">symbolize.gllvmTMB()</a></code> now reads binomial latent-variable models end-to-end. The conditional distribution renders as <code>y_{ij} | mu_{t(j)}, Lambda_B, z_{B,i} ~ Bernoulli(logit^{-1}(mu_{t(j)} + (Lambda_B z_{B,i})_{t(j)}))</code>, trait intercepts read as logit baseline success probabilities (e.g. “plogis(mu_t)”), and loadings on <code>Lambda_B</code> are noted as living on the logit scale (an odds-ratio per unit of <code>z</code>).</li>
+<li>
+<code>glm_build_distribution()</code> and the assumption / interpretation template lookups are now family-aware: each gllvm family slug (<code>gllvm_gaussian</code>, <code>gllvm_binomial</code>, …) selects its own rows. Added <code>gllvm_template_family()</code> helper that maps an upstream family name to the slug.</li>
+<li>The sigma_eps capability check now fires only for Gaussian gllvm fits. drmTMB’s binomial / Poisson / etc. carry a placeholder <code>fit$report$sigma_eps</code> that previously triggered a spurious capability error.</li>
+<li>Capability rows flipped to First slice for <code>gllvmTMB / binomial / mu</code>, <code>Lambda_B</code>, <code>Sigma_B</code>, <code>Psi_B</code>.</li>
+</ul><p>The other gllvm families (Poisson, nbinom2, Gamma, lognormal, ordinal, …) stay Planned or reserved. The pattern is now straightforward: add a CSV slug, mirror the gllvm_gaussian rows with family-appropriate wording, and add a branch in <code>glm_build_distribution()</code>.</p>
+</div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.4.0" id="symbolizer-040">symbolizer 0.4.0<a class="anchor" aria-label="anchor" href="#symbolizer-040"></a></h2>
 <div class="section level3">

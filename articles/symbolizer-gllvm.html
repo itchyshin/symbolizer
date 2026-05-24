@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -348,11 +348,11 @@ to load strongly on a small set of traits and near zero on the rest.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://itchyshin.github.io/gllvmTMB/reference/getLoadings.html" class="external-link">getLoadings</a></span><span class="op">(</span><span class="va">fit</span>, rotate <span class="op">=</span> <span class="st">"varimax"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                LV1         LV2</span></span>
-<span><span class="co">#&gt; trait_1 0.41772304  0.51115670</span></span>
-<span><span class="co">#&gt; trait_2 0.94899617 -0.06185149</span></span>
-<span><span class="co">#&gt; trait_3 0.60377617  0.35032356</span></span>
-<span><span class="co">#&gt; trait_4 0.07808868  0.55425773</span></span>
-<span><span class="co">#&gt; trait_5 0.04018411  0.63548458</span></span></code></pre></div>
+<span><span class="co">#&gt; trait_1 0.41772349  0.51115661</span></span>
+<span><span class="co">#&gt; trait_2 0.94899615 -0.06185129</span></span>
+<span><span class="co">#&gt; trait_3 0.60377586  0.35032338</span></span>
+<span><span class="co">#&gt; trait_4 0.07808923  0.55425840</span></span>
+<span><span class="co">#&gt; trait_5 0.04018403  0.63548464</span></span></code></pre></div>
 <p>Reading down the columns of the rotated loading matrix, the first
 axis loads on traits 4 and 5 (the <em>activity-shelter-use</em> syndrome
 in the simulated truth); the second axis loads on traits 1, 2, and 3
@@ -364,7 +364,7 @@ variance that the shared axes capture:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://itchyshin.github.io/gllvmTMB/reference/extract_communality.html" class="external-link">extract_communality</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   trait_1   trait_2   trait_3   trait_4   trait_5 </span></span>
-<span><span class="co">#&gt; 0.4346916 0.9999998 0.4802252 0.3698218 0.8354094</span></span></code></pre></div>
+<span><span class="co">#&gt; 0.4346919 0.9999998 0.4802250 0.3698222 0.8354092</span></span></code></pre></div>
 <p>Traits with communality near 1 are well-explained by the shared axes;
 traits with low communality have most of their between-individual
 variability in the trait-specific uniqueness
@@ -376,16 +376,16 @@ scale falls out of <code><a href="https://itchyshin.github.io/gllvmTMB/reference
 <span><span class="va">co_B</span> <span class="op">&lt;-</span> <span class="va">co</span><span class="op">[</span><span class="va">co</span><span class="op">$</span><span class="va">tier</span> <span class="op">==</span> <span class="st">"B"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"trait_i"</span>, <span class="st">"trait_j"</span>, <span class="st">"correlation"</span>, <span class="st">"lower"</span>, <span class="st">"upper"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="va">co_B</span></span>
 <span><span class="co">#&gt;    trait_i trait_j  correlation       lower     upper</span></span>
-<span><span class="co">#&gt; 1  trait_1 trait_2  0.383117590  0.08131245 0.6205657</span></span>
-<span><span class="co">#&gt; 2  trait_1 trait_3  0.427619562  0.13395387 0.6522450</span></span>
-<span><span class="co">#&gt; 3  trait_2 trait_3  0.575506327  0.32166337 0.7521700</span></span>
-<span><span class="co">#&gt; 4  trait_1 trait_4  0.342823160  0.03505772 0.5911970</span></span>
-<span><span class="co">#&gt; 5  trait_2 trait_4  0.045496546 -0.26983710 0.3520169</span></span>
-<span><span class="co">#&gt; 6  trait_3 trait_4  0.260280784 -0.05574866 0.5289065</span></span>
-<span><span class="co">#&gt; 7  trait_1 trait_5  0.489755175  0.21033527 0.6952022</span></span>
-<span><span class="co">#&gt; 8  trait_2 trait_5 -0.001767607 -0.31310455 0.3099124</span></span>
-<span><span class="co">#&gt; 9  trait_3 trait_5  0.351814509  0.04526602 0.5978080</span></span>
-<span><span class="co">#&gt; 10 trait_4 trait_5  0.554195857  0.29332538 0.7382549</span></span></code></pre></div>
+<span><span class="co">#&gt; 1  trait_1 trait_2  0.383118140  0.08131309 0.6205661</span></span>
+<span><span class="co">#&gt; 2  trait_1 trait_3  0.427619667  0.13395400 0.6522451</span></span>
+<span><span class="co">#&gt; 3  trait_2 trait_3  0.575506262  0.32166329 0.7521699</span></span>
+<span><span class="co">#&gt; 4  trait_1 trait_4  0.342823480  0.03505808 0.5911973</span></span>
+<span><span class="co">#&gt; 5  trait_2 trait_4  0.045497188 -0.26983650 0.3520175</span></span>
+<span><span class="co">#&gt; 6  trait_3 trait_4  0.260281128 -0.05574829 0.5289067</span></span>
+<span><span class="co">#&gt; 7  trait_1 trait_5  0.489754989  0.21033504 0.6952020</span></span>
+<span><span class="co">#&gt; 8  trait_2 trait_5 -0.001767542 -0.31310449 0.3099124</span></span>
+<span><span class="co">#&gt; 9  trait_3 trait_5  0.351814309  0.04526579 0.5978078</span></span>
+<span><span class="co">#&gt; 10 trait_4 trait_5  0.554196054  0.29332564 0.7382551</span></span></code></pre></div>
 <p>The two within-syndrome correlations (traits 1-2-3 among themselves
 and traits 4-5 among themselves) are clearly positive; the
 across-syndrome pairs are smaller.</p>
