@@ -1,6 +1,6 @@
-# symbolizer 0.1.1.9000 (development)
+# symbolizer 0.2.0
 
-## v0.2 (in progress) — bivariate Gaussian and structural comparison
+## v0.2 — bivariate Gaussian, structural comparison, article tidy
 
 * `symbolize.drmTMB()` reads bivariate Gaussian fits — the
   `biv_gaussian(y2 ~ ...)` family from drmTMB — through the same

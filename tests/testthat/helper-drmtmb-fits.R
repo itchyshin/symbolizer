@@ -18,18 +18,16 @@ fit_drm_location_scale <- function(seed = 1L, n = 80L) {
 
 fit_drm_biv_gaussian <- function(seed = 20260524L, n = 80L) {
   testthat::skip_if_not_installed("drmTMB")
-  testthat::skip_if_not_installed("MASS")
   set.seed(seed)
   x1 <- rnorm(n)
   x2 <- rnorm(n)
-  eps <- MASS::mvrnorm(
-    n,
-    mu    = c(0, 0),
-    Sigma = matrix(c(1, 0.6, 0.6, 1), 2L, 2L)
-  )
+  # Cholesky factorisation for two correlated standard normals (rho = 0.6),
+  # no extra package needed (avoids a Suggests dependency on MASS):
+  e1 <- rnorm(n)
+  e2 <- 0.6 * e1 + sqrt(1 - 0.6^2) * rnorm(n)
   dat <- data.frame(
-    y1 = 30 + 1.5 * x1 + eps[, 1L],
-    y2 = 10 + 0.8 * x2 + eps[, 2L],
+    y1 = 30 + 1.5 * x1 + e1,
+    y2 = 10 + 0.8 * x2 + e2,
     x1 = x1,
     x2 = x2
   )
