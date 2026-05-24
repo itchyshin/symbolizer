@@ -313,6 +313,39 @@ test_that("continuous x factor interaction gets a biological reading", {
   expect_match(interaction_rows$biological_reading[[1L]], "differs by")
 })
 
+test_that("S1: fixed_effects + interpretation carry confidence band columns", {
+  fit <- fit_drm_location_scale()
+  sym <- symbolize(fit)
+  # All new columns present in both fixed_effects and interpretation
+  fe_cols <- names(sym$fixed_effects)
+  expect_true(all(c("std_error", "confint_low", "confint_high",
+                    "excludes_zero", "ci_method") %in% fe_cols))
+  ip_cols <- names(sym$interpretation)
+  expect_true(all(c("std_error", "confint_low", "confint_high",
+                    "excludes_zero", "ci_method") %in% ip_cols))
+  # Default ci_method is wald; stored on metadata
+  expect_equal(sym$metadata$ci_method, "wald")
+  expect_true(all(sym$interpretation$ci_method == "wald"))
+  # On this fit (strong predictor) most rows should exclude zero
+  expect_true(any(sym$interpretation$excludes_zero))
+  # Wald SE recoverable from the symmetric band
+  fe <- sym$fixed_effects
+  recovered <- (fe$confint_high - fe$confint_low) / (2 * stats::qnorm(0.975))
+  expect_equal(fe$std_error, recovered, tolerance = 1e-8)
+})
+
+test_that("S1: ci_method = 'profile' produces non-NA bounds and is recorded", {
+  fit <- fit_drm_location_scale()
+  sym <- symbolize(fit, ci_method = "profile")
+  expect_equal(sym$metadata$ci_method, "profile")
+  expect_true(all(sym$interpretation$ci_method == "profile"))
+  # Profile CIs are asymmetric; std_error is left NA by design
+  expect_true(all(is.na(sym$fixed_effects$std_error)))
+  # But the bounds themselves are non-NA
+  expect_true(all(!is.na(sym$fixed_effects$confint_low)))
+  expect_true(all(!is.na(sym$fixed_effects$confint_high)))
+})
+
 test_that("interaction-row estimate is looked up correctly and matches drmTMB::fixef", {
   # Regression test for a previous bug: drm_build_fixed_effects() looked up
   # interaction rows by term_label ("sex:body_size") but drmTMB names the

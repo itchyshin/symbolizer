@@ -4,7 +4,14 @@
 \alias{symbolize.drmTMB}
 \title{Symbolize a drmTMB fit (Gaussian location-scale, v0.1)}
 \usage{
-\method{symbolize}{drmTMB}(fit, symbols = NULL, units = NULL, context = NULL, ...)
+\method{symbolize}{drmTMB}(
+  fit,
+  symbols = NULL,
+  units = NULL,
+  context = NULL,
+  ci_method = "wald",
+  ...
+)
 }
 \arguments{
 \item{fit}{A fitted statistical model object.}
@@ -18,6 +25,10 @@ units, e.g. \code{c(body_mass = "g", temperature = "C")}.}
 \item{context}{Optional short character description of the model, e.g.
 \code{"avian body-size location-scale model"}.}
 
+\item{ci_method}{Confidence-interval method passed to
+\code{\link[drmTMB:confint.drmTMB]{drmTMB::confint}}. One of \code{"wald"} (default,
+fast), \code{"profile"} (slower, more honest), or \code{"bootstrap"}.}
+
 \item{...}{Reserved for method-specific extra arguments.}
 }
 \value{
@@ -28,3 +39,16 @@ Builds a \code{\link[=new_symbolized_model]{symbolized_model}} from a \code{drmT
 v0.1 covers the Gaussian location-scale fixed-effects path; other families
 and components return capability errors via \code{\link[=capability_check]{capability_check()}}.
 }
+\section{Confidence intervals}{
+
+The returned \code{fixed_effects} and \code{interpretation} tibbles carry a confidence
+band per coefficient: \code{confint_low}, \code{confint_high}, \code{excludes_zero}, plus
+a \code{ci_method} column recording which method produced them. The default
+\code{ci_method = "wald"} is fast and is what \code{drmTMB::confint(fit, method = "wald")}
+returns by default. Wald intervals can be too narrow when group counts
+are small (finite-df situations). For more honest intervals, pass
+\code{ci_method = "profile"} — slower but profile-likelihood-based.
+Satterthwaite / Kenward-Roger corrections are not implemented; when Wald
+looks suspicious the recommended alternative is \code{"profile"}.
+}
+

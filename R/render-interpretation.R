@@ -84,8 +84,10 @@ print.symbolizer_interpretation <- function(x, ...) {
     rows <- which(x$submodel == sm)
     for (i in rows) {
       est <- formatC(x$estimate[[i]], digits = 3L, format = "fg", flag = "#")
+      ci_str <- interp_ci_str(x, i)
+      marker <- if (isTRUE(x$excludes_zero[[i]] %||% FALSE)) " *" else ""
       cli::cli_text(
-        "{.emph {x$term_label[[i]]}} [{.val {x$coefficient_role[[i]]}}]  estimate = {.val {est}}"
+        "{.emph {x$term_label[[i]]}} [{.val {x$coefficient_role[[i]]}}]  estimate = {.val {est}}{ci_str}{marker}"
       )
       if (has_link) {
         v <- x$link_scale_reading[[i]]
@@ -120,3 +122,16 @@ print.symbolizer_interpretation <- function(x, ...) {
 interp_show <- function(s) {
   !is.na(s) && nzchar(s) && !identical(s, "--")
 }
+
+# Format the confidence band " (lo, hi)" for the print method, or "" if NA.
+# The "*" marker for excludes_zero is rendered separately.
+interp_ci_str <- function(x, i) {
+  if (!("confint_low" %in% names(x))) return("")
+  lo <- x$confint_low[[i]]
+  hi <- x$confint_high[[i]]
+  if (is.na(lo) || is.na(hi)) return("")
+  fmt <- function(v) formatC(v, digits = 3L, format = "fg", flag = "#")
+  paste0(" (", fmt(lo), ", ", fmt(hi), ")")
+}
+
+`%||%` <- function(a, b) if (is.null(a)) b else a

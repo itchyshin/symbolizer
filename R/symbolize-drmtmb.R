@@ -25,11 +25,25 @@
 #' v0.1 covers the Gaussian location-scale fixed-effects path; other families
 #' and components return capability errors via [`capability_check()`].
 #'
+#' @section Confidence intervals:
+#' The returned `fixed_effects` and `interpretation` tibbles carry a confidence
+#' band per coefficient: `confint_low`, `confint_high`, `excludes_zero`, plus
+#' a `ci_method` column recording which method produced them. The default
+#' `ci_method = "wald"` is fast and is what `drmTMB::confint(fit, method = "wald")`
+#' returns by default. Wald intervals can be too narrow when group counts
+#' are small (finite-df situations). For more honest intervals, pass
+#' `ci_method = "profile"` — slower but profile-likelihood-based.
+#' Satterthwaite / Kenward-Roger corrections are not implemented; when Wald
+#' looks suspicious the recommended alternative is `"profile"`.
+#'
 #' @inheritParams symbolize
+#' @param ci_method Confidence-interval method passed to
+#'   [`drmTMB::confint`][drmTMB::confint.drmTMB]. One of `"wald"` (default,
+#'   fast), `"profile"` (slower, more honest), or `"bootstrap"`.
 #' @return A `symbolized_model` object.
 #' @export
 symbolize.drmTMB <- function(fit, symbols = NULL, units = NULL,
-                             context = NULL, ...) {
+                             context = NULL, ci_method = "wald", ...) {
   entries <- fit$formula$entries
   if (!is.list(entries) || length(entries) == 0L) {
     cli::cli_abort("{.arg fit} has no submodel entries in {.code fit$formula$entries}.")
@@ -83,7 +97,7 @@ symbolize.drmTMB <- function(fit, symbols = NULL, units = NULL,
                                          response_symbol_matrix)
   submodels    <- drm_build_submodels(entries, fit, param)
   terms_tbl    <- drm_build_terms(entries_fe, data, symbols)
-  fixed_eff    <- drm_build_fixed_effects(terms_tbl, fit)
+  fixed_eff    <- drm_build_fixed_effects(terms_tbl, fit, ci_method = ci_method)
   re_tbl       <- drm_build_random_effects(re_per_entry)
   vc_tbl       <- drm_build_variance_components(re_per_entry)
   components   <- drm_build_components(submodels, terms_tbl, re_tbl,
@@ -100,6 +114,7 @@ symbolize.drmTMB <- function(fit, symbols = NULL, units = NULL,
   metadata <- list(
     call = fit$call,
     context = context %||% "",
+    ci_method = ci_method,
     package_versions = list(
       symbolizer = utils::packageVersion("symbolizer"),
       drmTMB     = utils::packageVersion("drmTMB")
@@ -339,7 +354,7 @@ drm_build_terms <- function(entries, data, symbols) {
   do.call(rbind, rows)
 }
 
-drm_build_fixed_effects <- function(terms_tbl, fit) {
+drm_build_fixed_effects <- function(terms_tbl, fit, ci_method = "wald") {
   if (nrow(terms_tbl) == 0L) {
     return(tibble::tibble(
       submodel = character(0),
@@ -352,7 +367,11 @@ drm_build_fixed_effects <- function(terms_tbl, fit) {
       coefficient_symbol = character(0),
       latex_term = character(0),
       estimate = double(0),
-      std_error = double(0)
+      std_error = double(0),
+      confint_low = double(0),
+      confint_high = double(0),
+      excludes_zero = logical(0),
+      ci_method = character(0)
     ))
   }
   coef_for <- function(dpar) {
@@ -360,7 +379,17 @@ drm_build_fixed_effects <- function(terms_tbl, fit) {
     if (is.null(cf)) cf <- drmTMB::fixef(fit, dpar = dpar)
     cf
   }
-  estimate <- rep(NA_real_, nrow(terms_tbl))
+  # Pull all CIs from drmTMB in one shot. Default Wald is fast; "profile" is
+  # honest but slow. drmTMB labels rows as "fixef:<dpar>:<column>". On any
+  # error (e.g., singular Hessian on a tiny test fit) keep CI columns NA
+  # rather than crashing the whole extractor.
+  # First pass: compute all the hit (model-matrix column) names. We need
+  # them to enumerate parm targets for the profile CI call.
+  estimate    <- rep(NA_real_,   nrow(terms_tbl))
+  ci_low      <- rep(NA_real_,   nrow(terms_tbl))
+  ci_high     <- rep(NA_real_,   nrow(terms_tbl))
+  std_error   <- rep(NA_real_,   nrow(terms_tbl))
+  hits        <- rep(NA_character_, nrow(terms_tbl))
   for (i in seq_len(nrow(terms_tbl))) {
     row <- terms_tbl[i, , drop = FALSE]
     if (is.na(row$coefficient_symbol)) next
@@ -394,7 +423,41 @@ drm_build_fixed_effects <- function(terms_tbl, fit) {
     if (!is.null(cf) && hit %in% names(cf)) {
       estimate[i] <- unname(cf[hit])
     }
+    hits[i] <- hit
   }
+  # Build parm targets in the "fixef:<dpar>:<column>" format drmTMB expects.
+  # Profile needs explicit targets (Wald returns all whether you pass parm
+  # or not, but passing it doesn't hurt and stays explicit).
+  parm_targets <- vapply(seq_len(nrow(terms_tbl)), function(i) {
+    if (is.na(hits[i])) NA_character_
+    else paste0("fixef:", terms_tbl$submodel[i], ":", hits[i])
+  }, character(1L))
+  parm_lookup <- parm_targets[!is.na(parm_targets)]
+  # `confint(fit)` dispatches to `confint.drmTMB` (an S3 method); accessing
+  # `drmTMB::confint` directly errors because the package only registers
+  # the method, not a re-exported `confint` symbol.
+  ci_df <- if (length(parm_lookup) > 0L) {
+    tryCatch(
+      stats::confint(fit, parm = parm_lookup, method = ci_method, level = 0.95),
+      error = function(e) NULL
+    )
+  } else NULL
+  # Second pass: join the CI columns back onto rows.
+  for (i in seq_len(nrow(terms_tbl))) {
+    if (is.na(hits[i]) || is.null(ci_df)) next
+    key <- parm_targets[i]
+    hit_ci <- ci_df[ci_df$parm == key, , drop = FALSE]
+    if (nrow(hit_ci) == 1L) {
+      ci_low[i]  <- hit_ci$lower
+      ci_high[i] <- hit_ci$upper
+      if (identical(ci_method, "wald")) {
+        std_error[i] <- (hit_ci$upper - hit_ci$lower) / (2 * stats::qnorm(0.975))
+      }
+    }
+  }
+  # Excludes-zero is the indicator: both bounds the same sign, neither zero.
+  excludes_zero <- !is.na(ci_low) & !is.na(ci_high) &
+    sign(ci_low) == sign(ci_high) & ci_low != 0 & ci_high != 0
   tibble::tibble(
     submodel = terms_tbl$submodel,
     term_label = terms_tbl$term_label,
@@ -406,7 +469,11 @@ drm_build_fixed_effects <- function(terms_tbl, fit) {
     coefficient_symbol = terms_tbl$coefficient_symbol,
     latex_term = terms_tbl$latex_term,
     estimate = estimate,
-    std_error = rep(NA_real_, nrow(terms_tbl))
+    std_error = std_error,
+    confint_low = ci_low,
+    confint_high = ci_high,
+    excludes_zero = excludes_zero,
+    ci_method = rep(ci_method, nrow(terms_tbl))
   )
 }
 
@@ -822,18 +889,22 @@ drm_interaction_subs <- function(row, data) {
 }
 
 drm_build_interpretation <- function(fixed_eff, family, response, data) {
-  if (nrow(fixed_eff) == 0L) {
-    return(tibble::tibble(
-      submodel = character(0),
-      term_label = character(0),
-      coefficient_role = character(0),
-      estimate = double(0),
-      link_scale_reading = character(0),
-      natural_scale_reading = character(0),
-      variance_scale_reading = character(0),
-      biological_reading = character(0)
-    ))
-  }
+  empty <- tibble::tibble(
+    submodel = character(0),
+    term_label = character(0),
+    coefficient_role = character(0),
+    estimate = double(0),
+    std_error = double(0),
+    confint_low = double(0),
+    confint_high = double(0),
+    excludes_zero = logical(0),
+    ci_method = character(0),
+    link_scale_reading = character(0),
+    natural_scale_reading = character(0),
+    variance_scale_reading = character(0),
+    biological_reading = character(0)
+  )
+  if (nrow(fixed_eff) == 0L) return(empty)
   tbl <- load_template("interpretation-templates")
   rows <- list()
   for (i in seq_len(nrow(fixed_eff))) {
@@ -869,24 +940,18 @@ drm_build_interpretation <- function(fixed_eff, family, response, data) {
       term_label = r$term_label,
       coefficient_role = cr,
       estimate = r$estimate,
+      std_error = r$std_error %||% NA_real_,
+      confint_low = r$confint_low %||% NA_real_,
+      confint_high = r$confint_high %||% NA_real_,
+      excludes_zero = r$excludes_zero %||% NA,
+      ci_method = r$ci_method %||% NA_character_,
       link_scale_reading = drm_substitute(template$link_scale_reading[[1L]], mapping),
       natural_scale_reading = drm_substitute(template$natural_scale_reading[[1L]], mapping),
       variance_scale_reading = drm_substitute(template$variance_scale_reading[[1L]], mapping),
       biological_reading = drm_substitute(template$biological_reading[[1L]], mapping)
     )
   }
-  if (length(rows) == 0L) {
-    return(tibble::tibble(
-      submodel = character(0),
-      term_label = character(0),
-      coefficient_role = character(0),
-      estimate = double(0),
-      link_scale_reading = character(0),
-      natural_scale_reading = character(0),
-      variance_scale_reading = character(0),
-      biological_reading = character(0)
-    ))
-  }
+  if (length(rows) == 0L) return(empty)
   do.call(rbind, rows)
 }
 

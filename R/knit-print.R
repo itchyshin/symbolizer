@@ -97,17 +97,49 @@ knit_print.symbolizer_formula_bridge <- function(x, ...) {
 #' @exportS3Method knitr::knit_print
 knit_print.symbolizer_interpretation <- function(x, ...) {
   df <- as.data.frame(x, stringsAsFactors = FALSE)
-  if ("estimate" %in% names(df)) {
-    df$estimate <- formatC(df$estimate, digits = 3, format = "fg", flag = "#")
+  fmt <- function(v) formatC(v, digits = 3, format = "fg", flag = "#")
+  if ("estimate" %in% names(df)) df$estimate <- fmt(df$estimate)
+  # Render the confidence band as a single column "lo, hi" with a star
+  # marker when the band excludes zero. Both columns visible together so
+  # the reader can see the number AND the indicator side by side.
+  if (all(c("confint_low", "confint_high") %in% names(df))) {
+    has_ci <- !is.na(df$confint_low) & !is.na(df$confint_high)
+    band <- ifelse(
+      has_ci,
+      paste0(fmt(df$confint_low), ", ", fmt(df$confint_high)),
+      "--"
+    )
+    if ("excludes_zero" %in% names(df)) {
+      band <- ifelse(isTRUE_vec(df$excludes_zero), paste0(band, " *"), band)
+    }
+    df$`95% CI` <- band
   }
   cols <- intersect(
-    c("submodel", "term_label", "coefficient_role", "estimate",
+    c("submodel", "term_label", "coefficient_role", "estimate", "95% CI",
       "link_scale_reading", "natural_scale_reading",
       "variance_scale_reading", "biological_reading"),
     names(df)
   )
   kab <- sym_kable(df[, cols, drop = FALSE])
-  knitr::asis_output(paste(c("", kab, ""), collapse = "\n"))
+  # Footer announces which CI method produced the band.
+  footer <- if ("ci_method" %in% names(df)) {
+    m <- unique(df$ci_method[!is.na(df$ci_method)])
+    if (length(m) == 1L) {
+      paste0(
+        "*Rows marked `*` have a 95% confidence interval that excludes zero",
+        " (CI method: `", m, "`).*"
+      )
+    } else ""
+  } else ""
+  knitr::asis_output(paste(c("", kab, "", footer, ""), collapse = "\n"))
+}
+
+#' @keywords internal
+isTRUE_vec <- function(x) {
+  if (is.null(x)) return(logical(0))
+  out <- as.logical(x)
+  out[is.na(out)] <- FALSE
+  out
 }
 
 #' @exportS3Method knitr::knit_print
