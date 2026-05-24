@@ -464,3 +464,119 @@ test_that("factor x factor interaction gets a difference-of-differences reading"
   expect_true(nrow(ff) >= 1L)
   expect_match(ff$biological_reading[[1L]], "differs by")
 })
+
+test_that("biv_gaussian fit symbolizes with two responses, two mus, two sigmas, and rho12", {
+  fit <- fit_drm_biv_gaussian()
+  sym <- symbolize(fit)
+  expect_s3_class(sym, "symbolized_model")
+  # Submodels should include the bivariate dpars
+  expect_true(all(c("mu1", "mu2", "sigma1", "sigma2", "rho12") %in% sym$submodels$parameter))
+  # Symbol dictionary should carry the two responses and rho12
+  d <- sym$symbol_dictionary
+  expect_true(any(grepl("rho_{12", d$symbol, fixed = TRUE)) ||
+              any(grepl("rho12", d$symbol, fixed = TRUE)))
+  # An assumption table row for the residual decomposition (the Sigma_i form)
+  expect_true(any(sym$assumptions$assumption == "residual_decomposition"))
+  # Interpretation should have a rho12 intercept reading
+  expect_true(any(sym$interpretation$submodel == "rho12"))
+})
+
+test_that("biv_gaussian: links are recorded per dpar (atanh_guarded on rho12)", {
+  fit <- fit_drm_biv_gaussian()
+  sym <- symbolize(fit)
+  s <- sym$submodels
+  expect_equal(s$link[s$parameter == "mu1"], "identity")
+  expect_equal(s$link[s$parameter == "mu2"], "identity")
+  expect_equal(s$link[s$parameter == "sigma1"], "log")
+  expect_equal(s$link[s$parameter == "sigma2"], "log")
+  expect_equal(s$link[s$parameter == "rho12"], "atanh_guarded")
+})
+
+test_that("biv_gaussian: fixed_effects join coefficient estimates from drmTMB", {
+  fit <- fit_drm_biv_gaussian()
+  sym <- symbolize(fit)
+  fe <- sym$fixed_effects
+  # mu1 has 2 coefs, mu2 has 2 coefs, sigma1/sigma2/rho12 each have 1 = 7
+  expect_equal(nrow(fe), 7L)
+  expect_true(all(!is.na(fe$estimate)))
+  expect_equal(fe$estimate[fe$submodel == "mu1"],
+               unname(drmTMB::fixef(fit, dpar = "mu1")))
+  expect_equal(fe$estimate[fe$submodel == "rho12"],
+               unname(drmTMB::fixef(fit, dpar = "rho12")))
+})
+
+test_that("biv_gaussian: components include the Sigma_i decomposition row", {
+  fit <- fit_drm_biv_gaussian()
+  sym <- symbolize(fit)
+  decomp <- sym$components[sym$components$kind == "covariance_decomposition", , drop = FALSE]
+  expect_equal(nrow(decomp), 1L)
+  expect_match(decomp$equation, "\\\\Sigma_i =")
+  expect_match(decomp$equation, "\\\\begin\\{pmatrix\\}")
+  expect_match(decomp$equation, "\\\\rho_\\{12,i\\}")
+})
+
+test_that("biv_gaussian: distribution row uses MVN_2 with both responses", {
+  fit <- fit_drm_biv_gaussian()
+  sym <- symbolize(fit)
+  expect_equal(sym$distribution$family, "biv_gaussian")
+  expect_match(sym$distribution$latex, "\\\\mathcal\\{N\\}_2")
+  expect_match(sym$distribution$latex, "\\\\Sigma_i")
+})
+
+test_that("biv_gaussian: linear predictors use atanh^{-1} on rho12", {
+  fit <- fit_drm_biv_gaussian()
+  sym <- symbolize(fit)
+  rho_row <- sym$components[sym$components$kind == "linear_predictor" &
+                              sym$components$submodel == "rho12", , drop = FALSE]
+  expect_equal(nrow(rho_row), 1L)
+  expect_match(rho_row$equation, "\\\\mathrm\\{tanh\\}\\^\\{-1\\}\\(\\\\rho_\\{12,i\\}\\)")
+})
+
+test_that("biv_gaussian: model$responses captures both response variable names", {
+  fit <- fit_drm_biv_gaussian()
+  sym <- symbolize(fit)
+  expect_equal(sym$model$family, "biv_gaussian")
+  expect_equal(sym$model$responses, c("y1", "y2"))
+})
+
+test_that("biv_gaussian: assumption rows present and substituted with responses", {
+  fit <- fit_drm_biv_gaussian()
+  sym <- symbolize(fit)
+  a <- sym$assumptions
+  expect_true("conditional_distribution" %in% a$assumption)
+  expect_true("residual_decomposition" %in% a$assumption)
+  expect_true("independence_across_observations" %in% a$assumption)
+  expect_true("linear_predictor_rho12" %in% a$assumption)
+  # response_1 / response_2 substitution worked
+  cd_meaning <- a$biological_meaning[a$assumption == "conditional_distribution"]
+  expect_match(cd_meaning, "y1")
+  expect_match(cd_meaning, "y2")
+})
+
+test_that("biv_gaussian: interpretation has separate rows per submodel and rho12 mentions tanh", {
+  fit <- fit_drm_biv_gaussian()
+  sym <- symbolize(fit)
+  interp <- sym$interpretation
+  expect_true(all(c("mu1", "mu2", "sigma1", "sigma2", "rho12") %in% interp$submodel))
+  rho_intercept <- interp[interp$submodel == "rho12" &
+                            interp$coefficient_role == "intercept", , drop = FALSE]
+  expect_equal(nrow(rho_intercept), 1L)
+  expect_match(rho_intercept$natural_scale_reading, "tanh")
+  # mu1 reading should mention y1 (not y2)
+  mu1_int <- interp[interp$submodel == "mu1" &
+                      interp$coefficient_role == "intercept", , drop = FALSE]
+  expect_match(mu1_int$biological_reading, "y1", fixed = TRUE)
+  mu2_int <- interp[interp$submodel == "mu2" &
+                      interp$coefficient_role == "intercept", , drop = FALSE]
+  expect_match(mu2_int$biological_reading, "y2", fixed = TRUE)
+})
+
+test_that("biv_gaussian: formula_bridge has one row per dpar with bivariate meanings", {
+  fit <- fit_drm_biv_gaussian()
+  sym <- symbolize(fit)
+  br <- sym$formula_bridge
+  expect_equal(br$submodel, c("mu1", "mu2", "sigma1", "sigma2", "rho12"))
+  expect_match(br$statistical_meaning[br$submodel == "mu1"], "y1")
+  expect_match(br$statistical_meaning[br$submodel == "mu2"], "y2")
+  expect_match(br$statistical_meaning[br$submodel == "rho12"], "correlation")
+})

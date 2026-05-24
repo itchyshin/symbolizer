@@ -149,13 +149,26 @@ extract_terms <- function(formula, data, submodel,
   n_rows <- length(col_names) + length(offset_terms)
   rows <- vector("list", n_rows)
 
+  # Coefficient family may carry its own subscript for multi-response models,
+  # e.g. "beta_{1}" for the first response of biv_gaussian. Detect that and
+  # merge into a single subscript ("\\beta_{1,k}") rather than nesting braces.
+  cf_match <- regmatches(coefficient_family,
+                         regexec("^([A-Za-z]+)(_\\{([^}]+)\\})?$",
+                                 coefficient_family))[[1L]]
+  cf_root <- if (length(cf_match) >= 2L && nzchar(cf_match[[2L]])) cf_match[[2L]] else coefficient_family
+  cf_inner <- if (length(cf_match) == 4L && nzchar(cf_match[[4L]])) cf_match[[4L]] else ""
+
   for (ci in seq_along(col_names)) {
     col_name <- col_names[ci]
     term_idx <- assign[ci]
     term_label <- if (term_idx == 0L) "(Intercept)" else term_labels[term_idx]
     info <- classify_term(term_label, col_name)
     coef_idx <- ci - 1L
-    coef_symbol <- sprintf("\\%s_{%d}", coefficient_family, coef_idx)
+    coef_symbol <- if (nzchar(cf_inner)) {
+      sprintf("\\%s_{%s,%d}", cf_root, cf_inner, coef_idx)
+    } else {
+      sprintf("\\%s_{%d}", cf_root, coef_idx)
+    }
     symbol <- if (is.na(info$variable)) NA_character_ else lookup_symbol(info$variable)
     latex_term <- build_latex(
       info$role, info$variable, info$contrast_level, info$transform,

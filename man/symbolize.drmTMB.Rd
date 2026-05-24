@@ -2,7 +2,7 @@
 % Please edit documentation in R/symbolize-drmtmb.R
 \name{symbolize.drmTMB}
 \alias{symbolize.drmTMB}
-\title{Symbolize a drmTMB fit (Gaussian location-scale, v0.1)}
+\title{Symbolize a drmTMB fit (Gaussian and bivariate Gaussian, v0.1)}
 \usage{
 \method{symbolize}{drmTMB}(
   fit,
@@ -36,8 +36,10 @@ A \code{symbolized_model} object.
 }
 \description{
 Builds a \code{\link[=new_symbolized_model]{symbolized_model}} from a \code{drmTMB} fit.
-v0.1 covers the Gaussian location-scale fixed-effects path; other families
-and components return capability errors via \code{\link[=capability_check]{capability_check()}}.
+v0.1 covers the Gaussian location-scale fixed-effects path (with optional
+\code{(1 | group)} random intercepts on \code{mu}) and the bivariate Gaussian
+(\code{biv_gaussian()}) location-scale-correlation path. Other families and
+components return capability errors via \code{\link[=capability_check]{capability_check()}}.
 }
 \section{Confidence intervals}{
 

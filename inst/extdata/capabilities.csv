@@ -20,11 +20,11 @@ drmTMB,poisson,mu,Planned or reserved,,
 drmTMB,nbinom2,mu,Planned or reserved,,
 drmTMB,nbinom2,sigma,Planned or reserved,,
 drmTMB,cumulative_logit,mu,Planned or reserved,,
-drmTMB,biv_gaussian,mu1,Planned or reserved,,
-drmTMB,biv_gaussian,mu2,Planned or reserved,,
-drmTMB,biv_gaussian,sigma1,Planned or reserved,,
-drmTMB,biv_gaussian,sigma2,Planned or reserved,,
-drmTMB,biv_gaussian,rho12,Planned or reserved,,
+drmTMB,biv_gaussian,mu1,First slice,0.1.0,Bivariate Gaussian location submodel for the first response.
+drmTMB,biv_gaussian,mu2,First slice,0.1.0,Bivariate Gaussian location submodel for the second response.
+drmTMB,biv_gaussian,sigma1,First slice,0.1.0,Bivariate Gaussian scale submodel for the first response (log link).
+drmTMB,biv_gaussian,sigma2,First slice,0.1.0,Bivariate Gaussian scale submodel for the second response (log link).
+drmTMB,biv_gaussian,rho12,First slice,0.1.0,Residual correlation between the two responses (atanh_guarded link).
 gllvmTMB,gaussian,mu,First slice,0.1.0,Per-trait intercept submodel via 0 + trait fixed effects.
 gllvmTMB,gaussian,Lambda_B,First slice,0.1.0,Between-unit reduced-rank loading matrix via latent(0 + trait | unit).
 gllvmTMB,gaussian,Sigma_B,First slice,0.1.0,"Implied between-unit covariance Lambda_B Lambda_B^T (+ Psi_B when unique term present)."

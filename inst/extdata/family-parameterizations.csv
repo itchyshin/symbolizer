@@ -1,3 +1,4 @@
 family,response_distribution,scale_parameter,scale_meaning,link_mu,link_sigma,variance_expression,natural_sd_ratio,natural_variance_ratio,notes
 gaussian,Normal,sigma,residual standard deviation,identity,log,\sigma_i^2,exp(beta),exp(2*beta),drmTMB convention: larger sigma always means larger modelled variability.
 gllvm_gaussian,Multivariate Normal,sigma_eps,shared row-level residual standard deviation,identity,log,\sigma_\epsilon^2,exp(beta),exp(2*beta),"gllvmTMB Gaussian latent model: between-unit covariance is \boldsymbol{\Lambda}_B \boldsymbol{\Lambda}_B^\top + \boldsymbol{\Psi}_B; row-level residual is a single shared \sigma_\epsilon."
+biv_gaussian,Bivariate Normal,(sigma1; sigma2; rho12),paired residual SDs and correlation,identity,log,Sigma_i (2x2),exp(beta) per dpar,exp(2*beta) per dpar,"drmTMB convention: rho12 in (-1, 1) via an atanh_guarded link (response-scale correlation is 0.99999999 * tanh(eta_rho12))."

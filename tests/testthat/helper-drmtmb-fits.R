@@ -16,6 +16,36 @@ fit_drm_location_scale <- function(seed = 1L, n = 80L) {
   )
 }
 
+fit_drm_biv_gaussian <- function(seed = 20260524L, n = 80L) {
+  testthat::skip_if_not_installed("drmTMB")
+  testthat::skip_if_not_installed("MASS")
+  set.seed(seed)
+  x1 <- rnorm(n)
+  x2 <- rnorm(n)
+  eps <- MASS::mvrnorm(
+    n,
+    mu    = c(0, 0),
+    Sigma = matrix(c(1, 0.6, 0.6, 1), 2L, 2L)
+  )
+  dat <- data.frame(
+    y1 = 30 + 1.5 * x1 + eps[, 1L],
+    y2 = 10 + 0.8 * x2 + eps[, 2L],
+    x1 = x1,
+    x2 = x2
+  )
+  drmTMB::drmTMB(
+    drmTMB::drm_formula(
+      mu1    = y1 ~ x1,
+      mu2    = y2 ~ x2,
+      sigma1 = ~ 1,
+      sigma2 = ~ 1,
+      rho12  = ~ 1
+    ),
+    family = drmTMB::biv_gaussian(),
+    data   = dat
+  )
+}
+
 fit_drm_with_re <- function(seed = 2L, n = 80L, n_groups = 6L) {
   testthat::skip_if_not_installed("drmTMB")
   set.seed(seed)
