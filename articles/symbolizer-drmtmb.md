@@ -759,9 +759,9 @@ We fit a bivariate Gaussian location-scale-correlation model to 80
 paired observations of growth and repro using the drmTMB package
 (version 0.1.3.9000) in R. The means of the two responses were modelled
 as linear functions of `x1` and `x2` respectively. The residual standard
-deviations of the two responses were modelled on the log scale (an
-intercept only; an intercept only). The residual correlation between the
-two responses was modelled on the Fisher-z scale (an intercept only).
+deviations of the two responses were modelled on the log scale, with
+both intercept-only. The residual correlation between the two responses
+was modelled with an intercept only on the Fisher-z linear predictor.
 Parameters were estimated by maximum likelihood via the Template Model
 Builder framework. We report 95% Wald confidence intervals on the
 fixed-effect coefficients.

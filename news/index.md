@@ -2,7 +2,17 @@
 
 ## symbolizer 0.2.1.9000 (development)
 
-### v0.3 (in progress) — non-Gaussian drmTMB families
+### v0.3 (in progress) — non-Gaussian drmTMB families, polished methods_text
+
+- `methods_text(sym)` on biv_gaussian fits now reads cleanly when the
+  three secondary submodels (sigma1, sigma2, rho12) are intercept-only.
+  The old output included an awkward parenthesised
+  `(an intercept only; an intercept only)` clause; the polished version
+  uses dedicated `sigma_pair_clause` and `rho12_clause` slots that pick
+  one of three readable phrasings (both intercept-only, mixed, or both
+  with predictors). Templates for univariate families are unaffected;
+  this is biv_gaussian-specific because the three-clause shape is
+  genuinely unique to it.
 
 - [`symbolize.drmTMB()`](https://itchyshin.github.io/symbolizer/reference/symbolize.drmTMB.md)
   reads Student-t fits (`family = drmTMB::student()`) end-to-end. The
@@ -11,6 +21,7 @@
   `logm2` link) so that `nu > 2` is always enforced and the modelled
   variance `nu / (nu - 2) * sigma^2` is finite. The structured symbolic
   object carries:
+
   - a Student-t distribution row in both index and matrix forms,
   - submodels for `mu` (identity), `sigma` (log), `nu` (logm2),
   - interpretation rows for the three submodels including a biological
@@ -21,15 +32,19 @@
     [`methods_text()`](https://itchyshin.github.io/symbolizer/reference/methods_text.md)
     template covering the three submodels and the log(nu - 2) link
     explanation.
+
 - Capability registry rows flipped from “Planned or reserved” to “First
   slice”:
+
   - `drmTMB / student / mu`
   - `drmTMB / student / sigma`
   - `drmTMB / student / nu`
+
 - `drm_link_for()` now generalises the multi-dpar link lookup. The
   previous biv_gaussian-only branch was extended to recognise any family
   whose links are exposed as a named vector (Student-t today; future
   families can land without further changes here).
+
 - [`symbolize.drmTMB()`](https://itchyshin.github.io/symbolizer/reference/symbolize.drmTMB.md)
   reads lognormal fits (`family = drmTMB::lognormal()`) end-to-end. The
   conditional distribution row reads
@@ -38,6 +53,7 @@
   Interpretation rows on mu speak in terms of the geometric mean of the
   response — a unit change in a predictor multiplies the geometric mean
   by `exp(beta)`.
+
 - **Architectural refactor: distribution LaTeX is now CSV-driven.**
   `inst/extdata/family-distributions.csv` carries the conditional-
   distribution row (index + matrix form) for every family. The previous
