@@ -34,3 +34,7 @@ Invisibly returns the matched row's status word.
 
 Wildcards: a row with value `"*"` in `class`, `family`, or `component`
 matches any value in that slot.
+
+When the check fails, the error message also lists the
+currently-readable tuples (status: Stable or First slice) so the user
+immediately sees what they *can* do today.

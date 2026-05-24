@@ -38,7 +38,7 @@ Status words follow drmTMB's five-level vocabulary:
 
 ``` r
 symbolizer_capabilities()
-#> # A tibble: 37 × 6
+#> # A tibble: 54 × 6
 #>    class  family    component      status              since notes              
 #>    <chr>  <chr>     <chr>          <chr>               <chr> <chr>              
 #>  1 drmTMB gaussian  mu             Stable              0.1.0 Univariate locatio…
@@ -51,5 +51,5 @@ symbolizer_capabilities()
 #>  8 drmTMB student   sigma          Planned or reserved NA    NA                 
 #>  9 drmTMB student   nu             Planned or reserved NA    NA                 
 #> 10 drmTMB lognormal mu             Planned or reserved NA    NA                 
-#> # ℹ 27 more rows
+#> # ℹ 44 more rows
 ```

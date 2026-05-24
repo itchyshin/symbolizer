@@ -76,6 +76,8 @@ sym <- symbolize(
   context = "structured body-size location-scale model"
 )
 sym
+#> <symbolized_model> -- call `summary()` for a plain-English walkthrough, or
+#> `explain()` in one step from your fit.
 #> 
 #> ── <symbolized_model> ──────────────────────────────────────────────────────────
 #> Class: <drmTMB> (drmTMB)
@@ -299,12 +301,12 @@ assumption_table(sym)
 
 | assumption | expression | biological meaning | status |
 |:---|:---|:---|:---|
-| conditional_distribution | $`W_i \mid \mu_i\, \sigma_i \sim \mathrm{Normal}(\mu_i\, \sigma_i^2)`$ | body_mass varies normally around its expected value | stated |
-| linear_predictor | $`\mu_i = \beta_0 + \sum_k \beta_k X_{ki}`$ | Expected body_mass is a linear combination of the mean-model predictors | stated |
-| linear_predictor | $`\log(\sigma_i) = \gamma_0 + \sum_k \gamma_k Z_{ki}`$ | Log residual SD of body_mass is a linear combination of the scale-model predictors | stated |
-| independence_given_random_effects | $`W_i \perp W_j \mid X\, \mathbf{u} \text{ for } i \ne j`$ | Observations are conditionally independent given the predictors and the random effects | stated |
-| positivity | $`\sigma_i > 0`$ | Residual SD is constrained positive via the log link | implied |
-| no_missing_at_random | — | Observations are assumed not missing in a way that depends on the unobserved response | not_checked |
+| conditional_distribution | $`W_i \mid \mu_i\, \sigma_i \sim \mathrm{Normal}(\mu_i\, \sigma_i^2)`$ | body_mass varies normally around its expected value | explicit |
+| linear_predictor | $`\mu_i = \beta_0 + \sum_k \beta_k X_{ki}`$ | Expected body_mass is a linear combination of the mean-model predictors | explicit |
+| linear_predictor | $`\log(\sigma_i) = \gamma_0 + \sum_k \gamma_k Z_{ki}`$ | Log residual SD of body_mass is a linear combination of the scale-model predictors | explicit |
+| independence_given_random_effects | $`W_i \perp W_j \mid X\, \mathbf{u} \text{ for } i \ne j`$ | Observations are conditionally independent given the predictors and the random effects | explicit |
+| positivity | $`\sigma_i > 0`$ | Residual SD is constrained positive via the log link | follows from the formula |
+| no_missing_at_random | — | Observations are assumed not missing in a way that depends on the unobserved response | your responsibility |
 
 One known limitation: the `independence` row reads “Observations are
 conditionally independent given the predictors”. When a random intercept
@@ -440,7 +442,7 @@ reserved**, or **Unsupported or blocked**.
 ``` r
 
 symbolizer_capabilities()
-#> # A tibble: 37 × 6
+#> # A tibble: 54 × 6
 #>    class  family    component      status              since notes              
 #>    <chr>  <chr>     <chr>          <chr>               <chr> <chr>              
 #>  1 drmTMB gaussian  mu             Stable              0.1.0 Univariate locatio…
@@ -453,7 +455,7 @@ symbolizer_capabilities()
 #>  8 drmTMB student   sigma          Planned or reserved NA    NA                 
 #>  9 drmTMB student   nu             Planned or reserved NA    NA                 
 #> 10 drmTMB lognormal mu             Planned or reserved NA    NA                 
-#> # ℹ 27 more rows
+#> # ℹ 44 more rows
 ```
 
 For the model fit in this vignette, the relevant rows are:

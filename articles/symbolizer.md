@@ -18,6 +18,28 @@ what the fit guarantees and what it does not.
 **Takeaway.** The product is the `symbolized_model` object; everything
 else is a renderer of that object.
 
+## A short glossary
+
+If you don’t read formula-grammar terminology fluently, here’s the
+quickest possible map of what each word means in a biology context.
+
+| word | meaning |
+|:---|:---|
+| response | the outcome you measured (e.g., body mass, abundance). |
+| predictor | a variable you think influences the response. |
+| factor | a categorical predictor with named levels (e.g., sex with “female” and “male”). |
+| submodel | one piece of the formula. A location-scale model has two submodels: one for the mean (mu), one for the residual SD (sigma). |
+| linear predictor | the sum that determines a parameter for an observation: intercept + slope x predictor + … Sometimes a link function (e.g., log) is applied to make it work on its natural scale. |
+| design matrix | the table the computer multiplies coefficients by to get fitted values. Each row is one observation; each column is one term (intercept, slope, factor contrast, …). |
+| coefficient | a single number the model estimates: an intercept, a slope, or a factor contrast. |
+| link function | the transformation between a parameter’s natural scale (e.g., probability) and the scale the linear predictor works on (e.g., logit). For `sigma` in a location-scale model, the link is log, so the linear predictor models log(sigma). |
+| random intercept | a per-group offset that lets each group have its own baseline, while assuming those offsets follow a shared distribution. |
+| latent variable | an unmeasured axis the model uses to explain shared variation in multiple traits or species. (Used in gllvmTMB.) |
+| loading | how strongly a single trait or species responds to a latent axis. |
+
+**Takeaway.** If a word above is unfamiliar, treat the next section as a
+hands-on definition by example.
+
 ## A first `symbolize()` call
 
 The canonical v0.1 example is a Gaussian location-scale model fit with
@@ -179,9 +201,11 @@ three tabs over the same fit.
 as_html_three_views(sym, head = 5, tail = 2)
 ```
 
-    <div class="sym-tab sym-active" data-tab="eq">1. Equation</div>
-    <div class="sym-tab"            data-tab="idx">2. Index</div>
-    <div class="sym-tab"            data-tab="mat">3. Matrix (with data)</div>
+[Skip three-views widget](#sym-sym-1779581395-end)
+
+    <button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779581395-tab-eq" aria-controls="sym-sym-1779581395-panel-eq" aria-selected="true" tabindex="0" data-tab="eq"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>1. Equation</button>
+    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779581395-tab-idx" aria-controls="sym-sym-1779581395-panel-idx" aria-selected="false" tabindex="-1" data-tab="idx"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>2. Index</button>
+    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779581395-tab-mat" aria-controls="sym-sym-1779581395-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>3. Matrix (with data)</button>
 
 The structural contract. No indices, no numbers – the shape of the
 model.
@@ -206,6 +230,11 @@ W_i \mid \mu_i,\, \sigma_i & \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 
 The actual numbers stacked – what the computer is multiplying. Showing
 first 5 and last 2 rows of n = 80.
+
+Matrix-form expansion of the model. Each row shows the response y_i and
+the corresponding row of the design matrix X (showing head and tail rows
+of the n total observations), with the coefficient vector beta listed
+below.
 
 ``` sym-matrix
 
@@ -289,12 +318,17 @@ assumption_table(sym)
 
 | assumption | expression | biological meaning | status |
 |:---|:---|:---|:---|
-| conditional_distribution | $`W_i \mid \mu_i\, \sigma_i \sim \mathrm{Normal}(\mu_i\, \sigma_i^2)`$ | body_mass varies normally around its expected value | stated |
-| linear_predictor | $`\mu_i = \beta_0 + \sum_k \beta_k X_{ki}`$ | Expected body_mass is a linear combination of the mean-model predictors | stated |
-| linear_predictor | $`\log(\sigma_i) = \gamma_0 + \sum_k \gamma_k Z_{ki}`$ | Log residual SD of body_mass is a linear combination of the scale-model predictors | stated |
-| independence | $`W_i \perp W_j \mid X \text{ for } i \ne j`$ | Observations are conditionally independent given the predictors | implied |
-| positivity | $`\sigma_i > 0`$ | Residual SD is constrained positive via the log link | implied |
-| no_missing_at_random | — | Observations are assumed not missing in a way that depends on the unobserved response | not_checked |
+| conditional_distribution | $`W_i \mid \mu_i\, \sigma_i \sim \mathrm{Normal}(\mu_i\, \sigma_i^2)`$ | body_mass varies normally around its expected value | explicit |
+| linear_predictor | $`\mu_i = \beta_0 + \sum_k \beta_k X_{ki}`$ | Expected body_mass is a linear combination of the mean-model predictors | explicit |
+| linear_predictor | $`\log(\sigma_i) = \gamma_0 + \sum_k \gamma_k Z_{ki}`$ | Log residual SD of body_mass is a linear combination of the scale-model predictors | explicit |
+| independence | $`W_i \perp W_j \mid X \text{ for } i \ne j`$ | Observations are conditionally independent given the predictors | follows from the formula |
+| positivity | $`\sigma_i > 0`$ | Residual SD is constrained positive via the log link | follows from the formula |
+| no_missing_at_random | — | Observations are assumed not missing in a way that depends on the unobserved response | your responsibility |
+
+**Note.** The status column shows whether the assumption is *explicit*
+(written in the formula), *follows from the formula* (implied by the
+link or parameterization), or *your responsibility* (something
+`symbolizer` cannot check from the fit, e.g. missing-at-random).
 
 [`formula_bridge()`](https://itchyshin.github.io/symbolizer/reference/formula_bridge.md)
 translates R syntax to mathematics. Each submodel has its R formula on
@@ -468,7 +502,7 @@ later versions.
 ``` r
 
 symbolizer_capabilities()
-#> # A tibble: 37 × 6
+#> # A tibble: 54 × 6
 #>    class  family    component      status              since notes              
 #>    <chr>  <chr>     <chr>          <chr>               <chr> <chr>              
 #>  1 drmTMB gaussian  mu             Stable              0.1.0 Univariate locatio…
@@ -481,7 +515,7 @@ symbolizer_capabilities()
 #>  8 drmTMB student   sigma          Planned or reserved NA    NA                 
 #>  9 drmTMB student   nu             Planned or reserved NA    NA                 
 #> 10 drmTMB lognormal mu             Planned or reserved NA    NA                 
-#> # ℹ 27 more rows
+#> # ℹ 44 more rows
 ```
 
 The roadmap in `README.md` lists the planned version per family /

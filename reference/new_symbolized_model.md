@@ -20,6 +20,7 @@ new_symbolized_model(
   random_effects = NULL,
   variance_components = NULL,
   covariance_components = NULL,
+  loadings = NULL,
   symbol_dictionary,
   assumptions,
   components,
@@ -75,6 +76,13 @@ new_symbolized_model(
 - covariance_components:
 
   A tibble or `NULL`.
+
+- loadings:
+
+  A tibble of latent-factor loadings (rows: one per
+  `(submodel, trait, axis)` entry of a loading matrix) or `NULL`.
+  Populated by extractors for reduced-rank latent-variable models such
+  as gllvmTMB.
 
 - symbol_dictionary:
 

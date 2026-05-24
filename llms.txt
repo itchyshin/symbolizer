@@ -128,12 +128,12 @@ assumption_table(sym)
 
 | assumption | expression | biological meaning | status |
 |:---|:---|:---|:---|
-| conditional_distribution | $`W_i \mid \mu_i\, \sigma_i \sim \mathrm{Normal}(\mu_i\, \sigma_i^2)`$ | body_mass varies normally around its expected value | stated |
-| linear_predictor | $`\mu_i = \beta_0 + \sum_k \beta_k X_{ki}`$ | Expected body_mass is a linear combination of the mean-model predictors | stated |
-| linear_predictor | $`\log(\sigma_i) = \gamma_0 + \sum_k \gamma_k Z_{ki}`$ | Log residual SD of body_mass is a linear combination of the scale-model predictors | stated |
-| independence | $`W_i \perp W_j \mid X \text{ for } i \ne j`$ | Observations are conditionally independent given the predictors | implied |
-| positivity | $`\sigma_i > 0`$ | Residual SD is constrained positive via the log link | implied |
-| no_missing_at_random | — | Observations are assumed not missing in a way that depends on the unobserved response | not_checked |
+| conditional_distribution | $`W_i \mid \mu_i\, \sigma_i \sim \mathrm{Normal}(\mu_i\, \sigma_i^2)`$ | body_mass varies normally around its expected value | explicit |
+| linear_predictor | $`\mu_i = \beta_0 + \sum_k \beta_k X_{ki}`$ | Expected body_mass is a linear combination of the mean-model predictors | explicit |
+| linear_predictor | $`\log(\sigma_i) = \gamma_0 + \sum_k \gamma_k Z_{ki}`$ | Log residual SD of body_mass is a linear combination of the scale-model predictors | explicit |
+| independence | $`W_i \perp W_j \mid X \text{ for } i \ne j`$ | Observations are conditionally independent given the predictors | follows from the formula |
+| positivity | $`\sigma_i > 0`$ | Residual SD is constrained positive via the log link | follows from the formula |
+| no_missing_at_random | — | Observations are assumed not missing in a way that depends on the unobserved response | your responsibility |
 
 ### What each coefficient means
 
@@ -220,6 +220,16 @@ GPL-3. Companion to [`drmTMB`](https://itchyshin.github.io/drmTMB/) and
   : symbolizer: Structured Symbolic Specifications, Interpretations, and
   Teachable Stories for Modern Statistical Models
 
+## First-time entry
+
+One call that does it all, plus the plain-English summary of a
+symbolized_model.
+
+- [`explain()`](https://itchyshin.github.io/symbolizer/reference/explain.md)
+  : One-call explainer for a fitted model
+- [`summary(`*`<symbolized_model>`*`)`](https://itchyshin.github.io/symbolizer/reference/summary.symbolized_model.md)
+  : Plain-English summary of a symbolized model
+
 ## Build the structured symbolic object
 
 The product. Renderers consume it; users override symbols, units,
@@ -229,6 +239,8 @@ context here.
   : Symbolize a fitted statistical model
 - [`symbolize(`*`<drmTMB>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.drmTMB.md)
   : Symbolize a drmTMB fit (Gaussian location-scale, v0.1)
+- [`symbolize(`*`<gllvmTMB>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.gllvmTMB.md)
+  : Symbolize a gllvmTMB fit (Gaussian latent-variable, v0.1)
 - [`validate_symbolized_model()`](https://itchyshin.github.io/symbolizer/reference/validate_symbolized_model.md)
   : Validate a symbolized_model object
 - [`symbolizer_capabilities()`](https://itchyshin.github.io/symbolizer/reference/symbolizer_capabilities.md)
@@ -339,5 +351,7 @@ every renderer reads.
   symbolizer](https://itchyshin.github.io/symbolizer/articles/symbolizer.md):
 - [A worked example: structured body-size
   model](https://itchyshin.github.io/symbolizer/articles/symbolizer-large.md):
+- [Latent variables in ecology: a gllvmTMB worked
+  example](https://itchyshin.github.io/symbolizer/articles/symbolizer-gllvm.md):
 - [How symbolizer compares to equatiomatic, gtsummary, and
   friends](https://itchyshin.github.io/symbolizer/articles/symbolizer-vs-others.md):

@@ -7,6 +7,16 @@
   : symbolizer: Structured Symbolic Specifications, Interpretations, and
   Teachable Stories for Modern Statistical Models
 
+## First-time entry
+
+One call that does it all, plus the plain-English summary of a
+symbolized_model.
+
+- [`explain()`](https://itchyshin.github.io/symbolizer/reference/explain.md)
+  : One-call explainer for a fitted model
+- [`summary(`*`<symbolized_model>`*`)`](https://itchyshin.github.io/symbolizer/reference/summary.symbolized_model.md)
+  : Plain-English summary of a symbolized model
+
 ## Build the structured symbolic object
 
 The product. Renderers consume it; users override symbols, units,
@@ -16,6 +26,8 @@ context here.
   : Symbolize a fitted statistical model
 - [`symbolize(`*`<drmTMB>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.drmTMB.md)
   : Symbolize a drmTMB fit (Gaussian location-scale, v0.1)
+- [`symbolize(`*`<gllvmTMB>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.gllvmTMB.md)
+  : Symbolize a gllvmTMB fit (Gaussian latent-variable, v0.1)
 - [`validate_symbolized_model()`](https://itchyshin.github.io/symbolizer/reference/validate_symbolized_model.md)
   : Validate a symbolized_model object
 - [`symbolizer_capabilities()`](https://itchyshin.github.io/symbolizer/reference/symbolizer_capabilities.md)
