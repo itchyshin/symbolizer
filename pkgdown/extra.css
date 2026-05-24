@@ -2,27 +2,42 @@
 
 /*
  * Make the hex logo prominent — matches the visual weight of the drmTMB
- * and gllvmTMB sister-package pkgdown sites. pkgdown's default rule is
- * .logo{width:100px;float:right;margin-left:30px}, with responsive
- * variants at 120px and 80px. We bump those up substantially so the hex
- * carries the page heading visually.
+ * and gllvmTMB sister-package pkgdown sites.
+ *
+ * pkgdown ships bootstrap.min.css with these rules:
+ *   .logo                    { width: 100px; float: right; margin-left: 30px }
+ *   .template-home img.logo  { width: 120px }
+ *   (small screens)          .logo { width: 80px }
+ *
+ * The `.template-home img.logo` rule has higher specificity (a chained
+ * class + element + class selector) than a bare `.logo`. To override it
+ * we use selectors of matching or higher specificity below, plus
+ * !important on the responsive overrides for belt-and-braces (Bootstrap's
+ * media-query block also targets the bare .logo and would otherwise win
+ * on small screens).
  */
-.logo {
-  width: 320px;
-  margin-left: 40px;
+
+/* Default desktop / tablet. The chained `.template-home img.logo`
+ * selector matches the pkgdown rule we are overriding. */
+.template-home img.logo,
+img.logo {
+  width: 320px !important;
+  margin-left: 40px !important;
 }
 
-/* Larger screens: full drmTMB-scale presence. */
+/* Large screens: full drmTMB-scale presence. */
 @media (min-width: 992px) {
-  .logo {
-    width: 400px;
+  .template-home img.logo,
+  img.logo {
+    width: 400px !important;
   }
 }
 
 /* Phones: keep the logo visible but not overwhelming the title. */
 @media (max-width: 575.98px) {
-  .logo {
-    width: 180px;
-    margin-left: 20px;
+  .template-home img.logo,
+  img.logo {
+    width: 180px !important;
+    margin-left: 20px !important;
   }
 }
