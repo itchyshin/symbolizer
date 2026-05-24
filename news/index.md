@@ -24,15 +24,25 @@
 - Interpretation templates and assumption templates gain `biv_gaussian`
   rows (`inst/extdata/interpretation-templates.csv` and
   `inst/extdata/assumption-templates.csv`).
-- New: `compare_symbolic(sym_a, sym_b)` returns a structural diff
-  between two `symbolized_model` objects. Slots: `meta` (left / right
-  model summaries — class, family, response, n_obs), `diff_submodels`
-  (presence per submodel: `left_only` / `right_only` / `both`),
-  `diff_terms` (presence per (submodel, term_label) pair), and
+- New: `compare_symbolic(sym_a, sym_b, metrics = FALSE)` returns a
+  structural diff between two `symbolized_model` objects. Slots: `meta`
+  (left / right model summaries — class, family, response, n_obs),
+  `diff_submodels` (presence per submodel: `left_only` / `right_only` /
+  `both`), `diff_terms` (presence per (submodel, term_label) pair), and
   `diff_assumptions` (status on each side plus a `same_status` flag). S3
   class `symbolic_comparison`;
   [`print()`](https://rdrr.io/r/base/print.html) produces a structured
   cli block and `knit_print()` produces side-by-side markdown tables.
+  Passing `metrics = TRUE` adds a fifth slot `diff_metrics` with AIC,
+  BIC, log-likelihood, and df on each side plus their delta (right -
+  left); the metrics block refuses to compute deltas when the two fits
+  are obviously incomparable (different family, response, or n_obs) and
+  instead carries a `comparable = FALSE` attribute plus a `note`
+  explaining why. For fit-time identifiability and convergence
+  diagnostics, run
+  [`drmTMB::check_drm()`](https://itchyshin.github.io/drmTMB/reference/check_drm.html)
+  (or the gllvmTMB analogue) per fit before interpreting the structural
+  diff.
 
 ## symbolizer 0.1.1
 
