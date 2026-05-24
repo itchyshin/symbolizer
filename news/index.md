@@ -1,5 +1,36 @@
 # Changelog
 
+## symbolizer 0.2.1.9000 (development)
+
+### v0.3 (in progress) — non-Gaussian drmTMB families
+
+- [`symbolize.drmTMB()`](https://itchyshin.github.io/symbolizer/reference/symbolize.drmTMB.md)
+  reads Student-t fits (`family = drmTMB::student()`) end-to-end. The
+  Student-t adds a `nu` (degrees-of-freedom) submodel alongside `mu` and
+  `sigma`; drmTMB parameterises `nu` on the `log(nu - 2)` scale (the
+  `logm2` link) so that `nu > 2` is always enforced and the modelled
+  variance `nu / (nu - 2) * sigma^2` is finite. The structured symbolic
+  object carries:
+  - a Student-t distribution row in both index and matrix forms,
+  - submodels for `mu` (identity), `sigma` (log), `nu` (logm2),
+  - interpretation rows for the three submodels including a biological
+    reading on `nu` that explains heavier vs lighter tails,
+  - an assumption row `positivity_and_finite_variance` capturing the
+    `nu > 2` constraint,
+  - a
+    [`methods_text()`](https://itchyshin.github.io/symbolizer/reference/methods_text.md)
+    template covering the three submodels and the log(nu - 2) link
+    explanation.
+- Capability registry rows flipped from “Planned or reserved” to “First
+  slice”:
+  - `drmTMB / student / mu`
+  - `drmTMB / student / sigma`
+  - `drmTMB / student / nu`
+- `drm_link_for()` now generalises the multi-dpar link lookup. The
+  previous biv_gaussian-only branch was extended to recognise any family
+  whose links are exposed as a named vector (Student-t today; future
+  families can land without further changes here).
+
 ## symbolizer 0.2.1
 
 ### v0.2.1 — methods_text, per-fit warnings, biv_gaussian gate

@@ -228,11 +228,11 @@ three tabs over the same fit.
 as_html_three_views(sym, head = 5, tail = 2)
 ```
 
-[Skip three-views widget](#sym-sym-1779637869-end)
+[Skip three-views widget](#sym-sym-1779638491-end)
 
-    <button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779637869-tab-eq" aria-controls="sym-sym-1779637869-panel-eq" aria-selected="true" tabindex="0" data-tab="eq"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>1. Equation</button>
-    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779637869-tab-idx" aria-controls="sym-sym-1779637869-panel-idx" aria-selected="false" tabindex="-1" data-tab="idx"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>2. Index</button>
-    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779637869-tab-mat" aria-controls="sym-sym-1779637869-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>3. Matrix (with data)</button>
+    <button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779638491-tab-eq" aria-controls="sym-sym-1779638491-panel-eq" aria-selected="true" tabindex="0" data-tab="eq"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>1. Equation</button>
+    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779638491-tab-idx" aria-controls="sym-sym-1779638491-panel-idx" aria-selected="false" tabindex="-1" data-tab="idx"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>2. Index</button>
+    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779638491-tab-mat" aria-controls="sym-sym-1779638491-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>3. Matrix (with data)</button>
 
 The structural contract. No indices, no numbers – the shape of the
 model.
@@ -538,9 +538,9 @@ symbolizer_capabilities()
 #>  4 drmTMB gaussian  zi             Planned or reserved NA    Zero-inflation sub…
 #>  5 drmTMB gaussian  hu             Planned or reserved NA    Hurdle submodel.   
 #>  6 drmTMB gaussian  rho12          Planned or reserved NA    Bivariate residual…
-#>  7 drmTMB student   mu             Planned or reserved NA    NA                 
-#>  8 drmTMB student   sigma          Planned or reserved NA    NA                 
-#>  9 drmTMB student   nu             Planned or reserved NA    NA                 
+#>  7 drmTMB student   mu             First slice         0.2.2 Student-t location…
+#>  8 drmTMB student   sigma          First slice         0.2.2 Student-t scale su…
+#>  9 drmTMB student   nu             First slice         0.2.2 Student-t degrees-…
 #> 10 drmTMB lognormal mu             Planned or reserved NA    NA                 
 #> # ℹ 44 more rows
 ```
