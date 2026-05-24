@@ -55,7 +55,6 @@ reference:
       - symbolize
       - symbolize.drmTMB
       - symbolize.gllvmTMB
-      - validate_symbolized_model
       - symbolizer_capabilities
   - title: "Read both notations"
     desc: "Educator-facing bridge between index and matrix forms."
@@ -107,5 +106,7 @@ reference:
       - align_at
       - wrap_env
   - title: "Internal: object construction"
+    desc: "S3 constructor and validator. Useful only for advanced users hand-building symbolized_model objects."
     contents:
       - new_symbolized_model
+      - validate_symbolized_model
