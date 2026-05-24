@@ -4,6 +4,7 @@
 <url><loc>https://itchyshin.github.io/symbolizer/CLAUDE.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/CONTRIBUTING.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/articles/index.html</loc></url>
+<url><loc>https://itchyshin.github.io/symbolizer/articles/symbolizer-gllvm-design.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/articles/symbolizer-gllvm.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/articles/symbolizer-large.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/articles/symbolizer-vs-others.html</loc></url>
@@ -29,6 +30,7 @@
 <url><loc>https://itchyshin.github.io/symbolizer/reference/get_parameterization.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/reference/index.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/reference/load_template.html</loc></url>
+<url><loc>https://itchyshin.github.io/symbolizer/reference/model_card.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/reference/new_symbolized_model.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/reference/notation_bridge.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/reference/parameter_interpretation.html</loc></url>

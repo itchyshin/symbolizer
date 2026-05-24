@@ -91,66 +91,59 @@ format, one row per (individual, session, trait).
 
 ## 3. The model in symbols
 
-The model has the same shape in two notations. In index form (one
-equation per observation):
+The same model can be written two ways. The **long form** matches the
+way
+[`gllvmTMB()`](https://itchyshin.github.io/gllvmTMB/reference/gllvmTMB.html)
+actually fits the data — one row per (individual, occasion, trait) cell,
+with a scalar response. The **wide form** matches the factor-analytic
+textbooks — one row per observation, with a trait-vector response. The
+two panels below place them side by side.
 
-``` r
+#### Long form
 
-cat("$$
-\\begin{aligned}
-y_{ij} \\mid \\mu,\\, \\boldsymbol{\\Lambda},\\, \\mathbf{z}_i
-  & \\sim \\mathcal{N}\\!\\left(\\mu_j + \\sum_{k=1}^{d_B} \\lambda_{jk}\\, z_{ik},\\, s_j^2\\right) \\\\
-\\mathbf{z}_i & \\sim \\mathcal{N}(\\mathbf{0},\\, \\mathbf{I}_{d_B})
-\\end{aligned}
-$$")
-```
-
-``` math
-\begin{aligned}
-y_{ij} \mid \mu,\, \boldsymbol{\Lambda},\, \mathbf{z}_i
-  & \sim \mathcal{N}\!\left(\mu_j + \sum_{k=1}^{d_B} \lambda_{jk}\, z_{ik},\, s_j^2\right) \\
-\mathbf{z}_i & \sim \mathcal{N}(\mathbf{0},\, \mathbf{I}_{d_B})
-\end{aligned}
-```
-
-Index $`i`$ ranges over individuals, $`j`$ over traits, $`k`$ over
-latent axes. $`\mu_j`$ is the trait $`j`$ mean across individuals;
-$`\lambda_{jk}`$ is the loading of trait $`j`$ on axis $`k`$; $`z_{ik}`$
-is individual $`i`$’s position on axis $`k`$; $`s_j^2`$ is trait $`j`$’s
-unique between-individual variance.
-
-In matrix form (one block for the whole dataset):
-
-``` r
-
-cat("$$
-\\begin{aligned}
-\\mathbf{Y} \\mid \\boldsymbol{\\mu},\\, \\boldsymbol{\\Lambda},\\, \\mathbf{Z}
-  & \\sim \\mathcal{MN}\\!\\left(\\mathbf{1}\\boldsymbol{\\mu}^{\\!\\top} + \\mathbf{Z}\\,\\boldsymbol{\\Lambda}^{\\!\\top},\\; \\mathbf{S}\\right) \\\\
-\\mathbf{z}_i & \\sim \\mathcal{N}(\\mathbf{0},\\, \\mathbf{I}_{d_B})
-\\end{aligned}
-$$")
-```
+Each row of the data is one (individual, occasion, trait) cell. The
+scalar response is $`y_{ijt}`$.
 
 ``` math
-\begin{aligned}
-\mathbf{Y} \mid \boldsymbol{\mu},\, \boldsymbol{\Lambda},\, \mathbf{Z}
-  & \sim \mathcal{MN}\!\left(\mathbf{1}\boldsymbol{\mu}^{\!\top} + \mathbf{Z}\,\boldsymbol{\Lambda}^{\!\top},\; \mathbf{S}\right) \\
-\mathbf{z}_i & \sim \mathcal{N}(\mathbf{0},\, \mathbf{I}_{d_B})
-\end{aligned}
+y_{ijt} \mid \boldsymbol{\mu},\, \boldsymbol{\Lambda},\, \mathbf{z}_i,\, \boldsymbol{\Psi}
+  \sim \mathcal{N}\!\left(\mu_t + \sum_{k=1}^{d_B} \lambda_{tk}\, z_{ik},\; \sigma^2_{e}\right)
 ```
 
-$`\mathbf{Y}`$ is the $`n \times T`$ matrix of trait values,
-$`\boldsymbol{\mu}`$ is the length-$`T`$ vector of trait means,
-$`\mathbf{Z}`$ is the $`n \times d_B`$ matrix of latent-variable scores,
-$`\boldsymbol{\Lambda}`$ is the $`T \times d_B`$ loading matrix, and
-$`\mathbf{S} = \mathrm{diag}(s_1^2, \ldots, s_T^2)`$ collects the
-trait-specific residual variances. With $`n = 40`$ individuals,
-$`T = 5`$ traits, and $`d_B = 2`$ latent axes, the matrix block is a
-five-line recipe for a 40 by 5 matrix of trait values.
+Native to `gllvmTMB`’s formula interface. Each row’s contribution is a
+scalar Gaussian.
 
-**Takeaway.** Index form is one equation per observation; matrix form is
-one block for the whole dataset. Same model, two reading speeds.
+#### Wide form
+
+Each row is one observation; the response is a $`T`$-vector
+$`\mathbf{Y}_{ij}`$.
+
+``` math
+\mathbf{Y}_{ij} \mid \boldsymbol{\mu},\, \boldsymbol{\Lambda},\, \mathbf{z}_i,\, \boldsymbol{\Psi}
+  \sim \mathcal{MN}\!\left(\boldsymbol{\mu} + \boldsymbol{\Lambda}\,\mathbf{z}_i,\; \boldsymbol{\Sigma}\right),
+\quad \boldsymbol{\Sigma} = \boldsymbol{\Lambda}\boldsymbol{\Lambda}^{\!\top} + \boldsymbol{\Psi}
+```
+
+Native to factor-analytic textbooks. The covariance decomposition
+$`\boldsymbol{\Sigma} = \boldsymbol{\Lambda}\boldsymbol{\Lambda}^{\!\top} + \boldsymbol{\Psi}`$
+is the headline result.
+
+*Bridge.* The two forms describe the same model. The wide form makes the
+covariance decomposition explicit; the long form is what
+[`gllvmTMB()`](https://itchyshin.github.io/gllvmTMB/reference/gllvmTMB.html)
+actually fits.
+
+Index $`i`$ ranges over individuals, $`j`$ over occasions, $`t`$ (or
+$`j`$ in the wide form) over traits, $`k`$ over latent axes. $`\mu_t`$
+is the trait $`t`$ mean; $`\lambda_{tk}`$ is the loading of trait $`t`$
+on axis $`k`$; $`z_{ik}`$ is individual $`i`$’s position on axis $`k`$;
+$`\boldsymbol{\Psi} = \mathrm{diag}(\psi_1^2, \ldots, \psi_T^2)`$
+collects the trait-specific between-individual uniquenesses;
+$`\sigma^2_e`$ is the residual scalar variance in the long form.
+
+**Takeaway.** Long form is one scalar equation per (individual,
+occasion, trait); wide form is one $`T`$-vector equation per
+observation, with the covariance decomposition written explicitly. Same
+model, two notations.
 
 ## 4. The fit
 

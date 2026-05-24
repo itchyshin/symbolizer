@@ -185,7 +185,7 @@ Pre-release. Read status words consistently:
 | `drmTMB` Gaussian random intercepts `(1 \| group)` | First slice |
 | `drmTMB` non-Gaussian families, ZI, hurdle, bivariate | Planned |
 | `gllvmTMB`, `glmmTMB`, `brms`, `MCMCglmm`, `sdmTMB`, `lme4`, `lm`/`glm` | Unsupported in v0.1 (see roadmap) |
-| `compare_symbolic()`, `model_card()`, `methods_text()`, model diagrams | Planned (v0.2 to v0.5) |
+| `compare_symbolic()`, [`model_card()`](https://itchyshin.github.io/symbolizer/reference/model_card.md), `methods_text()`, model diagrams | Planned (v0.2 to v0.5) |
 
 See
 [`symbolizer_capabilities()`](https://itchyshin.github.io/symbolizer/reference/symbolizer_capabilities.md)
@@ -229,6 +229,14 @@ symbolized_model.
   : One-call explainer for a fitted model
 - [`summary(`*`<symbolized_model>`*`)`](https://itchyshin.github.io/symbolizer/reference/summary.symbolized_model.md)
   : Plain-English summary of a symbolized model
+
+## Teaching bundle (one-call)
+
+model_card collects equation, assumptions, readings, extraction calls,
+recommended plots in one S3 object.
+
+- [`model_card()`](https://itchyshin.github.io/symbolizer/reference/model_card.md)
+  : One-call teaching bundle for a symbolized model
 
 ## Build the structured symbolic object
 
@@ -353,5 +361,7 @@ every renderer reads.
   model](https://itchyshin.github.io/symbolizer/articles/symbolizer-large.md):
 - [Latent variables in ecology: a gllvmTMB worked
   example](https://itchyshin.github.io/symbolizer/articles/symbolizer-gllvm.md):
+- [What a symbolized GLLVM should
+  explain](https://itchyshin.github.io/symbolizer/articles/symbolizer-gllvm-design.md):
 - [How symbolizer compares to equatiomatic, gtsummary, and
   friends](https://itchyshin.github.io/symbolizer/articles/symbolizer-vs-others.md):

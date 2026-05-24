@@ -17,6 +17,14 @@ symbolized_model.
 - [`summary(`*`<symbolized_model>`*`)`](https://itchyshin.github.io/symbolizer/reference/summary.symbolized_model.md)
   : Plain-English summary of a symbolized model
 
+## Teaching bundle (one-call)
+
+model_card collects equation, assumptions, readings, extraction calls,
+recommended plots in one S3 object.
+
+- [`model_card()`](https://itchyshin.github.io/symbolizer/reference/model_card.md)
+  : One-call teaching bundle for a symbolized model
+
 ## Build the structured symbolic object
 
 The product. Renderers consume it; users override symbols, units,

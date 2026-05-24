@@ -2,11 +2,12 @@ pandoc: 3.8.3
 pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
+  symbolizer-gllvm-design: symbolizer-gllvm-design.html
   symbolizer-gllvm: symbolizer-gllvm.html
   symbolizer-large: symbolizer-large.html
   symbolizer-vs-others: symbolizer-vs-others.html
   symbolizer: symbolizer.html
-last_built: 2026-05-24T00:09Z
+last_built: 2026-05-24T00:31Z
 urls:
   reference: https://itchyshin.github.io/symbolizer/reference
   article: https://itchyshin.github.io/symbolizer/articles

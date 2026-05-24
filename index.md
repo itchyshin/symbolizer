@@ -185,7 +185,7 @@ Pre-release. Read status words consistently:
 | `drmTMB` Gaussian random intercepts `(1 \| group)` | First slice |
 | `drmTMB` non-Gaussian families, ZI, hurdle, bivariate | Planned |
 | `gllvmTMB`, `glmmTMB`, `brms`, `MCMCglmm`, `sdmTMB`, `lme4`, `lm`/`glm` | Unsupported in v0.1 (see roadmap) |
-| `compare_symbolic()`, `model_card()`, `methods_text()`, model diagrams | Planned (v0.2 to v0.5) |
+| `compare_symbolic()`, [`model_card()`](https://itchyshin.github.io/symbolizer/reference/model_card.md), `methods_text()`, model diagrams | Planned (v0.2 to v0.5) |
 
 See
 [`symbolizer_capabilities()`](https://itchyshin.github.io/symbolizer/reference/symbolizer_capabilities.md)
