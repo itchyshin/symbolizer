@@ -444,11 +444,19 @@ with few RE groups). Templated from inst/extdata/warning-templates.csv.
 ## Model diagram
 
 Render the structural model as a DAG (nodes for response, parameters,
-predictors, groups, random effects). Returns a list with the DOT
-representation ready for GraphvizOnline or DiagrammeR.
+predictors, groups, random effects). Returns a list with DOT (GraphViz),
+Mermaid (Markdown / Quarto), and TikZ (LaTeX) representations.
 
 - [`as_dag()`](https://itchyshin.github.io/symbolizer/reference/as_dag.md)
   : Model diagram for a symbolized model
+
+## Simulation recipe
+
+Pseudocode + runnable R code describing how to simulate from a fitted
+model.
+
+- [`simulate_recipe()`](https://itchyshin.github.io/symbolizer/reference/simulate_recipe.md)
+  : Simulation recipe for a symbolized model
 
 ## Internal: term-grammar bridge
 

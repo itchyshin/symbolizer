@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.17.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.18.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,6 +35,29 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.18.0" id="symbolizer-0180">symbolizer 0.18.0<a class="anchor" aria-label="anchor" href="#symbolizer-0180"></a></h2>
+<div class="section level3">
+<h3 id="v018--option-b-debt-cleared-simulate_recipe-and-diagram-surfaces-0-18-0">v0.18 – Option B debt cleared: simulate_recipe() and diagram surfaces<a class="anchor" aria-label="anchor" href="#v018--option-b-debt-cleared-simulate_recipe-and-diagram-surfaces-0-18-0"></a></h3>
+<p>Closes the long-standing Option B debt named in the master plan (simulate_recipe + diagrams beyond as_dag).</p>
+<ul><li>New exported function <code>simulate_recipe(sym, n = NULL, seed = NULL)</code>. Returns a <code>symbolizer_simulation_recipe</code> S3 object with two slots:
+<ul><li>
+<code>$pseudocode</code> – numbered prose steps describing the generative model (draw random effects, build linear predictor, apply inverse link, sample response).</li>
+<li>
+<code>$r_code</code> – runnable R code with the right RNG calls for the fitted family (rnorm / rbinom / rpois / rgamma / rnbinom for Gaussian / binomial / Poisson / Gamma / negative-binomial, and a two-tier draw for <code>meta_normal</code>). Family-aware via the symbolized_model’s <code>submodels</code> and <code>random_effects</code> tibbles; honours link functions and detects optional sigma / zi submodels.</li>
+</ul></li>
+<li>
+<code>as_dag(sym)</code> is enriched with two new slots (no new exports):
+<ul><li>
+<code>$mermaid</code> – Mermaid-flowchart string suitable for pasting into Markdown / Quarto.</li>
+<li>
+<code>$tikz</code> – TikZ string suitable for inclusion in a LaTeX document (requires <code>\\usepackage{tikz}</code> and the <code>positioning,shapes.geometric</code> libraries). The existing <code>$dot</code> (GraphViz) slot is unchanged.</li>
+</ul></li>
+<li>pkgdown reference page gains a “Simulation recipe” section listing <code>simulate_recipe</code>; the “Model diagram” section is rewritten to mention all three syntactic frames (DOT / Mermaid / TikZ).</li>
+<li>
+<code>as_dag</code> test updated to assert the five-slot shape.</li>
+</ul></div>
+</div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.17.0" id="symbolizer-0170">symbolizer 0.17.0<a class="anchor" aria-label="anchor" href="#symbolizer-0170"></a></h2>
 <div class="section level3">
 <h3 id="v017--ladder-vignette-and-homepage-refresh-0-17-0">v0.17 – ladder vignette and homepage refresh<a class="anchor" aria-label="anchor" href="#v017--ladder-vignette-and-homepage-refresh-0-17-0"></a></h3>
@@ -48,7 +71,7 @@
 <li>
 <code>_pkgdown.yml</code>: navbar Articles dropdown reorganised. “Get started” is now Ladder -&gt; Concepts (the existing <code>symbolizer.Rmd</code>); remaining articles moved into “Deep dives”.</li>
 <li>README “Tiny example” gets a callout pointing readers at the ladder for a gentler on-ramp.</li>
-</ul><p>Option B debt (<code>simulate_recipe()</code>, <code>as_mermaid()</code>, <code>as_tikz()</code>, <code>render_model_notebook()</code>) stays deferred to v0.18.</p>
+</ul><p>Option B debt (<code><a href="../reference/simulate_recipe.html">simulate_recipe()</a></code>, <code>as_mermaid()</code>, <code>as_tikz()</code>, <code>render_model_notebook()</code>) stays deferred to v0.18.</p>
 </div>
 </div>
     <div class="section level2">

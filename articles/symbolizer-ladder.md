@@ -323,11 +323,11 @@ three-view widget:
 as_html_three_views(sym4)
 ```
 
-[Skip three-views widget](#sym-sym-1779723055-end)
+[Skip three-views widget](#sym-sym-1779724032-end)
 
-    <button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779723055-tab-eq" aria-controls="sym-sym-1779723055-panel-eq" aria-selected="true" tabindex="0" data-tab="eq"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>1. Equation</button>
-    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779723055-tab-idx" aria-controls="sym-sym-1779723055-panel-idx" aria-selected="false" tabindex="-1" data-tab="idx"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>2. Index</button>
-    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779723055-tab-mat" aria-controls="sym-sym-1779723055-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>3. Matrix (with data)</button>
+    <button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779724032-tab-eq" aria-controls="sym-sym-1779724032-panel-eq" aria-selected="true" tabindex="0" data-tab="eq"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>1. Equation</button>
+    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779724032-tab-idx" aria-controls="sym-sym-1779724032-panel-idx" aria-selected="false" tabindex="-1" data-tab="idx"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>2. Index</button>
+    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779724032-tab-mat" aria-controls="sym-sym-1779724032-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>3. Matrix (with data)</button>
 
 The structural contract. No indices, no numbers – the shape of the
 model.
@@ -444,25 +444,25 @@ overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border:
 0; } .sym-skip { position: absolute; top: -100px; left: 0; padding:
 0.4rem 0.7rem; background: \#8a1f22; color: \#fff; text-decoration:
 none; font-size: 0.85rem; z-index: 5; } .sym-skip:focus { top: 0;
-}\</style\> \<div class="sym-tabs" id="sym-sym-1779723055"\> \<a
-class="sym-skip" href="#sym-sym-1779723055-end"\>Skip three-views
+}\</style\> \<div class="sym-tabs" id="sym-sym-1779724032"\> \<a
+class="sym-skip" href="#sym-sym-1779724032-end"\>Skip three-views
 widget\</a\> \<div class="sym-tablist" role="tablist" aria-label="Three
 views of the model"\> \<button type="button" class="sym-tab sym-active"
-role="tab" id="sym-sym-1779723055-tab-eq"
-aria-controls="sym-sym-1779723055-panel-eq" aria-selected="true"
+role="tab" id="sym-sym-1779724032-tab-eq"
+aria-controls="sym-sym-1779724032-panel-eq" aria-selected="true"
 tabindex="0" data-tab="eq"\>\<span class="sym-tab-marker"
 aria-hidden="true"\>&#9656;\</span\>1. Equation\</button\> \<button
-type="button" class="sym-tab" role="tab" id="sym-sym-1779723055-tab-idx"
-aria-controls="sym-sym-1779723055-panel-idx" aria-selected="false"
+type="button" class="sym-tab" role="tab" id="sym-sym-1779724032-tab-idx"
+aria-controls="sym-sym-1779724032-panel-idx" aria-selected="false"
 tabindex="-1" data-tab="idx"\>\<span class="sym-tab-marker"
 aria-hidden="true"\>&#9656;\</span\>2. Index\</button\> \<button
-type="button" class="sym-tab" role="tab" id="sym-sym-1779723055-tab-mat"
-aria-controls="sym-sym-1779723055-panel-mat" aria-selected="false"
+type="button" class="sym-tab" role="tab" id="sym-sym-1779724032-tab-mat"
+aria-controls="sym-sym-1779724032-panel-mat" aria-selected="false"
 tabindex="-1" data-tab="mat"\>\<span class="sym-tab-marker"
 aria-hidden="true"\>&#9656;\</span\>3. Matrix (with data)\</button\>
 \</div\> \<div class="sym-panel sym-active" role="tabpanel"
-id="sym-sym-1779723055-panel-eq"
-aria-labelledby="sym-sym-1779723055-tab-eq" data-panel="eq"
+id="sym-sym-1779724032-panel-eq"
+aria-labelledby="sym-sym-1779724032-tab-eq" data-panel="eq"
 tabindex="0"\> \<p class="sym-caption"\>The structural contract. No
 indices, no numbers -- the shape of the model.\</p\> \<div
 class="sym-eq"\>\$\$\begin{aligned} \mathbf{body_mass} \mid
@@ -472,8 +472,8 @@ class="sym-eq"\>\$\$\begin{aligned} \mathbf{body_mass} \mid
 \log(\boldsymbol{\sigma}) & = \mathbf{Z} \boldsymbol{\gamma} \\
 \mathbf{u}\_{site} & \sim \mathcal{N}(\mathbf{0},\\ \sigma\_{site}^2
 \mathbf{I}\_{12}) \end{aligned}\$\$\</div\> \</div\> \<div
-class="sym-panel" role="tabpanel" id="sym-sym-1779723055-panel-idx"
-aria-labelledby="sym-sym-1779723055-tab-idx" data-panel="idx" hidden
+class="sym-panel" role="tabpanel" id="sym-sym-1779724032-panel-idx"
+aria-labelledby="sym-sym-1779724032-tab-idx" data-panel="idx" hidden
 tabindex="0"\> \<p class="sym-caption"\>What happens for each
 observation \<em\>i\</em\>.\</p\> \<div
 class="sym-eq"\>\$\$\begin{aligned} body_mass_i \mid \mu_i,\\ \sigma_i &
@@ -482,8 +482,8 @@ class="sym-eq"\>\$\$\begin{aligned} body_mass_i \mid \mu_i,\\ \sigma_i &
 u\_{site(i)} \\ \log(\sigma_i) & = \gamma\_{0} + \gamma\_{1} \\
 temperature_i \\ u\_{site} & \sim \mathcal{N}(0,\\ \sigma\_{site}^2)
 \end{aligned}\$\$\</div\> \</div\> \<div class="sym-panel"
-role="tabpanel" id="sym-sym-1779723055-panel-mat"
-aria-labelledby="sym-sym-1779723055-tab-mat" data-panel="mat" hidden
+role="tabpanel" id="sym-sym-1779724032-panel-mat"
+aria-labelledby="sym-sym-1779724032-tab-mat" data-panel="mat" hidden
 tabindex="0"\> \<p class="sym-caption"\>The actual numbers stacked --
 what the computer is multiplying. Showing first 5 and last 2 rows of n =
 200.\</p\> \<span class="sym-sr-only"\>Matrix-form expansion of the
@@ -506,9 +506,9 @@ gamma_1 = 0.0392 Z_g (group indicator) u (random effects, BLUPs) 1.00 0
 -0.0000000901 u_10 = -0.000000120 u_11 = 0.000000322 u_12 = 0.0000000515
 Fitted mu_hat (first 5): 39.0 37.1 36.7 35.0 36.7 Fitted sigma_hat
 (first 5): 4.10 3.22 2.77 2.45 3.04 \</pre\> \</div\> \</div\> \<span
-id="sym-sym-1779723055-end" tabindex="-1"\>\</span\>
+id="sym-sym-1779724032-end" tabindex="-1"\>\</span\>
 \<script\>(function() { var root =
-document.getElementById("sym-sym-1779723055"); if (!root) return; var
+document.getElementById("sym-sym-1779724032"); if (!root) return; var
 tabs =
 Array.prototype.slice.call(root.querySelectorAll("\[role="tab"\]")); var
 panels =
