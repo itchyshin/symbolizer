@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.18.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.18.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,6 +34,23 @@
       <small>Source: <a href="https://github.com/itchyshin/symbolizer/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.18.2" id="symbolizer-0182">symbolizer 0.18.2<a class="anchor" aria-label="anchor" href="#symbolizer-0182"></a></h2>
+<div class="section level3">
+<h3 id="v0182--three-views-widget-tab-switching-works-again-0-18-2">v0.18.2 – three-views widget tab switching works again<a class="anchor" aria-label="anchor" href="#v0182--three-views-widget-tab-switching-works-again-0-18-2"></a></h3>
+<p>The interactive <code><a href="../reference/as_html_three_views.html">as_html_three_views()</a></code> widget rendered correctly in v0.18.1 (after the indented-code-block fix) but the <strong>tabs did not switch on click</strong>. Only the first panel (“Equation”) was reachable on the deployed pkgdown article and any knitted vignette.</p>
+<p>Root cause: the inline JavaScript that wires up <code>click</code> and <code>keydown</code> handlers was written as a literal R string with embedded <code>\"</code> escape sequences inside the two <code>querySelectorAll</code> selectors:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="bu">root</span><span class="op">.</span><span class="fu">querySelectorAll</span>(<span class="st">"[role=</span><span class="sc">\"</span><span class="st">tab</span><span class="sc">\"</span><span class="st">]"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="bu">root</span><span class="op">.</span><span class="fu">querySelectorAll</span>(<span class="st">"[role=</span><span class="sc">\"</span><span class="st">tabpanel</span><span class="sc">\"</span><span class="st">]"</span>)</span></code></pre></div>
+<p>R’s string parser <strong>does</strong> process <code>\"</code> inside both single- and double-quoted strings, stripping the backslash. After R parsing, the emitted JavaScript became:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="bu">root</span><span class="op">.</span><span class="fu">querySelectorAll</span>(<span class="st">"[role="</span>tab<span class="st">"]"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="bu">root</span><span class="op">.</span><span class="fu">querySelectorAll</span>(<span class="st">"[role="</span>tabpanel<span class="st">"]"</span>)</span></code></pre></div>
+<p>which is a JS syntax error. The IIFE failed silently, no event handlers were installed, and the panel-switching logic never ran.</p>
+<p>Fix: the JS body is now wrapped in an R raw string (<code>r"---(...)---"</code>, available since R 4.0; the package’s <code>Depends</code> is R &gt;= 4.1.0). Raw strings do not process escape sequences, so the <code>\"</code> survives verbatim into the rendered <code>&lt;script&gt;</code> block.</p>
+<p>A regression test (<code>test-three-views.R::"emitted JS preserves the escaped CSS selector quotes"</code>) asserts both that the <strong>escaped</strong> form <code>querySelectorAll("[role=\"tab\"]")</code> appears, and that the <strong>broken</strong> un-escaped form <code>querySelectorAll("[role="tab"]")</code> does not. This catches any future regression to plain-quoted R strings.</p>
+<p>No other changes. <code>devtools::check()</code> clean (0 / 0 / 0). <code><a href="https://testthat.r-lib.org/reference/test_dir.html" class="external-link">testthat::test_dir()</a></code>: all assertions pass (<code>test-three-views.R</code> now has 44 expectations).</p>
+</div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.18.1" id="symbolizer-0181">symbolizer 0.18.1<a class="anchor" aria-label="anchor" href="#symbolizer-0181"></a></h2>
 <div class="section level3">

@@ -1,5 +1,53 @@
 # Changelog
 
+## symbolizer 0.18.2
+
+### v0.18.2 – three-views widget tab switching works again
+
+The interactive
+[`as_html_three_views()`](https://itchyshin.github.io/symbolizer/reference/as_html_three_views.md)
+widget rendered correctly in v0.18.1 (after the indented-code-block fix)
+but the **tabs did not switch on click**. Only the first panel
+(“Equation”) was reachable on the deployed pkgdown article and any
+knitted vignette.
+
+Root cause: the inline JavaScript that wires up `click` and `keydown`
+handlers was written as a literal R string with embedded `\"` escape
+sequences inside the two `querySelectorAll` selectors:
+
+``` js
+root.querySelectorAll("[role=\"tab\"]")
+root.querySelectorAll("[role=\"tabpanel\"]")
+```
+
+R’s string parser **does** process `\"` inside both single- and
+double-quoted strings, stripping the backslash. After R parsing, the
+emitted JavaScript became:
+
+``` js
+root.querySelectorAll("[role="tab"]")
+root.querySelectorAll("[role="tabpanel"]")
+```
+
+which is a JS syntax error. The IIFE failed silently, no event handlers
+were installed, and the panel-switching logic never ran.
+
+Fix: the JS body is now wrapped in an R raw string (`r"---(...)---"`,
+available since R 4.0; the package’s `Depends` is R \>= 4.1.0). Raw
+strings do not process escape sequences, so the `\"` survives verbatim
+into the rendered `<script>` block.
+
+A regression test
+(`test-three-views.R::"emitted JS preserves the escaped CSS selector quotes"`)
+asserts both that the **escaped** form
+`querySelectorAll("[role=\"tab\"]")` appears, and that the **broken**
+un-escaped form `querySelectorAll("[role="tab"]")` does not. This
+catches any future regression to plain-quoted R strings.
+
+No other changes. `devtools::check()` clean (0 / 0 / 0).
+[`testthat::test_dir()`](https://testthat.r-lib.org/reference/test_dir.html):
+all assertions pass (`test-three-views.R` now has 44 expectations).
+
 ## symbolizer 0.18.1
 
 ### v0.18.1 – audit pass: doc + vignette consistency
