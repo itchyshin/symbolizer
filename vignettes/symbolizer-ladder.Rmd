@@ -318,8 +318,9 @@ covers — `glmmTMB`, `brms`, `MCMCglmm`, `sdmTMB`, `metafor`,
   `vignette("symbolizer-factors")`.
 - For a tour of distributional families (Student-t, Gamma, beta,
   binomial, …), see `vignette("symbolizer-families")`.
-- For meta-analysis with `metafor`, `glmmTMB::propto()`, and
-  `drmTMB` location-scale side by side, see
+- For meta-analysis with `metafor` and `drmTMB` location-scale
+  (plus `glmmTMB`'s `propto()` as the related phylogenetic /
+  structured-covariance pattern, not strict meta-analysis), see
   `vignette("symbolizer-meta")`.
 - For the full capability matrix and what's planned next, see
   `vignette("symbolizer-roadmap")`.

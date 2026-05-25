@@ -66,7 +66,7 @@ glmmTMB,nbinom2,sigma,First slice,0.11.0,"Overdispersion parameter (log link); s
 glmmTMB,nbinom2,random_effects,First slice,0.11.0,"Random intercepts on the nbinom2 conditional submodel."
 glmmTMB,poisson,zi,First slice,0.11.0,"Zero-inflation submodel (logit link) on glmmTMB poisson via ziformula."
 glmmTMB,nbinom2,zi,First slice,0.11.0,"Zero-inflation submodel (logit link) on glmmTMB nbinom2 via ziformula."
-glmmTMB,gaussian,propto,First slice,0.16.0,"propto(0 + obs | g, R) covariance structure with a known correlation / covariance matrix; surfaces a meta-analysis / phylogenetic info row in warning_table()."
+glmmTMB,gaussian,propto,First slice,0.16.0,"propto(0 + obs | g, R) covariance structure: Sigma = sigma^2 * R with sigma^2 estimated, the phylogenetic / pedigree / structured-covariance pattern. Surfaces an info row in warning_table() noting this is NOT the meta-analytic fixed-V pattern (that requires glmmTMB's planned equalto())."
 glmmTMB,binomial,propto,First slice,0.16.0,"propto() on a binomial conditional submodel (e.g., phylogenetic binomial GLMM)."
 glmmTMB,poisson,propto,First slice,0.16.0,"propto() on a poisson conditional submodel."
 glmmTMB,*,*,Planned or reserved,,Other families and submodels targeted for v0.11.x.

@@ -233,7 +233,13 @@ symbolize.glmmTMB <- function(fit, symbols = NULL, units = NULL,
       symbolizer = utils::packageVersion("symbolizer"),
       glmmTMB    = utils::packageVersion("glmmTMB")
     ),
-    meta_analysis_via_glmmTMB = isTRUE(meta_via_glmmTMB),
+    # v0.20: renamed from `meta_analysis_via_glmmTMB` because propto
+    # is the phylogenetic / structured-covariance bridge, not meta-analysis.
+    # We also keep the old field set to the same value as a deprecation
+    # alias so downstream code that still reads the old name keeps
+    # working until the next major version.
+    propto_known_corr_block  = isTRUE(meta_via_glmmTMB),
+    meta_analysis_via_glmmTMB = isTRUE(meta_via_glmmTMB),  # deprecated alias
     created_by = "symbolize.glmmTMB"
   )
 
@@ -583,14 +589,27 @@ glmm_build_warnings <- function(fit, sym_stub) {
       )
     }
   }
-  if (isTRUE(sym_stub$metadata$meta_analysis_via_glmmTMB)) {
+  # v0.20: renamed from `meta_analysis_via_glmmTMB` to
+  # `propto_known_corr_block`. v0.16-v0.19 set the old flag name; for
+  # back-compat we honour both. The label change reflects the v0.20
+  # correction: propto attaches Sigma = sigma^2 * V with sigma^2
+  # estimated -- the phylogenetic / pedigree / known-correlation
+  # pattern, NOT the meta-analytic fixed-V pattern. Fisher's empirical
+  # audit on k = 30 simulated meta-analytic data showed the propto
+  # scale converged to sigma^2_propto = 0.942742, not 1, with one
+  # extra free parameter relative to metafor::rma.mv(V = V, ...).
+  if (isTRUE(sym_stub$metadata$propto_known_corr_block) ||
+      isTRUE(sym_stub$metadata$meta_analysis_via_glmmTMB)) {
     rows[[length(rows) + 1L]] <- tibble::tibble(
-      code = "meta_analysis_via_glmmTMB",
+      code = "propto_known_corr_block",
       severity = "info",
       message = paste0(
-        "This fit uses propto() (or equalto() in newer glmmTMB) to attach a known correlation / covariance matrix on a random-effect block. ",
-        "Structurally, that's the meta-analytic / phylogenetic / pedigree-controlled pattern: sigma_residual is fixed (sampling-variance-known), and the (1 | study) variance reads as the between-study heterogeneity tau^2. ",
-        "Compare with metafor::rma.mv(yi, V, random = list(~ 1 | study, ~ 1 | id), R = list(...)) or drmTMB's location-scale form (Williams 2023; Viechtbauer & L\u00F3pez-L\u00F3pez 2022; Nakagawa et al. 2025)."
+        "This fit uses propto() to attach a covariance proportional to a known matrix V on a random-effect block: Sigma = sigma^2 * V, with sigma^2 estimated. ",
+        "That is the phylogenetic / pedigree / structured-covariance pattern, equivalent to metafor::rma.mv(V = 0, random = ~ 1 | g, R = list(g = V)). ",
+        "It is NOT the meta-analytic fixed-V pattern: metafor::rma.mv(V = V, ...) fixes Sigma = V exactly, with no scalar multiplier. ",
+        "glmmTMB also estimates an independent residual sigma_res unless dispformula = ~ 0 is passed -- so the full conditional covariance under a propto fit is sigma^2_propto * V + sigma^2_res * I, two free scalars. ",
+        "The exact meta-analytic GLMM bridge requires glmmTMB's planned equalto() block (Sigma = V, no multiplier), which is reserved but not yet implemented in glmmTMB <= 1.1.11. ",
+        "References: Hadfield & Nakagawa 2010 (phylogenetic mixed models); Viechtbauer & L\u00F3pez-L\u00F3pez 2022 (location-scale meta-analysis); Nakagawa et al. 2025 (multilevel + phylo location-scale)."
       ),
       context = ""
     )

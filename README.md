@@ -192,14 +192,14 @@ as_html_three_views(sym)
 .sym-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .sym-skip { position: absolute; top: -100px; left: 0; padding: 0.4rem 0.7rem; background: #8a1f22; color: #fff; text-decoration: none; font-size: 0.85rem; z-index: 5; }
 .sym-skip:focus { top: 0; }</style>
-<div class="sym-tabs" id="sym-sym-1779749553">
-<a class="sym-skip" href="#sym-sym-1779749553-end">Skip three-views widget</a>
+<div class="sym-tabs" id="sym-sym-1779751015">
+<a class="sym-skip" href="#sym-sym-1779751015-end">Skip three-views widget</a>
 <div class="sym-tablist" role="tablist" aria-label="Three views of the model">
-<button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779749553-tab-idx" aria-controls="sym-sym-1779749553-panel-idx" aria-selected="true" tabindex="0" data-tab="idx"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>1. Index</button>
-<button type="button" class="sym-tab" role="tab" id="sym-sym-1779749553-tab-eq" aria-controls="sym-sym-1779749553-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>2. Matrix</button>
-<button type="button" class="sym-tab" role="tab" id="sym-sym-1779749553-tab-mat" aria-controls="sym-sym-1779749553-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>3. Equations with data</button>
+<button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779751015-tab-idx" aria-controls="sym-sym-1779751015-panel-idx" aria-selected="true" tabindex="0" data-tab="idx"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>1. Index</button>
+<button type="button" class="sym-tab" role="tab" id="sym-sym-1779751015-tab-eq" aria-controls="sym-sym-1779751015-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>2. Matrix</button>
+<button type="button" class="sym-tab" role="tab" id="sym-sym-1779751015-tab-mat" aria-controls="sym-sym-1779751015-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>3. Equations with data</button>
 </div>
-<div class="sym-panel sym-active" role="tabpanel" id="sym-sym-1779749553-panel-idx" aria-labelledby="sym-sym-1779749553-tab-idx" data-panel="idx" tabindex="0">
+<div class="sym-panel sym-active" role="tabpanel" id="sym-sym-1779751015-panel-idx" aria-labelledby="sym-sym-1779751015-tab-idx" data-panel="idx" tabindex="0">
   <p class="sym-caption">What happens for each observation <em>i</em> -- the per-individual reading.</p>
   <p class="sym-biology">Each observation is normally distributed around a mean that may shift with the predictors, and a residual SD that may also shift with its own predictors -- so both the centre and the spread of the response are modeled.</p>
   <div class="sym-eq">$$\begin{aligned}
@@ -219,7 +219,7 @@ W_i \mid \mu_i,\, \sigma_i & \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 </ul>
 </details>
 </div>
-<div class="sym-panel" role="tabpanel" id="sym-sym-1779749553-panel-eq" aria-labelledby="sym-sym-1779749553-tab-eq" data-panel="eq" hidden tabindex="0">
+<div class="sym-panel" role="tabpanel" id="sym-sym-1779751015-panel-eq" aria-labelledby="sym-sym-1779751015-tab-eq" data-panel="eq" hidden tabindex="0">
   <p class="sym-caption">The same model in matrix form -- the structural contract every textbook past chapter 4 switches to.</p>
   <p class="sym-biology">Each observation is normally distributed around a mean that may shift with the predictors, and a residual SD that may also shift with its own predictors -- so both the centre and the spread of the response are modeled.</p>
   <div class="sym-eq">$$\begin{aligned}
@@ -240,7 +240,7 @@ W_i \mid \mu_i,\, \sigma_i & \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 </ul>
 </details>
 </div>
-<div class="sym-panel" role="tabpanel" id="sym-sym-1779749553-panel-mat" aria-labelledby="sym-sym-1779749553-tab-mat" data-panel="mat" hidden tabindex="0">
+<div class="sym-panel" role="tabpanel" id="sym-sym-1779751015-panel-mat" aria-labelledby="sym-sym-1779751015-tab-mat" data-panel="mat" hidden tabindex="0">
   <p class="sym-caption">The same matrix equation, with your actual numbers stacked inside the brackets -- what the computer multiplies. Showing first 5 and last 2 rows of n = 200.</p>
   <p class="sym-biology">Each observation is normally distributed around a mean that may shift with the predictors, and a residual SD that may also shift with its own predictors -- so both the centre and the spread of the response are modeled.</p>
   <span class="sym-sr-only">Matrix-form expansion of the model. Each row shows the response y_i and the corresponding row of the design matrix X (showing head and tail rows of the n total observations), with the coefficient vector beta listed below.</span>
@@ -271,9 +271,9 @@ $$</div>
 $$</div>
 </div>
 </div>
-<span id="sym-sym-1779749553-end" tabindex="-1"></span>
+<span id="sym-sym-1779751015-end" tabindex="-1"></span>
 <script>(function() {
-  var root = document.getElementById("sym-sym-1779749553");
+  var root = document.getElementById("sym-sym-1779751015");
   if (!root) return;
   var tabs   = Array.prototype.slice.call(root.querySelectorAll("[role=\"tab\"]"));
   var panels = Array.prototype.slice.call(root.querySelectorAll("[role=\"tabpanel\"]"));

@@ -107,7 +107,7 @@ helpers.
 | v0.14 | mgcv `gam` / `bam` (additive grammar) |
 | v0.14.1 | metafor `rma.mv` (multilevel + structured / phylogenetic) |
 | v0.15 | metafor `rma.uni` location-scale (`scale = ~ z`, `rma.ls`); `tau2_scale` capability row |
-| v0.16 | metafor `rma.mv` `struct = "UN"` (bivariate / multivariate meta-analysis); glmmTMB `equalto` / `propto` covariance code → meta-analysis bridge; "three faces of meta-analysis" article |
+| v0.16 | metafor `rma.mv` `struct = "UN"` (bivariate / multivariate meta-analysis); glmmTMB `propto` covariance code → originally framed as meta-analysis bridge (**corrected in v0.20**: propto is the phylogenetic / structured-covariance pattern, not meta-analysis); "three faces of meta-analysis" article |
 | v0.17 | "Building up" ladder vignette (`lm` → `lm + sex` → `lmer + (1 \| site)` → `drmTMB` location-scale on one shared dataset); homepage three-views widget screenshot |
 | v0.18 | `simulate_recipe(sym)` (numbered pseudocode + family-aware runnable R); `as_dag(sym)$mermaid` and `$tikz` slots for diagram rendering |
 | v0.18.1 | Audit pass: `@references` blocks on all 10 extractors; widget HTML render fix (de-indent `<button>` lines so pandoc stops wrapping them as code blocks); inline-R guards in vignettes |
