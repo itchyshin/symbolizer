@@ -193,31 +193,36 @@ Pre-release. Read status words consistently:
 | Planned or reserved | Public grammar may exist, but `symbolize()` should reject it as design-only. |
 | Unsupported | Do not use as analysis syntax; fit the nearest implemented model. |
 
-### Capability matrix (v0.1 – v0.7)
+### Capability matrix (v0.1 – v0.14)
 
 | Surface | Status |
 |----|----|
 | `drmTMB` Gaussian location-scale, fixed effects (μ + σ submodels) | Stable |
 | `drmTMB` Gaussian random intercepts `(1 \| group)` and random slopes `(1 + x \| group)` on μ | First slice (v0.3.1) |
 | `drmTMB` bivariate Gaussian (`mu1`, `mu2`, `sigma1`, `sigma2`, `rho12`) | First slice (v0.2) |
-| `drmTMB` Student-t (`mu`, `sigma`, `nu` via `log(nu-2)` link) | First slice (v0.3) |
-| `drmTMB` lognormal, Gamma | First slice (v0.3) |
-| `drmTMB` beta, beta_binomial | First slice (v0.3) |
-| `drmTMB` Poisson, nbinom2, truncated_nbinom2 | First slice (v0.3) |
+| `drmTMB` Student-t, lognormal, Gamma, beta, beta_binomial, Poisson, nbinom2, truncated_nbinom2 | First slice (v0.3) |
 | `drmTMB` zero-inflation (`zi`), hurdle (`hu`), cumulative_logit | First slice (v0.4) |
-| `gllvmTMB` Gaussian latent variables (mu, Λ_B, Σ_B, Ψ_B, σ_eps) | First slice |
-| `gllvmTMB` binomial (first non-Gaussian latent-variable family) | First slice (v0.5) |
-| `glmmTMB` Gaussian conditional + optional `dispformula = ~ z` + `(1 \| g)` random intercepts | First slice (v0.7) |
+| `gllvmTMB` Gaussian and binomial latent-variable families | First slice (v0.4 – v0.5) |
+| `glmmTMB` Gaussian / binomial / poisson / nbinom2 conditional submodel + `dispformula` + `ziformula` + `(1 \| g)` | First slice (v0.7 – v0.11) |
+| `lme4::lmer` + `lme4::glmer` (binomial / poisson) | First slice (v0.10 – v0.11) |
+| `brmsfit` Gaussian / binomial / poisson + `bf(sigma ~ z)` distributional | First slice (v0.8 – v0.11) |
+| `MCMCglmm` Gaussian + `~ g` random intercepts + animal models via `ginverse` | First slice (v0.9 – v0.12) |
+| `stats::lm`, `stats::glm` (gaussian / binomial / poisson / Gamma) | First slice (v0.10 – v0.11) |
+| **`sdmTMB`** Gaussian + spatial random field (`omega`) + spatiotemporal field (`epsilon`) | First slice (v0.12) |
+| **`metafor::rma.uni`** random / mixed-effects meta-analysis + meta-regression (two-tier `y_i | theta_i ~ N(theta_i, v_i)` model with known sampling variance and between-study heterogeneity τ²) | First slice (v0.13) |
+| **`mgcv::gam`** / **`mgcv::bam`** additive models: gaussian / poisson / binomial / Gamma + `s(x)` + `s(x, by = factor)` + `te(x, z)`; smooths summarised in `metadata$smooths` (label, basis dim, edf); `f_l(x_i)` terms appended to the LaTeX linear predictor. `mgcv::gamm` / `gamm4::gamm4` covered via the `$gam` slot | First slice (v0.14) |
 | `as_dag()` structural model diagram (nodes / edges / DOT string) | First slice (v0.6) |
 | `model_card()` teaching bundle (equation + assumptions + readings + extraction calls) | First slice |
-| `parameter_interpretation()` confidence bands (Wald / profile) | First slice (v0.1.1) |
+| `parameter_interpretation()` confidence bands (Wald / profile / credible) | First slice (v0.1.1) |
 | `group_means()`, `group_slopes()` via `emmeans` (response- and link-scale) | First slice (v0.1.1, response default in v0.3.1) |
 | `compare_symbolic()` structural diff + optional AIC/BIC metrics | First slice (v0.2) |
 | `methods_text()` draft Methods-section paragraph (template-based) | First slice (v0.2.1) |
 | `warning_table()` per-fit prose warnings | First slice (v0.2.1) |
+| Expanded `emmeans` layer: `marginal_contrasts()`, `reference_grid_story()` (existing `group_means` / `group_slopes` extended in place) | Planned (v0.15) |
+| `metafor::rma.mv` (multilevel / multivariate meta-analysis) | Planned (v0.13.x) |
+| brms negative-binomial / other distributional dpars; glmmTMB hurdle | Planned (v0.16+) |
 | `gllvmTMB` other non-Gaussian families, within-unit decompositions, phylo / spatial | Planned |
-| `glmmTMB` non-Gaussian families and zero-inflation | Planned (v0.7.x) |
-| `brms`, `MCMCglmm`, `sdmTMB`, `lme4`, `lm`/`glm` | Planned (see roadmap) |
+| Phylogenetic flagship: `phylolm`, `phyloglm`, `phyr::pglmm`, `sommer` | Considered |
 
 See `symbolizer_capabilities()` for the full registry — that table is
 the source of truth; any class / family / component not marked Stable or
@@ -237,10 +242,15 @@ First slice there will be refused by `symbolize()`.
 | v0.4 (released) | `drmTMB` zero-inflation / hurdle / cumulative_logit |
 | v0.5 (released) | gllvmTMB binomial (first non-Gaussian latent-variable family) |
 | v0.6 (released) | `as_dag(sym)` structural model diagram (DOT-language string) |
-| v0.7 (current) | `glmmTMB` Gaussian conditional submodel + `(1 \| g)` + `dispformula = ~ z`; CI band visible at all reading scales |
-| v0.8 | `brms` |
-| v0.9 | `MCMCglmm` |
-| v0.10 | `sdmTMB`, `lme4`, `lm`, `glm` |
+| v0.7 (released) | `glmmTMB` Gaussian conditional submodel + `(1 \| g)` + `dispformula = ~ z`; CI band visible at all reading scales |
+| v0.8 (released) | `brms` Gaussian + random effects |
+| v0.9 (released) | `MCMCglmm` Gaussian + `~ g` random intercepts |
+| v0.10 (released) | `lme4::lmer`, `stats::lm`, `stats::glm` (gaussian / binomial / poisson) |
+| v0.11.x (released) | glmmTMB non-Gaussian families (binomial / poisson / nbinom2 + zero-inflation); `lme4::glmer`; glm Gamma; brms binomial / poisson / `bf(sigma ~ z)`; robustness sweep across every extractor |
+| v0.12 (released) | `sdmTMB` Gaussian + spatial / spatiotemporal random fields; `MCMCglmm` animal models via `ginverse`; roadmap text refresh |
+| v0.13 (released) | `metafor::rma.uni` — research-synthesis flagship: two-tier `y_i \| theta_i ~ N(theta_i, v_i)` with known sampling variance + tau² heterogeneity + meta-regression moderators |
+| v0.14 (current) | `mgcv::gam` / `mgcv::bam` — additive models: `s(x)`, `s(x, by =)`, `te(x, z)` smooths summarised in `metadata$smooths`; `gamm` / `gamm4` covered via `$gam` slot |
+| v0.15 | Expanded `emmeans` layer: `marginal_contrasts()`, `reference_grid_story()`; `group_means` / `group_slopes` extended in place (kept-public list grows by ~2, not 4) |
 
 ## How symbolizer fits with related packages
 

@@ -161,3 +161,15 @@ test_that("robustness: metafor rma.uni with moderator", {
   sym <- symbolize(fit_metafor_rma_mods())
   run_public_surface(sym, "metafor rma.uni + mods")
 })
+
+test_that("robustness: mgcv gam with s(x)", {
+  skip_if_not_installed("mgcv")
+  sym <- symbolize(fit_gam_simple())
+  run_public_surface(sym, "mgcv gam s(x)")
+})
+
+test_that("robustness: mgcv gam with te(x, z)", {
+  skip_if_not_installed("mgcv")
+  sym <- symbolize(fit_gam_te())
+  run_public_surface(sym, "mgcv gam te(x, z)")
+})

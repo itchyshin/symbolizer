@@ -1,3 +1,33 @@
+# symbolizer 0.14.0
+
+## v0.14 -- mgcv additive grammar (gam / bam / gamm / gamm4)
+
+* `symbolize.gam()` (and `symbolize.bam = symbolize.gam` since `bam`
+  inherits from `gam`) for `mgcv::gam` / `mgcv::bam` fits. First
+  slice covers gaussian / poisson / binomial / Gamma families with
+  smooth specifications `s(x)`, `s(x, by = factor)`, and `te(x, z)`.
+  Method-of-fit (REML / GCV.Cp) is captured as metadata.
+* Smooth terms are summarised in `sym$metadata$smooths` -- one row
+  per smooth with `label`, `bs_dim` (basis dimension K), `edf`
+  (effective degrees of freedom), p-value, underlying `variable`(s),
+  and `by_var` (for `s(x, by = group)`).
+* LaTeX rendering appends a smooth term `f_l(x_i)` (or
+  `f_l(x_i, z_i)` for tensor products) to the linear predictor for
+  each smooth, so the additive structure
+  `g(mu_i) = beta_0 + sum beta_k x_ki + sum_l f_l(z_li)` is visible.
+* Smoothing parameters lambda_l appear in `variance_components` with
+  `kind = "smoothing_param"`; the residual SD (for Gaussian) appears
+  with `kind = "residual"`.
+* `mgcv::gamm()` and `gamm4::gamm4()` return lists with a `$gam`
+  slot of class `gam`. Document the pattern
+  `symbolize(fit_gamm$gam)`; both are covered by the test sweep.
+* Warning surface: when a smooth's `edf` approaches its basis
+  dimension `K`, the extractor flags it with the same suggestion
+  `mgcv::gam.check()` makes -- "consider increasing k".
+* mgcv + gamm4 added to `Suggests`.
+* Two new robustness-sweep rows: gam with `s(x)`, gam with
+  `te(x, z)`.
+
 # symbolizer 0.13.0
 
 ## v0.13 -- metafor (research-synthesis flagship)

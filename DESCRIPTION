@@ -1,6 +1,6 @@
 Package: symbolizer
 Title: Structured Symbolic Specifications, Interpretations, and Teachable Stories for Modern Statistical Models
-Version: 0.13.0
+Version: 0.14.0
 Authors@R: c(
     person("Shinichi", "Nakagawa", email = "itchyshin@gmail.com",
            role = c("aut", "cre", "cph"),
@@ -32,10 +32,12 @@ Suggests:
     gllvmTMB,
     glmmTMB,
     knitr,
+    gamm4,
     lme4,
     MCMCglmm,
     metadat,
     metafor,
+    mgcv,
     rmarkdown,
     sdmTMB,
     testthat (>= 3.0.0),
