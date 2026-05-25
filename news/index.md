@@ -1,5 +1,24 @@
 # Changelog
 
+## symbolizer 0.11.1
+
+### v0.11.1 – two more deferred items
+
+- [`symbolize.brmsfit()`](https://itchyshin.github.io/symbolizer/reference/symbolize.brmsfit.md)
+  now handles `bf(y ~ x, sigma ~ z)` distributional fits. The sigma
+  submodel shows up alongside mu with its own credible band; LaTeX
+  renders both lines with the correct log link on sigma. brms’s other
+  distributional dpars (`nu`, `phi`, etc.) are still routed to the
+  “Planned or reserved” status word.
+- [`symbolize.glmmTMB()`](https://itchyshin.github.io/symbolizer/reference/symbolize.glmmTMB.md)
+  now handles `ziformula = ~ x` for poisson and nbinom2 fits. The
+  zero-inflation submodel shows up alongside mu with its logit link in
+  the LaTeX. Behaviour matches `drmTMB`’s zi / hu handling so the same
+  fit through either package produces the same teachable story.
+- Hardened: `brms::VarCorr(fit)` errors on fixed-effects-only fits; the
+  extractor now catches that and treats it as “no random effects” rather
+  than crashing.
+
 ## symbolizer 0.11.0
 
 ### v0.11 – deferred items: non-Gaussian glmmTMB / glmer, glm Gamma, robustness

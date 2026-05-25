@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.11.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.11.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,6 +33,17 @@
       <small>Source: <a href="https://github.com/itchyshin/symbolizer/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.11.1" id="symbolizer-0111">symbolizer 0.11.1<a class="anchor" aria-label="anchor" href="#symbolizer-0111"></a></h2>
+<div class="section level3">
+<h3 id="v0111--two-more-deferred-items-0-11-1">v0.11.1 – two more deferred items<a class="anchor" aria-label="anchor" href="#v0111--two-more-deferred-items-0-11-1"></a></h3>
+<ul><li>
+<code><a href="../reference/symbolize.brmsfit.html">symbolize.brmsfit()</a></code> now handles <code>bf(y ~ x, sigma ~ z)</code> distributional fits. The sigma submodel shows up alongside mu with its own credible band; LaTeX renders both lines with the correct log link on sigma. brms’s other distributional dpars (<code>nu</code>, <code>phi</code>, etc.) are still routed to the “Planned or reserved” status word.</li>
+<li>
+<code><a href="../reference/symbolize.glmmTMB.html">symbolize.glmmTMB()</a></code> now handles <code>ziformula = ~ x</code> for poisson and nbinom2 fits. The zero-inflation submodel shows up alongside mu with its logit link in the LaTeX. Behaviour matches <code>drmTMB</code>’s zi / hu handling so the same fit through either package produces the same teachable story.</li>
+<li>Hardened: <code>brms::VarCorr(fit)</code> errors on fixed-effects-only fits; the extractor now catches that and treats it as “no random effects” rather than crashing.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.11.0" id="symbolizer-0110">symbolizer 0.11.0<a class="anchor" aria-label="anchor" href="#symbolizer-0110"></a></h2>
 <div class="section level3">
