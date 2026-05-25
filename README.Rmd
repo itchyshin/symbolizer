@@ -29,9 +29,9 @@ options(crayon.enabled = FALSE)
 
 ## Positioning
 
-> `symbolizer` does not just print equations for `drmTMB`; it makes a fitted distributional model auditable by connecting the R formula, symbolic model, parameter scales, assumptions, coefficient readings, and next diagnostic steps.
+> `symbolizer` makes a fitted model **auditable**. It connects the R formula, the symbolic model in both notations, every parameter's scale, the assumptions that are stated vs. implied vs. unchecked, what each coefficient means biologically, and the next diagnostic steps — across the GLMM, meta-analysis, additive-model, and Bayesian-multilevel packages an ecologist or evolutionary biologist actually uses.
 
-`symbolizer` is the complement to [`equatiomatic`](https://datalorax.github.io/equatiomatic/), not a replacement. Reach for `equatiomatic` when you want a clean LaTeX equation for one model. Reach for `symbolizer` when you need to understand the model — its assumptions, what each coefficient means on a natural scale, both notations side by side, and how your data actually flows through the matrices.
+`symbolizer` is the complement to [`equatiomatic`](https://datalorax.github.io/equatiomatic/), not a replacement. Reach for `equatiomatic` when you want a clean LaTeX equation for one `lm()` or `lmer()` model. Reach for `symbolizer` when you need to understand the model — across multi-submodel distributional fits, mixed models, latent-variable, spatial, meta-analytic, or additive structures — its assumptions, what each coefficient means on a natural scale, both notations side by side, and how your data actually flows through the matrices.
 
 | What you want | `equatiomatic` | `symbolizer` |
 | --- | --- | --- |
@@ -43,7 +43,7 @@ options(crayon.enabled = FALSE)
 | Index and matrix notation side by side | — | `equations(sym, notation = "both")`, `notation_bridge(sym)` |
 | Three views with real data | — | `expand(sym)`, `as_html_three_views(sym)` |
 
-Built first for the two TMB sister packages — [`drmTMB`](https://itchyshin.github.io/drmTMB/) (Stable: Gaussian location-scale + (1 | group); First slice today) and [`gllvmTMB`](https://itchyshin.github.io/gllvmTMB/) (First slice: Gaussian latent-variable models) — with planned extensions across the GLMM ecosystem used in ecology and evolution: `glmmTMB`, `brms`, `MCMCglmm`, `sdmTMB`, `lme4`, and base `lm`/`glm`. The capability registry (`symbolizer_capabilities()`) is the source of truth for what's readable today; any fitted-model class not listed there with a Stable or First slice status will be refused by `symbolize()`.
+**Currently reads ten package families** (14 fitted-class methods, 30+ family-class combinations): the two TMB sister packages [`drmTMB`](https://itchyshin.github.io/drmTMB/) and [`gllvmTMB`](https://itchyshin.github.io/gllvmTMB/), the broader GLMM ecosystem `glmmTMB`, `brms`, `lme4` (`lmer` + `glmer`), `MCMCglmm` (including animal models), `sdmTMB` (spatial + spatiotemporal random fields), `stats::lm` / `stats::glm`, the meta-analytic framework `metafor` (`rma.uni` + `rma.mv` with multilevel / structured / location-scale variants), and additive models via `mgcv::gam` / `mgcv::bam` (with `gamm` / `gamm4` covered through the `$gam` slot). See the [Roadmap article](articles/symbolizer-roadmap.html) for the full capability matrix; `symbolizer_capabilities()` is the in-package source of truth, and any class / family / component not marked Stable or First slice there will be refused by `symbolize()`.
 
 ## Install
 

@@ -1,18 +1,19 @@
 Package: symbolizer
 Title: Structured Symbolic Specifications, Interpretations, and Teachable Stories for Modern Statistical Models
-Version: 0.15.0
+Version: 0.15.1
 Authors@R: c(
     person("Shinichi", "Nakagawa", email = "itchyshin@gmail.com",
            role = c("aut", "cre", "cph"),
            comment = c(ORCID = "0000-0002-7765-5182"))
   )
-Description: Turns fitted distributional, multivariate, latent-variable, and
-    spatial regression models into structured symbolic specifications that
-    render as publication-ready LaTeX equations, assumption tables, formula
-    bridges, parameter interpretations, and (later) structural model
-    comparisons, methods text, simulation recipes, and model graphs.
-    Companion to 'drmTMB' and 'gllvmTMB'; complementary to 'equatiomatic'
-    for one-formula models.
+Description: Turns fitted distributional, multivariate, latent-variable,
+    spatial, mixed-effect, meta-analytic, and additive models into structured
+    symbolic specifications that render as publication-ready LaTeX equations,
+    assumption tables, formula bridges, parameter interpretations,
+    structural model comparisons, methods-section paragraphs, and structural
+    DAGs. First-class methods for 'drmTMB', 'gllvmTMB', 'glmmTMB', 'brms',
+    'lme4', 'MCMCglmm', 'sdmTMB', 'stats::lm' / 'stats::glm', 'metafor', and
+    'mgcv'. Complementary to 'equatiomatic' for one-formula models.
 License: GPL-3
 URL: https://itchyshin.github.io/symbolizer/, https://github.com/itchyshin/symbolizer
 BugReports: https://github.com/itchyshin/symbolizer/issues

@@ -8,7 +8,7 @@
 \description{
 \if{html}{\figure{logo.svg}{options: style='float: right' alt='logo' width='120'}}
 
-Turns fitted distributional, multivariate, latent-variable, and spatial regression models into structured symbolic specifications that render as publication-ready LaTeX equations, assumption tables, formula bridges, parameter interpretations, and (later) structural model comparisons, methods text, simulation recipes, and model graphs. Companion to 'drmTMB' and 'gllvmTMB'; complementary to 'equatiomatic' for one-formula models.
+Turns fitted distributional, multivariate, latent-variable, spatial, mixed-effect, meta-analytic, and additive models into structured symbolic specifications that render as publication-ready LaTeX equations, assumption tables, formula bridges, parameter interpretations, structural model comparisons, methods-section paragraphs, and structural DAGs. First-class methods for 'drmTMB', 'gllvmTMB', 'glmmTMB', 'brms', 'lme4', 'MCMCglmm', 'sdmTMB', 'stats::lm' / 'stats::glm', 'metafor', and 'mgcv'. Complementary to 'equatiomatic' for one-formula models.
 }
 \seealso{
 Useful links:

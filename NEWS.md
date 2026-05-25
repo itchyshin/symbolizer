@@ -1,3 +1,34 @@
+# symbolizer 0.15.1
+
+## v0.15.1 -- positioning text refresh: not just drmTMB
+
+Stale framing pass: the homepage positioning paragraph still
+described `symbolizer` as "for drmTMB" even though the package now
+reads ten package families. This release rewrites the user-facing
+prose so the multi-package scope is visible from the homepage and
+Get-started vignette.
+
+* README `Positioning` paragraph rewritten: now describes
+  `symbolizer` as making "a fitted model auditable" across "the GLMM,
+  meta-analysis, additive-model, and Bayesian-multilevel packages an
+  ecologist or evolutionary biologist actually uses".
+* README "Built first for..." paragraph: now reads "Currently reads
+  ten package families" with the list spelt out, and a direct link
+  to the Roadmap article.
+* DESCRIPTION text: extended to name `drmTMB`, `gllvmTMB`, `glmmTMB`,
+  `brms`, `lme4`, `MCMCglmm`, `sdmTMB`, `stats::lm`/`glm`, `metafor`,
+  `mgcv` explicitly.
+* `vignette("symbolizer")` "What's supported, what's planned": no
+  longer claims "v0.1 marks ... as Stable"; reflects v0.15 reality
+  and links to the Roadmap article.
+* `vignette("symbolizer-families")`: no longer says "Eight
+  distribution families ship today"; clarifies that this vignette
+  walks the drmTMB non-Gaussian families specifically, while the
+  same `symbolize(fit)` interface applies to all ten package
+  families.
+
+No code changes. Test sweep + check unchanged.
+
 # symbolizer 0.15.0
 
 ## v0.15 -- location-scale meta-regression (rma.ls)
