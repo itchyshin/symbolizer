@@ -15,6 +15,15 @@
 - [Comparing two symbolized
   models](https://itchyshin.github.io/symbolizer/articles/symbolizer-compare.md):
 
+### Cross-package bridges
+
+- [Three faces of meta-analysis: metafor, glmmTMB,
+  drmTMB](https://itchyshin.github.io/symbolizer/articles/symbolizer-meta.md):
+
+  The same two-tier meta-analytic model, fit three ways. Symbolizer
+  reads each one and reveals the shared structure underneath the
+  package-specific syntax.
+
 ### Where we’re going
 
 - [Roadmap and capability

@@ -228,11 +228,11 @@ three tabs over the same fit.
 as_html_three_views(sym, head = 5, tail = 2)
 ```
 
-[Skip three-views widget](#sym-sym-1779717579-end)
+[Skip three-views widget](#sym-sym-1779721753-end)
 
-    <button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779717579-tab-eq" aria-controls="sym-sym-1779717579-panel-eq" aria-selected="true" tabindex="0" data-tab="eq"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>1. Equation</button>
-    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779717579-tab-idx" aria-controls="sym-sym-1779717579-panel-idx" aria-selected="false" tabindex="-1" data-tab="idx"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>2. Index</button>
-    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779717579-tab-mat" aria-controls="sym-sym-1779717579-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>3. Matrix (with data)</button>
+    <button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779721753-tab-eq" aria-controls="sym-sym-1779721753-panel-eq" aria-selected="true" tabindex="0" data-tab="eq"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>1. Equation</button>
+    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779721753-tab-idx" aria-controls="sym-sym-1779721753-panel-idx" aria-selected="false" tabindex="-1" data-tab="idx"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>2. Index</button>
+    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779721753-tab-mat" aria-controls="sym-sym-1779721753-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>3. Matrix (with data)</button>
 
 The structural contract. No indices, no numbers – the shape of the
 model.
@@ -546,7 +546,7 @@ slice.
 ``` r
 
 symbolizer_capabilities()
-#> # A tibble: 113 × 6
+#> # A tibble: 117 × 6
 #>    class  family            component      status              since notes      
 #>    <chr>  <chr>             <chr>          <chr>               <chr> <chr>      
 #>  1 drmTMB gaussian          mu             Stable              0.1.0 Univariate…
@@ -559,7 +559,7 @@ symbolizer_capabilities()
 #>  8 drmTMB truncated_nbinom2 hu             First slice         0.4.0 Hurdle sub…
 #>  9 drmTMB gaussian          rho12          Planned or reserved NA    Bivariate …
 #> 10 drmTMB student           mu             First slice         0.2.2 Student-t …
-#> # ℹ 103 more rows
+#> # ℹ 107 more rows
 ```
 
 The [Roadmap
