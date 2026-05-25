@@ -31,8 +31,12 @@ navbar:
 
 articles:
   - title: "Get started"
+    desc: "Start here. The ladder builds up from lm() to location-scale on one shared dataset."
     contents:
+      - symbolizer-ladder
       - symbolizer
+  - title: "Deep dives"
+    contents:
       - symbolizer-drmtmb
       - symbolizer-factors
       - symbolizer-families
