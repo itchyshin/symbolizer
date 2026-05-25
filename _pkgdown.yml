@@ -63,6 +63,7 @@ reference:
       - symbolize.glmerMod
       - symbolize.sdmTMB
       - symbolize.rma.uni
+      - symbolize.rma.mv
       - symbolize.gam
       - symbolizer_capabilities
   - title: "Read both notations"

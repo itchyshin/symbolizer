@@ -173,3 +173,15 @@ test_that("robustness: mgcv gam with te(x, z)", {
   sym <- symbolize(fit_gam_te())
   run_public_surface(sym, "mgcv gam te(x, z)")
 })
+
+test_that("robustness: metafor rma.mv multilevel", {
+  skip_if_not_installed("metafor")
+  sym <- symbolize(fit_metafor_rma_mv())
+  run_public_surface(sym, "metafor rma.mv multilevel")
+})
+
+test_that("robustness: metafor rma.mv structured (R-matrix)", {
+  skip_if_not_installed("metafor")
+  sym <- symbolize(fit_metafor_rma_mv_structured())
+  run_public_surface(sym, "metafor rma.mv structured")
+})

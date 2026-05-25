@@ -1,3 +1,38 @@
+# symbolizer 0.14.1
+
+## v0.14.1 -- metafor rma.mv (multilevel + structured meta-analysis)
+
+`symbolize.rma.mv()` for `metafor::rma.mv` fits. Covers the two
+patterns that dominate modern ecology / evolution / education
+meta-analyses:
+
+* **Multilevel meta-analysis** -- multiple random-effect tiers via
+  `random = list(~ 1 | study, ~ 1 | id)` or the nested syntax
+  `random = ~ 1 | district / study`. Each tier gets a row in
+  `variance_components` with `kind = "heterogeneity"`, and a
+  `u_{tier(i)} \sim \mathcal{N}(0, \sigma^2_{tier})` line in the
+  LaTeX.
+
+* **Structured random effects (phylogenetic / pedigree / spatial)**
+  -- when `R = list(group = R_matrix)` is attached to the fit, the
+  tier is tagged `kind = "structured"` and listed in
+  `sym$metadata$structured_random` with the R-matrix dimension.
+
+The fixed-effects extraction reuses the rma.uni infrastructure
+(intrcpt row-name mapping + Wald CIs via `fit$ci.lb` / `fit$ci.ub`),
+so meta-regression moderators work the same way for `rma.mv` as for
+`rma.uni`. The two-tier sampling-distribution / linear-predictor
+structure inherits from `family = meta_normal` so the assumption /
+interpretation prose is shared with `rma.uni`.
+
+Two new helper fits (`fit_metafor_rma_mv()`,
+`fit_metafor_rma_mv_structured()`) and two new robustness-sweep rows.
+
+Capability rows: `rma.mv,meta_normal,mu` and
+`rma.mv,meta_normal,structured` (both First slice).
+`struct = "UN"` / `"HCS"` / `"AR"` covariance structures and
+selection / publication-bias variants remain Planned.
+
 # symbolizer 0.14.0
 
 ## v0.14 -- mgcv additive grammar (gam / bam / gamm / gamm4)

@@ -101,7 +101,9 @@ glm,*,*,Planned or reserved,,Other families (inverse.gaussian / quasi*) targeted
 rma.uni,meta_normal,mu,First slice,0.13.0,"metafor random / mixed-effects meta-regression: theta_i = beta_0 + sum beta_k x_ki + u_i."
 rma.uni,meta_normal,tau2,First slice,0.13.0,"Between-study heterogeneity variance tau^2; appears in variance_components with kind = ""heterogeneity""."
 rma.uni,*,*,Planned or reserved,,"Non-meta_normal metrics (selection / publication-bias models, multilevel rma.mv) targeted for a later release."
-rma.mv,*,*,Planned or reserved,,Multilevel / multivariate meta-analysis targeted for v0.13.x.
+rma.mv,meta_normal,mu,First slice,0.13.1,"metafor multilevel / multivariate meta-regression: theta_i = beta_0 + sum beta_k x_ki + sum_r u_{r,i}."
+rma.mv,meta_normal,structured,First slice,0.13.1,"R-matrix structured random effects via R = list(phylo = phylo.cor); the tier renders as u_r ~ N(0, sigma^2_r * R_r) and is tagged kind = ""structured"" in variance_components."
+rma.mv,*,*,Planned or reserved,,"Non-default struct = ""UN"" / ""HCS"" / ""AR"" / ""DIAG"" covariance structures and selection / publication-bias variants still planned."
 gam,gaussian,mu,First slice,0.14.0,mgcv gam / bam Gaussian additive model (identity link).
 gam,gaussian,smooth,First slice,0.14.0,"Smooth terms (s(x), s(x, by = factor), te(x, z)) summarised by basis dimension and edf in metadata$smooths."
 gam,poisson,mu,First slice,0.14.0,mgcv gam / bam Poisson additive model (log link).

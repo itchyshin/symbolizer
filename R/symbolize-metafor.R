@@ -1,8 +1,20 @@
 # ----------------------------------------------------------------------------
-# symbolize.rma.uni
+# symbolize.rma.uni / symbolize.rma.mv
 #
-# v0.13 First slice extractor for metafor random-effects meta-analysis
-# and meta-regression. Models the two-tier structure explicitly:
+# v0.13.0 First slice for metafor random-effects meta-analysis and
+# meta-regression. v0.14.1 adds rma.mv (multilevel / multivariate
+# meta-analysis) -- supports multiple random-effect tiers via
+# `random = list(~ 1 | study, ~ 1 | outcome)` or the nested syntax
+# `random = ~ 1 | district / study`.
+#
+# Both classes share the same fixed-effects model and CI extraction
+# (via fit$beta / fit$se / fit$ci.lb / fit$ci.ub). They differ in:
+#   - rma.uni stores between-study heterogeneity in fit$tau2 (one
+#     scalar);
+#   - rma.mv stores it in fit$sigma2 (numeric vector, one per random
+#     effect) with names in fit$s.names.
+#
+# Models the two-tier structure explicitly:
 #
 #   y_i | theta_i  ~ N(theta_i, v_i)              (sampling level, v_i known)
 #   theta_i        = beta_0 + sum_k beta_k x_{ki} + u_i
@@ -181,6 +193,304 @@ symbolize.rma.uni <- function(fit, symbols = NULL, units = NULL,
     expanded            = expanded,
     metadata            = metadata
   )
+}
+
+# ----------------------------------------------------------------------------
+# symbolize.rma.mv
+#
+# v0.13.1 extractor for metafor multilevel / multivariate meta-analysis.
+# Differences from rma.uni:
+#
+#   - fit$random is a list of formulas (one per random-effect tier)
+#   - fit$sigma2 is a numeric vector (one per tier); fit$s.names
+#     carries human-readable names
+#   - fit$tau2 is unused (always 0); heterogeneity lives in sigma2
+#   - fit$R is a named list of (correlation) matrices, NULL where
+#     unstructured. A non-NULL entry tags the tier as "structured"
+#     (phylogenetic / spatial / pedigree-style), and the model is
+#     u_r ~ N(0, sigma^2_r * R_r) instead of u_r ~ N(0, sigma^2_r * I).
+# ----------------------------------------------------------------------------
+
+#' Symbolize a metafor rma.mv fit (multilevel / multivariate meta-analysis, v0.13.1)
+#'
+#' Builds a [`symbolized_model`][new_symbolized_model] from an
+#' `rma.mv` fit. Covers the multi-tier random-effects structure
+#' (`random = list(~ 1 | study, ~ 1 | id)` or nested
+#' `~ 1 | district / study`), optional R-matrix structured random
+#' effects (e.g., phylogenetic via `R = list(phylo = phylo.cor)`),
+#' and meta-regression moderators.
+#'
+#' Each random-effect tier gets a row in `variance_components` with
+#' `kind = "heterogeneity"` (unstructured) or `kind = "structured"`
+#' (when an R-matrix is attached). Tiers with an R-matrix render as
+#' `u_r ~ N(0, sigma^2_r * R_r)` in the LaTeX; structured tiers also
+#' appear in `sym$metadata$structured_random` with their matrix
+#' dimension.
+#'
+#' @inheritParams symbolize
+#' @return A `symbolized_model` object.
+#' @export
+symbolize.rma.mv <- function(fit, symbols = NULL, units = NULL,
+                             context = NULL, ...) {
+  if (!requireNamespace("metafor", quietly = TRUE)) {
+    cli::cli_abort(c(
+      "{.pkg metafor} is needed to symbolize this fit.",
+      i = "Install it with {.code install.packages(\"metafor\")}."
+    ))
+  }
+  family <- "meta_normal"
+  capability_check("rma.mv", family, "mu")
+
+  response <- "yi"
+  data <- fit$data
+  if (is.null(data)) data <- data.frame(yi = fit$yi, vi = fit$vi)
+  n_obs <- as.integer(fit$k %||% nrow(data))
+
+  beta_names <- rownames(fit$beta) %||% names(stats::coef(fit))
+  pred_names <- setdiff(beta_names, c("intrcpt", "(Intercept)"))
+  rhs_text <- if (length(pred_names) == 0L) "1" else paste(pred_names, collapse = " + ")
+  cond_form <- stats::as.formula(paste(response, "~", rhs_text))
+
+  # Bring moderator columns into a fresh `data` frame so drm_build_terms
+  # can resolve them (rma.mv's data slot may not carry them).
+  if (length(pred_names) > 0L && !is.null(fit$X)) {
+    for (m in pred_names) {
+      if (!m %in% names(data) && m %in% colnames(fit$X)) {
+        data[[m]] <- as.numeric(fit$X[, m])
+      }
+    }
+  }
+
+  entries <- list(
+    list(
+      dpar = "mu",
+      response = response,
+      rhs = if (length(pred_names) == 0L) quote(1) else metafor_rhs_expr(cond_form),
+      expr = cond_form,
+      position = 1L
+    )
+  )
+
+  param <- get_parameterization(family)
+  index <- list(observation = "i", study = "s", outcome = "k")
+
+  response_symbol <- metafor_resolve_response_symbol(response, symbols)
+  response_symbol_matrix <- "\\mathbf{y}"
+  response_units <- drm_resolve_units(response, units)
+
+  # Detect structured (R-matrix) random-effect tiers.
+  structured_groups <- character(0)
+  if (!is.null(fit$R) && length(fit$R) > 0L) {
+    for (gn in names(fit$R)) {
+      if (!is.null(fit$R[[gn]])) structured_groups <- c(structured_groups, gn)
+    }
+  }
+  if (length(structured_groups) > 0L) {
+    capability_check("rma.mv", family, "structured")
+  }
+
+  model <- list(
+    class = "rma.mv",
+    package = "metafor",
+    family = family,
+    response = response,
+    n_obs = n_obs,
+    method = fit$method,
+    n_random_tiers = length(fit$random %||% list())
+  )
+
+  distribution <- drm_build_distribution(
+    family, response_symbol, response_symbol_matrix,
+    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_
+  )
+  submodels  <- metafor_build_submodels(entries, param)
+  terms_tbl  <- drm_build_terms(entries, data, symbols)
+  fixed_eff  <- metafor_build_fixed_effects(terms_tbl, fit)
+  re_per_entry <- list(metafor_mv_build_re_per_entry(fit))
+  re_tbl     <- drm_build_random_effects(re_per_entry)
+  vc_tbl     <- metafor_mv_build_variance_components(fit, structured_groups)
+  cov_tbl    <- drm_build_covariance_components(re_tbl)
+  components <- drm_build_components(
+    submodels, terms_tbl, re_tbl,
+    response_symbol, response_symbol_matrix,
+    family = family,
+    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_
+  )
+  symbol_dict <- drm_build_symbol_dictionary(
+    terms_tbl, response, response_symbol, response_symbol_matrix,
+    response_units, family, submodels, units, data, n_obs, re_tbl,
+    response_1 = response, response_2 = NA_character_,
+    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_
+  )
+  assumptions <- drm_build_assumptions(
+    family, response, response_symbol, re_tbl,
+    response_1 = response, response_2 = NA_character_
+  )
+  interp <- drm_build_interpretation(
+    fixed_eff, family, response, data,
+    response_1 = response, response_2 = NA_character_
+  )
+  bridge <- drm_build_formula_bridge(
+    entries, components, response,
+    response_1 = response, response_2 = NA_character_
+  )
+  expanded <- list(y = as.numeric(fit$yi), X = fit$X, Z = NULL,
+                   beta = as.numeric(fit$beta), u = NULL,
+                   fitted = stats::fitted(fit), residuals = stats::residuals(fit))
+
+  # Structured random-effects metadata: one row per tier with an
+  # attached R-matrix.
+  structured_tbl <- if (length(structured_groups) > 0L) {
+    do.call(rbind, lapply(structured_groups, function(gn) {
+      tibble::tibble(
+        group = gn,
+        matrix_dim = NROW(fit$R[[gn]]),
+        matrix_kind = "R"
+      )
+    }))
+  } else NULL
+
+  metadata <- list(
+    call = fit$call,
+    context = context %||% "",
+    ci_method = "wald",
+    fit = fit,
+    package_versions = list(
+      symbolizer = utils::packageVersion("symbolizer"),
+      metafor    = utils::packageVersion("metafor")
+    ),
+    method = fit$method,
+    n_random_tiers = length(fit$random %||% list()),
+    structured_random = structured_tbl,
+    sigma2 = fit$sigma2,
+    s_names = fit$s.names,
+    created_by = "symbolize.rma.mv"
+  )
+
+  sym_stub <- list(
+    model = model, metadata = metadata, random_effects = re_tbl
+  )
+  warnings_tbl <- metafor_mv_build_warnings(fit, sym_stub)
+
+  new_symbolized_model(
+    model               = model,
+    index               = index,
+    parameterization    = param,
+    distribution        = distribution,
+    submodels           = submodels,
+    terms               = terms_tbl,
+    fixed_effects       = fixed_eff,
+    random_effects      = re_tbl,
+    variance_components = vc_tbl,
+    covariance_components = cov_tbl,
+    symbol_dictionary   = symbol_dict,
+    assumptions         = assumptions,
+    components          = components,
+    interpretation      = interp,
+    formula_bridge      = bridge,
+    warnings_registry   = warnings_tbl,
+    expanded            = expanded,
+    metadata            = metadata
+  )
+}
+
+# rma.mv random-effects: one row per (tier, intercept). Tier names
+# come from fit$s.names which already handles the nested-syntax
+# unrolling (e.g., "district" + "district/study").
+metafor_mv_build_re_per_entry <- function(fit) {
+  s_names <- fit$s.names %||% character(0)
+  n_levels <- fit$s.nlevels %||% rep(NA_integer_, length(s_names))
+  if (length(s_names) == 0L) return(NULL)
+  rows <- list()
+  for (i in seq_along(s_names)) {
+    nm <- s_names[[i]]
+    rows[[length(rows) + 1L]] <- tibble::tibble(
+      submodel    = "mu",
+      term_label  = sprintf("(1 | %s)", nm),
+      lhs_expr    = "1",
+      group_var   = nm,
+      component   = "(Intercept)",
+      n_levels    = as.integer(n_levels[[i]])
+    )
+  }
+  do.call(rbind, rows)
+}
+
+# rma.mv variance components: one row per random-effect tier with
+# kind = "heterogeneity" (or "structured" if an R-matrix is attached).
+# Also append a row for the (known) mean sampling variance.
+metafor_mv_build_variance_components <- function(fit, structured_groups) {
+  rows <- list()
+  s_names <- fit$s.names %||% character(0)
+  sigma2 <- fit$sigma2 %||% numeric(0)
+  for (i in seq_along(s_names)) {
+    nm <- s_names[[i]]
+    s2 <- as.numeric(sigma2[[i]])
+    is_struct <- nm %in% structured_groups
+    rows[[length(rows) + 1L]] <- tibble::tibble(
+      parameter    = "mu",
+      group        = nm,
+      term         = sprintf("sigma^2_%s", nm),
+      sd_estimate  = sqrt(s2),
+      var_estimate = s2,
+      kind         = if (is_struct) "structured" else "heterogeneity"
+    )
+  }
+  if (!is.null(fit$vi)) {
+    rows[[length(rows) + 1L]] <- tibble::tibble(
+      parameter    = "mu",
+      group        = "sampling",
+      term         = "mean(v_i)",
+      sd_estimate  = sqrt(mean(fit$vi, na.rm = TRUE)),
+      var_estimate = mean(fit$vi, na.rm = TRUE),
+      kind         = "sampling_variance"
+    )
+  }
+  if (length(rows) == 0L) {
+    return(tibble::tibble(
+      parameter = character(0), group = character(0), term = character(0),
+      sd_estimate = double(0), var_estimate = double(0), kind = character(0)
+    ))
+  }
+  do.call(rbind, rows)
+}
+
+metafor_mv_build_warnings <- function(fit, sym_stub) {
+  rows <- list()
+  k <- fit$k %||% 0L
+  n_tiers <- length(fit$random %||% list())
+  if (k < 10L && n_tiers > 0L) {
+    rows[[length(rows) + 1L]] <- tibble::tibble(
+      code = "few_effect_sizes",
+      severity = "warning",
+      message = sprintf(
+        "Only %d effect sizes across %d random-effect tier(s) -- some sigma^2 components are likely poorly identified.",
+        k, n_tiers
+      )
+    )
+  }
+  # Detect zero / near-zero variance components (potentially
+  # unidentified).
+  if (!is.null(fit$sigma2)) {
+    for (i in seq_along(fit$sigma2)) {
+      if (fit$sigma2[[i]] < 1e-8) {
+        nm <- fit$s.names[[i]] %||% sprintf("tier %d", i)
+        rows[[length(rows) + 1L]] <- tibble::tibble(
+          code = "zero_variance_component",
+          severity = "warning",
+          message = sprintf(
+            "Variance component for %s estimated at ~ 0 -- the tier may be unidentified, or that variation is genuinely absent. Consider whether the random structure is appropriate.",
+            nm
+          )
+        )
+      }
+    }
+  }
+  if (length(rows) == 0L) {
+    return(tibble::tibble(code = character(0), severity = character(0),
+                          message = character(0)))
+  }
+  do.call(rbind, rows)
 }
 
 # ---- helpers ---------------------------------------------------------------

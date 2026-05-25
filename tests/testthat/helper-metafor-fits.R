@@ -29,3 +29,34 @@ fit_metafor_rma_mods <- function() {
                         data = dat)
   metafor::rma(yi, vi, mods = ~ year, data = es, method = "REML")
 }
+
+# v0.13.1: multilevel rma.mv -- studies nested within districts.
+.load_dat_konstantopoulos <- function() {
+  e <- new.env()
+  pkg <- if (requireNamespace("metadat", quietly = TRUE)) "metadat" else "metafor"
+  utils::data("dat.konstantopoulos2011", package = pkg, envir = e)
+  e$dat.konstantopoulos2011
+}
+
+fit_metafor_rma_mv <- function() {
+  testthat::skip_if_not_installed("metafor")
+  dat <- .load_dat_konstantopoulos()
+  metafor::rma.mv(yi, vi,
+                  random = ~ 1 | district / study,
+                  data = dat, method = "REML")
+}
+
+# v0.13.1: rma.mv with an attached R-matrix random effect (synthetic
+# phylogenetic-style correlation on the district level for testing).
+fit_metafor_rma_mv_structured <- function() {
+  testthat::skip_if_not_installed("metafor")
+  dat <- .load_dat_konstantopoulos()
+  n_dist <- length(unique(dat$district))
+  R_dist <- diag(n_dist) * 0.8 + matrix(0.2, n_dist, n_dist)
+  rownames(R_dist) <- colnames(R_dist) <- as.character(sort(unique(dat$district)))
+  dat$d2 <- dat$district
+  metafor::rma.mv(yi, vi,
+                  random = list(~ 1 | study, ~ 1 | d2),
+                  R = list(d2 = R_dist),
+                  data = dat, method = "REML")
+}
