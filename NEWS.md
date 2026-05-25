@@ -1,3 +1,44 @@
+# symbolizer 0.11.0
+
+## v0.11 -- deferred items: non-Gaussian glmmTMB / glmer, glm Gamma, robustness
+
+This release picks up the items deferred during the v0.7 -> v0.10
+push and adds a robustness sweep so any future extractor regression
+surfaces in one place.
+
+### New family coverage
+
+* glmmTMB binomial / poisson / nbinom2 (with `(1 | g)` random
+  intercepts) -- the family check was the only thing blocking these;
+  the CSV-driven prose layer already had templates from earlier
+  releases. Reusing the same extractor code path means the LaTeX,
+  assumption table, parameter readings, and methods text all line
+  up across drmTMB and glmmTMB for the same family.
+* `symbolize.glmerMod()` for lme4 generalised mixed models. First
+  slice covers binomial / poisson with their canonical links.
+* glm Gamma (`stats::Gamma(link = "log")`) is now First slice via
+  the same CSV plumbing that drmTMB Gamma uses.
+
+### Robustness
+
+* New `tests/testthat/test-robustness-sweep.R` runs every
+  `symbolize.*` method through every public renderer
+  (`as_latex`, `equations`, `symbol_table`, `assumption_table`,
+  `formula_bridge`, `parameter_interpretation`, `as_dag`,
+  `warning_table`). 13 model classes / family combinations,
+  ~120 expectations. Any new extractor must keep this sweep
+  green.
+
+### Still deferred (v0.11.x and later)
+
+* sdmTMB (not installed in the dev environment).
+* brms distributional formulas (`sigma ~ z`) and non-Gaussian brms
+  families.
+* MCMCglmm flexible covariance structures (animal models,
+  multi-membership, per-trait residuals).
+* glmmTMB zero-inflation submodels (`ziformula`).
+* glm inverse.gaussian / quasi-families.
+
 # symbolizer 0.10.0
 
 ## v0.10 -- base R + lme4

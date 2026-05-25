@@ -57,7 +57,14 @@ glmmTMB,gaussian,mu,First slice,0.7.0,Gaussian conditional submodel (identity li
 glmmTMB,gaussian,sigma,First slice,0.7.0,"Distributional sigma submodel from `dispformula = ~ z` (log link)."
 glmmTMB,gaussian,random_effects,First slice,0.7.0,"Random intercepts (1 | group) on the conditional submodel; nested / crossed / RE-on-sigma still planned."
 glmmTMB,gaussian,zi,Planned or reserved,,Zero-inflation submodel.
-glmmTMB,*,*,Planned or reserved,,Non-Gaussian families targeted for v0.7.x.
+glmmTMB,binomial,mu,First slice,0.11.0,Binomial / Bernoulli conditional submodel (logit link).
+glmmTMB,binomial,random_effects,First slice,0.11.0,"Random intercepts (1 | group) on the binomial conditional submodel."
+glmmTMB,poisson,mu,First slice,0.11.0,Poisson conditional submodel (log link).
+glmmTMB,poisson,random_effects,First slice,0.11.0,"Random intercepts (1 | group) on the poisson conditional submodel."
+glmmTMB,nbinom2,mu,First slice,0.11.0,Negative binomial (type 2) conditional submodel (log link).
+glmmTMB,nbinom2,sigma,First slice,0.11.0,"Overdispersion parameter (log link); size = exp(sigma)."
+glmmTMB,nbinom2,random_effects,First slice,0.11.0,"Random intercepts on the nbinom2 conditional submodel."
+glmmTMB,*,*,Planned or reserved,,Other families and zero-inflation targeted for v0.11.x.
 brmsfit,gaussian,mu,First slice,0.8.0,Gaussian conditional submodel (identity link).
 brmsfit,gaussian,random_effects,First slice,0.8.0,"Random intercepts (1 | group) and (1 + x | group) on the conditional submodel; nested / crossed still planned."
 brmsfit,gaussian,sigma_distributional,Planned or reserved,,brms distributional formulas (sigma ~ z) and brmsformula multi-parameter syntax targeted for v0.8.x.
@@ -68,10 +75,15 @@ MCMCglmm,*,*,Planned or reserved,,Non-Gaussian families and flexible covariance 
 sdmTMB,*,*,Planned or reserved,,Targeted for v0.10.x.
 lmerMod,gaussian,mu,First slice,0.10.0,Gaussian conditional submodel (identity link) from lme4::lmer().
 lmerMod,gaussian,random_effects,First slice,0.10.0,"Random intercepts (1 | g) and (1 + x | g) on the conditional submodel; nested / crossed still planned."
-lmerMod,*,*,Planned or reserved,,Other lme4 features targeted for v0.10.x.
-glmerMod,*,*,Planned or reserved,,Generalized lme4 fits targeted for v0.10.x.
+lmerMod,*,*,Planned or reserved,,Other lme4 features targeted for v0.11.x.
+glmerMod,binomial,mu,First slice,0.11.0,Binomial / Bernoulli conditional submodel (logit link) from lme4::glmer().
+glmerMod,binomial,random_effects,First slice,0.11.0,"Random intercepts (1 | g) on the binomial conditional submodel."
+glmerMod,poisson,mu,First slice,0.11.0,Poisson conditional submodel (log link) from lme4::glmer().
+glmerMod,poisson,random_effects,First slice,0.11.0,"Random intercepts (1 | g) on the poisson conditional submodel."
+glmerMod,*,*,Planned or reserved,,Other glmer families targeted for v0.11.x.
 lm,gaussian,mu,First slice,0.10.0,Gaussian fit from stats::lm().
 glm,gaussian,mu,First slice,0.10.0,Gaussian glm from stats::glm().
 glm,binomial,mu,First slice,0.10.0,Binomial / Bernoulli glm (logit link) from stats::glm().
 glm,poisson,mu,First slice,0.10.0,Poisson glm (log link) from stats::glm().
-glm,*,*,Planned or reserved,,Other families (Gamma / inverse.gaussian / quasi*) targeted for v0.10.x.
+glm,Gamma,mu,First slice,0.11.0,Gamma glm (log link by convention) from stats::glm().
+glm,*,*,Planned or reserved,,Other families (inverse.gaussian / quasi*) targeted for v0.11.x.

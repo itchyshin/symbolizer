@@ -56,6 +56,35 @@ symbolize.lmerMod <- function(fit, symbols = NULL, units = NULL,
                        ci_method = ci_method, ...)
 }
 
+#' Symbolize an lme4 glmer() fit (binomial / poisson, v0.11 first slice)
+#'
+#' Builds a [`symbolized_model`][new_symbolized_model] from a
+#' `glmerMod` object. v0.11 covers binomial / poisson families with
+#' their canonical links, plus optional `(1 | g)` random intercepts.
+#'
+#' @inheritParams symbolize.lmerMod
+#' @return A `symbolized_model` object.
+#' @export
+symbolize.glmerMod <- function(fit, symbols = NULL, units = NULL,
+                               context = NULL, ci_method = "Wald", ...) {
+  if (!requireNamespace("lme4", quietly = TRUE)) {
+    cli::cli_abort(c(
+      "{.pkg lme4} is needed to symbolize this fit.",
+      i = "Install it with {.code install.packages(\"lme4\")}."
+    ))
+  }
+  family <- fit@resp$family$family
+  link <- fit@resp$family$link %||% "identity"
+  if (is.null(family) || !nzchar(family)) {
+    cli::cli_abort("Could not resolve {.code fit@resp$family$family}.")
+  }
+  capability_check("glmerMod", family, "mu")
+  lme4_symbolize_impl(fit, family = family, link = link,
+                       class_name = "glmerMod",
+                       symbols = symbols, units = units, context = context,
+                       ci_method = ci_method, ...)
+}
+
 # Shared lme4 implementation. Currently only used by lmerMod; the
 # glmerMod sibling can be added later.
 lme4_symbolize_impl <- function(fit, family, link, class_name,
@@ -78,7 +107,7 @@ lme4_symbolize_impl <- function(fit, family, link, class_name,
   re_per_entry <- lapply(entries, function(e) lme4_re_terms(fit, e$dpar))
   has_re <- vapply(re_per_entry, function(x) !is.null(x), logical(1L))
   if (any(has_re)) {
-    capability_check("lmerMod", family, "random_effects")
+    capability_check(class_name, family, "random_effects")
     for (i in which(has_re)) {
       drm_assert_supported_re(re_per_entry[[i]], entries[[i]]$dpar)
     }
