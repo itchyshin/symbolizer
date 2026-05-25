@@ -49,6 +49,31 @@
 #' the between-study heterogeneity `tau^2` appears in the
 #' `variance_components` tibble.
 #'
+#' @section Location-scale (rma.ls):
+#' When the fit was created with `rma(..., scale = ~ z)`,
+#' `symbolize.rma.uni()` adds a second submodel `tau2` to the
+#' returned object. metafor parameterises the scale model as
+#' `log(tau^2_i) = alpha_0 + alpha_1 z_{1i} + ... + alpha_q z_{qi}`
+#' -- log of the **variance**, not the SD -- with coefficient family
+#' `alpha`. This contrasts with the SD parameterisation that brms,
+#' glmmTMB, and drmTMB use for their distributional location-scale
+#' models (`log(sigma_i) = gamma_0 + gamma_k z_ki`). The natural-scale
+#' reading on a metafor scale slope is therefore "tau^2_i changes
+#' multiplicatively by exp(alpha_k) per unit of z_k" -- a change in
+#' the variance, not the SD. The two scales are related by
+#' `alpha_k ~ 2 * gamma_k` (since `log(tau^2) = 2 * log(tau) + const`).
+#'
+#' @references
+#' Viechtbauer, W., & López-López, J. A. (2022). Location-scale
+#' models for meta-analysis. *Research Synthesis Methods*, 13(6),
+#' 697-715.
+#'
+#' Nakagawa, S., Mizuno, A., Morrison, K., Ricolfi, L., Williams, C.,
+#' Drobniak, S. M., Lagisz, M., & Yang, Y. (2025). Location-scale
+#' meta-analysis and meta-regression as a tool to capture large-scale
+#' changes in biological and methodological heterogeneity: A spotlight
+#' on heteroscedasticity. *Global Change Biology*, 31, e70204.
+#'
 #' @inheritParams symbolize
 #' @return A `symbolized_model` object.
 #' @export
@@ -62,7 +87,12 @@ symbolize.rma.uni <- function(fit, symbols = NULL, units = NULL,
   }
   family <- "meta_normal"
   capability_check("rma.uni", family, "mu")
-  if (!is.null(fit$tau2) && fit$tau2 > 0) {
+  # Note: metafor models log(tau^2_i) (log of the VARIANCE), not log(sigma_i).
+  # Coefficient family for tau2 is alpha. Symbol is tau^2.
+  is_location_scale <- identical(fit$model %||% "rma.uni", "rma.ls")
+  if (is_location_scale) {
+    capability_check("rma.uni", family, "tau2_scale")
+  } else if (!is.null(fit$tau2) && length(fit$tau2) == 1L && fit$tau2 > 0) {
     capability_check("rma.uni", family, "tau2")
   }
 
@@ -98,6 +128,26 @@ symbolize.rma.uni <- function(fit, symbols = NULL, units = NULL,
       position = 1L
     )
   )
+
+  # Location-scale rma.ls: append a tau2 submodel. metafor models
+  # log(tau^2_i) (log VARIANCE, not log SD) with coefficient alpha.
+  if (is_location_scale && !is.null(fit$Z)) {
+    z_pred_names <- setdiff(colnames(fit$Z), c("intrcpt", "(Intercept)"))
+    z_rhs <- if (length(z_pred_names) == 0L) "1" else paste(z_pred_names, collapse = " + ")
+    tau2_form <- stats::as.formula(paste("tau2 ~", z_rhs))
+    for (m in z_pred_names) {
+      if (!m %in% names(data) && m %in% colnames(fit$Z)) {
+        data[[m]] <- as.numeric(fit$Z[, m])
+      }
+    }
+    entries[[length(entries) + 1L]] <- list(
+      dpar = "tau2",
+      response = NA_character_,
+      rhs = if (length(z_pred_names) == 0L) quote(1) else metafor_rhs_expr(tau2_form),
+      expr = tau2_form,
+      position = 2L
+    )
+  }
 
   param <- get_parameterization(family)
   index <- list(observation = "i", study = "s", outcome = "k")
@@ -164,7 +214,9 @@ symbolize.rma.uni <- function(fit, symbols = NULL, units = NULL,
       metafor    = utils::packageVersion("metafor")
     ),
     method = fit$method,
-    tau2 = as.numeric(fit$tau2 %||% NA_real_),
+    tau2 = if (is.null(fit$tau2) || length(fit$tau2) == 0L) NA_real_
+           else as.numeric(fit$tau2),
+    is_location_scale = isTRUE(is_location_scale),
     created_by = "symbolize.rma.uni"
   )
 
@@ -510,11 +562,12 @@ metafor_build_submodels <- function(entries, param) {
   rows <- lapply(entries, function(e) {
     dpar <- e$dpar
     coef_family <- drm_coef_family_for(dpar)
+    link <- if (identical(dpar, "tau2")) "log" else "identity"
     f <- stats::as.formula(paste("~", paste(deparse(e$rhs), collapse = " ")))
     tibble::tibble(
       parameter = dpar,
       formula = list(f),
-      link = "identity",
+      link = link,
       coef_family = coef_family,
       position = e$position
     )
@@ -543,6 +596,9 @@ metafor_build_fixed_effects <- function(terms_tbl, fit) {
     ))
   }
   beta_names <- rownames(fit$beta) %||% names(stats::coef(fit))
+  alpha_names <- if (!is.null(fit$alpha)) {
+    rownames(fit$alpha) %||% colnames(fit$Z) %||% character(0)
+  } else character(0)
   estimate <- rep(NA_real_, nrow(terms_tbl))
   std_err  <- rep(NA_real_, nrow(terms_tbl))
   ci_low   <- rep(NA_real_, nrow(terms_tbl))
@@ -551,12 +607,24 @@ metafor_build_fixed_effects <- function(terms_tbl, fit) {
     row <- terms_tbl[i, , drop = FALSE]
     if (is.na(row$coefficient_symbol)) next
     hit <- metafor_hit_name(row)
-    j <- which(beta_names == hit)
-    if (length(j) >= 1L) {
-      estimate[i] <- as.numeric(fit$beta[j[[1L]], 1L])
-      if (!is.null(fit$se)) std_err[i] <- as.numeric(fit$se[j[[1L]]])
-      if (!is.null(fit$ci.lb)) ci_low[i]  <- as.numeric(fit$ci.lb[j[[1L]]])
-      if (!is.null(fit$ci.ub)) ci_high[i] <- as.numeric(fit$ci.ub[j[[1L]]])
+    if (identical(row$submodel, "tau2")) {
+      # Scale-part coefficients: pull from fit$alpha + alpha SE/CI slots.
+      j <- which(alpha_names == hit)
+      if (length(j) >= 1L) {
+        estimate[i] <- as.numeric(fit$alpha[j[[1L]], 1L])
+        if (!is.null(fit$se.alpha))    std_err[i] <- as.numeric(fit$se.alpha[j[[1L]]])
+        if (!is.null(fit$ci.lb.alpha)) ci_low[i]  <- as.numeric(fit$ci.lb.alpha[j[[1L]]])
+        if (!is.null(fit$ci.ub.alpha)) ci_high[i] <- as.numeric(fit$ci.ub.alpha[j[[1L]]])
+      }
+    } else {
+      # Location-part coefficients from fit$beta + standard CI slots.
+      j <- which(beta_names == hit)
+      if (length(j) >= 1L) {
+        estimate[i] <- as.numeric(fit$beta[j[[1L]], 1L])
+        if (!is.null(fit$se))    std_err[i] <- as.numeric(fit$se[j[[1L]]])
+        if (!is.null(fit$ci.lb)) ci_low[i]  <- as.numeric(fit$ci.lb[j[[1L]]])
+        if (!is.null(fit$ci.ub)) ci_high[i] <- as.numeric(fit$ci.ub[j[[1L]]])
+      }
     }
   }
   excludes_zero <- !is.na(ci_low) & !is.na(ci_high) &
@@ -584,7 +652,12 @@ metafor_build_fixed_effects <- function(terms_tbl, fit) {
 # called "study", with single intercept-only component. NULL when
 # `tau^2` is exactly zero (fixed-effects meta-analysis).
 metafor_build_re_per_entry <- function(fit) {
-  if (is.null(fit$tau2) || fit$tau2 == 0) return(NULL)
+  # rma.uni: tau2 is a scalar. rma.ls: tau2 is a vector (one per
+  # observation). Treat either case as "yes there's a study-level u_i"
+  # when any element is non-zero.
+  tau2 <- fit$tau2
+  if (is.null(tau2) || length(tau2) == 0L) return(NULL)
+  if (all(is.na(tau2)) || all(tau2 == 0)) return(NULL)
   tibble::tibble(
     submodel    = "mu",
     term_label  = "(1 | study)",
@@ -597,18 +670,33 @@ metafor_build_re_per_entry <- function(fit) {
 
 # tau^2 appears as the variance component. Also report the (known)
 # sampling-variance summary (mean v_i) for transparency.
+# For rma.ls, tau^2 is a vector (one per observation); summarise by the
+# mean to give a single representative row, and mark kind = "heterogeneity_scale".
 metafor_build_variance_components <- function(fit) {
   rows <- list()
-  tau2 <- as.numeric(fit$tau2 %||% NA_real_)
-  if (!is.na(tau2)) {
-    rows[[length(rows) + 1L]] <- tibble::tibble(
-      parameter    = "mu",
-      group        = "study",
-      term         = "tau^2",
-      sd_estimate  = sqrt(tau2),
-      var_estimate = tau2,
-      kind         = "heterogeneity"
-    )
+  tau2 <- fit$tau2
+  is_scale_model <- identical(fit$model %||% "rma.uni", "rma.ls")
+  if (!is.null(tau2) && length(tau2) > 0L && !all(is.na(tau2))) {
+    if (is_scale_model || length(tau2) > 1L) {
+      tau2_mean <- mean(as.numeric(tau2), na.rm = TRUE)
+      rows[[length(rows) + 1L]] <- tibble::tibble(
+        parameter    = "mu",
+        group        = "study",
+        term         = "mean(tau^2_i)",
+        sd_estimate  = sqrt(tau2_mean),
+        var_estimate = tau2_mean,
+        kind         = if (is_scale_model) "heterogeneity_scale" else "heterogeneity"
+      )
+    } else {
+      rows[[length(rows) + 1L]] <- tibble::tibble(
+        parameter    = "mu",
+        group        = "study",
+        term         = "tau^2",
+        sd_estimate  = sqrt(as.numeric(tau2[[1L]])),
+        var_estimate = as.numeric(tau2[[1L]]),
+        kind         = "heterogeneity"
+      )
+    }
   }
   # Mean sampling variance as a known summary -- not estimated, but
   # reported for the reader's reference.

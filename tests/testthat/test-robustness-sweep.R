@@ -185,3 +185,9 @@ test_that("robustness: metafor rma.mv structured (R-matrix)", {
   sym <- symbolize(fit_metafor_rma_mv_structured())
   run_public_surface(sym, "metafor rma.mv structured")
 })
+
+test_that("robustness: metafor rma.ls location-scale", {
+  skip_if_not_installed("metafor")
+  sym <- symbolize(fit_metafor_rma_ls())
+  run_public_surface(sym, "metafor rma.ls")
+})

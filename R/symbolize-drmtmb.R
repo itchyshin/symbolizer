@@ -363,6 +363,7 @@ drm_coef_family_for <- function(dpar) {
     nu      = "nu",
     zi      = "alpha",  # zero-inflation submodel; logit link
     hu      = "delta",  # hurdle submodel; logit link
+    tau2    = "alpha",  # metafor location-scale: log(tau^2_i) = alpha_0 + sum alpha_k z_ki
     cli::cli_abort("No coefficient symbol family defined for dpar {.val {dpar}}.")
   )
 }
@@ -390,6 +391,8 @@ drm_link_for <- function(family, dpar, family_link, family_links = NULL) {
   # above the hurdle).
   if (dpar == "zi") return("logit")
   if (dpar == "hu") return("logit")
+  # metafor location-scale: log of the heterogeneity VARIANCE (not SD).
+  if (dpar == "tau2") return("log")
   family_link
 }
 
@@ -406,6 +409,7 @@ drm_param_greek <- function(dpar) {
     nu     = "\\nu",
     zi     = "\\pi_{\\mathrm{zi}}",  # zero-inflation probability
     hu     = "\\pi_{\\mathrm{hu}}",  # hurdle probability
+    tau2   = "\\tau^{2}",            # meta-analytic heterogeneity (variance)
     paste0("\\", dpar)
   )
 }

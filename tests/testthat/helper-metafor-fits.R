@@ -48,6 +48,22 @@ fit_metafor_rma_mv <- function() {
 
 # v0.13.1: rma.mv with an attached R-matrix random effect (synthetic
 # phylogenetic-style correlation on the district level for testing).
+.load_dat_bangert <- function() {
+  e <- new.env()
+  pkg <- if (requireNamespace("metadat", quietly = TRUE)) "metadat" else "metafor"
+  utils::data("dat.bangertdrowns2004", package = pkg, envir = e)
+  e$dat.bangertdrowns2004
+}
+
+# v0.15: location-scale rma (rma.ls). Models log(tau^2_i) = alpha_0 +
+# alpha_1 * ni_i alongside the standard location-part mu_i = beta_0 +
+# beta_1 * ni_i.
+fit_metafor_rma_ls <- function() {
+  testthat::skip_if_not_installed("metafor")
+  dat <- .load_dat_bangert()
+  metafor::rma(yi, vi, mods = ~ ni, scale = ~ ni, data = dat)
+}
+
 fit_metafor_rma_mv_structured <- function() {
   testthat::skip_if_not_installed("metafor")
   dat <- .load_dat_konstantopoulos()

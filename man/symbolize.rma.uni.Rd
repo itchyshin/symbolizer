@@ -31,3 +31,30 @@ are treated as known (sampling variances are not parameters), and
 the between-study heterogeneity \code{tau^2} appears in the
 \code{variance_components} tibble.
 }
+\section{Location-scale (rma.ls)}{
+
+When the fit was created with \code{rma(..., scale = ~ z)},
+\code{symbolize.rma.uni()} adds a second submodel \code{tau2} to the
+returned object. metafor parameterises the scale model as
+\verb{log(tau^2_i) = alpha_0 + alpha_1 z_\{1i\} + ... + alpha_q z_\{qi\}}
+-- log of the \strong{variance}, not the SD -- with coefficient family
+\code{alpha}. This contrasts with the SD parameterisation that brms,
+glmmTMB, and drmTMB use for their distributional location-scale
+models (\verb{log(sigma_i) = gamma_0 + gamma_k z_ki}). The natural-scale
+reading on a metafor scale slope is therefore "tau^2_i changes
+multiplicatively by exp(alpha_k) per unit of z_k" -- a change in
+the variance, not the SD. The two scales are related by
+\code{alpha_k ~ 2 * gamma_k} (since \code{log(tau^2) = 2 * log(tau) + const}).
+}
+
+\references{
+Viechtbauer, W., & López-López, J. A. (2022). Location-scale
+models for meta-analysis. \emph{Research Synthesis Methods}, 13(6),
+697-715.
+
+Nakagawa, S., Mizuno, A., Morrison, K., Ricolfi, L., Williams, C.,
+Drobniak, S. M., Lagisz, M., & Yang, Y. (2025). Location-scale
+meta-analysis and meta-regression as a tool to capture large-scale
+changes in biological and methodological heterogeneity: A spotlight
+on heteroscedasticity. \emph{Global Change Biology}, 31, e70204.
+}
