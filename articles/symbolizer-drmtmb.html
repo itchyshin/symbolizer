@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.19.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.19.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -591,22 +591,22 @@ random-effect block populated from the data:</p>
 .sym-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .sym-skip { position: absolute; top: -100px; left: 0; padding: 0.4rem 0.7rem; background: #8a1f22; color: #fff; text-decoration: none; font-size: 0.85rem; z-index: 5; }
 .sym-skip:focus { top: 0; }</style>
-<div id="sym-sym-1779746822" class="sym-tabs">
-<a class="sym-skip" href="#sym-sym-1779746822-end">Skip three-views
+<div id="sym-sym-1779747649" class="sym-tabs">
+<a class="sym-skip" href="#sym-sym-1779747649-end">Skip three-views
 widget</a>
 <div class="sym-tablist" role="tablist" aria-label="Three views of the model">
-<button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779746822-tab-idx" aria-controls="sym-sym-1779746822-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
+<button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779747649-tab-idx" aria-controls="sym-sym-1779747649-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
 <span class="sym-tab-marker" aria-hidden="true">▸</span>1. Index
 </button>
-<button type="button" class="sym-tab" role="tab" id="sym-sym-1779746822-tab-eq" aria-controls="sym-sym-1779746822-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
+<button type="button" class="sym-tab" role="tab" id="sym-sym-1779747649-tab-eq" aria-controls="sym-sym-1779747649-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
 <span class="sym-tab-marker" aria-hidden="true">▸</span>2. Matrix
 </button>
-<button type="button" class="sym-tab" role="tab" id="sym-sym-1779746822-tab-mat" aria-controls="sym-sym-1779746822-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
-<span class="sym-tab-marker" aria-hidden="true">▸</span>3. Matrix with
-data
+<button type="button" class="sym-tab" role="tab" id="sym-sym-1779747649-tab-mat" aria-controls="sym-sym-1779747649-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
+<span class="sym-tab-marker" aria-hidden="true">▸</span>3. Equations
+with data
 </button>
 </div>
-<div id="sym-sym-1779746822-panel-idx" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-sym-1779746822-tab-idx" data-panel="idx" tabindex="0">
+<div id="sym-sym-1779747649-panel-idx" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-sym-1779747649-tab-idx" data-panel="idx" tabindex="0">
 <p class="sym-caption">
 What happens for each observation <em>i</em> – the per-individual
 reading.
@@ -661,7 +661,7 @@ u_{site(i)} — random intercept by site  <span class="sym-dim">scalar;
 </li>
 </ul></details>
 </div>
-<div id="sym-sym-1779746822-panel-eq" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1779746822-tab-eq" data-panel="eq" hidden="" tabindex="0">
+<div id="sym-sym-1779747649-panel-eq" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1779747649-tab-eq" data-panel="eq" hidden="" tabindex="0">
 <p class="sym-caption">
 The same model in matrix form – the structural contract every textbook
 past chapter 4 switches to.
@@ -722,7 +722,7 @@ form</span>
 </li>
 </ul></details>
 </div>
-<div id="sym-sym-1779746822-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1779746822-tab-mat" data-panel="mat" hidden="" tabindex="0">
+<div id="sym-sym-1779747649-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1779747649-tab-mat" data-panel="mat" hidden="" tabindex="0">
 <p class="sym-caption">
 The same matrix equation, with your actual numbers stacked inside the
 brackets – what the computer multiplies. Showing first 5 and last 2 rows
@@ -776,7 +776,21 @@ And the
 submodel (no observed counterpart –
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>’s
 job is to describe the spread of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>𝛆</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat{\boldsymbol{\varepsilon}}</annotation></semantics></math>):
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>𝛆</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat{\boldsymbol{\varepsilon}}</annotation></semantics></math>).
+For the same observation <em>i</em> = 1:
+</p>
+<div class="sym-eq">
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><msub><mover><mi>σ</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><msub><mover><mi>γ</mi><mo accent="true">̂</mo></mover><mn>0</mn></msub><mo>+</mo><msub><mover><mi>γ</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mspace width="0.167em"></mspace><msub><mrow><mi mathvariant="normal">t</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">p</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi></mrow><mn>1</mn></msub></mtd><mtd columnalign="right" style="text-align: right"><mspace width="1.0em"></mspace><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">sigma submodel for observation 1, log link</mtext><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><msub><mover><mi>σ</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mn>0.578</mn><mo>+</mo><mn>0.0422</mn><mo>×</mo><mn>24.7</mn><mo>=</mo><mn>1.62</mn></mtd><mtd columnalign="right" style="text-align: right"><mspace width="1.0em"></mspace><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">with your numbers</mtext><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><msub><mover><mi>σ</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mn>1.62</mn><mo stretchy="false" form="postfix">)</mo><mo>≈</mo><mn>5.05</mn></mtd><mtd columnalign="right" style="text-align: right"><mspace width="1.0em"></mspace><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">predicted residual SD for observation 1</mtext><mo stretchy="false" form="postfix">)</mo></mtd></mtr></mtable><annotation encoding="application/x-tex">
+\begin{aligned}
+\log\hat\sigma_{1} &amp;= \hat\gamma_{0} + \hat\gamma_{1}\,\mathrm{temperature}_{1} &amp;\quad(\text{sigma submodel for observation 1, log link}) \\
+\log\hat\sigma_{1} &amp;= 0.578 + 0.0422 \times 24.7 = 1.62 &amp;\quad(\text{with your numbers}) \\
+\hat\sigma_{1} &amp;= \exp(1.62) \approx 5.05 &amp;\quad(\text{predicted residual SD for observation 1})
+\end{aligned}
+</annotation></semantics></math>
+</div>
+<p class="sym-caption" style="font-size:0.95em;color:#374151">
+Stacking the same log-link equation for all <em>n</em> = 120
+observations:
 </p>
 <div class="sym-eq">
 <math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mspace width="-0.167em"></mspace><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mn>5.05</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>3.95</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>4.25</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>3.55</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>4.34</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>2.95</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>3.95</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mi>𝛔</mi><mrow><mspace width="0.167em"></mspace><mn>120</mn><mo>×</mo><mn>1</mn></mrow></msub><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.278em"></mspace><mo>=</mo><mspace width="0.278em"></mspace><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mn>1.00</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>24.7</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1.00</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>18.9</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1.00</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>20.6</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1.00</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>16.3</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1.00</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>21.1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1.00</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>11.9</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1.00</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>18.9</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mi>𝐗</mi><mrow><mi>σ</mi><mo>,</mo><mspace width="0.167em"></mspace><mn>120</mn><mo>×</mo><mn>2</mn></mrow></msub><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.167em"></mspace><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mn>0.578</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.0422</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mi>𝛄</mi><mrow><mspace width="0.167em"></mspace><mn>2</mn><mo>×</mo><mn>1</mn></mrow></msub><mspace width="0.167em"></mspace></mrow></munder></mrow><annotation encoding="application/x-tex">
@@ -785,9 +799,9 @@ job is to describe the spread of
 </div>
 </div>
 </div>
-<span id="sym-sym-1779746822-end" tabindex="-1"></span>
+<span id="sym-sym-1779747649-end" tabindex="-1"></span>
 <script>(function() {
-  var root = document.getElementById("sym-sym-1779746822");
+  var root = document.getElementById("sym-sym-1779747649");
   if (!root) return;
   var tabs   = Array.prototype.slice.call(root.querySelectorAll("[role=\"tab\"]"));
   var panels = Array.prototype.slice.call(root.querySelectorAll("[role=\"tabpanel\"]"));

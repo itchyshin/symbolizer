@@ -228,13 +228,13 @@ three tabs over the same fit.
 as_html_three_views(sym, head = 5, tail = 2)
 ```
 
-[Skip three-views widget](#sym-sym-1779746852-end)
+[Skip three-views widget](#sym-sym-1779747683-end)
 
 ▸1. Index
 
 ▸2. Matrix
 
-▸3. Matrix with data
+▸3. Equations with data
 
 What happens for each observation *i* – the per-individual reading.
 
@@ -331,7 +331,18 @@ Every row of this matrix equation is one of the response-equation rows
 from the worked row above.
 
 And the $`\sigma`$ submodel (no observed counterpart – $`\sigma`$’s job
-is to describe the spread of $`\hat{\boldsymbol{\varepsilon}}`$):
+is to describe the spread of $`\hat{\boldsymbol{\varepsilon}}`$). For
+the same observation *i* = 1:
+
+``` math
+\begin{aligned}
+\log\hat\sigma_{1} &= \hat\gamma_{0} + \hat\gamma_{1}\,\mathrm{temperature}_{1} &\quad(\text{sigma submodel for observation 1, log link}) \\
+\log\hat\sigma_{1} &= 0.485 + 0.0936 \times 14.0 = 1.79 &\quad(\text{with your numbers}) \\
+\hat\sigma_{1} &= \exp(1.79) \approx 6.01 &\quad(\text{predicted residual SD for observation 1})
+\end{aligned}
+```
+
+Stacking the same log-link equation for all *n* = 80 observations:
 
 ``` math
 \log\!\underbrace{\begin{bmatrix} 6.01 \\ 6.98 \\ 9.26 \\ 14.8 \\ 5.50 \\ \vdots \\ 12.3 \\ 16.0 \end{bmatrix}}_{\textstyle\,\boldsymbol{\sigma}_{\,80 \times 1}\,} \;=\; \underbrace{\begin{bmatrix} 1.00 & 14.0 \\ 1.00 & 15.6 \\ 1.00 & 18.6 \\ 1.00 & 23.6 \\ 1.00 & 13.0 \\ \vdots & \vdots \\ 1.00 & 21.7 \\ 1.00 & 24.4 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\sigma,\,80 \times 2}\,}\, \underbrace{\begin{bmatrix} 0.485 \\ 0.0936 \end{bmatrix}}_{\textstyle\,\boldsymbol{\gamma}_{\,2 \times 1}\,}

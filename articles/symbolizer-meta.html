@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.19.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.19.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -147,10 +147,10 @@ three.</p>
 <span>                  obs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">id</span><span class="op">)</span>, g <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">dat</span>, <span class="fl">4</span><span class="op">)</span></span>
 <span><span class="co">#&gt;            y         vi study obs g</span></span>
-<span><span class="co">#&gt; 1 -0.1037070 0.05214863     1   1 1</span></span>
-<span><span class="co">#&gt; 2  0.2746595 0.10619273     2   2 1</span></span>
+<span><span class="co">#&gt; 1 -0.2839669 0.05214863     1   1 1</span></span>
+<span><span class="co">#&gt; 2 -0.6689495 0.10619273     2   2 1</span></span>
 <span><span class="co">#&gt; 3  0.1386369 0.04267655     3   3 1</span></span>
-<span><span class="co">#&gt; 4  0.4370492 0.12001508     4   4 1</span></span></code></pre></div>
+<span><span class="co">#&gt; 4  0.6629762 0.12001508     4   4 1</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="face-1-metafor-the-canonical-interface">Face 1 — metafor (the canonical interface)<a class="anchor" aria-label="anchor" href="#face-1-metafor-the-canonical-interface"></a>
@@ -174,8 +174,8 @@ three.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 6</span></span></span>
 <span><span class="co">#&gt;   parameter group    term          sd_estimate var_estimate kind             </span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> mu        study    sigma^2_study      0.349       0.122   heterogeneity    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> mu        obs      sigma^2_obs        0.059<span style="text-decoration: underline;">6</span>      0.003<span style="text-decoration: underline;">55</span> heterogeneity    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> mu        study    sigma^2_study      0.302       0.091<span style="text-decoration: underline;">0</span>  heterogeneity    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> mu        obs      sigma^2_obs        0.094<span style="text-decoration: underline;">3</span>      0.008<span style="text-decoration: underline;">90</span> heterogeneity    </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> mu        sampling mean(v_i)          0.316       0.099<span style="text-decoration: underline;">9</span>  sampling_variance</span></span></code></pre></div>
 <p>The model the package teaches: <code>meta_normal</code> family, two
 random-effect tiers (study + observation), sampling variances
@@ -192,15 +192,7 @@ identical; syntactically different.</p>
 <span>  <span class="va">y</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">study</span><span class="op">)</span> <span class="op">+</span> <span class="fu">propto</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">obs</span> <span class="op">|</span> <span class="va">g</span>, <span class="va">V</span><span class="op">)</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">dat</span>, REML <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old): Model convergence</span></span>
-<span><span class="co">#&gt; problem; non-positive-definite Hessian matrix. See vignette('troubleshooting')</span></span>
-<span><span class="co">#&gt; Warning in finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old): Model convergence</span></span>
-<span><span class="co">#&gt; problem; false convergence (8). See vignette('troubleshooting'),</span></span>
-<span><span class="co">#&gt; help('diagnose')</span></span>
-<span><span class="va">sym_glmm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/symbolize.html">symbolize</a></span><span class="op">(</span><span class="va">fit_glmm</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in sqrt(diag(vv)): NaNs produced</span></span>
-<span><span class="co">#&gt; Warning in sqrt(diag(object$cov.fixed)): NaNs produced</span></span>
-<span><span class="co">#&gt; Warning in sqrt(diag(object$cov.fixed)): NaNs produced</span></span></code></pre></div>
+<span><span class="va">sym_glmm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/symbolize.html">symbolize</a></span><span class="op">(</span><span class="va">fit_glmm</span><span class="op">)</span></span></code></pre></div>
 <p><code>symbolizer</code> detects the <code>propto()</code> block and
 adds an info-level warning row:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">

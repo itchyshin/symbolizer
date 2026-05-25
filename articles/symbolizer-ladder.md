@@ -326,13 +326,13 @@ three-view widget:
 as_html_three_views(sym4)
 ```
 
-[Skip three-views widget](#sym-sym-1779746842-end)
+[Skip three-views widget](#sym-sym-1779747671-end)
 
 ▸1. Index
 
 ▸2. Matrix
 
-▸3. Matrix with data
+▸3. Equations with data
 
 What happens for each observation *i* – the per-individual reading.
 
@@ -438,7 +438,18 @@ Every row of this matrix equation is one of the response-equation rows
 from the worked row above.
 
 And the $`\sigma`$ submodel (no observed counterpart – $`\sigma`$’s job
-is to describe the spread of $`\hat{\boldsymbol{\varepsilon}}`$):
+is to describe the spread of $`\hat{\boldsymbol{\varepsilon}}`$). For
+the same observation *i* = 1:
+
+``` math
+\begin{aligned}
+\log\hat\sigma_{1} &= \hat\gamma_{0} + \hat\gamma_{1}\,\mathrm{temperature}_{1} &\quad(\text{sigma submodel for observation 1, log link}) \\
+\log\hat\sigma_{1} &= 0.465 + 0.0399 \times 23.9 = 1.42 &\quad(\text{with your numbers}) \\
+\hat\sigma_{1} &= \exp(1.42) \approx 4.12 &\quad(\text{predicted residual SD for observation 1})
+\end{aligned}
+```
+
+Stacking the same log-link equation for all *n* = 200 observations:
 
 ``` math
 \log\!\underbrace{\begin{bmatrix} 4.12 \\ 3.22 \\ 2.77 \\ 2.44 \\ 3.04 \\ \vdots \\ 3.53 \\ 2.58 \end{bmatrix}}_{\textstyle\,\boldsymbol{\sigma}_{\,200 \times 1}\,} \;=\; \underbrace{\begin{bmatrix} 1.00 & 23.9 \\ 1.00 & 17.7 \\ 1.00 & 13.9 \\ 1.00 & 10.7 \\ 1.00 & 16.3 \\ \vdots & \vdots \\ 1.00 & 19.9 \\ 1.00 & 12.1 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\sigma,\,200 \times 2}\,}\, \underbrace{\begin{bmatrix} 0.465 \\ 0.0399 \end{bmatrix}}_{\textstyle\,\boldsymbol{\gamma}_{\,2 \times 1}\,}

@@ -250,11 +250,11 @@ of traits and near zero on the rest.
 
 getLoadings(fit, rotate = "varimax")
 #>                LV1         LV2
-#> trait_1 0.41286756  0.51357999
-#> trait_2 0.96220244 -0.06232975
-#> trait_3 0.59822026  0.35650149
-#> trait_4 0.07572941  0.55762916
-#> trait_5 0.03928117  0.63132132
+#> trait_1 0.41286758  0.51358005
+#> trait_2 0.96220244 -0.06232972
+#> trait_3 0.59822023  0.35650155
+#> trait_4 0.07572939  0.55762911
+#> trait_5 0.03928119  0.63132134
 ```
 
 Reading down the columns of the rotated loading matrix, the first axis
@@ -271,7 +271,7 @@ variance that the shared axes capture:
 
 extract_communality(fit)
 #>   trait_1   trait_2   trait_3   trait_4   trait_5 
-#> 0.4286515 0.9999997 0.4816947 0.3769111 0.8343110
+#> 0.4286516 0.9999997 0.4816947 0.3769110 0.8343111
 ```
 
 Traits with communality near 1 are well-explained by the shared axes;
@@ -288,16 +288,16 @@ co <- extract_correlations(fit)
 co_B <- co[co$tier == "B", c("trait_i", "trait_j", "correlation", "lower", "upper")]
 co_B
 #>    trait_i trait_j  correlation       lower     upper
-#> 1  trait_1 trait_2  0.376366282  0.07347076 0.6156910
-#> 2  trait_1 trait_3  0.425867891  0.13185001 0.6510127
-#> 3  trait_2 trait_3  0.571987880  0.31695310 0.7498833
-#> 4  trait_1 trait_4  0.344313714  0.03674558 0.5922953
-#> 5  trait_2 trait_4  0.043119153 -0.27204430 0.3499283
-#> 6  trait_3 trait_4  0.265401442 -0.05026344 0.5328568
-#> 7  trait_1 trait_5  0.488456107  0.20870267 0.6943188
-#> 8  trait_2 trait_5 -0.002326784 -0.31360882 0.3094068
-#> 9  trait_3 trait_5  0.357724317  0.05201076 0.6021351
-#> 10 trait_4 trait_5  0.559281316  0.30004647 0.7415899
+#> 1  trait_1 trait_2  0.376366305  0.07347079 0.6156910
+#> 2  trait_1 trait_3  0.425867914  0.13185003 0.6510127
+#> 3  trait_2 trait_3  0.571987850  0.31695306 0.7498833
+#> 4  trait_1 trait_4  0.344313716  0.03674559 0.5922953
+#> 5  trait_2 trait_4  0.043119159 -0.27204430 0.3499283
+#> 6  trait_3 trait_4  0.265401446 -0.05026343 0.5328568
+#> 7  trait_1 trait_5  0.488456169  0.20870275 0.6943189
+#> 8  trait_2 trait_5 -0.002326723 -0.31360877 0.3094069
+#> 9  trait_3 trait_5  0.357724385  0.05201084 0.6021351
+#> 10 trait_4 trait_5  0.559281305  0.30004646 0.7415899
 ```
 
 The two within-syndrome correlations (traits 1-2-3 among themselves and

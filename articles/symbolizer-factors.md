@@ -362,13 +362,13 @@ through:
 as_html_three_views(sym3)
 ```
 
-[Skip three-views widget](#sym-sym-1779746828-end)
+[Skip three-views widget](#sym-sym-1779747655-end)
 
 ▸1. Index
 
 ▸2. Matrix
 
-▸3. Matrix with data
+▸3. Equations with data
 
 What happens for each observation *i* – the per-individual reading.
 
@@ -465,7 +465,18 @@ Every row of this matrix equation is one of the response-equation rows
 from the worked row above.
 
 And the $`\sigma`$ submodel (no observed counterpart – $`\sigma`$’s job
-is to describe the spread of $`\hat{\boldsymbol{\varepsilon}}`$):
+is to describe the spread of $`\hat{\boldsymbol{\varepsilon}}`$). For
+the same observation *i* = 1:
+
+``` math
+\begin{aligned}
+\log\hat\sigma_{1} &= \hat\gamma_{0} &\quad(\text{sigma submodel for observation 1, log link}) \\
+\log\hat\sigma_{1} &= 1.17 = 1.17 &\quad(\text{with your numbers}) \\
+\hat\sigma_{1} &= \exp(1.17) \approx 3.21 &\quad(\text{predicted residual SD for observation 1})
+\end{aligned}
+```
+
+Stacking the same log-link equation for all *n* = 120 observations:
 
 ``` math
 \log\!\underbrace{\begin{bmatrix} 3.21 \\ 3.21 \\ 3.21 \\ 3.21 \\ 3.21 \\ \vdots \\ 3.21 \\ 3.21 \end{bmatrix}}_{\textstyle\,\boldsymbol{\sigma}_{\,120 \times 1}\,} \;=\; \underbrace{\begin{bmatrix} 1.00 \\ 1.00 \\ 1.00 \\ 1.00 \\ 1.00 \\ \vdots \\ 1.00 \\ 1.00 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\sigma,\,120 \times 1}\,}\, \underbrace{\begin{bmatrix} 1.17 \end{bmatrix}}_{\textstyle\,\boldsymbol{\gamma}_{\,1 \times 1}\,}

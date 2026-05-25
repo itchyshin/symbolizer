@@ -12,12 +12,12 @@ Source:
 
 Nakagawa S (2026). *symbolizer: Structured Symbolic Specifications,
 Interpretations, and Teachable Stories for Modern Statistical Models*. R
-package version 0.19.0, <https://itchyshin.github.io/symbolizer/>.
+package version 0.19.1, <https://itchyshin.github.io/symbolizer/>.
 
     @Manual{,
       title = {symbolizer: Structured Symbolic Specifications, Interpretations, and Teachable Stories for Modern Statistical Models},
       author = {Shinichi Nakagawa},
       year = {2026},
-      note = {R package version 0.19.0},
+      note = {R package version 0.19.1},
       url = {https://itchyshin.github.io/symbolizer/},
     }

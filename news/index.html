@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.19.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.19.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,6 +34,19 @@
       <small>Source: <a href="https://github.com/itchyshin/symbolizer/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.19.1" id="symbolizer-0191">symbolizer 0.19.1<a class="anchor" aria-label="anchor" href="#symbolizer-0191"></a></h2>
+<div class="section level3">
+<h3 id="v0191--balance-the-worked-row-treatment-across-both-submodels-0-19-1">v0.19.1 – balance the worked-row treatment across both submodels<a class="anchor" aria-label="anchor" href="#v0191--balance-the-worked-row-treatment-across-both-submodels-0-19-1"></a></h3>
+<p>Small follow-up to v0.19.0:</p>
+<ul><li>
+<strong>Sigma submodel now gets a worked row too.</strong> On Tab 3, observation i = 1 is now walked through BOTH submodels in scalar arithmetic, not just the mu side. The new sigma block reads <code>log(sigma_hat_1) = gamma_0 + gamma_1 T_1</code> in symbols, then with numbers, then back-transformed to the predicted residual SD in original units (<code>sigma_hat_1 = exp(...) approx 7.04 g</code> for the ladder example). One observation, both submodels, before the matrix bmatrices stack each one n times.</li>
+<li>
+<strong>Tab 3 renamed</strong>: “Matrix with data” -&gt; <strong>“Equations with data”</strong>. The label “matrix with data” stopped being accurate in v0.19.0 once the tab carried both scalar response equations (the worked row) and the matrix-form response equations stacked from them. “Equations with data” captures that the tab is now multiple equations – scalar
+<ul><li>matrix, mu + sigma – all populated with the user’s numbers.</li>
+</ul></li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.19.0" id="symbolizer-0190">symbolizer 0.19.0<a class="anchor" aria-label="anchor" href="#symbolizer-0190"></a></h2>
 <div class="section level3">
