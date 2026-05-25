@@ -64,6 +64,29 @@ test_that("CSS and JS are embedded inline", {
   expect_match(html, "\\.sym-tab")
 })
 
+test_that("emitted JS preserves the escaped CSS selector quotes", {
+  # Regression for v0.18.1: the JS source was wrapped in an R
+  # single-quoted string and contained `querySelectorAll("[role=\"tab\"]")`.
+  # R's string parser strips `\"` -> `"`, which corrupted the JS to
+  # `querySelectorAll("[role="tab"]")` -- a syntax error that
+  # silently disabled tab switching on the rendered page. The fix
+  # is a raw R string around the JS body; this test guards against
+  # any regression to plain-quoted strings.
+  fit <- fit_drm_location_scale()
+  sym <- symbolize(fit)
+  html <- withr::with_output_sink(tempfile(), as_html_three_views(sym))
+  # The PROPER escaped form must appear:
+  expect_match(html,
+               'querySelectorAll\\("\\[role=\\\\"tab\\\\"\\]"\\)',
+               perl = TRUE)
+  expect_match(html,
+               'querySelectorAll\\("\\[role=\\\\"tabpanel\\\\"\\]"\\)',
+               perl = TRUE)
+  # And the BROKEN un-escaped form must not:
+  expect_false(grepl('querySelectorAll("[role="tab"]")', html, fixed = TRUE))
+  expect_false(grepl('querySelectorAll("[role="tabpanel"]")', html, fixed = TRUE))
+})
+
 test_that("widget exposes WAI-ARIA tabs roles", {
   fit <- fit_drm_location_scale()
   sym <- symbolize(fit)

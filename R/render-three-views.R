@@ -266,8 +266,18 @@ three_views_css <- function() {
 }
 
 three_views_js <- function(uid) {
+  # IMPORTANT: This JS contains `\"` escape sequences inside the
+  # querySelectorAll() string literals. If you write this function
+  # body as an ordinary R single- or double-quoted string, R's
+  # string parser will strip the backslashes ("\"" -> '"'), and the
+  # browser will then see invalid JS like
+  #     querySelectorAll("[role="tab"]")
+  # which is a syntax error -- the IIFE never installs the click
+  # handlers and tab switching silently fails. Use a raw R string
+  # (R >= 4.0) so the `\"` survives verbatim into the rendered
+  # <script> block.
   sprintf(
-'(function() {
+r"---((function() {
   var root = document.getElementById("%s");
   if (!root) return;
   var tabs   = Array.prototype.slice.call(root.querySelectorAll("[role=\"tab\"]"));
@@ -302,5 +312,5 @@ three_views_js <- function(uid) {
       if (next !== null) { activate(next); tabs[next].focus(); e.preventDefault(); }
     });
   });
-})();', uid)
+})();)---", uid)
 }
