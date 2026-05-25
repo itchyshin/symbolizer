@@ -62,7 +62,9 @@ brmsfit,gaussian,mu,First slice,0.8.0,Gaussian conditional submodel (identity li
 brmsfit,gaussian,random_effects,First slice,0.8.0,"Random intercepts (1 | group) and (1 + x | group) on the conditional submodel; nested / crossed still planned."
 brmsfit,gaussian,sigma_distributional,Planned or reserved,,brms distributional formulas (sigma ~ z) and brmsformula multi-parameter syntax targeted for v0.8.x.
 brmsfit,*,*,Planned or reserved,,Non-Gaussian families targeted for v0.8.x.
-MCMCglmm,*,*,Planned or reserved,,Targeted for v0.9
+MCMCglmm,gaussian,mu,First slice,0.9.0,Gaussian conditional submodel (identity link). Requires `data = ...` argument since MCMCglmm doesn't keep the data frame.
+MCMCglmm,gaussian,random_effects,First slice,0.9.0,"Random intercepts (~ g) on the conditional submodel; MCMCglmm's flexible covariance structures still planned."
+MCMCglmm,*,*,Planned or reserved,,Non-Gaussian families and flexible covariance structures targeted for v0.9.x.
 sdmTMB,*,*,Planned or reserved,,Targeted for v0.10
 lmerMod,*,*,Planned or reserved,,Targeted for v0.10
 glmerMod,*,*,Planned or reserved,,Targeted for v0.10

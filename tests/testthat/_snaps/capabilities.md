@@ -22,6 +22,7 @@
       * gllvmTMB binomial: Lambda_B, mu, Psi_B, Sigma_B (First slice)
       * gllvmTMB gaussian: Lambda_B, mu, Psi_B, Sigma_B, sigma_eps (First slice)
       * glmmTMB gaussian: mu, random_effects, sigma (First slice)
+      * MCMCglmm gaussian: mu, random_effects (First slice)
       i See `symbolizer_capabilities()` for the full registry.
 
 # capability_check() rejects brmsfit/gaussian/sigma_distributional (Planned)
@@ -48,6 +49,7 @@
       * gllvmTMB binomial: Lambda_B, mu, Psi_B, Sigma_B (First slice)
       * gllvmTMB gaussian: Lambda_B, mu, Psi_B, Sigma_B, sigma_eps (First slice)
       * glmmTMB gaussian: mu, random_effects, sigma (First slice)
+      * MCMCglmm gaussian: mu, random_effects (First slice)
       i See `symbolizer_capabilities()` for the full registry.
 
 # capability_check() errors when no entry exists at all

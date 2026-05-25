@@ -33,7 +33,7 @@ errors via \code{\link[=capability_check]{capability_check()}}.
 \section{Credible intervals}{
 
 brms is Bayesian, so the "confidence band" carried in
-\code{fixed_effects} and \code{interpretation} is a 95\% \strong{credible interval} —
+\code{fixed_effects} and \code{interpretation} is a 95\% \strong{credible interval} --
 the 2.5\% and 97.5\% posterior quantiles. \code{excludes_zero} is the
 indicator for whether the credible interval excludes zero (i.e. the
 posterior puts negligible mass on either side of zero). \code{ci_method}
