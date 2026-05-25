@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.18.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.19.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,6 +34,61 @@
       <small>Source: <a href="https://github.com/itchyshin/symbolizer/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.19.0" id="symbolizer-0190">symbolizer 0.19.0<a class="anchor" aria-label="anchor" href="#symbolizer-0190"></a></h2>
+<div class="section level3">
+<h3 id="v0190--three-views-widget-v2-pedagogically-reordered-live-on-the-homepage-embedded-in-more-vignettes-0-19-0">v0.19.0 – three-views widget v2: pedagogically reordered, live on the homepage, embedded in more vignettes<a class="anchor" aria-label="anchor" href="#v0190--three-views-widget-v2-pedagogically-reordered-live-on-the-homepage-embedded-in-more-vignettes-0-19-0"></a></h3>
+<p>Today’s headline change is in the interactive <code><a href="../reference/as_html_three_views.html">as_html_three_views()</a></code> widget. A four-agent design pass (Pat / Noether / Darwin / Boole) surfaced a series of issues with the v0.18.x widget; the most important fixes ship now, with the more substantive moves (worked-row anchor, biology one-liner per tab, narrative bridge captions, print stylesheet, dark mode) staged for v0.20.</p>
+<div class="section level4">
+<h4 id="pedagogical-reorder-of-the-three-tabs-0-19-0">Pedagogical reorder of the three tabs<a class="anchor" aria-label="anchor" href="#pedagogical-reorder-of-the-three-tabs-0-19-0"></a></h4>
+<p>The widget now opens on <strong>1. Per-observation (Index)</strong>, then steps to <strong>2. Matrix form</strong>, then <strong>3. Matrix with your data</strong>. The order matters: biologists read scalar regression notation fluently from undergrad coursework but encounter matrix algebra as an abstraction. The new order is <em>familiar → abstract → concrete grounding</em>: each tab builds on the previous one rather than dropping the reader into bold letters cold.</p>
+</div>
+<div class="section level4">
+<h4 id="notation-cleanup-0-19-0">Notation cleanup<a class="anchor" aria-label="anchor" href="#notation-cleanup-0-19-0"></a></h4>
+<ul><li>The sigma-submodel design matrix is now rendered as <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝐗</mi><mi>σ</mi></msub><annotation encoding="application/x-tex">\mathbf{X}_\sigma</annotation></semantics></math> rather than <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐙</mi><annotation encoding="application/x-tex">\mathbf{Z}</annotation></semantics></math>. <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐙</mi><annotation encoding="application/x-tex">\mathbf{Z}</annotation></semantics></math> is reserved for random-effect design matrices, matching the convention in Pinheiro &amp; Bates and the lme4 paper. Noether’s audit flagged the earlier <code>Z</code>-overload as the single biggest notational tell.</li>
+<li>Dimension annotations now use textbook subscript form <code>\mathbf{X}_{n \times p}</code> rather than the programming-type-annotation form <code>\mathbf{X}\,(n \times p)</code>.</li>
+<li>The spurious <code>+ \boldsymbol{\varepsilon}</code> tail on the matrix-with-data equation is removed. It conflicted with the conditional-mean form (<code>\boldsymbol{\mu} = \mathbf{X}\boldsymbol{\beta}</code>) used on the other two tabs.</li>
+<li>Dimension labels under each <code>\underbrace{...}_{label}</code> are now rendered at <code>\textstyle</code> instead of the LaTeX default <code>\scriptstyle</code>. The labels were genuinely hard to read at half size.</li>
+</ul></div>
+<div class="section level4">
+<h4 id="symbol-gloss-rendering-bug-fixed-0-19-0">Symbol-gloss rendering bug fixed<a class="anchor" aria-label="anchor" href="#symbol-gloss-rendering-bug-fixed-0-19-0"></a></h4>
+<p><code>three_views_symbol_gloss()</code> wrapped every <code>dimension_concrete</code> value in MathJax <code>\(...\)</code> delimiters, but for predictor columns the field carries prose (“column of X (length 200)”), not LaTeX. The wrap turned the prose into garbled italic math on the default-open tab. The helper now MathJax-wraps only strings that begin with <code>\</code> (i.e. actually look like LaTeX); plain prose falls through verbatim.</p>
+</div>
+<div class="section level4">
+<h4 id="live-widgets-in-more-places-0-19-0">Live widgets in more places<a class="anchor" aria-label="anchor" href="#live-widgets-in-more-places-0-19-0"></a></h4>
+<p>The widget is now embedded as a <strong>live, clickable</strong> widget (not a static screenshot) on:</p>
+<ul><li>the pkgdown <strong>homepage</strong> (<code>index.html</code>),</li>
+<li>the <strong>ladder article</strong> (Rung 4),</li>
+<li>
+<code>symbolizer-drmtmb.Rmd</code> (Section 5: Gaussian location-scale with a random intercept – showcases the <code>Z u</code> block alongside the <code>X \beta</code> block in the matrix-with-data tab),</li>
+<li>
+<code>symbolizer-factors.Rmd</code> (Step 3: <code>sex + body_size</code> mixed factor + continuous predictor – showcases how the <code>sexmale</code> dummy column sits next to the continuous <code>body_size</code> column in the design matrix).</li>
+</ul><p>On GitHub these sections render as static markup; on the pkgdown homepage and articles the tabs are interactive. The same widget also underlies the bigger v0.20 work to come.</p>
+</div>
+<div class="section level4">
+<h4 id="other-small-fixes-folded-in-0-19-0">Other small fixes folded in<a class="anchor" aria-label="anchor" href="#other-small-fixes-folded-in-0-19-0"></a></h4>
+<ul><li>Homepage README: <code><a href="../articles/symbolizer-ladder.html">vignette("symbolizer-ladder")</a></code> mentions trimmed from three to two; the second mention is now a soft cross-reference to the article’s <em>Three views of the same fit</em> section.</li>
+<li>CI actions bumped to Node-24-compatible versions: <code>actions/checkout@v4</code> -&gt; <code>@v6</code>, <code>JamesIves/github-pages-deploy-action@v4.5.0</code> -&gt; <code>@v4.8.0</code>.</li>
+</ul></div>
+<div class="section level4">
+<h4 id="audit-findings-deferred-to-v020-0-19-0">Audit findings deferred to v0.20<a class="anchor" aria-label="anchor" href="#audit-findings-deferred-to-v020-0-19-0"></a></h4>
+<p>Fisher’s inference/interval audit and Emmy’s S3/field-contract audit surfaced a real set of substantive issues:</p>
+<ul><li>
+<code><a href="../reference/simulate_recipe.html">simulate_recipe()</a></code> double-draws the random effect for meta-analysis fits and references several undefined variables (<code>sigma_residual</code>, <code>v_i</code>, <code>tau2</code>, <code>n_studies</code>, <code>study_index</code>) in fall-back branches.</li>
+<li>
+<code>MCMCglmm</code> HPD credible intervals are labeled with the same generic <code>"credible"</code> tag as <code>brms</code>’s posterior quantiles; the two intervals are materially different.</li>
+<li>
+<code>lme4</code> / <code>glmmTMB</code> / <code>brms</code> extractors don’t surface singular-fit / boundary / divergent-transition warnings.</li>
+<li>
+<code>symbolize.drmTMB</code> adds <code>ci_method = "wald"</code> before <code>...</code>, breaking the generic’s signature.</li>
+<li>
+<code>symbolize.bam</code> is exported but its capability row is unreachable (<code>symbolize.bam &lt;- symbolize.gam</code>, and <code>symbolize.gam</code> calls <code>capability_check("gam", ...)</code>).</li>
+<li>
+<code>metafor</code> CIs are unconditionally labelled Wald even when <code>test = "knha"</code> widens them.</li>
+</ul><p>These need test cases and careful staging; they will land in v0.20.</p>
+</div>
+</div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.18.3" id="symbolizer-0183">symbolizer 0.18.3<a class="anchor" aria-label="anchor" href="#symbolizer-0183"></a></h2>
 <div class="section level3">

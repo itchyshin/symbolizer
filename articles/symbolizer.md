@@ -228,26 +228,20 @@ three tabs over the same fit.
 as_html_three_views(sym, head = 5, tail = 2)
 ```
 
-[Skip three-views widget](#sym-sym-1779734373-end)
+[Skip three-views widget](#sym-sym-1779746852-end)
 
-▸1. Equation
+▸1. Index
 
-▸2. Index
+▸2. Matrix
 
-▸3. Matrix (with data)
+▸3. Matrix with data
 
-The structural contract. No indices, no numbers – the shape of the
-model.
+What happens for each observation *i* – the per-individual reading.
 
-``` math
-\begin{aligned}
-\mathbf{w} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} & \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2)) \\
-\boldsymbol{\mu} & = \mathbf{X} \boldsymbol{\beta} \\
-\log(\boldsymbol{\sigma}) & = \mathbf{Z} \boldsymbol{\gamma}
-\end{aligned}
-```
-
-What happens for each observation *i*.
+Each observation is normally distributed around a mean that may shift
+with the predictors, and a residual SD that may also shift with its own
+predictors – so both the centre and the spread of the response are
+modeled.
 
 ``` math
 \begin{aligned}
@@ -257,44 +251,90 @@ W_i \mid \mu_i,\, \sigma_i & \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 \end{aligned}
 ```
 
-The actual numbers stacked – what the computer is multiplying. Showing
-first 5 and last 2 rows of n = 80.
+where:
+
+- W_i — response variable  $`\mathbb{R}^{80}`$
+- T_i — continuous predictor  column of X (length 80)
+- $`\mu_i`$ — conditional mu of body_mass  $`\mathbb{R}^{80}`$
+- $`\sigma_i`$ — conditional sigma of body_mass  $`\mathbb{R}^{80}`$
+- $`\beta_{0}, \beta_{1}`$ — mu submodel coefficients
+   $`\mathbb{R}^{2}`$
+- $`\gamma_{0}, \gamma_{1}`$ — sigma submodel coefficients
+   $`\mathbb{R}^{2}`$
+
+The same model in matrix form – the structural contract every textbook
+past chapter 4 switches to.
+
+Each observation is normally distributed around a mean that may shift
+with the predictors, and a residual SD that may also shift with its own
+predictors – so both the centre and the spread of the response are
+modeled.
+
+``` math
+\begin{aligned}
+\mathbf{w} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} & \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2)) \\
+\boldsymbol{\mu} & = \mathbf{X} \boldsymbol{\beta} \\
+\log(\boldsymbol{\sigma}) & = \mathbf{Z} \boldsymbol{\gamma}
+\end{aligned}
+```
+
+where:
+
+- $`\mathbf{w}`$ — response variable  $`\mathbb{R}^{80}`$
+- $`\boldsymbol{\mu}`$ — conditional mu of body_mass
+   $`\mathbb{R}^{80}`$
+- $`\boldsymbol{\sigma}`$ — conditional sigma of body_mass
+   $`\mathbb{R}^{80}`$
+- $`\boldsymbol{\beta}`$ — mu submodel coefficients  $`\mathbb{R}^{2}`$
+- $`\boldsymbol{\gamma}`$ — sigma submodel coefficients
+   $`\mathbb{R}^{2}`$
+- $`\mathbf{X}`$ — mu submodel design matrix
+   $`\mathbb{R}^{80 \times 2}`$
+- $`\mathbf{Z}`$ — sigma submodel design matrix
+   $`\mathbb{R}^{80 \times 2}`$
+
+The same matrix equation, with your actual numbers stacked inside the
+brackets – what the computer multiplies. Showing first 5 and last 2 rows
+of n = 80.
+
+Each observation is normally distributed around a mean that may shift
+with the predictors, and a residual SD that may also shift with its own
+predictors – so both the centre and the spread of the response are
+modeled.
 
 Matrix-form expansion of the model. Each row shows the response y_i and
 the corresponding row of the design matrix X (showing head and tail rows
 of the n total observations), with the coefficient vector beta listed
 below.
 
-``` sym-matrix
+For observation *i* = 1 of your data:
 
-  y                   X                          beta
-  y_1 = 34.5          1.00  14.0              
-  y_2 = 34.2          1.00  15.6              
-  y_3 = 44.8          1.00  18.6              
-  y_4 = 49.2          1.00  23.6              
-  y_5 = 31.0          1.00  13.0              
-  ...               ...                   
-  y_79 = 45.8         1.00  21.7              
-  y_80 = 36.4         1.00  24.4              
+``` math
+\begin{aligned}
+W_{1} &= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{temperature}_{1} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
+34.5 &= 29.6 + 0.492 \times 14.0 + (-1.94) &\quad(\text{with your numbers}) \\
+&= \underbrace{36.4}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-1.94)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
+\end{aligned}
+```
 
-  Coefficients (beta, mu):
-    beta_0 = 29.6
-    beta_1 = 0.492
+Stacking the same response equation for all *n* = 80 observations:
 
-  X_sigma                       gamma
-  1.00  14.0                    
-  1.00  15.6                    
-  1.00  18.6                    
-  1.00  23.6                    
-  1.00  13.0                    
-  ...                         
-  1.00  21.7                    
-  1.00  24.4                    
-    gamma_0 = 0.485
-    gamma_1 = 0.0936
+``` math
+\underbrace{\begin{bmatrix} 34.5 \\ 34.2 \\ 44.8 \\ 49.2 \\ 31.0 \\ \vdots \\ 45.8 \\ 36.4 \end{bmatrix}}_{\textstyle\,\mathbf{w}_{\,80 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix} 1.00 & 14.0 \\ 1.00 & 15.6 \\ 1.00 & 18.6 \\ 1.00 & 23.6 \\ 1.00 & 13.0 \\ \vdots & \vdots \\ 1.00 & 21.7 \\ 1.00 & 24.4 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,80 \times 2}\,}\, \underbrace{\begin{bmatrix} 29.6 \\ 0.492 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,2 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} -1.94 \\ -2.98 \\ 6.11 \\ 8.01 \\ -4.93 \\ \vdots \\ 5.56 \\ -5.16 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,80 \times 1}\;\text{(residual)}\,}
+```
 
-  Fitted mu_hat (first 5): 36.4  37.2  38.7  41.2  36.0
-  Fitted sigma_hat (first 5): 6.01  6.98  9.26  14.8  5.50
+**Left**: observed vector $`\mathbf{w}`$. **Middle**: the prediction
+$`\mathbf{X}\hat{\boldsymbol{\beta}} = \hat{\boldsymbol{\mu}}`$.
+**Right**: the residual vector
+$`\hat{\boldsymbol{\varepsilon}} = \mathbf{w} - \hat{\boldsymbol{\mu}}`$.
+Every row of this matrix equation is one of the response-equation rows
+from the worked row above.
+
+And the $`\sigma`$ submodel (no observed counterpart – $`\sigma`$’s job
+is to describe the spread of $`\hat{\boldsymbol{\varepsilon}}`$):
+
+``` math
+\log\!\underbrace{\begin{bmatrix} 6.01 \\ 6.98 \\ 9.26 \\ 14.8 \\ 5.50 \\ \vdots \\ 12.3 \\ 16.0 \end{bmatrix}}_{\textstyle\,\boldsymbol{\sigma}_{\,80 \times 1}\,} \;=\; \underbrace{\begin{bmatrix} 1.00 & 14.0 \\ 1.00 & 15.6 \\ 1.00 & 18.6 \\ 1.00 & 23.6 \\ 1.00 & 13.0 \\ \vdots & \vdots \\ 1.00 & 21.7 \\ 1.00 & 24.4 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\sigma,\,80 \times 2}\,}\, \underbrace{\begin{bmatrix} 0.485 \\ 0.0936 \end{bmatrix}}_{\textstyle\,\boldsymbol{\gamma}_{\,2 \times 1}\,}
 ```
 
 Tab 1 (Equation) is the structural contract – $`\mathbf{y}`$,

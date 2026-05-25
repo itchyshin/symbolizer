@@ -326,27 +326,20 @@ three-view widget:
 as_html_three_views(sym4)
 ```
 
-[Skip three-views widget](#sym-sym-1779734362-end)
+[Skip three-views widget](#sym-sym-1779746842-end)
 
-▸1. Equation
+▸1. Index
 
-▸2. Index
+▸2. Matrix
 
-▸3. Matrix (with data)
+▸3. Matrix with data
 
-The structural contract. No indices, no numbers – the shape of the
-model.
+What happens for each observation *i* – the per-individual reading.
 
-``` math
-\begin{aligned}
-\mathbf{body_mass} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} & \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2)) \\
-\boldsymbol{\mu} & = \mathbf{X} \boldsymbol{\beta} + \mathbf{u} \\
-\log(\boldsymbol{\sigma}) & = \mathbf{Z} \boldsymbol{\gamma} \\
-\mathbf{u}_{site} & \sim \mathcal{N}(\mathbf{0},\, \sigma_{site}^2 \mathbf{I}_{12})
-\end{aligned}
-```
-
-What happens for each observation *i*.
+Each observation is normally distributed around a mean that may shift
+with the fixed-effect predictors and a group offset, with a residual SD
+that may also shift with its own predictors – both location and spread
+are modeled.
 
 ``` math
 \begin{aligned}
@@ -357,8 +350,63 @@ u_{site} & \sim \mathcal{N}(0,\, \sigma_{site}^2)
 \end{aligned}
 ```
 
-The actual numbers stacked – what the computer is multiplying. Showing
-first 5 and last 2 rows of n = 200.
+where:
+
+- body_mass_i — response variable  $`\mathbb{R}^{200}`$
+- temperature_i — continuous predictor  column of X (length 200)
+- sex_i — factor (F \[reference\], M)  column of X (length 200)
+- $`\mu_i`$ — conditional mu of body_mass  $`\mathbb{R}^{200}`$
+- $`\sigma_i`$ — conditional sigma of body_mass  $`\mathbb{R}^{200}`$
+- $`\beta_{0}, \beta_{1}, \beta_{2}`$ — mu submodel coefficients
+   $`\mathbb{R}^{3}`$
+- $`\gamma_{0}, \gamma_{1}`$ — sigma submodel coefficients
+   $`\mathbb{R}^{2}`$
+- u\_{site(i)} — random intercept by site  scalar; ^{12} in matrix form
+- $`\sigma_{site}`$ — between-site standard deviation  scalar
+
+The same model in matrix form – the structural contract every textbook
+past chapter 4 switches to.
+
+Each observation is normally distributed around a mean that may shift
+with the fixed-effect predictors and a group offset, with a residual SD
+that may also shift with its own predictors – both location and spread
+are modeled.
+
+``` math
+\begin{aligned}
+\mathbf{body_mass} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} & \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2)) \\
+\boldsymbol{\mu} & = \mathbf{X} \boldsymbol{\beta} + \mathbf{u} \\
+\log(\boldsymbol{\sigma}) & = \mathbf{Z} \boldsymbol{\gamma} \\
+\mathbf{u}_{site} & \sim \mathcal{N}(\mathbf{0},\, \sigma_{site}^2 \mathbf{I}_{12})
+\end{aligned}
+```
+
+where:
+
+- $`\mathbf{body_mass}`$ — response variable  $`\mathbb{R}^{200}`$
+- $`\boldsymbol{\mu}`$ — conditional mu of body_mass
+   $`\mathbb{R}^{200}`$
+- $`\boldsymbol{\sigma}`$ — conditional sigma of body_mass
+   $`\mathbb{R}^{200}`$
+- $`\boldsymbol{\beta}`$ — mu submodel coefficients  $`\mathbb{R}^{3}`$
+- $`\boldsymbol{\gamma}`$ — sigma submodel coefficients
+   $`\mathbb{R}^{2}`$
+- $`\mathbf{X}`$ — mu submodel design matrix
+   $`\mathbb{R}^{200 \times 3}`$
+- $`\mathbf{Z}`$ — sigma submodel design matrix
+   $`\mathbb{R}^{200 \times 2}`$
+- $`\mathbf{u}_{site}`$ — random intercept by site  scalar; ^{12} in
+  matrix form
+- $`\sigma_{site}`$ — between-site standard deviation  scalar
+
+The same matrix equation, with your actual numbers stacked inside the
+brackets – what the computer multiplies. Showing first 5 and last 2 rows
+of n = 200.
+
+Each observation is normally distributed around a mean that may shift
+with the fixed-effect predictors and a group offset, with a residual SD
+that may also shift with its own predictors – both location and spread
+are modeled.
 
 Matrix-form expansion of the model. Each row shows the response y_i and
 the corresponding row of the design matrix X (showing head and tail rows
@@ -366,59 +414,34 @@ of the n total observations), with the coefficient vector beta listed
 below. A random-effect indicator matrix Z_g and the predicted BLUPs u
 are also shown.
 
-``` sym-matrix
+For observation *i* = 1 of your data:
 
-  y                   X                          beta
-  y_1 = 36.8          1.00  23.9  0           
-  y_2 = 32.9          1.00  17.7  0           
-  y_3 = 37.7          1.00  13.9  1.00        
-  y_4 = 40.2          1.00  10.7  0           
-  y_5 = 36.1          1.00  16.3  0           
-  ...               ...                   
-  y_199 = 38.0        1.00  19.9  1.00        
-  y_200 = 38.3        1.00  12.1  1.00        
+``` math
+\begin{aligned}
+W_{1} &= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{temperature}_{1} + \hat\beta_{2}\,\mathrm{sexM}_{1} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
+36.8 &= 32.1 + 0.300 \times 23.9 + 0.757 \times 0 + (-2.40) &\quad(\text{with your numbers}) \\
+&= \underbrace{39.2}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-2.40)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
+\end{aligned}
+```
 
-  Coefficients (beta, mu):
-    beta_0 = 32.1
-    beta_1 = 0.300
-    beta_2 = 0.757
+Stacking the same response equation for all *n* = 200 observations:
 
-  X_sigma                       gamma
-  1.00  23.9                    
-  1.00  17.7                    
-  1.00  13.9                    
-  1.00  10.7                    
-  1.00  16.3                    
-  ...                         
-  1.00  19.9                    
-  1.00  12.1                    
-    gamma_0 = 0.465
-    gamma_1 = 0.0399
+``` math
+\underbrace{\begin{bmatrix} 36.8 \\ 32.9 \\ 37.7 \\ 40.2 \\ 36.1 \\ \vdots \\ 38.0 \\ 38.3 \end{bmatrix}}_{\textstyle\,\mathbf{body_mass}_{\,200 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix} 1.00 & 23.9 & 0 \\ 1.00 & 17.7 & 0 \\ 1.00 & 13.9 & 1.00 \\ 1.00 & 10.7 & 0 \\ 1.00 & 16.3 & 0 \\ \vdots & \vdots & \vdots \\ 1.00 & 19.9 & 1.00 \\ 1.00 & 12.1 & 1.00 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,200 \times 3}\,}\, \underbrace{\begin{bmatrix} 32.1 \\ 0.300 \\ 0.757 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,3 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} 1.00 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ 0 & 1.00 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ 0 & 0 & 1.00 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ 0 & 0 & 0 & 1.00 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ 0 & 0 & 0 & 0 & 1.00 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\ 0 & 0 & 0 & 0 & 0 & 0 & 1.00 & 0 & 0 & 0 & 0 & 0 \\ 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1.00 & 0 & 0 & 0 & 0 \end{bmatrix}}_{\textstyle\,\mathbf{Z}_{\,200 \times 12}\,}\, \underbrace{\begin{bmatrix} -1.33 \\ 0.266 \\ -1.38 \\ 1.48 \\ 0.519 \\ -0.761 \\ -0.247 \\ 0.281 \\ -0.0776 \\ -0.728 \\ 1.75 \\ 0.233 \end{bmatrix}}_{\textstyle\,\hat{\mathbf{u}}_{\,12 \times 1}\;\text{(BLUP)}\,} \;+\; \underbrace{\begin{bmatrix} -2.40 \\ -4.50 \\ 0.678 \\ 4.90 \\ -0.883 \\ \vdots \\ -0.815 \\ 1.82 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,200 \times 1}\;\text{(residual)}\,}
+```
 
-  Z_g (group indicator)         u (random effects, BLUPs)
-  1.00  0  0  0  0  0  0  0  0  0  0  0  
-  0  1.00  0  0  0  0  0  0  0  0  0  0  
-  0  0  1.00  0  0  0  0  0  0  0  0  0  
-  0  0  0  1.00  0  0  0  0  0  0  0  0  
-  0  0  0  0  1.00  0  0  0  0  0  0  0  
-  ...                         
-  0  0  0  0  0  0  1.00  0  0  0  0  0  
-  0  0  0  0  0  0  0  1.00  0  0  0  0  
-    u_1 = -1.33
-    u_2 = 0.266
-    u_3 = -1.38
-    u_4 = 1.48
-    u_5 = 0.519
-    u_6 = -0.761
-    u_7 = -0.247
-    u_8 = 0.281
-    u_9 = -0.0776
-    u_10 = -0.728
-    u_11 = 1.75
-    u_12 = 0.233
+**Left**: observed vector $`\mathbf{w}`$. **Middle**: the prediction
+$`\mathbf{X}\hat{\boldsymbol{\beta}} + \mathbf{Z}\hat{\mathbf{u}} = \hat{\boldsymbol{\mu}}`$.
+**Right**: the residual vector
+$`\hat{\boldsymbol{\varepsilon}} = \mathbf{w} - \hat{\boldsymbol{\mu}}`$.
+Every row of this matrix equation is one of the response-equation rows
+from the worked row above.
 
-  Fitted mu_hat (first 5): 39.2  37.4  37.0  35.3  36.9
-  Fitted sigma_hat (first 5): 4.12  3.22  2.77  2.44  3.04
+And the $`\sigma`$ submodel (no observed counterpart – $`\sigma`$’s job
+is to describe the spread of $`\hat{\boldsymbol{\varepsilon}}`$):
+
+``` math
+\log\!\underbrace{\begin{bmatrix} 4.12 \\ 3.22 \\ 2.77 \\ 2.44 \\ 3.04 \\ \vdots \\ 3.53 \\ 2.58 \end{bmatrix}}_{\textstyle\,\boldsymbol{\sigma}_{\,200 \times 1}\,} \;=\; \underbrace{\begin{bmatrix} 1.00 & 23.9 \\ 1.00 & 17.7 \\ 1.00 & 13.9 \\ 1.00 & 10.7 \\ 1.00 & 16.3 \\ \vdots & \vdots \\ 1.00 & 19.9 \\ 1.00 & 12.1 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\sigma,\,200 \times 2}\,}\, \underbrace{\begin{bmatrix} 0.465 \\ 0.0399 \end{bmatrix}}_{\textstyle\,\boldsymbol{\gamma}_{\,2 \times 1}\,}
 ```
 
 (The widget renders live in this page. In an R session,

@@ -378,6 +378,143 @@ reports it as $`\sigma_{\mathrm{site}}`$.
 independence assumption from unconditional to conditional. The audit
 trail is built into the template, not into prose.
 
+### See the three views of this RE fit
+
+The same
+[`as_html_three_views()`](https://itchyshin.github.io/symbolizer/reference/as_html_three_views.md)
+widget that anchors the [ladder
+article](https://itchyshin.github.io/symbolizer/articles/symbolizer-ladder.md)
+works on every `symbolized_model`. Calling it on `sym_re` lets a reader
+walk from the per-observation form
+$`y_i = \beta_0 + \beta_1 T_i + u_{\mathrm{site}(i)} + \varepsilon_i`$
+through the matrix abstraction
+$`\boldsymbol{\mu} = \mathbf{X}\boldsymbol{\beta} + \mathbf{Z}\mathbf{u}`$
+to the actual numeric arrays — with both the
+$`\mathbf{X}\boldsymbol{\beta}`$ fixed-effect block and the
+$`\mathbf{Z}\mathbf{u}`$ random-effect block populated from the data:
+
+``` r
+
+as_html_three_views(sym_re)
+```
+
+[Skip three-views widget](#sym-sym-1779746822-end)
+
+▸1. Index
+
+▸2. Matrix
+
+▸3. Matrix with data
+
+What happens for each observation *i* – the per-individual reading.
+
+Each observation is normally distributed around a mean that may shift
+with the fixed-effect predictors and a group offset, with a residual SD
+that may also shift with its own predictors – both location and spread
+are modeled.
+
+``` math
+\begin{aligned}
+W_i \mid \mu_i,\, \sigma_i & \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
+\mu_i & = \beta_{0} + \beta_{1} \, T_i + u_{site(i)} \\
+\log(\sigma_i) & = \gamma_{0} + \gamma_{1} \, T_i \\
+u_{site} & \sim \mathcal{N}(0,\, \sigma_{site}^2)
+\end{aligned}
+```
+
+where:
+
+- W_i — response variable  $`\mathbb{R}^{120}`$
+- T_i — continuous predictor  column of X (length 120)
+- $`\mu_i`$ — conditional mu of body_mass  $`\mathbb{R}^{120}`$
+- $`\sigma_i`$ — conditional sigma of body_mass  $`\mathbb{R}^{120}`$
+- $`\beta_{0}, \beta_{1}`$ — mu submodel coefficients
+   $`\mathbb{R}^{2}`$
+- $`\gamma_{0}, \gamma_{1}`$ — sigma submodel coefficients
+   $`\mathbb{R}^{2}`$
+- u\_{site(i)} — random intercept by site  scalar; ^{6} in matrix form
+- $`\sigma_{site}`$ — between-site standard deviation  scalar
+
+The same model in matrix form – the structural contract every textbook
+past chapter 4 switches to.
+
+Each observation is normally distributed around a mean that may shift
+with the fixed-effect predictors and a group offset, with a residual SD
+that may also shift with its own predictors – both location and spread
+are modeled.
+
+``` math
+\begin{aligned}
+\mathbf{w} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} & \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2)) \\
+\boldsymbol{\mu} & = \mathbf{X} \boldsymbol{\beta} + \mathbf{u} \\
+\log(\boldsymbol{\sigma}) & = \mathbf{Z} \boldsymbol{\gamma} \\
+\mathbf{u}_{site} & \sim \mathcal{N}(\mathbf{0},\, \sigma_{site}^2 \mathbf{I}_{6})
+\end{aligned}
+```
+
+where:
+
+- $`\mathbf{w}`$ — response variable  $`\mathbb{R}^{120}`$
+- $`\boldsymbol{\mu}`$ — conditional mu of body_mass
+   $`\mathbb{R}^{120}`$
+- $`\boldsymbol{\sigma}`$ — conditional sigma of body_mass
+   $`\mathbb{R}^{120}`$
+- $`\boldsymbol{\beta}`$ — mu submodel coefficients  $`\mathbb{R}^{2}`$
+- $`\boldsymbol{\gamma}`$ — sigma submodel coefficients
+   $`\mathbb{R}^{2}`$
+- $`\mathbf{X}`$ — mu submodel design matrix
+   $`\mathbb{R}^{120 \times 2}`$
+- $`\mathbf{Z}`$ — sigma submodel design matrix
+   $`\mathbb{R}^{120 \times 2}`$
+- $`\mathbf{u}_{site}`$ — random intercept by site  scalar; ^{6} in
+  matrix form
+- $`\sigma_{site}`$ — between-site standard deviation  scalar
+
+The same matrix equation, with your actual numbers stacked inside the
+brackets – what the computer multiplies. Showing first 5 and last 2 rows
+of n = 120.
+
+Each observation is normally distributed around a mean that may shift
+with the fixed-effect predictors and a group offset, with a residual SD
+that may also shift with its own predictors – both location and spread
+are modeled.
+
+Matrix-form expansion of the model. Each row shows the response y_i and
+the corresponding row of the design matrix X (showing head and tail rows
+of the n total observations), with the coefficient vector beta listed
+below. A random-effect indicator matrix Z_g and the predicted BLUPs u
+are also shown.
+
+For observation *i* = 1 of your data:
+
+``` math
+\begin{aligned}
+W_{1} &= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{temperature}_{1} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
+40.2 &= 29.0 + 0.458 \times 24.7 + (-0.0441) &\quad(\text{with your numbers}) \\
+&= \underbrace{40.2}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-0.0441)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
+\end{aligned}
+```
+
+Stacking the same response equation for all *n* = 120 observations:
+
+``` math
+\underbrace{\begin{bmatrix} 40.2 \\ 41.4 \\ 44.2 \\ 33.8 \\ 38.0 \\ \vdots \\ 34.8 \\ 36.2 \end{bmatrix}}_{\textstyle\,\mathbf{w}_{\,120 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix} 1.00 & 24.7 \\ 1.00 & 18.9 \\ 1.00 & 20.6 \\ 1.00 & 16.3 \\ 1.00 & 21.1 \\ \vdots & \vdots \\ 1.00 & 11.9 \\ 1.00 & 18.9 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,120 \times 2}\,}\, \underbrace{\begin{bmatrix} 29.0 \\ 0.458 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,2 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} 1.00 & 0 & 0 & 0 & 0 & 0 \\ 0 & 1.00 & 0 & 0 & 0 & 0 \\ 0 & 0 & 1.00 & 0 & 0 & 0 \\ 0 & 0 & 0 & 1.00 & 0 & 0 \\ 0 & 0 & 0 & 0 & 1.00 & 0 \\ \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\ 0 & 0 & 0 & 0 & 1.00 & 0 \\ 0 & 0 & 0 & 0 & 0 & 1.00 \end{bmatrix}}_{\textstyle\,\mathbf{Z}_{\,120 \times 6}\,}\, \underbrace{\begin{bmatrix} 0.482 \\ 1.47 \\ -0.889 \\ -0.823 \\ -0.450 \\ 0.207 \end{bmatrix}}_{\textstyle\,\hat{\mathbf{u}}_{\,6 \times 1}\;\text{(BLUP)}\,} \;+\; \underbrace{\begin{bmatrix} -0.0441 \\ 3.84 \\ 5.78 \\ -2.59 \\ -0.559 \\ \vdots \\ 0.360 \\ -1.39 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,120 \times 1}\;\text{(residual)}\,}
+```
+
+**Left**: observed vector $`\mathbf{w}`$. **Middle**: the prediction
+$`\mathbf{X}\hat{\boldsymbol{\beta}} + \mathbf{Z}\hat{\mathbf{u}} = \hat{\boldsymbol{\mu}}`$.
+**Right**: the residual vector
+$`\hat{\boldsymbol{\varepsilon}} = \mathbf{w} - \hat{\boldsymbol{\mu}}`$.
+Every row of this matrix equation is one of the response-equation rows
+from the worked row above.
+
+And the $`\sigma`$ submodel (no observed counterpart – $`\sigma`$’s job
+is to describe the spread of $`\hat{\boldsymbol{\varepsilon}}`$):
+
+``` math
+\log\!\underbrace{\begin{bmatrix} 5.05 \\ 3.95 \\ 4.25 \\ 3.55 \\ 4.34 \\ \vdots \\ 2.95 \\ 3.95 \end{bmatrix}}_{\textstyle\,\boldsymbol{\sigma}_{\,120 \times 1}\,} \;=\; \underbrace{\begin{bmatrix} 1.00 & 24.7 \\ 1.00 & 18.9 \\ 1.00 & 20.6 \\ 1.00 & 16.3 \\ 1.00 & 21.1 \\ \vdots & \vdots \\ 1.00 & 11.9 \\ 1.00 & 18.9 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\sigma,\,120 \times 2}\,}\, \underbrace{\begin{bmatrix} 0.578 \\ 0.0422 \end{bmatrix}}_{\textstyle\,\boldsymbol{\gamma}_{\,2 \times 1}\,}
+```
+
 ## 6. A richer worked example: four predictor roles in one fit
 
 The previous sections walked the basics on a simple two-predictor fit. A

@@ -196,23 +196,85 @@ Matrix-with-data* widget that runs your actual numeric arrays through
 the model live. Three tabs — equation, expanded scalar form, matrix form
 with data — backed by the same `symbolized_model` object.
 
-![Three-views widget for a drmTMB location-scale
-fit](reference/figures/three-views-widget.png)
-
-Three-views widget for a drmTMB location-scale fit
-
 ``` r
 
 as_html_three_views(sym)
 ```
 
-The widget renders live in
-[`vignette("symbolizer-ladder")`](https://itchyshin.github.io/symbolizer/articles/symbolizer-ladder.md),
-which is also the recommended on-ramp — it builds a model from
-[`lm()`](https://rdrr.io/r/stats/lm.html) to location-scale one rung at
-a time and uses the same
-[`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
-call at every step.
+[Skip three-views widget](#sym-sym-1779746539-end)
+
+``` R
+<button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779746539-tab-eq" aria-controls="sym-sym-1779746539-panel-eq" aria-selected="true" tabindex="0" data-tab="eq"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>1. Equation</button>
+<button type="button" class="sym-tab" role="tab" id="sym-sym-1779746539-tab-idx" aria-controls="sym-sym-1779746539-panel-idx" aria-selected="false" tabindex="-1" data-tab="idx"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>2. Index</button>
+<button type="button" class="sym-tab" role="tab" id="sym-sym-1779746539-tab-mat" aria-controls="sym-sym-1779746539-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>3. Matrix (with data)</button>
+```
+
+The structural contract. No indices, no numbers – the shape of the
+model.
+
+``` math
+\begin{aligned}
+\mathbf{w} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} & \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2)) \\
+\boldsymbol{\mu} & = \mathbf{X} \boldsymbol{\beta} \\
+\log(\boldsymbol{\sigma}) & = \mathbf{Z} \boldsymbol{\gamma}
+\end{aligned}
+```
+
+What happens for each observation *i*.
+
+``` math
+\begin{aligned}
+W_i \mid \mu_i,\, \sigma_i & \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
+\mu_i & = \beta_{0} + \beta_{1} \, T_i \\
+\log(\sigma_i) & = \gamma_{0} + \gamma_{1} \, T_i
+\end{aligned}
+```
+
+The actual numbers stacked – what the computer is multiplying. Showing
+first 5 and last 2 rows of n = 200.
+
+Matrix-form expansion of the model. Each row shows the response y_i and
+the corresponding row of the design matrix X (showing head and tail rows
+of the n total observations), with the coefficient vector beta listed
+below.
+
+``` sym-matrix
+
+  y                   X                          beta
+  y_1 = 31.5          1.00  14.0
+  y_2 = 36.6          1.00  15.6
+  y_3 = 27.8          1.00  18.6
+  y_4 = 42.2          1.00  23.6
+  y_5 = 31.2          1.00  13.0
+  ...               ...
+  y_199 = 35.5        1.00  14.8
+  y_200 = 34.3        1.00  21.7
+
+  Coefficients (beta, mu):
+    beta_0 = 30.4
+    beta_1 = 0.371
+
+  X_sigma                       gamma
+  1.00  14.0
+  1.00  15.6
+  1.00  18.6
+  1.00  23.6
+  1.00  13.0
+  ...
+  1.00  14.8
+  1.00  21.7
+    gamma_0 = 0.799
+    gamma_1 = 0.0825
+
+  Fitted mu_hat (first 5): 35.6  36.2  37.3  39.2  35.3
+  Fitted sigma_hat (first 5): 7.04  8.03  10.3  15.6  6.51
+```
+
+On GitHub this section renders as static markup (GitHub doesn’t execute
+the inline JavaScript); on the pkgdown homepage the tabs are
+interactive. The same widget also renders in the [ladder
+article](https://itchyshin.github.io/symbolizer/articles/symbolizer-ladder.md),
+in its own *Three views of the same fit* section.
 
 ## Status
 

@@ -347,6 +347,130 @@ means: it is now the expected response at the reference factor level
 still a difference from the reference, now read “at the same level of
 the continuous predictor(s)”.
 
+### Three views: how the dummy column sits in the X matrix
+
+For a `sex + body_size` fit the design matrix has **three columns** —
+intercept, `sexmale` (0 for female, 1 for male), and `body_size` — and
+the three-views widget shows exactly that on the matrix-with-data tab:
+the `0`s and `1`s of the dummy column sit next to the continuous
+`body_size` column, with the coefficient vector
+$`\boldsymbol{\beta} = (\beta_0,\,\beta_1,\,\beta_2)^\top`$ multiplying
+through:
+
+``` r
+
+as_html_three_views(sym3)
+```
+
+[Skip three-views widget](#sym-sym-1779746828-end)
+
+▸1. Index
+
+▸2. Matrix
+
+▸3. Matrix with data
+
+What happens for each observation *i* – the per-individual reading.
+
+Each observation is normally distributed around a mean that may shift
+with the predictors, and a residual SD that may also shift with its own
+predictors – so both the centre and the spread of the response are
+modeled.
+
+``` math
+\begin{aligned}
+W_i \mid \mu_i,\, \sigma_i & \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
+\mu_i & = \beta_{0} + \beta_{1} \, [sex = \mathrm{male}] + \beta_{2} \, L_i \\
+\log(\sigma_i) & = \gamma_{0}
+\end{aligned}
+```
+
+where:
+
+- W_i — response variable  $`\mathbb{R}^{120}`$
+- sex_i — factor (female \[reference\], male)  column of X (length 120)
+- L_i — continuous predictor  column of X (length 120)
+- $`\mu_i`$ — conditional mu of body_mass  $`\mathbb{R}^{120}`$
+- $`\sigma_i`$ — conditional sigma of body_mass  $`\mathbb{R}^{120}`$
+- $`\beta_{0}, \beta_{1}, \beta_{2}`$ — mu submodel coefficients
+   $`\mathbb{R}^{3}`$
+- $`\gamma_{0}`$ — sigma submodel coefficients  $`\mathbb{R}^{1}`$
+
+The same model in matrix form – the structural contract every textbook
+past chapter 4 switches to.
+
+Each observation is normally distributed around a mean that may shift
+with the predictors, and a residual SD that may also shift with its own
+predictors – so both the centre and the spread of the response are
+modeled.
+
+``` math
+\begin{aligned}
+\mathbf{w} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} & \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2)) \\
+\boldsymbol{\mu} & = \mathbf{X} \boldsymbol{\beta} \\
+\log(\boldsymbol{\sigma}) & = \mathbf{Z} \boldsymbol{\gamma}
+\end{aligned}
+```
+
+where:
+
+- $`\mathbf{w}`$ — response variable  $`\mathbb{R}^{120}`$
+- $`\boldsymbol{\mu}`$ — conditional mu of body_mass
+   $`\mathbb{R}^{120}`$
+- $`\boldsymbol{\sigma}`$ — conditional sigma of body_mass
+   $`\mathbb{R}^{120}`$
+- $`\boldsymbol{\beta}`$ — mu submodel coefficients  $`\mathbb{R}^{3}`$
+- $`\boldsymbol{\gamma}`$ — sigma submodel coefficients
+   $`\mathbb{R}^{1}`$
+- $`\mathbf{X}`$ — mu submodel design matrix
+   $`\mathbb{R}^{120 \times 3}`$
+- $`\mathbf{Z}`$ — sigma submodel design matrix
+   $`\mathbb{R}^{120 \times 1}`$
+
+The same matrix equation, with your actual numbers stacked inside the
+brackets – what the computer multiplies. Showing first 5 and last 2 rows
+of n = 120.
+
+Each observation is normally distributed around a mean that may shift
+with the predictors, and a residual SD that may also shift with its own
+predictors – so both the centre and the spread of the response are
+modeled.
+
+Matrix-form expansion of the model. Each row shows the response y_i and
+the corresponding row of the design matrix X (showing head and tail rows
+of the n total observations), with the coefficient vector beta listed
+below.
+
+For observation *i* = 1 of your data:
+
+``` math
+\begin{aligned}
+W_{1} &= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{sexmale}_{1} + \hat\beta_{2}\,\mathrm{body\_size}_{1} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
+39.5 &= 29.9 + 5.26 \times 0 + 0.197 \times 60.5 + (-2.36) &\quad(\text{with your numbers}) \\
+&= \underbrace{41.8}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-2.36)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
+\end{aligned}
+```
+
+Stacking the same response equation for all *n* = 120 observations:
+
+``` math
+\underbrace{\begin{bmatrix} 39.5 \\ 55.1 \\ 50.4 \\ 46.7 \\ 55.4 \\ \vdots \\ 49.4 \\ 48.7 \end{bmatrix}}_{\textstyle\,\mathbf{w}_{\,120 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix} 1.00 & 0 & 60.5 \\ 1.00 & 0 & 129. \\ 1.00 & 0 & 70.5 \\ 1.00 & 0 & 77.9 \\ 1.00 & 1.00 & 111. \\ \vdots & \vdots & \vdots \\ 1.00 & 0 & 77.0 \\ 1.00 & 1.00 & 103. \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,120 \times 3}\,}\, \underbrace{\begin{bmatrix} 29.9 \\ 5.26 \\ 0.197 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,3 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} -2.36 \\ -0.159 \\ 6.62 \\ 1.51 \\ -1.49 \\ \vdots \\ 4.37 \\ -6.76 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,120 \times 1}\;\text{(residual)}\,}
+```
+
+**Left**: observed vector $`\mathbf{w}`$. **Middle**: the prediction
+$`\mathbf{X}\hat{\boldsymbol{\beta}} = \hat{\boldsymbol{\mu}}`$.
+**Right**: the residual vector
+$`\hat{\boldsymbol{\varepsilon}} = \mathbf{w} - \hat{\boldsymbol{\mu}}`$.
+Every row of this matrix equation is one of the response-equation rows
+from the worked row above.
+
+And the $`\sigma`$ submodel (no observed counterpart – $`\sigma`$’s job
+is to describe the spread of $`\hat{\boldsymbol{\varepsilon}}`$):
+
+``` math
+\log\!\underbrace{\begin{bmatrix} 3.21 \\ 3.21 \\ 3.21 \\ 3.21 \\ 3.21 \\ \vdots \\ 3.21 \\ 3.21 \end{bmatrix}}_{\textstyle\,\boldsymbol{\sigma}_{\,120 \times 1}\,} \;=\; \underbrace{\begin{bmatrix} 1.00 \\ 1.00 \\ 1.00 \\ 1.00 \\ 1.00 \\ \vdots \\ 1.00 \\ 1.00 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\sigma,\,120 \times 1}\,}\, \underbrace{\begin{bmatrix} 1.17 \end{bmatrix}}_{\textstyle\,\boldsymbol{\gamma}_{\,1 \times 1}\,}
+```
+
 ## Step 4: Continuous-by-factor interaction (`body_mass ~ sex * body_size`)
 
 Step 3 forced the male and female regression lines to be parallel.
