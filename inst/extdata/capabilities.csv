@@ -64,10 +64,12 @@ glmmTMB,poisson,random_effects,First slice,0.11.0,"Random intercepts (1 | group)
 glmmTMB,nbinom2,mu,First slice,0.11.0,Negative binomial (type 2) conditional submodel (log link).
 glmmTMB,nbinom2,sigma,First slice,0.11.0,"Overdispersion parameter (log link); size = exp(sigma)."
 glmmTMB,nbinom2,random_effects,First slice,0.11.0,"Random intercepts on the nbinom2 conditional submodel."
-glmmTMB,*,*,Planned or reserved,,Other families and zero-inflation targeted for v0.11.x.
+glmmTMB,poisson,zi,First slice,0.11.0,"Zero-inflation submodel (logit link) on glmmTMB poisson via ziformula."
+glmmTMB,nbinom2,zi,First slice,0.11.0,"Zero-inflation submodel (logit link) on glmmTMB nbinom2 via ziformula."
+glmmTMB,*,*,Planned or reserved,,Other families and submodels targeted for v0.11.x.
 brmsfit,gaussian,mu,First slice,0.8.0,Gaussian conditional submodel (identity link).
 brmsfit,gaussian,random_effects,First slice,0.8.0,"Random intercepts (1 | group) and (1 + x | group) on the conditional submodel; nested / crossed still planned."
-brmsfit,gaussian,sigma_distributional,Planned or reserved,,brms distributional formulas (sigma ~ z) and brmsformula multi-parameter syntax targeted for v0.8.x.
+brmsfit,gaussian,sigma_distributional,First slice,0.11.0,brms distributional formula on sigma via bf(y ~ x; sigma ~ z); other dpars still planned.
 brmsfit,*,*,Planned or reserved,,Non-Gaussian families targeted for v0.8.x.
 MCMCglmm,gaussian,mu,First slice,0.9.0,Gaussian conditional submodel (identity link). Requires `data = ...` argument since MCMCglmm doesn't keep the data frame.
 MCMCglmm,gaussian,random_effects,First slice,0.9.0,"Random intercepts (~ g) on the conditional submodel; MCMCglmm's flexible covariance structures still planned."

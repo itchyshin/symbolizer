@@ -62,10 +62,20 @@ symbolize.brmsfit <- function(fit, symbols = NULL, units = NULL,
   }
   capability_check("brmsfit", family, "mu")
 
-  # brms also supports per-distribution parameter formulas (sigma ~ z,
-  # etc.) via brmsformula. v0.8 first slice rejects those.
-  if (brms_has_distributional_formula(fit)) {
+  # brms supports per-distribution parameter formulas (sigma ~ z, nu ~ z,
+  # etc.) via brmsformula. As of v0.11, we handle a sigma submodel
+  # explicitly when the user fit `bf(y ~ x, sigma ~ z)`; other dpars
+  # are still rejected via the capability registry.
+  pforms <- fit$formula$pforms %||% list()
+  has_sigma_distributional <- "sigma" %in% names(pforms)
+  if (has_sigma_distributional) {
     capability_check("brmsfit", family, "sigma_distributional")
+  }
+  # Any pform other than sigma still hits the wildcard reject.
+  other_pforms <- setdiff(names(pforms), "sigma")
+  if (length(other_pforms) > 0L) {
+    capability_check("brmsfit", family,
+                     sprintf("%s_distributional", other_pforms[[1L]]))
   }
 
   response <- brms_response_name(fit)
@@ -85,6 +95,21 @@ symbolize.brmsfit <- function(fit, symbols = NULL, units = NULL,
       position = 1L
     )
   )
+  # Add sigma submodel entry when bf(y ~ x, sigma ~ z) was used.
+  if (has_sigma_distributional) {
+    sigma_form <- pforms$sigma
+    sigma_full <- stats::as.formula(
+      paste("sigma ~", paste(deparse(brms_rhs_expr(sigma_form)), collapse = " ")),
+      env = environment(sigma_form)
+    )
+    entries[[length(entries) + 1L]] <- list(
+      dpar = "sigma",
+      response = NA_character_,
+      rhs = brms_rhs_expr(sigma_form),
+      expr = sigma_full,
+      position = 2L
+    )
+  }
 
   # Random-effects per entry (drmTMB-shaped tibble or NULL).
   re_per_entry <- lapply(entries, function(e) brms_re_terms(fit, e$dpar))
@@ -255,7 +280,10 @@ brms_build_submodels <- function(entries, fit, param, link_mu) {
 # `(1 | g)` and `(1 + x | g)` random intercepts / random slopes.
 brms_re_terms <- function(fit, dpar) {
   if (dpar != "mu") return(NULL)
-  vc <- brms::VarCorr(fit)
+  # brms::VarCorr errors with "The model does not contain covariance
+  # matrices" on fixed-effects-only fits. Catch and treat as no RE.
+  vc <- tryCatch(brms::VarCorr(fit), error = function(e) NULL)
+  if (is.null(vc)) return(NULL)
   # Drop the residual_ entry; only keep grouping variances.
   vc <- vc[!names(vc) %in% c("residual__")]
   if (length(vc) == 0L) return(NULL)
@@ -308,7 +336,9 @@ brms_build_fixed_effects <- function(terms_tbl, fit) {
   }
   fe <- brms::fixef(fit)
   # fe is a matrix; row names are coefficient names (Intercept, x,
-  # sexmale, etc.). Columns: Estimate, Est.Error, Q2.5, Q97.5.
+  # sexmale, etc.). Columns: Estimate, Est.Error, Q2.5, Q97.5. When
+  # bf() carries a sigma formula, sigma coefficients appear with
+  # row name prefix "sigma_" (e.g. "sigma_Intercept", "sigma_x").
   estimate <- rep(NA_real_, nrow(terms_tbl))
   std_err  <- rep(NA_real_, nrow(terms_tbl))
   ci_low   <- rep(NA_real_, nrow(terms_tbl))
@@ -317,6 +347,8 @@ brms_build_fixed_effects <- function(terms_tbl, fit) {
     row <- terms_tbl[i, , drop = FALSE]
     if (is.na(row$coefficient_symbol)) next
     hit <- brms_hit_name(row)
+    # Prefix non-mu rows with the submodel name (brms's convention).
+    if (row$submodel != "mu") hit <- paste0(row$submodel, "_", hit)
     j <- which(rownames(fe) == hit)
     if (length(j) >= 1L) {
       estimate[i] <- as.numeric(fe[j[[1L]], "Estimate"])
@@ -375,7 +407,8 @@ brms_hit_name <- function(row) {
 # plus the residual SD.
 brms_build_variance_components <- function(fit, re_per_entry) {
   rows <- list()
-  vc <- brms::VarCorr(fit)
+  vc <- tryCatch(brms::VarCorr(fit), error = function(e) NULL)
+  if (is.null(vc)) vc <- list()
   for (g in names(vc)) {
     if (g == "residual__") next
     sd_mat <- vc[[g]]$sd

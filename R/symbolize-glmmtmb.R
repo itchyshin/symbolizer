@@ -73,9 +73,11 @@ symbolize.glmmTMB <- function(fit, symbols = NULL, units = NULL,
     capability_check("glmmTMB", family, "sigma")
   }
 
-  # Reject ziformula in the first slice.
+  # Detect ziformula. ~0 means no zero-inflation; anything else (~ 1 or
+  # ~ x) creates a zi submodel.
   zi_form    <- fit$modelInfo$allForm$ziformula
-  if (!glmm_is_zero_formula(zi_form)) {
+  has_zi_sub <- !glmm_is_zero_formula(zi_form)
+  if (has_zi_sub) {
     capability_check("glmmTMB", family, "zi")
   }
 
@@ -111,6 +113,19 @@ symbolize.glmmTMB <- function(fit, symbols = NULL, units = NULL,
       rhs = glmm_rhs_expr(disp_form),
       expr = sigma_full,
       position = 2L
+    )
+  }
+  if (has_zi_sub) {
+    zi_full <- stats::as.formula(
+      paste("zi ~", paste(deparse(glmm_rhs_expr(zi_form)), collapse = " ")),
+      env = environment(zi_form)
+    )
+    entries[[length(entries) + 1L]] <- list(
+      dpar = "zi",
+      response = NA_character_,
+      rhs = glmm_rhs_expr(zi_form),
+      expr = zi_full,
+      position = length(entries) + 1L
     )
   }
 
@@ -271,12 +286,14 @@ glmm_build_submodels <- function(entries, fit, param, link_mu) {
   rows <- lapply(entries, function(e) {
     dpar <- e$dpar
     coef_family <- drm_coef_family_for(dpar)
-    link <- if (dpar == "mu") link_mu else "log"
-    f <- if (dpar == "mu") {
-      stats::as.formula(paste("~", paste(deparse(e$rhs), collapse = " ")))
-    } else {
-      stats::as.formula(paste("~", paste(deparse(e$rhs), collapse = " ")))
-    }
+    link <- switch(
+      dpar,
+      mu    = link_mu,
+      sigma = "log",
+      zi    = "logit",
+      "log"
+    )
+    f <- stats::as.formula(paste("~", paste(deparse(e$rhs), collapse = " ")))
     tibble::tibble(
       parameter = dpar,
       formula = list(f),
@@ -341,10 +358,17 @@ glmm_build_fixed_effects <- function(terms_tbl, fit, ci_method = "wald") {
   }
   fe <- glmmTMB::fixef(fit)
   estimate <- rep(NA_real_, nrow(terms_tbl))
+  glmm_fe_component <- function(submodel) {
+    switch(submodel,
+           mu = "cond",
+           sigma = "disp",
+           zi = "zi",
+           "cond")
+  }
   for (i in seq_len(nrow(terms_tbl))) {
     row <- terms_tbl[i, , drop = FALSE]
     if (is.na(row$coefficient_symbol)) next
-    component <- if (row$submodel == "mu") "cond" else "disp"
+    component <- glmm_fe_component(row$submodel)
     cf <- fe[[component]]
     if (is.null(cf)) next
     hit <- glmm_hit_name(row)
@@ -371,19 +395,19 @@ glmm_build_fixed_effects <- function(terms_tbl, fit, ci_method = "wald") {
     #   * Multiple components (cond + disp / zi): rn = "cond.(Intercept)",
     #     "cond.x", "disp.(Intercept)", "disp.x", ...
     # Detect which shape we have and parse component / bare name accordingly.
-    has_prefix <- any(grepl("^(cond|disp|zi)[.]", rn))
+    has_prefix <- any(grepl("^(cond|disp|zi)\\.", rn))
     if (has_prefix) {
-      comp_prefix <- ifelse(grepl("^cond[.]", rn), "cond",
-                     ifelse(grepl("^disp[.]", rn), "disp",
-                     ifelse(grepl("^zi[.]",   rn), "zi", NA_character_)))
-      bare <- sub("^(cond|disp|zi)[.]", "", rn)
+      comp_prefix <- ifelse(grepl("^cond\\.", rn), "cond",
+                     ifelse(grepl("^disp\\.", rn), "disp",
+                     ifelse(grepl("^zi\\.",   rn), "zi", NA_character_)))
+      bare <- sub("^(cond|disp|zi)\\.", "", rn)
     } else {
       # No prefix: all rows belong to "cond".
       comp_prefix <- rep("cond", length(rn))
       bare <- rn
     }
     for (i in seq_len(nrow(terms_tbl))) {
-      want_comp <- if (terms_tbl$submodel[i] == "mu") "cond" else "disp"
+      want_comp <- glmm_fe_component(terms_tbl$submodel[i])
       hit <- glmm_hit_name(terms_tbl[i, , drop = FALSE])
       j <- which(comp_prefix == want_comp & bare == hit)
       if (length(j) >= 1L) {

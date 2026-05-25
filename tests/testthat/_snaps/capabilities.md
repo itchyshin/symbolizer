@@ -6,7 +6,7 @@
       Error in `symbolizer:::capability_check()`:
       ! `symbolize()` cannot read drmTMB / gaussian / zi yet (status: Planned or reserved).
       i Today we can read:
-      * brmsfit gaussian: mu, random_effects (First slice)
+      * brmsfit gaussian: mu, random_effects, sigma_distributional (First slice)
       * drmTMB gaussian: mu, sigma (Stable)
       * drmTMB beta: mu, sigma (First slice)
       * drmTMB beta_binomial: mu, sigma (First slice)
@@ -29,22 +29,22 @@
       * glmerMod poisson: mu, random_effects (First slice)
       * glmmTMB binomial: mu, random_effects (First slice)
       * glmmTMB gaussian: mu, random_effects, sigma (First slice)
-      * glmmTMB nbinom2: mu, random_effects, sigma (First slice)
-      * glmmTMB poisson: mu, random_effects (First slice)
+      * glmmTMB nbinom2: mu, random_effects, sigma, zi (First slice)
+      * glmmTMB poisson: mu, random_effects, zi (First slice)
       * lm gaussian: mu (First slice)
       * lmerMod gaussian: mu, random_effects (First slice)
       * MCMCglmm gaussian: mu, random_effects (First slice)
       i See `symbolizer_capabilities()` for the full registry.
 
-# capability_check() rejects brmsfit/gaussian/sigma_distributional (Planned)
+# capability_check() rejects sdmTMB/gaussian/mu (Planned) via wildcard
 
     Code
-      symbolizer:::capability_check("brmsfit", "gaussian", "sigma_distributional")
+      symbolizer:::capability_check("sdmTMB", "gaussian", "mu")
     Condition
       Error in `symbolizer:::capability_check()`:
-      ! `symbolize()` cannot read brmsfit / gaussian / sigma_distributional yet (status: Planned or reserved).
+      ! `symbolize()` cannot read sdmTMB / gaussian / mu yet (status: Planned or reserved).
       i Today we can read:
-      * brmsfit gaussian: mu, random_effects (First slice)
+      * brmsfit gaussian: mu, random_effects, sigma_distributional (First slice)
       * drmTMB gaussian: mu, sigma (Stable)
       * drmTMB beta: mu, sigma (First slice)
       * drmTMB beta_binomial: mu, sigma (First slice)
@@ -67,8 +67,8 @@
       * glmerMod poisson: mu, random_effects (First slice)
       * glmmTMB binomial: mu, random_effects (First slice)
       * glmmTMB gaussian: mu, random_effects, sigma (First slice)
-      * glmmTMB nbinom2: mu, random_effects, sigma (First slice)
-      * glmmTMB poisson: mu, random_effects (First slice)
+      * glmmTMB nbinom2: mu, random_effects, sigma, zi (First slice)
+      * glmmTMB poisson: mu, random_effects, zi (First slice)
       * lm gaussian: mu (First slice)
       * lmerMod gaussian: mu, random_effects (First slice)
       * MCMCglmm gaussian: mu, random_effects (First slice)
