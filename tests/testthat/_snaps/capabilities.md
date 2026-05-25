@@ -6,9 +6,6 @@
       Error in `symbolizer:::capability_check()`:
       ! `symbolize()` cannot read drmTMB / gaussian / zi yet (status: Planned or reserved).
       i Today we can read:
-      * brmsfit binomial: mu, random_effects (First slice)
-      * brmsfit gaussian: mu, random_effects, sigma_distributional (First slice)
-      * brmsfit poisson: mu, random_effects (First slice)
       * drmTMB gaussian: mu, sigma (Stable)
       * drmTMB beta: mu, sigma (First slice)
       * drmTMB beta_binomial: mu, sigma (First slice)
@@ -21,28 +18,9 @@
       * drmTMB poisson: mu, zi (First slice)
       * drmTMB student: mu, nu, sigma (First slice)
       * drmTMB truncated_nbinom2: hu, mu, sigma (First slice)
-      * gam binomial: mu (First slice)
-      * gam Gamma: mu (First slice)
-      * gam gaussian: mu, smooth (First slice)
-      * gam poisson: mu (First slice)
       * gllvmTMB binomial: Lambda_B, mu, Psi_B, Sigma_B (First slice)
       * gllvmTMB gaussian: Lambda_B, mu, Psi_B, Sigma_B, sigma_eps (First slice)
-      * glm binomial: mu (First slice)
-      * glm Gamma: mu (First slice)
-      * glm gaussian: mu (First slice)
-      * glm poisson: mu (First slice)
-      * glmerMod binomial: mu, random_effects (First slice)
-      * glmerMod poisson: mu, random_effects (First slice)
-      * glmmTMB binomial: mu, random_effects (First slice)
       * glmmTMB gaussian: mu, random_effects, sigma (First slice)
-      * glmmTMB nbinom2: mu, random_effects, sigma, zi (First slice)
-      * glmmTMB poisson: mu, random_effects, zi (First slice)
-      * lm gaussian: mu (First slice)
-      * lmerMod gaussian: mu, random_effects (First slice)
-      * MCMCglmm gaussian: animal, mu, random_effects (First slice)
-      * rma.mv meta_normal: mu, structured (First slice)
-      * rma.uni meta_normal: mu, tau2 (First slice)
-      * sdmTMB gaussian: epsilon, mu, omega (First slice)
       i See `symbolizer_capabilities()` for the full registry.
 
 # capability_check() rejects sdmTMB/binomial/mu (Planned) via wildcard
@@ -53,9 +31,6 @@
       Error in `symbolizer:::capability_check()`:
       ! `symbolize()` cannot read sdmTMB / binomial / mu yet (status: Planned or reserved).
       i Today we can read:
-      * brmsfit binomial: mu, random_effects (First slice)
-      * brmsfit gaussian: mu, random_effects, sigma_distributional (First slice)
-      * brmsfit poisson: mu, random_effects (First slice)
       * drmTMB gaussian: mu, sigma (Stable)
       * drmTMB beta: mu, sigma (First slice)
       * drmTMB beta_binomial: mu, sigma (First slice)
@@ -68,28 +43,9 @@
       * drmTMB poisson: mu, zi (First slice)
       * drmTMB student: mu, nu, sigma (First slice)
       * drmTMB truncated_nbinom2: hu, mu, sigma (First slice)
-      * gam binomial: mu (First slice)
-      * gam Gamma: mu (First slice)
-      * gam gaussian: mu, smooth (First slice)
-      * gam poisson: mu (First slice)
       * gllvmTMB binomial: Lambda_B, mu, Psi_B, Sigma_B (First slice)
       * gllvmTMB gaussian: Lambda_B, mu, Psi_B, Sigma_B, sigma_eps (First slice)
-      * glm binomial: mu (First slice)
-      * glm Gamma: mu (First slice)
-      * glm gaussian: mu (First slice)
-      * glm poisson: mu (First slice)
-      * glmerMod binomial: mu, random_effects (First slice)
-      * glmerMod poisson: mu, random_effects (First slice)
-      * glmmTMB binomial: mu, random_effects (First slice)
       * glmmTMB gaussian: mu, random_effects, sigma (First slice)
-      * glmmTMB nbinom2: mu, random_effects, sigma, zi (First slice)
-      * glmmTMB poisson: mu, random_effects, zi (First slice)
-      * lm gaussian: mu (First slice)
-      * lmerMod gaussian: mu, random_effects (First slice)
-      * MCMCglmm gaussian: animal, mu, random_effects (First slice)
-      * rma.mv meta_normal: mu, structured (First slice)
-      * rma.uni meta_normal: mu, tau2 (First slice)
-      * sdmTMB gaussian: epsilon, mu, omega (First slice)
       i See `symbolizer_capabilities()` for the full registry.
 
 # capability_check() errors when no entry exists at all

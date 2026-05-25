@@ -22,8 +22,12 @@ home:
 
 navbar:
   structure:
-    left:  [intro, articles, reference, news]
+    left:  [intro, articles, roadmap, reference, news]
     right: [search, github]
+  components:
+    roadmap:
+      text: Roadmap
+      href: articles/symbolizer-roadmap.html
 
 articles:
   - title: "Get started"
@@ -34,6 +38,9 @@ articles:
       - symbolizer-families
       - symbolizer-gllvm
       - symbolizer-compare
+  - title: "Where we're going"
+    contents:
+      - symbolizer-roadmap
 
 reference:
   - title: "Package"
