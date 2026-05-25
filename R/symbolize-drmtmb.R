@@ -53,7 +53,7 @@
 #'   fast), `"profile"` (slower, more honest), or `"bootstrap"`.
 #'
 #' @references
-#' Nakagawa, S. (2024+). `drmTMB`: Distributional regression in TMB.
+#' Nakagawa, S. (forthcoming). `drmTMB`: Distributional regression in TMB.
 #' <https://itchyshin.github.io/drmTMB/>
 #'
 #' Kristensen, K., Nielsen, A., Berg, C. W., Skaug, H., & Bell, B. M.

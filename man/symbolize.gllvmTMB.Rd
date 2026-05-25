@@ -42,6 +42,6 @@ parametric-bootstrap uncertainty via
 }
 
 \references{
-Nakagawa, S. (2024+). \code{gllvmTMB}: Generalized linear latent-variable
+Nakagawa, S. (forthcoming). \code{gllvmTMB}: Generalized linear latent-variable
 models in TMB. \url{https://itchyshin.github.io/gllvmTMB/}
 }

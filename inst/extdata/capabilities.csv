@@ -103,7 +103,7 @@ glm,Gamma,mu,First slice,0.11.0,Gamma glm (log link by convention) from stats::g
 glm,*,*,Planned or reserved,,Other families (inverse.gaussian / quasi*) targeted for v0.11.x.
 rma.uni,meta_normal,mu,First slice,0.13.0,"metafor random / mixed-effects meta-regression: theta_i = beta_0 + sum beta_k x_ki + u_i."
 rma.uni,meta_normal,tau2,First slice,0.13.0,"Between-study heterogeneity variance tau^2; appears in variance_components with kind = ""heterogeneity""."
-rma.uni,meta_normal,tau2_scale,First slice,0.15.0,"Location-scale meta-regression (rma.ls): log(tau^2_i) = alpha_0 + sum alpha_k z_ki. metafor models the log VARIANCE (not log SD); alpha coefficients. References: Viechtbauer & Lopez-Lopez (2022), Nakagawa et al. (2025)."
+rma.uni,meta_normal,tau2_scale,First slice,0.15.0,"Location-scale meta-regression (rma.ls): log(tau^2_i) = alpha_0 + sum alpha_k z_ki. metafor models the log VARIANCE (not log SD); alpha coefficients. References: Viechtbauer & López-López (2022), Nakagawa et al. (2025)."
 rma.uni,*,*,Planned or reserved,,"Non-meta_normal metrics (selection / publication-bias detection layer, double-hierarchical scale random effects) targeted for v0.16+."
 rma.mv,meta_normal,mu,First slice,0.13.1,"metafor multilevel / multivariate meta-regression: theta_i = beta_0 + sum beta_k x_ki + sum_r u_{r,i}."
 rma.mv,meta_normal,structured,First slice,0.13.1,"R-matrix structured random effects via R = list(phylo = phylo.cor); the tier renders as u_r ~ N(0, sigma^2_r * R_r) and is tagged kind = ""structured"" in variance_components."

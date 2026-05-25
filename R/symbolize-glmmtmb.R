@@ -590,7 +590,7 @@ glmm_build_warnings <- function(fit, sym_stub) {
       message = paste0(
         "This fit uses propto() (or equalto() in newer glmmTMB) to attach a known correlation / covariance matrix on a random-effect block. ",
         "Structurally, that's the meta-analytic / phylogenetic / pedigree-controlled pattern: sigma_residual is fixed (sampling-variance-known), and the (1 | study) variance reads as the between-study heterogeneity tau^2. ",
-        "Compare with metafor::rma.mv(yi, V, random = list(~ 1 | study, ~ 1 | id), R = list(...)) or drmTMB's location-scale form (Williams 2023; Viechtbauer & Lopez-Lopez 2022; Nakagawa et al. 2025)."
+        "Compare with metafor::rma.mv(yi, V, random = list(~ 1 | study, ~ 1 | id), R = list(...)) or drmTMB's location-scale form (Williams 2023; Viechtbauer & L\u00F3pez-L\u00F3pez 2022; Nakagawa et al. 2025)."
       ),
       context = ""
     )

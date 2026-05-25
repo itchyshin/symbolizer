@@ -30,13 +30,14 @@ in Section 6 of this same vignette.
 
 ## 1. Why distributional models need a structured story
 
-`drmTMB` fits Gaussian location-scale models — and, since v0.2,
-bivariate Gaussian location-scale-correlation models (Student-t,
-lognormal, gamma, and beta remain on the roadmap). A univariate
-location-scale fit has *two* linear predictors: one for the mean `mu`,
-one for the residual standard deviation `sigma`. Both depend on
-covariates. Both have a link function. Both have their own coefficient
-vector.
+`drmTMB` fits Gaussian location-scale models, bivariate Gaussian
+location-scale-correlation models, and a family of non-Gaussian
+distributional models (Student-t, lognormal, Gamma, beta, beta-binomial,
+Poisson, nbinom2, truncated nbinom2, with optional zero-inflation /
+hurdle / cumulative-logit components). A univariate location-scale fit
+has *two* linear predictors: one for the mean `mu`, one for the residual
+standard deviation `sigma`. Both depend on covariates. Both have a link
+function. Both have their own coefficient vector.
 
 That structure makes the question *what does this fit actually say?*
 genuinely hard to answer in one line. The mean coefficient on

@@ -80,7 +80,16 @@ knit_print.symbolizer_formula_bridge <- function(x, ...) {
   df <- as.data.frame(x, stringsAsFactors = FALSE)
   if ("mathematics" %in% names(df))        df$mathematics <- sym_dollar(df$mathematics)
   if ("mathematics_matrix" %in% names(df)) df$mathematics_matrix <- sym_dollar(df$mathematics_matrix)
-  if ("r_syntax" %in% names(df))           df$r_syntax <- paste0("`", df$r_syntax, "`")
+  if ("r_syntax" %in% names(df)) {
+    # Pre-escape `|` so pandoc's pipe-table parser doesn't HTML-encode
+    # it to `&#124;` (which then gets `&` -> `&amp;` re-escaped, surfacing
+    # as literal `&amp;#124;` on the rendered page). R syntax for mixed
+    # models -- `(1 | group)` -- routinely contains `|`. Without this
+    # escape the literal entity appears in every formula_bridge() table
+    # that mentions a random effect. Patched in v0.18.3 after Pat's audit.
+    df$r_syntax <- gsub("|", "\\|", df$r_syntax, fixed = TRUE)
+    df$r_syntax <- paste0("`", df$r_syntax, "`")
+  }
   cols <- intersect(
     c("submodel", "r_syntax", "statistical_meaning",
       "mathematics", "mathematics_matrix"),

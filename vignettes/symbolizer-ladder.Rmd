@@ -57,7 +57,7 @@ n <- 200
 n_sites <- 12
 sites <- factor(rep(paste0("S", sprintf("%02d", seq_len(n_sites))),
                     length.out = n))
-site_effect <- rnorm(n_sites, 0, 0.6)[as.integer(sites)]
+site_effect <- rnorm(n_sites, 0, 1.5)[as.integer(sites)]
 sex <- factor(sample(c("F", "M"), n, replace = TRUE))
 temperature <- runif(n, 10, 25)
 
@@ -80,7 +80,7 @@ The "truth" the ladder will gradually uncover:
 
 - Slope of temperature on the mean: `0.4` g per °C
 - Sex contrast (M − F) on the mean: `+0.7` g
-- Site-to-site SD on the mean: `0.6` g
+- Site-to-site SD on the mean: `1.5` g
 - Heteroscedasticity: residual SD grows by a factor of `exp(0.05) ≈ 1.05` per °C
 
 ## Rung 1 — A linear model
@@ -201,8 +201,12 @@ abline(h = 0, col = "#666666")
 
 The variance is changing with temperature. A standard mixed model
 forces residual variance to be constant, so the inference on
-$\beta_1$ ignores that. Climb the last rung: fit
-$\log(\sigma_i) = \gamma_0 + \gamma_1\, T_i$.
+$\beta_1$ ignores that. This is called a **location-scale model**
+(also known as **distributional regression** or, when the variance
+component is what changes, *heteroscedastic regression*): instead of
+treating the residual SD as a single fixed number, we let it depend
+on its own predictors with its own coefficients. Climb the last rung:
+fit $\log(\sigma_i) = \gamma_0 + \gamma_1\, T_i$.
 
 ```{r rung4-fit}
 library(drmTMB)
@@ -264,7 +268,16 @@ will render the same widget into a knitted document.)
 
 ```{r recap, echo = FALSE, results = "asis"}
 recap <- data.frame(
-  Rung     = c("1: `lm`", "2: `lm + sex`", "3: `lmer + (1|site)`", "4: `drmTMB` location-scale"),
+  # Use explicit <code> tags rather than markdown backticks: when the
+  # surrounding chunk is `results = "asis"` + kable(format = "html",
+  # escape = FALSE), pandoc still parses markdown inside the cells, and
+  # backticks around `(1|site)` turn into <code>(1&#124;site)</code> --
+  # which then gets `&` -> `&amp;` re-escaped and surfaces as literal
+  # `&amp;#124;`. Raw <code> bypasses the markdown reader.
+  Rung     = c("1: <code>lm</code>",
+               "2: <code>lm + sex</code>",
+               "3: <code>lmer + (1|site)</code>",
+               "4: <code>drmTMB</code> location-scale"),
   Equation = c(
     "$y_i \\sim \\mathcal{N}(\\mu_i,\\, \\sigma^2)$; $\\mu_i = \\beta_0 + \\beta_1 T_i$",
     "$\\mu_i = \\beta_0 + \\beta_1 T_i + \\beta_2 [\\mathit{sex} = M]$",
@@ -279,7 +292,7 @@ recap <- data.frame(
   ),
   check.names = FALSE
 )
-knitr::kable(recap)
+knitr::kable(recap, format = "html", escape = FALSE)
 ```
 
 Three observations:

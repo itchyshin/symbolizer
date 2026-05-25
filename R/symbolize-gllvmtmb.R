@@ -57,7 +57,7 @@
 #' @inheritParams symbolize
 #'
 #' @references
-#' Nakagawa, S. (2024+). `gllvmTMB`: Generalized linear latent-variable
+#' Nakagawa, S. (forthcoming). `gllvmTMB`: Generalized linear latent-variable
 #' models in TMB. <https://itchyshin.github.io/gllvmTMB/>
 #'
 #' @return A `symbolized_model` object.

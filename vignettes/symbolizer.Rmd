@@ -93,7 +93,7 @@ hands-on definition by example.
 
 ## A first `symbolize()` call
 
-The canonical v0.1 example is a Gaussian location-scale model fit with
+The canonical example is a Gaussian location-scale model fit with
 [`drmTMB`](https://itchyshin.github.io/drmTMB/): one submodel for the mean
 (`mu`), one for the residual standard deviation (`sigma`).
 
@@ -256,10 +256,11 @@ makes sense for its submodel; the package writes them so you do not have to.
 
 ## Random intercepts (first slice)
 
-v0.1 supports Gaussian random intercepts of the form `(1 | group)` as a *first
-slice*. The same `symbolize()` call works; the equation set picks up the
-random-intercept term and a new distribution row, and the structured object
-gains a `random_effects` and `variance_components` tibble.
+`symbolizer` supports Gaussian random intercepts of the form `(1 | group)` as a
+*first slice* on every class that carries them. The same `symbolize()` call
+works; the equation set picks up the random-intercept term and a new
+distribution row, and the structured object gains a `random_effects` and
+`variance_components` tibble.
 
 ```{r re-fit}
 set.seed(2)

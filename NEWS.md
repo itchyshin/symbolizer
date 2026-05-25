@@ -1,3 +1,77 @@
+# symbolizer 0.18.3
+
+## v0.18.3 -- Pat + Rose cross-repo audit
+
+Dispatched two role-named review agents in parallel after the
+maintainer spotted `(1&#124;site)` rendering as literal text on the
+deployed ladder vignette:
+
+* **Pat** (applied-reader / tutorial-flow) — surfaced the
+  package-level pipe-encoding bug, a singular-fit landmine on Rung 3
+  of the ladder, and a "30+ vs ~30 family-class combinations"
+  inconsistency between the homepage's two paragraphs.
+* **Rose** (cross-repo consistency / stale wording) — found that the
+  roadmap article had drifted badly: claimed `marginal_contrasts()`
+  and `reference_grid_story()` were upcoming features (they were
+  never built), described rma.ls and `propto` as "planned" when they
+  shipped in v0.15 / v0.16, and the release-history table stopped at
+  v0.14.1.
+
+### Fixes
+
+* **Package-level pipe-encoding fix in `knit_print.symbolizer_formula_bridge()`**:
+  pre-escape `|` -> `\|` in the `r_syntax` column before backticking.
+  Previously, mixed-model R syntax like `(1 | group)` was rendered as
+  `(1&#124;group)` in pandoc pipe-tables, then re-escaped at HTML
+  output to literal `&amp;#124;`. The fix runs everywhere
+  `formula_bridge()` knit-prints, so every vignette and every user's
+  knitted report benefits.
+* **Ladder recap table**: the `Rung` column moved from markdown
+  backticks to explicit `<code>` tags. With
+  `kable(format = "html", escape = FALSE)`, pandoc still parses
+  markdown inside table cells; explicit HTML tags bypass that.
+* **Roadmap article rewritten** (`vignettes/symbolizer-roadmap.Rmd`):
+  - "What's covered today" header bumped from v0.14.1 -> v0.18.x.
+  - Cross-cutting-surfaces table updated: confidence bands marked
+    Stable, `as_dag()` row notes the new `$mermaid` / `$tikz` slots,
+    `simulate_recipe()` and `as_html_three_views()` rows added,
+    stale version anchors removed.
+  - "What's planned" rewritten: rma.ls / `struct = "UN"` / glmmTMB
+    `propto` removed (shipped); `marginal_contrasts()` /
+    `reference_grid_story()` removed (never built and out of scope
+    given the kept-public discipline). Remaining items merged into
+    v0.19+ and Considered buckets.
+  - Release-history table extended with v0.15 -- v0.18.3.
+  - Kept-public list updated to include `simulate_recipe()`.
+* **Rung 3 singular-fit landmine** (`vignettes/symbolizer-ladder.Rmd`):
+  the data-gen used `rnorm(n_sites, 0, 0.6)`, which combined with
+  `set.seed(1)` and the heteroscedastic residual produced a
+  `boundary (singular) fit` from `lmer` — `variance_components`
+  showed site SD = 0 in the very rung that's supposed to demonstrate
+  variance partitioning. Bumped to `rnorm(n_sites, 0, 1.5)`; lmer
+  now recovers a clearly non-zero site SD. Truth-list bullet updated.
+* **Rung 4 lead-in** named the *location-scale* concept (also called
+  "distributional regression" / "heteroscedastic regression") in
+  plain language before introducing `log(σ_i) = γ_0 + γ_1 T_i` —
+  an ecologist meeting `dpar`-style submodels for the first time
+  now has a phrase to look up.
+* **Stale version anchors** in four vignettes cleaned up
+  (`symbolizer.Rmd:96`, `:259`; `symbolizer-drmtmb.Rmd:33`;
+  `symbolizer-factors.Rmd:528`). The drmTMB one was the worst —
+  it said Student-t / lognormal / Gamma / beta "remain on the
+  roadmap" when all four shipped in v0.3.
+* **README "30+ vs ~30"** mismatch resolved (both paragraphs now
+  say "30+", consistent with the capability registry count).
+* **NEWS v0.17 line** that promised `as_mermaid()` / `as_tikz()` /
+  `render_model_notebook()` exports for v0.18 was corrected — only
+  `simulate_recipe()` shipped as a function; diagram surfaces became
+  slots on `as_dag()` to keep the public surface tight;
+  `render_model_notebook()` is deferred further.
+* **Citation consistency**: `Lopez-Lopez` -> `López-López` (3 sites);
+  `Nakagawa (2024+)` -> `Nakagawa (forthcoming)` (2 sites).
+
+devtools::check(): 0 errors / 0 warnings / 0 notes.
+
 # symbolizer 0.18.2
 
 ## v0.18.2 -- three-views widget tab switching works again
@@ -191,8 +265,12 @@ shared synthetic dataset.
 * README "Tiny example" gets a callout pointing readers at the
   ladder for a gentler on-ramp.
 
-Option B debt (`simulate_recipe()`, `as_mermaid()`, `as_tikz()`,
-`render_model_notebook()`) stays deferred to v0.18.
+Option B debt (`simulate_recipe()` and diagram surfaces) stays
+deferred to v0.18. (When it landed in v0.18, `simulate_recipe()`
+became a real exported function; the diagram surfaces shipped as
+`$mermaid` and `$tikz` slots on `as_dag()` rather than as separate
+`as_mermaid()` / `as_tikz()` exports, to keep the public surface
+tight. `render_model_notebook()` is deferred further.)
 
 # symbolizer 0.16.0
 

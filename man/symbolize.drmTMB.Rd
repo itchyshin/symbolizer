@@ -55,7 +55,7 @@ looks suspicious the recommended alternative is \code{"profile"}.
 }
 
 \references{
-Nakagawa, S. (2024+). \code{drmTMB}: Distributional regression in TMB.
+Nakagawa, S. (forthcoming). \code{drmTMB}: Distributional regression in TMB.
 \url{https://itchyshin.github.io/drmTMB/}
 
 Kristensen, K., Nielsen, A., Berg, C. W., Skaug, H., & Bell, B. M.
