@@ -57,6 +57,9 @@ context here.
 - [`symbolize(`*`<rma.uni>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.rma.uni.md)
   : Symbolize a metafor rma.uni fit (meta-analysis / meta-regression,
   v0.13 first slice)
+- [`symbolize(`*`<gam>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.gam.md)
+  : Symbolize an mgcv gam / bam fit (additive grammar, v0.14 first
+  slice)
 - [`symbolizer_capabilities()`](https://itchyshin.github.io/symbolizer/reference/symbolizer_capabilities.md)
   : Symbolizer capability registry
 

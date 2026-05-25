@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.13.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.14.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -459,7 +459,7 @@ W_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 </tbody>
 </table>
 <div class="section level3">
-<h3 id="capability-matrix-v01--v07">Capability matrix (v0.1 – v0.7)<a class="anchor" aria-label="anchor" href="#capability-matrix-v01--v07"></a>
+<h3 id="capability-matrix-v01--v014">Capability matrix (v0.1 – v0.14)<a class="anchor" aria-label="anchor" href="#capability-matrix-v01--v014"></a>
 </h3>
 <table class="table">
 <colgroup>
@@ -488,22 +488,7 @@ W_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 </tr>
 <tr>
 <td>
-<code>drmTMB</code> Student-t (<code>mu</code>, <code>sigma</code>, <code>nu</code> via <code>log(nu-2)</code> link)</td>
-<td>First slice (v0.3)</td>
-</tr>
-<tr>
-<td>
-<code>drmTMB</code> lognormal, Gamma</td>
-<td>First slice (v0.3)</td>
-</tr>
-<tr>
-<td>
-<code>drmTMB</code> beta, beta_binomial</td>
-<td>First slice (v0.3)</td>
-</tr>
-<tr>
-<td>
-<code>drmTMB</code> Poisson, nbinom2, truncated_nbinom2</td>
+<code>drmTMB</code> Student-t, lognormal, Gamma, beta, beta_binomial, Poisson, nbinom2, truncated_nbinom2</td>
 <td>First slice (v0.3)</td>
 </tr>
 <tr>
@@ -513,18 +498,50 @@ W_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 </tr>
 <tr>
 <td>
-<code>gllvmTMB</code> Gaussian latent variables (mu, Λ_B, Σ_B, Ψ_B, σ_eps)</td>
-<td>First slice</td>
+<code>gllvmTMB</code> Gaussian and binomial latent-variable families</td>
+<td>First slice (v0.4 – v0.5)</td>
 </tr>
 <tr>
 <td>
-<code>gllvmTMB</code> binomial (first non-Gaussian latent-variable family)</td>
-<td>First slice (v0.5)</td>
+<code>glmmTMB</code> Gaussian / binomial / poisson / nbinom2 conditional submodel + <code>dispformula</code> + <code>ziformula</code> + <code>(1 \| g)</code>
+</td>
+<td>First slice (v0.7 – v0.11)</td>
 </tr>
 <tr>
 <td>
-<code>glmmTMB</code> Gaussian conditional + optional <code>dispformula = ~ z</code> + <code>(1 \| g)</code> random intercepts</td>
-<td>First slice (v0.7)</td>
+<code><a href="https://rdrr.io/pkg/lme4/man/lmer.html" class="external-link">lme4::lmer</a></code> + <code><a href="https://rdrr.io/pkg/lme4/man/glmer.html" class="external-link">lme4::glmer</a></code> (binomial / poisson)</td>
+<td>First slice (v0.10 – v0.11)</td>
+</tr>
+<tr>
+<td>
+<code>brmsfit</code> Gaussian / binomial / poisson + <code>bf(sigma ~ z)</code> distributional</td>
+<td>First slice (v0.8 – v0.11)</td>
+</tr>
+<tr>
+<td>
+<code>MCMCglmm</code> Gaussian + <code>~ g</code> random intercepts + animal models via <code>ginverse</code>
+</td>
+<td>First slice (v0.9 – v0.12)</td>
+</tr>
+<tr>
+<td>
+<code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">stats::lm</a></code>, <code><a href="https://rdrr.io/r/stats/glm.html" class="external-link">stats::glm</a></code> (gaussian / binomial / poisson / Gamma)</td>
+<td>First slice (v0.10 – v0.11)</td>
+</tr>
+<tr>
+<td>
+<strong><code>sdmTMB</code></strong> Gaussian + spatial random field (<code>omega</code>) + spatiotemporal field (<code>epsilon</code>)</td>
+<td>First slice (v0.12)</td>
+</tr>
+<tr>
+<td>
+<strong><code><a href="https://wviechtb.github.io/metafor/reference/rma.uni.html" class="external-link">metafor::rma.uni</a></code></strong> random / mixed-effects meta-analysis + meta-regression (two-tier <code>y_i | theta_i ~ N(theta_i, v_i)</code> model with known sampling variance and between-study heterogeneity τ²)</td>
+<td>First slice (v0.13)</td>
+</tr>
+<tr>
+<td>
+<strong><code><a href="https://rdrr.io/pkg/mgcv/man/gam.html" class="external-link">mgcv::gam</a></code></strong> / <strong><code><a href="https://rdrr.io/pkg/mgcv/man/bam.html" class="external-link">mgcv::bam</a></code></strong> additive models: gaussian / poisson / binomial / Gamma + <code>s(x)</code> + <code>s(x, by = factor)</code> + <code>te(x, z)</code>; smooths summarised in <code>metadata$smooths</code> (label, basis dim, edf); <code>f_l(x_i)</code> terms appended to the LaTeX linear predictor. <code><a href="https://rdrr.io/pkg/mgcv/man/gamm.html" class="external-link">mgcv::gamm</a></code> / <code><a href="https://rdrr.io/pkg/gamm4/man/gamm4.html" class="external-link">gamm4::gamm4</a></code> covered via the <code>$gam</code> slot</td>
+<td>First slice (v0.14)</td>
 </tr>
 <tr>
 <td>
@@ -538,7 +555,7 @@ W_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 </tr>
 <tr>
 <td>
-<code><a href="reference/parameter_interpretation.html">parameter_interpretation()</a></code> confidence bands (Wald / profile)</td>
+<code><a href="reference/parameter_interpretation.html">parameter_interpretation()</a></code> confidence bands (Wald / profile / credible)</td>
 <td>First slice (v0.1.1)</td>
 </tr>
 <tr>
@@ -562,20 +579,27 @@ W_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 <td>First slice (v0.2.1)</td>
 </tr>
 <tr>
+<td>Expanded <code>emmeans</code> layer: <code>marginal_contrasts()</code>, <code>reference_grid_story()</code> (existing <code>group_means</code> / <code>group_slopes</code> extended in place)</td>
+<td>Planned (v0.15)</td>
+</tr>
+<tr>
+<td>
+<code><a href="https://wviechtb.github.io/metafor/reference/rma.mv.html" class="external-link">metafor::rma.mv</a></code> (multilevel / multivariate meta-analysis)</td>
+<td>Planned (v0.13.x)</td>
+</tr>
+<tr>
+<td>brms negative-binomial / other distributional dpars; glmmTMB hurdle</td>
+<td>Planned (v0.16+)</td>
+</tr>
+<tr>
 <td>
 <code>gllvmTMB</code> other non-Gaussian families, within-unit decompositions, phylo / spatial</td>
 <td>Planned</td>
 </tr>
 <tr>
-<td>
-<code>glmmTMB</code> non-Gaussian families and zero-inflation</td>
-<td>Planned (v0.7.x)</td>
-</tr>
-<tr>
-<td>
-<code>brms</code>, <code>MCMCglmm</code>, <code>sdmTMB</code>, <code>lme4</code>, <code>lm</code>/<code>glm</code>
+<td>Phylogenetic flagship: <code>phylolm</code>, <code>phyloglm</code>, <code>phyr::pglmm</code>, <code>sommer</code>
 </td>
-<td>Planned (see roadmap)</td>
+<td>Considered</td>
 </tr>
 </tbody>
 </table>
@@ -640,23 +664,47 @@ W_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 <code>as_dag(sym)</code> structural model diagram (DOT-language string)</td>
 </tr>
 <tr>
-<td>v0.7 (current)</td>
+<td>v0.7 (released)</td>
 <td>
 <code>glmmTMB</code> Gaussian conditional submodel + <code>(1 \| g)</code> + <code>dispformula = ~ z</code>; CI band visible at all reading scales</td>
 </tr>
 <tr>
-<td>v0.8</td>
-<td><code>brms</code></td>
-</tr>
-<tr>
-<td>v0.9</td>
-<td><code>MCMCglmm</code></td>
-</tr>
-<tr>
-<td>v0.10</td>
+<td>v0.8 (released)</td>
 <td>
-<code>sdmTMB</code>, <code>lme4</code>, <code>lm</code>, <code>glm</code>
-</td>
+<code>brms</code> Gaussian + random effects</td>
+</tr>
+<tr>
+<td>v0.9 (released)</td>
+<td>
+<code>MCMCglmm</code> Gaussian + <code>~ g</code> random intercepts</td>
+</tr>
+<tr>
+<td>v0.10 (released)</td>
+<td>
+<code><a href="https://rdrr.io/pkg/lme4/man/lmer.html" class="external-link">lme4::lmer</a></code>, <code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">stats::lm</a></code>, <code><a href="https://rdrr.io/r/stats/glm.html" class="external-link">stats::glm</a></code> (gaussian / binomial / poisson)</td>
+</tr>
+<tr>
+<td>v0.11.x (released)</td>
+<td>glmmTMB non-Gaussian families (binomial / poisson / nbinom2 + zero-inflation); <code><a href="https://rdrr.io/pkg/lme4/man/glmer.html" class="external-link">lme4::glmer</a></code>; glm Gamma; brms binomial / poisson / <code>bf(sigma ~ z)</code>; robustness sweep across every extractor</td>
+</tr>
+<tr>
+<td>v0.12 (released)</td>
+<td>
+<code>sdmTMB</code> Gaussian + spatial / spatiotemporal random fields; <code>MCMCglmm</code> animal models via <code>ginverse</code>; roadmap text refresh</td>
+</tr>
+<tr>
+<td>v0.13 (released)</td>
+<td>
+<code><a href="https://wviechtb.github.io/metafor/reference/rma.uni.html" class="external-link">metafor::rma.uni</a></code> — research-synthesis flagship: two-tier <code>y_i \| theta_i ~ N(theta_i, v_i)</code> with known sampling variance + tau² heterogeneity + meta-regression moderators</td>
+</tr>
+<tr>
+<td>v0.14 (current)</td>
+<td>
+<code><a href="https://rdrr.io/pkg/mgcv/man/gam.html" class="external-link">mgcv::gam</a></code> / <code><a href="https://rdrr.io/pkg/mgcv/man/bam.html" class="external-link">mgcv::bam</a></code> — additive models: <code>s(x)</code>, <code>s(x, by =)</code>, <code>te(x, z)</code> smooths summarised in <code>metadata$smooths</code>; <code>gamm</code> / <code>gamm4</code> covered via <code>$gam</code> slot</td>
+</tr>
+<tr>
+<td>v0.15</td>
+<td>Expanded <code>emmeans</code> layer: <code>marginal_contrasts()</code>, <code>reference_grid_story()</code>; <code>group_means</code> / <code>group_slopes</code> extended in place (kept-public list grows by ~2, not 4)</td>
 </tr>
 </tbody>
 </table>

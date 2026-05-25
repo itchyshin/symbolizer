@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.13.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.14.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,6 +33,22 @@
       <small>Source: <a href="https://github.com/itchyshin/symbolizer/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.14.0" id="symbolizer-0140">symbolizer 0.14.0<a class="anchor" aria-label="anchor" href="#symbolizer-0140"></a></h2>
+<div class="section level3">
+<h3 id="v014--mgcv-additive-grammar-gam--bam--gamm--gamm4-0-14-0">v0.14 – mgcv additive grammar (gam / bam / gamm / gamm4)<a class="anchor" aria-label="anchor" href="#v014--mgcv-additive-grammar-gam--bam--gamm--gamm4-0-14-0"></a></h3>
+<ul><li>
+<code><a href="../reference/symbolize.gam.html">symbolize.gam()</a></code> (and <code>symbolize.bam = symbolize.gam</code> since <code>bam</code> inherits from <code>gam</code>) for <code><a href="https://rdrr.io/pkg/mgcv/man/gam.html" class="external-link">mgcv::gam</a></code> / <code><a href="https://rdrr.io/pkg/mgcv/man/bam.html" class="external-link">mgcv::bam</a></code> fits. First slice covers gaussian / poisson / binomial / Gamma families with smooth specifications <code>s(x)</code>, <code>s(x, by = factor)</code>, and <code>te(x, z)</code>. Method-of-fit (REML / GCV.Cp) is captured as metadata.</li>
+<li>Smooth terms are summarised in <code>sym$metadata$smooths</code> – one row per smooth with <code>label</code>, <code>bs_dim</code> (basis dimension K), <code>edf</code> (effective degrees of freedom), p-value, underlying <code>variable</code>(s), and <code>by_var</code> (for <code>s(x, by = group)</code>).</li>
+<li>LaTeX rendering appends a smooth term <code>f_l(x_i)</code> (or <code>f_l(x_i, z_i)</code> for tensor products) to the linear predictor for each smooth, so the additive structure <code>g(mu_i) = beta_0 + sum beta_k x_ki + sum_l f_l(z_li)</code> is visible.</li>
+<li>Smoothing parameters lambda_l appear in <code>variance_components</code> with <code>kind = "smoothing_param"</code>; the residual SD (for Gaussian) appears with <code>kind = "residual"</code>.</li>
+<li>
+<code><a href="https://rdrr.io/pkg/mgcv/man/gamm.html" class="external-link">mgcv::gamm()</a></code> and <code><a href="https://rdrr.io/pkg/gamm4/man/gamm4.html" class="external-link">gamm4::gamm4()</a></code> return lists with a <code>$gam</code> slot of class <code>gam</code>. Document the pattern <code>symbolize(fit_gamm$gam)</code>; both are covered by the test sweep.</li>
+<li>Warning surface: when a smooth’s <code>edf</code> approaches its basis dimension <code>K</code>, the extractor flags it with the same suggestion <code><a href="https://rdrr.io/pkg/mgcv/man/gam.check.html" class="external-link">mgcv::gam.check()</a></code> makes – “consider increasing k”.</li>
+<li>mgcv + gamm4 added to <code>Suggests</code>.</li>
+<li>Two new robustness-sweep rows: gam with <code>s(x)</code>, gam with <code>te(x, z)</code>.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.13.0" id="symbolizer-0130">symbolizer 0.13.0<a class="anchor" aria-label="anchor" href="#symbolizer-0130"></a></h2>
 <div class="section level3">
