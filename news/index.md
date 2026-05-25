@@ -1,5 +1,27 @@
 # Changelog
 
+## symbolizer 0.9.0
+
+### v0.9 – MCMCglmm
+
+- New:
+  [`symbolize.MCMCglmm()`](https://itchyshin.github.io/symbolizer/reference/symbolize.MCMCglmm.md)
+  (first slice). Builds a `symbolized_model` from an `MCMCglmm` fit for
+  the Gaussian conditional submodel (identity link) with optional `~ g`
+  random intercepts.
+- MCMCglmm does NOT keep the data frame on the fitted object, so
+  `symbolize.MCMCglmm(fit, data = ...)` takes a mandatory `data`
+  argument. The function errors with a friendly message if `data` is
+  omitted.
+- CI band uses the 95% credible interval from `summary(fit)$solutions`
+  (l-95% CI / u-95% CI, the highest-posterior-density bounds).
+  `ci_method = "credible"`.
+- methods_text() template for `MCMCglmm / gaussian` mentions Gibbs
+  sampling with inverse-Wishart priors on the variance components.
+- MCMCglmm’s flexible covariance structures (per-trait residuals,
+  multi-membership, animal models) are routed through the capability
+  registry as “Planned or reserved” for v0.9.x.
+
 ## symbolizer 0.8.0
 
 ### v0.8 – brms

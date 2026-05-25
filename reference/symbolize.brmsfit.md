@@ -48,7 +48,7 @@ A `symbolized_model` object.
 ## Credible intervals
 
 brms is Bayesian, so the "confidence band" carried in `fixed_effects`
-and `interpretation` is a 95% **credible interval** — the 2.5% and 97.5%
+and `interpretation` is a 95% **credible interval** – the 2.5% and 97.5%
 posterior quantiles. `excludes_zero` is the indicator for whether the
 credible interval excludes zero (i.e. the posterior puts negligible mass
 on either side of zero). `ci_method` is set to `"credible"` so renderers

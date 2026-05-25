@@ -40,6 +40,8 @@ context here.
   : Symbolize a glmmTMB fit (Gaussian, v0.7 first slice)
 - [`symbolize(`*`<brmsfit>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.brmsfit.md)
   : Symbolize a brms fit (Gaussian, v0.8 first slice)
+- [`symbolize(`*`<MCMCglmm>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.MCMCglmm.md)
+  : Symbolize an MCMCglmm fit (Gaussian, v0.9 first slice)
 - [`symbolizer_capabilities()`](https://itchyshin.github.io/symbolizer/reference/symbolizer_capabilities.md)
   : Symbolizer capability registry
 

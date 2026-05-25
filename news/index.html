@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.9.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,6 +33,17 @@
       <small>Source: <a href="https://github.com/itchyshin/symbolizer/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.9.0" id="symbolizer-090">symbolizer 0.9.0<a class="anchor" aria-label="anchor" href="#symbolizer-090"></a></h2>
+<div class="section level3">
+<h3 id="v09--mcmcglmm-0-9-0">v0.9 – MCMCglmm<a class="anchor" aria-label="anchor" href="#v09--mcmcglmm-0-9-0"></a></h3>
+<ul><li>New: <code><a href="../reference/symbolize.MCMCglmm.html">symbolize.MCMCglmm()</a></code> (first slice). Builds a <code>symbolized_model</code> from an <code>MCMCglmm</code> fit for the Gaussian conditional submodel (identity link) with optional <code>~ g</code> random intercepts.</li>
+<li>MCMCglmm does NOT keep the data frame on the fitted object, so <code>symbolize.MCMCglmm(fit, data = ...)</code> takes a mandatory <code>data</code> argument. The function errors with a friendly message if <code>data</code> is omitted.</li>
+<li>CI band uses the 95% credible interval from <code>summary(fit)$solutions</code> (l-95% CI / u-95% CI, the highest-posterior-density bounds). <code>ci_method = "credible"</code>.</li>
+<li>methods_text() template for <code>MCMCglmm / gaussian</code> mentions Gibbs sampling with inverse-Wishart priors on the variance components.</li>
+<li>MCMCglmm’s flexible covariance structures (per-trait residuals, multi-membership, animal models) are routed through the capability registry as “Planned or reserved” for v0.9.x.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.8.0" id="symbolizer-080">symbolizer 0.8.0<a class="anchor" aria-label="anchor" href="#symbolizer-080"></a></h2>
 <div class="section level3">
