@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.11.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.12.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,6 +33,36 @@
       <small>Source: <a href="https://github.com/itchyshin/symbolizer/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.12.0" id="symbolizer-0120">symbolizer 0.12.0<a class="anchor" aria-label="anchor" href="#symbolizer-0120"></a></h2>
+<div class="section level3">
+<h3 id="v012--close-the-original-vision-gaps-sdmtmb--mcmcglmm-animal-models-0-12-0">v0.12 – close the original-vision gaps: sdmTMB + MCMCglmm animal models<a class="anchor" aria-label="anchor" href="#v012--close-the-original-vision-gaps-sdmtmb--mcmcglmm-animal-models-0-12-0"></a></h3>
+<p>This release closes the two remaining gaps from the May 23 master roadmap. sdmTMB lands as a first-class extractor; MCMCglmm gains an animal-model branch with derived heritability.</p>
+<div class="section level4">
+<h4 id="sdmtmb-new-0-12-0">sdmTMB (new)<a class="anchor" aria-label="anchor" href="#sdmtmb-new-0-12-0"></a></h4>
+<ul><li>
+<code><a href="../reference/symbolize.sdmTMB.html">symbolize.sdmTMB()</a></code> – first slice covers Gaussian fits with an optional spatial random field (<code>spatial = "on"</code>) and / or spatiotemporal field (<code>time = "..."</code>). Fixed-effect estimates and Wald CIs come from <code>sdmTMB::tidy(fit)</code>; spatial-range and field-SD parameters come from <code>sdmTMB::tidy(fit, "ran_pars")</code> and appear in the <code>variance_components</code> tibble with <code>kind = "spatial_random"</code> / <code>spatial_range</code>.</li>
+<li>Capability rows: <code>sdmTMB,gaussian,mu</code> / <code>omega</code> / <code>epsilon</code> all First slice; non-Gaussian families, delta-models, and <code>spatial_varying</code> slopes still Planned.</li>
+<li>
+<code>sdmTMB</code> added to <code>Suggests</code>.</li>
+</ul></div>
+<div class="section level4">
+<h4 id="mcmcglmm-animal-models-extension-0-12-0">MCMCglmm animal models (extension)<a class="anchor" aria-label="anchor" href="#mcmcglmm-animal-models-extension-0-12-0"></a></h4>
+<ul><li>
+<code><a href="../reference/symbolize.MCMCglmm.html">symbolize.MCMCglmm()</a></code> now detects <code>fit$ginverse</code> and treats those groups as animal-model / phylogenetic effects. The <code>variance_components</code> tibble gains a <code>kind</code> column (<code>animal</code> / <code>random</code> / <code>residual</code>), and a heritability tibble <code>h^2 = sigma^2_A / (sigma^2_A + sigma^2_E)</code> is derived and attached to <code>sym$metadata$heritability</code> whenever both an animal effect and a residual variance are present.</li>
+<li>Capability row: <code>MCMCglmm,gaussian,animal</code> First slice. The flexible residual covariance structures (<code>us(trait):unit</code>, <code>idh(trait):unit</code>) remain Planned – multi-response fixtures and matrix-rendering grammar are coming with the metafor v0.13 batch.</li>
+</ul></div>
+<div class="section level4">
+<h4 id="robustness-sweep-0-12-0">Robustness sweep<a class="anchor" aria-label="anchor" href="#robustness-sweep-0-12-0"></a></h4>
+<ul><li>
+<code>test-robustness-sweep.R</code> gains two new rows: MCMCglmm animal + sdmTMB spatial. The full public renderer surface (<code>as_latex</code>, <code>equations</code>, <code>symbol_table</code>, <code>assumption_table</code>, <code>formula_bridge</code>, <code>parameter_interpretation</code>, <code>as_dag</code>, <code>warning_table</code>) is exercised on each.</li>
+</ul></div>
+<div class="section level4">
+<h4 id="roadmap-text-refresh-0-12-0">Roadmap text refresh<a class="anchor" aria-label="anchor" href="#roadmap-text-refresh-0-12-0"></a></h4>
+<ul><li>README capability matrix and roadmap table rewritten to reflect v0.7 -&gt; v0.12 as released, with metafor / mgcv / emmeans-depth listed as Planned for v0.13 / v0.14 / v0.15. Capabilities CSV’s stale “Targeted for v0.X” notes updated.</li>
+</ul></div>
+</div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.11.2" id="symbolizer-0112">symbolizer 0.11.2<a class="anchor" aria-label="anchor" href="#symbolizer-0112"></a></h2>
 <div class="section level3">

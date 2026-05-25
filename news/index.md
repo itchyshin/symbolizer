@@ -1,5 +1,57 @@
 # Changelog
 
+## symbolizer 0.12.0
+
+### v0.12 – close the original-vision gaps: sdmTMB + MCMCglmm animal models
+
+This release closes the two remaining gaps from the May 23 master
+roadmap. sdmTMB lands as a first-class extractor; MCMCglmm gains an
+animal-model branch with derived heritability.
+
+#### sdmTMB (new)
+
+- [`symbolize.sdmTMB()`](https://itchyshin.github.io/symbolizer/reference/symbolize.sdmTMB.md)
+  – first slice covers Gaussian fits with an optional spatial random
+  field (`spatial = "on"`) and / or spatiotemporal field
+  (`time = "..."`). Fixed-effect estimates and Wald CIs come from
+  `sdmTMB::tidy(fit)`; spatial-range and field-SD parameters come from
+  `sdmTMB::tidy(fit, "ran_pars")` and appear in the
+  `variance_components` tibble with `kind = "spatial_random"` /
+  `spatial_range`.
+- Capability rows: `sdmTMB,gaussian,mu` / `omega` / `epsilon` all First
+  slice; non-Gaussian families, delta-models, and `spatial_varying`
+  slopes still Planned.
+- `sdmTMB` added to `Suggests`.
+
+#### MCMCglmm animal models (extension)
+
+- [`symbolize.MCMCglmm()`](https://itchyshin.github.io/symbolizer/reference/symbolize.MCMCglmm.md)
+  now detects `fit$ginverse` and treats those groups as animal-model /
+  phylogenetic effects. The `variance_components` tibble gains a `kind`
+  column (`animal` / `random` / `residual`), and a heritability tibble
+  `h^2 = sigma^2_A / (sigma^2_A + sigma^2_E)` is derived and attached to
+  `sym$metadata$heritability` whenever both an animal effect and a
+  residual variance are present.
+- Capability row: `MCMCglmm,gaussian,animal` First slice. The flexible
+  residual covariance structures (`us(trait):unit`, `idh(trait):unit`)
+  remain Planned – multi-response fixtures and matrix-rendering grammar
+  are coming with the metafor v0.13 batch.
+
+#### Robustness sweep
+
+- `test-robustness-sweep.R` gains two new rows: MCMCglmm animal + sdmTMB
+  spatial. The full public renderer surface (`as_latex`, `equations`,
+  `symbol_table`, `assumption_table`, `formula_bridge`,
+  `parameter_interpretation`, `as_dag`, `warning_table`) is exercised on
+  each.
+
+#### Roadmap text refresh
+
+- README capability matrix and roadmap table rewritten to reflect v0.7
+  -\> v0.12 as released, with metafor / mgcv / emmeans-depth listed as
+  Planned for v0.13 / v0.14 / v0.15. Capabilities CSV’s stale “Targeted
+  for v0.X” notes updated.
+
 ## symbolizer 0.11.2
 
 ### v0.11.2 – more brms families + interaction robustness
