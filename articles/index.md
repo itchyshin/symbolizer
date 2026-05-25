@@ -2,8 +2,22 @@
 
 ### Get started
 
+Start here. The ladder builds up from lm() to location-scale on one
+shared dataset.
+
+- [Building up: from \`lm\` to
+  location-scale](https://itchyshin.github.io/symbolizer/articles/symbolizer-ladder.md):
+
+  One synthetic dataset, four models of increasing complexity, the same
+  [`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
+  call. Watch the symbolic equation grow one row at a time as you add a
+  factor, then a random effect, then a heterogeneity submodel.
+
 - [Get started with
   symbolizer](https://itchyshin.github.io/symbolizer/articles/symbolizer.md):
+
+### Deep dives
+
 - [Understanding a drmTMB fit with
   symbolizer](https://itchyshin.github.io/symbolizer/articles/symbolizer-drmtmb.md):
 - [Reading factors, dummies, and

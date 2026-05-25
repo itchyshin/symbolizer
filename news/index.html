@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.16.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.17.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,6 +34,23 @@
       <small>Source: <a href="https://github.com/itchyshin/symbolizer/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.17.0" id="symbolizer-0170">symbolizer 0.17.0<a class="anchor" aria-label="anchor" href="#symbolizer-0170"></a></h2>
+<div class="section level3">
+<h3 id="v017--ladder-vignette-and-homepage-refresh-0-17-0">v0.17 – ladder vignette and homepage refresh<a class="anchor" aria-label="anchor" href="#v017--ladder-vignette-and-homepage-refresh-0-17-0"></a></h3>
+<p>This release replaces the abrupt “jump straight into a complex location-scale model” on-ramp with a gentle 4-rung ladder, on one shared synthetic dataset.</p>
+<ul><li>New article <code>vignettes/symbolizer-ladder.Rmd</code> (“Building up: from <code>lm</code> to location-scale”). One synthetic <code>body_mass ~ temperature + sex + site</code> dataset, four rungs:
+<ol style="list-style-type: decimal"><li>
+<code>lm(body_mass ~ temperature)</code>, (2) <code>+ sex</code>, (3) <code>lmer</code> with <code>(1 | site)</code>, (4) <code>drmTMB</code> location-scale with <code>sigma ~ temperature</code>. At each rung the same <code><a href="../reference/symbolize.html">symbolize()</a></code> call produces a richer symbolic specification; “what just got added” callouts highlight the new line(s).</li>
+</ol></li>
+<li>The interactive <code><a href="../reference/as_html_three_views.html">as_html_three_views()</a></code> widget renders live at the end of the ladder (Rung 4) so the reader sees Equation / Index-expansion / Matrix-with-data tabs side by side.</li>
+<li>New homepage screenshot of the widget at <code>man/figures/three-views-widget.png</code> – the README’s “Three views of the same fit” section now shows the widget instead of just describing it.</li>
+<li>
+<code>_pkgdown.yml</code>: navbar Articles dropdown reorganised. “Get started” is now Ladder -&gt; Concepts (the existing <code>symbolizer.Rmd</code>); remaining articles moved into “Deep dives”.</li>
+<li>README “Tiny example” gets a callout pointing readers at the ladder for a gentler on-ramp.</li>
+</ul><p>Option B debt (<code>simulate_recipe()</code>, <code>as_mermaid()</code>, <code>as_tikz()</code>, <code>render_model_notebook()</code>) stays deferred to v0.18.</p>
+</div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.16.0" id="symbolizer-0160">symbolizer 0.16.0<a class="anchor" aria-label="anchor" href="#symbolizer-0160"></a></h2>
 <div class="section level3">

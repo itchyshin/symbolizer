@@ -1,5 +1,39 @@
 # Changelog
 
+## symbolizer 0.17.0
+
+### v0.17 – ladder vignette and homepage refresh
+
+This release replaces the abrupt “jump straight into a complex
+location-scale model” on-ramp with a gentle 4-rung ladder, on one shared
+synthetic dataset.
+
+- New article `vignettes/symbolizer-ladder.Rmd` (“Building up: from `lm`
+  to location-scale”). One synthetic
+  `body_mass ~ temperature + sex + site` dataset, four rungs:
+  1.  `lm(body_mass ~ temperature)`, (2) `+ sex`, (3) `lmer` with
+      `(1 | site)`, (4) `drmTMB` location-scale with
+      `sigma ~ temperature`. At each rung the same
+      [`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
+      call produces a richer symbolic specification; “what just got
+      added” callouts highlight the new line(s).
+- The interactive
+  [`as_html_three_views()`](https://itchyshin.github.io/symbolizer/reference/as_html_three_views.md)
+  widget renders live at the end of the ladder (Rung 4) so the reader
+  sees Equation / Index-expansion / Matrix-with-data tabs side by side.
+- New homepage screenshot of the widget at
+  `man/figures/three-views-widget.png` – the README’s “Three views of
+  the same fit” section now shows the widget instead of just describing
+  it.
+- `_pkgdown.yml`: navbar Articles dropdown reorganised. “Get started” is
+  now Ladder -\> Concepts (the existing `symbolizer.Rmd`); remaining
+  articles moved into “Deep dives”.
+- README “Tiny example” gets a callout pointing readers at the ladder
+  for a gentler on-ramp.
+
+Option B debt (`simulate_recipe()`, `as_mermaid()`, `as_tikz()`,
+`render_model_notebook()`) stays deferred to v0.18.
+
 ## symbolizer 0.16.0
 
 ### v0.16 – meta-analysis bridge complete
