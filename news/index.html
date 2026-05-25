@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.9.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,6 +33,19 @@
       <small>Source: <a href="https://github.com/itchyshin/symbolizer/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.10.0" id="symbolizer-0100">symbolizer 0.10.0<a class="anchor" aria-label="anchor" href="#symbolizer-0100"></a></h2>
+<div class="section level3">
+<h3 id="v010--base-r--lme4-0-10-0">v0.10 – base R + lme4<a class="anchor" aria-label="anchor" href="#v010--base-r--lme4-0-10-0"></a></h3>
+<ul><li>New: <code><a href="../reference/symbolize.lm.html">symbolize.lm()</a></code> for base R <code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm()</a></code> fits (Gaussian + identity link only – the only family <code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm()</a></code> fits). Wald-t confidence intervals from <code><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint()</a></code>.</li>
+<li>New: <code><a href="../reference/symbolize.glm.html">symbolize.glm()</a></code> for base R <code><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm()</a></code> fits. First slice covers Gaussian / binomial / poisson with their canonical links. Wald CIs via <code><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint.default()</a></code> (the default <code><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint()</a></code> for glm uses profile likelihood which is slow on big fits; the extractor opts into the faster Wald path).</li>
+<li>New: <code><a href="../reference/symbolize.lmerMod.html">symbolize.lmerMod()</a></code> for <code><a href="https://rdrr.io/pkg/lme4/man/lmer.html" class="external-link">lme4::lmer()</a></code> fits (Gaussian conditional submodel with optional <code>(1 | g)</code> random intercepts). CIs via <code>lme4::confint.merMod(fit, parm = "beta_", method = "Wald")</code>. Pass <code>ci_method = "profile"</code> for profile-likelihood CIs.</li>
+<li>methods_text() templates added for lm / glm / lmerMod.</li>
+<li>
+<code>glm</code> family classes for binomial / poisson are family-keyed in the capability registry; Gamma / inverse.gaussian / quasi families are deferred to v0.10.x.</li>
+<li>sdmTMB is deferred to v0.10.x (not installed in the dev environment; needs separate testing on a machine with sdmTMB available).</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.9.0" id="symbolizer-090">symbolizer 0.9.0<a class="anchor" aria-label="anchor" href="#symbolizer-090"></a></h2>
 <div class="section level3">

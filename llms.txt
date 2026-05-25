@@ -332,6 +332,13 @@ context here.
   : Symbolize a brms fit (Gaussian, v0.8 first slice)
 - [`symbolize(`*`<MCMCglmm>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.MCMCglmm.md)
   : Symbolize an MCMCglmm fit (Gaussian, v0.9 first slice)
+- [`symbolize(`*`<lm>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.lm.md)
+  : Symbolize a base R lm() fit (Gaussian, v0.10 first slice)
+- [`symbolize(`*`<glm>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.glm.md)
+  : Symbolize a base R glm() fit (Gaussian / binomial / poisson, v0.10
+  first slice)
+- [`symbolize(`*`<lmerMod>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.lmerMod.md)
+  : Symbolize an lme4 lmer() fit (Gaussian, v0.10 first slice)
 - [`symbolizer_capabilities()`](https://itchyshin.github.io/symbolizer/reference/symbolizer_capabilities.md)
   : Symbolizer capability registry
 

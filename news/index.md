@@ -1,5 +1,38 @@
 # Changelog
 
+## symbolizer 0.10.0
+
+### v0.10 – base R + lme4
+
+- New:
+  [`symbolize.lm()`](https://itchyshin.github.io/symbolizer/reference/symbolize.lm.md)
+  for base R [`lm()`](https://rdrr.io/r/stats/lm.html) fits (Gaussian +
+  identity link only – the only family
+  [`lm()`](https://rdrr.io/r/stats/lm.html) fits). Wald-t confidence
+  intervals from [`confint()`](https://rdrr.io/r/stats/confint.html).
+- New:
+  [`symbolize.glm()`](https://itchyshin.github.io/symbolizer/reference/symbolize.glm.md)
+  for base R [`glm()`](https://rdrr.io/r/stats/glm.html) fits. First
+  slice covers Gaussian / binomial / poisson with their canonical links.
+  Wald CIs via
+  [`confint.default()`](https://rdrr.io/r/stats/confint.html) (the
+  default [`confint()`](https://rdrr.io/r/stats/confint.html) for glm
+  uses profile likelihood which is slow on big fits; the extractor opts
+  into the faster Wald path).
+- New:
+  [`symbolize.lmerMod()`](https://itchyshin.github.io/symbolizer/reference/symbolize.lmerMod.md)
+  for [`lme4::lmer()`](https://rdrr.io/pkg/lme4/man/lmer.html) fits
+  (Gaussian conditional submodel with optional `(1 | g)` random
+  intercepts). CIs via
+  `lme4::confint.merMod(fit, parm = "beta_", method = "Wald")`. Pass
+  `ci_method = "profile"` for profile-likelihood CIs.
+- methods_text() templates added for lm / glm / lmerMod.
+- `glm` family classes for binomial / poisson are family-keyed in the
+  capability registry; Gamma / inverse.gaussian / quasi families are
+  deferred to v0.10.x.
+- sdmTMB is deferred to v0.10.x (not installed in the dev environment;
+  needs separate testing on a machine with sdmTMB available).
+
 ## symbolizer 0.9.0
 
 ### v0.9 – MCMCglmm
