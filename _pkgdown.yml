@@ -122,9 +122,13 @@ reference:
     contents:
       - warning_table
   - title: "Model diagram"
-    desc: "Render the structural model as a DAG (nodes for response, parameters, predictors, groups, random effects). Returns a list with the DOT representation ready for GraphvizOnline or DiagrammeR."
+    desc: "Render the structural model as a DAG (nodes for response, parameters, predictors, groups, random effects). Returns a list with DOT (GraphViz), Mermaid (Markdown / Quarto), and TikZ (LaTeX) representations."
     contents:
       - as_dag
+  - title: "Simulation recipe"
+    desc: "Pseudocode + runnable R code describing how to simulate from a fitted model."
+    contents:
+      - simulate_recipe
   - title: "Internal: term-grammar bridge"
     desc: "The R formula <-> model matrix <-> biological symbol layer that every renderer reads."
     contents:

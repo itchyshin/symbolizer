@@ -44,9 +44,11 @@ as_dag.symbolized_model <- function(x, ...) {
   nodes <- build_dag_nodes(x)
   edges <- build_dag_edges(x, nodes)
   out <- list(
-    nodes = nodes,
-    edges = edges,
-    dot   = build_dag_dot(nodes, edges, sym = x)
+    nodes   = nodes,
+    edges   = edges,
+    dot     = build_dag_dot(nodes, edges, sym = x),
+    mermaid = build_dag_mermaid(nodes, edges, sym = x),
+    tikz    = build_dag_tikz(nodes, edges, sym = x)
   )
   class(out) <- c("symbolic_dag", "list")
   out
@@ -240,6 +242,126 @@ build_dag_dot <- function(nodes, edges, sym) {
     ),
     collapse = "\n"
   )
+}
+
+# Assemble the Mermaid-flowchart string. Same structural DAG as the
+# DOT renderer; different syntax. Each node id is the symbolizer id;
+# shapes are encoded via Mermaid's bracket conventions:
+#   response       (( double-circle ))
+#   parameter      (( single ))
+#   predictor      [ rect ]
+#   group          {{ hex }}
+#   random_effect  (( oval ))
+build_dag_mermaid <- function(nodes, edges, sym) {
+  node_shape <- function(kind, id, label) {
+    open_close <- switch(
+      kind,
+      response      = c("(((", ")))"),
+      parameter     = c("((",  "))"),
+      predictor     = c("[",   "]"),
+      group         = c("{{",  "}}"),
+      random_effect = c("(",   ")"),
+      c("[",  "]")
+    )
+    sprintf("%s%s\"%s\"%s", id, open_close[[1L]], label, open_close[[2L]])
+  }
+  node_lines <- vapply(seq_len(nrow(nodes)), function(i) {
+    node_shape(nodes$kind[[i]], nodes$id[[i]], nodes$label[[i]])
+  }, character(1L))
+  edge_style <- function(kind) {
+    switch(
+      kind,
+      distribution        = "==>",          # bold
+      linear_predictor    = "-->",          # solid
+      groups              = "-.->",         # dashed
+      random_contribution = "-.->",         # dashed
+      "-->"
+    )
+  }
+  edge_lines <- if (!is.null(edges) && nrow(edges) > 0L) {
+    vapply(seq_len(nrow(edges)), function(i) {
+      sprintf("  %s %s %s", edges$from[[i]], edge_style(edges$kind[[i]]), edges$to[[i]])
+    }, character(1L))
+  } else character(0L)
+  paste(
+    c("flowchart LR",
+      paste0("  ", node_lines),
+      edge_lines),
+    collapse = "\n"
+  )
+}
+
+# Assemble the TikZ string. Wraps the DAG in tikzpicture environment
+# with positioning, basic shapes, and color fills matching the DOT
+# / Mermaid versions. Renderable inside a LaTeX document that loads
+# \usepackage{tikz} and \usetikzlibrary{positioning,shapes.geometric}.
+build_dag_tikz <- function(nodes, edges, sym) {
+  shape_for <- function(kind) {
+    switch(
+      kind,
+      response      = "double circle",
+      parameter     = "ellipse",
+      predictor     = "rectangle",
+      group         = "regular polygon, regular polygon sides=5",
+      random_effect = "circle",
+      "ellipse"
+    )
+  }
+  fill_for <- function(kind) {
+    switch(
+      kind,
+      response      = "red!20",
+      parameter     = "yellow!20",
+      predictor     = "green!20",
+      group         = "blue!20",
+      random_effect = "orange!30",
+      "white"
+    )
+  }
+  node_lines <- vapply(seq_len(nrow(nodes)), function(i) {
+    sprintf(
+      "  \\node[draw, %s, fill=%s] (%s) {%s};",
+      shape_for(nodes$kind[[i]]),
+      fill_for(nodes$kind[[i]]),
+      nodes$id[[i]],
+      escape_tikz(nodes$label[[i]])
+    )
+  }, character(1L))
+  edge_style <- function(kind) {
+    switch(
+      kind,
+      distribution        = "[ultra thick, ->, color=red!60!black]",
+      linear_predictor    = "[->]",
+      groups              = "[->, dashed, color=gray]",
+      random_contribution = "[->, dashed]",
+      "[->]"
+    )
+  }
+  edge_lines <- if (!is.null(edges) && nrow(edges) > 0L) {
+    vapply(seq_len(nrow(edges)), function(i) {
+      sprintf("  \\draw%s (%s) -- (%s);",
+              edge_style(edges$kind[[i]]),
+              edges$from[[i]], edges$to[[i]])
+    }, character(1L))
+  } else character(0L)
+  paste(
+    c(
+      "% requires: \\usepackage{tikz}",
+      "% \\usetikzlibrary{positioning,shapes.geometric}",
+      "\\begin{tikzpicture}[node distance=2cm, auto]",
+      node_lines,
+      edge_lines,
+      "\\end{tikzpicture}"
+    ),
+    collapse = "\n"
+  )
+}
+
+# Escape characters that are special inside TikZ node labels.
+escape_tikz <- function(s) {
+  s <- gsub("\\\\", "\\\\textbackslash{}", s)
+  s <- gsub("([&%$#_{}])", "\\\\\\1", s)
+  s
 }
 
 # Sanitise a label into a node id (letters, digits, underscores).

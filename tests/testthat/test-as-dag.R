@@ -7,7 +7,7 @@ test_that("as_dag returns a symbolic_dag S3 list with nodes, edges, and dot", {
   sym <- symbolize(fit)
   dag <- as_dag(sym)
   expect_s3_class(dag, "symbolic_dag")
-  expect_named(dag, c("nodes", "edges", "dot"))
+  expect_named(dag, c("nodes", "edges", "dot", "mermaid", "tikz"))
   expect_true(nrow(dag$nodes) >= 3L)   # at least response + mu + sigma
   expect_true(nrow(dag$edges) >= 2L)
   expect_type(dag$dot, "character")

@@ -1,3 +1,34 @@
+# symbolizer 0.18.0
+
+## v0.18 -- Option B debt cleared: simulate_recipe() and diagram surfaces
+
+Closes the long-standing Option B debt named in the master plan
+(simulate_recipe + diagrams beyond as_dag).
+
+* New exported function `simulate_recipe(sym, n = NULL, seed = NULL)`.
+  Returns a `symbolizer_simulation_recipe` S3 object with two slots:
+  - `$pseudocode` -- numbered prose steps describing the
+    generative model (draw random effects, build linear predictor,
+    apply inverse link, sample response).
+  - `$r_code` -- runnable R code with the right RNG calls for the
+    fitted family (rnorm / rbinom / rpois / rgamma / rnbinom for
+    Gaussian / binomial / Poisson / Gamma / negative-binomial, and a
+    two-tier draw for `meta_normal`).
+  Family-aware via the symbolized_model's `submodels` and
+  `random_effects` tibbles; honours link functions and detects
+  optional sigma / zi submodels.
+* `as_dag(sym)` is enriched with two new slots (no new exports):
+  - `$mermaid` -- Mermaid-flowchart string suitable for pasting into
+    Markdown / Quarto.
+  - `$tikz`    -- TikZ string suitable for inclusion in a LaTeX
+    document (requires `\\usepackage{tikz}` and the
+    `positioning,shapes.geometric` libraries).
+  The existing `$dot` (GraphViz) slot is unchanged.
+* pkgdown reference page gains a "Simulation recipe" section listing
+  `simulate_recipe`; the "Model diagram" section is rewritten to
+  mention all three syntactic frames (DOT / Mermaid / TikZ).
+* `as_dag` test updated to assert the five-slot shape.
+
 # symbolizer 0.17.0
 
 ## v0.17 -- ladder vignette and homepage refresh
