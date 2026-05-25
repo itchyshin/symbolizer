@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.11.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,6 +33,32 @@
       <small>Source: <a href="https://github.com/itchyshin/symbolizer/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.11.0" id="symbolizer-0110">symbolizer 0.11.0<a class="anchor" aria-label="anchor" href="#symbolizer-0110"></a></h2>
+<div class="section level3">
+<h3 id="v011--deferred-items-non-gaussian-glmmtmb--glmer-glm-gamma-robustness-0-11-0">v0.11 – deferred items: non-Gaussian glmmTMB / glmer, glm Gamma, robustness<a class="anchor" aria-label="anchor" href="#v011--deferred-items-non-gaussian-glmmtmb--glmer-glm-gamma-robustness-0-11-0"></a></h3>
+<p>This release picks up the items deferred during the v0.7 -&gt; v0.10 push and adds a robustness sweep so any future extractor regression surfaces in one place.</p>
+<div class="section level4">
+<h4 id="new-family-coverage-0-11-0">New family coverage<a class="anchor" aria-label="anchor" href="#new-family-coverage-0-11-0"></a></h4>
+<ul><li>glmmTMB binomial / poisson / nbinom2 (with <code>(1 | g)</code> random intercepts) – the family check was the only thing blocking these; the CSV-driven prose layer already had templates from earlier releases. Reusing the same extractor code path means the LaTeX, assumption table, parameter readings, and methods text all line up across drmTMB and glmmTMB for the same family.</li>
+<li>
+<code><a href="../reference/symbolize.glmerMod.html">symbolize.glmerMod()</a></code> for lme4 generalised mixed models. First slice covers binomial / poisson with their canonical links.</li>
+<li>glm Gamma (<code>stats::Gamma(link = "log")</code>) is now First slice via the same CSV plumbing that drmTMB Gamma uses.</li>
+</ul></div>
+<div class="section level4">
+<h4 id="robustness-0-11-0">Robustness<a class="anchor" aria-label="anchor" href="#robustness-0-11-0"></a></h4>
+<ul><li>New <code>tests/testthat/test-robustness-sweep.R</code> runs every <code>symbolize.*</code> method through every public renderer (<code>as_latex</code>, <code>equations</code>, <code>symbol_table</code>, <code>assumption_table</code>, <code>formula_bridge</code>, <code>parameter_interpretation</code>, <code>as_dag</code>, <code>warning_table</code>). 13 model classes / family combinations, ~120 expectations. Any new extractor must keep this sweep green.</li>
+</ul></div>
+<div class="section level4">
+<h4 id="still-deferred-v011x-and-later-0-11-0">Still deferred (v0.11.x and later)<a class="anchor" aria-label="anchor" href="#still-deferred-v011x-and-later-0-11-0"></a></h4>
+<ul><li>sdmTMB (not installed in the dev environment).</li>
+<li>brms distributional formulas (<code>sigma ~ z</code>) and non-Gaussian brms families.</li>
+<li>MCMCglmm flexible covariance structures (animal models, multi-membership, per-trait residuals).</li>
+<li>glmmTMB zero-inflation submodels (<code>ziformula</code>).</li>
+<li>glm inverse.gaussian / quasi-families.</li>
+</ul></div>
+</div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.10.0" id="symbolizer-0100">symbolizer 0.10.0<a class="anchor" aria-label="anchor" href="#symbolizer-0100"></a></h2>
 <div class="section level3">

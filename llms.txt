@@ -339,6 +339,9 @@ context here.
   first slice)
 - [`symbolize(`*`<lmerMod>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.lmerMod.md)
   : Symbolize an lme4 lmer() fit (Gaussian, v0.10 first slice)
+- [`symbolize(`*`<glmerMod>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.glmerMod.md)
+  : Symbolize an lme4 glmer() fit (binomial / poisson, v0.11 first
+  slice)
 - [`symbolizer_capabilities()`](https://itchyshin.github.io/symbolizer/reference/symbolizer_capabilities.md)
   : Symbolizer capability registry
 
