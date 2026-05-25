@@ -1,3 +1,70 @@
+# symbolizer 0.16.0
+
+## v0.16 -- meta-analysis bridge complete
+
+Three slices that together close the cross-package meta-analysis
+story:
+
+### Slice B -- rma.mv `struct = "UN"` (bivariate / multivariate covariance)
+
+`symbolize.rma.mv()` now handles fits constructed with
+`~ inner | outer, struct = "UN"` -- the bivariate / multivariate
+meta-analysis pattern (e.g., two outcome measures per trial). When
+detected:
+
+* Per-inner-level diagonal variances appear in `variance_components`
+  with `kind = "heterogeneity_un"` (one row per inner level).
+* Off-diagonal correlations (from `fit$rho`) appear as rows with
+  `kind = "correlation"`.
+* LaTeX renders one `u_{level(i)}` random-effect symbol per inner
+  level.
+
+New capability row `rma.mv,meta_normal,struct_UN` (First slice).
+
+### Slice C -- glmmTMB `propto()` (and future `equalto()`) detection
+
+`symbolize.glmmTMB()` now detects the meta-analytic /
+phylogenetic / pedigree-controlled pattern used in
+`glmmTMB(y ~ 1 + (1 | study) + propto(0 + obs | g, V), ...)`. When
+the conditional RE blocks include a `propto()` (covariance code 11)
+or future `equalto()` term:
+
+* `sym$metadata$meta_analysis_via_glmmTMB` is set to `TRUE`.
+* `warning_table()` adds an info-level row pointing at the
+  equivalent metafor `rma.mv(yi, V, random = ..., R = ...)` and
+  drmTMB location-scale constructions, citing Williams (2023),
+  Viechtbauer & Lopez-Lopez (2022), and Nakagawa et al. (2025).
+* The propto / equalto block is stripped from the rhs before
+  `extract_terms()` runs (`glmm_strip_meta_calls()`), so the
+  formula bridge and LaTeX render cleanly.
+
+New capability rows: `glmmTMB,{gaussian,binomial,poisson},propto`
+(First slice).
+
+### Slice D -- "Three faces of meta-analysis" article
+
+New vignette `vignettes/symbolizer-meta.Rmd`. Fits the same
+two-tier meta-analytic model via `metafor::rma.mv`, `glmmTMB` with
+`propto()`, and `drmTMB` location-scale. Shows `symbolize()` output
+side by side, explains the variance ($\tau^2$, $\alpha$) vs SD
+($\sigma$, $\gamma$) parameterization gap with the
+$\alpha_k \approx 2 \gamma_k$ relationship, and points to when each
+package is the natural choice.
+
+The article is reachable from a new pkgdown navbar group
+"Cross-package bridges".
+
+### Deferred to later
+
+* Full prose re-routing for glmmTMB-as-meta-analysis (currently
+  flagged via warning, but `family` stays Gaussian for prose
+  templating) -- v0.16.x
+* Double-hierarchical location-scale via brms (Nakagawa Eq 19-22)
+  -- v0.17 candidate
+* Publication-bias detection layer (Nakagawa Sec 2.5) -- v0.17
+  candidate
+* I^2 / CV heterogeneity partitioning -- v0.17 candidate
+
 # symbolizer 0.15.1
 
 ## v0.15.1 -- positioning text refresh: not just drmTMB

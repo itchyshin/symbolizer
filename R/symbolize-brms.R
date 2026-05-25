@@ -479,13 +479,14 @@ brms_build_warnings <- function(fit, sym_stub) {
         message = sprintf(
           "Random-effect group %s has %d levels - identifiability of the variance component depends heavily on the prior.",
           small$group_var[[i]], small$n_levels[[i]]
-        )
+        ),
+        context = ""
       )
     }
   }
   if (length(rows) == 0L) {
     return(tibble::tibble(code = character(0), severity = character(0),
-                          message = character(0)))
+                          message = character(0), context = character(0)))
   }
   do.call(rbind, rows)
 }

@@ -38,6 +38,9 @@ articles:
       - symbolizer-families
       - symbolizer-gllvm
       - symbolizer-compare
+  - title: "Cross-package bridges"
+    contents:
+      - symbolizer-meta
   - title: "Where we're going"
     contents:
       - symbolizer-roadmap

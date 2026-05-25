@@ -413,13 +413,14 @@ lme4_build_warnings <- function(fit, sym_stub) {
         message = sprintf(
           "Random-effect group %s has %d levels - Wald CIs on the variance component are unreliable. Consider ci_method = 'profile'.",
           small$group_var[[i]], small$n_levels[[i]]
-        )
+        ),
+        context = ""
       )
     }
   }
   if (length(rows) == 0L) {
     return(tibble::tibble(code = character(0), severity = character(0),
-                          message = character(0)))
+                          message = character(0), context = character(0)))
   }
   do.call(rbind, rows)
 }

@@ -191,3 +191,16 @@ test_that("robustness: metafor rma.ls location-scale", {
   sym <- symbolize(fit_metafor_rma_ls())
   run_public_surface(sym, "metafor rma.ls")
 })
+
+test_that("robustness: metafor rma.mv struct = 'UN' (bivariate)", {
+  skip_if_not_installed("metafor")
+  sym <- symbolize(fit_metafor_rma_mv_un())
+  run_public_surface(sym, "metafor rma.mv UN")
+})
+
+test_that("robustness: glmmTMB meta-analysis via propto()", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("MASS")
+  sym <- symbolize(fit_glmm_meta_propto())
+  run_public_surface(sym, "glmmTMB propto meta")
+})

@@ -341,6 +341,17 @@ symbolize.rma.mv <- function(fit, symbols = NULL, units = NULL,
     capability_check("rma.mv", family, "structured")
   }
 
+  # Detect UN-structure inner / outer ~ inner|outer with struct="UN".
+  # fit$struct is a per-formula character vector (e.g. c("UN", "CS")).
+  # When UN is in play, s.names is typically empty and the variance
+  # decomposition lives on fit$G (block-diagonal covariance), fit$tau2
+  # (diagonal variances), and fit$rho (off-diagonal correlations).
+  un_index <- which((fit$struct %||% character(0)) == "UN")
+  has_un <- length(un_index) > 0L
+  if (has_un) {
+    capability_check("rma.mv", family, "struct_UN")
+  }
+
   model <- list(
     class = "rma.mv",
     package = "metafor",
@@ -448,11 +459,12 @@ symbolize.rma.mv <- function(fit, symbols = NULL, units = NULL,
 
 # rma.mv random-effects: one row per (tier, intercept). Tier names
 # come from fit$s.names which already handles the nested-syntax
-# unrolling (e.g., "district" + "district/study").
+# unrolling (e.g., "district" + "district/study"). When the fit uses
+# UN structure (~ inner | outer, struct = "UN"), s.names is empty
+# and the inner levels come from fit$g.levels.f instead.
 metafor_mv_build_re_per_entry <- function(fit) {
   s_names <- fit$s.names %||% character(0)
   n_levels <- fit$s.nlevels %||% rep(NA_integer_, length(s_names))
-  if (length(s_names) == 0L) return(NULL)
   rows <- list()
   for (i in seq_along(s_names)) {
     nm <- s_names[[i]]
@@ -465,12 +477,35 @@ metafor_mv_build_re_per_entry <- function(fit) {
       n_levels    = as.integer(n_levels[[i]])
     )
   }
+  # UN structure: render the inner-level random effects (e.g., one per
+  # outcome / trait) as separate group_vars. The outer level (study /
+  # trial) is the implicit grouping variable.
+  if (length((fit$struct %||% character(0))) > 0L &&
+      any(fit$struct == "UN") &&
+      !is.null(fit$g.levels.f) && length(fit$g.levels.f) >= 1L) {
+    inner_levels <- fit$g.levels.f[[1L]]
+    outer_n <- length(fit$g.levels.f[[2L]] %||% character(0))
+    for (lvl in inner_levels) {
+      rows[[length(rows) + 1L]] <- tibble::tibble(
+        submodel    = "mu",
+        term_label  = sprintf("(1 | %s)", lvl),
+        lhs_expr    = "1",
+        group_var   = lvl,
+        component   = "(Intercept)",
+        n_levels    = as.integer(outer_n)
+      )
+    }
+  }
+  if (length(rows) == 0L) return(NULL)
   do.call(rbind, rows)
 }
 
 # rma.mv variance components: one row per random-effect tier with
-# kind = "heterogeneity" (or "structured" if an R-matrix is attached).
-# Also append a row for the (known) mean sampling variance.
+# kind = "heterogeneity" (or "structured" if an R-matrix is attached;
+# or "heterogeneity_un" when UN structure produces per-inner-level
+# diagonal variances). Also append a row for the (known) mean
+# sampling variance, and UN-structure off-diagonal correlations as
+# kind = "correlation".
 metafor_mv_build_variance_components <- function(fit, structured_groups) {
   rows <- list()
   s_names <- fit$s.names %||% character(0)
@@ -487,6 +522,45 @@ metafor_mv_build_variance_components <- function(fit, structured_groups) {
       var_estimate = s2,
       kind         = if (is_struct) "structured" else "heterogeneity"
     )
+  }
+  # UN-structure rows: per-inner-level diagonal variances from fit$tau2;
+  # off-diagonal correlations from fit$rho.
+  if (length((fit$struct %||% character(0))) > 0L &&
+      any(fit$struct == "UN") &&
+      !is.null(fit$g.levels.f) && length(fit$g.levels.f) >= 1L) {
+    inner_levels <- as.character(fit$g.levels.f[[1L]])
+    tau2 <- fit$tau2 %||% rep(NA_real_, length(inner_levels))
+    for (i in seq_along(inner_levels)) {
+      v <- if (length(tau2) >= i) as.numeric(tau2[[i]]) else NA_real_
+      rows[[length(rows) + 1L]] <- tibble::tibble(
+        parameter    = "mu",
+        group        = inner_levels[[i]],
+        term         = sprintf("tau^2_%s", inner_levels[[i]]),
+        sd_estimate  = sqrt(v),
+        var_estimate = v,
+        kind         = "heterogeneity_un"
+      )
+    }
+    # Off-diagonal correlations. For UN with K inner levels there are
+    # K*(K-1)/2 correlations stored in fit$rho.
+    if (!is.null(fit$rho) && length(inner_levels) >= 2L) {
+      pair_idx <- 1L
+      for (a in seq_along(inner_levels)) {
+        if (a == length(inner_levels)) break
+        for (b in seq.int(a + 1L, length(inner_levels))) {
+          r <- if (length(fit$rho) >= pair_idx) as.numeric(fit$rho[[pair_idx]]) else NA_real_
+          rows[[length(rows) + 1L]] <- tibble::tibble(
+            parameter    = "mu",
+            group        = sprintf("%s,%s", inner_levels[[a]], inner_levels[[b]]),
+            term         = sprintf("rho_%s_%s", inner_levels[[a]], inner_levels[[b]]),
+            sd_estimate  = NA_real_,
+            var_estimate = r,
+            kind         = "correlation"
+          )
+          pair_idx <- pair_idx + 1L
+        }
+      }
+    }
   }
   if (!is.null(fit$vi)) {
     rows[[length(rows) + 1L]] <- tibble::tibble(
@@ -522,25 +596,28 @@ metafor_mv_build_warnings <- function(fit, sym_stub) {
     )
   }
   # Detect zero / near-zero variance components (potentially
-  # unidentified).
-  if (!is.null(fit$sigma2)) {
+  # unidentified). For UN structure, s.names is empty -- fall back to
+  # a generic tier label.
+  if (!is.null(fit$sigma2) && length(fit$sigma2) > 0L) {
+    s_names <- fit$s.names %||% character(0)
     for (i in seq_along(fit$sigma2)) {
       if (fit$sigma2[[i]] < 1e-8) {
-        nm <- fit$s.names[[i]] %||% sprintf("tier %d", i)
+        nm <- if (length(s_names) >= i) s_names[[i]] else sprintf("tier %d", i)
         rows[[length(rows) + 1L]] <- tibble::tibble(
           code = "zero_variance_component",
           severity = "warning",
           message = sprintf(
             "Variance component for %s estimated at ~ 0 -- the tier may be unidentified, or that variation is genuinely absent. Consider whether the random structure is appropriate.",
             nm
-          )
-        )
+          ),
+        context = ""
+      )
       }
     }
   }
   if (length(rows) == 0L) {
     return(tibble::tibble(code = character(0), severity = character(0),
-                          message = character(0)))
+                          message = character(0), context = character(0)))
   }
   do.call(rbind, rows)
 }
@@ -729,12 +806,13 @@ metafor_build_warnings <- function(fit, sym_stub) {
       message = sprintf(
         "Only %d effect sizes -- tau^2 is poorly identified with k < 10. Consider a profile-likelihood CI on tau^2 (metafor::confint(fit, type = \"PL\")).",
         k
-      )
+      ),
+      context = ""
     )
   }
   if (length(rows) == 0L) {
     return(tibble::tibble(code = character(0), severity = character(0),
-                          message = character(0)))
+                          message = character(0), context = character(0)))
   }
   do.call(rbind, rows)
 }

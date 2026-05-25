@@ -64,6 +64,23 @@ fit_metafor_rma_ls <- function() {
   metafor::rma(yi, vi, mods = ~ ni, scale = ~ ni, data = dat)
 }
 
+.load_dat_berkey <- function() {
+  e <- new.env()
+  pkg <- if (requireNamespace("metadat", quietly = TRUE)) "metadat" else "metafor"
+  utils::data("dat.berkey1998", package = pkg, envir = e)
+  e$dat.berkey1998
+}
+
+# v0.16: rma.mv with ~ inner | outer, struct = "UN". Bivariate
+# meta-analysis: two outcome measures (PD, AL) per trial.
+fit_metafor_rma_mv_un <- function() {
+  testthat::skip_if_not_installed("metafor")
+  dat <- .load_dat_berkey()
+  metafor::rma.mv(yi, vi, mods = ~ outcome - 1,
+                  random = ~ outcome | trial, struct = "UN",
+                  data = dat)
+}
+
 fit_metafor_rma_mv_structured <- function() {
   testthat::skip_if_not_installed("metafor")
   dat <- .load_dat_konstantopoulos()

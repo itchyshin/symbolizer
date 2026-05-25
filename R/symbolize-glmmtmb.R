@@ -89,6 +89,17 @@ symbolize.glmmTMB <- function(fit, symbols = NULL, units = NULL,
   data <- fit$frame
   n_obs <- as.integer(fit$modelInfo$nobs %||% nrow(data))
 
+  # Detect meta-analysis-via-glmmTMB pattern: a RE block with
+  # covariance code 11 (propto) means the user attached a known
+  # correlation / covariance matrix -- the canonical meta-analytic
+  # construction where v_i are known. .valid_covstruct maps
+  # numeric blockCodes to names; we test for "propto" (and the
+  # not-yet-released "equalto" if present).
+  meta_via_glmmTMB <- glmm_detect_meta_pattern(fit)
+  if (isTRUE(meta_via_glmmTMB)) {
+    capability_check("glmmTMB", family, "propto")
+  }
+
   # Build entries-shaped list so we can reuse drm_build_* helpers downstream.
   # Each entry has $dpar, $response, $rhs (an unevaluated expression),
   # $expr (the full formula), and $position (1, 2, ...).
@@ -155,10 +166,18 @@ symbolize.glmmTMB <- function(fit, symbols = NULL, units = NULL,
     n_obs = n_obs
   )
 
-  # Strip RE terms from rhs of any entry that carries them.
+  # Strip RE terms from rhs of any entry that carries them. For
+  # glmmTMB we also strip propto() / equalto() calls FIRST (they have
+  # nested parens with `|` inside that confuse the generic RE stripper)
+  # then run the standard RE strip for `(1 | g)` style blocks.
   entries_fe <- entries
+  if (isTRUE(meta_via_glmmTMB)) {
+    for (i in seq_along(entries_fe)) {
+      entries_fe[[i]]$rhs <- glmm_strip_meta_calls(entries_fe[[i]]$rhs)
+    }
+  }
   for (i in which(has_re)) {
-    entries_fe[[i]]$rhs <- drm_strip_re_terms(entries[[i]]$rhs)
+    entries_fe[[i]]$rhs <- drm_strip_re_terms(entries_fe[[i]]$rhs)
   }
 
   distribution <- drm_build_distribution(
@@ -206,6 +225,7 @@ symbolize.glmmTMB <- function(fit, symbols = NULL, units = NULL,
       symbolizer = utils::packageVersion("symbolizer"),
       glmmTMB    = utils::packageVersion("glmmTMB")
     ),
+    meta_analysis_via_glmmTMB = isTRUE(meta_via_glmmTMB),
     created_by = "symbolize.glmmTMB"
   )
 
@@ -312,8 +332,21 @@ glmm_re_terms <- function(fit, dpar) {
   if (dpar != "mu") return(NULL)  # v0.7 first slice: cond only
   vc <- glmmTMB::VarCorr(fit)$cond
   if (is.null(vc) || length(vc) == 0L) return(NULL)
+  # Identify which RE blocks use propto / equalto (covariance code 11 in
+  # glmmTMB 1.1.x). Those blocks are meta-analytic / phylogenetic
+  # constructions, not user-facing random effects -- skip them so they
+  # don't trip the standard intercept-shape assertion in
+  # drm_assert_supported_re().
+  cs <- fit$modelInfo$reStruc$condReStruc %||% list()
+  meta_block_idx <- vapply(cs, function(x) {
+    bc <- x$blockCode %||% NA
+    if (is.null(bc) || length(bc) == 0L) return(FALSE)
+    as.integer(bc) %in% c(11L)  # propto (and future equalto)
+  }, logical(1L))
   rows <- list()
-  for (g in names(vc)) {
+  for (i in seq_along(names(vc))) {
+    if (length(meta_block_idx) >= i && isTRUE(meta_block_idx[[i]])) next
+    g <- names(vc)[[i]]
     cmp <- rownames(vc[[g]])
     if (is.null(cmp)) next
     for (c in cmp) {
@@ -522,7 +555,9 @@ glmm_build_expanded <- function(fit, re_per_entry, has_re) {
 }
 
 # Warning detection. v0.7 first slice: flag random-effect groups with
-# < 5 levels (Wald CIs on variance components get unreliable).
+# < 5 levels (Wald CIs on variance components get unreliable). v0.16
+# adds a "this is a meta-analysis" info row when the fit uses propto()
+# (and in future glmmTMB releases, equalto()).
 glmm_build_warnings <- function(fit, sym_stub) {
   rows <- list()
   re <- sym_stub$random_effects
@@ -535,13 +570,65 @@ glmm_build_warnings <- function(fit, sym_stub) {
         message = sprintf(
           "Random-effect group %s has %d levels -- Wald CIs on the variance component are unreliable. Consider ci_method = \"profile\".",
           small$group_var[[i]], small$n_levels[[i]]
-        )
+        ),
+        context = ""
       )
     }
   }
+  if (isTRUE(sym_stub$metadata$meta_analysis_via_glmmTMB)) {
+    rows[[length(rows) + 1L]] <- tibble::tibble(
+      code = "meta_analysis_via_glmmTMB",
+      severity = "info",
+      message = paste0(
+        "This fit uses propto() (or equalto() in newer glmmTMB) to attach a known correlation / covariance matrix on a random-effect block. ",
+        "Structurally, that's the meta-analytic / phylogenetic / pedigree-controlled pattern: sigma_residual is fixed (sampling-variance-known), and the (1 | study) variance reads as the between-study heterogeneity tau^2. ",
+        "Compare with metafor::rma.mv(yi, V, random = list(~ 1 | study, ~ 1 | id), R = list(...)) or drmTMB's location-scale form (Williams 2023; Viechtbauer & Lopez-Lopez 2022; Nakagawa et al. 2025)."
+      ),
+      context = ""
+    )
+  }
   if (length(rows) == 0L) {
     return(tibble::tibble(code = character(0), severity = character(0),
-                          message = character(0)))
+                          message = character(0), context = character(0)))
   }
   do.call(rbind, rows)
+}
+
+# Strip propto() / equalto() calls from a formula's RHS. These are
+# glmmTMB-internal covariance constructors that extract_terms can't
+# evaluate. Returns the rhs with the meta-pattern call removed.
+glmm_strip_meta_calls <- function(rhs_expr) {
+  txt <- paste(deparse(rhs_expr), collapse = " ")
+  # Strip propto(...) / equalto(...) including the surrounding "+".
+  pattern <- "(propto|equalto)\\([^)]*\\)"
+  txt <- gsub(paste0("\\+\\s*", pattern), "", txt)
+  txt <- gsub(paste0(pattern, "\\s*\\+"), "", txt)
+  txt <- gsub(pattern, "", txt)
+  txt <- trimws(txt)
+  if (!nzchar(txt)) txt <- "1"
+  parse(text = txt)[[1L]]
+}
+
+# Detect the meta-analytic / phylogenetic pattern: a conditional RE
+# block with covariance code 11 = propto (or in newer glmmTMB
+# releases, "equalto"). Both fix the structure to a known correlation
+# / covariance matrix.
+glmm_detect_meta_pattern <- function(fit) {
+  cs <- fit$modelInfo$reStruc$condReStruc
+  if (is.null(cs) || length(cs) == 0L) return(FALSE)
+  codes <- vapply(cs, function(x) {
+    bc <- x$blockCode %||% NA
+    if (is.null(bc) || length(bc) == 0L) NA_integer_ else as.integer(bc)
+  }, integer(1L))
+  # 11 = propto in glmmTMB 1.1.x. Future "equalto" may take a higher
+  # code; .valid_covstruct is an internal glmmTMB lookup, so we fetch
+  # it via getFromNamespace (no `:::` import declaration needed).
+  valid <- tryCatch(
+    utils::getFromNamespace(".valid_covstruct", "glmmTMB"),
+    error = function(e) NULL
+  )
+  meta_codes <- if (!is.null(valid)) {
+    unname(valid[names(valid) %in% c("propto", "equalto")])
+  } else 11L
+  any(codes %in% as.integer(meta_codes), na.rm = TRUE)
 }

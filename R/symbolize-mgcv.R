@@ -439,14 +439,15 @@ mgcv_build_warnings <- function(fit, sym_stub) {
           message = sprintf(
             "Smooth %s has edf %.2f close to basis dimension %d -- consider increasing k via s(%s, k = ...). See mgcv::gam.check().",
             label, edf, bs_dim, paste(sm$term, collapse = ", ")
-          )
+          ),
+          context = ""
         )
       }
     }
   }
   if (length(rows) == 0L) {
     return(tibble::tibble(code = character(0), severity = character(0),
-                          message = character(0)))
+                          message = character(0), context = character(0)))
   }
   do.call(rbind, rows)
 }

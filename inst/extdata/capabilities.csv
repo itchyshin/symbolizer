@@ -66,6 +66,9 @@ glmmTMB,nbinom2,sigma,First slice,0.11.0,"Overdispersion parameter (log link); s
 glmmTMB,nbinom2,random_effects,First slice,0.11.0,"Random intercepts on the nbinom2 conditional submodel."
 glmmTMB,poisson,zi,First slice,0.11.0,"Zero-inflation submodel (logit link) on glmmTMB poisson via ziformula."
 glmmTMB,nbinom2,zi,First slice,0.11.0,"Zero-inflation submodel (logit link) on glmmTMB nbinom2 via ziformula."
+glmmTMB,gaussian,propto,First slice,0.16.0,"propto(0 + obs | g, R) covariance structure with a known correlation / covariance matrix; surfaces a meta-analysis / phylogenetic info row in warning_table()."
+glmmTMB,binomial,propto,First slice,0.16.0,"propto() on a binomial conditional submodel (e.g., phylogenetic binomial GLMM)."
+glmmTMB,poisson,propto,First slice,0.16.0,"propto() on a poisson conditional submodel."
 glmmTMB,*,*,Planned or reserved,,Other families and submodels targeted for v0.11.x.
 brmsfit,gaussian,mu,First slice,0.8.0,Gaussian conditional submodel (identity link).
 brmsfit,gaussian,random_effects,First slice,0.8.0,"Random intercepts (1 | group) and (1 + x | group) on the conditional submodel; nested / crossed still planned."
@@ -104,7 +107,8 @@ rma.uni,meta_normal,tau2_scale,First slice,0.15.0,"Location-scale meta-regressio
 rma.uni,*,*,Planned or reserved,,"Non-meta_normal metrics (selection / publication-bias detection layer, double-hierarchical scale random effects) targeted for v0.16+."
 rma.mv,meta_normal,mu,First slice,0.13.1,"metafor multilevel / multivariate meta-regression: theta_i = beta_0 + sum beta_k x_ki + sum_r u_{r,i}."
 rma.mv,meta_normal,structured,First slice,0.13.1,"R-matrix structured random effects via R = list(phylo = phylo.cor); the tier renders as u_r ~ N(0, sigma^2_r * R_r) and is tagged kind = ""structured"" in variance_components."
-rma.mv,*,*,Planned or reserved,,"Non-default struct = ""UN"" / ""HCS"" / ""AR"" / ""DIAG"" covariance structures and selection / publication-bias variants still planned."
+rma.mv,meta_normal,struct_UN,First slice,0.16.0,"Unstructured covariance between inner-level random effects via ~ inner | outer with struct = ""UN""; per-inner-level diagonal variances (kind = ""heterogeneity_un"") and off-diagonal correlations (kind = ""correlation"") appear in variance_components. Bivariate / multivariate meta-analysis pattern."
+rma.mv,*,*,Planned or reserved,,"Other covariance structures (HCS, AR, DIAG, ...) and selection / publication-bias variants still planned."
 gam,gaussian,mu,First slice,0.14.0,mgcv gam / bam Gaussian additive model (identity link).
 gam,gaussian,smooth,First slice,0.14.0,"Smooth terms (s(x), s(x, by = factor), te(x, z)) summarised by basis dimension and edf in metadata$smooths."
 gam,poisson,mu,First slice,0.14.0,mgcv gam / bam Poisson additive model (log link).

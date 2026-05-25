@@ -1,0 +1,216 @@
+---
+title: "Three faces of meta-analysis: metafor, glmmTMB, drmTMB"
+description: >
+  The same two-tier meta-analytic model, fit three ways. Symbolizer
+  reads each one and reveals the shared structure underneath the
+  package-specific syntax.
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 2
+vignette: >
+  %\VignetteIndexEntry{Three faces of meta-analysis: metafor, glmmTMB, drmTMB}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+has_metafor  <- requireNamespace("metafor",  quietly = TRUE)
+has_glmmTMB  <- requireNamespace("glmmTMB",  quietly = TRUE)
+has_MASS     <- requireNamespace("MASS",     quietly = TRUE)
+has_metadat  <- requireNamespace("metadat",  quietly = TRUE)
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment  = "#>",
+  eval     = has_metafor && has_glmmTMB && has_MASS && has_metadat
+)
+```
+
+## The shared model
+
+A meta-analysis is, structurally, a two-tier Normal model:
+
+$$
+\begin{aligned}
+y_i \mid \theta_i &\sim \mathcal{N}(\theta_i,\, v_i), \quad v_i \text{ known} \\
+\theta_i &= \beta_0 + \sum_k \beta_k\, x_{ki} + u_i \\
+u_i &\sim \mathcal{N}(0,\, \tau^2)
+\end{aligned}
+$$
+
+The observed effect size $y_i$ from study $i$ is a noisy estimate of a
+true effect $\theta_i$, with **known** sampling variance $v_i$ (an
+input, not a parameter). The true effects vary around a meta-analytic
+mean with between-study heterogeneity variance $\tau^2$. Moderators
+$x_{ki}$ explain part of the location; a separate scale model can
+explain part of $\tau^2$ as well (the **location-scale**
+extension; see Viechtbauer & López-López, 2022; Nakagawa et al.,
+2025).
+
+What changes from package to package isn't the model — it's the
+syntax used to construct it. `symbolizer` reads all three.
+
+## Setup — a tiny simulated meta-analytic dataset
+
+```{r sim}
+library(symbolizer)
+library(metafor)
+library(glmmTMB)
+
+set.seed(1)
+k_studies <- 10
+k_per <- 3
+study <- rep(seq_len(k_studies), times = k_per)
+k <- length(study)
+id <- seq_len(k)
+# Sampling variances (known per effect size)
+vi <- rbeta(k, 2, 20)
+# Block-diagonal V with within-study correlation rho = 0.5
+V <- matrix(0, k, k)
+for (s in unique(study)) {
+  idx <- which(study == s)
+  for (i in idx) for (j in idx) {
+    V[i, j] <- if (i == j) vi[i] else 0.5 * sqrt(vi[i] * vi[j])
+  }
+}
+rownames(V) <- colnames(V) <- as.character(id)
+# Simulate y_i around a true between-study mean
+true_y <- 0 + rnorm(k_studies, 0, 0.5)[study]
+y <- true_y + as.numeric(MASS::mvrnorm(1, rep(0, k), V))
+dat <- data.frame(y = y, vi = vi, study = factor(study),
+                  obs = factor(id), g = factor(1))
+head(dat, 4)
+```
+
+## Face 1 — metafor (the canonical interface)
+
+```{r metafor}
+fit_meta <- rma.mv(yi = y, V = V,
+                   random = list(~ 1 | study, ~ 1 | obs),
+                   data = dat)
+sym_meta <- symbolize(fit_meta)
+```
+
+The symbolic surface:
+
+```{r metafor-out}
+cat(as_latex(sym_meta), "\n")
+```
+
+```{r metafor-vc}
+sym_meta$variance_components
+```
+
+The model the package teaches: `meta_normal` family, two random-effect
+tiers (study + observation), sampling variances `v_i` known.
+
+## Face 2 — glmmTMB via `propto()` (the GLMM bridge)
+
+The same model can be fit through `glmmTMB` by attaching the known
+`V` matrix via `propto()`. Structurally identical; syntactically
+different.
+
+```{r glmm}
+fit_glmm <- glmmTMB(
+  y ~ 1 + (1 | study) + propto(0 + obs | g, V),
+  data = dat, REML = TRUE
+)
+sym_glmm <- symbolize(fit_glmm)
+```
+
+`symbolizer` detects the `propto()` block and adds an info-level
+warning row:
+
+```{r glmm-warn}
+warning_table(sym_glmm)
+```
+
+This is the bridge: `propto(0 + obs | g, V)` **fixes** the residual
+covariance to the known `V`, which is exactly what `rma.mv(..., V = V)`
+does in `metafor`. The `(1 | study)` term carries the between-study
+heterogeneity $\tau^2$.
+
+When this pattern is present:
+
+| Conceptual quantity | metafor | glmmTMB |
+| --- | --- | --- |
+| Known sampling-variance matrix | `V` argument | `propto(0 + obs | g, V)` block |
+| Between-study heterogeneity $\tau^2$ | `sigma2[["study"]]` | `VarCorr(fit)$cond$study` |
+| Moderator coefficients $\beta_k$ | `fit$beta` | `fixef(fit)$cond` |
+
+```{r glmm-out, results = "markup"}
+cat(as_latex(sym_glmm), "\n")
+```
+
+## Face 3 — drmTMB location-scale (the distributional surface)
+
+`drmTMB` has location-scale Gaussian as its core form. With known
+sampling variances entered as $\sigma_i^2 = v_i$ (via an offset on
+the log-scale formula), `drmTMB` fits the meta-analytic model as a
+distributional Gaussian. Symbolic output uses $\log(\sigma_i)$ on the
+**SD scale** (the drmTMB convention), with $\gamma_k$ coefficients.
+
+(Sketch only — a full drmTMB construction with known sigma offsets
+is shown in `vignette("symbolizer-drmtmb")` and the drmTMB docs.)
+
+## The variance / SD parameterization gap
+
+Each package writes the scale model differently:
+
+| Package | Quantity modelled | Link | Coefficient |
+| --- | --- | --- | --- |
+| `metafor::rma(scale = ~ z)` | $\tau^2$ (variance) | $\log(\tau^2_i) = \alpha_0 + \alpha_1 z_i$ | $\alpha$ |
+| `brms::bf(sigma ~ z)` | $\sigma$ (SD) | $\log(\sigma_i) = \gamma_0 + \gamma_1 z_i$ | $\gamma$ |
+| `glmmTMB(dispformula = ~ z)` | $\sigma$ (SD) | $\log(\sigma_i) = \gamma_0 + \gamma_1 z_i$ | $\gamma$ |
+| `drmTMB(sigma ~ z)` | $\sigma$ (SD) | $\log(\sigma_i) = \gamma_0 + \gamma_1 z_i$ | $\gamma$ |
+
+The two parameterizations are mathematically equivalent. Because
+$\log(\tau^2) = 2 \log(\tau) + \mathrm{const}$, the slope on the
+variance scale is twice the slope on the SD scale:
+
+$$
+\alpha_k \;\approx\; 2 \cdot \gamma_k
+$$
+
+(For the intercept the relationship is offset by $\log 2$ once.) So
+a `metafor` location-scale slope of $\alpha = 0.4$ is the same
+biological signal as a `brms` / `glmmTMB` / `drmTMB` location-scale
+slope of $\gamma \approx 0.2$ — variance doubles ≈ SD increases by
+$\sqrt{2}$.
+
+`symbolizer` renders each faithfully in its own parameterization:
+look for the coefficient symbol ($\alpha$ vs $\gamma$) and the
+$\tau^2$-vs-$\sigma$ distinction in the LaTeX block to know which
+convention is in play.
+
+## When to use which
+
+- **`metafor`** is the canonical interface for traditional
+  meta-analysis. Rich diagnostics, well-documented effect-size
+  computation (`escalc()`), and a long literature on small-sample
+  corrections.
+- **`glmmTMB` with `propto()`** brings meta-analysis into the GLMM
+  ecosystem — letting you reuse the same modelling pipeline
+  (model checking, prediction, marginal effects) you use for
+  GLMMs in general.
+- **`drmTMB`** lets you fit location-scale meta-analysis with
+  moderators on heterogeneity directly, with the same syntax as any
+  other location-scale model. This is the surface Nakagawa et al.
+  (2025) explore in depth for ecology and evolution.
+
+`symbolizer` lets all three speak the same teachable language.
+
+## References
+
+- Viechtbauer, W., & López-López, J. A. (2022). Location-scale
+  models for meta-analysis. *Research Synthesis Methods*, **13**(6),
+  697–715.
+- Nakagawa, S., Mizuno, A., Morrison, K., Ricolfi, L., Williams, C.,
+  Drobniak, S. M., Lagisz, M., & Yang, Y. (2025). Location-scale
+  meta-analysis and meta-regression as a tool to capture large-scale
+  changes in biological and methodological heterogeneity: A
+  spotlight on heteroscedasticity. *Global Change Biology*, **31**,
+  e70204.
+- Williams, C. R. (2023). *Fitting meta-analysis with the glmmTMB R
+  package: a worked tutorial.*
+  <https://coraliewilliams.github.io/equalto_sim_study/webpage.html>

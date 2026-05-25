@@ -389,19 +389,21 @@ sdmtmb_build_warnings <- function(fit, sym_stub) {
     rows[[length(rows) + 1L]] <- tibble::tibble(
       code = "bad_eig",
       severity = "warning",
-      message = "sdmTMB reports a bad-eigenvalue Hessian. Random-field standard errors may be unreliable."
-    )
+      message = "sdmTMB reports a bad-eigenvalue Hessian. Random-field standard errors may be unreliable.",
+        context = ""
+      )
   }
   if (!isTRUE(fit$pos_def_hessian %||% TRUE)) {
     rows[[length(rows) + 1L]] <- tibble::tibble(
       code = "non_pos_def_hessian",
       severity = "warning",
-      message = "sdmTMB reports a non-positive-definite Hessian. Re-fit with a finer mesh or a stronger prior."
-    )
+      message = "sdmTMB reports a non-positive-definite Hessian. Re-fit with a finer mesh or a stronger prior.",
+        context = ""
+      )
   }
   if (length(rows) == 0L) {
     return(tibble::tibble(code = character(0), severity = character(0),
-                          message = character(0)))
+                          message = character(0), context = character(0)))
   }
   do.call(rbind, rows)
 }
