@@ -17,7 +17,7 @@ variance_components tibble."><meta property="og:image" content="https://itchyshi
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.14.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.15.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -90,6 +90,34 @@ units, e.g. <code>c(body_mass = "g", temperature = "C")</code>.</p></dd>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A <code>symbolized_model</code> object.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="location-scale-rma-ls-">Location-scale (rma.ls)<a class="anchor" aria-label="anchor" href="#location-scale-rma-ls-"></a></h2>
+
+
+<p>When the fit was created with <code>rma(..., scale = ~ z)</code>,
+<code>symbolize.rma.uni()</code> adds a second submodel <code>tau2</code> to the
+returned object. metafor parameterises the scale model as
+<code>log(tau^2_i) = alpha_0 + alpha_1 z_{1i} + ... + alpha_q z_{qi}</code>
+– log of the <strong>variance</strong>, not the SD – with coefficient family
+<code>alpha</code>. This contrasts with the SD parameterisation that brms,
+glmmTMB, and drmTMB use for their distributional location-scale
+models (<code>log(sigma_i) = gamma_0 + gamma_k z_ki</code>). The natural-scale
+reading on a metafor scale slope is therefore "tau^2_i changes
+multiplicatively by exp(alpha_k) per unit of z_k" – a change in
+the variance, not the SD. The two scales are related by
+<code>alpha_k ~ 2 * gamma_k</code> (since <code>log(tau^2) = 2 * log(tau) + const</code>).</p>
+    </div>
+    <div class="section level2">
+    <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
+    <p>Viechtbauer, W., &amp; López-López, J. A. (2022). Location-scale
+models for meta-analysis. <em>Research Synthesis Methods</em>, 13(6),
+697-715.</p>
+<p>Nakagawa, S., Mizuno, A., Morrison, K., Ricolfi, L., Williams, C.,
+Drobniak, S. M., Lagisz, M., &amp; Yang, Y. (2025). Location-scale
+meta-analysis and meta-regression as a tool to capture large-scale
+changes in biological and methodological heterogeneity: A spotlight
+on heteroscedasticity. <em>Global Change Biology</em>, 31, e70204.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

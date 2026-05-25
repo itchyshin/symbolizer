@@ -1,5 +1,65 @@
 # Changelog
 
+## symbolizer 0.15.0
+
+### v0.15 – location-scale meta-regression (rma.ls)
+
+First slice of the cross-package meta-analysis bridge:
+[`metafor::rma`](https://wviechtb.github.io/metafor/reference/rma.uni.html)
+with `scale = ~ z` (the `rma.ls` location-scale model) is now recognised
+by
+[`symbolize.rma.uni()`](https://itchyshin.github.io/symbolizer/reference/symbolize.rma.uni.md).
+A second submodel `tau2` is added with the variance-faithful
+parameterisation:
+
+log(tau^2_i) = alpha_0 + alpha_1 z\_{1i} + … + alpha_q z\_{qi}
+
+This is **log of the variance**, not log of the SD – coefficients are
+`alpha` (Greek alpha) and the natural-scale reading is “tau^2_i changes
+multiplicatively by exp(alpha_k) per unit of z_k”. The distinction
+matters because brms / glmmTMB / drmTMB parameterise the same structural
+model via `log(sigma)` (the SD), with `gamma` coefficients, and the
+relationship is alpha_k ~ 2 \* gamma_k.
+
+- New `tau2` submodel in the symbolizer-wide registry:
+  `drm_coef_family_for("tau2") = "alpha"`,
+  `drm_link_for(..., "tau2") = "log"`,
+  `drm_param_greek("tau2") = "\\tau^{2}"`.
+- New capability row `rma.uni,meta_normal,tau2_scale` (First slice).
+- New interpretation templates
+  `meta_normal,tau2,{intercept,slope,factor_contrast}` that explicitly
+  contrast variance vs SD parameterisations and cite Viechtbauer &
+  Lopez-Lopez 2022 / Nakagawa et al. 2025.
+- Alpha estimates pulled from `fit$alpha` with Wald CIs from
+  `fit$ci.lb.alpha` / `fit$ci.ub.alpha`.
+- For rma.ls, `variance_components` reports the mean tau^2_i with
+  `kind = "heterogeneity_scale"`; the per-observation vector lives in
+  `metadata$tau2`.
+- Robustness sweep gains one row: rma.ls location-scale.
+
+#### Still planned beyond this batch
+
+The wider meta-analysis bridge (Slices C + D) is in flight but not in
+v0.15.0:
+
+- glmmTMB `equalto()` / `propto()` detection – treat a glmmTMB fit with
+  `equalto(0 + obs | g, VCV)` as a meta-analysis and route prose through
+  `meta_normal` rather than gaussian.
+- Cross-package “Three faces of meta-analysis” article showing the same
+  model in metafor / brms / glmmTMB / drmTMB with the alpha vs gamma
+  parameterisation relationship made explicit.
+- Double-hierarchical location-scale via brms (Nakagawa et al. 2025 Eq
+  19-22): random effects on the scale part with bivariate (u^(l), u^(s))
+  distribution.
+- Publication-bias detection layer (Nakagawa et al. 2025 Section 2.5):
+  small-study effect / decline effect / small-study divergence / Proteus
+  effect, surfaced via
+  [`warning_table()`](https://itchyshin.github.io/symbolizer/reference/warning_table.md).
+- I^2 / CV partitioning (Eq 14-16, 26-31): derived heterogeneity
+  measures attached to `metadata$heterogeneity_partition`.
+
+These are queued for v0.15.x / v0.16.
+
 ## symbolizer 0.14.2
 
 ### v0.14.2 – Roadmap moved to its own page; README slimmed

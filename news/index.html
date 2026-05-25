@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.14.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.15.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,6 +34,31 @@
       <small>Source: <a href="https://github.com/itchyshin/symbolizer/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.15.0" id="symbolizer-0150">symbolizer 0.15.0<a class="anchor" aria-label="anchor" href="#symbolizer-0150"></a></h2>
+<div class="section level3">
+<h3 id="v015--location-scale-meta-regression-rmals-0-15-0">v0.15 – location-scale meta-regression (rma.ls)<a class="anchor" aria-label="anchor" href="#v015--location-scale-meta-regression-rmals-0-15-0"></a></h3>
+<p>First slice of the cross-package meta-analysis bridge: <code><a href="https://wviechtb.github.io/metafor/reference/rma.uni.html" class="external-link">metafor::rma</a></code> with <code>scale = ~ z</code> (the <code>rma.ls</code> location-scale model) is now recognised by <code><a href="../reference/symbolize.rma.uni.html">symbolize.rma.uni()</a></code>. A second submodel <code>tau2</code> is added with the variance-faithful parameterisation:</p>
+<p>log(tau^2_i) = alpha_0 + alpha_1 z_{1i} + … + alpha_q z_{qi}</p>
+<p>This is <strong>log of the variance</strong>, not log of the SD – coefficients are <code>alpha</code> (Greek alpha) and the natural-scale reading is “tau^2_i changes multiplicatively by exp(alpha_k) per unit of z_k”. The distinction matters because brms / glmmTMB / drmTMB parameterise the same structural model via <code>log(sigma)</code> (the SD), with <code>gamma</code> coefficients, and the relationship is alpha_k ~ 2 * gamma_k.</p>
+<ul><li>New <code>tau2</code> submodel in the symbolizer-wide registry: <code>drm_coef_family_for("tau2") = "alpha"</code>, <code>drm_link_for(..., "tau2") = "log"</code>, <code>drm_param_greek("tau2") = "\\tau^{2}"</code>.</li>
+<li>New capability row <code>rma.uni,meta_normal,tau2_scale</code> (First slice).</li>
+<li>New interpretation templates <code>meta_normal,tau2,{intercept,slope,factor_contrast}</code> that explicitly contrast variance vs SD parameterisations and cite Viechtbauer &amp; Lopez-Lopez 2022 / Nakagawa et al. 2025.</li>
+<li>Alpha estimates pulled from <code>fit$alpha</code> with Wald CIs from <code>fit$ci.lb.alpha</code> / <code>fit$ci.ub.alpha</code>.</li>
+<li>For rma.ls, <code>variance_components</code> reports the mean tau^2_i with <code>kind = "heterogeneity_scale"</code>; the per-observation vector lives in <code>metadata$tau2</code>.</li>
+<li>Robustness sweep gains one row: rma.ls location-scale.</li>
+</ul><div class="section level4">
+<h4 id="still-planned-beyond-this-batch-0-15-0">Still planned beyond this batch<a class="anchor" aria-label="anchor" href="#still-planned-beyond-this-batch-0-15-0"></a></h4>
+<p>The wider meta-analysis bridge (Slices C + D) is in flight but not in v0.15.0:</p>
+<ul><li>glmmTMB <code>equalto()</code> / <code>propto()</code> detection – treat a glmmTMB fit with <code>equalto(0 + obs | g, VCV)</code> as a meta-analysis and route prose through <code>meta_normal</code> rather than gaussian.</li>
+<li>Cross-package “Three faces of meta-analysis” article showing the same model in metafor / brms / glmmTMB / drmTMB with the alpha vs gamma parameterisation relationship made explicit.</li>
+<li>Double-hierarchical location-scale via brms (Nakagawa et al. 2025 Eq 19-22): random effects on the scale part with bivariate (u^(l), u^(s)) distribution.</li>
+<li>Publication-bias detection layer (Nakagawa et al. 2025 Section 2.5): small-study effect / decline effect / small-study divergence / Proteus effect, surfaced via <code><a href="../reference/warning_table.html">warning_table()</a></code>.</li>
+<li>I^2 / CV partitioning (Eq 14-16, 26-31): derived heterogeneity measures attached to <code>metadata$heterogeneity_partition</code>.</li>
+</ul><p>These are queued for v0.15.x / v0.16.</p>
+</div>
+</div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.14.2" id="symbolizer-0142">symbolizer 0.14.2<a class="anchor" aria-label="anchor" href="#symbolizer-0142"></a></h2>
 <div class="section level3">
