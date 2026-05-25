@@ -201,7 +201,7 @@ with data — backed by the same `symbolized_model` object.
 as_html_three_views(sym)
 ```
 
-[Skip three-views widget](#sym-sym-1779749553-end)
+[Skip three-views widget](#sym-sym-1779751015-end)
 
 ▸1. Index
 

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.19.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.20.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,6 +34,71 @@
       <small>Source: <a href="https://github.com/itchyshin/symbolizer/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.20.0" id="symbolizer-0200">symbolizer 0.20.0<a class="anchor" aria-label="anchor" href="#symbolizer-0200"></a></h2>
+<div class="section level3">
+<h3 id="v0200--corrective-release-propto-is-the-phylogenetic-bridge-not-the-meta-analysis-bridge-0-20-0">v0.20.0 – corrective release: propto is the phylogenetic bridge, not the meta-analysis bridge<a class="anchor" aria-label="anchor" href="#v0200--corrective-release-propto-is-the-phylogenetic-bridge-not-the-meta-analysis-bridge-0-20-0"></a></h3>
+<p>This release corrects a substantive inferential framing error that had been woven through the package since v0.16. The maintainer flagged it directly; three audit agents (Fisher empirical, Rose cross-repo, Noether math) verified it independently. <strong>No previous audit had been asked to verify the equivalence claim by fitting both models and comparing estimates</strong> – that is the audit-process gap this release documents.</p>
+<div class="section level4">
+<h4 id="what-the-package-used-to-claim-wrong-0-20-0">What the package used to claim (wrong)<a class="anchor" aria-label="anchor" href="#what-the-package-used-to-claim-wrong-0-20-0"></a></h4>
+<p>v0.16 introduced detection of <code>glmmTMB</code>’s <code>propto(0 + obs | g, V)</code> covariance block and framed it as “the GLMM bridge to metafor”: <code><a href="../articles/symbolizer-meta.html">vignette("symbolizer-meta")</a></code> Face 2 said <em>“<code>propto(0 + obs | g, V)</code> <strong>fixes</strong> the residual covariance to the known <code>V</code>, which is exactly what <code>rma.mv(..., V = V)</code> does in <code>metafor</code>. Structurally identical; syntactically different.”</em> The info-row in <code><a href="../reference/warning_table.html">warning_table()</a></code> carried the same claim: <em>“sigma_residual is fixed (sampling-variance-known)”</em>. Every downstream reference to propto in capability rows, the roadmap, the ladder cross-reference, and NEWS itself inherited that framing.</p>
+</div>
+<div class="section level4">
+<h4 id="what-is-actually-true-0-20-0">What is actually true<a class="anchor" aria-label="anchor" href="#what-is-actually-true-0-20-0"></a></h4>
+<p><code>propto(X, V)</code> parameterises <strong>Σ = σ² · V</strong> with <strong>σ² estimated</strong> as a free scalar. Combined with glmmTMB’s default residual term (which stays on unless <code>dispformula = ~ 0</code> is passed), the full conditional covariance is <code>σ²_propto · V + σ²_res · I</code> – <strong>two free scalars</strong> on top of <code>V</code>, not zero. That is the <strong>phylogenetic / pedigree / structured-covariance</strong> pattern, mirroring metafor’s <code>R = list(g = V)</code> argument, not its <code>V = V</code> argument. The structural twin of <code>rma.mv(V = V, …)</code> would be <code>equalto(X, V)</code>, which parameterises Σ = V exactly (no scalar multiplier). <strong><code>equalto</code> is reserved but not yet implemented in <code>glmmTMB</code> &lt;= 1.1.11</strong> (<code>.valid_covstruct</code> exposes codes 0-13; no <code>equalto</code> entry). The package had been treating two distinct covariance models as identical.</p>
+</div>
+<div class="section level4">
+<h4 id="fishers-empirical-verification-k--seed-0-20-0">Fisher’s empirical verification (k = 30, seed 1)<a class="anchor" aria-label="anchor" href="#fishers-empirical-verification-k--seed-0-20-0"></a></h4>
+<table class="table"><colgroup><col width="33%"><col width="33%"><col width="33%"></colgroup><thead><tr><th>quantity</th>
+<th align="right">metafor <code>rma.mv(V = V, ~ 1 | study)</code>
+</th>
+<th align="right">glmmTMB <code>(1 | study) + propto(0 + obs | g, V)</code>
+</th>
+</tr></thead><tbody><tr><td>β̂_0</td>
+<td align="right">0.357438</td>
+<td align="right">0.357024</td>
+</tr><tr><td>SE(β̂_0)</td>
+<td align="right">0.063038</td>
+<td align="right">0.064973</td>
+</tr><tr><td>τ̂² (study)</td>
+<td align="right">0.068911</td>
+<td align="right">0.071700</td>
+</tr><tr><td><strong>σ̂² (propto scale)</strong></td>
+<td align="right"><strong>n/a (fixed at 1)</strong></td>
+<td align="right">
+<strong>0.942742</strong> (estimated; constant across all i with sd ≈ 2e-16)</td>
+</tr><tr><td>logLik</td>
+<td align="right">-10.6426</td>
+<td align="right">-12.3428</td>
+</tr><tr><td>n parameters</td>
+<td align="right">2</td>
+<td align="right">3</td>
+</tr></tbody></table><p>The decisive number is the 0.942742 propto-scale: propto multiplied <code>V</code> by a single free scalar that converged near, but not at, 1. The two models share neither parameter count, log-likelihood, nor standard errors. They are not “structurally identical.”</p>
+<p>Phase 3 of Fisher’s audit verified that on AR(1)-correlation phylogenetic data, <code>metafor::rma.mv(V = 0, R = list(sp = C))</code> and <code>glmmTMB(y ~ 1 + propto(0 + obs | g, C))</code> agree to <strong>five decimals</strong>. So <code>propto</code> IS the right bridge – just for phylogenetic / pedigree / known-correlation models, not meta-analysis.</p>
+</div>
+<div class="section level4">
+<h4 id="fixes-in-this-release-0-20-0">Fixes in this release<a class="anchor" aria-label="anchor" href="#fixes-in-this-release-0-20-0"></a></h4>
+<ul><li>
+<strong><code>vignettes/symbolizer-meta.Rmd</code> Face 2 rewritten</strong> as “glmmTMB via propto() (phylogenetic / structured-covariance, NOT meta-analysis)”. The new section names propto’s σ² estimation explicitly, points at metafor’s <code>R = list(...)</code> argument as the true counterpart, and documents that the meta-analytic identity (Σ = V) is upstream-blocked until <code>glmmTMB</code> ships <code>equalto()</code>.</li>
+<li>
+<strong>Face 3 (drmTMB-as-meta) caveated</strong>: writing <code>sigma ~ 1 + offset(0.5 * log(vi))</code> does not pin σ_i² = v_i unless the intercept γ_0 is also constrained to 0. The vignette now flags this honestly.</li>
+<li>
+<strong><code>R/symbolize-glmmtmb.R</code> info-row prose rewritten</strong>: σ² is named as <em>estimated</em>; the σ_res default is named; the metafor counterpart is named as <code>R = list(g = V)</code> (phylo), not <code>V = V</code> (meta-analysis).</li>
+<li>
+<strong>Metadata flag renamed</strong>: <code>propto_known_corr_block</code> is the new name; <code>meta_analysis_via_glmmTMB</code> stays set as a deprecation alias for back-compat through one minor version.</li>
+<li>
+<strong><code>inst/extdata/capabilities.csv:69</code></strong> gaussian-propto description trimmed: drop “meta-analysis /”. Binomial/poisson rows were already correctly framed as phylogenetic.</li>
+<li>
+<strong><code>inst/extdata/family-distributions.csv</code> <code>meta_normal</code> row</strong>: the matrix-form covariance now renders as <code>\mathcal{N}(θ, V)</code> with <code>V</code> known, not <code>\mathrm{diag}(v)</code> (which silently lost off-diagonal correlations when V was block-diagonal, as in the meta vignette’s own simulated data).</li>
+<li>
+<strong><code>vignettes/symbolizer-roadmap.Rmd</code></strong> v0.16 row annotated with the v0.20 correction. <strong><code>vignettes/symbolizer-ladder.Rmd</code></strong> cross-reference no longer lists <code>glmmTMB::propto()</code> alongside metafor in the meta-analysis sentence.</li>
+</ul></div>
+<div class="section level4">
+<h4 id="audit-process-lesson-0-20-0">Audit-process lesson<a class="anchor" aria-label="anchor" href="#audit-process-lesson-0-20-0"></a></h4>
+<p>The propto = meta-analysis equivalence was a <em>quantitative</em> claim. The v0.16 audits (Pat readability, Rose stale-wording, GF2 capability truth, several others) all reviewed the <em>prose</em> of the claim against the <em>intent</em>. None were asked to verify the intent itself by fitting both models and comparing estimates. From v0.20 onward, any equivalence claim between two packages must be paired with a Fisher brief that <strong>fits both and reports estimate divergence</strong>, with the results pinned in a regression test snapshot. The propto/equalto empirical comparison from Fisher’s audit is preserved in <code>tests/testthat/test-glmm-propto-not-metafor.R</code> for this purpose – if a future version of symbolizer ever claims the two are equivalent again, that test fails.</p>
+</div>
+</div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.19.2" id="symbolizer-0192">symbolizer 0.19.2<a class="anchor" aria-label="anchor" href="#symbolizer-0192"></a></h2>
 <div class="section level3">

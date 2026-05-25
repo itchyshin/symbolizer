@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.19.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.20.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -182,26 +182,73 @@ random-effect tiers (study + observation), sampling variances
 <code>v_i</code> known.</p>
 </div>
 <div class="section level2">
-<h2 id="face-2-glmmtmb-via-propto-the-glmm-bridge">Face 2 — glmmTMB via <code>propto()</code> (the GLMM bridge)<a class="anchor" aria-label="anchor" href="#face-2-glmmtmb-via-propto-the-glmm-bridge"></a>
+<h2 id="face-2-glmmtmb-via-propto-phylogenetic-structured-covariance-not-meta-analysis">Face 2 — glmmTMB via <code>propto()</code> (phylogenetic /
+structured-covariance, NOT meta-analysis)<a class="anchor" aria-label="anchor" href="#face-2-glmmtmb-via-propto-phylogenetic-structured-covariance-not-meta-analysis"></a>
 </h2>
-<p>The same model can be fit through <code>glmmTMB</code> by attaching
-the known <code>V</code> matrix via <code>propto()</code>. Structurally
-identical; syntactically different.</p>
+<blockquote>
+<p><strong>v0.20 correction.</strong> v0.16 of this article claimed
+<code>propto(0 + obs | g, V)</code> was “structurally identical” to
+<code>metafor::rma.mv(..., V = V)</code>. <strong>That was
+wrong.</strong> Empirical verification (k = 30, seed 1, see Fisher’s
+v0.20.0 audit in <code>NEWS.md</code>): metafor estimates β̂₀ = 0.357438
+and τ̂² = 0.068911; the glmmTMB-propto fit on the same data estimates β̂₀
+= 0.357024 and τ̂² = 0.071700, <strong>with an additional free scalar
+σ̂²_propto = 0.942742</strong> that propto inserts between Σ and V. The
+models differ in parameter count, standard errors, and log-likelihood.
+See §“What <code>propto</code> actually does” below for the corrected
+story.</p>
+</blockquote>
+<div class="section level3">
+<h3 id="what-propto-actually-does">What <code>propto</code> actually does<a class="anchor" aria-label="anchor" href="#what-propto-actually-does"></a>
+</h3>
+<p><code>glmmTMB::propto(X, V)</code> parameterises</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>𝚺</mi><mtext mathvariant="normal">propto</mtext></msub><mspace width="0.278em"></mspace><mo>=</mo><mspace width="0.278em"></mspace><msubsup><mi>σ</mi><mtext mathvariant="normal">propto</mtext><mn>2</mn></msubsup><mspace width="0.167em"></mspace><mi>V</mi></mrow><annotation encoding="application/x-tex">
+\boldsymbol{\Sigma}_{\text{propto}} \;=\; \sigma_{\text{propto}}^{2}\, V
+</annotation></semantics></math></p>
+<p>with <strong>σ²_propto estimated</strong> as a free scalar. Combined
+with glmmTMB’s default residual term (unless
+<code>dispformula = ~ 0</code> is passed), the full conditional
+covariance is</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">Cov</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>𝐲</mi><mo>∣</mo><mi>𝐮</mi><mo stretchy="false" form="postfix">)</mo><mspace width="0.278em"></mspace><mo>=</mo><mspace width="0.278em"></mspace><msubsup><mi>σ</mi><mtext mathvariant="normal">propto</mtext><mn>2</mn></msubsup><mspace width="0.167em"></mspace><mi>V</mi><mspace width="0.278em"></mspace><mo>+</mo><mspace width="0.278em"></mspace><msubsup><mi>σ</mi><mtext mathvariant="normal">res</mtext><mn>2</mn></msubsup><mspace width="0.167em"></mspace><mi>𝐈</mi><mo>,</mo></mrow><annotation encoding="application/x-tex">
+\operatorname{Cov}(\mathbf{y}\mid \mathbf{u})
+\;=\; \sigma_{\text{propto}}^{2}\,V \;+\; \sigma_{\text{res}}^{2}\,\mathbf{I},
+</annotation></semantics></math></p>
+<p>i.e. <strong>two</strong> free scalars sitting on top of
+<code>V</code>, not zero. This is the <strong>phylogenetic / pedigree /
+known-correlation</strong> pattern: you know the <em>shape</em> of the
+covariance (the matrix <code>V</code>, or a phylogenetic correlation
+matrix <code>C</code>), and the model estimates how big it is.</p>
+<p>The corresponding metafor construction is</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">metafor</span><span class="fu">::</span><span class="fu"><a href="https://wviechtb.github.io/metafor/reference/rma.mv.html" class="external-link">rma.mv</a></span><span class="op">(</span><span class="va">yi</span>, V <span class="op">=</span> <span class="fl">0</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="va">k</span><span class="op">)</span>,</span>
+<span>                random <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">~</span> <span class="fl">1</span> <span class="op">|</span> <span class="va">study</span>, <span class="op">~</span> <span class="fl">1</span> <span class="op">|</span> <span class="va">obs</span><span class="op">)</span>,</span>
+<span>                R <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>obs <span class="op">=</span> <span class="va">V</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>— i.e. <code>propto</code> mirrors metafor’s
+<code>R = list(...)</code> argument, <strong>not</strong> its
+<code>V = V</code> argument. Fisher’s audit fitted both on the same
+AR(1)-correlation data and they agree to five decimals.</p>
+</div>
+<div class="section level3">
+<h3 id="why-the-package-detects-propto-anyway">Why the package detects <code>propto</code> anyway<a class="anchor" aria-label="anchor" href="#why-the-package-detects-propto-anyway"></a>
+</h3>
+<p>The <code>glmmTMB</code> extractor still detects covariance code 11
+(the propto block) and surfaces an info-level row in
+<code><a href="../reference/warning_table.html">warning_table()</a></code>. The info-row text in v0.20+ names propto
+as a <strong>structured-covariance / phylogenetic</strong> pattern, not
+meta-analysis:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_glmm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span></span>
 <span>  <span class="va">y</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">study</span><span class="op">)</span> <span class="op">+</span> <span class="fu">propto</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">obs</span> <span class="op">|</span> <span class="va">g</span>, <span class="va">V</span><span class="op">)</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">dat</span>, REML <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">sym_glmm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/symbolize.html">symbolize</a></span><span class="op">(</span><span class="va">fit_glmm</span><span class="op">)</span></span></code></pre></div>
-<p><code>symbolizer</code> detects the <code>propto()</code> block and
-adds an info-level warning row:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/warning_table.html">warning_table</a></span><span class="op">(</span><span class="va">sym_glmm</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <colgroup>
-<col width="1%">
-<col width="97%">
-<col width="1%">
+<col width="0%">
+<col width="98%">
+<col width="0%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">severity</th>
@@ -210,61 +257,25 @@ adds an info-level warning row:</p>
 </tr></thead>
 <tbody><tr class="odd">
 <td align="left">info</td>
-<td align="left">This fit uses propto() (or equalto() in newer glmmTMB)
-to attach a known correlation / covariance matrix on a random-effect
-block. Structurally, that’s the meta-analytic / phylogenetic /
-pedigree-controlled pattern: sigma_residual is fixed
-(sampling-variance-known), and the (1 | study) variance reads as the
-between-study heterogeneity tau^2. Compare with metafor::rma.mv(yi, V,
-random = list(~ 1 | study, ~ 1 | id), R = list(…)) or drmTMB’s
-location-scale form (Williams 2023; Viechtbauer &amp; López-López 2022;
-Nakagawa et al. 2025).</td>
+<td align="left">This fit uses propto() to attach a covariance
+proportional to a known matrix V on a random-effect block: Sigma =
+sigma^2 * V, with sigma^2 estimated. That is the phylogenetic / pedigree
+/ structured-covariance pattern, equivalent to metafor::rma.mv(V = 0,
+random = ~ 1 | g, R = list(g = V)). It is NOT the meta-analytic fixed-V
+pattern: metafor::rma.mv(V = V, …) fixes Sigma = V exactly, with no
+scalar multiplier. glmmTMB also estimates an independent residual
+sigma_res unless dispformula = ~ 0 is passed – so the full conditional
+covariance under a propto fit is sigma^2_propto * V + sigma^2_res * I,
+two free scalars. The exact meta-analytic GLMM bridge requires glmmTMB’s
+planned equalto() block (Sigma = V, no multiplier), which is reserved
+but not yet implemented in glmmTMB &lt;= 1.1.11. References: Hadfield
+&amp; Nakagawa 2010 (phylogenetic mixed models); Viechtbauer &amp;
+López-López 2022 (location-scale meta-analysis); Nakagawa et al. 2025
+(multilevel + phylo location-scale).</td>
 <td align="left"></td>
 </tr></tbody>
 </table>
-<p>This is the bridge: <code>propto(0 + obs | g, V)</code>
-<strong>fixes</strong> the residual covariance to the known
-<code>V</code>, which is exactly what <code>rma.mv(..., V = V)</code>
-does in <code>metafor</code>. The <code>(1 | study)</code> term carries
-the between-study heterogeneity
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>τ</mi><mn>2</mn></msup><annotation encoding="application/x-tex">\tau^2</annotation></semantics></math>.</p>
-<p>When this pattern is present:</p>
-<table class="table">
-<colgroup>
-<col width="33%">
-<col width="33%">
-<col width="33%">
-</colgroup>
-<thead><tr class="header">
-<th>Conceptual quantity</th>
-<th>metafor</th>
-<th>glmmTMB</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td>Known sampling-variance matrix</td>
-<td>
-<code>V</code> argument</td>
-<td>
-<code>propto(0 + obs | g, V)</code> block</td>
-</tr>
-<tr class="even">
-<td>Between-study heterogeneity
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>τ</mi><mn>2</mn></msup><annotation encoding="application/x-tex">\tau^2</annotation></semantics></math>
-</td>
-<td><code>sigma2[["study"]]</code></td>
-<td><code>VarCorr(fit)$cond$study</code></td>
-</tr>
-<tr class="odd">
-<td>Moderator coefficients
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mi>k</mi></msub><annotation encoding="application/x-tex">\beta_k</annotation></semantics></math>
-</td>
-<td><code>fit$beta</code></td>
-<td><code>fixef(fit)$cond</code></td>
-</tr>
-</tbody>
-</table>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="../reference/as_latex.html">as_latex</a></span><span class="op">(</span><span class="va">sym_glmm</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; \begin{aligned}</span></span>
 <span><span class="co">#&gt; y \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\</span></span>
@@ -272,18 +283,50 @@ the between-study heterogeneity
 <span><span class="co">#&gt; u_{study} &amp; \sim \mathcal{N}(0,\, \sigma_{study}^2)</span></span>
 <span><span class="co">#&gt; \end{aligned}</span></span></code></pre></div>
 </div>
+<div class="section level3">
+<h3 id="what-youd-need-for-an-actual-meta-analytic-glmmtmb-fit">What you’d need for an actual meta-analytic glmmTMB fit<a class="anchor" aria-label="anchor" href="#what-youd-need-for-an-actual-meta-analytic-glmmtmb-fit"></a>
+</h3>
+<p>The structural twin of <code>rma.mv(..., V = V)</code> would be</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html" class="external-link">glmmTMB</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">study</span><span class="op">)</span> <span class="op">+</span> <span class="fu">equalto</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">obs</span> <span class="op">|</span> <span class="va">g</span>, <span class="va">V</span><span class="op">)</span>,</span>
+<span>        data <span class="op">=</span> <span class="va">dat</span>, dispformula <span class="op">=</span> <span class="op">~</span> <span class="fl">0</span><span class="op">)</span></span></code></pre></div>
+<p>where <code>equalto(X, V)</code> parameterises Σ = V exactly (no
+scalar multiplier), and <code>dispformula = ~ 0</code> suppresses the
+residual term. <strong><code>equalto</code> is reserved but not yet
+implemented in <code>glmmTMB</code> ≤ 1.1.11</strong>
+(<code>.valid_covstruct</code> shows codes 0–13; no equalto entry).
+Until glmmTMB ships it, the GLMM-side meta-analytic bridge is
+incomplete; the honest two routes today are metafor (Face 1) and drmTMB
+(Face 3 below).</p>
+</div>
+</div>
 <div class="section level2">
 <h2 id="face-3-drmtmb-location-scale-the-distributional-surface">Face 3 — drmTMB location-scale (the distributional surface)<a class="anchor" aria-label="anchor" href="#face-3-drmtmb-location-scale-the-distributional-surface"></a>
 </h2>
 <p><code>drmTMB</code> has location-scale Gaussian as its core form.
 With known sampling variances entered as
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>σ</mi><mi>i</mi><mn>2</mn></msubsup><mo>=</mo><msub><mi>v</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">\sigma_i^2 = v_i</annotation></semantics></math>
-(via an offset on the log-scale formula), <code>drmTMB</code> fits the
-meta-analytic model as a distributional Gaussian. Symbolic output uses
+(via an offset on the log-scale formula), <code>drmTMB</code> fits a
+meta-analytic-flavoured model as a distributional Gaussian. Symbolic
+output uses
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>σ</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\log(\sigma_i)</annotation></semantics></math>
 on the <strong>SD scale</strong> (the drmTMB convention), with
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>γ</mi><mi>k</mi></msub><annotation encoding="application/x-tex">\gamma_k</annotation></semantics></math>
 coefficients.</p>
+<blockquote>
+<p><strong>Caveat (v0.20).</strong> Writing
+<code>sigma ~ 1 + offset(0.5 * log(vi))</code> does not pin
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>σ</mi><mi>i</mi><mn>2</mn></msubsup><mo>=</mo><msub><mi>v</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">\sigma_i^{2} = v_i</annotation></semantics></math>
+unless the intercept
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>γ</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\gamma_0</annotation></semantics></math>
+is <em>also</em> constrained to 0 (e.g. via <code>map</code>). Without
+that constraint, drmTMB estimates
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>σ</mi><mi>i</mi></msub><mo>=</mo><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>γ</mi><mo accent="true">̂</mo></mover><mn>0</mn></msub><mo stretchy="false" form="postfix">)</mo><msqrt><msub><mi>v</mi><mi>i</mi></msub></msqrt></mrow><annotation encoding="application/x-tex">\sigma_i = \exp(\hat{\gamma}_0) \sqrt{v_i}</annotation></semantics></math>
+— <strong>proportional</strong> to the sampling SE, not equal to it. The
+construction is genuinely useful (the proportionality constant captures
+over- or under-dispersion beyond the known sampling variance), but it is
+<em>not</em> the exact metafor fixed-V identity.</p>
+</blockquote>
 <p>(Sketch only — a full drmTMB construction with known sigma offsets is
 shown in <code><a href="../articles/symbolizer-drmtmb.html">vignette("symbolizer-drmtmb")</a></code> and the drmTMB
 docs.)</p>
@@ -374,10 +417,15 @@ traditional meta-analysis. Rich diagnostics, well-documented effect-size
 computation (<code><a href="https://wviechtb.github.io/metafor/reference/escalc.html" class="external-link">escalc()</a></code>), and a long literature on
 small-sample corrections.</li>
 <li>
-<strong><code>glmmTMB</code> with <code>propto()</code></strong>
-brings meta-analysis into the GLMM ecosystem — letting you reuse the
-same modelling pipeline (model checking, prediction, marginal effects)
-you use for GLMMs in general.</li>
+<strong><code>glmmTMB</code> with <code>propto()</code></strong> is
+<strong>not</strong> a meta-analytic surface in the strict sense (propto
+estimates a scalar multiplier on the known covariance; meta-analysis
+fixes the covariance to V exactly). It <em>is</em> the right glmmTMB
+surface for <strong>phylogenetic / pedigree /
+structured-covariance</strong> models, where you know the <em>shape</em>
+of the covariance but want to estimate its size. The meta-analytic
+identity Σ = V (without a scalar multiplier) waits on glmmTMB shipping
+its planned <code>equalto()</code> block.</li>
 <li>
 <strong><code>drmTMB</code></strong> lets you fit location-scale
 meta-analysis with moderators on heterogeneity directly, with the same

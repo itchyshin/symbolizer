@@ -109,10 +109,61 @@ sym_meta$variance_components
 The model the package teaches: `meta_normal` family, two random-effect
 tiers (study + observation), sampling variances `v_i` known.
 
-## Face 2 — glmmTMB via `propto()` (the GLMM bridge)
+## Face 2 — glmmTMB via `propto()` (phylogenetic / structured-covariance, NOT meta-analysis)
 
-The same model can be fit through `glmmTMB` by attaching the known `V`
-matrix via `propto()`. Structurally identical; syntactically different.
+> **v0.20 correction.** v0.16 of this article claimed
+> `propto(0 + obs | g, V)` was “structurally identical” to
+> `metafor::rma.mv(..., V = V)`. **That was wrong.** Empirical
+> verification (k = 30, seed 1, see Fisher’s v0.20.0 audit in
+> `NEWS.md`): metafor estimates β̂₀ = 0.357438 and τ̂² = 0.068911; the
+> glmmTMB-propto fit on the same data estimates β̂₀ = 0.357024 and τ̂² =
+> 0.071700, **with an additional free scalar σ̂²_propto = 0.942742** that
+> propto inserts between Σ and V. The models differ in parameter count,
+> standard errors, and log-likelihood. See §“What `propto` actually
+> does” below for the corrected story.
+
+### What `propto` actually does
+
+`glmmTMB::propto(X, V)` parameterises
+
+``` math
+\boldsymbol{\Sigma}_{\text{propto}} \;=\; \sigma_{\text{propto}}^{2}\, V
+```
+
+with **σ²_propto estimated** as a free scalar. Combined with glmmTMB’s
+default residual term (unless `dispformula = ~ 0` is passed), the full
+conditional covariance is
+
+``` math
+\operatorname{Cov}(\mathbf{y}\mid \mathbf{u})
+\;=\; \sigma_{\text{propto}}^{2}\,V \;+\; \sigma_{\text{res}}^{2}\,\mathbf{I},
+```
+
+i.e. **two** free scalars sitting on top of `V`, not zero. This is the
+**phylogenetic / pedigree / known-correlation** pattern: you know the
+*shape* of the covariance (the matrix `V`, or a phylogenetic correlation
+matrix `C`), and the model estimates how big it is.
+
+The corresponding metafor construction is
+
+``` r
+
+metafor::rma.mv(yi, V = 0 * diag(k),
+                random = list(~ 1 | study, ~ 1 | obs),
+                R = list(obs = V))
+```
+
+— i.e. `propto` mirrors metafor’s `R = list(...)` argument, **not** its
+`V = V` argument. Fisher’s audit fitted both on the same
+AR(1)-correlation data and they agree to five decimals.
+
+### Why the package detects `propto` anyway
+
+The `glmmTMB` extractor still detects covariance code 11 (the propto
+block) and surfaces an info-level row in
+[`warning_table()`](https://itchyshin.github.io/symbolizer/reference/warning_table.md).
+The info-row text in v0.20+ names propto as a **structured-covariance /
+phylogenetic** pattern, not meta-analysis:
 
 ``` r
 
@@ -123,9 +174,6 @@ fit_glmm <- glmmTMB(
 sym_glmm <- symbolize(fit_glmm)
 ```
 
-`symbolizer` detects the `propto()` block and adds an info-level warning
-row:
-
 ``` r
 
 warning_table(sym_glmm)
@@ -133,20 +181,7 @@ warning_table(sym_glmm)
 
 | severity | message | context |
 |:---|:---|:---|
-| info | This fit uses propto() (or equalto() in newer glmmTMB) to attach a known correlation / covariance matrix on a random-effect block. Structurally, that’s the meta-analytic / phylogenetic / pedigree-controlled pattern: sigma_residual is fixed (sampling-variance-known), and the (1 \| study) variance reads as the between-study heterogeneity tau^2. Compare with metafor::rma.mv(yi, V, random = list(~ 1 \| study, ~ 1 \| id), R = list(…)) or drmTMB’s location-scale form (Williams 2023; Viechtbauer & López-López 2022; Nakagawa et al. 2025). |  |
-
-This is the bridge: `propto(0 + obs | g, V)` **fixes** the residual
-covariance to the known `V`, which is exactly what `rma.mv(..., V = V)`
-does in `metafor`. The `(1 | study)` term carries the between-study
-heterogeneity $`\tau^2`$.
-
-When this pattern is present:
-
-| Conceptual quantity | metafor | glmmTMB |
-|----|----|----|
-| Known sampling-variance matrix | `V` argument | `propto(0 + obs | g, V)` block |
-| Between-study heterogeneity $`\tau^2`$ | `sigma2[["study"]]` | `VarCorr(fit)$cond$study` |
-| Moderator coefficients $`\beta_k`$ | `fit$beta` | `fixef(fit)$cond` |
+| info | This fit uses propto() to attach a covariance proportional to a known matrix V on a random-effect block: Sigma = sigma^2 \* V, with sigma^2 estimated. That is the phylogenetic / pedigree / structured-covariance pattern, equivalent to metafor::rma.mv(V = 0, random = ~ 1 \| g, R = list(g = V)). It is NOT the meta-analytic fixed-V pattern: metafor::rma.mv(V = V, …) fixes Sigma = V exactly, with no scalar multiplier. glmmTMB also estimates an independent residual sigma_res unless dispformula = ~ 0 is passed – so the full conditional covariance under a propto fit is sigma^2_propto \* V + sigma^2_res \* I, two free scalars. The exact meta-analytic GLMM bridge requires glmmTMB’s planned equalto() block (Sigma = V, no multiplier), which is reserved but not yet implemented in glmmTMB \<= 1.1.11. References: Hadfield & Nakagawa 2010 (phylogenetic mixed models); Viechtbauer & López-López 2022 (location-scale meta-analysis); Nakagawa et al. 2025 (multilevel + phylo location-scale). |  |
 
 ``` r
 
@@ -158,13 +193,39 @@ cat(as_latex(sym_glmm), "\n")
 #> \end{aligned}
 ```
 
+### What you’d need for an actual meta-analytic glmmTMB fit
+
+The structural twin of `rma.mv(..., V = V)` would be
+
+``` r
+
+glmmTMB(y ~ 1 + (1 | study) + equalto(0 + obs | g, V),
+        data = dat, dispformula = ~ 0)
+```
+
+where `equalto(X, V)` parameterises Σ = V exactly (no scalar
+multiplier), and `dispformula = ~ 0` suppresses the residual term.
+**`equalto` is reserved but not yet implemented in `glmmTMB` ≤ 1.1.11**
+(`.valid_covstruct` shows codes 0–13; no equalto entry). Until glmmTMB
+ships it, the GLMM-side meta-analytic bridge is incomplete; the honest
+two routes today are metafor (Face 1) and drmTMB (Face 3 below).
+
 ## Face 3 — drmTMB location-scale (the distributional surface)
 
 `drmTMB` has location-scale Gaussian as its core form. With known
 sampling variances entered as $`\sigma_i^2 = v_i`$ (via an offset on the
-log-scale formula), `drmTMB` fits the meta-analytic model as a
+log-scale formula), `drmTMB` fits a meta-analytic-flavoured model as a
 distributional Gaussian. Symbolic output uses $`\log(\sigma_i)`$ on the
 **SD scale** (the drmTMB convention), with $`\gamma_k`$ coefficients.
+
+> **Caveat (v0.20).** Writing `sigma ~ 1 + offset(0.5 * log(vi))` does
+> not pin $`\sigma_i^{2} = v_i`$ unless the intercept $`\gamma_0`$ is
+> *also* constrained to 0 (e.g. via `map`). Without that constraint,
+> drmTMB estimates $`\sigma_i = \exp(\hat{\gamma}_0) \sqrt{v_i}`$ —
+> **proportional** to the sampling SE, not equal to it. The construction
+> is genuinely useful (the proportionality constant captures over- or
+> under-dispersion beyond the known sampling variance), but it is *not*
+> the exact metafor fixed-V identity.
 
 (Sketch only — a full drmTMB construction with known sigma offsets is
 shown in
@@ -208,9 +269,14 @@ convention is in play.
   computation
   ([`escalc()`](https://wviechtb.github.io/metafor/reference/escalc.html)),
   and a long literature on small-sample corrections.
-- **`glmmTMB` with `propto()`** brings meta-analysis into the GLMM
-  ecosystem — letting you reuse the same modelling pipeline (model
-  checking, prediction, marginal effects) you use for GLMMs in general.
+- **`glmmTMB` with `propto()`** is **not** a meta-analytic surface in
+  the strict sense (propto estimates a scalar multiplier on the known
+  covariance; meta-analysis fixes the covariance to V exactly). It *is*
+  the right glmmTMB surface for **phylogenetic / pedigree /
+  structured-covariance** models, where you know the *shape* of the
+  covariance but want to estimate its size. The meta-analytic identity Σ
+  = V (without a scalar multiplier) waits on glmmTMB shipping its
+  planned `equalto()` block.
 - **`drmTMB`** lets you fit location-scale meta-analysis with moderators
   on heterogeneity directly, with the same syntax as any other
   location-scale model. This is the surface Nakagawa et al.

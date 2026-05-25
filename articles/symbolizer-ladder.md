@@ -326,7 +326,7 @@ three-view widget:
 as_html_three_views(sym4)
 ```
 
-[Skip three-views widget](#sym-sym-1779750212-end)
+[Skip three-views widget](#sym-sym-1779752064-end)
 
 ▸1. Index
 
@@ -487,8 +487,9 @@ educator-facing surface stays one verb deep.
 - For a tour of distributional families (Student-t, Gamma, beta,
   binomial, …), see
   [`vignette("symbolizer-families")`](https://itchyshin.github.io/symbolizer/articles/symbolizer-families.md).
-- For meta-analysis with `metafor`, `glmmTMB::propto()`, and `drmTMB`
-  location-scale side by side, see
+- For meta-analysis with `metafor` and `drmTMB` location-scale (plus
+  `glmmTMB`’s `propto()` as the related phylogenetic /
+  structured-covariance pattern, not strict meta-analysis), see
   [`vignette("symbolizer-meta")`](https://itchyshin.github.io/symbolizer/articles/symbolizer-meta.md).
 - For the full capability matrix and what’s planned next, see
   [`vignette("symbolizer-roadmap")`](https://itchyshin.github.io/symbolizer/articles/symbolizer-roadmap.md).
