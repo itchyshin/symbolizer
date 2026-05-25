@@ -9,9 +9,9 @@
 > formula, the symbolic model in both notations, every parameter’s
 > scale, the assumptions that are stated vs. implied vs. unchecked, what
 > each coefficient means biologically, and the next diagnostic steps —
-> across the GLMM, meta-analysis, additive-model, and
-> Bayesian-multilevel packages an ecologist or evolutionary biologist
-> actually uses.
+> across the GLMM, meta-analysis, additive-model, Bayesian-multilevel,
+> and classical (base-R) regression packages an ecologist or
+> evolutionary biologist actually uses.
 
 `symbolizer` is the complement to
 [`equatiomatic`](https://datalorax.github.io/equatiomatic/), not a

@@ -60,3 +60,9 @@ a mandatory argument here.
 MCMCglmm is Bayesian. The CI band in `fixed_effects` and
 `interpretation` is a 95% **credible interval** (`l-95% CI` / `u-95% CI`
 from `summary(fit)$solutions`). `ci_method` is set to `"credible"`.
+
+## References
+
+Hadfield, J. D. (2010). MCMC Methods for Multi-Response Generalized
+Linear Mixed Models: The MCMCglmm R Package. *Journal of Statistical
+Software*, 33(2), 1-22.

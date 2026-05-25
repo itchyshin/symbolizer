@@ -53,3 +53,8 @@ posterior quantiles. `excludes_zero` is the indicator for whether the
 credible interval excludes zero (i.e. the posterior puts negligible mass
 on either side of zero). `ci_method` is set to `"credible"` so renderers
 can label the band correctly.
+
+## References
+
+Bürkner, P.-C. (2017). brms: An R Package for Bayesian Multilevel Models
+Using Stan. *Journal of Statistical Software*, 80(1), 1-28.

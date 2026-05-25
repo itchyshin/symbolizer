@@ -13,7 +13,7 @@ specifications s(x), s(x, by = factor), and te(x, z)."><meta property="og:image"
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.18.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.18.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -96,6 +96,26 @@ units, e.g. <code>c(body_mass = "g", temperature = "C")</code>.</p></dd>
 <code>gamm4</code> are reflected via the <code>$gam</code> object's smooth and
 parametric-coefficient blocks; the GAMM-specific covariance
 structures are not separately rendered in v0.14.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="confidence-intervals">Confidence intervals<a class="anchor" aria-label="anchor" href="#confidence-intervals"></a></h2>
+
+
+<p>Parametric (non-smooth) coefficients in <code>fixed_effects</code> carry
+approximate Wald 95% CIs computed as estimate ± 1.96 * SE from
+<code>summary(fit)$p.coeff</code> / <code>summary(fit)$se</code>. Smooth-term inference
+is summarised separately in <code>sym$metadata$smooths</code> (basis
+dimension, edf, p-value per smooth) rather than a single
+coefficient row.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
+    <p>Wood, S. N. (2017). <em>Generalized Additive Models: An Introduction
+with R</em> (2nd ed.). Chapman and Hall/CRC.</p>
+<p>Wood, S. N. (2011). Fast stable restricted maximum likelihood and
+marginal likelihood estimation of semiparametric generalized linear
+models. <em>Journal of the Royal Statistical Society (B)</em>, 73(1),
+3-36.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

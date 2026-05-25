@@ -13,7 +13,7 @@ and family-specific weights are deferred via the capability registry."><meta pro
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.18.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.18.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -84,6 +84,18 @@ units, e.g. <code>c(body_mass = "g", temperature = "C")</code>.</p></dd>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A <code>symbolized_model</code> object.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="confidence-intervals">Confidence intervals<a class="anchor" aria-label="anchor" href="#confidence-intervals"></a></h2>
+
+
+<p>CIs come from <code>stats::confint(fit)</code>, which for <code>glm</code> uses profile
+likelihood by default. <code>ci_method</code> is labelled <code>"profile"</code>.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
+    <p>McCullagh, P., &amp; Nelder, J. A. (1989). <em>Generalized Linear Models</em>
+(2nd ed.). Chapman and Hall/CRC.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

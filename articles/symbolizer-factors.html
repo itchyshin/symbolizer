@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.18.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.18.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -904,9 +904,9 @@ intercepts</strong> at <code>body_size = 0</code>. It is no longer “the
 average male mass” <em>or</em> “the male-female mass difference at
 average body size”.</li>
 </ul>
-<p><code><a href="../reference/parameter_interpretation.html">parameter_interpretation()</a></code> reads the three templated
-rows it knows about, but v0.1 does not yet ship an interaction template,
-so the interaction row is silent:</p>
+<p><code><a href="../reference/parameter_interpretation.html">parameter_interpretation()</a></code> reads all four templated
+rows, including the dedicated continuous-by-factor interaction
+reading:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/parameter_interpretation.html">parameter_interpretation</a></span><span class="op">(</span><span class="va">sym4</span>, scale <span class="op">=</span> <span class="st">"biological"</span><span class="op">)</span></span></code></pre></div>
 <table class="table">

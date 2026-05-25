@@ -43,3 +43,13 @@ symbolize(fit, symbols = NULL, units = NULL, context = NULL, ...)
 ## Value
 
 A `symbolized_model` object.
+
+## Confidence intervals
+
+CIs come from `stats::confint(fit)`, which for `glm` uses profile
+likelihood by default. `ci_method` is labelled `"profile"`.
+
+## References
+
+McCullagh, P., & Nelder, J. A. (1989). *Generalized Linear Models* (2nd
+ed.). Chapman and Hall/CRC.

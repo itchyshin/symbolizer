@@ -62,3 +62,9 @@ CIs come from `lme4::confint(fit, parm = "beta_", method = ci_method)`.
 Default `ci_method = "Wald"`. Profile-likelihood CIs (`"profile"`) are
 slower but more honest for fits with small group counts. `ci_method` is
 stored on metadata as lowercase `"wald"` / `"profile"`.
+
+## References
+
+Bates, D., Maechler, M., Bolker, B., & Walker, S. (2015). Fitting Linear
+Mixed-Effects Models Using lme4. *Journal of Statistical Software*,
+67(1), 1-48.

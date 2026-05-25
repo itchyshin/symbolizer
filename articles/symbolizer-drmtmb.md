@@ -686,8 +686,9 @@ mc$recommended_plots
 #>                                                                              "histogram or QQ of BLUPs"
 ```
 
-These are text recipes only; the v0.1 surface does not plot live. The
-recipes name the plot the reader should make next.
+These are text recipes only – `symbolizer` does not draw the plots
+itself. The recipes name the diagnostic plot the reader should make
+next, in their own plotting framework of choice.
 
 **Takeaway.** Diagnostics before coefficients. The extraction-calls list
 is the order a reader should work through the fit.
@@ -834,10 +835,15 @@ not the prose, decides what
 accepts; check the status word before designing a workflow around a
 tuple.
 
-**Takeaway.** The capability registry is the single source of truth.
-v0.1 ships Gaussian `mu`, `sigma`, and intercept-only random effects;
-v0.2 added the full bivariate Gaussian surface (`mu1`, `mu2`, `sigma1`,
-`sigma2`, `rho12`); the rest of the roadmap is non-Gaussian families.
+**Takeaway.** The capability registry is the single source of truth. For
+`drmTMB` it covers the Gaussian location-scale family (including random
+intercepts and random slopes), the full bivariate Gaussian surface
+(`mu1`, `mu2`, `sigma1`, `sigma2`, `rho12`), the Student-t / lognormal /
+Gamma / beta / beta_binomial / Poisson / nbinom2 / truncated_nbinom2 /
+cumulative_logit families, and the zero-inflation and hurdle submodels.
+See
+[`vignette("symbolizer-roadmap")`](https://itchyshin.github.io/symbolizer/articles/symbolizer-roadmap.md)
+for the full matrix.
 
 ## 11. Where to read next
 

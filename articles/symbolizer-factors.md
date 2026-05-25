@@ -443,8 +443,8 @@ So:
   mass” *or* “the male-female mass difference at average body size”.
 
 [`parameter_interpretation()`](https://itchyshin.github.io/symbolizer/reference/parameter_interpretation.md)
-reads the three templated rows it knows about, but v0.1 does not yet
-ship an interaction template, so the interaction row is silent:
+reads all four templated rows, including the dedicated
+continuous-by-factor interaction reading:
 
 ``` r
 

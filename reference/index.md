@@ -35,7 +35,8 @@ context here.
 - [`symbolize(`*`<drmTMB>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.drmTMB.md)
   : Symbolize a drmTMB fit (Gaussian and bivariate Gaussian, v0.1)
 - [`symbolize(`*`<gllvmTMB>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.gllvmTMB.md)
-  : Symbolize a gllvmTMB fit (Gaussian latent-variable, v0.1)
+  : Symbolize a gllvmTMB fit (Gaussian and binomial latent-variable
+  models)
 - [`symbolize(`*`<glmmTMB>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.glmmTMB.md)
   : Symbolize a glmmTMB fit (Gaussian, v0.7 first slice)
 - [`symbolize(`*`<brmsfit>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.brmsfit.md)

@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.18.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.18.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -440,15 +440,22 @@ widget with three tabs over the same fit.</p>
 .sym-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .sym-skip { position: absolute; top: -100px; left: 0; padding: 0.4rem 0.7rem; background: #8a1f22; color: #fff; text-decoration: none; font-size: 0.85rem; z-index: 5; }
 .sym-skip:focus { top: 0; }</style>
-<div id="sym-sym-1779724044" class="sym-tabs">
-<a class="sym-skip" href="#sym-sym-1779724044-end">Skip three-views
+<div id="sym-sym-1779731243" class="sym-tabs">
+<a class="sym-skip" href="#sym-sym-1779731243-end">Skip three-views
 widget</a>
 <div class="sym-tablist" role="tablist" aria-label="Three views of the model">
-<pre><code>&lt;button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779724044-tab-eq" aria-controls="sym-sym-1779724044-panel-eq" aria-selected="true" tabindex="0" data-tab="eq"&gt;&lt;span class="sym-tab-marker" aria-hidden="true"&gt;&amp;#9656;&lt;/span&gt;1. Equation&lt;/button&gt;
-&lt;button type="button" class="sym-tab" role="tab" id="sym-sym-1779724044-tab-idx" aria-controls="sym-sym-1779724044-panel-idx" aria-selected="false" tabindex="-1" data-tab="idx"&gt;&lt;span class="sym-tab-marker" aria-hidden="true"&gt;&amp;#9656;&lt;/span&gt;2. Index&lt;/button&gt;
-&lt;button type="button" class="sym-tab" role="tab" id="sym-sym-1779724044-tab-mat" aria-controls="sym-sym-1779724044-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat"&gt;&lt;span class="sym-tab-marker" aria-hidden="true"&gt;&amp;#9656;&lt;/span&gt;3. Matrix (with data)&lt;/button&gt;</code></pre>
+<button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779731243-tab-eq" aria-controls="sym-sym-1779731243-panel-eq" aria-selected="true" tabindex="0" data-tab="eq">
+<span class="sym-tab-marker" aria-hidden="true">▸</span>1. Equation
+</button>
+<button type="button" class="sym-tab" role="tab" id="sym-sym-1779731243-tab-idx" aria-controls="sym-sym-1779731243-panel-idx" aria-selected="false" tabindex="-1" data-tab="idx">
+<span class="sym-tab-marker" aria-hidden="true">▸</span>2. Index
+</button>
+<button type="button" class="sym-tab" role="tab" id="sym-sym-1779731243-tab-mat" aria-controls="sym-sym-1779731243-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
+<span class="sym-tab-marker" aria-hidden="true">▸</span>3. Matrix (with
+data)
+</button>
 </div>
-<div id="sym-sym-1779724044-panel-eq" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-sym-1779724044-tab-eq" data-panel="eq" tabindex="0">
+<div id="sym-sym-1779731243-panel-eq" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-sym-1779731243-tab-eq" data-panel="eq" tabindex="0">
 <p class="sym-caption">
 The structural contract. No indices, no numbers – the shape of the
 model.
@@ -461,7 +468,7 @@ model.
 \end{aligned}</annotation></semantics></math>
 </div>
 </div>
-<div id="sym-sym-1779724044-panel-idx" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1779724044-tab-idx" data-panel="idx" hidden="" tabindex="0">
+<div id="sym-sym-1779731243-panel-idx" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1779731243-tab-idx" data-panel="idx" hidden="" tabindex="0">
 <p class="sym-caption">
 What happens for each observation <em>i</em>.
 </p>
@@ -473,7 +480,7 @@ W_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 \end{aligned}</annotation></semantics></math>
 </div>
 </div>
-<div id="sym-sym-1779724044-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1779724044-tab-mat" data-panel="mat" hidden="" tabindex="0">
+<div id="sym-sym-1779731243-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1779731243-tab-mat" data-panel="mat" hidden="" tabindex="0">
 <p class="sym-caption">
 The actual numbers stacked – what the computer is multiplying. Showing
 first 5 and last 2 rows of n = 80.
@@ -514,9 +521,9 @@ coefficient vector beta listed below.</span>
 </pre>
 </div>
 </div>
-<span id="sym-sym-1779724044-end" tabindex="-1"></span>
+<span id="sym-sym-1779731243-end" tabindex="-1"></span>
 <script>(function() {
-  var root = document.getElementById("sym-sym-1779724044");
+  var root = document.getElementById("sym-sym-1779731243");
   if (!root) return;
   var tabs   = Array.prototype.slice.call(root.querySelectorAll("[role="tab"]"));
   var panels = Array.prototype.slice.call(root.querySelectorAll("[role="tabpanel"]"));
@@ -580,7 +587,7 @@ multiplying</em>.</p>
 <p><code><a href="../reference/symbol_table.html">symbol_table()</a></code> lists every symbol that appears in the
 equations together with its role, units, dimension, and description.
 Dimensions appear in both abstract and concrete forms.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/symbol_table.html">symbol_table</a></span><span class="op">(</span><span class="va">sym</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <colgroup>
@@ -693,7 +700,7 @@ from the parameterisation (positivity of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>,
 conditional independence); <strong>not_checked</strong> assumptions are
 still the user’s responsibility (missing-at-random).</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/assumption_table.html">assumption_table</a></span><span class="op">(</span><span class="va">sym</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <colgroup>
@@ -761,7 +768,7 @@ the fit, e.g. missing-at-random).</p>
 <p><code><a href="../reference/formula_bridge.html">formula_bridge()</a></code> translates R syntax to mathematics.
 Each submodel has its R formula on the left, a plain-English meaning,
 and the corresponding math in both notations.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/formula_bridge.html">formula_bridge</a></span><span class="op">(</span><span class="va">sym</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <colgroup>
@@ -809,7 +816,7 @@ estimate on multiple scales. By default (<code>scale = "all"</code>) it
 shows link, natural, variance (for
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>
 coefficients), and biological readings together:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/parameter_interpretation.html">parameter_interpretation</a></span><span class="op">(</span><span class="va">sym</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <colgroup>
@@ -894,7 +901,7 @@ excludes zero (CI method: <code>wald</code>).</em></p>
 <p>The <code>scale</code> argument filters to a single reading. The
 <code>"biological"</code> scale is the one that goes in a results
 paragraph:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/parameter_interpretation.html">parameter_interpretation</a></span><span class="op">(</span><span class="va">sym</span>, scale <span class="op">=</span> <span class="st">"biological"</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <colgroup>
@@ -966,7 +973,7 @@ so you do not have to.</p>
 random-intercept term and a new distribution row, and the structured
 object gains a <code>random_effects</code> and
 <code>variance_components</code> tibble.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span>
 <span><span class="va">n</span>        <span class="op">&lt;-</span> <span class="fl">80</span></span>
 <span><span class="va">n_groups</span> <span class="op">&lt;-</span> <span class="fl">6</span></span>
@@ -998,7 +1005,7 @@ object gains a <code>random_effects</code> and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><msub><mi>u</mi><mrow><mi>g</mi><mi>r</mi><mi>o</mi><mi>u</mi><mi>p</mi><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo></mrow></msub></mrow><annotation encoding="application/x-tex">+ u_{group(i)}</annotation></semantics></math>
 term, and a new distributional row appears for the random
 intercepts:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/equations.html">equations</a></span><span class="op">(</span><span class="va">sym_re</span><span class="op">)</span></span></code></pre></div>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>W</mi><mi>i</mi></msub><mo>∣</mo><msub><mi>μ</mi><mi>i</mi></msub><mo>,</mo><mspace width="0.167em"></mspace><msub><mi>σ</mi><mi>i</mi></msub><mo>∼</mo><mrow><mi mathvariant="normal">N</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>μ</mi><mi>i</mi></msub><mo>,</mo><mspace width="0.167em"></mspace><msubsup><mi>σ</mi><mi>i</mi><mn>2</mn></msubsup><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>μ</mi><mi>i</mi></msub><mo>=</mo><msub><mi>β</mi><mn>0</mn></msub><mo>+</mo><msub><mi>β</mi><mn>1</mn></msub><mspace width="0.167em"></mspace><msub><mi>T</mi><mi>i</mi></msub><mo>+</mo><msub><mi>u</mi><mrow><mi>g</mi><mi>r</mi><mi>o</mi><mi>u</mi><mi>p</mi><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo></mrow></msub></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>σ</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>γ</mi><mn>0</mn></msub><mo>+</mo><msub><mi>γ</mi><mn>1</mn></msub><mspace width="0.167em"></mspace><msub><mi>T</mi><mi>i</mi></msub></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>u</mi><mrow><mi>g</mi><mi>r</mi><mi>o</mi><mi>u</mi><mi>p</mi></mrow></msub><mo>∼</mo><mi>𝒩</mi><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mspace width="0.167em"></mspace><msubsup><mi>σ</mi><mrow><mi>g</mi><mi>r</mi><mi>o</mi><mi>u</mi><mi>p</mi></mrow><mn>2</mn></msubsup><mo stretchy="false" form="postfix">)</mo></mtd></mtr></mtable><annotation encoding="application/x-tex">
 \begin{aligned}
@@ -1008,7 +1015,7 @@ W_i \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 u_{group} \sim \mathcal{N}(0,\, \sigma_{group}^2)
 \end{aligned}
 </annotation></semantics></math></p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"$$"</span>, <span class="fu"><a href="../reference/as_latex.html">as_latex</a></span><span class="op">(</span><span class="va">sym_re</span>, notation <span class="op">=</span> <span class="st">"both"</span><span class="op">)</span>, <span class="st">"$$"</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">(index notation)</mtext><mtable><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>W</mi><mi>i</mi></msub><mo>∣</mo><msub><mi>μ</mi><mi>i</mi></msub><mo>,</mo><mspace width="0.167em"></mspace><msub><mi>σ</mi><mi>i</mi></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>∼</mo><mrow><mi mathvariant="normal">N</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>μ</mi><mi>i</mi></msub><mo>,</mo><mspace width="0.167em"></mspace><msubsup><mi>σ</mi><mi>i</mi><mn>2</mn></msubsup><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>μ</mi><mi>i</mi></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><msub><mi>β</mi><mn>0</mn></msub><mo>+</mo><msub><mi>β</mi><mn>1</mn></msub><mspace width="0.167em"></mspace><msub><mi>T</mi><mi>i</mi></msub><mo>+</mo><msub><mi>u</mi><mrow><mi>g</mi><mi>r</mi><mi>o</mi><mi>u</mi><mi>p</mi><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo></mrow></msub></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>σ</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><msub><mi>γ</mi><mn>0</mn></msub><mo>+</mo><msub><mi>γ</mi><mn>1</mn></msub><mspace width="0.167em"></mspace><msub><mi>T</mi><mi>i</mi></msub></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>u</mi><mrow><mi>g</mi><mi>r</mi><mi>o</mi><mi>u</mi><mi>p</mi></mrow></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>∼</mo><mi>𝒩</mi><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mspace width="0.167em"></mspace><msubsup><mi>σ</mi><mrow><mi>g</mi><mi>r</mi><mi>o</mi><mi>u</mi><mi>p</mi></mrow><mn>2</mn></msubsup><mo stretchy="false" form="postfix">)</mo></mtd></mtr></mtable><mtext mathvariant="normal">(matrix notation)</mtext><mtable><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mi>𝐰</mi><mo>∣</mo><mi>𝛍</mi><mo>,</mo><mspace width="0.167em"></mspace><mi>𝛔</mi></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>∼</mo><mi>𝒩</mi><mo stretchy="false" form="prefix">(</mo><mi>𝛍</mi><mo>,</mo><mspace width="0.167em"></mspace><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">g</mi></mrow><mo stretchy="false" form="prefix">(</mo><msup><mi>𝛔</mi><mn>2</mn></msup><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mi>𝛍</mi></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>𝐗</mi><mi>𝛃</mi><mo>+</mo><mi>𝐮</mi></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>𝛔</mi><mo stretchy="false" form="postfix">)</mo></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>𝐙</mi><mi>𝛄</mi></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>𝐮</mi><mrow><mi>g</mi><mi>r</mi><mi>o</mi><mi>u</mi><mi>p</mi></mrow></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>∼</mo><mi>𝒩</mi><mo stretchy="false" form="prefix">(</mo><mn>𝟎</mn><mo>,</mo><mspace width="0.167em"></mspace><msubsup><mi>σ</mi><mrow><mi>g</mi><mi>r</mi><mi>o</mi><mi>u</mi><mi>p</mi></mrow><mn>2</mn></msubsup><msub><mi>𝐈</mi><mn>6</mn></msub><mo stretchy="false" form="postfix">)</mo></mtd></mtr></mtable></mrow><annotation encoding="application/x-tex">
 \text{(index notation)}
@@ -1028,7 +1035,7 @@ u_{group} &amp; \sim \mathcal{N}(0,\, \sigma_{group}^2)
 </annotation></semantics></math></p>
 <p>The grouping structure is exposed as tidy tibbles, ready to feed into
 reports or other renderers:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sym_re</span><span class="op">$</span><span class="va">random_effects</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 11</span></span></span>
 <span><span class="co">#&gt;   submodel term_label  lhs_expr group_var component   n_levels component_index</span></span>
@@ -1053,8 +1060,8 @@ which submodel.</p>
 <code><a href="../reference/symbolize.html">symbolize()</a></code>. Each row carries one of five status words:
 <strong>Stable</strong>, <strong>First slice</strong>, <strong>Opt-in
 control</strong>, <strong>Planned or reserved</strong>, or
-<strong>Unsupported</strong>. Today (v0.15) <code><a href="../reference/symbolize.html">symbolize()</a></code>
-reads ten package families: <code>drmTMB</code>, <code>gllvmTMB</code>,
+<strong>Unsupported</strong>. <code><a href="../reference/symbolize.html">symbolize()</a></code> currently reads
+ten package families: <code>drmTMB</code>, <code>gllvmTMB</code>,
 <code>glmmTMB</code>, <code>brms</code>, <code>lme4</code>
 (<code>lmer</code> + <code>glmer</code>), <code>MCMCglmm</code>
 (including animal models), <code>sdmTMB</code> (spatial + spatiotemporal
@@ -1065,7 +1072,7 @@ including location-scale meta-regression), and <code><a href="https://rdrr.io/pk
 the <code>$gam</code> slot). The Gaussian location-scale path on
 <code>drmTMB</code> shown above is the most mature; other classes are
 mostly First slice.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/symbolizer_capabilities.html">symbolizer_capabilities</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 117 × 6</span></span></span>
 <span><span class="co">#&gt;    class  family            component      status              since notes      </span></span>
@@ -1081,10 +1088,10 @@ mostly First slice.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> drmTMB gaussian          rho12          Planned or reserved <span style="color: #BB0000;">NA</span>    Bivariate …</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> drmTMB student           mu             First slice         0.2.2 Student-t …</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 107 more rows</span></span></span></code></pre></div>
-<p>The <a href="symbolizer-roadmap.html">Roadmap article</a> lays out
-the full capability matrix and what’s planned next. If
-<code><a href="../reference/symbolize.html">symbolize()</a></code> errors with a capability message, the registry
-tells you which version is scheduled to lift it.</p>
+<p>For the full capability matrix and what’s planned next, see
+<code><a href="../articles/symbolizer-roadmap.html">vignette("symbolizer-roadmap")</a></code>. If <code><a href="../reference/symbolize.html">symbolize()</a></code>
+errors with a capability message, the registry tells you which version
+is scheduled to lift it.</p>
 <p><strong>Takeaway.</strong> The registry is the single source of truth
 for “what works”. Read the status word before designing around an
 unsupported tuple.</p>

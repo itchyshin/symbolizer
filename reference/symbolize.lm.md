@@ -51,3 +51,8 @@ A `symbolized_model` object.
 CIs come from `stats::confint(fit)`. The method is "Wald-t" – the usual
 frequentist t-based CI you'd see in `summary(fit)`. `ci_method` is set
 to `"wald"` for consistency with the other frequentist extractors.
+
+## References
+
+Chambers, J. M. (1992). Linear models. Chapter 4 of *Statistical Models
+in S* (Chambers, J. M., & Hastie, T. J., eds.). Wadsworth & Brooks/Cole.

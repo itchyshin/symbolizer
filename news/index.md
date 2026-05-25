@@ -1,5 +1,96 @@
 # Changelog
 
+## symbolizer 0.18.1
+
+### v0.18.1 – audit pass: doc + vignette consistency
+
+A documentation-consistency sweep. Three exploration agents (vignette
+audit, R/ documentation audit, top-level files audit) surfaced the
+following inconsistencies, now fixed:
+
+#### Vignette staleness
+
+- `vignettes/symbolizer-gllvm.Rmd` no longer says “`symbolize.gllvmTMB`
+  is a v0.4 First slice still being wired in” with
+  [`tryCatch()`](https://rdrr.io/r/base/conditions.html) guards – the
+  extractor has been live since v0.4-v0.5. Section 5 now invokes
+  [`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
+  directly. Section 9 (“What’s available now, what’s next”) rewritten to
+  reflect current scope (Gaussian + binomial latent variable shipped;
+  further families and bootstrap uncertainty still planned).
+- `vignettes/symbolizer.Rmd` “Today (v0.15)
+  [`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
+  reads ten package families” -\>
+  “[`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
+  currently reads ten package families” (drop the stale version anchor).
+- `vignettes/symbolizer-drmtmb.Rmd` line 482 “v0.1 surface does not plot
+  live” rewritten as “`symbolizer` does not draw the plots itself” (the
+  v0.1 reference is irrelevant by now).
+- `vignettes/symbolizer-drmtmb.Rmd` section 10 “v0.1 ships … v0.2 added
+  …” rewritten to describe the current drmTMB capability set.
+- `vignettes/symbolizer-factors.Rmd` “v0.1 does not yet ship an
+  interaction template” – removed; interaction templates have been in
+  `interpretation-templates.csv` since v0.1.1.
+
+#### R/ documentation
+
+`@references` blocks added to every `symbolize.X` method that didn’t
+already have one:
+
+- `drmTMB` (Nakagawa; Kristensen et al. 2016 TMB)
+- `gllvmTMB` (Nakagawa)
+- `glmmTMB` (Brooks et al. 2017)
+- `brmsfit` (Bürkner 2017)
+- `lmerMod` / `glmerMod` (Bates et al. 2015)
+- `MCMCglmm` (Hadfield 2010)
+- `sdmTMB` (Anderson et al. 2022)
+- `gam` / `bam` (Wood 2017; Wood 2011)
+- `lm` (Chambers 1992)
+- `glm` (McCullagh & Nelder 1989)
+
+`@section Confidence intervals:` blocks added to `symbolize.gam` / `bam`
+(Wald approximations on parametric coefs; smooths summarised separately)
+and `symbolize.gllvmTMB` (Wald via sd_report). `symbolize.glm` gets an
+explicit “profile likelihood” CI note.
+
+#### Top-level files
+
+- `README.Rmd` Positioning paragraph now mentions classical (base-R)
+  regression explicitly, not just GLMM / meta-analysis / additive-model
+  / Bayesian-multilevel.
+- `NEWS.md` v0.15.0 “Still planned beyond this batch” – two items that
+  shipped in v0.16.0 (Slices C + D) are now annotated as shipped.
+
+#### Bug fix: three-views widget rendering in pkgdown / knitted vignettes
+
+- [`as_html_three_views()`](https://itchyshin.github.io/symbolizer/reference/as_html_three_views.md)
+  previously emitted the three tab `<button>` elements with 4-space
+  cosmetic indentation. Pandoc’s markdown reader treats any line with 4+
+  leading spaces as the start of an indented code block, so the buttons
+  were silently re-emitted inside `<pre><code>...</code></pre>` with
+  HTML-escaped angle brackets, causing the raw tags and stylesheet to
+  leak into the rendered page (visible on the deployed pkgdown ladder
+  vignette and any external re-render). The function now keeps all
+  nested HTML at 0-2 spaces of indentation and carries a header comment
+  warning against re-introducing 4+-space indents.
+- `vignettes/symbolizer-ladder.Rmd` no longer wraps the call in
+  `htmltools::tagList(as_html_three_views(sym4))`. `tagList()` treats
+  the character return value as a text node and re-emits the same HTML
+  escaped, on top of the rendered widget. The chunk now uses
+  `invisible(as_html_three_views(sym4))` and a `results = "asis"`
+  context, which lets the function’s internal
+  [`cat()`](https://rdrr.io/r/base/cat.html) write raw HTML once. The
+  “(opens in the Viewer pane)” caption was also wrong –
+  [`cat()`](https://rdrr.io/r/base/cat.html) writes to the console, not
+  to RStudio’s Viewer – and has been replaced with an accurate
+  description of the [`cat()`](https://rdrr.io/r/base/cat.html) + `asis`
+  pattern.
+
+No other code changes. No behaviour changes for the other extractors.
+`testthat::test_file("tests/testthat/test-three-views.R")` continues to
+pass all 40 assertions (the de-indent only changes cosmetic whitespace,
+which the test suite did not depend on).
+
 ## symbolizer 0.18.0
 
 ### v0.18 – Option B debt cleared: simulate_recipe() and diagram surfaces
@@ -206,26 +297,29 @@ relationship is alpha_k ~ 2 \* gamma_k.
 
 #### Still planned beyond this batch
 
-The wider meta-analysis bridge (Slices C + D) is in flight but not in
-v0.15.0:
+Wider meta-analysis bridge items not in v0.15.0. **Update:** the first
+two shipped in v0.16.0:
 
-- glmmTMB `equalto()` / `propto()` detection – treat a glmmTMB fit with
-  `equalto(0 + obs | g, VCV)` as a meta-analysis and route prose through
-  `meta_normal` rather than gaussian.
-- Cross-package “Three faces of meta-analysis” article showing the same
-  model in metafor / brms / glmmTMB / drmTMB with the alpha vs gamma
-  parameterisation relationship made explicit.
+- ✅ glmmTMB `equalto()` / `propto()` detection – **shipped in v0.16.0**
+  (Slice C).
+- ✅ Cross-package “Three faces of meta-analysis” article – **shipped in
+  v0.16.0** as
+  [`vignette("symbolizer-meta")`](https://itchyshin.github.io/symbolizer/articles/symbolizer-meta.md)
+  (Slice D).
 - Double-hierarchical location-scale via brms (Nakagawa et al. 2025 Eq
   19-22): random effects on the scale part with bivariate (u^(l), u^(s))
-  distribution.
+  distribution. Still planned.
 - Publication-bias detection layer (Nakagawa et al. 2025 Section 2.5):
   small-study effect / decline effect / small-study divergence / Proteus
   effect, surfaced via
   [`warning_table()`](https://itchyshin.github.io/symbolizer/reference/warning_table.md).
+  Still planned.
 - I^2 / CV partitioning (Eq 14-16, 26-31): derived heterogeneity
-  measures attached to `metadata$heterogeneity_partition`.
+  measures attached to `metadata$heterogeneity_partition`. Still
+  planned.
 
-These are queued for v0.15.x / v0.16.
+The brms double-hierarchical / publication-bias / I^2 items are queued
+for v0.19+.
 
 ## symbolizer 0.14.2
 

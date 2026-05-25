@@ -323,11 +323,13 @@ three-view widget:
 as_html_three_views(sym4)
 ```
 
-[Skip three-views widget](#sym-sym-1779724032-end)
+[Skip three-views widget](#sym-sym-1779731231-end)
 
-    <button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779724032-tab-eq" aria-controls="sym-sym-1779724032-panel-eq" aria-selected="true" tabindex="0" data-tab="eq"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>1. Equation</button>
-    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779724032-tab-idx" aria-controls="sym-sym-1779724032-panel-idx" aria-selected="false" tabindex="-1" data-tab="idx"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>2. Index</button>
-    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779724032-tab-mat" aria-controls="sym-sym-1779724032-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>3. Matrix (with data)</button>
+▸1. Equation
+
+▸2. Index
+
+▸3. Matrix (with data)
 
 The structural contract. No indices, no numbers – the shape of the
 model.
@@ -416,125 +418,9 @@ are also shown.
   Fitted sigma_hat (first 5): 4.10  3.22  2.77  2.45  3.04
 ```
 
-\<style\>.sym-tabs { position: relative; border: 1px solid \#e5e7eb;
-border-radius: 8px; overflow: hidden; margin: 1em 0; font-family:
--apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-.sym-tablist { display: flex; background: \#f9fafb; border-bottom: 1px
-solid \#e5e7eb; } .sym-tab { flex: 1; text-align: center; padding:
-0.6rem 0.5rem; cursor: pointer; font-weight: 600; color: \#6b7280;
-border: 0; border-right: 1px solid \#e5e7eb; background: transparent;
-user-select: none; font-size: 0.92rem; font-family: inherit; }
-.sym-tab:last-child { border-right: 0; } .sym-tab:hover { background:
-\#fbe7e7; color: \#7a2a2a; } .sym-tab.sym-active { background: \#fff;
-color: \#8a1f22; box-shadow: inset 0 -3px 0 \#a0282b; }
-.sym-tab:focus-visible { outline: 2px solid \#a0282b; outline-offset:
--2px; } .sym-tab-marker { display: inline-block; margin-right: 0.35em;
-opacity: 0; transition: opacity 0.1s; } .sym-tab.sym-active
-.sym-tab-marker { opacity: 1; } .sym-panel { padding: 1rem 1.1rem
-1.2rem; } .sym-panel\[hidden\] { display: none; } .sym-eq { background:
-\#fbe7e7; border: 1px solid \#a0282b; border-radius: 6px; padding:
-0.7rem 1rem; margin: 0.4rem 0; text-align: center; } .sym-caption {
-color: \#6b7280; font-size: 0.85rem; margin: 0.2rem 0 0.4rem; }
-.sym-matrix { font-family: ui-monospace, "SF Mono", Menlo, monospace;
-font-size: 0.78rem; line-height: 1.35; white-space: pre; overflow-x:
-auto; background: \#f9fafb; border: 1px solid \#e5e7eb; border-radius:
-6px; padding: 0.6rem 0.8rem; margin: 0.3rem 0; } .sym-sr-only {
-position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
-overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border:
-0; } .sym-skip { position: absolute; top: -100px; left: 0; padding:
-0.4rem 0.7rem; background: \#8a1f22; color: \#fff; text-decoration:
-none; font-size: 0.85rem; z-index: 5; } .sym-skip:focus { top: 0;
-}\</style\> \<div class="sym-tabs" id="sym-sym-1779724032"\> \<a
-class="sym-skip" href="#sym-sym-1779724032-end"\>Skip three-views
-widget\</a\> \<div class="sym-tablist" role="tablist" aria-label="Three
-views of the model"\> \<button type="button" class="sym-tab sym-active"
-role="tab" id="sym-sym-1779724032-tab-eq"
-aria-controls="sym-sym-1779724032-panel-eq" aria-selected="true"
-tabindex="0" data-tab="eq"\>\<span class="sym-tab-marker"
-aria-hidden="true"\>&#9656;\</span\>1. Equation\</button\> \<button
-type="button" class="sym-tab" role="tab" id="sym-sym-1779724032-tab-idx"
-aria-controls="sym-sym-1779724032-panel-idx" aria-selected="false"
-tabindex="-1" data-tab="idx"\>\<span class="sym-tab-marker"
-aria-hidden="true"\>&#9656;\</span\>2. Index\</button\> \<button
-type="button" class="sym-tab" role="tab" id="sym-sym-1779724032-tab-mat"
-aria-controls="sym-sym-1779724032-panel-mat" aria-selected="false"
-tabindex="-1" data-tab="mat"\>\<span class="sym-tab-marker"
-aria-hidden="true"\>&#9656;\</span\>3. Matrix (with data)\</button\>
-\</div\> \<div class="sym-panel sym-active" role="tabpanel"
-id="sym-sym-1779724032-panel-eq"
-aria-labelledby="sym-sym-1779724032-tab-eq" data-panel="eq"
-tabindex="0"\> \<p class="sym-caption"\>The structural contract. No
-indices, no numbers -- the shape of the model.\</p\> \<div
-class="sym-eq"\>\$\$\begin{aligned} \mathbf{body_mass} \mid
-\boldsymbol{\mu},\\ \boldsymbol{\sigma} & \sim
-\mathcal{N}(\boldsymbol{\mu},\\ \mathrm{diag}(\boldsymbol{\sigma}^2)) \\
-\boldsymbol{\mu} & = \mathbf{X} \boldsymbol{\beta} + \mathbf{u} \\
-\log(\boldsymbol{\sigma}) & = \mathbf{Z} \boldsymbol{\gamma} \\
-\mathbf{u}\_{site} & \sim \mathcal{N}(\mathbf{0},\\ \sigma\_{site}^2
-\mathbf{I}\_{12}) \end{aligned}\$\$\</div\> \</div\> \<div
-class="sym-panel" role="tabpanel" id="sym-sym-1779724032-panel-idx"
-aria-labelledby="sym-sym-1779724032-tab-idx" data-panel="idx" hidden
-tabindex="0"\> \<p class="sym-caption"\>What happens for each
-observation \<em\>i\</em\>.\</p\> \<div
-class="sym-eq"\>\$\$\begin{aligned} body_mass_i \mid \mu_i,\\ \sigma_i &
-\sim \mathrm{Normal}(\mu_i,\\ \sigma_i^2) \\ \mu_i & = \beta\_{0} +
-\beta\_{1} \\ temperature_i + \beta\_{2} \\ \[sex = \mathrm{M}\] +
-u\_{site(i)} \\ \log(\sigma_i) & = \gamma\_{0} + \gamma\_{1} \\
-temperature_i \\ u\_{site} & \sim \mathcal{N}(0,\\ \sigma\_{site}^2)
-\end{aligned}\$\$\</div\> \</div\> \<div class="sym-panel"
-role="tabpanel" id="sym-sym-1779724032-panel-mat"
-aria-labelledby="sym-sym-1779724032-tab-mat" data-panel="mat" hidden
-tabindex="0"\> \<p class="sym-caption"\>The actual numbers stacked --
-what the computer is multiplying. Showing first 5 and last 2 rows of n =
-200.\</p\> \<span class="sym-sr-only"\>Matrix-form expansion of the
-model. Each row shows the response y_i and the corresponding row of the
-design matrix X (showing head and tail rows of the n total
-observations), with the coefficient vector beta listed below. A
-random-effect indicator matrix Z_g and the predicted BLUPs u are also
-shown.\</span\> \<pre class="sym-matrix" aria-hidden="true"\> y X beta
-y_1 = 37.4 1.00 23.9 0 y_2 = 32.7 1.00 17.7 0 y_3 = 38.4 1.00 13.9 1.00
-y_4 = 38.7 1.00 10.7 0 y_5 = 35.8 1.00 16.3 0 ... ... y_199 = 37.6 1.00
-19.9 1.00 y_200 = 37.6 1.00 12.1 1.00 Coefficients (beta, mu): beta_0 =
-31.9 beta_1 = 0.298 beta_2 = 0.766 X_sigma gamma 1.00 23.9 1.00 17.7
-1.00 13.9 1.00 10.7 1.00 16.3 ... 1.00 19.9 1.00 12.1 gamma_0 = 0.476
-gamma_1 = 0.0392 Z_g (group indicator) u (random effects, BLUPs) 1.00 0
-0 0 0 0 0 0 0 0 0 0 0 1.00 0 0 0 0 0 0 0 0 0 0 0 0 1.00 0 0 0 0 0 0 0 0
-0 0 0 0 1.00 0 0 0 0 0 0 0 0 0 0 0 0 1.00 0 0 0 0 0 0 0 ... 0 0 0 0 0 0
-1.00 0 0 0 0 0 0 0 0 0 0 0 0 1.00 0 0 0 0 u_1 = -0.000000257 u_2 =
-0.000000114 u_3 = -0.000000245 u_4 = 0.000000218 u_5 = 0.000000167 u_6 =
--0.0000000271 u_7 = -0.000000126 u_8 = -0.00000000693 u_9 =
--0.0000000901 u_10 = -0.000000120 u_11 = 0.000000322 u_12 = 0.0000000515
-Fitted mu_hat (first 5): 39.0 37.1 36.7 35.0 36.7 Fitted sigma_hat
-(first 5): 4.10 3.22 2.77 2.45 3.04 \</pre\> \</div\> \</div\> \<span
-id="sym-sym-1779724032-end" tabindex="-1"\>\</span\>
-\<script\>(function() { var root =
-document.getElementById("sym-sym-1779724032"); if (!root) return; var
-tabs =
-Array.prototype.slice.call(root.querySelectorAll("\[role="tab"\]")); var
-panels =
-Array.prototype.slice.call(root.querySelectorAll("\[role="tabpanel"\]"));
-function activate(idx) { tabs.forEach(function(t, i) { var on = (i ===
-idx); t.classList.toggle("sym-active", on);
-t.setAttribute("aria-selected", on ? "true" : "false");
-t.setAttribute("tabindex", on ? "0" : "-1"); });
-panels.forEach(function(p, i) { var on = (i === idx);
-p.classList.toggle("sym-active", on); if (on) {
-p.removeAttribute("hidden"); } else { p.setAttribute("hidden", ""); }
-}); if (typeof window.MathJax !== "undefined" &&
-window.MathJax.typesetPromise) { try {
-window.MathJax.typesetPromise(\[panels\[idx\]\]); } catch (e) {} } }
-tabs.forEach(function(t, idx) { t.addEventListener("click", function() {
-activate(idx); t.focus(); }); t.addEventListener("keydown", function(e)
-{ var k = e.key; var n = tabs.length; var next = null; if (k ===
-"ArrowRight") next = (idx + 1) % n; else if (k === "ArrowLeft") next =
-(idx - 1 + n) % n; else if (k === "Home") next = 0; else if (k ===
-"End") next = n - 1; else if (k === "Enter" \|\| k === " ") {
-activate(idx); e.preventDefault(); return; } if (next !== null) {
-activate(next); tabs\[next\].focus(); e.preventDefault(); } }); });
-})();\</script\>
-
-(The widget renders live in this page. In an R session it opens in the
-Viewer pane.)
+(The widget renders live in this page. In an R session,
+`cat(as_html_three_views(sym))` inside a `results = "asis"` chunk will
+render the same widget into a knitted document.)
 
 ## What just happened: a recap
 

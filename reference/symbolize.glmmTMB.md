@@ -66,3 +66,10 @@ confidence band per coefficient: `confint_low`, `confint_high`,
 `ci_method = "wald"` is fast and matches
 `confint(fit, method = "wald")`. `"profile"` and `"uniroot"` are
 available for slower, more honest bands.
+
+## References
+
+Brooks, M. E., Kristensen, K., van Benthem, K. J., Magnusson, A., Berg,
+C. W., Nielsen, A., Skaug, H. J., Maechler, M., & Bolker, B. M. (2017).
+glmmTMB Balances Speed and Flexibility Among Packages for Zero-inflated
+Generalized Linear Mixed Models. *The R Journal*, 9(2), 378-400.

@@ -228,11 +228,13 @@ three tabs over the same fit.
 as_html_three_views(sym, head = 5, tail = 2)
 ```
 
-[Skip three-views widget](#sym-sym-1779724044-end)
+[Skip three-views widget](#sym-sym-1779731243-end)
 
-    <button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779724044-tab-eq" aria-controls="sym-sym-1779724044-panel-eq" aria-selected="true" tabindex="0" data-tab="eq"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>1. Equation</button>
-    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779724044-tab-idx" aria-controls="sym-sym-1779724044-panel-idx" aria-selected="false" tabindex="-1" data-tab="idx"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>2. Index</button>
-    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779724044-tab-mat" aria-controls="sym-sym-1779724044-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>3. Matrix (with data)</button>
+▸1. Equation
+
+▸2. Index
+
+▸3. Matrix (with data)
 
 The structural contract. No indices, no numbers – the shape of the
 model.
@@ -528,11 +530,10 @@ between-group SD (`sd(group)`) goes with which submodel.
 is the registry that gates
 [`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md).
 Each row carries one of five status words: **Stable**, **First slice**,
-**Opt-in control**, **Planned or reserved**, or **Unsupported**. Today
-(v0.15)
+**Opt-in control**, **Planned or reserved**, or **Unsupported**.
 [`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
-reads ten package families: `drmTMB`, `gllvmTMB`, `glmmTMB`, `brms`,
-`lme4` (`lmer` + `glmer`), `MCMCglmm` (including animal models),
+currently reads ten package families: `drmTMB`, `gllvmTMB`, `glmmTMB`,
+`brms`, `lme4` (`lmer` + `glmer`), `MCMCglmm` (including animal models),
 `sdmTMB` (spatial + spatiotemporal fields),
 [`stats::lm`](https://rdrr.io/r/stats/lm.html) /
 [`stats::glm`](https://rdrr.io/r/stats/glm.html), `metafor` (`rma.uni` +
@@ -562,9 +563,9 @@ symbolizer_capabilities()
 #> # ℹ 107 more rows
 ```
 
-The [Roadmap
-article](https://itchyshin.github.io/symbolizer/articles/symbolizer-roadmap.md)
-lays out the full capability matrix and what’s planned next. If
+For the full capability matrix and what’s planned next, see
+[`vignette("symbolizer-roadmap")`](https://itchyshin.github.io/symbolizer/articles/symbolizer-roadmap.md).
+If
 [`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
 errors with a capability message, the registry tells you which version
 is scheduled to lift it.

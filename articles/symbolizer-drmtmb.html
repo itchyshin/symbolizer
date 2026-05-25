@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.18.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.18.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -1048,8 +1048,9 @@ recipes, in the same diagnostics-first order:</p>
 <span><span class="co">#&gt;                                     "plot fitted sigma against the scale-model predictor; on log scale" </span></span>
 <span><span class="co">#&gt;                                                                              Random-effect distribution </span></span>
 <span><span class="co">#&gt;                                                                              "histogram or QQ of BLUPs"</span></span></code></pre></div>
-<p>These are text recipes only; the v0.1 surface does not plot live. The
-recipes name the plot the reader should make next.</p>
+<p>These are text recipes only – <code>symbolizer</code> does not draw
+the plots itself. The recipes name the diagnostic plot the reader should
+make next, in their own plotting framework of choice.</p>
 <p><strong>Takeaway.</strong> Diagnostics before coefficients. The
 extraction-calls list is the order a reader should work through the
 fit.</p>
@@ -1196,11 +1197,14 @@ that names the row in the registry. The registry, not the prose, decides
 what <code><a href="../reference/symbolize.html">symbolize()</a></code> accepts; check the status word before
 designing a workflow around a tuple.</p>
 <p><strong>Takeaway.</strong> The capability registry is the single
-source of truth. v0.1 ships Gaussian <code>mu</code>,
-<code>sigma</code>, and intercept-only random effects; v0.2 added the
-full bivariate Gaussian surface (<code>mu1</code>, <code>mu2</code>,
-<code>sigma1</code>, <code>sigma2</code>, <code>rho12</code>); the rest
-of the roadmap is non-Gaussian families.</p>
+source of truth. For <code>drmTMB</code> it covers the Gaussian
+location-scale family (including random intercepts and random slopes),
+the full bivariate Gaussian surface (<code>mu1</code>, <code>mu2</code>,
+<code>sigma1</code>, <code>sigma2</code>, <code>rho12</code>), the
+Student-t / lognormal / Gamma / beta / beta_binomial / Poisson / nbinom2
+/ truncated_nbinom2 / cumulative_logit families, and the zero-inflation
+and hurdle submodels. See <code><a href="../articles/symbolizer-roadmap.html">vignette("symbolizer-roadmap")</a></code>
+for the full matrix.</p>
 </div>
 <div class="section level2">
 <h2 id="where-to-read-next">11. Where to read next<a class="anchor" aria-label="anchor" href="#where-to-read-next"></a>

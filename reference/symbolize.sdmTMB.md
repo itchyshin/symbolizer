@@ -50,3 +50,11 @@ A `symbolized_model` object.
 Fixed-effect CIs come from `sdmTMB::tidy(fit)` (Wald, 95% by default).
 Random-parameter CIs (range, spatial SD, spatiotemporal SD) come from
 `sdmTMB::tidy(fit, "ran_pars")` and appear in `variance_components`.
+
+## References
+
+Anderson, S. C., Ward, E. J., English, P. A., & Barnett, L. A. K.
+(2022). sdmTMB: an R package for fast, flexible, and user-friendly
+generalized linear mixed effects models with spatial and spatiotemporal
+random fields. *bioRxiv*.
+[doi:10.1101/2022.03.24.485545](https://doi.org/10.1101/2022.03.24.485545)

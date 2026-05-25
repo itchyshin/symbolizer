@@ -1,12 +1,13 @@
-# Symbolize a gllvmTMB fit (Gaussian latent-variable, v0.1)
+# Symbolize a gllvmTMB fit (Gaussian and binomial latent-variable models)
 
 Builds a
 [`symbolized_model`](https://itchyshin.github.io/symbolizer/reference/new_symbolized_model.md)
-from a `gllvmTMB` fit. v0.1 covers the Gaussian B-tier latent-variable
-First slice: per-trait intercepts (`0 + trait`), the between-unit
-reduced-rank loading term (`latent(0 + trait | unit, d = K)`), and the
-optional per-trait unique variances (`unique(0 + trait | unit)`). Other
-families and covstructs return capability errors via
+from a `gllvmTMB` fit. Covers the Gaussian and binomial B-tier
+latent-variable families: per-trait intercepts (`0 + trait`), the
+between-unit reduced-rank loading term
+(`latent(0 + trait | unit, d = K)`), and the optional per-trait unique
+variances (`unique(0 + trait | unit)`). Other families and covstructs
+return capability errors via
 [`capability_check()`](https://itchyshin.github.io/symbolizer/reference/capability_check.md).
 
 ## Usage
@@ -45,3 +46,17 @@ symbolize(fit, symbols = NULL, units = NULL, context = NULL, ...)
 ## Value
 
 A `symbolized_model` object.
+
+## Confidence intervals
+
+Fixed-effect estimates and Wald-style approximate CIs are pulled from
+`summary(fit$sd_report, "fixed")`. Loadings (`\boldsymbol{\Lambda}_B`)
+and the between-unit covariance (`\boldsymbol{\Sigma}_B`) are point
+estimates; parametric-bootstrap uncertainty via
+[`gllvmTMB::bootstrap_Sigma()`](https://itchyshin.github.io/gllvmTMB/reference/bootstrap_Sigma.html)
+is on the deferred list.
+
+## References
+
+Nakagawa, S. (2024+). `gllvmTMB`: Generalized linear latent-variable
+models in TMB. <https://itchyshin.github.io/gllvmTMB/>

@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.18.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.18.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -72,7 +72,7 @@
 <h2 id="positioning">Positioning<a class="anchor" aria-label="anchor" href="#positioning"></a>
 </h2>
 <blockquote>
-<p><code>symbolizer</code> makes a fitted model <strong>auditable</strong>. It connects the R formula, the symbolic model in both notations, every parameter’s scale, the assumptions that are stated vs. implied vs. unchecked, what each coefficient means biologically, and the next diagnostic steps — across the GLMM, meta-analysis, additive-model, and Bayesian-multilevel packages an ecologist or evolutionary biologist actually uses.</p>
+<p><code>symbolizer</code> makes a fitted model <strong>auditable</strong>. It connects the R formula, the symbolic model in both notations, every parameter’s scale, the assumptions that are stated vs. implied vs. unchecked, what each coefficient means biologically, and the next diagnostic steps — across the GLMM, meta-analysis, additive-model, Bayesian-multilevel, and classical (base-R) regression packages an ecologist or evolutionary biologist actually uses.</p>
 </blockquote>
 <p><code>symbolizer</code> is the complement to <a href="https://datalorax.github.io/equatiomatic/" class="external-link"><code>equatiomatic</code></a>, not a replacement. Reach for <code>equatiomatic</code> when you want a clean LaTeX equation for one <code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm()</a></code> or <code>lmer()</code> model. Reach for <code>symbolizer</code> when you need to understand the model — across multi-submodel distributional fits, mixed models, latent-variable, spatial, meta-analytic, or additive structures — its assumptions, what each coefficient means on a natural scale, both notations side by side, and how your data actually flows through the matrices.</p>
 <table class="table">
@@ -197,14 +197,14 @@ W_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 <code class="sourceCode R"><span><span class="fu"><a href="reference/symbol_table.html">symbol_table</a></span><span class="op">(</span><span class="va">sym</span>, notation <span class="op">=</span> <span class="st">"both"</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <colgroup>
+<col width="14%">
 <col width="12%">
-<col width="12%">
-<col width="12%">
-<col width="12%">
-<col width="12%">
-<col width="12%">
-<col width="12%">
-<col width="12%">
+<col width="7%">
+<col width="3%">
+<col width="8%">
+<col width="19%">
+<col width="16%">
+<col width="18%">
 </colgroup>
 <thead><tr>
 <th align="left">index</th>
@@ -307,10 +307,10 @@ W_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 <code class="sourceCode R"><span><span class="fu"><a href="reference/assumption_table.html">assumption_table</a></span><span class="op">(</span><span class="va">sym</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <colgroup>
-<col width="25%">
-<col width="25%">
-<col width="25%">
-<col width="25%">
+<col width="12%">
+<col width="33%">
+<col width="41%">
+<col width="12%">
 </colgroup>
 <thead><tr>
 <th align="left">assumption</th>
@@ -364,14 +364,14 @@ W_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 <p>The biological reading on each coefficient, with the estimate from the fit:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/parameter_interpretation.html">parameter_interpretation</a></span><span class="op">(</span><span class="va">sym</span>, scale <span class="op">=</span> <span class="st">"biological"</span><span class="op">)</span></span></code></pre></div>
-<table style="width:100%;" class="table">
+<table class="table">
 <colgroup>
-<col width="16%">
-<col width="16%">
-<col width="16%">
-<col width="16%">
-<col width="16%">
-<col width="16%">
+<col width="5%">
+<col width="7%">
+<col width="10%">
+<col width="5%">
+<col width="10%">
+<col width="60%">
 </colgroup>
 <thead><tr>
 <th align="left">submodel</th>
@@ -422,9 +422,10 @@ W_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 <h3 id="three-views-of-the-same-fit">Three views of the same fit<a class="anchor" aria-label="anchor" href="#three-views-of-the-same-fit"></a>
 </h3>
 <p><code>as_html_three_views(sym)</code> opens an interactive <em>Equation / Index / Matrix-with-data</em> widget that runs your actual numeric arrays through the model live. Three tabs — equation, expanded scalar form, matrix form with data — backed by the same <code>symbolized_model</code> object.</p>
-<figure><img src="reference/figures/three-views-widget.png" alt="Three-views widget for a drmTMB location-scale fit"><figcaption aria-hidden="true">
-Three-views widget for a drmTMB location-scale fit
-</figcaption></figure><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="float">
+<img src="reference/figures/three-views-widget.png" alt="Three-views widget for a drmTMB location-scale fit"><div class="figcaption">Three-views widget for a drmTMB location-scale fit</div>
+</div>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/as_html_three_views.html">as_html_three_views</a></span><span class="op">(</span><span class="va">sym</span><span class="op">)</span></span></code></pre></div>
 <p>The widget renders live in <a href="articles/symbolizer-ladder.html"><code>vignette("symbolizer-ladder")</code></a>, which is also the recommended on-ramp — it builds a model from <code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm()</a></code> to location-scale one rung at a time and uses the same <code><a href="reference/symbolize.html">symbolize()</a></code> call at every step.</p>
 </div>
@@ -435,8 +436,8 @@ Three-views widget for a drmTMB location-scale fit
 <p>Pre-release. Read status words consistently:</p>
 <table class="table">
 <colgroup>
-<col width="50%">
-<col width="50%">
+<col width="18%">
+<col width="81%">
 </colgroup>
 <thead><tr>
 <th>Status word</th>

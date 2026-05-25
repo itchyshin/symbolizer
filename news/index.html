@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.18.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.18.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,6 +34,66 @@
       <small>Source: <a href="https://github.com/itchyshin/symbolizer/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.18.1" id="symbolizer-0181">symbolizer 0.18.1<a class="anchor" aria-label="anchor" href="#symbolizer-0181"></a></h2>
+<div class="section level3">
+<h3 id="v0181--audit-pass-doc--vignette-consistency-0-18-1">v0.18.1 – audit pass: doc + vignette consistency<a class="anchor" aria-label="anchor" href="#v0181--audit-pass-doc--vignette-consistency-0-18-1"></a></h3>
+<p>A documentation-consistency sweep. Three exploration agents (vignette audit, R/ documentation audit, top-level files audit) surfaced the following inconsistencies, now fixed:</p>
+<div class="section level4">
+<h4 id="vignette-staleness-0-18-1">Vignette staleness<a class="anchor" aria-label="anchor" href="#vignette-staleness-0-18-1"></a></h4>
+<ul><li>
+<code>vignettes/symbolizer-gllvm.Rmd</code> no longer says “<code>symbolize.gllvmTMB</code> is a v0.4 First slice still being wired in” with <code><a href="https://rdrr.io/r/base/conditions.html" class="external-link">tryCatch()</a></code> guards – the extractor has been live since v0.4-v0.5. Section 5 now invokes <code><a href="../reference/symbolize.html">symbolize()</a></code> directly. Section 9 (“What’s available now, what’s next”) rewritten to reflect current scope (Gaussian + binomial latent variable shipped; further families and bootstrap uncertainty still planned).</li>
+<li>
+<code>vignettes/symbolizer.Rmd</code> “Today (v0.15) <code><a href="../reference/symbolize.html">symbolize()</a></code> reads ten package families” -&gt; “<code><a href="../reference/symbolize.html">symbolize()</a></code> currently reads ten package families” (drop the stale version anchor).</li>
+<li>
+<code>vignettes/symbolizer-drmtmb.Rmd</code> line 482 “v0.1 surface does not plot live” rewritten as “<code>symbolizer</code> does not draw the plots itself” (the v0.1 reference is irrelevant by now).</li>
+<li>
+<code>vignettes/symbolizer-drmtmb.Rmd</code> section 10 “v0.1 ships … v0.2 added …” rewritten to describe the current drmTMB capability set.</li>
+<li>
+<code>vignettes/symbolizer-factors.Rmd</code> “v0.1 does not yet ship an interaction template” – removed; interaction templates have been in <code>interpretation-templates.csv</code> since v0.1.1.</li>
+</ul></div>
+<div class="section level4">
+<h4 id="r-documentation-0-18-1">R/ documentation<a class="anchor" aria-label="anchor" href="#r-documentation-0-18-1"></a></h4>
+<p><code>@references</code> blocks added to every <code>symbolize.X</code> method that didn’t already have one:</p>
+<ul><li>
+<code>drmTMB</code> (Nakagawa; Kristensen et al. 2016 TMB)</li>
+<li>
+<code>gllvmTMB</code> (Nakagawa)</li>
+<li>
+<code>glmmTMB</code> (Brooks et al. 2017)</li>
+<li>
+<code>brmsfit</code> (Bürkner 2017)</li>
+<li>
+<code>lmerMod</code> / <code>glmerMod</code> (Bates et al. 2015)</li>
+<li>
+<code>MCMCglmm</code> (Hadfield 2010)</li>
+<li>
+<code>sdmTMB</code> (Anderson et al. 2022)</li>
+<li>
+<code>gam</code> / <code>bam</code> (Wood 2017; Wood 2011)</li>
+<li>
+<code>lm</code> (Chambers 1992)</li>
+<li>
+<code>glm</code> (McCullagh &amp; Nelder 1989)</li>
+</ul><p><code>@section Confidence intervals:</code> blocks added to <code>symbolize.gam</code> / <code>bam</code> (Wald approximations on parametric coefs; smooths summarised separately) and <code>symbolize.gllvmTMB</code> (Wald via sd_report). <code>symbolize.glm</code> gets an explicit “profile likelihood” CI note.</p>
+</div>
+<div class="section level4">
+<h4 id="top-level-files-0-18-1">Top-level files<a class="anchor" aria-label="anchor" href="#top-level-files-0-18-1"></a></h4>
+<ul><li>
+<code>README.Rmd</code> Positioning paragraph now mentions classical (base-R) regression explicitly, not just GLMM / meta-analysis / additive-model / Bayesian-multilevel.</li>
+<li>
+<code>NEWS.md</code> v0.15.0 “Still planned beyond this batch” – two items that shipped in v0.16.0 (Slices C + D) are now annotated as shipped.</li>
+</ul></div>
+<div class="section level4">
+<h4 id="bug-fix-three-views-widget-rendering-in-pkgdown--knitted-vignettes-0-18-1">Bug fix: three-views widget rendering in pkgdown / knitted vignettes<a class="anchor" aria-label="anchor" href="#bug-fix-three-views-widget-rendering-in-pkgdown--knitted-vignettes-0-18-1"></a></h4>
+<ul><li>
+<code><a href="../reference/as_html_three_views.html">as_html_three_views()</a></code> previously emitted the three tab <code>&lt;button&gt;</code> elements with 4-space cosmetic indentation. Pandoc’s markdown reader treats any line with 4+ leading spaces as the start of an indented code block, so the buttons were silently re-emitted inside <code>&lt;pre&gt;&lt;code&gt;...&lt;/code&gt;&lt;/pre&gt;</code> with HTML-escaped angle brackets, causing the raw tags and stylesheet to leak into the rendered page (visible on the deployed pkgdown ladder vignette and any external re-render). The function now keeps all nested HTML at 0-2 spaces of indentation and carries a header comment warning against re-introducing 4+-space indents.</li>
+<li>
+<code>vignettes/symbolizer-ladder.Rmd</code> no longer wraps the call in <code>htmltools::tagList(as_html_three_views(sym4))</code>. <code>tagList()</code> treats the character return value as a text node and re-emits the same HTML escaped, on top of the rendered widget. The chunk now uses <code>invisible(as_html_three_views(sym4))</code> and a <code>results = "asis"</code> context, which lets the function’s internal <code><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat()</a></code> write raw HTML once. The “(opens in the Viewer pane)” caption was also wrong – <code><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat()</a></code> writes to the console, not to RStudio’s Viewer – and has been replaced with an accurate description of the <code><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat()</a></code> + <code>asis</code> pattern.</li>
+</ul><p>No other code changes. No behaviour changes for the other extractors. <code>testthat::test_file("tests/testthat/test-three-views.R")</code> continues to pass all 40 assertions (the de-indent only changes cosmetic whitespace, which the test suite did not depend on).</p>
+</div>
+</div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.18.0" id="symbolizer-0180">symbolizer 0.18.0<a class="anchor" aria-label="anchor" href="#symbolizer-0180"></a></h2>
 <div class="section level3">
@@ -141,13 +201,13 @@
 <li>Robustness sweep gains one row: rma.ls location-scale.</li>
 </ul><div class="section level4">
 <h4 id="still-planned-beyond-this-batch-0-15-0">Still planned beyond this batch<a class="anchor" aria-label="anchor" href="#still-planned-beyond-this-batch-0-15-0"></a></h4>
-<p>The wider meta-analysis bridge (Slices C + D) is in flight but not in v0.15.0:</p>
-<ul><li>glmmTMB <code>equalto()</code> / <code>propto()</code> detection – treat a glmmTMB fit with <code>equalto(0 + obs | g, VCV)</code> as a meta-analysis and route prose through <code>meta_normal</code> rather than gaussian.</li>
-<li>Cross-package “Three faces of meta-analysis” article showing the same model in metafor / brms / glmmTMB / drmTMB with the alpha vs gamma parameterisation relationship made explicit.</li>
-<li>Double-hierarchical location-scale via brms (Nakagawa et al. 2025 Eq 19-22): random effects on the scale part with bivariate (u^(l), u^(s)) distribution.</li>
-<li>Publication-bias detection layer (Nakagawa et al. 2025 Section 2.5): small-study effect / decline effect / small-study divergence / Proteus effect, surfaced via <code><a href="../reference/warning_table.html">warning_table()</a></code>.</li>
-<li>I^2 / CV partitioning (Eq 14-16, 26-31): derived heterogeneity measures attached to <code>metadata$heterogeneity_partition</code>.</li>
-</ul><p>These are queued for v0.15.x / v0.16.</p>
+<p>Wider meta-analysis bridge items not in v0.15.0. <strong>Update:</strong> the first two shipped in v0.16.0:</p>
+<ul><li>✅ glmmTMB <code>equalto()</code> / <code>propto()</code> detection – <strong>shipped in v0.16.0</strong> (Slice C).</li>
+<li>✅ Cross-package “Three faces of meta-analysis” article – <strong>shipped in v0.16.0</strong> as <code><a href="../articles/symbolizer-meta.html">vignette("symbolizer-meta")</a></code> (Slice D).</li>
+<li>Double-hierarchical location-scale via brms (Nakagawa et al. 2025 Eq 19-22): random effects on the scale part with bivariate (u^(l), u^(s)) distribution. Still planned.</li>
+<li>Publication-bias detection layer (Nakagawa et al. 2025 Section 2.5): small-study effect / decline effect / small-study divergence / Proteus effect, surfaced via <code><a href="../reference/warning_table.html">warning_table()</a></code>. Still planned.</li>
+<li>I^2 / CV partitioning (Eq 14-16, 26-31): derived heterogeneity measures attached to <code>metadata$heterogeneity_partition</code>. Still planned.</li>
+</ul><p>The brms double-hierarchical / publication-bias / I^2 items are queued for v0.19+.</p>
 </div>
 </div>
 </div>

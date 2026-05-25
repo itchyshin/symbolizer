@@ -152,16 +152,17 @@ takes a long-format frame and a glmmTMB-style formula.
 `latent(0 + trait | individual, d = 2)` is the between-individual
 reduced-rank decomposition with two latent axes.
 `unique(0 + trait | individual)` adds the trait-specific
-between-individual uniqueness $`\mathbf{S}`$. `unique(0 + trait | obs)`
-absorbs the within-individual (across-session) residual.
+between-individual uniqueness $`\boldsymbol{\Psi}_B`$. The
+within-individual (across-session) residual is absorbed into the
+row-level $`\sigma^2_e`$ that `gllvmTMB` carries for the Gaussian
+family.
 
 ``` r
 
 fit <- gllvmTMB(
   value ~ 0 + trait +
           latent(0 + trait | individual, d = 2) +
-          unique(0 + trait | individual) +
-          unique(0 + trait | obs),
+          unique(0 + trait | individual),
   data     = dat,
   family   = gaussian(),
   trait    = "trait",
@@ -170,11 +171,6 @@ fit <- gllvmTMB(
   cluster  = "session",
   silent   = TRUE
 )
-#> ℹ Auto-suppressing `sigma_eps`: `unique(0 + trait | obs)` is at the per-row
-#>   level, so it already absorbs the observation residual.
-#> • Fixed at 0.00146 (~1/1000 of sd(y)) to keep the Gaussian density
-#>   well-defined; the row-level residual variance is fully captured by
-#>   `unique()`.
 class(fit)
 #> [1] "gllvmTMB_multi" "gllvmTMB"
 ```
@@ -185,67 +181,63 @@ simulator is intentionally well-posed.
 
 **Takeaway.** One
 [`gllvmTMB()`](https://itchyshin.github.io/gllvmTMB/reference/gllvmTMB.html)
-call. The formula carries four things: trait intercepts, a 2-axis latent
-decomposition, between-individual uniquenesses, and a within-individual
-residual.
+call. The formula carries three things: trait intercepts, a 2-axis
+between-individual latent decomposition, and trait-specific
+between-individual uniquenesses. The row-level $`\sigma^2_e`$ collects
+the within-individual residual; a separate trait-specific
+within-individual uniqueness ($`\boldsymbol{\Psi}_W`$) is on the roadmap
+but not in this first slice.
 
 ## 5. Symbolize it
 
-`symbolize.gllvmTMB` is a v0.4 First slice still being wired in (Agent
-G1’s parallel work). The vignette is structured so it works either way:
-the call is wrapped in
-[`tryCatch()`](https://rdrr.io/r/base/conditions.html) and downstream
-chunks guard on the return value.
+`symbolize.gllvmTMB` covers the Gaussian and binomial latent-variable
+families (First slice since v0.4 – v0.5):
 
 ``` r
 
-sym <- tryCatch(
-  symbolize(
-    fit,
-    symbols = c(value = "y_{ij}", trait = "j", individual = "i"),
-    context = "behavioural-syndromes GLLVM"
-  ),
-  error = function(e) {
-    cat(
-      "Note: symbolize.gllvmTMB is a v0.4 First slice still being wired in.\n",
-      "Once it lands, calling symbolize() here will return a structured\n",
-      "symbolized_model that the same accessors below consume.\n",
-      sep = ""
-    )
-    NULL
-  }
+sym <- symbolize(
+  fit,
+  symbols = c(value = "y_{ij}", trait = "j", individual = "i"),
+  context = "behavioural-syndromes GLLVM"
 )
-#> Note: symbolize.gllvmTMB is a v0.4 First slice still being wired in.
-#> Once it lands, calling symbolize() here will return a structured
-#> symbolized_model that the same accessors below consume.
 ```
 
-When the method lands, the returned `symbolized_model` will carry the
-same surfaces as the `drmTMB` examples in the other vignettes:
+The returned `symbolized_model` carries the same surfaces as the
+`drmTMB` examples in the other vignettes:
 
-- `equations(sym)` will return one row for the conditional distribution,
-  one for the linear predictor, and one for the latent variable
-  distribution $`\mathbf{z}_i \sim \mathcal{N}(\mathbf{0},
+- `equations(sym)` returns one row for the conditional distribution, one
+  for the linear predictor, and one for the latent variable distribution
+  $`\mathbf{z}_i \sim \mathcal{N}(\mathbf{0},
   \mathbf{I}_{d_B})`$.
-- `symbol_table(sym)` will list each symbol — $`\mathbf{Y}`$,
+- `symbol_table(sym)` lists each symbol — $`\mathbf{Y}`$,
   $`\boldsymbol{\Lambda}`$, $`\mathbf{Z}`$, $`\boldsymbol{\mu}`$,
-  $`\mathbf{S}`$ — with its abstract dimension
-  (`\mathbb{R}^{n \times T}`, `\mathbb{R}^{T \times d_B}`,
-  `\mathbb{R}^{n \times d_B}`) and its concrete dimension for this fit
-  (`\mathbb{R}^{40 \times 5}`, `\mathbb{R}^{5 \times 2}`,
-  `\mathbb{R}^{40 \times 2}`).
-- `assumption_table(sym)` will state the standard-Gaussian prior on the
+  $`\mathbf{S}`$ — with its abstract dimension and its concrete
+  dimension for this fit.
+- `assumption_table(sym)` states the standard-Gaussian prior on the
   latent variables, the trait-specific Gaussian residuals, and the
   lower-triangular identification convention on
   $`\boldsymbol{\Lambda}`$.
-- `parameter_interpretation(sym)` will read each loading as the
-  contribution of a one-SD shift on axis $`k`$ to trait $`j`$.
+- `parameter_interpretation(sym)` reads each loading as the contribution
+  of a one-SD shift on axis $`k`$ to trait $`j`$.
 
-For now we read the loadings directly from gllvmTMB’s own accessors.
+``` r
 
-**Takeaway.** The structural object is on the v0.4 roadmap. The
-accessors in section 6 are the gllvmTMB-side surface that
-`symbolize.gllvmTMB` will mirror.
+equations(sym)
+```
+
+``` math
+\begin{aligned}
+y_{ij} \mid \mu_{t(j)}, \boldsymbol{\Lambda}_B, \mathbf{z}_{B,i}, \sigma_\epsilon \sim \mathrm{Normal}(\mu_{t(j)} + (\boldsymbol{\Lambda}_B \mathbf{z}_{B,i})_{t(j)}, \sigma_\epsilon^2) \\
+\eta_{ij} = \mu_{t(j)} + \sum_{k=1}^{d_B} \lambda_{B,t(j)k} z_{B,ik} \\
+z_{B,ik} \sim \mathcal{N}(0, 1) \\
+\Sigma_{B,tt'} = \sum_{k=1}^{d_B} \lambda_{B,tk} \lambda_{B,t'k} + \psi_{B,t} \delta_{tt'}
+\end{aligned}
+```
+
+The structural-symbolic surface is the same
+[`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
+call the package uses for every other model class. Section 6 below reads
+the loadings directly from `gllvmTMB`’s native accessors for comparison.
 
 ## 6. Reading the latent axes biologically
 
@@ -258,11 +250,11 @@ of traits and near zero on the rest.
 
 getLoadings(fit, rotate = "varimax")
 #>                LV1         LV2
-#> trait_1 0.41772304  0.51115670
-#> trait_2 0.94899617 -0.06185149
-#> trait_3 0.60377617  0.35032356
-#> trait_4 0.07808868  0.55425773
-#> trait_5 0.04018411  0.63548458
+#> trait_1 0.41286758  0.51358005
+#> trait_2 0.96220244 -0.06232972
+#> trait_3 0.59822023  0.35650155
+#> trait_4 0.07572939  0.55762911
+#> trait_5 0.03928119  0.63132134
 ```
 
 Reading down the columns of the rotated loading matrix, the first axis
@@ -279,7 +271,7 @@ variance that the shared axes capture:
 
 extract_communality(fit)
 #>   trait_1   trait_2   trait_3   trait_4   trait_5 
-#> 0.4346916 0.9999998 0.4802252 0.3698218 0.8354094
+#> 0.4286516 0.9999997 0.4816947 0.3769110 0.8343111
 ```
 
 Traits with communality near 1 are well-explained by the shared axes;
@@ -296,16 +288,16 @@ co <- extract_correlations(fit)
 co_B <- co[co$tier == "B", c("trait_i", "trait_j", "correlation", "lower", "upper")]
 co_B
 #>    trait_i trait_j  correlation       lower     upper
-#> 1  trait_1 trait_2  0.383117590  0.08131245 0.6205657
-#> 2  trait_1 trait_3  0.427619562  0.13395387 0.6522450
-#> 3  trait_2 trait_3  0.575506327  0.32166337 0.7521700
-#> 4  trait_1 trait_4  0.342823160  0.03505772 0.5911970
-#> 5  trait_2 trait_4  0.045496546 -0.26983710 0.3520169
-#> 6  trait_3 trait_4  0.260280784 -0.05574866 0.5289065
-#> 7  trait_1 trait_5  0.489755175  0.21033527 0.6952022
-#> 8  trait_2 trait_5 -0.001767607 -0.31310455 0.3099124
-#> 9  trait_3 trait_5  0.351814509  0.04526602 0.5978080
-#> 10 trait_4 trait_5  0.554195857  0.29332538 0.7382549
+#> 1  trait_1 trait_2  0.376366305  0.07347079 0.6156910
+#> 2  trait_1 trait_3  0.425867914  0.13185003 0.6510127
+#> 3  trait_2 trait_3  0.571987850  0.31695306 0.7498833
+#> 4  trait_1 trait_4  0.344313716  0.03674559 0.5922953
+#> 5  trait_2 trait_4  0.043119159 -0.27204430 0.3499283
+#> 6  trait_3 trait_4  0.265401446 -0.05026343 0.5328568
+#> 7  trait_1 trait_5  0.488456169  0.20870275 0.6943189
+#> 8  trait_2 trait_5 -0.002326723 -0.31360877 0.3094069
+#> 9  trait_3 trait_5  0.357724385  0.05201084 0.6021351
+#> 10 trait_4 trait_5  0.559281305  0.30004646 0.7415899
 ```
 
 The two within-syndrome correlations (traits 1-2-3 among themselves and
@@ -393,12 +385,13 @@ The accessors in Section 6 —
 latent-variable case as a **First slice**: every piece walked above is
 shipped today, and the matrix-form story is fully populated.
 
-**Shipped today (v0.2):**
+**Shipped today:**
 
 - [`symbolize.gllvmTMB()`](https://itchyshin.github.io/symbolizer/reference/symbolize.gllvmTMB.md)
-  for Gaussian latent variables with mu, $`\boldsymbol{\Lambda}_B`$,
-  $`\boldsymbol{\Sigma}_B`$, $`\boldsymbol{\Psi}_B`$, and the
-  within-unit residual SD $`\sigma_\varepsilon`$.
+  for Gaussian and binomial latent-variable families: mu,
+  $`\boldsymbol{\Lambda}_B`$, $`\boldsymbol{\Sigma}_B`$,
+  $`\boldsymbol{\Psi}_B`$, and the within-unit residual SD
+  $`\sigma_\varepsilon`$ (Gaussian only). First slice since v0.4 – v0.5.
 - `compare_symbolic(fit_d1, fit_d2)` — diffs the structural
   specifications of $`d_B = 1`$ versus $`d_B = 2`$ side by side (which
   lines change, which assumption rows change), and with `metrics = TRUE`
@@ -406,15 +399,15 @@ shipped today, and the matrix-form story is fully populated.
   [`vignette("symbolizer-compare")`](https://itchyshin.github.io/symbolizer/articles/symbolizer-compare.md)
   for the worked example.
 
-**On the roadmap:**
+**Still planned:**
 
-1.  **Non-Gaussian gllvmTMB families (v0.5).** binomial, count,
-    beta-binomial — each adds a link to the linear predictor and
-    reshapes the loadings interpretation.
-2.  **Automated syndromes reading.**
+1.  **Other non-Gaussian gllvmTMB families** (count, Tweedie, ordinal) —
+    each adds a link to the linear predictor and reshapes the loadings
+    interpretation.
+2.  **Automated syndromes reading** —
     `parameter_interpretation(sym, scale = "biological")` produces one
-    row per (trait, axis) pair today; v0.5+ adds the natural-scale
-    reading for non-Gaussian families.
+    row per (trait, axis) pair today; a later slice will add the
+    natural-scale reading for the remaining families.
 3.  **Uncertainty on $`\boldsymbol{\Lambda}`$.**
     [`bootstrap_Sigma()`](https://itchyshin.github.io/gllvmTMB/reference/bootstrap_Sigma.html)
     from gllvmTMB returns parametric-bootstrap draws of the loading
@@ -428,5 +421,6 @@ shipped today, and the matrix-form story is fully populated.
     $`\boldsymbol{\Lambda}_W`$) for repeated-measures behaviour / trait
     data — `gllvmTMB_multi`.
 
-**Takeaway.** v0.2 ships the latent-variable Gaussian case end-to-end;
-further families and uncertainty surfaces come in v0.5+.
+See
+[`vignette("symbolizer-roadmap")`](https://itchyshin.github.io/symbolizer/articles/symbolizer-roadmap.md)
+for the full capability matrix and what’s planned beyond gllvmTMB.
