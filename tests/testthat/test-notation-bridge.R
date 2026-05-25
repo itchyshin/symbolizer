@@ -70,6 +70,11 @@ test_that("response symbol matrix strips _i and bolds the lowercased root", {
   sym1 <- symbolize(fit, symbols = c(body_mass = "W_i"))
   expect_equal(sym1$distribution$response_symbol_matrix, "\\mathbf{w}")
   sym2 <- symbolize(fit)
-  # The default response symbol is "body_mass_i"; the matrix form is bold lower.
-  expect_equal(sym2$distribution$response_symbol_matrix, "\\mathbf{body_mass}")
+  # The default response-symbol fallback is now `\\mathrm{body\\_mass}_i`
+  # (v0.19.2: underscores in the column name are escaped so MathJax
+  # doesn't render `body_mass` as "body subscript m subscript ass").
+  # The matrix-form is the lowercased bold-vector with `\\_` still
+  # escaped: `\\mathbf{body\\_mass}`.
+  expect_equal(sym2$distribution$response_symbol_matrix,
+               "\\mathbf{body\\_mass}")
 })

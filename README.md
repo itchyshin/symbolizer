@@ -179,76 +179,104 @@ as_html_three_views(sym)
 .sym-tab.sym-active .sym-tab-marker { opacity: 1; }
 .sym-panel { padding: 1rem 1.1rem 1.2rem; }
 .sym-panel[hidden] { display: none; }
-.sym-eq { background: #fbe7e7; border: 1px solid #a0282b; border-radius: 6px; padding: 0.7rem 1rem; margin: 0.4rem 0; text-align: center; }
+.sym-eq { background: #fbe7e7; border: 1px solid #a0282b; border-radius: 6px; padding: 0.7rem 1rem; margin: 0.4rem 0; text-align: center; overflow-x: auto; max-width: 100%; }
 .sym-caption { color: #6b7280; font-size: 0.85rem; margin: 0.2rem 0 0.4rem; }
+.sym-biology { color: #1f6feb; background: #f0f5ff; border-left: 3px solid #1f6feb; padding: 0.55rem 0.8rem; margin: 0.5rem 0 0.8rem; font-size: 0.95rem; line-height: 1.5; font-style: italic; }
+.sym-gloss { margin: 0.8rem 0 0.2rem; font-size: 0.9rem; color: #374151; }
+.sym-gloss > summary { cursor: pointer; font-weight: 600; color: #6b7280; padding: 0.2rem 0; }
+.sym-gloss > summary:hover { color: #8a1f22; }
+.sym-gloss-list { list-style: none; padding-left: 0.6rem; margin: 0.4rem 0 0.2rem; }
+.sym-gloss-list li { margin: 0.18rem 0; }
+.sym-dim { color: #6b7280; font-size: 0.85rem; }
 .sym-matrix { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.78rem; line-height: 1.35; white-space: pre; overflow-x: auto; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 0.6rem 0.8rem; margin: 0.3rem 0; }
 .sym-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .sym-skip { position: absolute; top: -100px; left: 0; padding: 0.4rem 0.7rem; background: #8a1f22; color: #fff; text-decoration: none; font-size: 0.85rem; z-index: 5; }
 .sym-skip:focus { top: 0; }</style>
-<div class="sym-tabs" id="sym-sym-1779746539">
-  <a class="sym-skip" href="#sym-sym-1779746539-end">Skip three-views widget</a>
-  <div class="sym-tablist" role="tablist" aria-label="Three views of the model">
-    <button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779746539-tab-eq" aria-controls="sym-sym-1779746539-panel-eq" aria-selected="true" tabindex="0" data-tab="eq"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>1. Equation</button>
-    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779746539-tab-idx" aria-controls="sym-sym-1779746539-panel-idx" aria-selected="false" tabindex="-1" data-tab="idx"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>2. Index</button>
-    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779746539-tab-mat" aria-controls="sym-sym-1779746539-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>3. Matrix (with data)</button>
-  </div>
-<div class="sym-panel sym-active" role="tabpanel" id="sym-sym-1779746539-panel-eq" aria-labelledby="sym-sym-1779746539-tab-eq" data-panel="eq" tabindex="0">
-  <p class="sym-caption">The structural contract. No indices, no numbers -- the shape of the model.</p>
-  <div class="sym-eq">$$\begin{aligned}
-\mathbf{w} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} & \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2)) \\
-\boldsymbol{\mu} & = \mathbf{X} \boldsymbol{\beta} \\
-\log(\boldsymbol{\sigma}) & = \mathbf{Z} \boldsymbol{\gamma}
-\end{aligned}$$</div>
+<div class="sym-tabs" id="sym-sym-1779749553">
+<a class="sym-skip" href="#sym-sym-1779749553-end">Skip three-views widget</a>
+<div class="sym-tablist" role="tablist" aria-label="Three views of the model">
+<button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779749553-tab-idx" aria-controls="sym-sym-1779749553-panel-idx" aria-selected="true" tabindex="0" data-tab="idx"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>1. Index</button>
+<button type="button" class="sym-tab" role="tab" id="sym-sym-1779749553-tab-eq" aria-controls="sym-sym-1779749553-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>2. Matrix</button>
+<button type="button" class="sym-tab" role="tab" id="sym-sym-1779749553-tab-mat" aria-controls="sym-sym-1779749553-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>3. Equations with data</button>
 </div>
-<div class="sym-panel" role="tabpanel" id="sym-sym-1779746539-panel-idx" aria-labelledby="sym-sym-1779746539-tab-idx" data-panel="idx" hidden tabindex="0">
-  <p class="sym-caption">What happens for each observation <em>i</em>.</p>
+<div class="sym-panel sym-active" role="tabpanel" id="sym-sym-1779749553-panel-idx" aria-labelledby="sym-sym-1779749553-tab-idx" data-panel="idx" tabindex="0">
+  <p class="sym-caption">What happens for each observation <em>i</em> -- the per-individual reading.</p>
+  <p class="sym-biology">Each observation is normally distributed around a mean that may shift with the predictors, and a residual SD that may also shift with its own predictors -- so both the centre and the spread of the response are modeled.</p>
   <div class="sym-eq">$$\begin{aligned}
 W_i \mid \mu_i,\, \sigma_i & \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 \mu_i & = \beta_{0} + \beta_{1} \, T_i \\
 \log(\sigma_i) & = \gamma_{0} + \gamma_{1} \, T_i
 \end{aligned}$$</div>
+<details class="sym-gloss" open>
+<summary>where:</summary>
+<ul class="sym-gloss-list">
+<li>W_i &mdash; response variable &nbsp;<span class="sym-dim">\(\mathbb{R}^{200}\)</span></li>
+<li>T_i &mdash; continuous predictor &nbsp;<span class="sym-dim">column of X (length 200)</span></li>
+<li>\(\mu_i\) &mdash; conditional mu of body_mass &nbsp;<span class="sym-dim">\(\mathbb{R}^{200}\)</span></li>
+<li>\(\sigma_i\) &mdash; conditional sigma of body_mass &nbsp;<span class="sym-dim">\(\mathbb{R}^{200}\)</span></li>
+<li>\(\beta_{0}, \beta_{1}\) &mdash; mu submodel coefficients &nbsp;<span class="sym-dim">\(\mathbb{R}^{2}\)</span></li>
+<li>\(\gamma_{0}, \gamma_{1}\) &mdash; sigma submodel coefficients &nbsp;<span class="sym-dim">\(\mathbb{R}^{2}\)</span></li>
+</ul>
+</details>
 </div>
-<div class="sym-panel" role="tabpanel" id="sym-sym-1779746539-panel-mat" aria-labelledby="sym-sym-1779746539-tab-mat" data-panel="mat" hidden tabindex="0">
-  <p class="sym-caption">The actual numbers stacked -- what the computer is multiplying. Showing first 5 and last 2 rows of n = 200.</p>
+<div class="sym-panel" role="tabpanel" id="sym-sym-1779749553-panel-eq" aria-labelledby="sym-sym-1779749553-tab-eq" data-panel="eq" hidden tabindex="0">
+  <p class="sym-caption">The same model in matrix form -- the structural contract every textbook past chapter 4 switches to.</p>
+  <p class="sym-biology">Each observation is normally distributed around a mean that may shift with the predictors, and a residual SD that may also shift with its own predictors -- so both the centre and the spread of the response are modeled.</p>
+  <div class="sym-eq">$$\begin{aligned}
+\mathbf{w} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} & \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2)) \\
+\boldsymbol{\mu} & = \mathbf{X} \boldsymbol{\beta} \\
+\log(\boldsymbol{\sigma}) & = \mathbf{Z} \boldsymbol{\gamma}
+\end{aligned}$$</div>
+<details class="sym-gloss" open>
+<summary>where:</summary>
+<ul class="sym-gloss-list">
+<li>\(\mathbf{w}\) &mdash; response variable &nbsp;<span class="sym-dim">\(\mathbb{R}^{200}\)</span></li>
+<li>\(\boldsymbol{\mu}\) &mdash; conditional mu of body_mass &nbsp;<span class="sym-dim">\(\mathbb{R}^{200}\)</span></li>
+<li>\(\boldsymbol{\sigma}\) &mdash; conditional sigma of body_mass &nbsp;<span class="sym-dim">\(\mathbb{R}^{200}\)</span></li>
+<li>\(\boldsymbol{\beta}\) &mdash; mu submodel coefficients &nbsp;<span class="sym-dim">\(\mathbb{R}^{2}\)</span></li>
+<li>\(\boldsymbol{\gamma}\) &mdash; sigma submodel coefficients &nbsp;<span class="sym-dim">\(\mathbb{R}^{2}\)</span></li>
+<li>\(\mathbf{X}\) &mdash; mu submodel design matrix &nbsp;<span class="sym-dim">\(\mathbb{R}^{200 \times 2}\)</span></li>
+<li>\(\mathbf{Z}\) &mdash; sigma submodel design matrix &nbsp;<span class="sym-dim">\(\mathbb{R}^{200 \times 2}\)</span></li>
+</ul>
+</details>
+</div>
+<div class="sym-panel" role="tabpanel" id="sym-sym-1779749553-panel-mat" aria-labelledby="sym-sym-1779749553-tab-mat" data-panel="mat" hidden tabindex="0">
+  <p class="sym-caption">The same matrix equation, with your actual numbers stacked inside the brackets -- what the computer multiplies. Showing first 5 and last 2 rows of n = 200.</p>
+  <p class="sym-biology">Each observation is normally distributed around a mean that may shift with the predictors, and a residual SD that may also shift with its own predictors -- so both the centre and the spread of the response are modeled.</p>
   <span class="sym-sr-only">Matrix-form expansion of the model. Each row shows the response y_i and the corresponding row of the design matrix X (showing head and tail rows of the n total observations), with the coefficient vector beta listed below.</span>
-<pre class="sym-matrix" aria-hidden="true">
-  y                   X                          beta
-  y_1 = 31.5          1.00  14.0              
-  y_2 = 36.6          1.00  15.6              
-  y_3 = 27.8          1.00  18.6              
-  y_4 = 42.2          1.00  23.6              
-  y_5 = 31.2          1.00  13.0              
-  ...               ...                   
-  y_199 = 35.5        1.00  14.8              
-  y_200 = 34.3        1.00  21.7              
-
-  Coefficients (beta, mu):
-    beta_0 = 30.4
-    beta_1 = 0.371
-
-  X_sigma                       gamma
-  1.00  14.0                    
-  1.00  15.6                    
-  1.00  18.6                    
-  1.00  23.6                    
-  1.00  13.0                    
-  ...                         
-  1.00  14.8                    
-  1.00  21.7                    
-    gamma_0 = 0.799
-    gamma_1 = 0.0825
-
-  Fitted mu_hat (first 5): 35.6  36.2  37.3  39.2  35.3
-  Fitted sigma_hat (first 5): 7.04  8.03  10.3  15.6  6.51
-</pre>
+<p class="sym-caption" style="font-size:0.95em;color:#374151">For observation <em>i</em> = 1 of your data:</p>
+<div class="sym-eq">$$
+\begin{aligned}
+W_{1} &= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{temperature}_{1} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
+31.5 &= 30.4 + 0.371 \times   14 + (-4.16) &\quad(\text{with your numbers}) \\
+&= \underbrace{35.6}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-4.16)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
+\end{aligned}
+$$</div>
+<p class="sym-caption" style="font-size:0.95em;color:#374151">Stacking the same response equation for all <em>n</em> = 200 observations:</p>
+<div class="sym-eq">$$
+\underbrace{\begin{bmatrix} 31.5 \\ 36.6 \\ 27.8 \\ 42.2 \\ 31.2 \\ \vdots \\ 35.5 \\ 34.3 \end{bmatrix}}_{\textstyle\,\mathbf{w}_{\,200 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 &   14 \\    1 & 15.6 \\    1 & 18.6 \\    1 & 23.6 \\    1 &   13 \\ \vdots & \vdots \\    1 & 14.8 \\    1 & 21.7 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,200 \times 2}\,}\, \underbrace{\begin{bmatrix} 30.4 \\ 0.371 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,2 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} -4.16 \\ 0.355 \\ -9.53 \\ 3.02 \\ -4.02 \\ \vdots \\ -0.364 \\ -4.23 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,200 \times 1}\;\text{(residual)}\,}
+$$</div>
+<p class="sym-caption" style="font-size:0.85em;color:#6b7280;margin-top:0.4rem"><strong>Left</strong>: observed vector \(\mathbf{w}\). <strong>Middle</strong>: the prediction \(\mathbf{X}\hat{\boldsymbol{\beta}} = \hat{\boldsymbol{\mu}}\). <strong>Right</strong>: the residual vector \(\hat{\boldsymbol{\varepsilon}} = \mathbf{w} - \hat{\boldsymbol{\mu}}\). Every row of this matrix equation is one of the response-equation rows from the worked row above.</p>
+<p class="sym-caption" style="font-size:0.95em;color:#374151;margin-top:1.2rem">And the \(\sigma\) submodel (no observed counterpart -- \(\sigma\)'s job is to describe the spread of \(\hat{\boldsymbol{\varepsilon}}\)). For the same observation <em>i</em> = 1:</p>
+<div class="sym-eq">$$
+\begin{aligned}
+\log\hat\sigma_{1} &= \hat\gamma_{0} + \hat\gamma_{1}\,\mathrm{temperature}_{1} &\quad(\text{sigma submodel for observation 1, log link}) \\
+\log\hat\sigma_{1} &= 0.799 + 0.0825 \times   14 = 1.95 &\quad(\text{with your numbers}) \\
+\hat\sigma_{1} &= \exp(1.95) \approx 7.04 &\quad(\text{predicted residual SD for observation 1})
+\end{aligned}
+$$</div>
+<p class="sym-caption" style="font-size:0.95em;color:#374151">Stacking the same log-link equation for all <em>n</em> = 200 observations:</p>
+<div class="sym-eq">$$
+\log\!\underbrace{\begin{bmatrix} 7.04 \\ 8.03 \\ 10.3 \\ 15.6 \\ 6.51 \\ \vdots \\ 7.51 \\ 13.4 \end{bmatrix}}_{\textstyle\,\boldsymbol{\sigma}_{\,200 \times 1}\,} \;=\; \underbrace{\begin{bmatrix}    1 &   14 \\    1 & 15.6 \\    1 & 18.6 \\    1 & 23.6 \\    1 &   13 \\ \vdots & \vdots \\    1 & 14.8 \\    1 & 21.7 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\sigma,\,200 \times 2}\,}\, \underbrace{\begin{bmatrix} 0.799 \\ 0.0825 \end{bmatrix}}_{\textstyle\,\boldsymbol{\gamma}_{\,2 \times 1}\,}
+$$</div>
 </div>
 </div>
-<span id="sym-sym-1779746539-end" tabindex="-1"></span>
+<span id="sym-sym-1779749553-end" tabindex="-1"></span>
 <script>(function() {
-  var root = document.getElementById("sym-sym-1779746539");
+  var root = document.getElementById("sym-sym-1779749553");
   if (!root) return;
-  var tabs   = Array.prototype.slice.call(root.querySelectorAll("[role="tab"]"));
-  var panels = Array.prototype.slice.call(root.querySelectorAll("[role="tabpanel"]"));
+  var tabs   = Array.prototype.slice.call(root.querySelectorAll("[role=\"tab\"]"));
+  var panels = Array.prototype.slice.call(root.querySelectorAll("[role=\"tabpanel\"]"));
   function activate(idx) {
     tabs.forEach(function(t, i) {
       var on = (i === idx);

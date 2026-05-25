@@ -162,7 +162,11 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L) {
   if (is.null(ex)) {
     return("<p><em>This symbolized_model carries no expanded numeric arrays.</em></p>\n")
   }
-  fmt <- function(v) formatC(v, digits = 3, format = "fg", flag = "#")
+  # format = "g" (not "fg") + no "#" flag avoids dangling decimals like
+  # "129." for values that happen to round to 3 sig figs as a whole
+  # number. We still get "1.00", "14.0", "30.4" etc for the values that
+  # need them.
+  fmt <- function(v) formatC(v, digits = 3, format = "g")
   trunc_idx <- function(n, head, tail) {
     if (n <= head + tail + 1L) seq_len(n)
     else c(seq_len(head), NA_integer_, seq.int(n - tail + 1L, n))
@@ -327,12 +331,39 @@ three_views_worked_row <- function(ex, resp_sym = "\\mathbf{y}") {
     return(NULL)
   if (length(ex$y) < 1L || nrow(ex$X) < 1L) return(NULL)
 
-  fmt <- function(v) formatC(v, digits = 3, format = "fg", flag = "#")
+  fmt <- function(v) formatC(v, digits = 3, format = "g")
   i  <- 1L
   X1 <- ex$X[i, ]
   W1 <- ex$y[i]
   mu1 <- ex$mu_hat[i]
   eps1 <- W1 - mu1
+
+  # If the model has a random effect, the conditional mean for
+  # observation i = 1 is `X[1,] beta + Z_g[1,] u`. The worked-row
+  # symbolic + numeric line must include the RE contribution explicitly,
+  # otherwise the arithmetic doesn't close (Pat's audit caught this:
+  # readers who try to mentally check the row see `X*beta + eps` != W).
+  has_re <- !is.null(ex$Z_g) && !is.null(ex$u)
+  re_contrib_num <- if (has_re) sum(ex$Z_g[i, ] * ex$u) else 0
+  # Find which level of which RE group observation i = 1 belongs to (we
+  # use it to build a symbolic label `\hat{u}_{group(1)}`). For simple
+  # `(1|group)` models, Z_g is a one-hot indicator and the active column
+  # is the group label.
+  re_group_label <- NULL
+  if (has_re) {
+    active_col <- which(ex$Z_g[i, ] != 0)
+    if (length(active_col) == 1L) {
+      lvl <- colnames(ex$Z_g)[active_col]
+      if (!is.null(lvl) && nzchar(lvl)) {
+        lvl_esc <- gsub("_", "\\_", lvl, fixed = TRUE)
+        re_group_label <- sprintf("\\hat{u}_{\\mathrm{%s}}", lvl_esc)
+      } else {
+        re_group_label <- "\\hat{u}_{\\,\\mathrm{group}(1)}"
+      }
+    } else {
+      re_group_label <- "\\hat{u}_{\\,\\mathrm{group}(1)}"
+    }
+  }
 
   # Detect intercept column.
   is_intercept <- vapply(seq_along(X1), function(k) {
@@ -364,6 +395,12 @@ three_views_worked_row <- function(ex, resp_sym = "\\mathbf{y}") {
       num_terms[k] <- paste0(fmt(ex$beta[k]), " \\times ", fmt(X1[k]))
     }
   }
+  # Append the RE term to both lists when present so the symbolic and
+  # numeric rows close arithmetically.
+  if (has_re) {
+    sym_terms <- c(sym_terms, re_group_label)
+    num_terms <- c(num_terms, sprintf("(%s)", fmt(re_contrib_num)))
+  }
   sym_rhs <- paste(sym_terms, collapse = " + ")
   num_rhs <- paste(num_terms, collapse = " + ")
 
@@ -392,7 +429,7 @@ three_views_worked_row_sigma <- function(ex) {
     return(NULL)
   if (length(ex$sigma_hat) < 1L || nrow(ex$X_sigma) < 1L) return(NULL)
 
-  fmt <- function(v) formatC(v, digits = 3, format = "fg", flag = "#")
+  fmt <- function(v) formatC(v, digits = 3, format = "g")
   i        <- 1L
   Xs1      <- ex$X_sigma[i, ]
   sigma1   <- ex$sigma_hat[i]
@@ -505,6 +542,13 @@ three_views_biology_gloss <- function(x) {
   has_sigma_submodel <- !is.null(x$expanded) &&
                        !is.null(x$expanded$X_sigma) &&
                        !is.null(x$expanded$gamma)
+  # A constant-sigma fit has X_sigma populated but with a single
+  # intercept-only column -- the model says `sigma_i = exp(gamma_0)`,
+  # i.e. the same value for every observation. Treat this the same as
+  # no sigma submodel for the purpose of the biology gloss.
+  sigma_varies <- has_sigma_submodel &&
+                  !is.null(ncol(x$expanded$X_sigma)) &&
+                  ncol(x$expanded$X_sigma) > 1L
   has_re <- !is.null(x$random_effects) &&
             (is.data.frame(x$random_effects) || is.list(x$random_effects)) &&
             length(x$random_effects) > 0L
@@ -515,9 +559,9 @@ three_views_biology_gloss <- function(x) {
             (!is.null(x$expanded) && !is.null(x$expanded$Z_g) && !is.null(x$expanded$u))
 
   sentence <- if (identical(family, "gaussian")) {
-    if (has_sigma_submodel && has_re) {
+    if (sigma_varies && has_re) {
       "Each observation is normally distributed around a mean that may shift with the fixed-effect predictors and a group offset, with a residual SD that may also shift with its own predictors -- both location and spread are modeled."
-    } else if (has_sigma_submodel) {
+    } else if (sigma_varies) {
       "Each observation is normally distributed around a mean that may shift with the predictors, and a residual SD that may also shift with its own predictors -- so both the centre and the spread of the response are modeled."
     } else if (has_re) {
       "Each observation is normally distributed around a group-specific mean; the random-effect SD captures how much groups vary, and the residual SD captures within-group variation."
@@ -548,7 +592,7 @@ three_views_css <- function() {
 .sym-tab.sym-active .sym-tab-marker { opacity: 1; }
 .sym-panel { padding: 1rem 1.1rem 1.2rem; }
 .sym-panel[hidden] { display: none; }
-.sym-eq { background: #fbe7e7; border: 1px solid #a0282b; border-radius: 6px; padding: 0.7rem 1rem; margin: 0.4rem 0; text-align: center; }
+.sym-eq { background: #fbe7e7; border: 1px solid #a0282b; border-radius: 6px; padding: 0.7rem 1rem; margin: 0.4rem 0; text-align: center; overflow-x: auto; max-width: 100%; }
 .sym-caption { color: #6b7280; font-size: 0.85rem; margin: 0.2rem 0 0.4rem; }
 .sym-biology { color: #1f6feb; background: #f0f5ff; border-left: 3px solid #1f6feb; padding: 0.55rem 0.8rem; margin: 0.5rem 0 0.8rem; font-size: 0.95rem; line-height: 1.5; font-style: italic; }
 .sym-gloss { margin: 0.8rem 0 0.2rem; font-size: 0.9rem; color: #374151; }

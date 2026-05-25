@@ -470,15 +470,43 @@ drm_coef_vector_symbol <- function(coef_family) {
 drm_response_symbol_matrix <- function(response_symbol) {
   # Strip a trailing _i and bold-face the (lower-cased) root.
   # Vectors are lowercase bold by convention: "W_i" -> "\mathbf{w}".
+  #
+  # If the input is already a `\mathrm{...}_i`-wrapped fallback from
+  # drm_resolve_response_symbol (e.g. `\mathrm{body\_mass}_i` when the
+  # user didn't supply a `symbols = c(...)` mapping), extract the inner
+  # name and re-wrap as a bold vector with the underscores still
+  # escaped. Otherwise the result would be `\mathbf{\mathrm{body\\_mass}}`
+  # which mangles the LaTeX.
+  m <- regmatches(response_symbol,
+                  regexec("^\\\\mathrm\\{(.*)\\}_i$", response_symbol))[[1L]]
+  if (length(m) == 2L) {
+    # Already-escaped scalar fallback. Lowercase the inner name and
+    # re-emit as `\mathbf{...}`. Underscores are already `\_`-escaped.
+    return(paste0("\\mathbf{", tolower(m[[2L]]), "}"))
+  }
   root <- sub("_i$", "", response_symbol)
-  paste0("\\mathbf{", tolower(root), "}")
+  root_lc <- tolower(root)
+  # Escape literal underscores so MathJax doesn't render them as
+  # subscripts inside the bold wrapper.
+  root_lc <- gsub("_", "\\_", root_lc, fixed = TRUE)
+  paste0("\\mathbf{", root_lc, "}")
 }
 
 drm_resolve_response_symbol <- function(response, symbols) {
   if (!is.null(symbols) && response %in% names(symbols)) {
     return(unname(symbols[[response]]))
   }
-  paste0(response, "_i")
+  # Default: use the column name directly as a scalar subscript_i.
+  # Escape any underscores in the column name so MathJax doesn't parse
+  # them as subscripts (the "body_m ass_i" rendering bug). Wrap
+  # multi-character names in \mathrm{...} so multi-letter variable
+  # names render upright as a single identifier.
+  esc <- gsub("_", "\\_", response, fixed = TRUE)
+  if (nchar(response) > 1L) {
+    paste0("\\mathrm{", esc, "}_i")
+  } else {
+    paste0(esc, "_i")
+  }
 }
 
 drm_resolve_biv_response_symbol <- function(response, symbols, which) {
