@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.14.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.14.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,6 +33,18 @@
       <small>Source: <a href="https://github.com/itchyshin/symbolizer/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.14.1" id="symbolizer-0141">symbolizer 0.14.1<a class="anchor" aria-label="anchor" href="#symbolizer-0141"></a></h2>
+<div class="section level3">
+<h3 id="v0141--metafor-rmamv-multilevel--structured-meta-analysis-0-14-1">v0.14.1 – metafor rma.mv (multilevel + structured meta-analysis)<a class="anchor" aria-label="anchor" href="#v0141--metafor-rmamv-multilevel--structured-meta-analysis-0-14-1"></a></h3>
+<p><code><a href="../reference/symbolize.rma.mv.html">symbolize.rma.mv()</a></code> for <code><a href="https://wviechtb.github.io/metafor/reference/rma.mv.html" class="external-link">metafor::rma.mv</a></code> fits. Covers the two patterns that dominate modern ecology / evolution / education meta-analyses:</p>
+<ul><li><p><strong>Multilevel meta-analysis</strong> – multiple random-effect tiers via <code>random = list(~ 1 | study, ~ 1 | id)</code> or the nested syntax <code>random = ~ 1 | district / study</code>. Each tier gets a row in <code>variance_components</code> with <code>kind = "heterogeneity"</code>, and a <code>u_{tier(i)} \sim \mathcal{N}(0, \sigma^2_{tier})</code> line in the LaTeX.</p></li>
+<li><p><strong>Structured random effects (phylogenetic / pedigree / spatial)</strong> – when <code>R = list(group = R_matrix)</code> is attached to the fit, the tier is tagged <code>kind = "structured"</code> and listed in <code>sym$metadata$structured_random</code> with the R-matrix dimension.</p></li>
+</ul><p>The fixed-effects extraction reuses the rma.uni infrastructure (intrcpt row-name mapping + Wald CIs via <code>fit$ci.lb</code> / <code>fit$ci.ub</code>), so meta-regression moderators work the same way for <code>rma.mv</code> as for <code>rma.uni</code>. The two-tier sampling-distribution / linear-predictor structure inherits from <code>family = meta_normal</code> so the assumption / interpretation prose is shared with <code>rma.uni</code>.</p>
+<p>Two new helper fits (<code>fit_metafor_rma_mv()</code>, <code>fit_metafor_rma_mv_structured()</code>) and two new robustness-sweep rows.</p>
+<p>Capability rows: <code>rma.mv,meta_normal,mu</code> and <code>rma.mv,meta_normal,structured</code> (both First slice). <code>struct = "UN"</code> / <code>"HCS"</code> / <code>"AR"</code> covariance structures and selection / publication-bias variants remain Planned.</p>
+</div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.14.0" id="symbolizer-0140">symbolizer 0.14.0<a class="anchor" aria-label="anchor" href="#symbolizer-0140"></a></h2>
 <div class="section level3">
