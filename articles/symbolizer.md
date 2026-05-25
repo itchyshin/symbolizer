@@ -228,7 +228,7 @@ three tabs over the same fit.
 as_html_three_views(sym, head = 5, tail = 2)
 ```
 
-[Skip three-views widget](#sym-sym-1779747683-end)
+[Skip three-views widget](#sym-sym-1779750224-end)
 
 ▸1. Index
 
@@ -312,7 +312,7 @@ For observation *i* = 1 of your data:
 ``` math
 \begin{aligned}
 W_{1} &= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{temperature}_{1} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
-34.5 &= 29.6 + 0.492 \times 14.0 + (-1.94) &\quad(\text{with your numbers}) \\
+34.5 &= 29.6 + 0.492 \times   14 + (-1.94) &\quad(\text{with your numbers}) \\
 &= \underbrace{36.4}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-1.94)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
 \end{aligned}
 ```
@@ -320,7 +320,7 @@ W_{1} &= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{temperature}_{1} + \hat\varepsil
 Stacking the same response equation for all *n* = 80 observations:
 
 ``` math
-\underbrace{\begin{bmatrix} 34.5 \\ 34.2 \\ 44.8 \\ 49.2 \\ 31.0 \\ \vdots \\ 45.8 \\ 36.4 \end{bmatrix}}_{\textstyle\,\mathbf{w}_{\,80 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix} 1.00 & 14.0 \\ 1.00 & 15.6 \\ 1.00 & 18.6 \\ 1.00 & 23.6 \\ 1.00 & 13.0 \\ \vdots & \vdots \\ 1.00 & 21.7 \\ 1.00 & 24.4 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,80 \times 2}\,}\, \underbrace{\begin{bmatrix} 29.6 \\ 0.492 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,2 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} -1.94 \\ -2.98 \\ 6.11 \\ 8.01 \\ -4.93 \\ \vdots \\ 5.56 \\ -5.16 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,80 \times 1}\;\text{(residual)}\,}
+\underbrace{\begin{bmatrix} 34.5 \\ 34.2 \\ 44.8 \\ 49.2 \\   31 \\ \vdots \\ 45.8 \\ 36.4 \end{bmatrix}}_{\textstyle\,\mathbf{w}_{\,80 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 &   14 \\    1 & 15.6 \\    1 & 18.6 \\    1 & 23.6 \\    1 &   13 \\ \vdots & \vdots \\    1 & 21.7 \\    1 & 24.4 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,80 \times 2}\,}\, \underbrace{\begin{bmatrix} 29.6 \\ 0.492 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,2 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} -1.94 \\ -2.98 \\ 6.11 \\ 8.01 \\ -4.93 \\ \vdots \\ 5.56 \\ -5.16 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,80 \times 1}\;\text{(residual)}\,}
 ```
 
 **Left**: observed vector $`\mathbf{w}`$. **Middle**: the prediction
@@ -337,7 +337,7 @@ the same observation *i* = 1:
 ``` math
 \begin{aligned}
 \log\hat\sigma_{1} &= \hat\gamma_{0} + \hat\gamma_{1}\,\mathrm{temperature}_{1} &\quad(\text{sigma submodel for observation 1, log link}) \\
-\log\hat\sigma_{1} &= 0.485 + 0.0936 \times 14.0 = 1.79 &\quad(\text{with your numbers}) \\
+\log\hat\sigma_{1} &= 0.485 + 0.0936 \times   14 = 1.79 &\quad(\text{with your numbers}) \\
 \hat\sigma_{1} &= \exp(1.79) \approx 6.01 &\quad(\text{predicted residual SD for observation 1})
 \end{aligned}
 ```
@@ -345,7 +345,7 @@ the same observation *i* = 1:
 Stacking the same log-link equation for all *n* = 80 observations:
 
 ``` math
-\log\!\underbrace{\begin{bmatrix} 6.01 \\ 6.98 \\ 9.26 \\ 14.8 \\ 5.50 \\ \vdots \\ 12.3 \\ 16.0 \end{bmatrix}}_{\textstyle\,\boldsymbol{\sigma}_{\,80 \times 1}\,} \;=\; \underbrace{\begin{bmatrix} 1.00 & 14.0 \\ 1.00 & 15.6 \\ 1.00 & 18.6 \\ 1.00 & 23.6 \\ 1.00 & 13.0 \\ \vdots & \vdots \\ 1.00 & 21.7 \\ 1.00 & 24.4 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\sigma,\,80 \times 2}\,}\, \underbrace{\begin{bmatrix} 0.485 \\ 0.0936 \end{bmatrix}}_{\textstyle\,\boldsymbol{\gamma}_{\,2 \times 1}\,}
+\log\!\underbrace{\begin{bmatrix} 6.01 \\ 6.98 \\ 9.26 \\ 14.8 \\  5.5 \\ \vdots \\ 12.3 \\   16 \end{bmatrix}}_{\textstyle\,\boldsymbol{\sigma}_{\,80 \times 1}\,} \;=\; \underbrace{\begin{bmatrix}    1 &   14 \\    1 & 15.6 \\    1 & 18.6 \\    1 & 23.6 \\    1 &   13 \\ \vdots & \vdots \\    1 & 21.7 \\    1 & 24.4 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\sigma,\,80 \times 2}\,}\, \underbrace{\begin{bmatrix} 0.485 \\ 0.0936 \end{bmatrix}}_{\textstyle\,\boldsymbol{\gamma}_{\,2 \times 1}\,}
 ```
 
 Tab 1 (Equation) is the structural contract – $`\mathbf{y}`$,

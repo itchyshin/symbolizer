@@ -398,7 +398,7 @@ $`\mathbf{Z}\mathbf{u}`$ random-effect block populated from the data:
 as_html_three_views(sym_re)
 ```
 
-[Skip three-views widget](#sym-sym-1779747649-end)
+[Skip three-views widget](#sym-sym-1779750190-end)
 
 ▸1. Index
 
@@ -489,8 +489,8 @@ For observation *i* = 1 of your data:
 
 ``` math
 \begin{aligned}
-W_{1} &= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{temperature}_{1} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
-40.2 &= 29.0 + 0.458 \times 24.7 + (-0.0441) &\quad(\text{with your numbers}) \\
+W_{1} &= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{temperature}_{1} + \hat{u}_{\mathrm{a}} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
+40.2 &=   29 + 0.458 \times 24.7 + (0.482) + (-0.0441) &\quad(\text{with your numbers}) \\
 &= \underbrace{40.2}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-0.0441)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
 \end{aligned}
 ```
@@ -498,7 +498,7 @@ W_{1} &= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{temperature}_{1} + \hat\varepsil
 Stacking the same response equation for all *n* = 120 observations:
 
 ``` math
-\underbrace{\begin{bmatrix} 40.2 \\ 41.4 \\ 44.2 \\ 33.8 \\ 38.0 \\ \vdots \\ 34.8 \\ 36.2 \end{bmatrix}}_{\textstyle\,\mathbf{w}_{\,120 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix} 1.00 & 24.7 \\ 1.00 & 18.9 \\ 1.00 & 20.6 \\ 1.00 & 16.3 \\ 1.00 & 21.1 \\ \vdots & \vdots \\ 1.00 & 11.9 \\ 1.00 & 18.9 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,120 \times 2}\,}\, \underbrace{\begin{bmatrix} 29.0 \\ 0.458 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,2 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} 1.00 & 0 & 0 & 0 & 0 & 0 \\ 0 & 1.00 & 0 & 0 & 0 & 0 \\ 0 & 0 & 1.00 & 0 & 0 & 0 \\ 0 & 0 & 0 & 1.00 & 0 & 0 \\ 0 & 0 & 0 & 0 & 1.00 & 0 \\ \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\ 0 & 0 & 0 & 0 & 1.00 & 0 \\ 0 & 0 & 0 & 0 & 0 & 1.00 \end{bmatrix}}_{\textstyle\,\mathbf{Z}_{\,120 \times 6}\,}\, \underbrace{\begin{bmatrix} 0.482 \\ 1.47 \\ -0.889 \\ -0.823 \\ -0.450 \\ 0.207 \end{bmatrix}}_{\textstyle\,\hat{\mathbf{u}}_{\,6 \times 1}\;\text{(BLUP)}\,} \;+\; \underbrace{\begin{bmatrix} -0.0441 \\ 3.84 \\ 5.78 \\ -2.59 \\ -0.559 \\ \vdots \\ 0.360 \\ -1.39 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,120 \times 1}\;\text{(residual)}\,}
+\underbrace{\begin{bmatrix} 40.2 \\ 41.4 \\ 44.2 \\ 33.8 \\   38 \\ \vdots \\ 34.8 \\ 36.2 \end{bmatrix}}_{\textstyle\,\mathbf{w}_{\,120 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 & 24.7 \\    1 & 18.9 \\    1 & 20.6 \\    1 & 16.3 \\    1 & 21.1 \\ \vdots & \vdots \\    1 & 11.9 \\    1 & 18.9 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,120 \times 2}\,}\, \underbrace{\begin{bmatrix}   29 \\ 0.458 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,2 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix}    1 &    0 &    0 &    0 &    0 &    0 \\    0 &    1 &    0 &    0 &    0 &    0 \\    0 &    0 &    1 &    0 &    0 &    0 \\    0 &    0 &    0 &    1 &    0 &    0 \\    0 &    0 &    0 &    0 &    1 &    0 \\ \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\    0 &    0 &    0 &    0 &    1 &    0 \\    0 &    0 &    0 &    0 &    0 &    1 \end{bmatrix}}_{\textstyle\,\mathbf{Z}_{\,120 \times 6}\,}\, \underbrace{\begin{bmatrix} 0.482 \\ 1.47 \\ -0.889 \\ -0.823 \\ -0.45 \\ 0.207 \end{bmatrix}}_{\textstyle\,\hat{\mathbf{u}}_{\,6 \times 1}\;\text{(BLUP)}\,} \;+\; \underbrace{\begin{bmatrix} -0.0441 \\ 3.84 \\ 5.78 \\ -2.59 \\ -0.559 \\ \vdots \\ 0.36 \\ -1.39 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,120 \times 1}\;\text{(residual)}\,}
 ```
 
 **Left**: observed vector $`\mathbf{w}`$. **Middle**: the prediction
@@ -523,7 +523,7 @@ the same observation *i* = 1:
 Stacking the same log-link equation for all *n* = 120 observations:
 
 ``` math
-\log\!\underbrace{\begin{bmatrix} 5.05 \\ 3.95 \\ 4.25 \\ 3.55 \\ 4.34 \\ \vdots \\ 2.95 \\ 3.95 \end{bmatrix}}_{\textstyle\,\boldsymbol{\sigma}_{\,120 \times 1}\,} \;=\; \underbrace{\begin{bmatrix} 1.00 & 24.7 \\ 1.00 & 18.9 \\ 1.00 & 20.6 \\ 1.00 & 16.3 \\ 1.00 & 21.1 \\ \vdots & \vdots \\ 1.00 & 11.9 \\ 1.00 & 18.9 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\sigma,\,120 \times 2}\,}\, \underbrace{\begin{bmatrix} 0.578 \\ 0.0422 \end{bmatrix}}_{\textstyle\,\boldsymbol{\gamma}_{\,2 \times 1}\,}
+\log\!\underbrace{\begin{bmatrix} 5.05 \\ 3.95 \\ 4.25 \\ 3.55 \\ 4.34 \\ \vdots \\ 2.95 \\ 3.95 \end{bmatrix}}_{\textstyle\,\boldsymbol{\sigma}_{\,120 \times 1}\,} \;=\; \underbrace{\begin{bmatrix}    1 & 24.7 \\    1 & 18.9 \\    1 & 20.6 \\    1 & 16.3 \\    1 & 21.1 \\ \vdots & \vdots \\    1 & 11.9 \\    1 & 18.9 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\sigma,\,120 \times 2}\,}\, \underbrace{\begin{bmatrix} 0.578 \\ 0.0422 \end{bmatrix}}_{\textstyle\,\boldsymbol{\gamma}_{\,2 \times 1}\,}
 ```
 
 ## 6. A richer worked example: four predictor roles in one fit

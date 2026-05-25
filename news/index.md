@@ -1,5 +1,77 @@
 # Changelog
 
+## symbolizer 0.19.2
+
+### v0.19.2 – multi-page widget bug sweep (Rose + Pat)
+
+After v0.19.1 the maintainer reported visible widget breakage on the
+deployed pages. A parallel Rose + Pat audit across all four
+widget-bearing pages (homepage, ladder, drmtmb, factors) surfaced a set
+of patterns; this release fixes them.
+
+#### Fixes
+
+- **Homepage widget was emitted inside a `<div class="sourceCode">`
+  block with stale v0.18.x tab labels and broken JS** (Rose Pattern A,
+  Pat 🔴 Pattern A). `README.md` had been knit against an older
+  installed `symbolizer`, so the v0.18.x `<button>` lines (4-space
+  indented + un-escaped `\"` in `querySelectorAll`) were baked into the
+  committed README. Re-knit `README.Rmd` against an installed v0.19.2
+  build; the homepage now carries the same de-indented buttons
+  - raw-R-string JS that the vignettes have been emitting since v0.18.2.
+- **Tab 3 horizontal overflow on every vignette with a wide matrix
+  equation** (Rose Pattern C, Pat 🔴 Pattern B). `.sym-eq` had no
+  `overflow-x` rule; for fits with a random effect, the response
+  equation `w = Xβ + Zu + ε̂` is 4-5 bmatrices side by side and ran off
+  the panel and the page. Added `overflow-x: auto; max-width: 100%;` to
+  the rule – one CSS line; ladder + drmtmb + factors Tab 3 panels now
+  scroll horizontally instead of clipping.
+- **`\mathbf{body_mass}` rendered as “body_m ass”** (Rose Pattern B, Pat
+  🟡 Pattern D). MathJax was parsing the underscore in the variable name
+  as a subscript operator inside `\mathbf{...}`. The fault was at one
+  helper site: `drm_response_symbol_matrix()` and
+  `drm_resolve_response_symbol()` in `R/symbolize-drmtmb.R` – both now
+  `gsub("_", "\\_", ...)` the variable name before LaTeX emission, and
+  the scalar-form fallback wraps multi-character names in `\mathrm{...}`
+  so they render upright as a single identifier.
+- **Worked row dropped the random-effect term silently, so the
+  arithmetic for observation i = 1 did not close** (Pat 🔴 Pattern C). A
+  reader checking `30.4 + 0.371 × 14.0 + (-2.4) = 28.4` against the
+  printed `μ̂_1 = 30.8` would conclude the package math was wrong, when
+  in fact the missing piece was `+ û_site(1)`. The worked-row helper now
+  reads `ex$Z_g[1, ] %*% ex$u` to compute the RE contribution for
+  observation 1, includes `\hat{u}_{site(L1)}` in the symbolic line, and
+  adds the numeric value in the with-numbers line. The decomposition
+  `μ̂_1 + ε̂_1 = W_1` now reconciles.
+- **Biology gloss claimed sigma shifts with predictors even on fits
+  where `sigma ~ 1`** (Pat 🟡 Pattern E). Affects the factors vignette
+  (sigma is intercept-only there). The gloss now detects
+  `ncol(X_sigma) > 1` and only emits the “spread also modeled” sentence
+  when sigma actually varies; constant-sigma fits get the simpler
+  sentence.
+- **Trailing dots in the bmatrix data** (Pat 🟡 Pattern G). The
+  formatter used `formatC(..., format = "fg", flag = "#")` which always
+  shows a decimal point, so `129` printed as `129.` and `111` as `111.`.
+  Switched to `format = "g"` – the values that need decimals still show
+  them, integers don’t carry dangling dots.
+
+#### Known remaining issues (deferred to v0.20)
+
+Rose surfaced three more patterns that need a deeper refactor and a test
+fixture, deferred:
+
+- Scalar-symbol gloss data-side ships as plain text rather than
+  `\(...\)`-wrapped MathJax for some rows (`body_mass_i` shows
+  literally, while `\(\mu_i\)` is wrapped).
+- `^{n}` literal in the `u_{site}` dim gloss leaks as raw LaTeX
+  (`scalar; ^{12} in matrix form`) instead of `\(\mathbb{R}^{12}\)`.
+- The user-supplied `symbols = c(body_mass = "W_i")` mapping isn’t
+  propagated into the gloss prose descriptions (“conditional mu of
+  body_mass” still shows the raw variable name).
+
+These ride on the symbol-table builder rather than the renderer and need
+a wider edit.
+
 ## symbolizer 0.19.1
 
 ### v0.19.1 – balance the worked-row treatment across both submodels

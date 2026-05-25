@@ -362,7 +362,7 @@ through:
 as_html_three_views(sym3)
 ```
 
-[Skip three-views widget](#sym-sym-1779747655-end)
+[Skip three-views widget](#sym-sym-1779750196-end)
 
 ▸1. Index
 
@@ -373,9 +373,7 @@ as_html_three_views(sym3)
 What happens for each observation *i* – the per-individual reading.
 
 Each observation is normally distributed around a mean that may shift
-with the predictors, and a residual SD that may also shift with its own
-predictors – so both the centre and the spread of the response are
-modeled.
+with the predictors; the residual SD is constant across observations.
 
 ``` math
 \begin{aligned}
@@ -400,9 +398,7 @@ The same model in matrix form – the structural contract every textbook
 past chapter 4 switches to.
 
 Each observation is normally distributed around a mean that may shift
-with the predictors, and a residual SD that may also shift with its own
-predictors – so both the centre and the spread of the response are
-modeled.
+with the predictors; the residual SD is constant across observations.
 
 ``` math
 \begin{aligned}
@@ -432,9 +428,7 @@ brackets – what the computer multiplies. Showing first 5 and last 2 rows
 of n = 120.
 
 Each observation is normally distributed around a mean that may shift
-with the predictors, and a residual SD that may also shift with its own
-predictors – so both the centre and the spread of the response are
-modeled.
+with the predictors; the residual SD is constant across observations.
 
 Matrix-form expansion of the model. Each row shows the response y_i and
 the corresponding row of the design matrix X (showing head and tail rows
@@ -446,7 +440,7 @@ For observation *i* = 1 of your data:
 ``` math
 \begin{aligned}
 W_{1} &= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{sexmale}_{1} + \hat\beta_{2}\,\mathrm{body\_size}_{1} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
-39.5 &= 29.9 + 5.26 \times 0 + 0.197 \times 60.5 + (-2.36) &\quad(\text{with your numbers}) \\
+39.5 &= 29.9 + 5.26 \times    0 + 0.197 \times 60.5 + (-2.36) &\quad(\text{with your numbers}) \\
 &= \underbrace{41.8}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-2.36)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
 \end{aligned}
 ```
@@ -454,7 +448,7 @@ W_{1} &= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{sexmale}_{1} + \hat\beta_{2}\,\m
 Stacking the same response equation for all *n* = 120 observations:
 
 ``` math
-\underbrace{\begin{bmatrix} 39.5 \\ 55.1 \\ 50.4 \\ 46.7 \\ 55.4 \\ \vdots \\ 49.4 \\ 48.7 \end{bmatrix}}_{\textstyle\,\mathbf{w}_{\,120 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix} 1.00 & 0 & 60.5 \\ 1.00 & 0 & 129. \\ 1.00 & 0 & 70.5 \\ 1.00 & 0 & 77.9 \\ 1.00 & 1.00 & 111. \\ \vdots & \vdots & \vdots \\ 1.00 & 0 & 77.0 \\ 1.00 & 1.00 & 103. \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,120 \times 3}\,}\, \underbrace{\begin{bmatrix} 29.9 \\ 5.26 \\ 0.197 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,3 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} -2.36 \\ -0.159 \\ 6.62 \\ 1.51 \\ -1.49 \\ \vdots \\ 4.37 \\ -6.76 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,120 \times 1}\;\text{(residual)}\,}
+\underbrace{\begin{bmatrix} 39.5 \\ 55.1 \\ 50.4 \\ 46.7 \\ 55.4 \\ \vdots \\ 49.4 \\ 48.7 \end{bmatrix}}_{\textstyle\,\mathbf{w}_{\,120 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 &    0 & 60.5 \\    1 &    0 &  129 \\    1 &    0 & 70.5 \\    1 &    0 & 77.9 \\    1 &    1 &  111 \\ \vdots & \vdots & \vdots \\    1 &    0 &   77 \\    1 &    1 &  103 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,120 \times 3}\,}\, \underbrace{\begin{bmatrix} 29.9 \\ 5.26 \\ 0.197 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,3 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} -2.36 \\ -0.159 \\ 6.62 \\ 1.51 \\ -1.49 \\ \vdots \\ 4.37 \\ -6.76 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,120 \times 1}\;\text{(residual)}\,}
 ```
 
 **Left**: observed vector $`\mathbf{w}`$. **Middle**: the prediction
@@ -479,7 +473,7 @@ the same observation *i* = 1:
 Stacking the same log-link equation for all *n* = 120 observations:
 
 ``` math
-\log\!\underbrace{\begin{bmatrix} 3.21 \\ 3.21 \\ 3.21 \\ 3.21 \\ 3.21 \\ \vdots \\ 3.21 \\ 3.21 \end{bmatrix}}_{\textstyle\,\boldsymbol{\sigma}_{\,120 \times 1}\,} \;=\; \underbrace{\begin{bmatrix} 1.00 \\ 1.00 \\ 1.00 \\ 1.00 \\ 1.00 \\ \vdots \\ 1.00 \\ 1.00 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\sigma,\,120 \times 1}\,}\, \underbrace{\begin{bmatrix} 1.17 \end{bmatrix}}_{\textstyle\,\boldsymbol{\gamma}_{\,1 \times 1}\,}
+\log\!\underbrace{\begin{bmatrix} 3.21 \\ 3.21 \\ 3.21 \\ 3.21 \\ 3.21 \\ \vdots \\ 3.21 \\ 3.21 \end{bmatrix}}_{\textstyle\,\boldsymbol{\sigma}_{\,120 \times 1}\,} \;=\; \underbrace{\begin{bmatrix}    1 \\    1 \\    1 \\    1 \\    1 \\ \vdots \\    1 \\    1 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\sigma,\,120 \times 1}\,}\, \underbrace{\begin{bmatrix} 1.17 \end{bmatrix}}_{\textstyle\,\boldsymbol{\gamma}_{\,1 \times 1}\,}
 ```
 
 ## Step 4: Continuous-by-factor interaction (`body_mass ~ sex * body_size`)
@@ -920,7 +914,7 @@ symbol_table(sym_p1)
 
 | index | matrix | variable | units | role | shape | concrete | description |
 |:---|:---|:---|:---|:---|:---|:---|:---|
-| body_mass_i | $`\mathbf{body_mass}`$ | body_mass | NA | response | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | response variable |
+| $`\mathrm{body\_mass}_i`$ | $`\mathbf{body\_mass}`$ | body_mass | NA | response | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | response variable |
 | sex_i | — | sex | NA | factor | column of design matrix | column of X (length 80) | factor (female \[reference\], male) |
 | body_size_i | — | body_size | NA | predictor | column of design matrix | column of X (length 80) | continuous predictor |
 | $`\mu_i`$ | $`\boldsymbol{\mu}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | conditional mu of body_mass |
@@ -1171,7 +1165,7 @@ symbol_table(sym_p6_poly)
 
 | index | matrix | variable | units | role | shape | concrete | description |
 |:---|:---|:---|:---|:---|:---|:---|:---|
-| body_mass_i | $`\mathbf{body_mass}`$ | body_mass | NA | response | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | response variable |
+| $`\mathrm{body\_mass}_i`$ | $`\mathbf{body\_mass}`$ | body_mass | NA | response | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | response variable |
 | body_size, 2_i | — | body_size, 2 | NA | transformation | column of design matrix | column of X (length 80) | predictor (poly-transformed) |
 | $`\mu_i`$ | $`\boldsymbol{\mu}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | conditional mu of body_mass |
 | $`\sigma_i`$ | $`\boldsymbol{\sigma}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | conditional sigma of body_mass |
@@ -1187,7 +1181,7 @@ symbol_table(sym_p6_raw)
 
 | index | matrix | variable | units | role | shape | concrete | description |
 |:---|:---|:---|:---|:---|:---|:---|:---|
-| body_mass_i | $`\mathbf{body_mass}`$ | body_mass | NA | response | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | response variable |
+| $`\mathrm{body\_mass}_i`$ | $`\mathbf{body\_mass}`$ | body_mass | NA | response | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | response variable |
 | body_size_i | — | body_size | NA | predictor | column of design matrix | column of X (length 80) | continuous predictor |
 | body_size^2_i | — | body_size^2 | NA | transformation | column of design matrix | column of X (length 80) | predictor (I-transformed) |
 | $`\mu_i`$ | $`\boldsymbol{\mu}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | conditional mu of body_mass |

@@ -99,7 +99,7 @@ symbol_table(sym1)
 
 | index | matrix | variable | units | role | shape | concrete | description |
 |:---|:---|:---|:---|:---|:---|:---|:---|
-| body_mass | $`\mathbf{body_mass}`$ | body_mass | NA | response | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ | response variable |
+| body_mass | $`\mathbf{body\_mass}`$ | body_mass | NA | response | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ | response variable |
 | temperature_i | — | temperature | NA | predictor | column of design matrix | column of X (length 200) | continuous predictor |
 | $`\mu_i`$ | $`\boldsymbol{\mu}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ | conditional mu of body_mass |
 | $`\beta_{0}, \beta_{1}`$ | $`\boldsymbol{\beta}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\mu}`$ | $`\mathbb{R}^{2}`$ | mu submodel coefficients |
@@ -156,7 +156,7 @@ symbol_table(sym2)
 
 | index | matrix | variable | units | role | shape | concrete | description |
 |:---|:---|:---|:---|:---|:---|:---|:---|
-| body_mass | $`\mathbf{body_mass}`$ | body_mass | NA | response | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ | response variable |
+| body_mass | $`\mathbf{body\_mass}`$ | body_mass | NA | response | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ | response variable |
 | temperature_i | — | temperature | NA | predictor | column of design matrix | column of X (length 200) | continuous predictor |
 | sex_i | — | sex | NA | factor | column of design matrix | column of X (length 200) | factor (F \[reference\], M) |
 | $`\mu_i`$ | $`\boldsymbol{\mu}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ | conditional mu of body_mass |
@@ -287,7 +287,7 @@ sym4 <- symbolize(fit4)
 
 cat(as_latex(sym4), "\n")
 #> \begin{aligned}
-#> body_mass_i \mid \mu_i,\, \sigma_i & \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
+#> \mathrm{body\_mass}_i \mid \mu_i,\, \sigma_i & \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 #> \mu_i & = \beta_{0} + \beta_{1} \, temperature_i + \beta_{2} \, [sex = \mathrm{M}] + u_{site(i)} \\
 #> \log(\sigma_i) & = \gamma_{0} + \gamma_{1} \, temperature_i \\
 #> u_{site} & \sim \mathcal{N}(0,\, \sigma_{site}^2)
@@ -326,7 +326,7 @@ three-view widget:
 as_html_three_views(sym4)
 ```
 
-[Skip three-views widget](#sym-sym-1779747671-end)
+[Skip three-views widget](#sym-sym-1779750212-end)
 
 ▸1. Index
 
@@ -343,7 +343,7 @@ are modeled.
 
 ``` math
 \begin{aligned}
-body_mass_i \mid \mu_i,\, \sigma_i & \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
+\mathrm{body\_mass}_i \mid \mu_i,\, \sigma_i & \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 \mu_i & = \beta_{0} + \beta_{1} \, temperature_i + \beta_{2} \, [sex = \mathrm{M}] + u_{site(i)} \\
 \log(\sigma_i) & = \gamma_{0} + \gamma_{1} \, temperature_i \\
 u_{site} & \sim \mathcal{N}(0,\, \sigma_{site}^2)
@@ -352,7 +352,7 @@ u_{site} & \sim \mathcal{N}(0,\, \sigma_{site}^2)
 
 where:
 
-- body_mass_i — response variable  $`\mathbb{R}^{200}`$
+- $`\mathrm{body\_mass}_i`$ — response variable  $`\mathbb{R}^{200}`$
 - temperature_i — continuous predictor  column of X (length 200)
 - sex_i — factor (F \[reference\], M)  column of X (length 200)
 - $`\mu_i`$ — conditional mu of body_mass  $`\mathbb{R}^{200}`$
@@ -374,7 +374,7 @@ are modeled.
 
 ``` math
 \begin{aligned}
-\mathbf{body_mass} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} & \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2)) \\
+\mathbf{body\_mass} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} & \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2)) \\
 \boldsymbol{\mu} & = \mathbf{X} \boldsymbol{\beta} + \mathbf{u} \\
 \log(\boldsymbol{\sigma}) & = \mathbf{Z} \boldsymbol{\gamma} \\
 \mathbf{u}_{site} & \sim \mathcal{N}(\mathbf{0},\, \sigma_{site}^2 \mathbf{I}_{12})
@@ -383,7 +383,7 @@ are modeled.
 
 where:
 
-- $`\mathbf{body_mass}`$ — response variable  $`\mathbb{R}^{200}`$
+- $`\mathbf{body\_mass}`$ — response variable  $`\mathbb{R}^{200}`$
 - $`\boldsymbol{\mu}`$ — conditional mu of body_mass
    $`\mathbb{R}^{200}`$
 - $`\boldsymbol{\sigma}`$ — conditional sigma of body_mass
@@ -418,16 +418,16 @@ For observation *i* = 1 of your data:
 
 ``` math
 \begin{aligned}
-W_{1} &= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{temperature}_{1} + \hat\beta_{2}\,\mathrm{sexM}_{1} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
-36.8 &= 32.1 + 0.300 \times 23.9 + 0.757 \times 0 + (-2.40) &\quad(\text{with your numbers}) \\
-&= \underbrace{39.2}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-2.40)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
+W_{1} &= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{temperature}_{1} + \hat\beta_{2}\,\mathrm{sexM}_{1} + \hat{u}_{\mathrm{S01}} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
+36.8 &= 32.1 +  0.3 \times 23.9 + 0.757 \times    0 + (-1.33) + (-2.4) &\quad(\text{with your numbers}) \\
+&= \underbrace{39.2}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-2.4)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
 \end{aligned}
 ```
 
 Stacking the same response equation for all *n* = 200 observations:
 
 ``` math
-\underbrace{\begin{bmatrix} 36.8 \\ 32.9 \\ 37.7 \\ 40.2 \\ 36.1 \\ \vdots \\ 38.0 \\ 38.3 \end{bmatrix}}_{\textstyle\,\mathbf{body_mass}_{\,200 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix} 1.00 & 23.9 & 0 \\ 1.00 & 17.7 & 0 \\ 1.00 & 13.9 & 1.00 \\ 1.00 & 10.7 & 0 \\ 1.00 & 16.3 & 0 \\ \vdots & \vdots & \vdots \\ 1.00 & 19.9 & 1.00 \\ 1.00 & 12.1 & 1.00 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,200 \times 3}\,}\, \underbrace{\begin{bmatrix} 32.1 \\ 0.300 \\ 0.757 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,3 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} 1.00 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ 0 & 1.00 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ 0 & 0 & 1.00 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ 0 & 0 & 0 & 1.00 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ 0 & 0 & 0 & 0 & 1.00 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\ 0 & 0 & 0 & 0 & 0 & 0 & 1.00 & 0 & 0 & 0 & 0 & 0 \\ 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1.00 & 0 & 0 & 0 & 0 \end{bmatrix}}_{\textstyle\,\mathbf{Z}_{\,200 \times 12}\,}\, \underbrace{\begin{bmatrix} -1.33 \\ 0.266 \\ -1.38 \\ 1.48 \\ 0.519 \\ -0.761 \\ -0.247 \\ 0.281 \\ -0.0776 \\ -0.728 \\ 1.75 \\ 0.233 \end{bmatrix}}_{\textstyle\,\hat{\mathbf{u}}_{\,12 \times 1}\;\text{(BLUP)}\,} \;+\; \underbrace{\begin{bmatrix} -2.40 \\ -4.50 \\ 0.678 \\ 4.90 \\ -0.883 \\ \vdots \\ -0.815 \\ 1.82 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,200 \times 1}\;\text{(residual)}\,}
+\underbrace{\begin{bmatrix} 36.8 \\ 32.9 \\ 37.7 \\ 40.2 \\ 36.1 \\ \vdots \\   38 \\ 38.3 \end{bmatrix}}_{\textstyle\,\mathbf{body\_mass}_{\,200 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 & 23.9 &    0 \\    1 & 17.7 &    0 \\    1 & 13.9 &    1 \\    1 & 10.7 &    0 \\    1 & 16.3 &    0 \\ \vdots & \vdots & \vdots \\    1 & 19.9 &    1 \\    1 & 12.1 &    1 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,200 \times 3}\,}\, \underbrace{\begin{bmatrix} 32.1 \\  0.3 \\ 0.757 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,3 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix}    1 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 \\    0 &    1 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 \\    0 &    0 &    1 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 \\    0 &    0 &    0 &    1 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 \\    0 &    0 &    0 &    0 &    1 &    0 &    0 &    0 &    0 &    0 &    0 &    0 \\ \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\    0 &    0 &    0 &    0 &    0 &    0 &    1 &    0 &    0 &    0 &    0 &    0 \\    0 &    0 &    0 &    0 &    0 &    0 &    0 &    1 &    0 &    0 &    0 &    0 \end{bmatrix}}_{\textstyle\,\mathbf{Z}_{\,200 \times 12}\,}\, \underbrace{\begin{bmatrix} -1.33 \\ 0.266 \\ -1.38 \\ 1.48 \\ 0.519 \\ -0.761 \\ -0.247 \\ 0.281 \\ -0.0776 \\ -0.728 \\ 1.75 \\ 0.233 \end{bmatrix}}_{\textstyle\,\hat{\mathbf{u}}_{\,12 \times 1}\;\text{(BLUP)}\,} \;+\; \underbrace{\begin{bmatrix} -2.4 \\ -4.5 \\ 0.678 \\  4.9 \\ -0.883 \\ \vdots \\ -0.815 \\ 1.82 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,200 \times 1}\;\text{(residual)}\,}
 ```
 
 **Left**: observed vector $`\mathbf{w}`$. **Middle**: the prediction
@@ -452,7 +452,7 @@ the same observation *i* = 1:
 Stacking the same log-link equation for all *n* = 200 observations:
 
 ``` math
-\log\!\underbrace{\begin{bmatrix} 4.12 \\ 3.22 \\ 2.77 \\ 2.44 \\ 3.04 \\ \vdots \\ 3.53 \\ 2.58 \end{bmatrix}}_{\textstyle\,\boldsymbol{\sigma}_{\,200 \times 1}\,} \;=\; \underbrace{\begin{bmatrix} 1.00 & 23.9 \\ 1.00 & 17.7 \\ 1.00 & 13.9 \\ 1.00 & 10.7 \\ 1.00 & 16.3 \\ \vdots & \vdots \\ 1.00 & 19.9 \\ 1.00 & 12.1 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\sigma,\,200 \times 2}\,}\, \underbrace{\begin{bmatrix} 0.465 \\ 0.0399 \end{bmatrix}}_{\textstyle\,\boldsymbol{\gamma}_{\,2 \times 1}\,}
+\log\!\underbrace{\begin{bmatrix} 4.12 \\ 3.22 \\ 2.77 \\ 2.44 \\ 3.04 \\ \vdots \\ 3.53 \\ 2.58 \end{bmatrix}}_{\textstyle\,\boldsymbol{\sigma}_{\,200 \times 1}\,} \;=\; \underbrace{\begin{bmatrix}    1 & 23.9 \\    1 & 17.7 \\    1 & 13.9 \\    1 & 10.7 \\    1 & 16.3 \\ \vdots & \vdots \\    1 & 19.9 \\    1 & 12.1 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\sigma,\,200 \times 2}\,}\, \underbrace{\begin{bmatrix} 0.465 \\ 0.0399 \end{bmatrix}}_{\textstyle\,\boldsymbol{\gamma}_{\,2 \times 1}\,}
 ```
 
 (The widget renders live in this page. In an R session,

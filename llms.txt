@@ -201,26 +201,20 @@ with data — backed by the same `symbolized_model` object.
 as_html_three_views(sym)
 ```
 
-[Skip three-views widget](#sym-sym-1779746539-end)
+[Skip three-views widget](#sym-sym-1779749553-end)
 
-``` R
-<button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779746539-tab-eq" aria-controls="sym-sym-1779746539-panel-eq" aria-selected="true" tabindex="0" data-tab="eq"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>1. Equation</button>
-<button type="button" class="sym-tab" role="tab" id="sym-sym-1779746539-tab-idx" aria-controls="sym-sym-1779746539-panel-idx" aria-selected="false" tabindex="-1" data-tab="idx"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>2. Index</button>
-<button type="button" class="sym-tab" role="tab" id="sym-sym-1779746539-tab-mat" aria-controls="sym-sym-1779746539-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>3. Matrix (with data)</button>
-```
+▸1. Index
 
-The structural contract. No indices, no numbers – the shape of the
-model.
+▸2. Matrix
 
-``` math
-\begin{aligned}
-\mathbf{w} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} & \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2)) \\
-\boldsymbol{\mu} & = \mathbf{X} \boldsymbol{\beta} \\
-\log(\boldsymbol{\sigma}) & = \mathbf{Z} \boldsymbol{\gamma}
-\end{aligned}
-```
+▸3. Equations with data
 
-What happens for each observation *i*.
+What happens for each observation *i* – the per-individual reading.
+
+Each observation is normally distributed around a mean that may shift
+with the predictors, and a residual SD that may also shift with its own
+predictors – so both the centre and the spread of the response are
+modeled.
 
 ``` math
 \begin{aligned}
@@ -230,44 +224,90 @@ W_i \mid \mu_i,\, \sigma_i & \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 \end{aligned}
 ```
 
-The actual numbers stacked – what the computer is multiplying. Showing
-first 5 and last 2 rows of n = 200.
+where:
+
+- W_i — response variable  (^{200})
+- T_i — continuous predictor  column of X (length 200)
+- (\_i) — conditional mu of body_mass  (^{200})
+- (\_i) — conditional sigma of body_mass  (^{200})
+- (*{0},* {1}) — mu submodel coefficients  (^{2})
+- (*{0},* {1}) — sigma submodel coefficients  (^{2})
+
+The same model in matrix form – the structural contract every textbook
+past chapter 4 switches to.
+
+Each observation is normally distributed around a mean that may shift
+with the predictors, and a residual SD that may also shift with its own
+predictors – so both the centre and the spread of the response are
+modeled.
+
+``` math
+\begin{aligned}
+\mathbf{w} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} & \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2)) \\
+\boldsymbol{\mu} & = \mathbf{X} \boldsymbol{\beta} \\
+\log(\boldsymbol{\sigma}) & = \mathbf{Z} \boldsymbol{\gamma}
+\end{aligned}
+```
+
+where:
+
+- () — response variable  (^{200})
+- () — conditional mu of body_mass  (^{200})
+- () — conditional sigma of body_mass  (^{200})
+- () — mu submodel coefficients  (^{2})
+- () — sigma submodel coefficients  (^{2})
+- () — mu submodel design matrix  (^{200 })
+- () — sigma submodel design matrix  (^{200 })
+
+The same matrix equation, with your actual numbers stacked inside the
+brackets – what the computer multiplies. Showing first 5 and last 2 rows
+of n = 200.
+
+Each observation is normally distributed around a mean that may shift
+with the predictors, and a residual SD that may also shift with its own
+predictors – so both the centre and the spread of the response are
+modeled.
 
 Matrix-form expansion of the model. Each row shows the response y_i and
 the corresponding row of the design matrix X (showing head and tail rows
 of the n total observations), with the coefficient vector beta listed
 below.
 
-``` sym-matrix
+For observation *i* = 1 of your data:
 
-  y                   X                          beta
-  y_1 = 31.5          1.00  14.0
-  y_2 = 36.6          1.00  15.6
-  y_3 = 27.8          1.00  18.6
-  y_4 = 42.2          1.00  23.6
-  y_5 = 31.2          1.00  13.0
-  ...               ...
-  y_199 = 35.5        1.00  14.8
-  y_200 = 34.3        1.00  21.7
+``` math
+\begin{aligned}
+W_{1} &= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{temperature}_{1} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
+31.5 &= 30.4 + 0.371 \times   14 + (-4.16) &\quad(\text{with your numbers}) \\
+&= \underbrace{35.6}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-4.16)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
+\end{aligned}
+```
 
-  Coefficients (beta, mu):
-    beta_0 = 30.4
-    beta_1 = 0.371
+Stacking the same response equation for all *n* = 200 observations:
 
-  X_sigma                       gamma
-  1.00  14.0
-  1.00  15.6
-  1.00  18.6
-  1.00  23.6
-  1.00  13.0
-  ...
-  1.00  14.8
-  1.00  21.7
-    gamma_0 = 0.799
-    gamma_1 = 0.0825
+``` math
+\underbrace{\begin{bmatrix} 31.5 \\ 36.6 \\ 27.8 \\ 42.2 \\ 31.2 \\ \vdots \\ 35.5 \\ 34.3 \end{bmatrix}}_{\textstyle\,\mathbf{w}_{\,200 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 &   14 \\    1 & 15.6 \\    1 & 18.6 \\    1 & 23.6 \\    1 &   13 \\ \vdots & \vdots \\    1 & 14.8 \\    1 & 21.7 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,200 \times 2}\,}\, \underbrace{\begin{bmatrix} 30.4 \\ 0.371 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,2 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} -4.16 \\ 0.355 \\ -9.53 \\ 3.02 \\ -4.02 \\ \vdots \\ -0.364 \\ -4.23 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,200 \times 1}\;\text{(residual)}\,}
+```
 
-  Fitted mu_hat (first 5): 35.6  36.2  37.3  39.2  35.3
-  Fitted sigma_hat (first 5): 7.04  8.03  10.3  15.6  6.51
+**Left**: observed vector (). **Middle**: the prediction ( = ).
+**Right**: the residual vector ( = - ). Every row of this matrix
+equation is one of the response-equation rows from the worked row above.
+
+And the () submodel (no observed counterpart – ()’s job is to describe
+the spread of ()). For the same observation *i* = 1:
+
+``` math
+\begin{aligned}
+\log\hat\sigma_{1} &= \hat\gamma_{0} + \hat\gamma_{1}\,\mathrm{temperature}_{1} &\quad(\text{sigma submodel for observation 1, log link}) \\
+\log\hat\sigma_{1} &= 0.799 + 0.0825 \times   14 = 1.95 &\quad(\text{with your numbers}) \\
+\hat\sigma_{1} &= \exp(1.95) \approx 7.04 &\quad(\text{predicted residual SD for observation 1})
+\end{aligned}
+```
+
+Stacking the same log-link equation for all *n* = 200 observations:
+
+``` math
+\log\!\underbrace{\begin{bmatrix} 7.04 \\ 8.03 \\ 10.3 \\ 15.6 \\ 6.51 \\ \vdots \\ 7.51 \\ 13.4 \end{bmatrix}}_{\textstyle\,\boldsymbol{\sigma}_{\,200 \times 1}\,} \;=\; \underbrace{\begin{bmatrix}    1 &   14 \\    1 & 15.6 \\    1 & 18.6 \\    1 & 23.6 \\    1 &   13 \\ \vdots & \vdots \\    1 & 14.8 \\    1 & 21.7 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\sigma,\,200 \times 2}\,}\, \underbrace{\begin{bmatrix} 0.799 \\ 0.0825 \end{bmatrix}}_{\textstyle\,\boldsymbol{\gamma}_{\,2 \times 1}\,}
 ```
 
 On GitHub this section renders as static markup (GitHub doesn’t execute

@@ -172,7 +172,7 @@ render_math(sym$distribution$latex)
 ```
 
 ``` math
-cbind(successes, failures)_i \mid N_i,\, \mu_i,\, \sigma_i \sim \mathrm{BetaBinomial}(N_i,\, \mu_i,\, \sigma_i); \mathbb{E}[cbind(successes, failures)_i] = N_i \mu_i
+\mathrm{cbind(successes, failures)}_i \mid N_i,\, \mu_i,\, \sigma_i \sim \mathrm{BetaBinomial}(N_i,\, \mu_i,\, \sigma_i); \mathbb{E}[\mathrm{cbind(successes, failures)}_i] = N_i \mu_i
 ```
 
 **Coefficient reading on mu:** same logit reading as Beta — `exp(beta)`
