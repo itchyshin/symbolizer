@@ -124,13 +124,19 @@ parameter_interpretation(sym, scale = "biological")
 
 `as_html_three_views(sym)` opens an interactive *Equation / Index / Matrix-with-data* widget that runs your actual numeric arrays through the model live. Three tabs — equation, expanded scalar form, matrix form with data — backed by the same `symbolized_model` object.
 
-![Three-views widget for a drmTMB location-scale fit](man/figures/three-views-widget.png)
-
 ```{r three-views, eval = FALSE}
 as_html_three_views(sym)
 ```
 
-The widget renders live in [`vignette("symbolizer-ladder")`](articles/symbolizer-ladder.html), which is also the recommended on-ramp — it builds a model from `lm()` to location-scale one rung at a time and uses the same `symbolize()` call at every step.
+```{r three-views-live, echo = FALSE, results = "asis"}
+# Emit the actual widget HTML so the pkgdown homepage carries a live,
+# clickable widget (not just a static screenshot). The chunk is gated
+# globally on drmTMB availability via the setup chunk; if drmTMB is
+# missing, this falls back silently.
+invisible(as_html_three_views(sym))
+```
+
+On GitHub this section renders as static markup (GitHub doesn't execute the inline JavaScript); on the pkgdown homepage the tabs are interactive. The same widget also renders in the [ladder article](articles/symbolizer-ladder.html), in its own *Three views of the same fit* section.
 
 ## Status
 

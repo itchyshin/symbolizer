@@ -260,6 +260,26 @@ means: it is now the expected response at the reference factor level
 still a difference from the reference, now read "at the same level of
 the continuous predictor(s)".
 
+### Three views: how the dummy column sits in the X matrix
+
+For a `sex + body_size` fit the design matrix has **three columns** —
+intercept, `sexmale` (0 for female, 1 for male), and `body_size` — and
+the three-views widget shows exactly that on the matrix-with-data tab:
+the `0`s and `1`s of the dummy column sit next to the continuous
+`body_size` column, with the coefficient vector
+$\boldsymbol{\beta} = (\beta_0,\,\beta_1,\,\beta_2)^\top$ multiplying
+through:
+
+```{r step3-three-views, eval = FALSE}
+as_html_three_views(sym3)
+```
+
+```{r step3-three-views-live, echo = FALSE, results = "asis"}
+if (requireNamespace("drmTMB", quietly = TRUE)) {
+  invisible(as_html_three_views(sym3))
+}
+```
+
 ## Step 4: Continuous-by-factor interaction (`body_mass ~ sex * body_size`)
 
 Step 3 forced the male and female regression lines to be parallel.

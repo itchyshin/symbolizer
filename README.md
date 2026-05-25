@@ -163,14 +163,125 @@ parameter_interpretation(sym, scale = "biological")
 
 `as_html_three_views(sym)` opens an interactive *Equation / Index / Matrix-with-data* widget that runs your actual numeric arrays through the model live. Three tabs — equation, expanded scalar form, matrix form with data — backed by the same `symbolized_model` object.
 
-![Three-views widget for a drmTMB location-scale fit](man/figures/three-views-widget.png)
-
 
 ``` r
 as_html_three_views(sym)
 ```
 
-The widget renders live in [`vignette("symbolizer-ladder")`](articles/symbolizer-ladder.html), which is also the recommended on-ramp — it builds a model from `lm()` to location-scale one rung at a time and uses the same `symbolize()` call at every step.
+<style>.sym-tabs { position: relative; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; margin: 1em 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+.sym-tablist { display: flex; background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
+.sym-tab { flex: 1; text-align: center; padding: 0.6rem 0.5rem; cursor: pointer; font-weight: 600; color: #6b7280; border: 0; border-right: 1px solid #e5e7eb; background: transparent; user-select: none; font-size: 0.92rem; font-family: inherit; }
+.sym-tab:last-child { border-right: 0; }
+.sym-tab:hover { background: #fbe7e7; color: #7a2a2a; }
+.sym-tab.sym-active { background: #fff; color: #8a1f22; box-shadow: inset 0 -3px 0 #a0282b; }
+.sym-tab:focus-visible { outline: 2px solid #a0282b; outline-offset: -2px; }
+.sym-tab-marker { display: inline-block; margin-right: 0.35em; opacity: 0; transition: opacity 0.1s; }
+.sym-tab.sym-active .sym-tab-marker { opacity: 1; }
+.sym-panel { padding: 1rem 1.1rem 1.2rem; }
+.sym-panel[hidden] { display: none; }
+.sym-eq { background: #fbe7e7; border: 1px solid #a0282b; border-radius: 6px; padding: 0.7rem 1rem; margin: 0.4rem 0; text-align: center; }
+.sym-caption { color: #6b7280; font-size: 0.85rem; margin: 0.2rem 0 0.4rem; }
+.sym-matrix { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.78rem; line-height: 1.35; white-space: pre; overflow-x: auto; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 0.6rem 0.8rem; margin: 0.3rem 0; }
+.sym-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.sym-skip { position: absolute; top: -100px; left: 0; padding: 0.4rem 0.7rem; background: #8a1f22; color: #fff; text-decoration: none; font-size: 0.85rem; z-index: 5; }
+.sym-skip:focus { top: 0; }</style>
+<div class="sym-tabs" id="sym-sym-1779746539">
+  <a class="sym-skip" href="#sym-sym-1779746539-end">Skip three-views widget</a>
+  <div class="sym-tablist" role="tablist" aria-label="Three views of the model">
+    <button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779746539-tab-eq" aria-controls="sym-sym-1779746539-panel-eq" aria-selected="true" tabindex="0" data-tab="eq"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>1. Equation</button>
+    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779746539-tab-idx" aria-controls="sym-sym-1779746539-panel-idx" aria-selected="false" tabindex="-1" data-tab="idx"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>2. Index</button>
+    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779746539-tab-mat" aria-controls="sym-sym-1779746539-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>3. Matrix (with data)</button>
+  </div>
+<div class="sym-panel sym-active" role="tabpanel" id="sym-sym-1779746539-panel-eq" aria-labelledby="sym-sym-1779746539-tab-eq" data-panel="eq" tabindex="0">
+  <p class="sym-caption">The structural contract. No indices, no numbers -- the shape of the model.</p>
+  <div class="sym-eq">$$\begin{aligned}
+\mathbf{w} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} & \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2)) \\
+\boldsymbol{\mu} & = \mathbf{X} \boldsymbol{\beta} \\
+\log(\boldsymbol{\sigma}) & = \mathbf{Z} \boldsymbol{\gamma}
+\end{aligned}$$</div>
+</div>
+<div class="sym-panel" role="tabpanel" id="sym-sym-1779746539-panel-idx" aria-labelledby="sym-sym-1779746539-tab-idx" data-panel="idx" hidden tabindex="0">
+  <p class="sym-caption">What happens for each observation <em>i</em>.</p>
+  <div class="sym-eq">$$\begin{aligned}
+W_i \mid \mu_i,\, \sigma_i & \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
+\mu_i & = \beta_{0} + \beta_{1} \, T_i \\
+\log(\sigma_i) & = \gamma_{0} + \gamma_{1} \, T_i
+\end{aligned}$$</div>
+</div>
+<div class="sym-panel" role="tabpanel" id="sym-sym-1779746539-panel-mat" aria-labelledby="sym-sym-1779746539-tab-mat" data-panel="mat" hidden tabindex="0">
+  <p class="sym-caption">The actual numbers stacked -- what the computer is multiplying. Showing first 5 and last 2 rows of n = 200.</p>
+  <span class="sym-sr-only">Matrix-form expansion of the model. Each row shows the response y_i and the corresponding row of the design matrix X (showing head and tail rows of the n total observations), with the coefficient vector beta listed below.</span>
+<pre class="sym-matrix" aria-hidden="true">
+  y                   X                          beta
+  y_1 = 31.5          1.00  14.0              
+  y_2 = 36.6          1.00  15.6              
+  y_3 = 27.8          1.00  18.6              
+  y_4 = 42.2          1.00  23.6              
+  y_5 = 31.2          1.00  13.0              
+  ...               ...                   
+  y_199 = 35.5        1.00  14.8              
+  y_200 = 34.3        1.00  21.7              
+
+  Coefficients (beta, mu):
+    beta_0 = 30.4
+    beta_1 = 0.371
+
+  X_sigma                       gamma
+  1.00  14.0                    
+  1.00  15.6                    
+  1.00  18.6                    
+  1.00  23.6                    
+  1.00  13.0                    
+  ...                         
+  1.00  14.8                    
+  1.00  21.7                    
+    gamma_0 = 0.799
+    gamma_1 = 0.0825
+
+  Fitted mu_hat (first 5): 35.6  36.2  37.3  39.2  35.3
+  Fitted sigma_hat (first 5): 7.04  8.03  10.3  15.6  6.51
+</pre>
+</div>
+</div>
+<span id="sym-sym-1779746539-end" tabindex="-1"></span>
+<script>(function() {
+  var root = document.getElementById("sym-sym-1779746539");
+  if (!root) return;
+  var tabs   = Array.prototype.slice.call(root.querySelectorAll("[role="tab"]"));
+  var panels = Array.prototype.slice.call(root.querySelectorAll("[role="tabpanel"]"));
+  function activate(idx) {
+    tabs.forEach(function(t, i) {
+      var on = (i === idx);
+      t.classList.toggle("sym-active", on);
+      t.setAttribute("aria-selected", on ? "true" : "false");
+      t.setAttribute("tabindex", on ? "0" : "-1");
+    });
+    panels.forEach(function(p, i) {
+      var on = (i === idx);
+      p.classList.toggle("sym-active", on);
+      if (on) { p.removeAttribute("hidden"); } else { p.setAttribute("hidden", ""); }
+    });
+    if (typeof window.MathJax !== "undefined" && window.MathJax.typesetPromise) {
+      try { window.MathJax.typesetPromise([panels[idx]]); } catch (e) {}
+    }
+  }
+  tabs.forEach(function(t, idx) {
+    t.addEventListener("click", function() { activate(idx); t.focus(); });
+    t.addEventListener("keydown", function(e) {
+      var k = e.key;
+      var n = tabs.length;
+      var next = null;
+      if (k === "ArrowRight") next = (idx + 1) % n;
+      else if (k === "ArrowLeft") next = (idx - 1 + n) % n;
+      else if (k === "Home") next = 0;
+      else if (k === "End") next = n - 1;
+      else if (k === "Enter" || k === " ") { activate(idx); e.preventDefault(); return; }
+      if (next !== null) { activate(next); tabs[next].focus(); e.preventDefault(); }
+    });
+  });
+})();</script>
+
+On GitHub this section renders as static markup (GitHub doesn't execute the inline JavaScript); on the pkgdown homepage the tabs are interactive. The same widget also renders in the [ladder article](articles/symbolizer-ladder.html), in its own *Three views of the same fit* section.
 
 ## Status
 

@@ -276,6 +276,27 @@ reports it as $\sigma_{\mathrm{site}}$.
 independence assumption from unconditional to conditional. The audit
 trail is built into the template, not into prose.
 
+### See the three views of this RE fit
+
+The same `as_html_three_views()` widget that anchors the
+[ladder article](symbolizer-ladder.html) works on every
+`symbolized_model`. Calling it on `sym_re` lets a reader walk from the
+per-observation form $y_i = \beta_0 + \beta_1 T_i + u_{\mathrm{site}(i)} + \varepsilon_i$
+through the matrix abstraction $\boldsymbol{\mu} = \mathbf{X}\boldsymbol{\beta} + \mathbf{Z}\mathbf{u}$
+to the actual numeric arrays — with both the $\mathbf{X}\boldsymbol{\beta}$
+fixed-effect block and the $\mathbf{Z}\mathbf{u}$ random-effect block
+populated from the data:
+
+```{r re-three-views, eval = FALSE}
+as_html_three_views(sym_re)
+```
+
+```{r re-three-views-live, echo = FALSE, results = "asis"}
+if (requireNamespace("drmTMB", quietly = TRUE)) {
+  invisible(as_html_three_views(sym_re))
+}
+```
+
 ## 6. A richer worked example: four predictor roles in one fit
 
 The previous sections walked the basics on a simple two-predictor fit.

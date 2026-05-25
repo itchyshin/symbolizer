@@ -1,3 +1,103 @@
+# symbolizer 0.19.0
+
+## v0.19.0 -- three-views widget v2: pedagogically reordered, live on the homepage, embedded in more vignettes
+
+Today's headline change is in the interactive `as_html_three_views()`
+widget. A four-agent design pass (Pat / Noether / Darwin / Boole)
+surfaced a series of issues with the v0.18.x widget; the most
+important fixes ship now, with the more substantive moves (worked-row
+anchor, biology one-liner per tab, narrative bridge captions, print
+stylesheet, dark mode) staged for v0.20.
+
+### Pedagogical reorder of the three tabs
+
+The widget now opens on **1. Per-observation (Index)**, then steps to
+**2. Matrix form**, then **3. Matrix with your data**. The order
+matters: biologists read scalar regression notation fluently from
+undergrad coursework but encounter matrix algebra as an abstraction.
+The new order is *familiar → abstract → concrete grounding*: each tab
+builds on the previous one rather than dropping the reader into bold
+letters cold.
+
+### Notation cleanup
+
+* The sigma-submodel design matrix is now rendered as
+  $\mathbf{X}_\sigma$ rather than $\mathbf{Z}$. $\mathbf{Z}$ is
+  reserved for random-effect design matrices, matching the convention
+  in Pinheiro & Bates and the lme4 paper. Noether's audit flagged the
+  earlier `Z`-overload as the single biggest notational tell.
+* Dimension annotations now use textbook subscript form
+  `\mathbf{X}_{n \times p}` rather than the programming-type-annotation
+  form `\mathbf{X}\,(n \times p)`.
+* The spurious `+ \boldsymbol{\varepsilon}` tail on the
+  matrix-with-data equation is removed. It conflicted with the
+  conditional-mean form (`\boldsymbol{\mu} = \mathbf{X}\boldsymbol{\beta}`)
+  used on the other two tabs.
+* Dimension labels under each `\underbrace{...}_{label}` are now
+  rendered at `\textstyle` instead of the LaTeX default
+  `\scriptstyle`. The labels were genuinely hard to read at half size.
+
+### Symbol-gloss rendering bug fixed
+
+`three_views_symbol_gloss()` wrapped every `dimension_concrete` value
+in MathJax `\(...\)` delimiters, but for predictor columns the field
+carries prose ("column of X (length 200)"), not LaTeX. The wrap turned
+the prose into garbled italic math on the default-open tab. The helper
+now MathJax-wraps only strings that begin with `\` (i.e. actually look
+like LaTeX); plain prose falls through verbatim.
+
+### Live widgets in more places
+
+The widget is now embedded as a **live, clickable** widget (not a
+static screenshot) on:
+
+* the pkgdown **homepage** (`index.html`),
+* the **ladder article** (Rung 4),
+* `symbolizer-drmtmb.Rmd` (Section 5: Gaussian location-scale with a
+  random intercept -- showcases the `Z u` block alongside the
+  `X \beta` block in the matrix-with-data tab),
+* `symbolizer-factors.Rmd` (Step 3: `sex + body_size` mixed
+  factor + continuous predictor -- showcases how the `sexmale` dummy
+  column sits next to the continuous `body_size` column in the design
+  matrix).
+
+On GitHub these sections render as static markup; on the pkgdown
+homepage and articles the tabs are interactive. The same widget also
+underlies the bigger v0.20 work to come.
+
+### Other small fixes folded in
+
+* Homepage README: `vignette("symbolizer-ladder")` mentions trimmed
+  from three to two; the second mention is now a soft cross-reference
+  to the article's *Three views of the same fit* section.
+* CI actions bumped to Node-24-compatible versions:
+  `actions/checkout@v4` -> `@v6`,
+  `JamesIves/github-pages-deploy-action@v4.5.0` -> `@v4.8.0`.
+
+### Audit findings deferred to v0.20
+
+Fisher's inference/interval audit and Emmy's S3/field-contract audit
+surfaced a real set of substantive issues:
+
+* `simulate_recipe()` double-draws the random effect for
+  meta-analysis fits and references several undefined variables
+  (`sigma_residual`, `v_i`, `tau2`, `n_studies`, `study_index`) in
+  fall-back branches.
+* `MCMCglmm` HPD credible intervals are labeled with the same
+  generic `"credible"` tag as `brms`'s posterior quantiles; the two
+  intervals are materially different.
+* `lme4` / `glmmTMB` / `brms` extractors don't surface
+  singular-fit / boundary / divergent-transition warnings.
+* `symbolize.drmTMB` adds `ci_method = "wald"` before `...`,
+  breaking the generic's signature.
+* `symbolize.bam` is exported but its capability row is unreachable
+  (`symbolize.bam <- symbolize.gam`, and `symbolize.gam` calls
+  `capability_check("gam", ...)`).
+* `metafor` CIs are unconditionally labelled Wald even when
+  `test = "knha"` widens them.
+
+These need test cases and careful staging; they will land in v0.20.
+
 # symbolizer 0.18.3
 
 ## v0.18.3 -- Pat + Rose cross-repo audit

@@ -57,28 +57,49 @@ as_html_three_views.symbolized_model <- function(x, head = 5L, tail = 2L,
   css <- three_views_css()
   js  <- three_views_js(uid)
 
-  eq_panel <- paste0(
-    "<div class=\"sym-panel sym-active\" role=\"tabpanel\" id=\"", pan_eq,
-    "\" aria-labelledby=\"", tab_eq, "\" data-panel=\"eq\" tabindex=\"0\">\n",
-    "  <p class=\"sym-caption\">The structural contract. No indices, no numbers -- the shape of the model.</p>\n",
-    "  <div class=\"sym-eq\">$$\\begin{aligned}\n",
-    paste0(vapply(eq_lines, align_at, character(1L)), collapse = " \\\\\n"),
-    "\n\\end{aligned}$$</div>\n",
-    "</div>\n"
-  )
+  # Symbol gloss for each panel, in the notation that panel uses. The
+  # tab order below is pedagogical: per-observation (familiar) -> matrix
+  # form (the abstraction) -> matrix form populated with the data
+  # (concrete grounding). This walks a biologist from the language they
+  # already read fluently to the matrix algebra every textbook past
+  # chapter 4 switches to, and shows the abstraction is the same model
+  # in different notation.
+  gloss_index   <- three_views_symbol_gloss(x, notation = "index")
+  gloss_matrix  <- three_views_symbol_gloss(x, notation = "matrix")
+  # One-sentence biology / whole-model reading per tab. Family-aware.
+  # Returns "" if no template applies. Observational language only --
+  # never "the effect of X on Y". Darwin's Move A from the v0.19 design
+  # pass; the maintainer's vision is "help biologists connect statistical
+  # results to biological phenomena" and the matrix algebra teaching needs
+  # one sentence anchoring it to the model's whole-system story.
+  bio_gloss <- three_views_biology_gloss(x)
   idx_panel <- paste0(
-    "<div class=\"sym-panel\" role=\"tabpanel\" id=\"", pan_idx,
-    "\" aria-labelledby=\"", tab_idx, "\" data-panel=\"idx\" hidden tabindex=\"0\">\n",
-    "  <p class=\"sym-caption\">What happens for each observation <em>i</em>.</p>\n",
+    "<div class=\"sym-panel sym-active\" role=\"tabpanel\" id=\"", pan_idx,
+    "\" aria-labelledby=\"", tab_idx, "\" data-panel=\"idx\" tabindex=\"0\">\n",
+    "  <p class=\"sym-caption\">What happens for each observation <em>i</em> -- the per-individual reading.</p>\n",
+    bio_gloss,
     "  <div class=\"sym-eq\">$$\\begin{aligned}\n",
     paste0(vapply(idx_lines, align_at, character(1L)), collapse = " \\\\\n"),
     "\n\\end{aligned}$$</div>\n",
+    gloss_index,
+    "</div>\n"
+  )
+  eq_panel <- paste0(
+    "<div class=\"sym-panel\" role=\"tabpanel\" id=\"", pan_eq,
+    "\" aria-labelledby=\"", tab_eq, "\" data-panel=\"eq\" hidden tabindex=\"0\">\n",
+    "  <p class=\"sym-caption\">The same model in matrix form -- the structural contract every textbook past chapter 4 switches to.</p>\n",
+    bio_gloss,
+    "  <div class=\"sym-eq\">$$\\begin{aligned}\n",
+    paste0(vapply(eq_lines, align_at, character(1L)), collapse = " \\\\\n"),
+    "\n\\end{aligned}$$</div>\n",
+    gloss_matrix,
     "</div>\n"
   )
   mat_panel <- paste0(
     "<div class=\"sym-panel\" role=\"tabpanel\" id=\"", pan_mat,
     "\" aria-labelledby=\"", tab_mat, "\" data-panel=\"mat\" hidden tabindex=\"0\">\n",
-    "  <p class=\"sym-caption\">The actual numbers stacked -- what the computer is multiplying. Showing first ", head, " and last ", tail, " rows of n = ", x$model$n_obs, ".</p>\n",
+    "  <p class=\"sym-caption\">The same matrix equation, with your actual numbers stacked inside the brackets -- what the computer multiplies. Showing first ", head, " and last ", tail, " rows of n = ", x$model$n_obs, ".</p>\n",
+    bio_gloss,
     "  <span class=\"sym-sr-only\">", matrix_summary, "</span>\n",
     matrix_block,
     "</div>\n"
@@ -99,19 +120,19 @@ as_html_three_views.symbolized_model <- function(x, head = 5L, tail = 2L,
     "<a class=\"sym-skip\" href=\"#", end_id, "\">Skip three-views widget</a>\n",
     "<div class=\"sym-tablist\" role=\"tablist\" aria-label=\"Three views of the model\">\n",
     "<button type=\"button\" class=\"sym-tab sym-active\" role=\"tab\"",
-    " id=\"", tab_eq, "\" aria-controls=\"", pan_eq, "\"",
-    " aria-selected=\"true\" tabindex=\"0\" data-tab=\"eq\">",
-    marker, "1. Equation</button>\n",
-    "<button type=\"button\" class=\"sym-tab\" role=\"tab\"",
     " id=\"", tab_idx, "\" aria-controls=\"", pan_idx, "\"",
-    " aria-selected=\"false\" tabindex=\"-1\" data-tab=\"idx\">",
-    marker, "2. Index</button>\n",
+    " aria-selected=\"true\" tabindex=\"0\" data-tab=\"idx\">",
+    marker, "1. Index</button>\n",
+    "<button type=\"button\" class=\"sym-tab\" role=\"tab\"",
+    " id=\"", tab_eq, "\" aria-controls=\"", pan_eq, "\"",
+    " aria-selected=\"false\" tabindex=\"-1\" data-tab=\"eq\">",
+    marker, "2. Matrix</button>\n",
     "<button type=\"button\" class=\"sym-tab\" role=\"tab\"",
     " id=\"", tab_mat, "\" aria-controls=\"", pan_mat, "\"",
     " aria-selected=\"false\" tabindex=\"-1\" data-tab=\"mat\">",
-    marker, "3. Matrix (with data)</button>\n",
+    marker, "3. Matrix with data</button>\n",
     "</div>\n",
-    eq_panel, idx_panel, mat_panel,
+    idx_panel, eq_panel, mat_panel,
     "</div>\n",
     "<span id=\"", end_id, "\" tabindex=\"-1\"></span>\n",
     "<script>", js, "</script>\n"
@@ -149,100 +170,308 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L) {
   n <- length(ex$y)
   rows <- trunc_idx(n, head, tail)
 
-  pad <- function(s, w) formatC(s, width = w, flag = "-")
-  cell <- function(label, idx) {
-    if (is.na(idx)) return("vdots")
-    paste0(label, " = ", fmt(ex$y[idx]))
+  # LaTeX helpers: emit \begin{bmatrix} ... \end{bmatrix} from a numeric
+  # vector or matrix, with `\vdots` for the truncation row.
+  latex_vec <- function(vals, idx = seq_along(vals)) {
+    rows_tex <- vapply(idx, function(i) {
+      if (is.na(i)) "\\vdots" else fmt(vals[i])
+    }, character(1L))
+    paste0("\\begin{bmatrix} ",
+           paste(rows_tex, collapse = " \\\\ "),
+           " \\end{bmatrix}")
+  }
+  latex_mat <- function(M, idx = seq_len(nrow(M))) {
+    p <- ncol(M)
+    rows_tex <- vapply(idx, function(i) {
+      if (is.na(i)) paste(rep("\\vdots", p), collapse = " & ")
+      else paste(fmt(M[i, ]), collapse = " & ")
+    }, character(1L))
+    paste0("\\begin{bmatrix} ",
+           paste(rows_tex, collapse = " \\\\ "),
+           " \\end{bmatrix}")
+  }
+  # Underbrace label helper: LaTeX defaults `\underbrace{X}_{label}` to
+  # `\scriptstyle` for the label, which renders at about half the text
+  # size and is hard to read on the matrix-with-data panel. Force
+  # `\textstyle` so the dimension annotations (`\mathbf{X}_{200\times 2}`
+  # etc.) render at normal math size. Dropping the parens follows the
+  # textbook convention `\mathbf{X}_{n \times p}` rather than the
+  # programming-type-annotation look `\mathbf{X}\,(n \times p)`.
+  underbrace <- function(latex, label) {
+    paste0("\\underbrace{", latex, "}_{\\textstyle\\,", label, "\\,}")
   }
 
-  # Build column vectors / matrices, all sharing the row index.
-  y_col <- vapply(rows, function(i) {
-    if (is.na(i)) "vdots" else sprintf("y_%d = %s", i, fmt(ex$y[i]))
-  }, character(1L))
+  has_sigma <- !is.null(ex$X_sigma) && !is.null(ex$gamma)
+  has_re    <- !is.null(ex$Z_g)     && !is.null(ex$u)
 
-  X_col <- vapply(rows, function(i) {
-    if (is.na(i)) "vdots"
-    else paste(fmt(ex$X[i, ]), collapse = "  ")
-  }, character(1L))
+  # Symbol for the response: default to `\mathbf{y}`, but use whatever the
+  # model card carries so the matrix block matches the equation block.
+  resp_sym <- tryCatch({
+    rt <- symbol_table(x, notation = "matrix")
+    resp_row <- rt[rt$role == "response", , drop = FALSE]
+    if (nrow(resp_row) >= 1L) resp_row$symbol_matrix[[1L]] else "\\mathbf{y}"
+  }, error = function(e) "\\mathbf{y}")
+  # symbol_table returns LaTeX with `\\mathbf{...}` literally — that's
+  # already R-string-encoded as a single backslash, so it can drop into
+  # the cat'd HTML as-is.
 
-  beta_lines <- if (!is.null(ex$beta)) {
-    nms <- names(ex$beta)
-    if (is.null(nms)) nms <- paste0("beta_", seq_along(ex$beta) - 1L)
-    paste0(nms, " = ", fmt(ex$beta))
-  } else character(0L)
+  # --- Block 1: response equation `w = X beta_hat (+ Z_g u_hat) + eps_hat`
+  # Pedagogically this is the matrix-form RESPONSE equation, not the
+  # conditional-mean equation. Tab 2 (the abstraction tab) shows
+  # `\boldsymbol{\mu} = \mathbf{X}\boldsymbol{\beta}` -- the conditional
+  # mean, no error term. Tab 3 (this one) drops down a level of honesty:
+  # it shows the observed vector `w`, the prediction `X\hat\beta`
+  # (= `\hat\mu`), AND the residual vector `\hat\varepsilon = w - \hat\mu`.
+  # Every row of THIS equation is exactly one of the per-observation
+  # response equations the worked-row block right above shows in scalar
+  # arithmetic. The matrix block IS the worked row, stacked n times.
+  eps_hat  <- ex$y - ex$mu_hat
+  y_vec    <- latex_vec(ex$y,     rows)
+  X_mat    <- latex_mat(ex$X,     rows)
+  beta_vec <- latex_vec(ex$beta)
+  eps_vec  <- latex_vec(eps_hat,  rows)
+  y_lab    <- sprintf("%s_{\\,%d \\times 1}\\;\\text{(observed)}",
+                      resp_sym, n)
+  X_lab    <- sprintf("\\mathbf{X}_{\\,%d \\times %d}", n, ncol(ex$X))
+  beta_lab <- sprintf("\\hat{\\boldsymbol{\\beta}}_{\\,%d \\times 1}\\;\\text{(estimated)}",
+                      length(ex$beta))
+  eps_lab  <- sprintf("\\hat{\\boldsymbol{\\varepsilon}}_{\\,%d \\times 1}\\;\\text{(residual)}",
+                      n)
 
-  Xs_col <- if (!is.null(ex$X_sigma)) {
-    vapply(rows, function(i) {
-      if (is.na(i)) "vdots"
-      else paste(fmt(ex$X_sigma[i, ]), collapse = "  ")
-    }, character(1L))
-  } else NULL
-  gamma_lines <- if (!is.null(ex$gamma)) {
-    nms <- names(ex$gamma)
-    if (is.null(nms)) nms <- paste0("gamma_", seq_along(ex$gamma) - 1L)
-    paste0(nms, " = ", fmt(ex$gamma))
-  } else character(0L)
-
-  Zg_col <- if (!is.null(ex$Z_g)) {
-    vapply(rows, function(i) {
-      if (is.na(i)) "vdots"
-      else paste(fmt(ex$Z_g[i, ]), collapse = "  ")
-    }, character(1L))
-  } else NULL
-  u_lines <- if (!is.null(ex$u)) {
-    nms <- names(ex$u)
-    if (is.null(nms)) nms <- paste0("u_", seq_along(ex$u))
-    paste0(nms, " = ", fmt(ex$u))
-  } else character(0L)
-
-  # Compose a fixed-width pre block.
-  block <- paste0(
-    "<pre class=\"sym-matrix\">\n",
-    "  y                   X                          beta\n",
-    paste(
-      mapply(function(yc, Xc) {
-        sprintf("  %-18s  %-22s  ", yc, Xc)
-      }, y_col, X_col),
-      collapse = "\n"
-    ),
-    "\n\n  Coefficients (beta, mu):\n",
-    paste0("    ", beta_lines, collapse = "\n"),
-    if (!is.null(Xs_col)) paste0(
-      "\n\n  X_sigma                       gamma\n",
-      paste(
-        mapply(function(Xs) sprintf("  %-28s  ", Xs), Xs_col),
-        collapse = "\n"
-      ),
-      "\n", paste0("    ", gamma_lines, collapse = "\n")
-    ) else "",
-    if (!is.null(Zg_col)) paste0(
-      "\n\n  Z_g (group indicator)         u (random effects, BLUPs)\n",
-      paste(
-        mapply(function(Zr) sprintf("  %-28s  ", Zr), Zg_col),
-        collapse = "\n"
-      ),
-      "\n", paste0("    ", u_lines, collapse = "\n")
-    ) else "",
-    if (!is.null(ex$mu_hat)) paste0(
-      "\n\n  Fitted mu_hat (first ", head, "): ",
-      paste(fmt(ex$mu_hat[seq_len(min(head, length(ex$mu_hat)))]),
-            collapse = "  ")
-    ) else "",
-    if (!is.null(ex$sigma_hat)) paste0(
-      "\n  Fitted sigma_hat (first ", head, "): ",
-      paste(fmt(ex$sigma_hat[seq_len(min(head, length(ex$sigma_hat)))]),
-            collapse = "  ")
-    ) else "",
-    "\n</pre>\n"
+  eq_mu <- paste0(
+    underbrace(y_vec,    y_lab),    " \\;=\\; ",
+    underbrace(X_mat,    X_lab),    "\\, ",
+    underbrace(beta_vec, beta_lab)
   )
-  # Replace ASCII "vdots" placeholders with a proper vertical dots glyph row.
-  block <- gsub("vdots", "...", block, fixed = TRUE)
-  # The visually-stacked pre is read linearly by screen readers, which is
-  # confusing. Hide it from assistive tech; the sym-sr-only summary above
-  # carries the announcement.
-  sub("<pre class=\"sym-matrix\">",
-      "<pre class=\"sym-matrix\" aria-hidden=\"true\">",
-      block, fixed = TRUE)
+  if (has_re) {
+    Zg_mat  <- latex_mat(ex$Z_g, rows)
+    u_vec   <- latex_vec(ex$u)
+    Zg_lab  <- sprintf("\\mathbf{Z}_{\\,%d \\times %d}",
+                       n, ncol(ex$Z_g))
+    u_lab   <- sprintf("\\hat{\\mathbf{u}}_{\\,%d \\times 1}\\;\\text{(BLUP)}",
+                       length(ex$u))
+    eq_mu <- paste0(
+      eq_mu, " \\;+\\; ",
+      underbrace(Zg_mat, Zg_lab), "\\, ",
+      underbrace(u_vec,  u_lab)
+    )
+  }
+  # Close the response equation with the residual vector.
+  eq_mu <- paste0(
+    eq_mu, " \\;+\\; ",
+    underbrace(eps_vec, eps_lab)
+  )
+
+  # --- Block 2: sigma submodel (only when distributional) ----------------
+  eq_sigma <- if (has_sigma) {
+    sigma_vec <- latex_vec(ex$sigma_hat, rows)
+    Xs_mat    <- latex_mat(ex$X_sigma, rows)
+    gamma_vec <- latex_vec(ex$gamma)
+    sigma_lab <- sprintf("\\boldsymbol{\\sigma}_{\\,%d \\times 1}", n)
+    # Sigma-submodel design matrix: rename `\mathbf{Z}` -> `\mathbf{X}_\sigma`
+    # so `\mathbf{Z}` is reserved for random effects only (Noether's audit).
+    Xs_lab    <- sprintf("\\mathbf{X}_{\\sigma,\\,%d \\times %d}",
+                         n, ncol(ex$X_sigma))
+    gamma_lab <- sprintf("\\boldsymbol{\\gamma}_{\\,%d \\times 1}",
+                         length(ex$gamma))
+    paste0(
+      "\\log\\!",
+      underbrace(sigma_vec, sigma_lab), " \\;=\\; ",
+      underbrace(Xs_mat,    Xs_lab),    "\\, ",
+      underbrace(gamma_vec, gamma_lab)
+    )
+  } else NULL
+
+  # --- Worked-row block: one observation in scalar arithmetic -----------
+  # Show the FIRST observation's row as `W_1 = beta_0 + beta_1 T_1 + eps_1`
+  # in symbols, then with the actual numbers, then decomposed into
+  # `predicted + residual`. This anchors the matrix algebra: the matrix
+  # equation immediately below is THIS equation, stacked n times.
+  worked_block <- three_views_worked_row(ex, resp_sym)
+
+  # --- Stitch: worked row first, then full matrix, then sigma submodel ---
+  pieces <- c(
+    if (!is.null(worked_block)) {
+      c(
+        "<p class=\"sym-caption\" style=\"font-size:0.95em;color:#374151\">For observation <em>i</em> = 1 of your data:</p>\n",
+        worked_block,
+        "<p class=\"sym-caption\" style=\"font-size:0.95em;color:#374151\">Stacking the same response equation for all <em>n</em> = ",
+        n, " observations:</p>\n"
+      )
+    },
+    paste0("<div class=\"sym-eq\">$$\n", eq_mu, "\n$$</div>\n"),
+    paste0("<p class=\"sym-caption\" style=\"font-size:0.85em;color:#6b7280;margin-top:0.4rem\"><strong>Left</strong>: observed vector \\(\\mathbf{w}\\). <strong>Middle</strong>: the prediction \\(\\mathbf{X}\\hat{\\boldsymbol{\\beta}}",
+           if (has_re) " + \\mathbf{Z}\\hat{\\mathbf{u}}" else "",
+           " = \\hat{\\boldsymbol{\\mu}}\\). <strong>Right</strong>: the residual vector \\(\\hat{\\boldsymbol{\\varepsilon}} = \\mathbf{w} - \\hat{\\boldsymbol{\\mu}}\\). Every row of this matrix equation is one of the response-equation rows from the worked row above.</p>\n"),
+    if (!is.null(eq_sigma)) {
+      c(
+        "<p class=\"sym-caption\" style=\"font-size:0.95em;color:#374151;margin-top:1.2rem\">And the \\(\\sigma\\) submodel (no observed counterpart -- \\(\\sigma\\)'s job is to describe the spread of \\(\\hat{\\boldsymbol{\\varepsilon}}\\)):</p>\n",
+        paste0("<div class=\"sym-eq\">$$\n", eq_sigma, "\n$$</div>\n")
+      )
+    }
+  )
+  paste(pieces, collapse = "")
+}
+
+# Worked-row block: writes the per-observation scalar response equation
+# `W_1 = beta_0 + beta_1 T_1 + ... + eps_1` once symbolically and once
+# with the actual numbers. Returns a `$$ ... $$` MathJax block, or NULL
+# if the model doesn't have enough structure to write a meaningful row.
+three_views_worked_row <- function(ex, resp_sym = "\\mathbf{y}") {
+  if (is.null(ex$y) || is.null(ex$X) || is.null(ex$beta) || is.null(ex$mu_hat))
+    return(NULL)
+  if (length(ex$y) < 1L || nrow(ex$X) < 1L) return(NULL)
+
+  fmt <- function(v) formatC(v, digits = 3, format = "fg", flag = "#")
+  i  <- 1L
+  X1 <- ex$X[i, ]
+  W1 <- ex$y[i]
+  mu1 <- ex$mu_hat[i]
+  eps1 <- W1 - mu1
+
+  # Detect intercept column.
+  is_intercept <- vapply(seq_along(X1), function(k) {
+    nm <- names(X1)[k]
+    identical(nm, "(Intercept)") || (!is.null(nm) && grepl("Intercept", nm)) ||
+      all(ex$X[, k] == 1)
+  }, logical(1L))
+
+  # Build symbolic and numeric term lists side by side.
+  scalar_response_sym <- "W_{1}"   # i = 1 in scalar form for the response
+  beta_k <- function(k) sprintf("\\hat\\beta_{%d}", k - 1L)
+  # For non-intercept columns, use the column name as a Roman label
+  # (sanitized for LaTeX) with subscript i = 1.
+  predictor_label <- function(k) {
+    nm <- names(X1)[k]
+    if (is.null(nm) || !nzchar(nm)) nm <- paste0("x_{", k, "}")
+    nm <- gsub("_", "\\_", nm, fixed = TRUE)
+    sprintf("\\mathrm{%s}_{1}", nm)
+  }
+
+  sym_terms <- character(length(X1))
+  num_terms <- character(length(X1))
+  for (k in seq_along(X1)) {
+    if (is_intercept[k]) {
+      sym_terms[k] <- beta_k(k)
+      num_terms[k] <- fmt(ex$beta[k])
+    } else {
+      sym_terms[k] <- paste0(beta_k(k), "\\,", predictor_label(k))
+      num_terms[k] <- paste0(fmt(ex$beta[k]), " \\times ", fmt(X1[k]))
+    }
+  }
+  sym_rhs <- paste(sym_terms, collapse = " + ")
+  num_rhs <- paste(num_terms, collapse = " + ")
+
+  paste0(
+    "<div class=\"sym-eq\">$$\n\\begin{aligned}\n",
+    scalar_response_sym, " &= ", sym_rhs, " + \\hat\\varepsilon_{1} ",
+    "&\\quad(\\text{response equation, one row of the model}) \\\\\n",
+    fmt(W1), " &= ", num_rhs, " + (", fmt(eps1), ") ",
+    "&\\quad(\\text{with your numbers}) \\\\\n",
+    "&= \\underbrace{", fmt(mu1),
+    "}_{\\textstyle\\,\\hat\\mu_{1}\\,\\text{(predicted)}\\,} \\;+\\; ",
+    "\\underbrace{(", fmt(eps1),
+    ")}_{\\textstyle\\,\\hat\\varepsilon_{1}\\,\\text{(residual)}\\,}",
+    "\n\\end{aligned}\n$$</div>\n"
+  )
+}
+
+# Symbol gloss for the Index / Matrix panels: one short line per symbol
+# carrying the symbol (MathJax), its concrete dimension, and the meaning.
+# Sourced from symbol_table(x, notation = "index" | "matrix") so the
+# gloss matches the equation block on the same panel. Falls back silently
+# to empty if the table is unavailable.
+three_views_symbol_gloss <- function(x, notation = c("matrix", "index")) {
+  notation <- match.arg(notation)
+  rt <- tryCatch(symbol_table(x, notation = notation),
+                 error = function(e) NULL)
+  if (is.null(rt) || nrow(rt) == 0L) return("")
+  sym_col <- if (notation == "matrix") "symbol_matrix" else "symbol_index"
+  if (!sym_col %in% names(rt)) {
+    # symbol_table with notation = "index" used to return the scalar
+    # symbol under `symbol_matrix` for back-compat -- be defensive.
+    sym_col <- intersect(c("symbol_index", "symbol_matrix", "symbol"),
+                        names(rt))[1L]
+    if (is.na(sym_col)) return("")
+  }
+  # Only wrap content that actually IS LaTeX (starts with `\`) in MathJax
+  # `\(...\)` delimiters. `dimension_concrete` for predictor columns
+  # carries prose like "column of X (length 200)", and wrapping that in
+  # `\(...\)` makes MathJax render it as garbled italic math
+  # ("columnofX(length200)"). Pat + Boole both caught this in the v0.19
+  # design pass.
+  wrap_math <- function(s) {
+    if (is.na(s) || !nzchar(s)) return("")
+    if (startsWith(s, "\\")) paste0("\\(", s, "\\)")
+    else                     s
+  }
+  ok <- !is.na(rt[[sym_col]]) & nzchar(rt[[sym_col]]) &
+        !is.na(rt$description)   & nzchar(rt$description)
+  rt <- rt[ok, , drop = FALSE]
+  if (nrow(rt) == 0L) return("")
+  items <- vapply(seq_len(nrow(rt)), function(i) {
+    sym  <- wrap_math(rt[[sym_col]][[i]])
+    dim  <- if ("dimension_concrete" %in% names(rt))
+              wrap_math(rt$dimension_concrete[[i]]) else ""
+    desc <- rt$description[[i]]
+    paste0("<li>", sym, " &mdash; ", desc,
+           if (nzchar(dim)) paste0(" &nbsp;<span class=\"sym-dim\">", dim, "</span>") else "",
+           "</li>")
+  }, character(1L))
+  paste0(
+    "<details class=\"sym-gloss\" open>\n",
+    "<summary>where:</summary>\n",
+    "<ul class=\"sym-gloss-list\">\n",
+    paste(items, collapse = "\n"),
+    "\n</ul>\n",
+    "</details>\n"
+  )
+}
+
+# One-sentence whole-model biological reading, shown above the equation
+# on each tab. Family-aware: only Gaussian (location-only or
+# location-scale, with or without random effects) has a template at
+# v0.19; other families return "" and the panel renders without a
+# biology gloss until templates are added. Observational language only
+# ("rises with", "is multiplied by"); never causal ("effect of",
+# "due to"). For v0.20 these templates move into a CSV so the prose
+# can be edited without code changes.
+three_views_biology_gloss <- function(x) {
+  family <- tryCatch(x$model$family, error = function(e) NULL)
+  if (is.null(family) || !nzchar(family)) return("")
+
+  has_sigma_submodel <- !is.null(x$expanded) &&
+                       !is.null(x$expanded$X_sigma) &&
+                       !is.null(x$expanded$gamma)
+  has_re <- !is.null(x$random_effects) &&
+            (is.data.frame(x$random_effects) || is.list(x$random_effects)) &&
+            length(x$random_effects) > 0L
+  # The has_re check above is loose -- real "does this fit have random
+  # effects" is whether any predictor is grouped. Use the expanded view
+  # as the second tell.
+  has_re <- has_re ||
+            (!is.null(x$expanded) && !is.null(x$expanded$Z_g) && !is.null(x$expanded$u))
+
+  sentence <- if (identical(family, "gaussian")) {
+    if (has_sigma_submodel && has_re) {
+      "Each observation is normally distributed around a mean that may shift with the fixed-effect predictors and a group offset, with a residual SD that may also shift with its own predictors -- both location and spread are modeled."
+    } else if (has_sigma_submodel) {
+      "Each observation is normally distributed around a mean that may shift with the predictors, and a residual SD that may also shift with its own predictors -- so both the centre and the spread of the response are modeled."
+    } else if (has_re) {
+      "Each observation is normally distributed around a group-specific mean; the random-effect SD captures how much groups vary, and the residual SD captures within-group variation."
+    } else {
+      "Each observation is normally distributed around a mean that may shift with the predictors; the residual SD is constant across observations."
+    }
+  } else if (identical(family, "binomial")) {
+    "Each observation is a Bernoulli / binomial trial; the log-odds of success may shift with the predictors."
+  } else if (identical(family, "poisson")) {
+    "Each observation is a count; the log of the expected count may shift with the predictors."
+  } else {
+    return("")
+  }
+  paste0(
+    "  <p class=\"sym-biology\">", sentence, "</p>\n"
+  )
 }
 
 three_views_css <- function() {
@@ -259,6 +488,13 @@ three_views_css <- function() {
 .sym-panel[hidden] { display: none; }
 .sym-eq { background: #fbe7e7; border: 1px solid #a0282b; border-radius: 6px; padding: 0.7rem 1rem; margin: 0.4rem 0; text-align: center; }
 .sym-caption { color: #6b7280; font-size: 0.85rem; margin: 0.2rem 0 0.4rem; }
+.sym-biology { color: #1f6feb; background: #f0f5ff; border-left: 3px solid #1f6feb; padding: 0.55rem 0.8rem; margin: 0.5rem 0 0.8rem; font-size: 0.95rem; line-height: 1.5; font-style: italic; }
+.sym-gloss { margin: 0.8rem 0 0.2rem; font-size: 0.9rem; color: #374151; }
+.sym-gloss > summary { cursor: pointer; font-weight: 600; color: #6b7280; padding: 0.2rem 0; }
+.sym-gloss > summary:hover { color: #8a1f22; }
+.sym-gloss-list { list-style: none; padding-left: 0.6rem; margin: 0.4rem 0 0.2rem; }
+.sym-gloss-list li { margin: 0.18rem 0; }
+.sym-dim { color: #6b7280; font-size: 0.85rem; }
 .sym-matrix { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.78rem; line-height: 1.35; white-space: pre; overflow-x: auto; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 0.6rem 0.8rem; margin: 0.3rem 0; }
 .sym-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .sym-skip { position: absolute; top: -100px; left: 0; padding: 0.4rem 0.7rem; background: #8a1f22; color: #fff; text-decoration: none; font-size: 0.85rem; z-index: 5; }

@@ -10,9 +10,10 @@ test_that("HTML contains all three tab labels and panels", {
   fit <- fit_drm_location_scale()
   sym <- symbolize(fit, symbols = c(body_mass = "W_i", temperature = "T_i"))
   html <- withr::with_output_sink(tempfile(), as_html_three_views(sym))
-  expect_match(html, "1\\. Equation")
-  expect_match(html, "2\\. Index")
-  expect_match(html, "3\\. Matrix \\(with data\\)")
+  # v0.19 pedagogical reorder: Index first, then Matrix, then Matrix with data.
+  expect_match(html, "1\\. Index")
+  expect_match(html, "2\\. Matrix")
+  expect_match(html, "3\\. Matrix with data")
   expect_match(html, "data-panel=\"eq\"")
   expect_match(html, "data-panel=\"idx\"")
   expect_match(html, "data-panel=\"mat\"")
@@ -34,21 +35,34 @@ test_that("index panel uses per-observation notation", {
   expect_match(html, "T_i")
 })
 
-test_that("matrix panel shows actual numeric data", {
+test_that("matrix panel shows actual numeric data in bmatrix LaTeX", {
+  # v0.19: matrix block now emits MathJax bmatrix LaTeX (not pre-formatted
+  # text). The panel must contain (a) the bmatrix environment, (b) the
+  # response vector w, (c) the coefficient vector beta_hat, and (d) the
+  # residual vector eps_hat with its `(residual)` annotation.
   fit <- fit_drm_location_scale()
   sym <- symbolize(fit, symbols = c(body_mass = "W_i"))
   html <- withr::with_output_sink(tempfile(), as_html_three_views(sym))
-  expect_match(html, "y_1 =")
-  expect_match(html, "beta")
-  expect_match(html, "Fitted mu_hat")
+  expect_match(html, "\\\\begin\\{bmatrix\\}")
+  expect_match(html, "\\\\boldsymbol\\{\\\\beta\\}")
+  expect_match(html, "\\\\hat\\{\\\\boldsymbol\\{\\\\varepsilon\\}\\}")
+  # observed label on the response vector
+  expect_match(html, "\\(observed\\)")
+  # residual label on the residual vector
+  expect_match(html, "\\(residual\\)")
 })
 
-test_that("matrix panel includes Z_g and u when RE is present", {
+test_that("matrix panel includes Z and u when RE is present", {
+  # v0.19: random-effect design matrix labelled `\mathbf{Z}_{n x g}`
+  # (Noether's audit -- sigma-submodel design renamed to X_sigma so Z is
+  # free for random effects). BLUP vector labelled `\hat{\mathbf{u}}` with
+  # a `(BLUP)` annotation.
   fit_re <- fit_drm_with_re()
   sym <- symbolize(fit_re, symbols = c(body_mass = "W_i"))
   html <- withr::with_output_sink(tempfile(), as_html_three_views(sym))
-  expect_match(html, "Z_g \\(group indicator\\)")
-  expect_match(html, "u \\(random effects")
+  expect_match(html, "\\\\mathbf\\{Z\\}_\\{")
+  expect_match(html, "\\\\hat\\{\\\\mathbf\\{u\\}\\}_\\{")
+  expect_match(html, "\\(BLUP\\)")
 })
 
 test_that("default method errors with pointer to symbolize()", {
@@ -135,13 +149,18 @@ test_that("active-tab signal is not color-only (marker glyph present)", {
   expect_match(html, "&#9656;", fixed = TRUE)
 })
 
-test_that("matrix panel includes a screen-reader summary, pre is aria-hidden", {
+test_that("matrix panel includes a screen-reader summary", {
+  # v0.19: the matrix block no longer uses `<pre class=\"sym-matrix\">`
+  # (which the v0.18.x impl used for column-padded plain text). It now
+  # uses `<div class=\"sym-eq\">` to host MathJax bmatrix equations. The
+  # sym-sr-only summary is still there for assistive tech.
   fit <- fit_drm_location_scale()
   sym <- symbolize(fit)
   html <- withr::with_output_sink(tempfile(), as_html_three_views(sym))
   expect_match(html, "class=\"sym-sr-only\"", fixed = TRUE)
   expect_match(html, "Matrix-form expansion", fixed = TRUE)
-  expect_match(html, "<pre class=\"sym-matrix\" aria-hidden=\"true\"", fixed = TRUE)
+  # No more <pre class=sym-matrix> — that's intentional in v0.19.
+  expect_false(grepl("<pre class=\"sym-matrix\"", html, fixed = TRUE))
 })
 
 test_that("matrix summary mentions Z_g only when RE is present", {
