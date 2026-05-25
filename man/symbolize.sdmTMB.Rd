@@ -39,3 +39,10 @@ SD) come from \code{sdmTMB::tidy(fit, "ran_pars")} and appear in
 \code{variance_components}.
 }
 
+\references{
+Anderson, S. C., Ward, E. J., English, P. A., & Barnett, L. A. K.
+(2022). sdmTMB: an R package for fast, flexible, and user-friendly
+generalized linear mixed effects models with spatial and
+spatiotemporal random fields. \emph{bioRxiv}.
+\doi{10.1101/2022.03.24.485545}
+}

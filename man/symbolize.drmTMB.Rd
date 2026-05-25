@@ -54,3 +54,11 @@ Satterthwaite / Kenward-Roger corrections are not implemented; when Wald
 looks suspicious the recommended alternative is \code{"profile"}.
 }
 
+\references{
+Nakagawa, S. (2024+). \code{drmTMB}: Distributional regression in TMB.
+\url{https://itchyshin.github.io/drmTMB/}
+
+Kristensen, K., Nielsen, A., Berg, C. W., Skaug, H., & Bell, B. M.
+(2016). TMB: Automatic Differentiation and Laplace Approximation.
+\emph{Journal of Statistical Software}, 70(5), 1-21.
+}

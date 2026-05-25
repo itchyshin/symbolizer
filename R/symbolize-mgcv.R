@@ -53,7 +53,25 @@
 #' parametric-coefficient blocks; the GAMM-specific covariance
 #' structures are not separately rendered in v0.14.
 #'
+#' @section Confidence intervals:
+#' Parametric (non-smooth) coefficients in `fixed_effects` carry
+#' approximate Wald 95% CIs computed as estimate ± 1.96 * SE from
+#' `summary(fit)$p.coeff` / `summary(fit)$se`. Smooth-term inference
+#' is summarised separately in `sym$metadata$smooths` (basis
+#' dimension, edf, p-value per smooth) rather than a single
+#' coefficient row.
+#'
 #' @inheritParams symbolize
+#'
+#' @references
+#' Wood, S. N. (2017). *Generalized Additive Models: An Introduction
+#' with R* (2nd ed.). Chapman and Hall/CRC.
+#'
+#' Wood, S. N. (2011). Fast stable restricted maximum likelihood and
+#' marginal likelihood estimation of semiparametric generalized linear
+#' models. *Journal of the Royal Statistical Society (B)*, 73(1),
+#' 3-36.
+#'
 #' @return A `symbolized_model` object.
 #' @export
 symbolize.gam <- function(fit, symbols = NULL, units = NULL,

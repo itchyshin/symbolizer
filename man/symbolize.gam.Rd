@@ -43,3 +43,22 @@ Correlation structures and lme4-style random effects from \code{gamm} /
 parametric-coefficient blocks; the GAMM-specific covariance
 structures are not separately rendered in v0.14.
 }
+\section{Confidence intervals}{
+
+Parametric (non-smooth) coefficients in \code{fixed_effects} carry
+approximate Wald 95\% CIs computed as estimate ± 1.96 * SE from
+\code{summary(fit)$p.coeff} / \code{summary(fit)$se}. Smooth-term inference
+is summarised separately in \code{sym$metadata$smooths} (basis
+dimension, edf, p-value per smooth) rather than a single
+coefficient row.
+}
+
+\references{
+Wood, S. N. (2017). \emph{Generalized Additive Models: An Introduction
+with R} (2nd ed.). Chapman and Hall/CRC.
+
+Wood, S. N. (2011). Fast stable restricted maximum likelihood and
+marginal likelihood estimation of semiparametric generalized linear
+models. \emph{Journal of the Royal Statistical Society (B)}, 73(1),
+3-36.
+}

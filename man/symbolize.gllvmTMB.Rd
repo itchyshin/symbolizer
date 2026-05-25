@@ -2,7 +2,7 @@
 % Please edit documentation in R/symbolize-gllvmtmb.R
 \name{symbolize.gllvmTMB}
 \alias{symbolize.gllvmTMB}
-\title{Symbolize a gllvmTMB fit (Gaussian latent-variable, v0.1)}
+\title{Symbolize a gllvmTMB fit (Gaussian and binomial latent-variable models)}
 \usage{
 \method{symbolize}{gllvmTMB}(fit, symbols = NULL, units = NULL, context = NULL, ...)
 }
@@ -25,9 +25,23 @@ A \code{symbolized_model} object.
 }
 \description{
 Builds a \code{\link[=new_symbolized_model]{symbolized_model}} from a \code{gllvmTMB} fit.
-v0.1 covers the Gaussian B-tier latent-variable First slice:
+Covers the Gaussian and binomial B-tier latent-variable families:
 per-trait intercepts (\code{0 + trait}), the between-unit reduced-rank loading
 term (\code{latent(0 + trait | unit, d = K)}), and the optional per-trait unique
 variances (\code{unique(0 + trait | unit)}). Other families and covstructs
 return capability errors via \code{\link[=capability_check]{capability_check()}}.
+}
+\section{Confidence intervals}{
+
+Fixed-effect estimates and Wald-style approximate CIs are pulled
+from \code{summary(fit$sd_report, "fixed")}. Loadings
+(\verb{\\boldsymbol\{\\Lambda\}_B}) and the between-unit covariance
+(\verb{\\boldsymbol\{\\Sigma\}_B}) are point estimates;
+parametric-bootstrap uncertainty via
+\code{gllvmTMB::bootstrap_Sigma()} is on the deferred list.
+}
+
+\references{
+Nakagawa, S. (2024+). \code{gllvmTMB}: Generalized linear latent-variable
+models in TMB. \url{https://itchyshin.github.io/gllvmTMB/}
 }

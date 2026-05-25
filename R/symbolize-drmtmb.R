@@ -51,6 +51,15 @@
 #' @param ci_method Confidence-interval method passed to
 #'   [`drmTMB::confint`][drmTMB::confint.drmTMB]. One of `"wald"` (default,
 #'   fast), `"profile"` (slower, more honest), or `"bootstrap"`.
+#'
+#' @references
+#' Nakagawa, S. (2024+). `drmTMB`: Distributional regression in TMB.
+#' <https://itchyshin.github.io/drmTMB/>
+#'
+#' Kristensen, K., Nielsen, A., Berg, C. W., Skaug, H., & Bell, B. M.
+#' (2016). TMB: Automatic Differentiation and Laplace Approximation.
+#' *Journal of Statistical Software*, 70(5), 1-21.
+#'
 #' @return A `symbolized_model` object.
 #' @export
 symbolize.drmTMB <- function(fit, symbols = NULL, units = NULL,

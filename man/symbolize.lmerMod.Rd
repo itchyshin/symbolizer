@@ -49,3 +49,8 @@ are slower but more honest for fits with small group counts.
 \code{"profile"}.
 }
 
+\references{
+Bates, D., Maechler, M., Bolker, B., & Walker, S. (2015). Fitting
+Linear Mixed-Effects Models Using lme4. \emph{Journal of Statistical
+Software}, 67(1), 1-48.
+}

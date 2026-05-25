@@ -39,3 +39,8 @@ usual frequentist t-based CI you'd see in \code{summary(fit)}.
 frequentist extractors.
 }
 
+\references{
+Chambers, J. M. (1992). Linear models. Chapter 4 of \emph{Statistical
+Models in S} (Chambers, J. M., & Hastie, T. J., eds.).
+Wadsworth & Brooks/Cole.
+}

@@ -318,8 +318,8 @@ between-group SD (`sd(group)`) goes with which submodel.
 
 `symbolizer_capabilities()` is the registry that gates `symbolize()`. Each row
 carries one of five status words: **Stable**, **First slice**, **Opt-in
-control**, **Planned or reserved**, or **Unsupported**. Today (v0.15)
-`symbolize()` reads ten package families: `drmTMB`, `gllvmTMB`, `glmmTMB`,
+control**, **Planned or reserved**, or **Unsupported**. `symbolize()`
+currently reads ten package families: `drmTMB`, `gllvmTMB`, `glmmTMB`,
 `brms`, `lme4` (`lmer` + `glmer`), `MCMCglmm` (including animal models),
 `sdmTMB` (spatial + spatiotemporal fields), `stats::lm` / `stats::glm`,
 `metafor` (`rma.uni` + `rma.mv`, including location-scale meta-regression),
@@ -331,9 +331,10 @@ mature; other classes are mostly First slice.
 symbolizer_capabilities()
 ```
 
-The [Roadmap article](symbolizer-roadmap.html) lays out the full capability
-matrix and what's planned next. If `symbolize()` errors with a capability
-message, the registry tells you which version is scheduled to lift it.
+For the full capability matrix and what's planned next, see
+`vignette("symbolizer-roadmap")`. If `symbolize()` errors with a
+capability message, the registry tells you which version is scheduled
+to lift it.
 
 **Takeaway.** The registry is the single source of truth for "what works".
 Read the status word before designing around an unsupported tuple.

@@ -38,6 +38,12 @@
 #' @param ci_method Confidence-interval method passed to
 #'   `lme4::confint.merMod`. One of `"Wald"` (default, fast),
 #'   `"profile"`, or `"boot"`.
+#'
+#' @references
+#' Bates, D., Maechler, M., Bolker, B., & Walker, S. (2015). Fitting
+#' Linear Mixed-Effects Models Using lme4. *Journal of Statistical
+#' Software*, 67(1), 1-48.
+#'
 #' @return A `symbolized_model` object.
 #' @export
 symbolize.lmerMod <- function(fit, symbols = NULL, units = NULL,

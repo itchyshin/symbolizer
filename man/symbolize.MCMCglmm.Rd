@@ -45,3 +45,8 @@ MCMCglmm is Bayesian. The CI band in \code{fixed_effects} and
 \code{"credible"}.
 }
 
+\references{
+Hadfield, J. D. (2010). MCMC Methods for Multi-Response Generalized
+Linear Mixed Models: The MCMCglmm R Package. \emph{Journal of
+Statistical Software}, 33(2), 1-22.
+}

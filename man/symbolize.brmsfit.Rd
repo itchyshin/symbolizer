@@ -40,3 +40,7 @@ posterior puts negligible mass on either side of zero). \code{ci_method}
 is set to \code{"credible"} so renderers can label the band correctly.
 }
 
+\references{
+Bürkner, P.-C. (2017). brms: An R Package for Bayesian Multilevel
+Models Using Stan. \emph{Journal of Statistical Software}, 80(1), 1-28.
+}

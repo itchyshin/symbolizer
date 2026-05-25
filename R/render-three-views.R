@@ -85,24 +85,32 @@ as_html_three_views.symbolized_model <- function(x, head = 5L, tail = 2L,
   )
 
   marker <- "<span class=\"sym-tab-marker\" aria-hidden=\"true\">&#9656;</span>"
+  # IMPORTANT: never indent inner HTML lines with 4+ leading spaces.
+  # Markdown processors (pandoc, commonmark) treat any line with 4+
+  # leading spaces as the start of an indented code block, which
+  # breaks the surrounding HTML block and emits the affected lines
+  # as escaped text inside `<pre><code>`. The three `<button>` lines
+  # below previously used 4-space indentation and silently leaked
+  # raw tags into the rendered vignette / pkgdown article. Keep all
+  # nested HTML at 0 or 2 spaces.
   html <- paste0(
     "<style>", css, "</style>\n",
     "<div class=\"sym-tabs\" id=\"", uid, "\">\n",
-    "  <a class=\"sym-skip\" href=\"#", end_id, "\">Skip three-views widget</a>\n",
-    "  <div class=\"sym-tablist\" role=\"tablist\" aria-label=\"Three views of the model\">\n",
-    "    <button type=\"button\" class=\"sym-tab sym-active\" role=\"tab\"",
+    "<a class=\"sym-skip\" href=\"#", end_id, "\">Skip three-views widget</a>\n",
+    "<div class=\"sym-tablist\" role=\"tablist\" aria-label=\"Three views of the model\">\n",
+    "<button type=\"button\" class=\"sym-tab sym-active\" role=\"tab\"",
     " id=\"", tab_eq, "\" aria-controls=\"", pan_eq, "\"",
     " aria-selected=\"true\" tabindex=\"0\" data-tab=\"eq\">",
     marker, "1. Equation</button>\n",
-    "    <button type=\"button\" class=\"sym-tab\" role=\"tab\"",
+    "<button type=\"button\" class=\"sym-tab\" role=\"tab\"",
     " id=\"", tab_idx, "\" aria-controls=\"", pan_idx, "\"",
     " aria-selected=\"false\" tabindex=\"-1\" data-tab=\"idx\">",
     marker, "2. Index</button>\n",
-    "    <button type=\"button\" class=\"sym-tab\" role=\"tab\"",
+    "<button type=\"button\" class=\"sym-tab\" role=\"tab\"",
     " id=\"", tab_mat, "\" aria-controls=\"", pan_mat, "\"",
     " aria-selected=\"false\" tabindex=\"-1\" data-tab=\"mat\">",
     marker, "3. Matrix (with data)</button>\n",
-    "  </div>\n",
+    "</div>\n",
     eq_panel, idx_panel, mat_panel,
     "</div>\n",
     "<span id=\"", end_id, "\" tabindex=\"-1\"></span>\n",

@@ -52,6 +52,12 @@
 #' @inheritParams symbolize
 #' @param data The data frame used to fit. Required: MCMCglmm does not
 #'   keep the data on the fitted object.
+#'
+#' @references
+#' Hadfield, J. D. (2010). MCMC Methods for Multi-Response Generalized
+#' Linear Mixed Models: The MCMCglmm R Package. *Journal of
+#' Statistical Software*, 33(2), 1-22.
+#'
 #' @return A `symbolized_model` object.
 #' @export
 symbolize.MCMCglmm <- function(fit, symbols = NULL, units = NULL,

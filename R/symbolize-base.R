@@ -41,6 +41,12 @@
 #' frequentist extractors.
 #'
 #' @inheritParams symbolize
+#'
+#' @references
+#' Chambers, J. M. (1992). Linear models. Chapter 4 of *Statistical
+#' Models in S* (Chambers, J. M., & Hastie, T. J., eds.).
+#' Wadsworth & Brooks/Cole.
+#'
 #' @return A `symbolized_model` object.
 #' @export
 symbolize.lm <- function(fit, symbols = NULL, units = NULL,
@@ -65,7 +71,16 @@ symbolize.lm <- function(fit, symbols = NULL, units = NULL,
 #' canonical links (identity / logit / log). Quasi-families, offsets,
 #' and family-specific weights are deferred via the capability registry.
 #'
+#' @section Confidence intervals:
+#' CIs come from `stats::confint(fit)`, which for `glm` uses profile
+#' likelihood by default. `ci_method` is labelled `"profile"`.
+#'
 #' @inheritParams symbolize
+#'
+#' @references
+#' McCullagh, P., & Nelder, J. A. (1989). *Generalized Linear Models*
+#' (2nd ed.). Chapman and Hall/CRC.
+#'
 #' @return A `symbolized_model` object.
 #' @export
 symbolize.glm <- function(fit, symbols = NULL, units = NULL,

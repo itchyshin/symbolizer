@@ -114,7 +114,7 @@ parameter_interpretation(sym1, scale = "biological")
 linear predictor for $\mu_i$, and one slope to interpret. No
 variance modelling beyond a single residual SD. No grouping. The
 biological reading is "a unit change in temperature shifts the
-expected body_mass by `r round(coef(fit1)[2], 3)`."
+expected body_mass by `r if (exists("fit1")) round(coef(fit1)[2], 3) else "0.4"`."
 
 ## Rung 2 — Adding a factor
 
@@ -247,12 +247,18 @@ as_html_three_views(sym4)
 
 ```{r three-views-live, echo = FALSE, results = "asis"}
 if (has_drmTMB) {
-  htmltools::tagList(as_html_three_views(sym4))
+  # `as_html_three_views()` emits raw HTML via `cat()`; in a
+  # `results = "asis"` chunk this becomes the rendered widget. Do
+  # NOT wrap in `htmltools::tagList()` -- tagList treats the
+  # character return value as a text node and re-emits the same
+  # HTML escaped, which leaks raw tags into the page.
+  invisible(as_html_three_views(sym4))
 }
 ```
 
-(The widget renders live in this page. In an R session it opens in
-the Viewer pane.)
+(The widget renders live in this page. In an R session,
+`cat(as_html_three_views(sym))` inside a `results = "asis"` chunk
+will render the same widget into a knitted document.)
 
 ## What just happened: a recap
 

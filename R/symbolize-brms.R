@@ -45,6 +45,11 @@
 #' is set to `"credible"` so renderers can label the band correctly.
 #'
 #' @inheritParams symbolize
+#'
+#' @references
+#' Bürkner, P.-C. (2017). brms: An R Package for Bayesian Multilevel
+#' Models Using Stan. *Journal of Statistical Software*, 80(1), 1-28.
+#'
 #' @return A `symbolized_model` object.
 #' @export
 symbolize.brmsfit <- function(fit, symbols = NULL, units = NULL,

@@ -51,3 +51,10 @@ confidence band per coefficient: \code{confint_low}, \code{confint_high},
 bands.
 }
 
+\references{
+Brooks, M. E., Kristensen, K., van Benthem, K. J., Magnusson, A.,
+Berg, C. W., Nielsen, A., Skaug, H. J., Maechler, M., & Bolker,
+B. M. (2017). glmmTMB Balances Speed and Flexibility Among
+Packages for Zero-inflated Generalized Linear Mixed Models. \emph{The
+R Journal}, 9(2), 378-400.
+}

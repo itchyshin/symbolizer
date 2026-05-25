@@ -29,7 +29,7 @@ options(crayon.enabled = FALSE)
 
 ## Positioning
 
-> `symbolizer` makes a fitted model **auditable**. It connects the R formula, the symbolic model in both notations, every parameter's scale, the assumptions that are stated vs. implied vs. unchecked, what each coefficient means biologically, and the next diagnostic steps — across the GLMM, meta-analysis, additive-model, and Bayesian-multilevel packages an ecologist or evolutionary biologist actually uses.
+> `symbolizer` makes a fitted model **auditable**. It connects the R formula, the symbolic model in both notations, every parameter's scale, the assumptions that are stated vs. implied vs. unchecked, what each coefficient means biologically, and the next diagnostic steps — across the GLMM, meta-analysis, additive-model, Bayesian-multilevel, and classical (base-R) regression packages an ecologist or evolutionary biologist actually uses.
 
 `symbolizer` is the complement to [`equatiomatic`](https://datalorax.github.io/equatiomatic/), not a replacement. Reach for `equatiomatic` when you want a clean LaTeX equation for one `lm()` or `lmer()` model. Reach for `symbolizer` when you need to understand the model — across multi-submodel distributional fits, mixed models, latent-variable, spatial, meta-analytic, or additive structures — its assumptions, what each coefficient means on a natural scale, both notations side by side, and how your data actually flows through the matrices.
 

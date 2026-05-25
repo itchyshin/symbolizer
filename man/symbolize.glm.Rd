@@ -29,3 +29,13 @@ Builds a \code{\link[=new_symbolized_model]{symbolized_model}} from a base R
 canonical links (identity / logit / log). Quasi-families, offsets,
 and family-specific weights are deferred via the capability registry.
 }
+\section{Confidence intervals}{
+
+CIs come from \code{stats::confint(fit)}, which for \code{glm} uses profile
+likelihood by default. \code{ci_method} is labelled \code{"profile"}.
+}
+
+\references{
+McCullagh, P., & Nelder, J. A. (1989). \emph{Generalized Linear Models}
+(2nd ed.). Chapman and Hall/CRC.
+}

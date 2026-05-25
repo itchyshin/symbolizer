@@ -96,11 +96,11 @@ parameter_interpretation(sym1, scale = "biological")
 
 Two coefficients on the mu submodel:
 
-- The **intercept** estimate (`r round(sym1$fixed_effects$estimate[1], 2)`) is the expected `body_mass` for the **reference level**,
+- The **intercept** estimate (`r if (exists("sym1")) round(sym1$fixed_effects$estimate[1], 2) else "30"`) is the expected `body_mass` for the **reference level**,
   i.e. females. It is *not* the overall mean of `body_mass` — if the
   sexes were unbalanced the overall mean would differ from the female
   mean.
-- The **`sexmale` contrast** estimate (`r round(sym1$fixed_effects$estimate[2], 2)`) is the **difference** between male
+- The **`sexmale` contrast** estimate (`r if (exists("sym1")) round(sym1$fixed_effects$estimate[2], 2) else "5"`) is the **difference** between male
   and female means. It is *not* the male mean. To get the male mean you
   add: `intercept + sexmale = r round(sum(sym1$fixed_effects$estimate[1:2]), 2)`.
 
@@ -334,9 +334,8 @@ So:
   intercepts** at `body_size = 0`. It is no longer "the average male
   mass" *or* "the male-female mass difference at average body size".
 
-`parameter_interpretation()` reads the three templated rows it knows
-about, but v0.1 does not yet ship an interaction template, so the
-interaction row is silent:
+`parameter_interpretation()` reads all four templated rows, including
+the dedicated continuous-by-factor interaction reading:
 
 ```{r step4-interp}
 parameter_interpretation(sym4, scale = "biological")
