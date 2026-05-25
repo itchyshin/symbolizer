@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.11.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.11.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,6 +33,15 @@
       <small>Source: <a href="https://github.com/itchyshin/symbolizer/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.11.2" id="symbolizer-0112">symbolizer 0.11.2<a class="anchor" aria-label="anchor" href="#symbolizer-0112"></a></h2>
+<div class="section level3">
+<h3 id="v0112--more-brms-families--interaction-robustness-0-11-2">v0.11.2 – more brms families + interaction robustness<a class="anchor" aria-label="anchor" href="#v0112--more-brms-families--interaction-robustness-0-11-2"></a></h3>
+<ul><li>
+<code><a href="../reference/symbolize.brmsfit.html">symbolize.brmsfit()</a></code> now handles <code>family = bernoulli()</code> and <code>family = poisson()</code>. brms’s <code>bernoulli()</code> is aliased to <code>binomial</code> internally because mathematically Bernoulli is just Binomial(1, p); the same templates and parameterization apply.</li>
+<li>New <code>tests/testthat/test-robustness-interactions.R</code> fits <code>y ~ x * sex</code> (continuous-by-factor interaction) in each family / class combination and verifies the interaction row appears in <code>fixed_effects</code> with sensible estimate, CI columns are populated, and LaTeX renders. Covers lm gaussian, glm binomial / poisson / Gamma, glmmTMB poisson / binomial, lmer with random intercept, and drmTMB gaussian.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.11.1" id="symbolizer-0111">symbolizer 0.11.1<a class="anchor" aria-label="anchor" href="#symbolizer-0111"></a></h2>
 <div class="section level3">

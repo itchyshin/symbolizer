@@ -1,5 +1,21 @@
 # Changelog
 
+## symbolizer 0.11.2
+
+### v0.11.2 – more brms families + interaction robustness
+
+- [`symbolize.brmsfit()`](https://itchyshin.github.io/symbolizer/reference/symbolize.brmsfit.md)
+  now handles `family = bernoulli()` and `family = poisson()`. brms’s
+  `bernoulli()` is aliased to `binomial` internally because
+  mathematically Bernoulli is just Binomial(1, p); the same templates
+  and parameterization apply.
+- New `tests/testthat/test-robustness-interactions.R` fits `y ~ x * sex`
+  (continuous-by-factor interaction) in each family / class combination
+  and verifies the interaction row appears in `fixed_effects` with
+  sensible estimate, CI columns are populated, and LaTeX renders. Covers
+  lm gaussian, glm binomial / poisson / Gamma, glmmTMB poisson /
+  binomial, lmer with random intercept, and drmTMB gaussian.
+
 ## symbolizer 0.11.1
 
 ### v0.11.1 – two more deferred items
