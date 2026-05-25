@@ -344,6 +344,9 @@ context here.
   slice)
 - [`symbolize(`*`<sdmTMB>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.sdmTMB.md)
   : Symbolize an sdmTMB fit (Gaussian, v0.12 first slice)
+- [`symbolize(`*`<rma.uni>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.rma.uni.md)
+  : Symbolize a metafor rma.uni fit (meta-analysis / meta-regression,
+  v0.13 first slice)
 - [`symbolizer_capabilities()`](https://itchyshin.github.io/symbolizer/reference/symbolizer_capabilities.md)
   : Symbolizer capability registry
 

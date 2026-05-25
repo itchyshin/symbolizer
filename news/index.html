@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.12.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.13.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,6 +33,32 @@
       <small>Source: <a href="https://github.com/itchyshin/symbolizer/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.13.0" id="symbolizer-0130">symbolizer 0.13.0<a class="anchor" aria-label="anchor" href="#symbolizer-0130"></a></h2>
+<div class="section level3">
+<h3 id="v013--metafor-research-synthesis-flagship-0-13-0">v0.13 – metafor (research-synthesis flagship)<a class="anchor" aria-label="anchor" href="#v013--metafor-research-synthesis-flagship-0-13-0"></a></h3>
+<p>This release adds the meta-analytic grammar – a distinct two-tier structure with sampling variance, true effects, and between-study heterogeneity that’s substantively different from the GLMMs the package has covered until now.</p>
+<div class="section level4">
+<h4 id="new-extractor-0-13-0">New extractor<a class="anchor" aria-label="anchor" href="#new-extractor-0-13-0"></a></h4>
+<ul><li>
+<p><code><a href="../reference/symbolize.rma.uni.html">symbolize.rma.uni()</a></code> for <code><a href="https://wviechtb.github.io/metafor/reference/rma.uni.html" class="external-link">metafor::rma.uni</a></code> fits. Covers random and mixed-effects meta-regression with the model:</p>
+<pre><code>y_i | theta_i ~ N(theta_i, v_i)             (sampling level, v_i known)
+theta_i = beta_0 + sum beta_k x_ki + u_i    (true-effect level)
+u_i ~ N(0, tau^2)                            (heterogeneity)
+w_i = 1 / (v_i + tau^2)                      (inverse-variance weight)</code></pre>
+</li>
+<li><p>Sampling variances <code>v_i</code> are treated as KNOWN (inputs, not parameters). <code>tau^2</code> shows up in <code>variance_components</code> with <code>kind = "heterogeneity"</code>; mean sampling variance is reported with <code>kind = "sampling_variance"</code> for reader reference.</p></li>
+<li><p>New family <code>meta_normal</code> in <code>family-distributions.csv</code> / <code>family-parameterizations.csv</code>. 9 new rows in <code>assumption-templates.csv</code> covering known sampling variance, the linear predictor for true effects, between-study heterogeneity, inverse-variance weights, publication-bias responsibility, correct effect-metric responsibility, and conditional independence. 3 new interpretation rows for intercept / slope / factor-contrast on the meta-analytic scale.</p></li>
+<li><p>metafor’s <code>intrcpt</code> row name (vs. R’s usual <code>(Intercept)</code>) is handled in the hit-name mapper.</p></li>
+<li><p><code>rma.mv</code> (multilevel / multivariate meta-analysis) remains Planned.</p></li>
+</ul></div>
+<div class="section level4">
+<h4 id="robustness-0-13-0">Robustness<a class="anchor" aria-label="anchor" href="#robustness-0-13-0"></a></h4>
+<ul><li>
+<code>test-robustness-sweep.R</code> gains two rows: random-effects meta- analysis (no moderators) + meta-regression (with moderator).</li>
+</ul></div>
+</div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.12.0" id="symbolizer-0120">symbolizer 0.12.0<a class="anchor" aria-label="anchor" href="#symbolizer-0120"></a></h2>
 <div class="section level3">
