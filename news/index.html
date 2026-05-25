@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.14.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.14.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -17,6 +17,7 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/symbolizer.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="../articles/index.html">Articles</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/symbolizer-roadmap.html">Roadmap</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -33,6 +34,19 @@
       <small>Source: <a href="https://github.com/itchyshin/symbolizer/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.14.2" id="symbolizer-0142">symbolizer 0.14.2<a class="anchor" aria-label="anchor" href="#symbolizer-0142"></a></h2>
+<div class="section level3">
+<h3 id="v0142--roadmap-moved-to-its-own-page-readme-slimmed-0-14-2">v0.14.2 – Roadmap moved to its own page; README slimmed<a class="anchor" aria-label="anchor" href="#v0142--roadmap-moved-to-its-own-page-readme-slimmed-0-14-2"></a></h3>
+<p>The README homepage had grown to ~250 lines because the capability matrix and roadmap tables sat alongside the introductory material. That layout was hard to scan once the package crossed ten model classes.</p>
+<ul><li>New article <code>vignettes/symbolizer-roadmap.Rmd</code> (“Roadmap and capability matrix”) – the canonical home for the status vocabulary, full capability matrix, planned releases, and release history. It’s reachable from a new top-level <strong>Roadmap</strong> entry in the pkgdown navbar.</li>
+<li>README slimmed: capability matrix and roadmap tables removed; in their place a single “At a glance” paragraph naming the 10 covered package families and linking to the Roadmap article. README is now ~170 lines.</li>
+<li>
+<code>_pkgdown.yml</code>: navbar gains a “Roadmap” link (<code>articles/symbolizer-roadmap.html</code>); the article is also listed under a new “Where we’re going” article group.</li>
+<li>NEWS continues to record past releases (no overlap with the Roadmap article, which is forward-looking).</li>
+</ul><p>No code changes; no behaviour changes. devtools::check() unchanged.</p>
+</div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.14.1" id="symbolizer-0141">symbolizer 0.14.1<a class="anchor" aria-label="anchor" href="#symbolizer-0141"></a></h2>
 <div class="section level3">

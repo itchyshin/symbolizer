@@ -1,5 +1,29 @@
 # Changelog
 
+## symbolizer 0.14.2
+
+### v0.14.2 – Roadmap moved to its own page; README slimmed
+
+The README homepage had grown to ~250 lines because the capability
+matrix and roadmap tables sat alongside the introductory material. That
+layout was hard to scan once the package crossed ten model classes.
+
+- New article `vignettes/symbolizer-roadmap.Rmd` (“Roadmap and
+  capability matrix”) – the canonical home for the status vocabulary,
+  full capability matrix, planned releases, and release history. It’s
+  reachable from a new top-level **Roadmap** entry in the pkgdown
+  navbar.
+- README slimmed: capability matrix and roadmap tables removed; in their
+  place a single “At a glance” paragraph naming the 10 covered package
+  families and linking to the Roadmap article. README is now ~170 lines.
+- `_pkgdown.yml`: navbar gains a “Roadmap” link
+  (`articles/symbolizer-roadmap.html`); the article is also listed under
+  a new “Where we’re going” article group.
+- NEWS continues to record past releases (no overlap with the Roadmap
+  article, which is forward-looking).
+
+No code changes; no behaviour changes. devtools::check() unchanged.
+
 ## symbolizer 0.14.1
 
 ### v0.14.1 – metafor rma.mv (multilevel + structured meta-analysis)
