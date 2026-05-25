@@ -65,8 +65,13 @@ brmsfit,*,*,Planned or reserved,,Non-Gaussian families targeted for v0.8.x.
 MCMCglmm,gaussian,mu,First slice,0.9.0,Gaussian conditional submodel (identity link). Requires `data = ...` argument since MCMCglmm doesn't keep the data frame.
 MCMCglmm,gaussian,random_effects,First slice,0.9.0,"Random intercepts (~ g) on the conditional submodel; MCMCglmm's flexible covariance structures still planned."
 MCMCglmm,*,*,Planned or reserved,,Non-Gaussian families and flexible covariance structures targeted for v0.9.x.
-sdmTMB,*,*,Planned or reserved,,Targeted for v0.10
-lmerMod,*,*,Planned or reserved,,Targeted for v0.10
-glmerMod,*,*,Planned or reserved,,Targeted for v0.10
-lm,*,*,Planned or reserved,,Targeted for v0.10
-glm,*,*,Planned or reserved,,Targeted for v0.10
+sdmTMB,*,*,Planned or reserved,,Targeted for v0.10.x.
+lmerMod,gaussian,mu,First slice,0.10.0,Gaussian conditional submodel (identity link) from lme4::lmer().
+lmerMod,gaussian,random_effects,First slice,0.10.0,"Random intercepts (1 | g) and (1 + x | g) on the conditional submodel; nested / crossed still planned."
+lmerMod,*,*,Planned or reserved,,Other lme4 features targeted for v0.10.x.
+glmerMod,*,*,Planned or reserved,,Generalized lme4 fits targeted for v0.10.x.
+lm,gaussian,mu,First slice,0.10.0,Gaussian fit from stats::lm().
+glm,gaussian,mu,First slice,0.10.0,Gaussian glm from stats::glm().
+glm,binomial,mu,First slice,0.10.0,Binomial / Bernoulli glm (logit link) from stats::glm().
+glm,poisson,mu,First slice,0.10.0,Poisson glm (log link) from stats::glm().
+glm,*,*,Planned or reserved,,Other families (Gamma / inverse.gaussian / quasi*) targeted for v0.10.x.

@@ -201,6 +201,18 @@ methods_slots_for <- function(sym) {
     slots$response_units_clause <- methods_units_clause(sym, slots$response)
     slots$mu_predictors_clause    <- methods_predictors_clause(sym, "mu")
     slots$ci_method <- NULL
+  } else if (identical(cls, "lm") ||
+             (identical(cls, "glm") &&
+              family %in% c("gaussian", "binomial", "poisson"))) {
+    slots$response             <- sym$model$response %||% "the response"
+    slots$response_units_clause <- methods_units_clause(sym, slots$response)
+    slots$mu_predictors_clause    <- methods_predictors_clause(sym, "mu")
+    # lm template doesn't carry {ci_method} (always Wald-t).
+    if (identical(cls, "lm")) slots$ci_method <- NULL
+  } else if (identical(family, "gaussian") && identical(cls, "lmerMod")) {
+    slots$response             <- sym$model$response %||% "the response"
+    slots$response_units_clause <- methods_units_clause(sym, slots$response)
+    slots$mu_predictors_clause    <- methods_predictors_clause(sym, "mu")
   }
 
   slots

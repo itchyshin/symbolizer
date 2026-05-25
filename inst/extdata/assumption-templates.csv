@@ -122,3 +122,9 @@ gllvm_binomial,Lambda_B,loading_rotation_ambiguity,"\boldsymbol{\Lambda}_B \math
 gllvm_binomial,Lambda_B,loading_sign_ambiguity,"(-\boldsymbol{\lambda}_{B\, k})(-z_{B\, ik}) = \boldsymbol{\lambda}_{B\, k} z_{B\, ik}","Each latent axis can be flipped without changing the fit.",implied
 gllvm_binomial,mu,link_scale_logit,"\mu_t = \mathrm{logit}(p_t) = \log(p_t / (1 - p_t))","For binomial traits, mu is on the logit scale. exp(mu) is an odds ratio relative to plogis(0) = 0.5.",stated
 gllvm_binomial,,no_missing_at_random,—,Observations are assumed not missing in a way that depends on the unobserved response,not_checked
+binomial,,conditional_distribution,"{response_symbol} \mid \mu_i \sim \mathrm{Binomial}(n_i\, \mu_i)","{response} is a count of successes out of n_i trials; mu_i is the success probability",stated
+binomial,,response_in_zero_to_n,{response_symbol} \in \{0\, 1\, \ldots\, n_i\},"{response} is a non-negative integer bounded by n_i (the number of trials per observation)",implied
+binomial,mu,linear_predictor,\mathrm{logit}(\mu_i) = \beta_0 + \sum_k \beta_k X_{ki},"logit link on mu; a unit change in a predictor multiplies the odds of success by exp(beta)",stated
+binomial,,variance_from_mean,"\mathrm{Var}({response_symbol}) = n_i \mu_i (1 - \mu_i)","Binomial variance is determined by the mean and number of trials; if the data show extra-binomial variation, prefer beta_binomial",your_responsibility
+binomial,,independence,{response_symbol} \perp {response_symbol_j} \mid X \text{ for } i \ne j,Observations are conditionally independent given the predictors,implied
+binomial,,no_missing_at_random,—,Observations are assumed not missing in a way that depends on the unobserved response,not_checked
