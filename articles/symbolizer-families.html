@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.15.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.15.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -68,12 +68,18 @@
     
     
 <blockquote>
-<p><em>Eight distribution families ship today. The biology of each one
-is different. This vignette walks each in turn — what kind of response
-it fits, what the link does, and how to read the <code>mu</code>
-coefficient.</em></p>
+<p><em>This tour walks through the non-Gaussian distributional families
+available for <code>drmTMB</code>. The biology of each is different —
+what kind of response it fits, what the link does, and how to read the
+<code>mu</code> coefficient. The same <code>symbolize(fit)</code>
+interface now applies to ten package families (<code>drmTMB</code>,
+<code>gllvmTMB</code>, <code>glmmTMB</code>, <code>brms</code>,
+<code>lme4</code>, <code>MCMCglmm</code>, <code>sdmTMB</code>,
+<code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">stats::lm</a></code> / <code><a href="https://rdrr.io/r/stats/glm.html" class="external-link">stats::glm</a></code>, <code>metafor</code>,
+<code>mgcv</code>); see the <a href="symbolizer-roadmap.html">Roadmap
+article</a> for the full capability matrix.</em></p>
 </blockquote>
-<p>The seven non-Gaussian families covered here all use the same
+<p>The non-Gaussian families covered here all use the same
 <code>symbolize(fit)</code> interface. The differences are in the LaTeX,
 the biological reading on each coefficient, and the assumption table.
 Every phrase you see below is templated from

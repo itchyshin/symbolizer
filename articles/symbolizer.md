@@ -228,11 +228,11 @@ three tabs over the same fit.
 as_html_three_views(sym, head = 5, tail = 2)
 ```
 
-[Skip three-views widget](#sym-sym-1779716284-end)
+[Skip three-views widget](#sym-sym-1779717579-end)
 
-    <button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779716284-tab-eq" aria-controls="sym-sym-1779716284-panel-eq" aria-selected="true" tabindex="0" data-tab="eq"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>1. Equation</button>
-    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779716284-tab-idx" aria-controls="sym-sym-1779716284-panel-idx" aria-selected="false" tabindex="-1" data-tab="idx"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>2. Index</button>
-    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779716284-tab-mat" aria-controls="sym-sym-1779716284-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>3. Matrix (with data)</button>
+    <button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779717579-tab-eq" aria-controls="sym-sym-1779717579-panel-eq" aria-selected="true" tabindex="0" data-tab="eq"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>1. Equation</button>
+    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779717579-tab-idx" aria-controls="sym-sym-1779717579-panel-idx" aria-selected="false" tabindex="-1" data-tab="idx"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>2. Index</button>
+    <button type="button" class="sym-tab" role="tab" id="sym-sym-1779717579-tab-mat" aria-controls="sym-sym-1779717579-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat"><span class="sym-tab-marker" aria-hidden="true">&#9656;</span>3. Matrix (with data)</button>
 
 The structural contract. No indices, no numbers – the shape of the
 model.
@@ -528,10 +528,20 @@ between-group SD (`sd(group)`) goes with which submodel.
 is the registry that gates
 [`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md).
 Each row carries one of five status words: **Stable**, **First slice**,
-**Opt-in control**, **Planned or reserved**, or **Unsupported**. v0.1
-marks `drmTMB` Gaussian `mu` and `sigma` as Stable, Gaussian
-`random_effects` as First slice, and reserves the rest of the matrix for
-later versions.
+**Opt-in control**, **Planned or reserved**, or **Unsupported**. Today
+(v0.15)
+[`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
+reads ten package families: `drmTMB`, `gllvmTMB`, `glmmTMB`, `brms`,
+`lme4` (`lmer` + `glmer`), `MCMCglmm` (including animal models),
+`sdmTMB` (spatial + spatiotemporal fields),
+[`stats::lm`](https://rdrr.io/r/stats/lm.html) /
+[`stats::glm`](https://rdrr.io/r/stats/glm.html), `metafor` (`rma.uni` +
+`rma.mv`, including location-scale meta-regression), and
+[`mgcv::gam`](https://rdrr.io/pkg/mgcv/man/gam.html) /
+[`mgcv::bam`](https://rdrr.io/pkg/mgcv/man/bam.html) (with `gamm` /
+`gamm4` via the `$gam` slot). The Gaussian location-scale path on
+`drmTMB` shown above is the most mature; other classes are mostly First
+slice.
 
 ``` r
 
@@ -552,11 +562,12 @@ symbolizer_capabilities()
 #> # ℹ 103 more rows
 ```
 
-The roadmap in `README.md` lists the planned version per family /
-package. If
+The [Roadmap
+article](https://itchyshin.github.io/symbolizer/articles/symbolizer-roadmap.md)
+lays out the full capability matrix and what’s planned next. If
 [`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
-errors with a capability message, the registry will tell you which
-version is scheduled to lift it.
+errors with a capability message, the registry tells you which version
+is scheduled to lift it.
 
 **Takeaway.** The registry is the single source of truth for “what
 works”. Read the status word before designing around an unsupported

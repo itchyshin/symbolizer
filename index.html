@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.15.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.15.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -72,9 +72,9 @@
 <h2 id="positioning">Positioning<a class="anchor" aria-label="anchor" href="#positioning"></a>
 </h2>
 <blockquote>
-<p><code>symbolizer</code> does not just print equations for <code>drmTMB</code>; it makes a fitted distributional model auditable by connecting the R formula, symbolic model, parameter scales, assumptions, coefficient readings, and next diagnostic steps.</p>
+<p><code>symbolizer</code> makes a fitted model <strong>auditable</strong>. It connects the R formula, the symbolic model in both notations, every parameter’s scale, the assumptions that are stated vs. implied vs. unchecked, what each coefficient means biologically, and the next diagnostic steps — across the GLMM, meta-analysis, additive-model, and Bayesian-multilevel packages an ecologist or evolutionary biologist actually uses.</p>
 </blockquote>
-<p><code>symbolizer</code> is the complement to <a href="https://datalorax.github.io/equatiomatic/" class="external-link"><code>equatiomatic</code></a>, not a replacement. Reach for <code>equatiomatic</code> when you want a clean LaTeX equation for one model. Reach for <code>symbolizer</code> when you need to understand the model — its assumptions, what each coefficient means on a natural scale, both notations side by side, and how your data actually flows through the matrices.</p>
+<p><code>symbolizer</code> is the complement to <a href="https://datalorax.github.io/equatiomatic/" class="external-link"><code>equatiomatic</code></a>, not a replacement. Reach for <code>equatiomatic</code> when you want a clean LaTeX equation for one <code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm()</a></code> or <code>lmer()</code> model. Reach for <code>symbolizer</code> when you need to understand the model — across multi-submodel distributional fits, mixed models, latent-variable, spatial, meta-analytic, or additive structures — its assumptions, what each coefficient means on a natural scale, both notations side by side, and how your data actually flows through the matrices.</p>
 <table class="table">
 <colgroup>
 <col width="33%">
@@ -128,7 +128,7 @@
 </tr>
 </tbody>
 </table>
-<p>Built first for the two TMB sister packages — <a href="https://itchyshin.github.io/drmTMB/" class="external-link"><code>drmTMB</code></a> (Stable: Gaussian location-scale + (1 | group); First slice today) and <a href="https://itchyshin.github.io/gllvmTMB/" class="external-link"><code>gllvmTMB</code></a> (First slice: Gaussian latent-variable models) — with planned extensions across the GLMM ecosystem used in ecology and evolution: <code>glmmTMB</code>, <code>brms</code>, <code>MCMCglmm</code>, <code>sdmTMB</code>, <code>lme4</code>, and base <code>lm</code>/<code>glm</code>. The capability registry (<code><a href="reference/symbolizer_capabilities.html">symbolizer_capabilities()</a></code>) is the source of truth for what’s readable today; any fitted-model class not listed there with a Stable or First slice status will be refused by <code><a href="reference/symbolize.html">symbolize()</a></code>.</p>
+<p><strong>Currently reads ten package families</strong> (14 fitted-class methods, 30+ family-class combinations): the two TMB sister packages <a href="https://itchyshin.github.io/drmTMB/" class="external-link"><code>drmTMB</code></a> and <a href="https://itchyshin.github.io/gllvmTMB/" class="external-link"><code>gllvmTMB</code></a>, the broader GLMM ecosystem <code>glmmTMB</code>, <code>brms</code>, <code>lme4</code> (<code>lmer</code> + <code>glmer</code>), <code>MCMCglmm</code> (including animal models), <code>sdmTMB</code> (spatial + spatiotemporal random fields), <code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">stats::lm</a></code> / <code><a href="https://rdrr.io/r/stats/glm.html" class="external-link">stats::glm</a></code>, the meta-analytic framework <code>metafor</code> (<code>rma.uni</code> + <code>rma.mv</code> with multilevel / structured / location-scale variants), and additive models via <code><a href="https://rdrr.io/pkg/mgcv/man/gam.html" class="external-link">mgcv::gam</a></code> / <code><a href="https://rdrr.io/pkg/mgcv/man/bam.html" class="external-link">mgcv::bam</a></code> (with <code>gamm</code> / <code>gamm4</code> covered through the <code>$gam</code> slot). See the <a href="articles/symbolizer-roadmap.html">Roadmap article</a> for the full capability matrix; <code><a href="reference/symbolizer_capabilities.html">symbolizer_capabilities()</a></code> is the in-package source of truth, and any class / family / component not marked Stable or First slice there will be refused by <code><a href="reference/symbolize.html">symbolize()</a></code>.</p>
 </div>
 <div class="section level2">
 <h2 id="install">Install<a class="anchor" aria-label="anchor" href="#install"></a>

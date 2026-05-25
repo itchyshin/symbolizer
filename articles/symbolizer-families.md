@@ -1,14 +1,20 @@
 # A tour of non-Gaussian families
 
-> *Eight distribution families ship today. The biology of each one is
-> different. This vignette walks each in turn — what kind of response it
-> fits, what the link does, and how to read the `mu` coefficient.*
+> *This tour walks through the non-Gaussian distributional families
+> available for `drmTMB`. The biology of each is different — what kind
+> of response it fits, what the link does, and how to read the `mu`
+> coefficient. The same `symbolize(fit)` interface now applies to ten
+> package families (`drmTMB`, `gllvmTMB`, `glmmTMB`, `brms`, `lme4`,
+> `MCMCglmm`, `sdmTMB`, [`stats::lm`](https://rdrr.io/r/stats/lm.html) /
+> [`stats::glm`](https://rdrr.io/r/stats/glm.html), `metafor`, `mgcv`);
+> see the [Roadmap
+> article](https://itchyshin.github.io/symbolizer/articles/symbolizer-roadmap.md)
+> for the full capability matrix.*
 
-The seven non-Gaussian families covered here all use the same
-`symbolize(fit)` interface. The differences are in the LaTeX, the
-biological reading on each coefficient, and the assumption table. Every
-phrase you see below is templated from `inst/extdata/*.csv` — no LLM at
-runtime.
+The non-Gaussian families covered here all use the same `symbolize(fit)`
+interface. The differences are in the LaTeX, the biological reading on
+each coefficient, and the assumption table. Every phrase you see below
+is templated from `inst/extdata/*.csv` — no LLM at runtime.
 
 For Gaussian and bivariate Gaussian, see
 [`vignette("symbolizer-drmtmb")`](https://itchyshin.github.io/symbolizer/articles/symbolizer-drmtmb.md).

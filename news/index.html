@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.15.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.15.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,6 +34,21 @@
       <small>Source: <a href="https://github.com/itchyshin/symbolizer/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.15.1" id="symbolizer-0151">symbolizer 0.15.1<a class="anchor" aria-label="anchor" href="#symbolizer-0151"></a></h2>
+<div class="section level3">
+<h3 id="v0151--positioning-text-refresh-not-just-drmtmb-0-15-1">v0.15.1 – positioning text refresh: not just drmTMB<a class="anchor" aria-label="anchor" href="#v0151--positioning-text-refresh-not-just-drmtmb-0-15-1"></a></h3>
+<p>Stale framing pass: the homepage positioning paragraph still described <code>symbolizer</code> as “for drmTMB” even though the package now reads ten package families. This release rewrites the user-facing prose so the multi-package scope is visible from the homepage and Get-started vignette.</p>
+<ul><li>README <code>Positioning</code> paragraph rewritten: now describes <code>symbolizer</code> as making “a fitted model auditable” across “the GLMM, meta-analysis, additive-model, and Bayesian-multilevel packages an ecologist or evolutionary biologist actually uses”.</li>
+<li>README “Built first for…” paragraph: now reads “Currently reads ten package families” with the list spelt out, and a direct link to the Roadmap article.</li>
+<li>DESCRIPTION text: extended to name <code>drmTMB</code>, <code>gllvmTMB</code>, <code>glmmTMB</code>, <code>brms</code>, <code>lme4</code>, <code>MCMCglmm</code>, <code>sdmTMB</code>, <code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">stats::lm</a></code>/<code>glm</code>, <code>metafor</code>, <code>mgcv</code> explicitly.</li>
+<li>
+<code><a href="../articles/symbolizer.html">vignette("symbolizer")</a></code> “What’s supported, what’s planned”: no longer claims “v0.1 marks … as Stable”; reflects v0.15 reality and links to the Roadmap article.</li>
+<li>
+<code><a href="../articles/symbolizer-families.html">vignette("symbolizer-families")</a></code>: no longer says “Eight distribution families ship today”; clarifies that this vignette walks the drmTMB non-Gaussian families specifically, while the same <code>symbolize(fit)</code> interface applies to all ten package families.</li>
+</ul><p>No code changes. Test sweep + check unchanged.</p>
+</div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.15.0" id="symbolizer-0150">symbolizer 0.15.0<a class="anchor" aria-label="anchor" href="#symbolizer-0150"></a></h2>
 <div class="section level3">
