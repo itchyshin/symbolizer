@@ -6,7 +6,9 @@
       Error in `symbolizer:::capability_check()`:
       ! `symbolize()` cannot read drmTMB / gaussian / zi yet (status: Planned or reserved).
       i Today we can read:
+      * brmsfit binomial: mu, random_effects (First slice)
       * brmsfit gaussian: mu, random_effects, sigma_distributional (First slice)
+      * brmsfit poisson: mu, random_effects (First slice)
       * drmTMB gaussian: mu, sigma (Stable)
       * drmTMB beta: mu, sigma (First slice)
       * drmTMB beta_binomial: mu, sigma (First slice)
@@ -44,7 +46,9 @@
       Error in `symbolizer:::capability_check()`:
       ! `symbolize()` cannot read sdmTMB / gaussian / mu yet (status: Planned or reserved).
       i Today we can read:
+      * brmsfit binomial: mu, random_effects (First slice)
       * brmsfit gaussian: mu, random_effects, sigma_distributional (First slice)
+      * brmsfit poisson: mu, random_effects (First slice)
       * drmTMB gaussian: mu, sigma (Stable)
       * drmTMB beta: mu, sigma (First slice)
       * drmTMB beta_binomial: mu, sigma (First slice)

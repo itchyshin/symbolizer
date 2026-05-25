@@ -70,7 +70,11 @@ glmmTMB,*,*,Planned or reserved,,Other families and submodels targeted for v0.11
 brmsfit,gaussian,mu,First slice,0.8.0,Gaussian conditional submodel (identity link).
 brmsfit,gaussian,random_effects,First slice,0.8.0,"Random intercepts (1 | group) and (1 + x | group) on the conditional submodel; nested / crossed still planned."
 brmsfit,gaussian,sigma_distributional,First slice,0.11.0,brms distributional formula on sigma via bf(y ~ x; sigma ~ z); other dpars still planned.
-brmsfit,*,*,Planned or reserved,,Non-Gaussian families targeted for v0.8.x.
+brmsfit,binomial,mu,First slice,0.11.2,"Binomial / Bernoulli conditional submodel (logit link); brms's bernoulli() is aliased to binomial internally."
+brmsfit,binomial,random_effects,First slice,0.11.2,Random intercepts on the binomial conditional submodel.
+brmsfit,poisson,mu,First slice,0.11.2,Poisson conditional submodel (log link).
+brmsfit,poisson,random_effects,First slice,0.11.2,Random intercepts on the poisson conditional submodel.
+brmsfit,*,*,Planned or reserved,,Other families and distributional dpars targeted for v0.11.x.
 MCMCglmm,gaussian,mu,First slice,0.9.0,Gaussian conditional submodel (identity link). Requires `data = ...` argument since MCMCglmm doesn't keep the data frame.
 MCMCglmm,gaussian,random_effects,First slice,0.9.0,"Random intercepts (~ g) on the conditional submodel; MCMCglmm's flexible covariance structures still planned."
 MCMCglmm,*,*,Planned or reserved,,Non-Gaussian families and flexible covariance structures targeted for v0.9.x.

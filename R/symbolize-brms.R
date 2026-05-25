@@ -60,6 +60,11 @@ symbolize.brmsfit <- function(fit, symbols = NULL, units = NULL,
   if (is.null(family) || !nzchar(family)) {
     cli::cli_abort("Could not resolve {.code fit$family$family}.")
   }
+  # brms distinguishes bernoulli() from binomial() for technical
+  # reasons (the trials() argument); mathematically Bernoulli is just
+  # Binomial with n_i = 1. We alias internally so the same templates,
+  # parameterization, and assumption rows apply to both.
+  if (identical(family, "bernoulli")) family <- "binomial"
   capability_check("brmsfit", family, "mu")
 
   # brms supports per-distribution parameter formulas (sigma ~ z, nu ~ z,
