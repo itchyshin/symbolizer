@@ -1,3 +1,43 @@
+# symbolizer 0.13.0
+
+## v0.13 -- metafor (research-synthesis flagship)
+
+This release adds the meta-analytic grammar -- a distinct two-tier
+structure with sampling variance, true effects, and between-study
+heterogeneity that's substantively different from the GLMMs the
+package has covered until now.
+
+### New extractor
+
+* `symbolize.rma.uni()` for `metafor::rma.uni` fits. Covers random
+  and mixed-effects meta-regression with the model:
+  ```
+  y_i | theta_i ~ N(theta_i, v_i)             (sampling level, v_i known)
+  theta_i = beta_0 + sum beta_k x_ki + u_i    (true-effect level)
+  u_i ~ N(0, tau^2)                            (heterogeneity)
+  w_i = 1 / (v_i + tau^2)                      (inverse-variance weight)
+  ```
+* Sampling variances `v_i` are treated as KNOWN (inputs, not
+  parameters). `tau^2` shows up in `variance_components` with
+  `kind = "heterogeneity"`; mean sampling variance is reported with
+  `kind = "sampling_variance"` for reader reference.
+* New family `meta_normal` in `family-distributions.csv` /
+  `family-parameterizations.csv`. 9 new rows in
+  `assumption-templates.csv` covering known sampling variance, the
+  linear predictor for true effects, between-study heterogeneity,
+  inverse-variance weights, publication-bias responsibility, correct
+  effect-metric responsibility, and conditional independence. 3 new
+  interpretation rows for intercept / slope / factor-contrast on the
+  meta-analytic scale.
+* metafor's `intrcpt` row name (vs. R's usual `(Intercept)`) is
+  handled in the hit-name mapper.
+* `rma.mv` (multilevel / multivariate meta-analysis) remains Planned.
+
+### Robustness
+
+* `test-robustness-sweep.R` gains two rows: random-effects meta-
+  analysis (no moderators) + meta-regression (with moderator).
+
 # symbolizer 0.12.0
 
 ## v0.12 -- close the original-vision gaps: sdmTMB + MCMCglmm animal models

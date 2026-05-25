@@ -62,6 +62,7 @@ reference:
       - symbolize.lmerMod
       - symbolize.glmerMod
       - symbolize.sdmTMB
+      - symbolize.rma.uni
       - symbolizer_capabilities
   - title: "Read both notations"
     desc: "Educator-facing bridge between index and matrix forms."

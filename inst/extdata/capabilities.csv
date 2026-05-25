@@ -98,3 +98,7 @@ glm,binomial,mu,First slice,0.10.0,Binomial / Bernoulli glm (logit link) from st
 glm,poisson,mu,First slice,0.10.0,Poisson glm (log link) from stats::glm().
 glm,Gamma,mu,First slice,0.11.0,Gamma glm (log link by convention) from stats::glm().
 glm,*,*,Planned or reserved,,Other families (inverse.gaussian / quasi*) targeted for v0.11.x.
+rma.uni,meta_normal,mu,First slice,0.13.0,"metafor random / mixed-effects meta-regression: theta_i = beta_0 + sum beta_k x_ki + u_i."
+rma.uni,meta_normal,tau2,First slice,0.13.0,"Between-study heterogeneity variance tau^2; appears in variance_components with kind = ""heterogeneity""."
+rma.uni,*,*,Planned or reserved,,"Non-meta_normal metrics (selection / publication-bias models, multilevel rma.mv) targeted for a later release."
+rma.mv,*,*,Planned or reserved,,Multilevel / multivariate meta-analysis targeted for v0.13.x.

@@ -149,3 +149,15 @@ test_that("robustness: sdmTMB gaussian + spatial", {
   sym <- symbolize(fit_sdmtmb_gaussian_spatial())
   run_public_surface(sym, "sdmTMB spatial")
 })
+
+test_that("robustness: metafor rma.uni random-effects meta-analysis", {
+  skip_if_not_installed("metafor")
+  sym <- symbolize(fit_metafor_rma())
+  run_public_surface(sym, "metafor rma.uni")
+})
+
+test_that("robustness: metafor rma.uni with moderator", {
+  skip_if_not_installed("metafor")
+  sym <- symbolize(fit_metafor_rma_mods())
+  run_public_surface(sym, "metafor rma.uni + mods")
+})

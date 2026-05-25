@@ -128,3 +128,12 @@ binomial,mu,linear_predictor,\mathrm{logit}(\mu_i) = \beta_0 + \sum_k \beta_k X_
 binomial,,variance_from_mean,"\mathrm{Var}({response_symbol}) = n_i \mu_i (1 - \mu_i)","Binomial variance is determined by the mean and number of trials; if the data show extra-binomial variation, prefer beta_binomial",your_responsibility
 binomial,,independence,{response_symbol} \perp {response_symbol_j} \mid X \text{ for } i \ne j,Observations are conditionally independent given the predictors,implied
 binomial,,no_missing_at_random,—,Observations are assumed not missing in a way that depends on the unobserved response,not_checked
+meta_normal,,conditional_distribution,"y_i \mid \theta_i \sim \mathrm{Normal}(\theta_i,\, v_i)",Each observed effect size is normally distributed around its true effect with KNOWN sampling variance,stated
+meta_normal,,known_sampling_variance,v_i \text{ is known (not estimated)},"Sampling variances v_i come from each primary study (or from escalc()); they are inputs, not parameters",your_responsibility
+meta_normal,mu,linear_predictor,"\theta_i = \beta_0 + \sum_k \beta_k X_{ki} + u_i",True effects are a linear combination of moderators plus a study-level random effect,stated
+meta_normal,mu,random_effects_distribution,"u_i \sim \mathrm{Normal}(0,\, \tau^2)",The between-study true effects vary around the grand mean with variance tau^2,stated
+meta_normal,,independence,"y_i \perp y_j \mid \theta_i,\, \theta_j \text{ for } i \ne j","Effect sizes are conditionally independent given their true effects -- non-independence (e.g., multiple effects from one study) needs rma.mv",implied
+meta_normal,,inverse_variance_weights,"w_i = 1 / (v_i + \tau^2)","Each study is weighted by the inverse of (sampling variance + heterogeneity)",stated
+meta_normal,,no_publication_bias,—,"The included effect sizes are not preferentially the larger / significant ones; if they are, tau^2 / beta are biased",your_responsibility
+meta_normal,,correct_effect_metric,—,"The metric (log RR, log OR, SMD, Fisher-z r, ...) is appropriate for the outcome and is calculated consistently across studies",your_responsibility
+meta_normal,,no_missing_at_random,—,Studies are not missing in a way that depends on their unobserved true effect,not_checked

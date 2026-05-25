@@ -36,6 +36,7 @@
       * lm gaussian: mu (First slice)
       * lmerMod gaussian: mu, random_effects (First slice)
       * MCMCglmm gaussian: animal, mu, random_effects (First slice)
+      * rma.uni meta_normal: mu, tau2 (First slice)
       * sdmTMB gaussian: epsilon, mu, omega (First slice)
       i See `symbolizer_capabilities()` for the full registry.
 
@@ -77,6 +78,7 @@
       * lm gaussian: mu (First slice)
       * lmerMod gaussian: mu, random_effects (First slice)
       * MCMCglmm gaussian: animal, mu, random_effects (First slice)
+      * rma.uni meta_normal: mu, tau2 (First slice)
       * sdmTMB gaussian: epsilon, mu, omega (First slice)
       i See `symbolizer_capabilities()` for the full registry.
 
