@@ -35,16 +35,17 @@
       * glmmTMB poisson: mu, random_effects, zi (First slice)
       * lm gaussian: mu (First slice)
       * lmerMod gaussian: mu, random_effects (First slice)
-      * MCMCglmm gaussian: mu, random_effects (First slice)
+      * MCMCglmm gaussian: animal, mu, random_effects (First slice)
+      * sdmTMB gaussian: epsilon, mu, omega (First slice)
       i See `symbolizer_capabilities()` for the full registry.
 
-# capability_check() rejects sdmTMB/gaussian/mu (Planned) via wildcard
+# capability_check() rejects sdmTMB/binomial/mu (Planned) via wildcard
 
     Code
-      symbolizer:::capability_check("sdmTMB", "gaussian", "mu")
+      symbolizer:::capability_check("sdmTMB", "binomial", "mu")
     Condition
       Error in `symbolizer:::capability_check()`:
-      ! `symbolize()` cannot read sdmTMB / gaussian / mu yet (status: Planned or reserved).
+      ! `symbolize()` cannot read sdmTMB / binomial / mu yet (status: Planned or reserved).
       i Today we can read:
       * brmsfit binomial: mu, random_effects (First slice)
       * brmsfit gaussian: mu, random_effects, sigma_distributional (First slice)
@@ -75,7 +76,8 @@
       * glmmTMB poisson: mu, random_effects, zi (First slice)
       * lm gaussian: mu (First slice)
       * lmerMod gaussian: mu, random_effects (First slice)
-      * MCMCglmm gaussian: mu, random_effects (First slice)
+      * MCMCglmm gaussian: animal, mu, random_effects (First slice)
+      * sdmTMB gaussian: epsilon, mu, omega (First slice)
       i See `symbolizer_capabilities()` for the full registry.
 
 # capability_check() errors when no entry exists at all

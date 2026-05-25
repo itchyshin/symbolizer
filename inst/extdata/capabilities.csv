@@ -77,8 +77,13 @@ brmsfit,poisson,random_effects,First slice,0.11.2,Random intercepts on the poiss
 brmsfit,*,*,Planned or reserved,,Other families and distributional dpars targeted for v0.11.x.
 MCMCglmm,gaussian,mu,First slice,0.9.0,Gaussian conditional submodel (identity link). Requires `data = ...` argument since MCMCglmm doesn't keep the data frame.
 MCMCglmm,gaussian,random_effects,First slice,0.9.0,"Random intercepts (~ g) on the conditional submodel; MCMCglmm's flexible covariance structures still planned."
-MCMCglmm,*,*,Planned or reserved,,Non-Gaussian families and flexible covariance structures targeted for v0.9.x.
-sdmTMB,*,*,Planned or reserved,,Targeted for v0.10.x.
+MCMCglmm,gaussian,animal,First slice,0.12.0,"Animal-model / phylogenetic random effect via ginverse = list(animal = Ainv); the variance-components row for the animal group is tagged kind = ""animal"" and heritability h^2 = sigma^2_A / (sigma^2_A + sigma^2_E) is derived and attached to metadata$heritability."
+MCMCglmm,*,*,Planned or reserved,,Non-Gaussian families and flexible residual covariance (us / idh) still planned for a later batch.
+sdmTMB,gaussian,mu,First slice,0.12.0,Gaussian conditional submodel (identity link) from sdmTMB::sdmTMB().
+sdmTMB,gaussian,omega,First slice,0.12.0,"Spatial random field omega(s_i) ~ GMRF(0, Q(kappa)) via spatial = ""on""."
+sdmTMB,gaussian,epsilon,First slice,0.12.0,"Spatiotemporal field epsilon(s_i, t) ~ GMRF(0, Q(kappa)) via the time = arg."
+sdmTMB,gaussian,delta_model,Planned or reserved,,"Delta (hurdle / two-component) sdmTMB models."
+sdmTMB,*,*,Planned or reserved,,Non-Gaussian families and spatial_varying / share_range still planned..x.
 lmerMod,gaussian,mu,First slice,0.10.0,Gaussian conditional submodel (identity link) from lme4::lmer().
 lmerMod,gaussian,random_effects,First slice,0.10.0,"Random intercepts (1 | g) and (1 + x | g) on the conditional submodel; nested / crossed still planned."
 lmerMod,*,*,Planned or reserved,,Other lme4 features targeted for v0.11.x.

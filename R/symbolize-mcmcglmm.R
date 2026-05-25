@@ -21,8 +21,15 @@
 # symbolize.MCMCglmm() takes a mandatory `data` argument.
 #
 # v0.9 scope: Gaussian + identity link, fixed effects, optional `~ g`
-# random intercepts. MCMCglmm's flexible covariance structures and
-# non-Gaussian families are deferred to v0.9.x.
+# random intercepts. v0.12 adds: animal models / phylogenetic effects
+# via `ginverse = list(animal = Ainv)` -- the extractor detects
+# ginverse groups, treats them as "animal" effects in the
+# variance-components tibble, and adds a heritability row to the
+# parameter-interpretation tibble when both an animal effect and
+# residual variance are present.
+#
+# MCMCglmm's flexible residual covariance structures (`us(trait):unit`,
+# `idh(trait):unit`) and non-Gaussian families are still deferred.
 # ----------------------------------------------------------------------------
 
 #' Symbolize an MCMCglmm fit (Gaussian, v0.9 first slice)
@@ -96,12 +103,17 @@ symbolize.MCMCglmm <- function(fit, symbols = NULL, units = NULL,
     mcmcglmm_re_terms(fit, e$dpar, data)
   })
   has_re <- vapply(re_per_entry, function(x) !is.null(x), logical(1L))
+  has_animal <- length(fit$ginverse %||% list()) > 0L
   if (any(has_re)) {
     capability_check("MCMCglmm", family, "random_effects")
+    if (has_animal) {
+      capability_check("MCMCglmm", family, "animal")
+    }
     for (i in which(has_re)) {
       drm_assert_supported_re(re_per_entry[[i]], entries[[i]]$dpar)
     }
   }
+  animal_groups <- names(fit$ginverse %||% list())
 
   param <- get_parameterization(family)
   index <- list(observation = "i", individual = "j",
@@ -131,7 +143,7 @@ symbolize.MCMCglmm <- function(fit, symbols = NULL, units = NULL,
   terms_tbl  <- drm_build_terms(entries_fe, data, symbols)
   fixed_eff  <- mcmcglmm_build_fixed_effects(terms_tbl, fit)
   re_tbl     <- drm_build_random_effects(re_per_entry)
-  vc_tbl     <- mcmcglmm_build_variance_components(fit)
+  vc_tbl     <- mcmcglmm_build_variance_components(fit, animal_groups)
   cov_tbl    <- drm_build_covariance_components(re_tbl)
   components <- drm_build_components(
     submodels, terms_tbl, re_tbl,
@@ -160,6 +172,7 @@ symbolize.MCMCglmm <- function(fit, symbols = NULL, units = NULL,
   expanded <- list(y = data[[response]], X = NULL, Z = NULL,
                    beta = NULL, u = NULL, fitted = NULL, residuals = NULL)
 
+  heritability_tbl <- mcmcglmm_heritability_row(vc_tbl)
   metadata <- list(
     call = NULL,
     context = context %||% "",
@@ -169,6 +182,8 @@ symbolize.MCMCglmm <- function(fit, symbols = NULL, units = NULL,
       symbolizer = utils::packageVersion("symbolizer"),
       MCMCglmm   = utils::packageVersion("MCMCglmm")
     ),
+    animal_groups = animal_groups,
+    heritability = heritability_tbl,
     created_by = "symbolize.MCMCglmm"
   )
 
@@ -339,7 +354,11 @@ mcmcglmm_hit_name <- function(row) {
 }
 
 # Variance components from summary's Gcovariances + Rcovariances.
-mcmcglmm_build_variance_components <- function(fit) {
+# `animal_groups` is the character vector of group names that have a
+# relationship-matrix inverse attached (`fit$ginverse`); rows for those
+# groups carry `kind = "animal"` so downstream readers know the
+# implied prior is N(0, sigma^2 * A) rather than N(0, sigma^2 * I).
+mcmcglmm_build_variance_components <- function(fit, animal_groups = character(0)) {
   s <- summary(fit)
   rows <- list()
   if (!is.null(s$Gcovariances)) {
@@ -352,7 +371,8 @@ mcmcglmm_build_variance_components <- function(fit) {
         group       = grp,
         term        = "(Intercept)",
         sd_estimate = sd_est,
-        var_estimate = sd_est ^ 2
+        var_estimate = sd_est ^ 2,
+        kind        = if (grp %in% animal_groups) "animal" else "random"
       )
     }
   }
@@ -365,17 +385,49 @@ mcmcglmm_build_variance_components <- function(fit) {
         group       = "residual",
         term        = "Residual",
         sd_estimate = sd_resid,
-        var_estimate = sd_resid ^ 2
+        var_estimate = sd_resid ^ 2,
+        kind        = "residual"
       )
     }
   }
   if (length(rows) == 0L) {
     return(tibble::tibble(
       parameter = character(0), group = character(0), term = character(0),
-      sd_estimate = double(0), var_estimate = double(0)
+      sd_estimate = double(0), var_estimate = double(0),
+      kind = character(0)
     ))
   }
   do.call(rbind, rows)
+}
+
+# Derive heritability rows from variance_components. When an "animal"
+# row and a "residual" row are both present, append a derived row
+# h^2 = sigma_A^2 / (sigma_A^2 + sigma_E^2). The derived row is added
+# to the `interpretation` tibble (not the variance_components tibble)
+# so renderers that read variance components see only direct
+# estimates.
+mcmcglmm_heritability_row <- function(vc_tbl) {
+  if (!"kind" %in% names(vc_tbl)) return(NULL)
+  animal_rows <- vc_tbl[vc_tbl$kind == "animal", , drop = FALSE]
+  resid_rows  <- vc_tbl[vc_tbl$kind == "residual", , drop = FALSE]
+  if (nrow(animal_rows) == 0L || nrow(resid_rows) == 0L) return(NULL)
+  out <- list()
+  for (i in seq_len(nrow(animal_rows))) {
+    var_a <- as.numeric(animal_rows$var_estimate[[i]])
+    var_e <- as.numeric(resid_rows$var_estimate[[1L]])
+    h2 <- var_a / (var_a + var_e)
+    out[[length(out) + 1L]] <- tibble::tibble(
+      group         = animal_rows$group[[i]],
+      variance_A    = var_a,
+      variance_E    = var_e,
+      heritability  = h2,
+      reading       = sprintf(
+        "Heritability h^2 = sigma^2_A / (sigma^2_A + sigma^2_E) = %.3f -- the proportion of phenotypic variation in %s attributable to additive-genetic effects.",
+        h2, animal_rows$group[[i]]
+      )
+    )
+  }
+  do.call(rbind, out)
 }
 
 mcmcglmm_build_warnings <- function(fit, sym_stub) {

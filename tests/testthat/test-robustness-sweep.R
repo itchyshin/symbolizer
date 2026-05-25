@@ -136,3 +136,16 @@ test_that("robustness: MCMCglmm gaussian + RE", {
   sym <- symbolize(bundle$fit, data = bundle$data)
   run_public_surface(sym, "MCMCglmm gaussian + RE")
 })
+
+test_that("robustness: MCMCglmm animal model", {
+  skip_if_not_installed("MCMCglmm")
+  bundle <- fit_mcmcglmm_animal()
+  sym <- symbolize(bundle$fit, data = bundle$data)
+  run_public_surface(sym, "MCMCglmm animal")
+})
+
+test_that("robustness: sdmTMB gaussian + spatial", {
+  skip_if_not_installed("sdmTMB")
+  sym <- symbolize(fit_sdmtmb_gaussian_spatial())
+  run_public_surface(sym, "sdmTMB spatial")
+})
