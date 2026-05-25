@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.18.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.18.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -124,7 +124,7 @@ model.</td>
 </table>
 </div>
 <div class="section level2">
-<h2 id="whats-covered-today-v0-1-v0-14-1">What’s covered today (v0.1 – v0.14.1)<a class="anchor" aria-label="anchor" href="#whats-covered-today-v0-1-v0-14-1"></a>
+<h2 id="whats-covered-today-v0-1-v0-18-x">What’s covered today (v0.1 – v0.18.x)<a class="anchor" aria-label="anchor" href="#whats-covered-today-v0-1-v0-18-x"></a>
 </h2>
 <div class="section level3">
 <h3 id="model-classes">Model classes<a class="anchor" aria-label="anchor" href="#model-classes"></a>
@@ -247,30 +247,30 @@ prose coverage.</p>
 <td>
 <code><a href="../reference/parameter_interpretation.html">parameter_interpretation()</a></code> 95% confidence bands (Wald /
 profile / credible)</td>
-<td>First slice (v0.1.1)</td>
+<td>Stable</td>
 </tr>
 <tr class="even">
 <td>
 <code><a href="../reference/group_means.html">group_means()</a></code>, <code><a href="../reference/group_slopes.html">group_slopes()</a></code> via
 <code>emmeans</code> (response- and link-scale)</td>
-<td>First slice (v0.1.1)</td>
+<td>First slice</td>
 </tr>
 <tr class="odd">
 <td>
 <code><a href="../reference/compare_symbolic.html">compare_symbolic()</a></code> structural diff + optional AIC/BIC
 metrics</td>
-<td>First slice (v0.2)</td>
+<td>First slice</td>
 </tr>
 <tr class="even">
 <td>
 <code><a href="../reference/methods_text.html">methods_text()</a></code> draft Methods-section paragraph
 (template-based)</td>
-<td>First slice (v0.2.1)</td>
+<td>First slice</td>
 </tr>
 <tr class="odd">
 <td>
 <code><a href="../reference/warning_table.html">warning_table()</a></code> per-fit prose warnings</td>
-<td>First slice (v0.2.1)</td>
+<td>First slice</td>
 </tr>
 <tr class="even">
 <td>
@@ -280,9 +280,21 @@ readings + extraction calls)</td>
 </tr>
 <tr class="odd">
 <td>
-<code><a href="../reference/as_dag.html">as_dag()</a></code> structural model diagram (nodes / edges / DOT
-string)</td>
-<td>First slice (v0.6)</td>
+<code><a href="../reference/as_dag.html">as_dag()</a></code> structural model diagram (nodes / edges +
+<code>$mermaid</code> and <code>$tikz</code> slots since v0.18)</td>
+<td>First slice</td>
+</tr>
+<tr class="even">
+<td>
+<code><a href="../reference/simulate_recipe.html">simulate_recipe()</a></code> generative pseudocode + runnable R
+code for the fitted model</td>
+<td>First slice (v0.18)</td>
+</tr>
+<tr class="odd">
+<td>
+<code><a href="../reference/as_html_three_views.html">as_html_three_views()</a></code> interactive Equation / Index /
+Matrix-with-data widget</td>
+<td>First slice</td>
 </tr>
 </tbody>
 </table>
@@ -302,38 +314,31 @@ string)</td>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td><strong>v0.15</strong></td>
-<td>Expanded <code>emmeans</code> layer:
-<code>marginal_contrasts()</code>, <code>reference_grid_story()</code>;
-<code>group_means</code> / <code>group_slopes</code> extended in place.
-New public functions limited to <strong>≤ 2</strong> – the rest are
-arguments on existing functions.</td>
-</tr>
-<tr class="even">
-<td>v0.15.x</td>
-<td>metafor <code>rma.uni</code> location-scale
-(<code>scale = ~ z</code>), <code>struct = "UN"</code> covariance
-between <code>rma.mv</code> random-effect components (bivariate
-meta-analysis).</td>
-</tr>
-<tr class="odd">
-<td>v0.16+</td>
+<td>v0.19+</td>
 <td>brms negative-binomial + other distributional dpars
 (<code>nu ~ z</code>, <code>phi ~ z</code>); glmmTMB hurdle
-(<code>truncated_nbinom2 + ziformula</code>); glmmTMB
-<code>equalto()</code> / <code>propto()</code> bridge – detect
-meta-analysis fit via glmmTMB and route through meta-analysis
-prose.</td>
+(<code>truncated_nbinom2 + ziformula</code>); MCMCglmm flexible
+covariance (<code>us(trait):unit</code>, <code>idh(trait):unit</code>);
+deeper publication-bias and I² / CV partitioning for
+<code>metafor</code>.</td>
 </tr>
 <tr class="even">
 <td>Considered</td>
 <td>Phylogenetic flagship (<code>phylolm</code>, <code>phyloglm</code>,
 <code>phyr::pglmm</code>, <code>sommer</code>); <code><a href="https://rdrr.io/pkg/nlme/man/lme.html" class="external-link">nlme::lme</a></code>
 standalone; <code>survival</code>; <code>ordinal::clm</code>;
-<code>geepack</code>.</td>
+<code>geepack</code>; <code>marginaleffects</code> /
+<code>ggeffects</code> companion layer; <code>DHARMa</code> /
+<code>performance</code> / <code>gratia</code> integration as
+<code><a href="../reference/warning_table.html">warning_table()</a></code> sources.</td>
 </tr>
 </tbody>
 </table>
+<p>Items previously listed here that have <strong>shipped</strong> in
+the v0.13 – v0.18 window are now in the Release history table below. The
+kept-public function surface stays tight: new model-class support
+arrives as S3 methods (invisible in
+<code>ls("package:symbolizer")</code>), not as new exported helpers.</p>
 </div>
 <div class="section level2">
 <h2 id="release-history-selected">Release history (selected)<a class="anchor" aria-label="anchor" href="#release-history-selected"></a>
@@ -420,6 +425,54 @@ slices</td>
 <td>metafor <code>rma.mv</code> (multilevel + structured /
 phylogenetic)</td>
 </tr>
+<tr class="even">
+<td>v0.15</td>
+<td>metafor <code>rma.uni</code> location-scale
+(<code>scale = ~ z</code>, <code>rma.ls</code>); <code>tau2_scale</code>
+capability row</td>
+</tr>
+<tr class="odd">
+<td>v0.16</td>
+<td>metafor <code>rma.mv</code> <code>struct = "UN"</code> (bivariate /
+multivariate meta-analysis); glmmTMB <code>equalto</code> /
+<code>propto</code> covariance code → meta-analysis bridge; “three faces
+of meta-analysis” article</td>
+</tr>
+<tr class="even">
+<td>v0.17</td>
+<td>“Building up” ladder vignette (<code>lm</code> →
+<code>lm + sex</code> → <code>lmer + (1 \| site)</code> →
+<code>drmTMB</code> location-scale on one shared dataset); homepage
+three-views widget screenshot</td>
+</tr>
+<tr class="odd">
+<td>v0.18</td>
+<td>
+<code>simulate_recipe(sym)</code> (numbered pseudocode +
+family-aware runnable R); <code>as_dag(sym)$mermaid</code> and
+<code>$tikz</code> slots for diagram rendering</td>
+</tr>
+<tr class="even">
+<td>v0.18.1</td>
+<td>Audit pass: <code>@references</code> blocks on all 10 extractors;
+widget HTML render fix (de-indent <code>&lt;button&gt;</code> lines so
+pandoc stops wrapping them as code blocks); inline-R guards in
+vignettes</td>
+</tr>
+<tr class="odd">
+<td>v0.18.2</td>
+<td>Tab-switching JavaScript fix in <code><a href="../reference/as_html_three_views.html">as_html_three_views()</a></code>
+(raw R string so <code>\"</code> escapes inside
+<code>querySelectorAll</code> survive into the browser)</td>
+</tr>
+<tr class="even">
+<td>v0.18.3</td>
+<td>Pipe-encoding fix in
+<code>knit_print.symbolizer_formula_bridge</code>
+(<code>(1 \| group)</code> no longer renders as literal
+<code>&amp;amp;#124;</code>); roadmap article rewritten to match shipped
+reality</td>
+</tr>
 </tbody>
 </table>
 <p>See <code>NEWS.md</code> (Changelog tab) for the full per-release
@@ -444,6 +497,7 @@ with new arguments and use articles to organise and explain.</p>
 <code><a href="../reference/methods_text.html">methods_text()</a></code>, <code><a href="../reference/warning_table.html">warning_table()</a></code>,
 <code><a href="../reference/group_means.html">group_means()</a></code>, <code><a href="../reference/group_slopes.html">group_slopes()</a></code>,
 <code><a href="../reference/expand.html">expand()</a></code>, <code><a href="../reference/as_html_three_views.html">as_html_three_views()</a></code>,
+<code><a href="../reference/simulate_recipe.html">simulate_recipe()</a></code>,
 <code><a href="../reference/symbolizer_capabilities.html">symbolizer_capabilities()</a></code>.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

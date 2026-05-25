@@ -23,7 +23,7 @@ with an informative message.
 | Planned or reserved | The grammar may exist, but [`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md) rejects it as design-only. |
 | Unsupported or blocked | Do not use as analysis syntax; fit the nearest implemented model. |
 
-## What’s covered today (v0.1 – v0.14.1)
+## What’s covered today (v0.1 – v0.18.x)
 
 ### Model classes
 
@@ -50,22 +50,28 @@ prose coverage.
 |----|----|
 | [`as_latex()`](https://itchyshin.github.io/symbolizer/reference/as_latex.md) / [`equations()`](https://itchyshin.github.io/symbolizer/reference/equations.md) / [`symbol_table()`](https://itchyshin.github.io/symbolizer/reference/symbol_table.md) | Stable |
 | [`assumption_table()`](https://itchyshin.github.io/symbolizer/reference/assumption_table.md) / [`formula_bridge()`](https://itchyshin.github.io/symbolizer/reference/formula_bridge.md) / [`parameter_interpretation()`](https://itchyshin.github.io/symbolizer/reference/parameter_interpretation.md) | Stable |
-| [`parameter_interpretation()`](https://itchyshin.github.io/symbolizer/reference/parameter_interpretation.md) 95% confidence bands (Wald / profile / credible) | First slice (v0.1.1) |
-| [`group_means()`](https://itchyshin.github.io/symbolizer/reference/group_means.md), [`group_slopes()`](https://itchyshin.github.io/symbolizer/reference/group_slopes.md) via `emmeans` (response- and link-scale) | First slice (v0.1.1) |
-| [`compare_symbolic()`](https://itchyshin.github.io/symbolizer/reference/compare_symbolic.md) structural diff + optional AIC/BIC metrics | First slice (v0.2) |
-| [`methods_text()`](https://itchyshin.github.io/symbolizer/reference/methods_text.md) draft Methods-section paragraph (template-based) | First slice (v0.2.1) |
-| [`warning_table()`](https://itchyshin.github.io/symbolizer/reference/warning_table.md) per-fit prose warnings | First slice (v0.2.1) |
+| [`parameter_interpretation()`](https://itchyshin.github.io/symbolizer/reference/parameter_interpretation.md) 95% confidence bands (Wald / profile / credible) | Stable |
+| [`group_means()`](https://itchyshin.github.io/symbolizer/reference/group_means.md), [`group_slopes()`](https://itchyshin.github.io/symbolizer/reference/group_slopes.md) via `emmeans` (response- and link-scale) | First slice |
+| [`compare_symbolic()`](https://itchyshin.github.io/symbolizer/reference/compare_symbolic.md) structural diff + optional AIC/BIC metrics | First slice |
+| [`methods_text()`](https://itchyshin.github.io/symbolizer/reference/methods_text.md) draft Methods-section paragraph (template-based) | First slice |
+| [`warning_table()`](https://itchyshin.github.io/symbolizer/reference/warning_table.md) per-fit prose warnings | First slice |
 | [`model_card()`](https://itchyshin.github.io/symbolizer/reference/model_card.md) teaching bundle (equation + assumptions + readings + extraction calls) | First slice |
-| [`as_dag()`](https://itchyshin.github.io/symbolizer/reference/as_dag.md) structural model diagram (nodes / edges / DOT string) | First slice (v0.6) |
+| [`as_dag()`](https://itchyshin.github.io/symbolizer/reference/as_dag.md) structural model diagram (nodes / edges + `$mermaid` and `$tikz` slots since v0.18) | First slice |
+| [`simulate_recipe()`](https://itchyshin.github.io/symbolizer/reference/simulate_recipe.md) generative pseudocode + runnable R code for the fitted model | First slice (v0.18) |
+| [`as_html_three_views()`](https://itchyshin.github.io/symbolizer/reference/as_html_three_views.md) interactive Equation / Index / Matrix-with-data widget | First slice |
 
 ## What’s planned
 
 | Target | Theme |
 |----|----|
-| **v0.15** | Expanded `emmeans` layer: `marginal_contrasts()`, `reference_grid_story()`; `group_means` / `group_slopes` extended in place. New public functions limited to **≤ 2** – the rest are arguments on existing functions. |
-| v0.15.x | metafor `rma.uni` location-scale (`scale = ~ z`), `struct = "UN"` covariance between `rma.mv` random-effect components (bivariate meta-analysis). |
-| v0.16+ | brms negative-binomial + other distributional dpars (`nu ~ z`, `phi ~ z`); glmmTMB hurdle (`truncated_nbinom2 + ziformula`); glmmTMB `equalto()` / `propto()` bridge – detect meta-analysis fit via glmmTMB and route through meta-analysis prose. |
-| Considered | Phylogenetic flagship (`phylolm`, `phyloglm`, `phyr::pglmm`, `sommer`); [`nlme::lme`](https://rdrr.io/pkg/nlme/man/lme.html) standalone; `survival`; `ordinal::clm`; `geepack`. |
+| v0.19+ | brms negative-binomial + other distributional dpars (`nu ~ z`, `phi ~ z`); glmmTMB hurdle (`truncated_nbinom2 + ziformula`); MCMCglmm flexible covariance (`us(trait):unit`, `idh(trait):unit`); deeper publication-bias and I² / CV partitioning for `metafor`. |
+| Considered | Phylogenetic flagship (`phylolm`, `phyloglm`, `phyr::pglmm`, `sommer`); [`nlme::lme`](https://rdrr.io/pkg/nlme/man/lme.html) standalone; `survival`; `ordinal::clm`; `geepack`; `marginaleffects` / `ggeffects` companion layer; `DHARMa` / `performance` / `gratia` integration as [`warning_table()`](https://itchyshin.github.io/symbolizer/reference/warning_table.md) sources. |
+
+Items previously listed here that have **shipped** in the v0.13 – v0.18
+window are now in the Release history table below. The kept-public
+function surface stays tight: new model-class support arrives as S3
+methods (invisible in `ls("package:symbolizer")`), not as new exported
+helpers.
 
 ## Release history (selected)
 
@@ -86,6 +92,13 @@ prose coverage.
 | v0.13 | metafor `rma.uni` (research-synthesis flagship) |
 | v0.14 | mgcv `gam` / `bam` (additive grammar) |
 | v0.14.1 | metafor `rma.mv` (multilevel + structured / phylogenetic) |
+| v0.15 | metafor `rma.uni` location-scale (`scale = ~ z`, `rma.ls`); `tau2_scale` capability row |
+| v0.16 | metafor `rma.mv` `struct = "UN"` (bivariate / multivariate meta-analysis); glmmTMB `equalto` / `propto` covariance code → meta-analysis bridge; “three faces of meta-analysis” article |
+| v0.17 | “Building up” ladder vignette (`lm` → `lm + sex` → `lmer + (1 \| site)` → `drmTMB` location-scale on one shared dataset); homepage three-views widget screenshot |
+| v0.18 | `simulate_recipe(sym)` (numbered pseudocode + family-aware runnable R); `as_dag(sym)$mermaid` and `$tikz` slots for diagram rendering |
+| v0.18.1 | Audit pass: `@references` blocks on all 10 extractors; widget HTML render fix (de-indent `<button>` lines so pandoc stops wrapping them as code blocks); inline-R guards in vignettes |
+| v0.18.2 | Tab-switching JavaScript fix in [`as_html_three_views()`](https://itchyshin.github.io/symbolizer/reference/as_html_three_views.md) (raw R string so `\"` escapes inside `querySelectorAll` survive into the browser) |
+| v0.18.3 | Pipe-encoding fix in `knit_print.symbolizer_formula_bridge` (`(1 \| group)` no longer renders as literal `&amp;#124;`); roadmap article rewritten to match shipped reality |
 
 See `NEWS.md` (Changelog tab) for the full per-release log.
 
@@ -115,4 +128,5 @@ Core public functions (the things users actually call):
 [`group_slopes()`](https://itchyshin.github.io/symbolizer/reference/group_slopes.md),
 [`expand()`](https://itchyshin.github.io/symbolizer/reference/expand.md),
 [`as_html_three_views()`](https://itchyshin.github.io/symbolizer/reference/as_html_three_views.md),
+[`simulate_recipe()`](https://itchyshin.github.io/symbolizer/reference/simulate_recipe.md),
 [`symbolizer_capabilities()`](https://itchyshin.github.io/symbolizer/reference/symbolizer_capabilities.md).

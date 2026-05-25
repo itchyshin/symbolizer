@@ -133,7 +133,7 @@ warning_table(sym_glmm)
 
 | severity | message | context |
 |:---|:---|:---|
-| info | This fit uses propto() (or equalto() in newer glmmTMB) to attach a known correlation / covariance matrix on a random-effect block. Structurally, that’s the meta-analytic / phylogenetic / pedigree-controlled pattern: sigma_residual is fixed (sampling-variance-known), and the (1 \| study) variance reads as the between-study heterogeneity tau^2. Compare with metafor::rma.mv(yi, V, random = list(~ 1 \| study, ~ 1 \| id), R = list(…)) or drmTMB’s location-scale form (Williams 2023; Viechtbauer & Lopez-Lopez 2022; Nakagawa et al. 2025). |  |
+| info | This fit uses propto() (or equalto() in newer glmmTMB) to attach a known correlation / covariance matrix on a random-effect block. Structurally, that’s the meta-analytic / phylogenetic / pedigree-controlled pattern: sigma_residual is fixed (sampling-variance-known), and the (1 \| study) variance reads as the between-study heterogeneity tau^2. Compare with metafor::rma.mv(yi, V, random = list(~ 1 \| study, ~ 1 \| id), R = list(…)) or drmTMB’s location-scale form (Williams 2023; Viechtbauer & López-López 2022; Nakagawa et al. 2025). |  |
 
 This is the bridge: `propto(0 + obs | g, V)` **fixes** the residual
 covariance to the known `V`, which is exactly what `rma.mv(..., V = V)`

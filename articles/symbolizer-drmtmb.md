@@ -16,13 +16,14 @@ vignette.
 
 ## 1. Why distributional models need a structured story
 
-`drmTMB` fits Gaussian location-scale models — and, since v0.2,
-bivariate Gaussian location-scale-correlation models (Student-t,
-lognormal, gamma, and beta remain on the roadmap). A univariate
-location-scale fit has *two* linear predictors: one for the mean `mu`,
-one for the residual standard deviation `sigma`. Both depend on
-covariates. Both have a link function. Both have their own coefficient
-vector.
+`drmTMB` fits Gaussian location-scale models, bivariate Gaussian
+location-scale-correlation models, and a family of non-Gaussian
+distributional models (Student-t, lognormal, Gamma, beta, beta-binomial,
+Poisson, nbinom2, truncated nbinom2, with optional zero-inflation /
+hurdle / cumulative-logit components). A univariate location-scale fit
+has *two* linear predictors: one for the mean `mu`, one for the residual
+standard deviation `sigma`. Both depend on covariates. Both have a link
+function. Both have their own coefficient vector.
 
 That structure makes the question *what does this fit actually say?*
 genuinely hard to answer in one line. The mean coefficient on
@@ -434,7 +435,7 @@ formula_bridge(sym_rich)
 
 | submodel | R syntax | meaning | math (index) | math (matrix) |
 |:---|:---|:---|:---|:---|
-| mu | `body_mass ~ temperature + log(food) + sex + (1 &#124; site)` | Expected body_mass is a linear function of the mean-model predictors | $`\mu_i = \beta_{0} + \beta_{1} \, T_i + \beta_{2} \, \mathrm{log}(F_i) + \beta_{3} \, [sex = \mathrm{male}] + u_{site(i)}`$ | $`\boldsymbol{\mu} = \mathbf{X} \boldsymbol{\beta} + \mathbf{u}`$ |
+| mu | `body_mass ~ temperature + log(food) + sex + (1 \&#124; site)` | Expected body_mass is a linear function of the mean-model predictors | $`\mu_i = \beta_{0} + \beta_{1} \, T_i + \beta_{2} \, \mathrm{log}(F_i) + \beta_{3} \, [sex = \mathrm{male}] + u_{site(i)}`$ | $`\boldsymbol{\mu} = \mathbf{X} \boldsymbol{\beta} + \mathbf{u}`$ |
 | sigma | `sigma ~ temperature + sex` | Log residual SD of body_mass is a linear function of the scale-model predictors | $`\log(\sigma_i) = \gamma_{0} + \gamma_{1} \, T_i + \gamma_{2} \, [sex = \mathrm{male}]`$ | $`\log(\boldsymbol{\sigma}) = \mathbf{Z} \boldsymbol{\gamma}`$ |
 
 For the mu submodel, the R syntax

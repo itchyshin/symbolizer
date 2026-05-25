@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.18.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.18.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -1250,8 +1250,11 @@ advantage is <em>bigger</em> at site <code>B</code> than at site
 <p>This is what “the effect of sex depends on site” means in
 coefficients. It is also why a factor-by-factor interaction is hard to
 read off a summary table without the cell-mean translation.</p>
-<p>The biological readings v0.1 carries cover only intercept and
-non-interaction contrasts:</p>
+<p>The biological readings <code><a href="../reference/parameter_interpretation.html">parameter_interpretation()</a></code>
+carries cover the intercept and the per-term contrasts; interaction-row
+prose is shipped via the <code>interpretation-templates.csv</code> and
+<code><a href="../reference/group_slopes.html">group_slopes()</a></code> / <code><a href="../reference/group_means.html">group_means()</a></code> gives you the
+cell-mean translation on demand:</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/parameter_interpretation.html">parameter_interpretation</a></span><span class="op">(</span><span class="va">sym5</span>, scale <span class="op">=</span> <span class="st">"biological"</span><span class="op">)</span></span></code></pre></div>
 <table class="table">

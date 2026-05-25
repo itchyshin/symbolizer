@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.18.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.18.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -132,7 +132,7 @@ read it. The <em>contents</em> of those outputs grow.</p>
 <span><span class="va">n_sites</span> <span class="op">&lt;-</span> <span class="fl">12</span></span>
 <span><span class="va">sites</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"S"</span>, <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"%02d"</span>, <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_sites</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>                    length.out <span class="op">=</span> <span class="va">n</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">site_effect</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n_sites</span>, <span class="fl">0</span>, <span class="fl">0.6</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">sites</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="va">site_effect</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n_sites</span>, <span class="fl">0</span>, <span class="fl">1.5</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">sites</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="va">sex</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"F"</span>, <span class="st">"M"</span><span class="op">)</span>, <span class="va">n</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">temperature</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">10</span>, <span class="fl">25</span><span class="op">)</span></span>
 <span></span>
@@ -150,15 +150,15 @@ read it. The <em>contents</em> of those outputs grow.</p>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">dat</span>, <span class="fl">4</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   body_mass temperature sex site</span></span>
-<span><span class="co">#&gt; 1  37.38671    23.85953   F  S01</span></span>
-<span><span class="co">#&gt; 2  32.70239    17.66440   F  S02</span></span>
-<span><span class="co">#&gt; 3  38.41142    13.86432   M  S03</span></span>
-<span><span class="co">#&gt; 4  38.73812    10.69691   F  S04</span></span></code></pre></div>
+<span><span class="co">#&gt; 1  36.82290    23.85953   F  S01</span></span>
+<span><span class="co">#&gt; 2  32.86767    17.66440   F  S02</span></span>
+<span><span class="co">#&gt; 3  37.65935    13.86432   M  S03</span></span>
+<span><span class="co">#&gt; 4  40.17388    10.69691   F  S04</span></span></code></pre></div>
 <p>The “truth” the ladder will gradually uncover:</p>
 <ul>
 <li>Slope of temperature on the mean: <code>0.4</code> g per °C</li>
 <li>Sex contrast (M − F) on the mean: <code>+0.7</code> g</li>
-<li>Site-to-site SD on the mean: <code>0.6</code> g</li>
+<li>Site-to-site SD on the mean: <code>1.5</code> g</li>
 <li>Heteroscedasticity: residual SD grows by a factor of
 <code>exp(0.05) ≈ 1.05</code> per °C</li>
 </ul>
@@ -280,18 +280,18 @@ knows about:</p>
 <td align="left">mu</td>
 <td align="left">(Intercept)</td>
 <td align="left">intercept</td>
-<td align="left">32.3</td>
-<td align="left">30.4, 34.2 *</td>
+<td align="left">32.4</td>
+<td align="left">30.4, 34.4 *</td>
 <td align="left">Baseline body_mass in the reference condition</td>
 </tr>
 <tr class="even">
 <td align="left">mu</td>
 <td align="left">temperature</td>
 <td align="left">slope</td>
-<td align="left">0.294</td>
-<td align="left">0.188, 0.401 *</td>
+<td align="left">0.303</td>
+<td align="left">0.190, 0.415 *</td>
 <td align="left">A unit change in temperature shifts the expected
-body_mass by 0.294</td>
+body_mass by 0.303</td>
 </tr>
 </tbody>
 </table>
@@ -302,7 +302,7 @@ response, a linear predictor for
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>μ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\mu_i</annotation></semantics></math>,
 and one slope to interpret. No variance modelling beyond a single
 residual SD. No grouping. The biological reading is “a unit change in
-temperature shifts the expected body_mass by 0.294.”</p>
+temperature shifts the expected body_mass by 0.303.”</p>
 </div>
 <div class="section level2">
 <h2 id="rung-2-adding-a-factor">Rung 2 — Adding a factor<a class="anchor" aria-label="anchor" href="#rung-2-adding-a-factor"></a>
@@ -427,8 +427,8 @@ The interpretation reads the contrast explicitly:</p>
 </tr></thead>
 <tbody><tr class="odd">
 <td align="left">sex</td>
-<td align="left">0.499</td>
-<td align="left">Average body_mass differs between M and F by 0.499</td>
+<td align="left">0.410</td>
+<td align="left">Average body_mass differs between M and F by 0.410</td>
 </tr></tbody>
 </table>
 <p><strong>What just got added.</strong> One row in the symbol table
@@ -451,7 +451,6 @@ Add a random intercept per site.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;     expand</span></span>
 <span><span class="va">fit3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/lme4/man/lmer.html" class="external-link">lmer</a></span><span class="op">(</span><span class="va">body_mass</span> <span class="op">~</span> <span class="va">temperature</span> <span class="op">+</span> <span class="va">sex</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">site</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">dat</span><span class="op">)</span></span>
-<span><span class="co">#&gt; boundary (singular) fit: see help('isSingular')</span></span>
 <span><span class="va">sym3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/symbolize.html">symbolize</a></span><span class="op">(</span><span class="va">fit3</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="../reference/as_latex.html">as_latex</a></span><span class="op">(</span><span class="va">sym3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
@@ -474,8 +473,8 @@ Add a random intercept per site.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 5</span></span></span>
 <span><span class="co">#&gt;   parameter group    term        sd_estimate var_estimate</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> mu        site     (Intercept)        0             0  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> residual  residual Residual           3.28         10.8</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> mu        site     (Intercept)        1.17         1.36</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> residual  residual Residual           3.29        10.8</span></span></code></pre></div>
 <p>You can read off the between-site SD and the residual SD directly.
 The fixed-effect interpretation rows for temperature and sex still read
 on the response scale; what changed is that the model now
@@ -499,7 +498,12 @@ symbol, a random-effect distributional line, and a
 <p>The variance is changing with temperature. A standard mixed model
 forces residual variance to be constant, so the inference on
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mn>1</mn></msub><annotation encoding="application/x-tex">\beta_1</annotation></semantics></math>
-ignores that. Climb the last rung: fit
+ignores that. This is called a <strong>location-scale model</strong>
+(also known as <strong>distributional regression</strong> or, when the
+variance component is what changes, <em>heteroscedastic
+regression</em>): instead of treating the residual SD as a single fixed
+number, we let it depend on its own predictors with its own
+coefficients. Climb the last rung: fit
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>σ</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>γ</mi><mn>0</mn></msub><mo>+</mo><msub><mi>γ</mi><mn>1</mn></msub><mspace width="0.167em"></mspace><msub><mi>T</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">\log(\sigma_i) = \gamma_0 + \gamma_1\, T_i</annotation></semantics></math>.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://itchyshin.github.io/drmTMB/" class="external-link">drmTMB</a></span><span class="op">)</span></span>
@@ -547,15 +551,15 @@ row. That single additional line is the heteroscedasticity story.</p>
 <tbody>
 <tr class="odd">
 <td align="left">(Intercept)</td>
-<td align="left">0.476</td>
+<td align="left">0.465</td>
 <td align="left">Baseline level of unexplained individual variation in
 body_mass</td>
 </tr>
 <tr class="even">
 <td align="left">temperature</td>
-<td align="left">0.0392</td>
+<td align="left">0.0399</td>
 <td align="left">A unit change in temperature multiplies the unexplained
-variability of body_mass by exp(0.0392)</td>
+variability of body_mass by exp(0.0399)</td>
 </tr>
 </tbody>
 </table>
@@ -590,22 +594,22 @@ the three-view widget:</p>
 .sym-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .sym-skip { position: absolute; top: -100px; left: 0; padding: 0.4rem 0.7rem; background: #8a1f22; color: #fff; text-decoration: none; font-size: 0.85rem; z-index: 5; }
 .sym-skip:focus { top: 0; }</style>
-<div id="sym-sym-1779732459" class="sym-tabs">
-<a class="sym-skip" href="#sym-sym-1779732459-end">Skip three-views
+<div id="sym-sym-1779734362" class="sym-tabs">
+<a class="sym-skip" href="#sym-sym-1779734362-end">Skip three-views
 widget</a>
 <div class="sym-tablist" role="tablist" aria-label="Three views of the model">
-<button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779732459-tab-eq" aria-controls="sym-sym-1779732459-panel-eq" aria-selected="true" tabindex="0" data-tab="eq">
+<button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779734362-tab-eq" aria-controls="sym-sym-1779734362-panel-eq" aria-selected="true" tabindex="0" data-tab="eq">
 <span class="sym-tab-marker" aria-hidden="true">▸</span>1. Equation
 </button>
-<button type="button" class="sym-tab" role="tab" id="sym-sym-1779732459-tab-idx" aria-controls="sym-sym-1779732459-panel-idx" aria-selected="false" tabindex="-1" data-tab="idx">
+<button type="button" class="sym-tab" role="tab" id="sym-sym-1779734362-tab-idx" aria-controls="sym-sym-1779734362-panel-idx" aria-selected="false" tabindex="-1" data-tab="idx">
 <span class="sym-tab-marker" aria-hidden="true">▸</span>2. Index
 </button>
-<button type="button" class="sym-tab" role="tab" id="sym-sym-1779732459-tab-mat" aria-controls="sym-sym-1779732459-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
+<button type="button" class="sym-tab" role="tab" id="sym-sym-1779734362-tab-mat" aria-controls="sym-sym-1779734362-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
 <span class="sym-tab-marker" aria-hidden="true">▸</span>3. Matrix (with
 data)
 </button>
 </div>
-<div id="sym-sym-1779732459-panel-eq" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-sym-1779732459-tab-eq" data-panel="eq" tabindex="0">
+<div id="sym-sym-1779734362-panel-eq" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-sym-1779734362-tab-eq" data-panel="eq" tabindex="0">
 <p class="sym-caption">
 The structural contract. No indices, no numbers – the shape of the
 model.
@@ -619,7 +623,7 @@ model.
 \end{aligned}</annotation></semantics></math>
 </div>
 </div>
-<div id="sym-sym-1779732459-panel-idx" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1779732459-tab-idx" data-panel="idx" hidden="" tabindex="0">
+<div id="sym-sym-1779734362-panel-idx" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1779734362-tab-idx" data-panel="idx" hidden="" tabindex="0">
 <p class="sym-caption">
 What happens for each observation <em>i</em>.
 </p>
@@ -632,7 +636,7 @@ u_{site} &amp; \sim \mathcal{N}(0,\, \sigma_{site}^2)
 \end{aligned}</annotation></semantics></math>
 </div>
 </div>
-<div id="sym-sym-1779732459-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1779732459-tab-mat" data-panel="mat" hidden="" tabindex="0">
+<div id="sym-sym-1779734362-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1779734362-tab-mat" data-panel="mat" hidden="" tabindex="0">
 <p class="sym-caption">
 The actual numbers stacked – what the computer is multiplying. Showing
 first 5 and last 2 rows of n = 200.
@@ -644,19 +648,19 @@ coefficient vector beta listed below. A random-effect indicator matrix
 Z_g and the predicted BLUPs u are also shown.</span>
 <pre class="sym-matrix" aria-hidden="true">
   y                   X                          beta
-  y_1 = 37.4          1.00  23.9  0           
-  y_2 = 32.7          1.00  17.7  0           
-  y_3 = 38.4          1.00  13.9  1.00        
-  y_4 = 38.7          1.00  10.7  0           
-  y_5 = 35.8          1.00  16.3  0           
+  y_1 = 36.8          1.00  23.9  0           
+  y_2 = 32.9          1.00  17.7  0           
+  y_3 = 37.7          1.00  13.9  1.00        
+  y_4 = 40.2          1.00  10.7  0           
+  y_5 = 36.1          1.00  16.3  0           
   ...               ...                   
-  y_199 = 37.6        1.00  19.9  1.00        
-  y_200 = 37.6        1.00  12.1  1.00        
+  y_199 = 38.0        1.00  19.9  1.00        
+  y_200 = 38.3        1.00  12.1  1.00        
 
   Coefficients (beta, mu):
-    beta_0 = 31.9
-    beta_1 = 0.298
-    beta_2 = 0.766
+    beta_0 = 32.1
+    beta_1 = 0.300
+    beta_2 = 0.757
 
   X_sigma                       gamma
   1.00  23.9                    
@@ -667,8 +671,8 @@ Z_g and the predicted BLUPs u are also shown.</span>
   ...                         
   1.00  19.9                    
   1.00  12.1                    
-    gamma_0 = 0.476
-    gamma_1 = 0.0392
+    gamma_0 = 0.465
+    gamma_1 = 0.0399
 
   Z_g (group indicator)         u (random effects, BLUPs)
   1.00  0  0  0  0  0  0  0  0  0  0  0  
@@ -679,27 +683,27 @@ Z_g and the predicted BLUPs u are also shown.</span>
   ...                         
   0  0  0  0  0  0  1.00  0  0  0  0  0  
   0  0  0  0  0  0  0  1.00  0  0  0  0  
-    u_1 = -0.000000257
-    u_2 = 0.000000114
-    u_3 = -0.000000245
-    u_4 = 0.000000218
-    u_5 = 0.000000167
-    u_6 = -0.0000000271
-    u_7 = -0.000000126
-    u_8 = -0.00000000693
-    u_9 = -0.0000000901
-    u_10 = -0.000000120
-    u_11 = 0.000000322
-    u_12 = 0.0000000515
+    u_1 = -1.33
+    u_2 = 0.266
+    u_3 = -1.38
+    u_4 = 1.48
+    u_5 = 0.519
+    u_6 = -0.761
+    u_7 = -0.247
+    u_8 = 0.281
+    u_9 = -0.0776
+    u_10 = -0.728
+    u_11 = 1.75
+    u_12 = 0.233
 
-  Fitted mu_hat (first 5): 39.0  37.1  36.7  35.0  36.7
-  Fitted sigma_hat (first 5): 4.10  3.22  2.77  2.45  3.04
+  Fitted mu_hat (first 5): 39.2  37.4  37.0  35.3  36.9
+  Fitted sigma_hat (first 5): 4.12  3.22  2.77  2.44  3.04
 </pre>
 </div>
 </div>
-<span id="sym-sym-1779732459-end" tabindex="-1"></span>
+<span id="sym-sym-1779734362-end" tabindex="-1"></span>
 <script>(function() {
-  var root = document.getElementById("sym-sym-1779732459");
+  var root = document.getElementById("sym-sym-1779734362");
   if (!root) return;
   var tabs   = Array.prototype.slice.call(root.querySelectorAll("[role=\"tab\"]"));
   var panels = Array.prototype.slice.call(root.querySelectorAll("[role=\"tabpanel\"]"));
@@ -742,49 +746,67 @@ knitted document.)</p>
 <h2 id="what-just-happened-a-recap">What just happened: a recap<a class="anchor" aria-label="anchor" href="#what-just-happened-a-recap"></a>
 </h2>
 <table class="table">
-<colgroup>
-<col width="12%">
-<col width="62%">
-<col width="25%">
-</colgroup>
-<thead><tr class="header">
-<th align="left">Rung</th>
-<th align="left">Equation</th>
-<th align="left">New rows in symbolize output</th>
+<thead><tr>
+<th style="text-align:left;">
+Rung
+</th>
+<th style="text-align:left;">
+Equation
+</th>
+<th style="text-align:left;">
+New rows in symbolize output
+</th>
 </tr></thead>
 <tbody>
-<tr class="odd">
-<td align="left">1: <code>lm</code>
+<tr>
+<td style="text-align:left;">
+1: <code>lm</code>
 </td>
-<td align="left">
+<td style="text-align:left;">
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mi>i</mi></msub><mo>∼</mo><mi>𝒩</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>μ</mi><mi>i</mi></msub><mo>,</mo><mspace width="0.167em"></mspace><msup><mi>σ</mi><mn>2</mn></msup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">y_i \sim \mathcal{N}(\mu_i,\, \sigma^2)</annotation></semantics></math>;
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>μ</mi><mi>i</mi></msub><mo>=</mo><msub><mi>β</mi><mn>0</mn></msub><mo>+</mo><msub><mi>β</mi><mn>1</mn></msub><msub><mi>T</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">\mu_i = \beta_0 + \beta_1 T_i</annotation></semantics></math>
 </td>
-<td align="left">distribution + linear predictor</td>
-</tr>
-<tr class="even">
-<td align="left">2: <code>lm + sex</code>
+<td style="text-align:left;">
+distribution + linear predictor
 </td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>μ</mi><mi>i</mi></msub><mo>=</mo><msub><mi>β</mi><mn>0</mn></msub><mo>+</mo><msub><mi>β</mi><mn>1</mn></msub><msub><mi>T</mi><mi>i</mi></msub><mo>+</mo><msub><mi>β</mi><mn>2</mn></msub><mo stretchy="false" form="prefix">[</mo><mrow><mi>𝑠</mi><mi>𝑒</mi><mi>𝑥</mi></mrow><mo>=</mo><mi>M</mi><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">\mu_i = \beta_0 + \beta_1 T_i + \beta_2 [\mathit{sex} = M]</annotation></semantics></math></td>
-<td align="left">+ factor contrast row in <code>symbol_table</code> /
-interp</td>
 </tr>
-<tr class="odd">
-<td align="left">3: <code>lmer + (1&amp;#124;site)</code>
+<tr>
+<td style="text-align:left;">
+2: <code>lm + sex</code>
 </td>
-<td align="left">
+<td style="text-align:left;">
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>μ</mi><mi>i</mi></msub><mo>=</mo><msub><mi>β</mi><mn>0</mn></msub><mo>+</mo><msub><mi>β</mi><mn>1</mn></msub><msub><mi>T</mi><mi>i</mi></msub><mo>+</mo><msub><mi>β</mi><mn>2</mn></msub><mo stretchy="false" form="prefix">[</mo><mrow><mi>𝑠</mi><mi>𝑒</mi><mi>𝑥</mi></mrow><mo>=</mo><mi>M</mi><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">\mu_i = \beta_0 + \beta_1 T_i + \beta_2 [\mathit{sex} = M]</annotation></semantics></math>
+</td>
+<td style="text-align:left;">
+<ul><li>factor contrast row in <code>symbol_table</code> / interp
+</li></ul>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+3: <code>lmer + (1|site)</code>
+</td>
+<td style="text-align:left;">
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>μ</mi><mi>i</mi></msub><mo>=</mo><msub><mi>β</mi><mn>0</mn></msub><mo>+</mo><msub><mi>β</mi><mn>1</mn></msub><msub><mi>T</mi><mi>i</mi></msub><mo>+</mo><msub><mi>β</mi><mn>2</mn></msub><mo stretchy="false" form="prefix">[</mo><mrow><mi>𝑠</mi><mi>𝑒</mi><mi>𝑥</mi></mrow><mo>=</mo><mi>M</mi><mo stretchy="false" form="postfix">]</mo><mo>+</mo><msub><mi>u</mi><mrow><mi>s</mi><mi>i</mi><mi>t</mi><mi>e</mi><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo></mrow></msub></mrow><annotation encoding="application/x-tex">\mu_i = \beta_0 + \beta_1 T_i + \beta_2 [\mathit{sex} = M] + u_{site(i)}</annotation></semantics></math>;<br><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>u</mi><mrow><mi>s</mi><mi>i</mi><mi>t</mi><mi>e</mi></mrow></msub><mo>∼</mo><mi>𝒩</mi><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mspace width="0.167em"></mspace><msubsup><mi>σ</mi><mrow><mi>s</mi><mi>i</mi><mi>t</mi><mi>e</mi></mrow><mn>2</mn></msubsup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">u_{site} \sim \mathcal{N}(0,\, \sigma^2_{site})</annotation></semantics></math>
 </td>
-<td align="left">+ random-effect symbol +
-<code>variance_components</code> rows</td>
+<td style="text-align:left;">
+<ul><li>random-effect symbol + <code>variance_components</code> rows
+</li></ul>
+</td>
 </tr>
-<tr class="even">
-<td align="left">4: <code>drmTMB</code> location-scale</td>
-<td align="left">as Rung 3, plus
+<tr>
+<td style="text-align:left;">
+4: <code>drmTMB</code> location-scale
+</td>
+<td style="text-align:left;">
+as Rung 3, plus
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>σ</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>γ</mi><mn>0</mn></msub><mo>+</mo><msub><mi>γ</mi><mn>1</mn></msub><msub><mi>T</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">\log(\sigma_i) = \gamma_0 + \gamma_1 T_i</annotation></semantics></math>
 </td>
-<td align="left">+ <code>sigma</code> submodel + heteroscedasticity
-reading</td>
+<td style="text-align:left;">
+<ul><li>
+<code>sigma</code> submodel + heteroscedasticity reading
+</li></ul>
+</td>
 </tr>
 </tbody>
 </table>

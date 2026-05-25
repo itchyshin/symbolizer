@@ -69,7 +69,7 @@ hands-on definition by example.
 
 ## A first `symbolize()` call
 
-The canonical v0.1 example is a Gaussian location-scale model fit with
+The canonical example is a Gaussian location-scale model fit with
 [`drmTMB`](https://itchyshin.github.io/drmTMB/): one submodel for the
 mean (`mu`), one for the residual standard deviation (`sigma`).
 
@@ -228,7 +228,7 @@ three tabs over the same fit.
 as_html_three_views(sym, head = 5, tail = 2)
 ```
 
-[Skip three-views widget](#sym-sym-1779732472-end)
+[Skip three-views widget](#sym-sym-1779734373-end)
 
 ▸1. Equation
 
@@ -424,8 +424,9 @@ have to.
 
 ## Random intercepts (first slice)
 
-v0.1 supports Gaussian random intercepts of the form `(1 | group)` as a
-*first slice*. The same
+`symbolizer` supports Gaussian random intercepts of the form
+`(1 | group)` as a *first slice* on every class that carries them. The
+same
 [`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
 call works; the equation set picks up the random-intercept term and a
 new distribution row, and the structured object gains a `random_effects`

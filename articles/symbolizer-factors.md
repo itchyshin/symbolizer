@@ -701,8 +701,14 @@ This is what “the effect of sex depends on site” means in coefficients.
 It is also why a factor-by-factor interaction is hard to read off a
 summary table without the cell-mean translation.
 
-The biological readings v0.1 carries cover only intercept and
-non-interaction contrasts:
+The biological readings
+[`parameter_interpretation()`](https://itchyshin.github.io/symbolizer/reference/parameter_interpretation.md)
+carries cover the intercept and the per-term contrasts; interaction-row
+prose is shipped via the `interpretation-templates.csv` and
+[`group_slopes()`](https://itchyshin.github.io/symbolizer/reference/group_slopes.md)
+/
+[`group_means()`](https://itchyshin.github.io/symbolizer/reference/group_means.md)
+gives you the cell-mean translation on demand:
 
 ``` r
 

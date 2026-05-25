@@ -37,7 +37,7 @@ n <- 200
 n_sites <- 12
 sites <- factor(rep(paste0("S", sprintf("%02d", seq_len(n_sites))),
                     length.out = n))
-site_effect <- rnorm(n_sites, 0, 0.6)[as.integer(sites)]
+site_effect <- rnorm(n_sites, 0, 1.5)[as.integer(sites)]
 sex <- factor(sample(c("F", "M"), n, replace = TRUE))
 temperature <- runif(n, 10, 25)
 
@@ -55,17 +55,17 @@ dat <- data.frame(
 )
 head(dat, 4)
 #>   body_mass temperature sex site
-#> 1  37.38671    23.85953   F  S01
-#> 2  32.70239    17.66440   F  S02
-#> 3  38.41142    13.86432   M  S03
-#> 4  38.73812    10.69691   F  S04
+#> 1  36.82290    23.85953   F  S01
+#> 2  32.86767    17.66440   F  S02
+#> 3  37.65935    13.86432   M  S03
+#> 4  40.17388    10.69691   F  S04
 ```
 
 The “truth” the ladder will gradually uncover:
 
 - Slope of temperature on the mean: `0.4` g per °C
 - Sex contrast (M − F) on the mean: `+0.7` g
-- Site-to-site SD on the mean: `0.6` g
+- Site-to-site SD on the mean: `1.5` g
 - Heteroscedasticity: residual SD grows by a factor of
   `exp(0.05) ≈ 1.05` per °C
 
@@ -114,8 +114,8 @@ parameter_interpretation(sym1, scale = "biological")
 
 | submodel | term_label | coefficient_role | estimate | 95% CI | biological_reading |
 |:---|:---|:---|:---|:---|:---|
-| mu | (Intercept) | intercept | 32.3 | 30.4, 34.2 \* | Baseline body_mass in the reference condition |
-| mu | temperature | slope | 0.294 | 0.188, 0.401 \* | A unit change in temperature shifts the expected body_mass by 0.294 |
+| mu | (Intercept) | intercept | 32.4 | 30.4, 34.4 \* | Baseline body_mass in the reference condition |
+| mu | temperature | slope | 0.303 | 0.190, 0.415 \* | A unit change in temperature shifts the expected body_mass by 0.303 |
 
 *Rows marked `*` have a 95% confidence interval that excludes zero (CI
 method: `wald`).*
@@ -124,7 +124,7 @@ method: `wald`).*
 predictor for $`\mu_i`$, and one slope to interpret. No variance
 modelling beyond a single residual SD. No grouping. The biological
 reading is “a unit change in temperature shifts the expected body_mass
-by 0.294.”
+by 0.303.”
 
 ## Rung 2 — Adding a factor
 
@@ -175,7 +175,7 @@ pi2[pi2$coefficient_role == "factor_contrast", c("term_label", "estimate", "biol
 
 | term_label | estimate | biological_reading                                 |
 |:-----------|:---------|:---------------------------------------------------|
-| sex        | 0.499    | Average body_mass differs between M and F by 0.499 |
+| sex        | 0.410    | Average body_mass differs between M and F by 0.410 |
 
 **What just got added.** One row in the symbol table (the factor
 contrast), one row in
@@ -198,7 +198,6 @@ library(lme4)
 #> 
 #>     expand
 fit3 <- lmer(body_mass ~ temperature + sex + (1 | site), data = dat)
-#> boundary (singular) fit: see help('isSingular')
 sym3 <- symbolize(fit3)
 ```
 
@@ -225,8 +224,8 @@ sym3$variance_components
 #> # A tibble: 2 × 5
 #>   parameter group    term        sd_estimate var_estimate
 #>   <chr>     <chr>    <chr>             <dbl>        <dbl>
-#> 1 mu        site     (Intercept)        0             0  
-#> 2 residual  residual Residual           3.28         10.8
+#> 1 mu        site     (Intercept)        1.17         1.36
+#> 2 residual  residual Residual           3.29        10.8
 ```
 
 You can read off the between-site SD and the residual SD directly. The
@@ -257,7 +256,11 @@ spread](symbolizer-ladder_files/figure-html/rung4-resid-1.png)
 
 The variance is changing with temperature. A standard mixed model forces
 residual variance to be constant, so the inference on $`\beta_1`$
-ignores that. Climb the last rung: fit
+ignores that. This is called a **location-scale model** (also known as
+**distributional regression** or, when the variance component is what
+changes, *heteroscedastic regression*): instead of treating the residual
+SD as a single fixed number, we let it depend on its own predictors with
+its own coefficients. Climb the last rung: fit
 $`\log(\sigma_i) = \gamma_0 + \gamma_1\, T_i`$.
 
 ``` r
@@ -305,8 +308,8 @@ pi4[pi4$submodel == "sigma", c("term_label", "estimate", "biological_reading")]
 
 | term_label | estimate | biological_reading |
 |:---|:---|:---|
-| (Intercept) | 0.476 | Baseline level of unexplained individual variation in body_mass |
-| temperature | 0.0392 | A unit change in temperature multiplies the unexplained variability of body_mass by exp(0.0392) |
+| (Intercept) | 0.465 | Baseline level of unexplained individual variation in body_mass |
+| temperature | 0.0399 | A unit change in temperature multiplies the unexplained variability of body_mass by exp(0.0399) |
 
 The slope $`\gamma_1`$ reads as “residual SD multiplies by `exp(γ_1)`
 per °C”. For our simulated data the truth was `exp(0.05) ≈ 1.05`, so
@@ -323,7 +326,7 @@ three-view widget:
 as_html_three_views(sym4)
 ```
 
-[Skip three-views widget](#sym-sym-1779732459-end)
+[Skip three-views widget](#sym-sym-1779734362-end)
 
 ▸1. Equation
 
@@ -366,19 +369,19 @@ are also shown.
 ``` sym-matrix
 
   y                   X                          beta
-  y_1 = 37.4          1.00  23.9  0           
-  y_2 = 32.7          1.00  17.7  0           
-  y_3 = 38.4          1.00  13.9  1.00        
-  y_4 = 38.7          1.00  10.7  0           
-  y_5 = 35.8          1.00  16.3  0           
+  y_1 = 36.8          1.00  23.9  0           
+  y_2 = 32.9          1.00  17.7  0           
+  y_3 = 37.7          1.00  13.9  1.00        
+  y_4 = 40.2          1.00  10.7  0           
+  y_5 = 36.1          1.00  16.3  0           
   ...               ...                   
-  y_199 = 37.6        1.00  19.9  1.00        
-  y_200 = 37.6        1.00  12.1  1.00        
+  y_199 = 38.0        1.00  19.9  1.00        
+  y_200 = 38.3        1.00  12.1  1.00        
 
   Coefficients (beta, mu):
-    beta_0 = 31.9
-    beta_1 = 0.298
-    beta_2 = 0.766
+    beta_0 = 32.1
+    beta_1 = 0.300
+    beta_2 = 0.757
 
   X_sigma                       gamma
   1.00  23.9                    
@@ -389,8 +392,8 @@ are also shown.
   ...                         
   1.00  19.9                    
   1.00  12.1                    
-    gamma_0 = 0.476
-    gamma_1 = 0.0392
+    gamma_0 = 0.465
+    gamma_1 = 0.0399
 
   Z_g (group indicator)         u (random effects, BLUPs)
   1.00  0  0  0  0  0  0  0  0  0  0  0  
@@ -401,21 +404,21 @@ are also shown.
   ...                         
   0  0  0  0  0  0  1.00  0  0  0  0  0  
   0  0  0  0  0  0  0  1.00  0  0  0  0  
-    u_1 = -0.000000257
-    u_2 = 0.000000114
-    u_3 = -0.000000245
-    u_4 = 0.000000218
-    u_5 = 0.000000167
-    u_6 = -0.0000000271
-    u_7 = -0.000000126
-    u_8 = -0.00000000693
-    u_9 = -0.0000000901
-    u_10 = -0.000000120
-    u_11 = 0.000000322
-    u_12 = 0.0000000515
+    u_1 = -1.33
+    u_2 = 0.266
+    u_3 = -1.38
+    u_4 = 1.48
+    u_5 = 0.519
+    u_6 = -0.761
+    u_7 = -0.247
+    u_8 = 0.281
+    u_9 = -0.0776
+    u_10 = -0.728
+    u_11 = 1.75
+    u_12 = 0.233
 
-  Fitted mu_hat (first 5): 39.0  37.1  36.7  35.0  36.7
-  Fitted sigma_hat (first 5): 4.10  3.22  2.77  2.45  3.04
+  Fitted mu_hat (first 5): 39.2  37.4  37.0  35.3  36.9
+  Fitted sigma_hat (first 5): 4.12  3.22  2.77  2.44  3.04
 ```
 
 (The widget renders live in this page. In an R session,

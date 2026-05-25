@@ -229,7 +229,7 @@ Pre-release. Read status words consistently:
 ### At a glance
 
 [`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
-reads **10 package families / 14 fitted-class methods / ~30 family-class
+reads **10 package families / 14 fitted-class methods / 30+ family-class
 combinations** today: `drmTMB`, `gllvmTMB`, `glmmTMB`, `brms`, `lme4`
 (`lmer` + `glmer`), `MCMCglmm` (including animal models via `ginverse`),
 `sdmTMB` (spatial + spatiotemporal fields),

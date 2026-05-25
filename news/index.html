@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.18.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.18.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,6 +34,45 @@
       <small>Source: <a href="https://github.com/itchyshin/symbolizer/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.18.3" id="symbolizer-0183">symbolizer 0.18.3<a class="anchor" aria-label="anchor" href="#symbolizer-0183"></a></h2>
+<div class="section level3">
+<h3 id="v0183--pat--rose-cross-repo-audit-0-18-3">v0.18.3 – Pat + Rose cross-repo audit<a class="anchor" aria-label="anchor" href="#v0183--pat--rose-cross-repo-audit-0-18-3"></a></h3>
+<p>Dispatched two role-named review agents in parallel after the maintainer spotted <code>(1&amp;#124;site)</code> rendering as literal text on the deployed ladder vignette:</p>
+<ul><li>
+<strong>Pat</strong> (applied-reader / tutorial-flow) — surfaced the package-level pipe-encoding bug, a singular-fit landmine on Rung 3 of the ladder, and a “30+ vs ~30 family-class combinations” inconsistency between the homepage’s two paragraphs.</li>
+<li>
+<strong>Rose</strong> (cross-repo consistency / stale wording) — found that the roadmap article had drifted badly: claimed <code>marginal_contrasts()</code> and <code>reference_grid_story()</code> were upcoming features (they were never built), described rma.ls and <code>propto</code> as “planned” when they shipped in v0.15 / v0.16, and the release-history table stopped at v0.14.1.</li>
+</ul><div class="section level4">
+<h4 id="fixes-0-18-3">Fixes<a class="anchor" aria-label="anchor" href="#fixes-0-18-3"></a></h4>
+<ul><li>
+<strong>Package-level pipe-encoding fix in <code>knit_print.symbolizer_formula_bridge()</code></strong>: pre-escape <code>|</code> -&gt; <code>\|</code> in the <code>r_syntax</code> column before backticking. Previously, mixed-model R syntax like <code>(1 | group)</code> was rendered as <code>(1&amp;#124;group)</code> in pandoc pipe-tables, then re-escaped at HTML output to literal <code>&amp;amp;#124;</code>. The fix runs everywhere <code><a href="../reference/formula_bridge.html">formula_bridge()</a></code> knit-prints, so every vignette and every user’s knitted report benefits.</li>
+<li>
+<strong>Ladder recap table</strong>: the <code>Rung</code> column moved from markdown backticks to explicit <code>&lt;code&gt;</code> tags. With <code>kable(format = "html", escape = FALSE)</code>, pandoc still parses markdown inside table cells; explicit HTML tags bypass that.</li>
+<li>
+<strong>Roadmap article rewritten</strong> (<code>vignettes/symbolizer-roadmap.Rmd</code>):
+<ul><li>“What’s covered today” header bumped from v0.14.1 -&gt; v0.18.x.</li>
+<li>Cross-cutting-surfaces table updated: confidence bands marked Stable, <code><a href="../reference/as_dag.html">as_dag()</a></code> row notes the new <code>$mermaid</code> / <code>$tikz</code> slots, <code><a href="../reference/simulate_recipe.html">simulate_recipe()</a></code> and <code><a href="../reference/as_html_three_views.html">as_html_three_views()</a></code> rows added, stale version anchors removed.</li>
+<li>“What’s planned” rewritten: rma.ls / <code>struct = "UN"</code> / glmmTMB <code>propto</code> removed (shipped); <code>marginal_contrasts()</code> / <code>reference_grid_story()</code> removed (never built and out of scope given the kept-public discipline). Remaining items merged into v0.19+ and Considered buckets.</li>
+<li>Release-history table extended with v0.15 – v0.18.3.</li>
+<li>Kept-public list updated to include <code><a href="../reference/simulate_recipe.html">simulate_recipe()</a></code>.</li>
+</ul></li>
+<li>
+<strong>Rung 3 singular-fit landmine</strong> (<code>vignettes/symbolizer-ladder.Rmd</code>): the data-gen used <code>rnorm(n_sites, 0, 0.6)</code>, which combined with <code>set.seed(1)</code> and the heteroscedastic residual produced a <code>boundary (singular) fit</code> from <code>lmer</code> — <code>variance_components</code> showed site SD = 0 in the very rung that’s supposed to demonstrate variance partitioning. Bumped to <code>rnorm(n_sites, 0, 1.5)</code>; lmer now recovers a clearly non-zero site SD. Truth-list bullet updated.</li>
+<li>
+<strong>Rung 4 lead-in</strong> named the <em>location-scale</em> concept (also called “distributional regression” / “heteroscedastic regression”) in plain language before introducing <code>log(σ_i) = γ_0 + γ_1 T_i</code> — an ecologist meeting <code>dpar</code>-style submodels for the first time now has a phrase to look up.</li>
+<li>
+<strong>Stale version anchors</strong> in four vignettes cleaned up (<code>symbolizer.Rmd:96</code>, <code>:259</code>; <code>symbolizer-drmtmb.Rmd:33</code>; <code>symbolizer-factors.Rmd:528</code>). The drmTMB one was the worst — it said Student-t / lognormal / Gamma / beta “remain on the roadmap” when all four shipped in v0.3.</li>
+<li>
+<strong>README “30+ vs ~30”</strong> mismatch resolved (both paragraphs now say “30+”, consistent with the capability registry count).</li>
+<li>
+<strong>NEWS v0.17 line</strong> that promised <code>as_mermaid()</code> / <code>as_tikz()</code> / <code>render_model_notebook()</code> exports for v0.18 was corrected — only <code><a href="../reference/simulate_recipe.html">simulate_recipe()</a></code> shipped as a function; diagram surfaces became slots on <code><a href="../reference/as_dag.html">as_dag()</a></code> to keep the public surface tight; <code>render_model_notebook()</code> is deferred further.</li>
+<li>
+<strong>Citation consistency</strong>: <code>Lopez-Lopez</code> -&gt; <code>López-López</code> (3 sites); <code>Nakagawa (2024+)</code> -&gt; <code>Nakagawa (forthcoming)</code> (2 sites).</li>
+</ul><p>devtools::check(): 0 errors / 0 warnings / 0 notes.</p>
+</div>
+</div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.18.2" id="symbolizer-0182">symbolizer 0.18.2<a class="anchor" aria-label="anchor" href="#symbolizer-0182"></a></h2>
 <div class="section level3">
@@ -148,7 +187,7 @@
 <li>
 <code>_pkgdown.yml</code>: navbar Articles dropdown reorganised. “Get started” is now Ladder -&gt; Concepts (the existing <code>symbolizer.Rmd</code>); remaining articles moved into “Deep dives”.</li>
 <li>README “Tiny example” gets a callout pointing readers at the ladder for a gentler on-ramp.</li>
-</ul><p>Option B debt (<code><a href="../reference/simulate_recipe.html">simulate_recipe()</a></code>, <code>as_mermaid()</code>, <code>as_tikz()</code>, <code>render_model_notebook()</code>) stays deferred to v0.18.</p>
+</ul><p>Option B debt (<code><a href="../reference/simulate_recipe.html">simulate_recipe()</a></code> and diagram surfaces) stays deferred to v0.18. (When it landed in v0.18, <code><a href="../reference/simulate_recipe.html">simulate_recipe()</a></code> became a real exported function; the diagram surfaces shipped as <code>$mermaid</code> and <code>$tikz</code> slots on <code><a href="../reference/as_dag.html">as_dag()</a></code> rather than as separate <code>as_mermaid()</code> / <code>as_tikz()</code> exports, to keep the public surface tight. <code>render_model_notebook()</code> is deferred further.)</p>
 </div>
 </div>
     <div class="section level2">
