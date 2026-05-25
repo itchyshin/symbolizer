@@ -1,3 +1,24 @@
+# symbolizer 0.19.1
+
+## v0.19.1 -- balance the worked-row treatment across both submodels
+
+Small follow-up to v0.19.0:
+
+* **Sigma submodel now gets a worked row too.** On Tab 3, observation
+  i = 1 is now walked through BOTH submodels in scalar arithmetic,
+  not just the mu side. The new sigma block reads
+  `log(sigma_hat_1) = gamma_0 + gamma_1 T_1` in symbols, then with
+  numbers, then back-transformed to the predicted residual SD in
+  original units (`sigma_hat_1 = exp(...) approx 7.04 g` for the
+  ladder example). One observation, both submodels, before the matrix
+  bmatrices stack each one n times.
+* **Tab 3 renamed**: "Matrix with data" -> **"Equations with data"**.
+  The label "matrix with data" stopped being accurate in v0.19.0 once
+  the tab carried both scalar response equations (the worked row) and
+  the matrix-form response equations stacked from them. "Equations
+  with data" captures that the tab is now multiple equations -- scalar
+  + matrix, mu + sigma -- all populated with the user's numbers.
+
 # symbolizer 0.19.0
 
 ## v0.19.0 -- three-views widget v2: pedagogically reordered, live on the homepage, embedded in more vignettes

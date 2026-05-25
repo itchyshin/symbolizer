@@ -130,7 +130,7 @@ as_html_three_views.symbolized_model <- function(x, head = 5L, tail = 2L,
     "<button type=\"button\" class=\"sym-tab\" role=\"tab\"",
     " id=\"", tab_mat, "\" aria-controls=\"", pan_mat, "\"",
     " aria-selected=\"false\" tabindex=\"-1\" data-tab=\"mat\">",
-    marker, "3. Matrix with data</button>\n",
+    marker, "3. Equations with data</button>\n",
     "</div>\n",
     idx_panel, eq_panel, mat_panel,
     "</div>\n",
@@ -282,19 +282,22 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L) {
     )
   } else NULL
 
-  # --- Worked-row block: one observation in scalar arithmetic -----------
-  # Show the FIRST observation's row as `W_1 = beta_0 + beta_1 T_1 + eps_1`
-  # in symbols, then with the actual numbers, then decomposed into
-  # `predicted + residual`. This anchors the matrix algebra: the matrix
-  # equation immediately below is THIS equation, stacked n times.
-  worked_block <- three_views_worked_row(ex, resp_sym)
+  # --- Worked-row blocks: walk observation 1 through both submodels -----
+  # Mu: `W_1 = beta_0 + beta_1 T_1 + eps_1` in symbols, then with numbers,
+  # then decomposed into `predicted + residual`.
+  # Sigma (if distributional): `log sigma_1 = gamma_0 + gamma_1 T_1`, then
+  # with numbers, then back-transformed to sigma_1 in original units.
+  # Both anchor the matrix algebra immediately below: each matrix equation
+  # is the corresponding worked row stacked n times.
+  worked_mu    <- three_views_worked_row(ex, resp_sym)
+  worked_sigma <- three_views_worked_row_sigma(ex)
 
-  # --- Stitch: worked row first, then full matrix, then sigma submodel ---
+  # --- Stitch: worked row + matrix block, paired per submodel -----------
   pieces <- c(
-    if (!is.null(worked_block)) {
+    if (!is.null(worked_mu)) {
       c(
         "<p class=\"sym-caption\" style=\"font-size:0.95em;color:#374151\">For observation <em>i</em> = 1 of your data:</p>\n",
-        worked_block,
+        worked_mu,
         "<p class=\"sym-caption\" style=\"font-size:0.95em;color:#374151\">Stacking the same response equation for all <em>n</em> = ",
         n, " observations:</p>\n"
       )
@@ -305,7 +308,9 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L) {
            " = \\hat{\\boldsymbol{\\mu}}\\). <strong>Right</strong>: the residual vector \\(\\hat{\\boldsymbol{\\varepsilon}} = \\mathbf{w} - \\hat{\\boldsymbol{\\mu}}\\). Every row of this matrix equation is one of the response-equation rows from the worked row above.</p>\n"),
     if (!is.null(eq_sigma)) {
       c(
-        "<p class=\"sym-caption\" style=\"font-size:0.95em;color:#374151;margin-top:1.2rem\">And the \\(\\sigma\\) submodel (no observed counterpart -- \\(\\sigma\\)'s job is to describe the spread of \\(\\hat{\\boldsymbol{\\varepsilon}}\\)):</p>\n",
+        "<p class=\"sym-caption\" style=\"font-size:0.95em;color:#374151;margin-top:1.2rem\">And the \\(\\sigma\\) submodel (no observed counterpart -- \\(\\sigma\\)'s job is to describe the spread of \\(\\hat{\\boldsymbol{\\varepsilon}}\\)). For the same observation <em>i</em> = 1:</p>\n",
+        if (!is.null(worked_sigma)) worked_sigma else character(0),
+        "<p class=\"sym-caption\" style=\"font-size:0.95em;color:#374151\">Stacking the same log-link equation for all <em>n</em> = ", n, " observations:</p>\n",
         paste0("<div class=\"sym-eq\">$$\n", eq_sigma, "\n$$</div>\n")
       )
     }
@@ -372,6 +377,63 @@ three_views_worked_row <- function(ex, resp_sym = "\\mathbf{y}") {
     "}_{\\textstyle\\,\\hat\\mu_{1}\\,\\text{(predicted)}\\,} \\;+\\; ",
     "\\underbrace{(", fmt(eps1),
     ")}_{\\textstyle\\,\\hat\\varepsilon_{1}\\,\\text{(residual)}\\,}",
+    "\n\\end{aligned}\n$$</div>\n"
+  )
+}
+
+# Worked-row for the sigma submodel, parallel to three_views_worked_row().
+# Walks observation 1 through the log-link prediction:
+#   log(sigma_hat_1) = gamma_0 + gamma_1 * T_1
+# in symbolic form, with numbers, and the back-transformed sigma_hat_1.
+# Returns NULL if the model has no sigma submodel; matrix-block stitcher
+# then skips this section.
+three_views_worked_row_sigma <- function(ex) {
+  if (is.null(ex$X_sigma) || is.null(ex$gamma) || is.null(ex$sigma_hat))
+    return(NULL)
+  if (length(ex$sigma_hat) < 1L || nrow(ex$X_sigma) < 1L) return(NULL)
+
+  fmt <- function(v) formatC(v, digits = 3, format = "fg", flag = "#")
+  i        <- 1L
+  Xs1      <- ex$X_sigma[i, ]
+  sigma1   <- ex$sigma_hat[i]
+  log_sig1 <- log(sigma1)
+
+  is_intercept <- vapply(seq_along(Xs1), function(k) {
+    nm <- names(Xs1)[k]
+    identical(nm, "(Intercept)") || (!is.null(nm) && grepl("Intercept", nm)) ||
+      all(ex$X_sigma[, k] == 1)
+  }, logical(1L))
+
+  gamma_k <- function(k) sprintf("\\hat\\gamma_{%d}", k - 1L)
+  predictor_label <- function(k) {
+    nm <- names(Xs1)[k]
+    if (is.null(nm) || !nzchar(nm)) nm <- paste0("z_{", k, "}")
+    nm <- gsub("_", "\\_", nm, fixed = TRUE)
+    sprintf("\\mathrm{%s}_{1}", nm)
+  }
+
+  sym_terms <- character(length(Xs1))
+  num_terms <- character(length(Xs1))
+  for (k in seq_along(Xs1)) {
+    if (is_intercept[k]) {
+      sym_terms[k] <- gamma_k(k)
+      num_terms[k] <- fmt(ex$gamma[k])
+    } else {
+      sym_terms[k] <- paste0(gamma_k(k), "\\,", predictor_label(k))
+      num_terms[k] <- paste0(fmt(ex$gamma[k]), " \\times ", fmt(Xs1[k]))
+    }
+  }
+  sym_rhs <- paste(sym_terms, collapse = " + ")
+  num_rhs <- paste(num_terms, collapse = " + ")
+
+  paste0(
+    "<div class=\"sym-eq\">$$\n\\begin{aligned}\n",
+    "\\log\\hat\\sigma_{1} &= ", sym_rhs, " ",
+    "&\\quad(\\text{sigma submodel for observation 1, log link}) \\\\\n",
+    "\\log\\hat\\sigma_{1} &= ", num_rhs, " = ", fmt(log_sig1), " ",
+    "&\\quad(\\text{with your numbers}) \\\\\n",
+    "\\hat\\sigma_{1} &= \\exp(", fmt(log_sig1), ") \\approx ", fmt(sigma1), " ",
+    "&\\quad(\\text{predicted residual SD for observation 1})",
     "\n\\end{aligned}\n$$</div>\n"
   )
 }

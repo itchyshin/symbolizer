@@ -10,10 +10,13 @@ test_that("HTML contains all three tab labels and panels", {
   fit <- fit_drm_location_scale()
   sym <- symbolize(fit, symbols = c(body_mass = "W_i", temperature = "T_i"))
   html <- withr::with_output_sink(tempfile(), as_html_three_views(sym))
-  # v0.19 pedagogical reorder: Index first, then Matrix, then Matrix with data.
+  # v0.19 pedagogical reorder: Index first, then Matrix, then
+  # Equations with data (was "Matrix with data" in 0.19.0; renamed in
+  # 0.19.1 because Tab 3 now carries multiple equations -- scalar +
+  # matrix, mu + sigma -- all populated with data).
   expect_match(html, "1\\. Index")
   expect_match(html, "2\\. Matrix")
-  expect_match(html, "3\\. Matrix with data")
+  expect_match(html, "3\\. Equations with data")
   expect_match(html, "data-panel=\"eq\"")
   expect_match(html, "data-panel=\"idx\"")
   expect_match(html, "data-panel=\"mat\"")
