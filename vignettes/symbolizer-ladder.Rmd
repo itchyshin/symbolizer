@@ -95,7 +95,7 @@ sym1 <- symbolize(fit1)
 The equation:
 
 ```{r rung1-latex}
-cat(as_latex(sym1), "\n")
+equations(sym1, notation = "index")
 ```
 
 The symbol dictionary, listing every variable the model uses:
@@ -127,7 +127,7 @@ sym2 <- symbolize(fit2)
 ```
 
 ```{r rung2-latex}
-cat(as_latex(sym2), "\n")
+equations(sym2, notation = "index")
 ```
 
 The equation now carries a contrast term. The symbol dictionary
@@ -164,7 +164,7 @@ sym3 <- symbolize(fit3)
 ```
 
 ```{r rung3-latex}
-cat(as_latex(sym3), "\n")
+equations(sym3, notation = "index")
 ```
 
 Two new rows in the equation block:
@@ -220,7 +220,7 @@ sym4 <- symbolize(fit4)
 ```
 
 ```{r rung4-latex}
-cat(as_latex(sym4), "\n")
+equations(sym4, notation = "index")
 ```
 
 The equation block grew by **one new line** — the

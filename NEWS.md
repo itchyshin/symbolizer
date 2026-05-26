@@ -1,3 +1,74 @@
+# symbolizer 0.20.2
+
+## v0.20.2 -- Pat cleanup + phylogenetic capability scaffold
+
+Pure cleanup release after Pat's R-output-vs-LaTeX audit, plus the
+first piece of scaffolding for a unified phylogenetic + spatial
+meta-analysis vignette (D+E) targeted for the next release.
+
+### Pat cleanup: vignette output paths now render math via knit_print
+
+1. **Six `cat(as_latex(sym), "\n")` chunks** in
+   `vignettes/symbolizer-ladder.Rmd` (rungs 1-4) and
+   `vignettes/symbolizer-meta.Rmd` (Face 1 and Face 2) were dumping
+   raw LaTeX strings to the page instead of rendered MathJax. Each is
+   now `equations(sym, notation = "index")`, which routes through the
+   existing `knit_print.symbolizer_equations` method and produces a
+   properly delimited `$$...$$` math block. The one `cat(as_latex(...))`
+   chunk in `vignettes/symbolizer.Rmd` is left intact -- it is a
+   deliberate teaching demonstration of the raw string.
+
+2. **Two new `knit_print` methods**:
+   `knit_print.symbolizer_random_effects` and
+   `knit_print.symbolizer_variance_components`. The `random_effects`
+   tibble carries LaTeX-valued columns (`u_symbol_index`,
+   `sigma_symbol`); the bare tibble print was leaking
+   `\sigma_{site}`-style strings onto the page. The new methods wrap
+   the symbol columns in `$...$` and render the table as a clean
+   pipe-Markdown kable so MathJax / KaTeX picks them up. The
+   underlying tbl_df / data.frame classes remain in the class chain,
+   so all downstream tibble operations are unaffected.
+
+3. **`print()` wrapper dropped** around `parameter_interpretation()`
+   in `vignettes/symbolizer-families.Rmd` so the
+   `knit_print.symbolizer_interpretation` method runs and the
+   biological-reading column renders as math instead of as raw text.
+
+### Phylogenetic capability scaffold (D+E article preview)
+
+The Mizuno, Williams, Lagisz, Senior, Nakagawa tutorial unifies
+phylogenetic and spatial meta-analysis: they are the same multilevel
+random-effects model, differing only in what "distance" means
+(evolutionary time vs geographic distance). The next release will
+ship a single article that teaches both via the shared
+$p \sim \mathcal N(0, \sigma^2_p \mathbf M)$ structure -- with
+$\mathbf M$ being the phylogenetic correlation matrix $\mathbf A$
+(phylo) or a kernel-derived spatial matrix (spatial).
+
+As a scaffold, three new `Planned or reserved` rows have been added
+to `inst/extdata/capabilities.csv`:
+
+- `drmTMB,gaussian,phylo` -- `drmTMB::phylo(term, tree)` uses
+  Hadfield & Nakagawa (2010) A-inverse sparse-precision internally,
+  which is the **all-nodes** representation (latent vector spans
+  tips + internal nodes).
+- `metafor,*,phylo` -- `rma.mv(..., R = list(species = A))` with the
+  tips-only k x k phylogenetic correlation matrix; distinct from the
+  `V = V` fixed-sampling-covariance pattern that v0.20.0 nailed down.
+- `brms,*,phylo` -- `gr(species, cov = A)` with the tips-only A.
+
+Existing rows for `gllvmTMB,*,phylo`, `glmmTMB propto`, and
+`MCMCglmm animal` already cover the rest of the phylo surface; the
+notes have been left as-is in this release. The extractor work that
+will populate `metadata$phylo_representation` (`"tips_only"` /
+`"all_nodes"`) is deferred to the D+E release.
+
+### Florence visual-check discipline (continued)
+
+Every widget-touching release must include a visual check of the
+live rendered page in a browser, not just `rcmdcheck`. v0.20.2 is
+no exception.
+
 # symbolizer 0.20.1
 
 ## v0.20.1 -- symbol gloss renders Greek letters / mathbb properly

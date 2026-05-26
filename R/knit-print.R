@@ -332,3 +332,60 @@ knit_print.symbolizer_equations <- function(x, ...) {
   }
   knitr::asis_output(lines)
 }
+
+#' @exportS3Method knitr::knit_print
+knit_print.symbolizer_random_effects <- function(x, ...) {
+  if (!requireNamespace("knitr", quietly = TRUE)) return(print(x))
+  df <- as.data.frame(x, stringsAsFactors = FALSE)
+
+  # Escape `|` in term labels so a kable pipe-table row like
+  # `(1 | site)` does not start a new column.
+  term_lab <- if ("term_label" %in% names(df)) {
+    gsub("|", "\\|", df$term_label, fixed = TRUE)
+  } else {
+    rep("", nrow(df))
+  }
+  term_lab <- ifelse(nzchar(term_lab), paste0("`", term_lab, "`"), "\u2014")
+
+  out <- data.frame(
+    submodel  = if ("submodel" %in% names(df))  df$submodel  else "",
+    term      = term_lab,
+    group     = if ("group_var" %in% names(df)) df$group_var else "",
+    levels    = if ("n_levels"  %in% names(df)) df$n_levels  else NA_integer_,
+    effect    = if ("u_symbol_index" %in% names(df)) sym_dollar(df$u_symbol_index) else "",
+    sd        = if ("sigma_symbol"   %in% names(df)) sym_dollar(df$sigma_symbol)   else "",
+    stringsAsFactors = FALSE
+  )
+  kab <- sym_kable(
+    out,
+    col.names = c("submodel", "term", "group", "levels",
+                  "random effect", "between-group SD")
+  )
+  knitr::asis_output(paste(c("", kab, ""), collapse = "\n"))
+}
+
+#' @exportS3Method knitr::knit_print
+knit_print.symbolizer_variance_components <- function(x, ...) {
+  if (!requireNamespace("knitr", quietly = TRUE)) return(print(x))
+  df <- as.data.frame(x, stringsAsFactors = FALSE)
+
+  # The variance_components tibble carries numeric SDs and variances. No
+  # LaTeX bleed in these columns -- the value of a knit_print method here
+  # is just consistent table styling and round-tripping to a clean kable
+  # in vignette output (no `# A tibble: N x M` header, no truncated names).
+  fmt_num <- function(v) {
+    if (!is.numeric(v)) return(as.character(v))
+    ifelse(is.na(v), "\u2014",
+           formatC(v, digits = 3, format = "g", flag = "#"))
+  }
+  cols <- intersect(
+    c("parameter", "group", "term", "sd_estimate", "var_estimate"),
+    names(df)
+  )
+  out <- df[, cols, drop = FALSE]
+  if ("sd_estimate" %in% cols)  out$sd_estimate  <- fmt_num(out$sd_estimate)
+  if ("var_estimate" %in% cols) out$var_estimate <- fmt_num(out$var_estimate)
+
+  kab <- sym_kable(out)
+  knitr::asis_output(paste(c("", kab, ""), collapse = "\n"))
+}

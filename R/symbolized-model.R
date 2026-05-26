@@ -56,6 +56,20 @@ new_symbolized_model <- function(
   expanded = NULL,
   metadata
 ) {
+  # Attach S3 sub-classes to optional tibbles so knit_print methods can render
+  # them with math math-aware formatting in vignettes / knitr output. The
+  # underlying tbl_df / tbl / data.frame classes remain intact, so all
+  # downstream tibble operations are unaffected.
+  if (!is.null(random_effects) &&
+      !inherits(random_effects, "symbolizer_random_effects")) {
+    class(random_effects) <- c("symbolizer_random_effects", class(random_effects))
+  }
+  if (!is.null(variance_components) &&
+      !inherits(variance_components, "symbolizer_variance_components")) {
+    class(variance_components) <- c("symbolizer_variance_components",
+                                    class(variance_components))
+  }
+
   obj <- list(
     model = model,
     index = index,

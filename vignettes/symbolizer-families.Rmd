@@ -84,7 +84,7 @@ dat <- data.frame(y = exp(rnorm(n, 2 + 0.3 * rnorm(n), 0.4)),
 fit <- drmTMB(drm_formula(y ~ x, sigma ~ 1),
               family = lognormal(), data = dat)
 sym <- symbolize(fit)
-print(parameter_interpretation(sym, scale = "biological"))
+parameter_interpretation(sym, scale = "biological")
 ```
 
 **Coefficient reading on mu:** a unit change in `x` multiplies the

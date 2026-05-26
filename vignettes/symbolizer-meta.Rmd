@@ -94,7 +94,7 @@ sym_meta <- symbolize(fit_meta)
 The symbolic surface:
 
 ```{r metafor-out}
-cat(as_latex(sym_meta), "\n")
+equations(sym_meta, notation = "index")
 ```
 
 ```{r metafor-vc}
@@ -169,8 +169,8 @@ sym_glmm <- symbolize(fit_glmm)
 warning_table(sym_glmm)
 ```
 
-```{r glmm-out, results = "markup"}
-cat(as_latex(sym_glmm), "\n")
+```{r glmm-out}
+equations(sym_glmm, notation = "index")
 ```
 
 ### What you'd need for an actual meta-analytic glmmTMB fit
