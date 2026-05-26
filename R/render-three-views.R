@@ -251,7 +251,11 @@ as_pdf_three_views.symbolized_model <- function(x, file, title = NULL,
     sprintf("    keep_tex: %s", if (isTRUE(keep_tex)) "true" else "false"),
     "    latex_engine: pdflatex",
     "header-includes:",
-    "  - \\usepackage{amsmath, amssymb, bm}",
+    # `bm` would give bold-italic math, but we use `\boldsymbol` from
+    # amsbsy (loaded by amsmath), so the `bm` package isn't needed.
+    # Dropped because tinytex's minimal install on GitHub Actions does
+    # not include `bm.sty` by default and the auto-install can fail.
+    "  - \\usepackage{amsmath, amssymb}",
     "---",
     "",
     "# 1. Index form",
