@@ -1224,7 +1224,15 @@ drm_build_symbol_dictionary <- function(terms_tbl, response, response_symbol,
                                         units, data, n_obs, re_tbl = NULL,
                                         response_1 = NULL, response_2 = NULL,
                                         response_symbol_1 = NULL,
-                                        response_symbol_2 = NULL) {
+                                        response_symbol_2 = NULL,
+                                        structured_matrices = NULL) {
+  # `structured_matrices` (v0.21+): optional list of rows to append for
+  # structured-covariance matrices (phylogenetic A, spatial Omega, etc.).
+  # Each entry is a named list with the same fields as a symbol_dictionary
+  # row: symbol, symbol_matrix, variable, units, role, dimension,
+  # dimension_concrete, description. Extractors that detect a structured
+  # random effect pass these so the dictionary surfaces the matrix as a
+  # first-class symbol. NULL or empty list -> no-op (back-compat).
   is_biv <- identical(family, "biv_gaussian")
   # Helper: per-submodel coefficient count (for concrete p_mu / p_sigma).
   p_for <- function(dpar) {
@@ -1418,6 +1426,15 @@ drm_build_symbol_dictionary <- function(terms_tbl, response, response_symbol,
         dimension_concrete = "scalar",
         description        = sprintf("between-%s standard deviation", g)
       )
+    }
+  }
+  # v0.21+ structured-covariance matrix rows (A, Omega, ...). Each entry is
+  # a named list with the symbol_dictionary row fields; extractors that
+  # detect a phylogenetic / spatial / temporal structured random effect
+  # pass these to surface the matrix itself as a first-class symbol.
+  if (!is.null(structured_matrices) && length(structured_matrices) > 0L) {
+    for (sm in structured_matrices) {
+      rows[[length(rows) + 1L]] <- tibble::as_tibble(sm)
     }
   }
   do.call(rbind, rows)
