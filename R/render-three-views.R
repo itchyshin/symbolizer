@@ -493,15 +493,29 @@ three_views_symbol_gloss <- function(x, notation = c("matrix", "index")) {
                         names(rt))[1L]
     if (is.na(sym_col)) return("")
   }
-  # Only wrap content that actually IS LaTeX (starts with `\`) in MathJax
-  # `\(...\)` delimiters. `dimension_concrete` for predictor columns
-  # carries prose like "column of X (length 200)", and wrapping that in
-  # `\(...\)` makes MathJax render it as garbled italic math
-  # ("columnofX(length200)"). Pat + Boole both caught this in the v0.19
-  # design pass.
-  wrap_math <- function(s) {
+  # Only wrap content that actually IS LaTeX (starts with `\`) in
+  # math delimiters. We use `$...$` not `\(...\)` because pandoc
+  # processes `<li>` content as markdown by default and DOESN'T
+  # recognise `\(...\)` as math (the `tex_math_single_backslash`
+  # extension is off by default), so it interprets `\mu` as an escape
+  # sequence and eats it -- the gloss line ends up reading "(_i)
+  # conditional mu" instead of "$\mu_i$ conditional mu". With `$...$`
+  # pandoc uses `tex_math_dollars` (on by default) and preserves the
+  # LaTeX intact for MathJax to render in the browser.
+  # `dimension_concrete` for predictor columns carries prose like
+  # "column of X (length 200)" which doesn't start with `\` and is
+  # passed through unwrapped.
+  # Two wrappers: the symbol column is ALWAYS math (e.g. `W_i`, `T_i`,
+  # `\mu_i`, `\beta_{0}, \beta_{1}`). Always wrap. The dimension column
+  # is sometimes math (`\mathbb{R}^{200}`) and sometimes prose
+  # ("column of X (length 200)"); only wrap if it looks like LaTeX.
+  wrap_always <- function(s) {
     if (is.na(s) || !nzchar(s)) return("")
-    if (startsWith(s, "\\")) paste0("\\(", s, "\\)")
+    paste0("$", s, "$")
+  }
+  wrap_if_latex <- function(s) {
+    if (is.na(s) || !nzchar(s)) return("")
+    if (startsWith(s, "\\")) paste0("$", s, "$")
     else                     s
   }
   ok <- !is.na(rt[[sym_col]]) & nzchar(rt[[sym_col]]) &
@@ -509,9 +523,9 @@ three_views_symbol_gloss <- function(x, notation = c("matrix", "index")) {
   rt <- rt[ok, , drop = FALSE]
   if (nrow(rt) == 0L) return("")
   items <- vapply(seq_len(nrow(rt)), function(i) {
-    sym  <- wrap_math(rt[[sym_col]][[i]])
+    sym  <- wrap_always(rt[[sym_col]][[i]])
     dim  <- if ("dimension_concrete" %in% names(rt))
-              wrap_math(rt$dimension_concrete[[i]]) else ""
+              wrap_if_latex(rt$dimension_concrete[[i]]) else ""
     desc <- rt$description[[i]]
     paste0("<li>", sym, " &mdash; ", desc,
            if (nzchar(dim)) paste0(" &nbsp;<span class=\"sym-dim\">", dim, "</span>") else "",
@@ -599,7 +613,7 @@ three_views_css <- function() {
 .sym-gloss > summary { cursor: pointer; font-weight: 600; color: #6b7280; padding: 0.2rem 0; }
 .sym-gloss > summary:hover { color: #8a1f22; }
 .sym-gloss-list { list-style: none; padding-left: 0.6rem; margin: 0.4rem 0 0.2rem; }
-.sym-gloss-list li { margin: 0.18rem 0; }
+.sym-gloss-list li { margin: 0.4rem 0; line-height: 1.7; }
 .sym-dim { color: #6b7280; font-size: 0.85rem; }
 .sym-matrix { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.78rem; line-height: 1.35; white-space: pre; overflow-x: auto; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 0.6rem 0.8rem; margin: 0.3rem 0; }
 .sym-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }

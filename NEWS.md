@@ -1,3 +1,64 @@
+# symbolizer 0.20.1
+
+## v0.20.1 -- symbol gloss renders Greek letters / mathbb properly
+
+The "where:" symbol gloss in the three-views widget was emitting
+`\(\mu_i\)`-style MathJax inline-math delimiters. Pandoc processes
+`<li>` content as markdown by default, and the `tex_math_single_backslash`
+extension is OFF by default -- so pandoc was interpreting `\mu`,
+`\sigma`, `\beta`, `\mathbb` as escape sequences and **eating them
+before MathJax ever saw them**. The published gloss was reading
+"`(_i) — conditional mu of body_mass`" where the `\mu` had vanished,
+"`({0}, {1}) — mu submodel coefficients`" where `\beta_{0}, \beta_{1}`
+collapsed (the `_{0}, _{1}` triggered italic markup, the `\beta`
+was eaten), and dimension labels like "`(^{200})`" with `\mathbb{R}`
+stripped.
+
+### The fix
+
+Three coordinated changes in `three_views_symbol_gloss()`:
+
+1. **Math delimiters**: switched from `\(...\)` to `$...$`. Pandoc's
+   `tex_math_dollars` extension is on by default, so `$\mu_i$` is
+   recognised as inline math and the contents are preserved verbatim
+   for MathJax to render. Pipeline verified: `\boldsymbol{\mu}`,
+   `\boldsymbol{\beta}`, `\mathbb{R}^{200}`, `\mathbb{R}^{n \times p}`
+   all survive R -> knitr -> pandoc -> MathJax intact.
+2. **Always-wrap for symbol columns**: split the wrapper into two.
+   `wrap_always()` wraps any non-empty symbol-column value (symbol
+   columns are always LaTeX, even when they don't start with `\` --
+   e.g. `W_i`, `T_i`). `wrap_if_latex()` keeps the old "only wrap
+   strings starting with `\`" heuristic for `dimension_concrete`,
+   which is sometimes math (`\mathbb{R}^{200}`) and sometimes prose
+   ("column of X (length 200)"). Without this split, `W_i` and `T_i`
+   were rendering as plain ASCII while `\mu_i` and `\sigma_i` rendered
+   as italic math -- visually inconsistent within the same gloss.
+3. **Line-height fix in `.sym-gloss-list li`**: MathJax-rendered
+   subscripts are taller than ASCII text, so the default tight margin
+   between list items caused adjacent rows to appear to overlap (the
+   "strikethrough" effect a reader sees on the rendered page). Bumped
+   to `line-height: 1.7; margin: 0.4rem 0;` so each row has room.
+
+### Process commitment: visual checks before each release
+
+The maintainer pointed out that this bug had been visible on the
+live deployed page since v0.19.x and we kept missing it because
+`rcmdcheck` says 0/0/0 and prior audits checked the *intent* of the
+gloss code rather than the *rendered output*. From v0.20.1 onward:
+
+**Every release that touches the widget must include a visual check
+step**: fetch the deployed HTML (`curl` the live URL or render a
+local preview), grep for known broken patterns (literal `(_i)`,
+`^{200}` outside math delimiters, raw `\mathbf{` strings), and open
+the rendered page in a browser before tagging. This complements
+`rcmdcheck`; the two answer different questions.
+
+The unfixed deferred items the v0.19.2 NEWS named as "Known
+remaining issues" -- the scalar-symbol gloss plain-text leak and
+the dimension `^{n}` literal -- were both symptoms of this same root
+cause. Naming them in NEWS without fixing them was a process
+failure as well as a rendering one.
+
 # symbolizer 0.20.0
 
 ## v0.20.0 -- corrective release: propto is the phylogenetic bridge, not the meta-analysis bridge
