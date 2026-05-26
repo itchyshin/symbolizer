@@ -259,7 +259,7 @@ sym_meta$expanded <- shim_metafor(fit_meta, A_tips)
 htmltools::HTML(as_html_three_views(sym_meta, id = "meta"))
 ```
 
-[Skip three-views widget](#sym-meta-1779818423-end)
+[Skip three-views widget](#sym-meta-1779824232-end)
 
 ▸1. Index
 
@@ -386,7 +386,7 @@ $`\sigma_p^2 \cdot \mathbf{A}`$, where $`\mathbf{A}`$ is the 60 × 60
 phylogenetic correlation matrix. Showing the head + tail rows / columns;
 full matrix is 60 × 60.
 
-[Skip three-views widget](#sym-meta-1779818423-end)
+[Skip three-views widget](#sym-meta-1779824232-end)
 
 ▸1. Index
 
@@ -657,7 +657,7 @@ sym_mcmc$expanded <- shim_mcmcglmm(fit_mcmc, dat, A_tips)
 htmltools::HTML(as_html_three_views(sym_mcmc, id = "mcmc"))
 ```
 
-[Skip three-views widget](#sym-mcmc-1779818424-end)
+[Skip three-views widget](#sym-mcmc-1779824233-end)
 
 ▸1. Index
 
@@ -783,7 +783,7 @@ $`\sigma_p^2 \cdot \mathbf{A}`$, where $`\mathbf{A}`$ is the 60 × 60
 phylogenetic correlation matrix. Showing the head + tail rows / columns;
 full matrix is 60 × 60.
 
-[Skip three-views widget](#sym-mcmc-1779818424-end)
+[Skip three-views widget](#sym-mcmc-1779824233-end)
 
 ▸1. Index
 

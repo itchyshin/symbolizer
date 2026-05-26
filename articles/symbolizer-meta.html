@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -147,10 +147,10 @@ three.</p>
 <span>                  obs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">id</span><span class="op">)</span>, g <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">dat</span>, <span class="fl">4</span><span class="op">)</span></span>
 <span><span class="co">#&gt;            y         vi study obs g</span></span>
-<span><span class="co">#&gt; 1 -0.1037070 0.05214863     1   1 1</span></span>
-<span><span class="co">#&gt; 2  0.2746595 0.10619273     2   2 1</span></span>
+<span><span class="co">#&gt; 1 -0.2839669 0.05214863     1   1 1</span></span>
+<span><span class="co">#&gt; 2 -0.6689495 0.10619273     2   2 1</span></span>
 <span><span class="co">#&gt; 3  0.1386369 0.04267655     3   3 1</span></span>
-<span><span class="co">#&gt; 4  0.4370492 0.12001508     4   4 1</span></span></code></pre></div>
+<span><span class="co">#&gt; 4  0.6629762 0.12001508     4   4 1</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="face-1-metafor-the-canonical-interface">Face 1 — metafor (the canonical interface)<a class="anchor" aria-label="anchor" href="#face-1-metafor-the-canonical-interface"></a>
@@ -186,15 +186,15 @@ u_{obs} \sim \mathcal{N}(0,\, \sigma_{obs}^2)
 <td align="left">mu</td>
 <td align="left">study</td>
 <td align="left">sigma^2_study</td>
-<td align="left">0.349</td>
-<td align="left">0.122</td>
+<td align="left">0.302</td>
+<td align="left">0.0910</td>
 </tr>
 <tr class="even">
 <td align="left">mu</td>
 <td align="left">obs</td>
 <td align="left">sigma^2_obs</td>
-<td align="left">0.0596</td>
-<td align="left">0.00355</td>
+<td align="left">0.0943</td>
+<td align="left">0.00890</td>
 </tr>
 <tr class="odd">
 <td align="left">mu</td>
@@ -269,15 +269,7 @@ meta-analysis:</p>
 <span>  <span class="va">y</span> <span class="op">~</span> <span class="fl">1</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">study</span><span class="op">)</span> <span class="op">+</span> <span class="fu">propto</span><span class="op">(</span><span class="fl">0</span> <span class="op">+</span> <span class="va">obs</span> <span class="op">|</span> <span class="va">g</span>, <span class="va">V</span><span class="op">)</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">dat</span>, REML <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old): Model convergence</span></span>
-<span><span class="co">#&gt; problem; non-positive-definite Hessian matrix. See vignette('troubleshooting')</span></span>
-<span><span class="co">#&gt; Warning in finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old): Model convergence</span></span>
-<span><span class="co">#&gt; problem; false convergence (8). See vignette('troubleshooting'),</span></span>
-<span><span class="co">#&gt; help('diagnose')</span></span>
-<span><span class="va">sym_glmm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/symbolize.html">symbolize</a></span><span class="op">(</span><span class="va">fit_glmm</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in sqrt(diag(vv)): NaNs produced</span></span>
-<span><span class="co">#&gt; Warning in sqrt(diag(object$cov.fixed)): NaNs produced</span></span>
-<span><span class="co">#&gt; Warning in sqrt(diag(object$cov.fixed)): NaNs produced</span></span></code></pre></div>
+<span><span class="va">sym_glmm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/symbolize.html">symbolize</a></span><span class="op">(</span><span class="va">fit_glmm</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/warning_table.html">warning_table</a></span><span class="op">(</span><span class="va">sym_glmm</span><span class="op">)</span></span></code></pre></div>
 <table class="table">

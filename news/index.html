@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,6 +34,35 @@
       <small>Source: <a href="https://github.com/itchyshin/symbolizer/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.21.3" id="symbolizer-0213">symbolizer 0.21.3<a class="anchor" aria-label="anchor" href="#symbolizer-0213"></a></h2>
+<div class="section level3">
+<h3 id="v0213--three-views-widget-rollout-to-symbolizer-familiesrmd-0-21-3">v0.21.3 – three-views widget rollout to symbolizer-families.Rmd<a class="anchor" aria-label="anchor" href="#v0213--three-views-widget-rollout-to-symbolizer-familiesrmd-0-21-3"></a></h3>
+<p>Continuation of the v0.21.2 widget-rollout arc. Three representative family chunks in <code>vignettes/symbolizer-families.Rmd</code> now carry interactive three-views widgets + PDF download links.</p>
+<div class="section level4">
+<h4 id="widget-chunks-added-0-21-3">Widget chunks added<a class="anchor" aria-label="anchor" href="#widget-chunks-added-0-21-3"></a></h4>
+<ul><li>
+<strong>Poisson</strong> (count, log link) — <code>exp(beta)</code> is the rate ratio.</li>
+<li>
+<strong>Beta</strong> (proportion, logit link) — <code>exp(beta)</code> is the odds ratio.</li>
+<li>
+<strong>Lognormal</strong> (positive continuous, log link) — <code>exp(beta)</code> is the multiplicative effect on the geometric mean.</li>
+</ul><p>The Tab-3 matrix-with-data view falls out naturally because <code>drmTMB</code> already populates <code>sym$expanded</code> with the right shape. No shim is needed.</p>
+</div>
+<div class="section level4">
+<h4 id="vignette-helper-0-21-3">Vignette helper<a class="anchor" aria-label="anchor" href="#vignette-helper-0-21-3"></a></h4>
+<p><code>pdf_alongside_html()</code> – the chunk-scoped helper introduced in v0.21.2 – is reused (defined inline) in the <code>families</code> vignette. The helper writes the PDF to the chunk cwd and copies into <code>../docs/articles</code> when that path exists (pkgdown build), so the <code>&lt;a href&gt;</code> link resolves under both <code><a href="https://pkgs.rstudio.com/rmarkdown/reference/render.html" class="external-link">rmarkdown::render()</a></code> and <code><a href="https://pkgdown.r-lib.org/reference/build_articles.html" class="external-link">pkgdown::build_article()</a></code>.</p>
+</div>
+<div class="section level4">
+<h4 id="gllvm-widget-deferred-to-v0214-0-21-3">GLLVM widget deferred to v0.21.4<a class="anchor" aria-label="anchor" href="#gllvm-widget-deferred-to-v0214-0-21-3"></a></h4>
+<p>A v1 GLLVM widget was prototyped (Σ_B as a single 5×5 block) but dropped before release. The Nakagawa et al. behavioural-syndromes manuscript surfaces the GLLVM as a <strong>trio</strong> of matrices per level (Λ_B, S_B, Σ_B = Λ_B Λ_B^T + S_B) plus integration indices (repeatability R_t, between-communality c²_B,t, within-communality c²_W,t, uniqueness ψ_t). Building only Σ_B would have shipped an incomplete and immediately-replaced view. The full Nakagawa-faithful GLLVM panel — including both Σ_B and Σ_W where available, plus the per-trait indices — is scoped into v0.21.4 with its own design doc at <code>.memory/designs/v0.21.4-gllvm-widget.md</code>.</p>
+</div>
+<div class="section level4">
+<h4 id="honest-scope-notes-0-21-3">Honest scope notes<a class="anchor" aria-label="anchor" href="#honest-scope-notes-0-21-3"></a></h4>
+<ul><li>The widget rollout to <code>symbolizer-meta.Rmd</code> is deferred to v0.22 (that vignette archives during the meta-analysis flagship).</li>
+</ul></div>
+</div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.21.2" id="symbolizer-0212">symbolizer 0.21.2<a class="anchor" aria-label="anchor" href="#symbolizer-0212"></a></h2>
 <div class="section level3">

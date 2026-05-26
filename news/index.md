@@ -1,5 +1,52 @@
 # Changelog
 
+## symbolizer 0.21.3
+
+### v0.21.3 – three-views widget rollout to symbolizer-families.Rmd
+
+Continuation of the v0.21.2 widget-rollout arc. Three representative
+family chunks in `vignettes/symbolizer-families.Rmd` now carry
+interactive three-views widgets + PDF download links.
+
+#### Widget chunks added
+
+- **Poisson** (count, log link) — `exp(beta)` is the rate ratio.
+- **Beta** (proportion, logit link) — `exp(beta)` is the odds ratio.
+- **Lognormal** (positive continuous, log link) — `exp(beta)` is the
+  multiplicative effect on the geometric mean.
+
+The Tab-3 matrix-with-data view falls out naturally because `drmTMB`
+already populates `sym$expanded` with the right shape. No shim is
+needed.
+
+#### Vignette helper
+
+`pdf_alongside_html()` – the chunk-scoped helper introduced in v0.21.2 –
+is reused (defined inline) in the `families` vignette. The helper writes
+the PDF to the chunk cwd and copies into `../docs/articles` when that
+path exists (pkgdown build), so the `<a href>` link resolves under both
+[`rmarkdown::render()`](https://pkgs.rstudio.com/rmarkdown/reference/render.html)
+and
+[`pkgdown::build_article()`](https://pkgdown.r-lib.org/reference/build_articles.html).
+
+#### GLLVM widget deferred to v0.21.4
+
+A v1 GLLVM widget was prototyped (Σ_B as a single 5×5 block) but dropped
+before release. The Nakagawa et al. behavioural-syndromes manuscript
+surfaces the GLLVM as a **trio** of matrices per level (Λ_B, S_B, Σ_B =
+Λ_B Λ_B^T + S_B) plus integration indices (repeatability R_t,
+between-communality c²_B,t, within-communality c²_W,t, uniqueness ψ_t).
+Building only Σ_B would have shipped an incomplete and
+immediately-replaced view. The full Nakagawa-faithful GLLVM panel —
+including both Σ_B and Σ_W where available, plus the per-trait indices —
+is scoped into v0.21.4 with its own design doc at
+`.memory/designs/v0.21.4-gllvm-widget.md`.
+
+#### Honest scope notes
+
+- The widget rollout to `symbolizer-meta.Rmd` is deferred to v0.22 (that
+  vignette archives during the meta-analysis flagship).
+
 ## symbolizer 0.21.2
 
 ### v0.21.2 – structural-dependence article: realistic phylo demo + widget + PDF rollout

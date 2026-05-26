@@ -228,7 +228,7 @@ three tabs over the same fit.
 as_html_three_views(sym, head = 5, tail = 2)
 ```
 
-[Skip three-views widget](#sym-sym-1779818433-end)
+[Skip three-views widget](#sym-sym-1779824242-end)
 
 ▸1. Index
 

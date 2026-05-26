@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -190,6 +190,393 @@ excludes zero (CI method: <code>wald</code>).</em></p>
 <p><strong>Coefficient reading on mu:</strong> a unit change in
 <code>x</code> multiplies the geometric mean by
 <code>exp(beta)</code>.</p>
+<div class="section level4">
+<h4 id="three-views-of-the-lognormal-fit">Three views of the lognormal fit<a class="anchor" aria-label="anchor" href="#three-views-of-the-lognormal-fit"></a>
+</h4>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">htmltools</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/htmltools/reference/HTML.html" class="external-link">HTML</a></span><span class="op">(</span><span class="fu"><a href="../reference/as_html_three_views.html">as_html_three_views</a></span><span class="op">(</span><span class="va">sym</span>, id <span class="op">=</span> <span class="st">"lognormal"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<style>.sym-tabs { position: relative; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; margin: 1em 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+.sym-tablist { display: flex; background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
+.sym-tab { flex: 1; text-align: center; padding: 0.6rem 0.5rem; cursor: pointer; font-weight: 600; color: #6b7280; border: 0; border-right: 1px solid #e5e7eb; background: transparent; user-select: none; font-size: 0.92rem; font-family: inherit; }
+.sym-tab:last-child { border-right: 0; }
+.sym-tab:hover { background: #fbe7e7; color: #7a2a2a; }
+.sym-tab.sym-active { background: #fff; color: #8a1f22; box-shadow: inset 0 -3px 0 #a0282b; }
+.sym-tab:focus-visible { outline: 2px solid #a0282b; outline-offset: -2px; }
+.sym-tab-marker { display: inline-block; margin-right: 0.35em; opacity: 0; transition: opacity 0.1s; }
+.sym-tab.sym-active .sym-tab-marker { opacity: 1; }
+.sym-panel { padding: 1rem 1.1rem 1.2rem; }
+.sym-panel[hidden] { display: none; }
+.sym-eq { background: #fbe7e7; border: 1px solid #a0282b; border-radius: 6px; padding: 0.7rem 1rem; margin: 0.4rem 0; text-align: center; overflow-x: auto; max-width: 100%; }
+.sym-caption { color: #6b7280; font-size: 0.85rem; margin: 0.2rem 0 0.4rem; }
+.sym-biology { color: #1f6feb; background: #f0f5ff; border-left: 3px solid #1f6feb; padding: 0.55rem 0.8rem; margin: 0.5rem 0 0.8rem; font-size: 0.95rem; line-height: 1.5; font-style: italic; }
+.sym-gloss { margin: 0.8rem 0 0.2rem; font-size: 0.9rem; color: #374151; }
+.sym-gloss > summary { cursor: pointer; font-weight: 600; color: #6b7280; padding: 0.2rem 0; }
+.sym-gloss > summary:hover { color: #8a1f22; }
+.sym-gloss-list { list-style: none; padding-left: 0.6rem; margin: 0.4rem 0 0.2rem; }
+.sym-gloss-list li { margin: 0.4rem 0; line-height: 1.7; }
+.sym-dim { color: #6b7280; font-size: 0.85rem; }
+.sym-matrix { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.78rem; line-height: 1.35; white-space: pre; overflow-x: auto; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 0.6rem 0.8rem; margin: 0.3rem 0; }
+.sym-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.sym-skip { position: absolute; top: -100px; left: 0; padding: 0.4rem 0.7rem; background: #8a1f22; color: #fff; text-decoration: none; font-size: 0.85rem; z-index: 5; }
+.sym-skip:focus { top: 0; }</style>
+<div id="sym-lognormal-1779824207" class="sym-tabs">
+<a class="sym-skip" href="#sym-lognormal-1779824207-end">Skip
+three-views widget</a>
+<div class="sym-tablist" role="tablist" aria-label="Three views of the model">
+<button type="button" class="sym-tab sym-active" role="tab" id="sym-lognormal-1779824207-tab-idx" aria-controls="sym-lognormal-1779824207-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
+<span class="sym-tab-marker" aria-hidden="true">▸</span>1. Index
+</button>
+<button type="button" class="sym-tab" role="tab" id="sym-lognormal-1779824207-tab-eq" aria-controls="sym-lognormal-1779824207-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
+<span class="sym-tab-marker" aria-hidden="true">▸</span>2. Matrix
+</button>
+<button type="button" class="sym-tab" role="tab" id="sym-lognormal-1779824207-tab-mat" aria-controls="sym-lognormal-1779824207-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
+<span class="sym-tab-marker" aria-hidden="true">▸</span>3. Equations
+with data
+</button>
+</div>
+<div id="sym-lognormal-1779824207-panel-idx" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-lognormal-1779824207-tab-idx" data-panel="idx" tabindex="0">
+<p class="sym-caption">
+What happens for each observation <em>i</em> – the per-individual
+reading.
+</p>
+<div class="sym-eq">
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>y</mi><mi>i</mi></msub><mo>∣</mo><msub><mi>μ</mi><mi>i</mi></msub><mo>,</mo><mspace width="0.167em"></mspace><msub><mi>σ</mi><mi>i</mi></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>∼</mo><mrow><mi mathvariant="normal">L</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">g</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>μ</mi><mi>i</mi></msub><mo>,</mo><mspace width="0.167em"></mspace><msubsup><mi>σ</mi><mi>i</mi><mn>2</mn></msubsup><mo stretchy="false" form="postfix">)</mo><mspace width="1.0em"></mspace><mo>⇔</mo><mspace width="1.0em"></mspace><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>y</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>∣</mo><msub><mi>μ</mi><mi>i</mi></msub><mo>,</mo><mspace width="0.167em"></mspace><msub><mi>σ</mi><mi>i</mi></msub><mo>∼</mo><mrow><mi mathvariant="normal">N</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>μ</mi><mi>i</mi></msub><mo>,</mo><mspace width="0.167em"></mspace><msubsup><mi>σ</mi><mi>i</mi><mn>2</mn></msubsup><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>μ</mi><mi>i</mi></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><msub><mi>β</mi><mn>0</mn></msub><mo>+</mo><msub><mi>β</mi><mn>1</mn></msub><mspace width="0.167em"></mspace><msub><mi>x</mi><mi>i</mi></msub></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>σ</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><msub><mi>γ</mi><mn>0</mn></msub></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+y_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Lognormal}(\mu_i,\, \sigma_i^2) \quad\Longleftrightarrow\quad \log(y_i) \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
+\mu_i &amp; = \beta_{0} + \beta_{1} \, x_i \\
+\log(\sigma_i) &amp; = \gamma_{0}
+\end{aligned}</annotation></semantics></math>
+</div>
+<details class="sym-gloss" open><summary>
+where:
+</summary><ul class="sym-gloss-list">
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>y</mi><mi>i</mi></msub><annotation encoding="application/x-tex">y_i</annotation></semantics></math>
+— response variable  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>100</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{100}</annotation></semantics></math></span>
+</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>x</mi><mi>i</mi></msub><annotation encoding="application/x-tex">x_i</annotation></semantics></math>
+— continuous predictor  <span class="sym-dim">column of X (length
+100)</span>
+</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>μ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\mu_i</annotation></semantics></math>
+— conditional mu of y  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>100</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{100}</annotation></semantics></math></span>
+</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\sigma_i</annotation></semantics></math>
+— conditional sigma of y  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>100</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{100}</annotation></semantics></math></span>
+</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mn>0</mn></msub><mo>,</mo><msub><mi>β</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">\beta_{0}, \beta_{1}</annotation></semantics></math>
+— mu submodel coefficients  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>2</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{2}</annotation></semantics></math></span>
+</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>γ</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\gamma_{0}</annotation></semantics></math>
+— sigma submodel coefficients  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>1</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{1}</annotation></semantics></math></span>
+</li>
+</ul></details>
+</div>
+<div id="sym-lognormal-1779824207-panel-eq" class="sym-panel" role="tabpanel" aria-labelledby="sym-lognormal-1779824207-tab-eq" data-panel="eq" hidden="" tabindex="0">
+<p class="sym-caption">
+The same model in matrix form – the structural contract every textbook
+past chapter 4 switches to.
+</p>
+<div class="sym-eq">
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>𝐲</mi><mo stretchy="false" form="postfix">)</mo><mo>∣</mo><mi>𝛍</mi><mo>,</mo><mspace width="0.167em"></mspace><mi>𝛔</mi></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>∼</mo><mi>𝒩</mi><mo stretchy="false" form="prefix">(</mo><mi>𝛍</mi><mo>,</mo><mspace width="0.167em"></mspace><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">g</mi></mrow><mo stretchy="false" form="prefix">(</mo><msup><mi>𝛔</mi><mn>2</mn></msup><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mi>𝛍</mi></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>𝐗</mi><mi>𝛃</mi></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>𝛔</mi><mo stretchy="false" form="postfix">)</mo></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>𝐙</mi><mi>𝛄</mi></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+\log(\mathbf{y}) \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} &amp; \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2)) \\
+\boldsymbol{\mu} &amp; = \mathbf{X} \boldsymbol{\beta} \\
+\log(\boldsymbol{\sigma}) &amp; = \mathbf{Z} \boldsymbol{\gamma}
+\end{aligned}</annotation></semantics></math>
+</div>
+<details class="sym-gloss" open><summary>
+where:
+</summary><ul class="sym-gloss-list">
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐲</mi><annotation encoding="application/x-tex">\mathbf{y}</annotation></semantics></math>
+— response variable  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>100</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{100}</annotation></semantics></math></span>
+</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛍</mi><annotation encoding="application/x-tex">\boldsymbol{\mu}</annotation></semantics></math>
+— conditional mu of y  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>100</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{100}</annotation></semantics></math></span>
+</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛔</mi><annotation encoding="application/x-tex">\boldsymbol{\sigma}</annotation></semantics></math>
+— conditional sigma of y  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>100</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{100}</annotation></semantics></math></span>
+</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛃</mi><annotation encoding="application/x-tex">\boldsymbol{\beta}</annotation></semantics></math>
+— mu submodel coefficients  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>2</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{2}</annotation></semantics></math></span>
+</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛄</mi><annotation encoding="application/x-tex">\boldsymbol{\gamma}</annotation></semantics></math>
+— sigma submodel coefficients  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>1</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{1}</annotation></semantics></math></span>
+</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐗</mi><annotation encoding="application/x-tex">\mathbf{X}</annotation></semantics></math>
+— mu submodel design matrix  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mn>100</mn><mo>×</mo><mn>2</mn></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{100 \times 2}</annotation></semantics></math></span>
+</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐙</mi><annotation encoding="application/x-tex">\mathbf{Z}</annotation></semantics></math>
+— sigma submodel design matrix  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mn>100</mn><mo>×</mo><mn>1</mn></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{100 \times 1}</annotation></semantics></math></span>
+</li>
+</ul></details>
+</div>
+<div id="sym-lognormal-1779824207-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-lognormal-1779824207-tab-mat" data-panel="mat" hidden="" tabindex="0">
+<p class="sym-caption">
+The same matrix equation, with your actual numbers stacked inside the
+brackets – what the computer multiplies. Showing first 5 and last 2 rows
+of n = 100.
+</p>
+<span class="sym-sr-only">Matrix-form expansion of the model. Each row
+shows the response y_i and the corresponding row of the design matrix X
+(showing head and tail rows of the n total observations), with the
+coefficient vector beta listed below.</span>
+<p class="sym-caption" style="font-size:0.95em;color:#374151">
+For observation <em>i</em> = 1 of your data:
+</p>
+<div class="sym-eq">
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>y</mi><mn>1</mn></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><msub><mover><mi>β</mi><mo accent="true">̂</mo></mover><mn>0</mn></msub><mo>+</mo><msub><mover><mi>β</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mspace width="0.167em"></mspace><msub><mi mathvariant="normal">x</mi><mn>1</mn></msub><mo>+</mo><msub><mover><mi>ε</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub></mtd><mtd columnalign="right" style="text-align: right"><mspace width="1.0em"></mspace><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">response equation, one row of the model</mtext><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mn>4.78</mn></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mn>2.02</mn><mo>+</mo><mi>−</mi><mn>0.0136</mn><mo>×</mo><mn>0.409</mn><mo>+</mo><mo stretchy="false" form="prefix">(</mo><mn>2.77</mn><mo stretchy="false" form="postfix">)</mo></mtd><mtd columnalign="right" style="text-align: right"><mspace width="1.0em"></mspace><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">with your numbers</mtext><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><munder><munder><mn>2.01</mn><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mover><mi>μ</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mspace width="0.167em"></mspace><mtext mathvariant="normal">(predicted)</mtext><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.278em"></mspace><mo>+</mo><mspace width="0.278em"></mspace><munder><munder><mrow><mo stretchy="false" form="prefix">(</mo><mn>2.77</mn><mo stretchy="false" form="postfix">)</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mover><mi>ε</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mspace width="0.167em"></mspace><mtext mathvariant="normal">(residual)</mtext><mspace width="0.167em"></mspace></mrow></munder></mtd></mtr></mtable><annotation encoding="application/x-tex">
+\begin{aligned}
+y_{1} &amp;= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{x}_{1} + \hat\varepsilon_{1} &amp;\quad(\text{response equation, one row of the model}) \\
+4.78 &amp;= 2.02 + -0.0136 \times 0.409 + (2.77) &amp;\quad(\text{with your numbers}) \\
+&amp;= \underbrace{2.01}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(2.77)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
+\end{aligned}
+</annotation></semantics></math>
+</div>
+<p class="sym-caption" style="font-size:0.95em;color:#374151">
+Stacking the same response equation for all <em>n</em> = 100
+observations:
+</p>
+<div class="sym-eq">
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mn>4.78</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>7.94</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>3.99</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>12.7</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>6.28</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>6.03</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>5.5</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mi>𝐲</mi><mrow><mspace width="0.167em"></mspace><mn>100</mn><mo>×</mo><mn>1</mn></mrow></msub><mspace width="0.278em"></mspace><mtext mathvariant="normal">(observed)</mtext><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.278em"></mspace><mo>=</mo><mspace width="0.278em"></mspace><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0.409</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>1.69</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>1.59</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>0.331</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>2.29</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>0.0506</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>0.306</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mi>𝐗</mi><mrow><mspace width="0.167em"></mspace><mn>100</mn><mo>×</mo><mn>2</mn></mrow></msub><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.167em"></mspace><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mn>2.02</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>0.0136</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mover><mi>𝛃</mi><mo accent="true">̂</mo></mover><mrow><mspace width="0.167em"></mspace><mn>2</mn><mo>×</mo><mn>1</mn></mrow></msub><mspace width="0.278em"></mspace><mtext mathvariant="normal">(estimated)</mtext><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.278em"></mspace><mo>+</mo><mspace width="0.278em"></mspace><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mn>2.77</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>5.95</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>2</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>10.7</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>4.23</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>4.02</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>3.48</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mover><mi>𝛆</mi><mo accent="true">̂</mo></mover><mrow><mspace width="0.167em"></mspace><mn>100</mn><mo>×</mo><mn>1</mn></mrow></msub><mspace width="0.278em"></mspace><mtext mathvariant="normal">(residual)</mtext><mspace width="0.167em"></mspace></mrow></munder></mrow><annotation encoding="application/x-tex">
+\underbrace{\begin{bmatrix} 4.78 \\ 7.94 \\ 3.99 \\ 12.7 \\ 6.28 \\ \vdots \\ 6.03 \\  5.5 \end{bmatrix}}_{\textstyle\,\mathbf{y}_{\,100 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 &amp; 0.409 \\    1 &amp; 1.69 \\    1 &amp; 1.59 \\    1 &amp; -0.331 \\    1 &amp; -2.29 \\ \vdots &amp; \vdots \\    1 &amp; -0.0506 \\    1 &amp; -0.306 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,100 \times 2}\,}\, \underbrace{\begin{bmatrix} 2.02 \\ -0.0136 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,2 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} 2.77 \\ 5.95 \\    2 \\ 10.7 \\ 4.23 \\ \vdots \\ 4.02 \\ 3.48 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,100 \times 1}\;\text{(residual)}\,}
+</annotation></semantics></math>
+</div>
+<p class="sym-caption" style="font-size:0.85em;color:#6b7280;margin-top:0.4rem">
+<strong>Left</strong>: observed vector
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐲</mi><annotation encoding="application/x-tex">\mathbf{y}</annotation></semantics></math>.
+<strong>Middle</strong>: the prediction
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐗</mi><mover><mi>𝛃</mi><mo accent="true">̂</mo></mover><mo>=</mo><mover><mi>𝛍</mi><mo accent="true">̂</mo></mover></mrow><annotation encoding="application/x-tex">\mathbf{X}\hat{\boldsymbol{\beta}} = \hat{\boldsymbol{\mu}}</annotation></semantics></math>.
+<strong>Right</strong>: the residual vector
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>𝛆</mi><mo accent="true">̂</mo></mover><mo>=</mo><mi>𝐲</mi><mo>−</mo><mover><mi>𝛍</mi><mo accent="true">̂</mo></mover></mrow><annotation encoding="application/x-tex">\hat{\boldsymbol{\varepsilon}} = \mathbf{y} - \hat{\boldsymbol{\mu}}</annotation></semantics></math>.
+Every row of this matrix equation is one of the response-equation rows
+from the worked row above.
+</p>
+<p class="sym-caption" style="font-size:0.95em;color:#374151;margin-top:1.2rem">
+And the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>
+submodel (no observed counterpart –
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>’s
+job is to describe the spread of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>𝛆</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat{\boldsymbol{\varepsilon}}</annotation></semantics></math>).
+For the same observation <em>i</em> = 1:
+</p>
+<div class="sym-eq">
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><msub><mover><mi>σ</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><msub><mover><mi>γ</mi><mo accent="true">̂</mo></mover><mn>0</mn></msub></mtd><mtd columnalign="right" style="text-align: right"><mspace width="1.0em"></mspace><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">sigma submodel for observation 1, log link</mtext><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><msub><mover><mi>σ</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mi>−</mi><mn>0.764</mn><mo>=</mo><mi>−</mi><mn>0.764</mn></mtd><mtd columnalign="right" style="text-align: right"><mspace width="1.0em"></mspace><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">with your numbers</mtext><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><msub><mover><mi>σ</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>−</mi><mn>0.764</mn><mo stretchy="false" form="postfix">)</mo><mo>≈</mo><mn>0.466</mn></mtd><mtd columnalign="right" style="text-align: right"><mspace width="1.0em"></mspace><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">predicted residual SD for observation 1</mtext><mo stretchy="false" form="postfix">)</mo></mtd></mtr></mtable><annotation encoding="application/x-tex">
+\begin{aligned}
+\log\hat\sigma_{1} &amp;= \hat\gamma_{0} &amp;\quad(\text{sigma submodel for observation 1, log link}) \\
+\log\hat\sigma_{1} &amp;= -0.764 = -0.764 &amp;\quad(\text{with your numbers}) \\
+\hat\sigma_{1} &amp;= \exp(-0.764) \approx 0.466 &amp;\quad(\text{predicted residual SD for observation 1})
+\end{aligned}
+</annotation></semantics></math>
+</div>
+<p class="sym-caption" style="font-size:0.95em;color:#374151">
+Stacking the same log-link equation for all <em>n</em> = 100
+observations:
+</p>
+<div class="sym-eq">
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mspace width="-0.167em"></mspace><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mn>0.466</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.466</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.466</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.466</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.466</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.466</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.466</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mi>𝛔</mi><mrow><mspace width="0.167em"></mspace><mn>100</mn><mo>×</mo><mn>1</mn></mrow></msub><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.278em"></mspace><mo>=</mo><mspace width="0.278em"></mspace><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mi>𝐗</mi><mrow><mi>σ</mi><mo>,</mo><mspace width="0.167em"></mspace><mn>100</mn><mo>×</mo><mn>1</mn></mrow></msub><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.167em"></mspace><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>0.764</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mi>𝛄</mi><mrow><mspace width="0.167em"></mspace><mn>1</mn><mo>×</mo><mn>1</mn></mrow></msub><mspace width="0.167em"></mspace></mrow></munder></mrow><annotation encoding="application/x-tex">
+\log\!\underbrace{\begin{bmatrix} 0.466 \\ 0.466 \\ 0.466 \\ 0.466 \\ 0.466 \\ \vdots \\ 0.466 \\ 0.466 \end{bmatrix}}_{\textstyle\,\boldsymbol{\sigma}_{\,100 \times 1}\,} \;=\; \underbrace{\begin{bmatrix}    1 \\    1 \\    1 \\    1 \\    1 \\ \vdots \\    1 \\    1 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\sigma,\,100 \times 1}\,}\, \underbrace{\begin{bmatrix} -0.764 \end{bmatrix}}_{\textstyle\,\boldsymbol{\gamma}_{\,1 \times 1}\,}
+</annotation></semantics></math>
+</div>
+</div>
+</div>
+<span id="sym-lognormal-1779824207-end" tabindex="-1"></span>
+<script>(function() {
+  var root = document.getElementById("sym-lognormal-1779824207");
+  if (!root) return;
+  var tabs   = Array.prototype.slice.call(root.querySelectorAll("[role=\"tab\"]"));
+  var panels = Array.prototype.slice.call(root.querySelectorAll("[role=\"tabpanel\"]"));
+  function activate(idx) {
+    tabs.forEach(function(t, i) {
+      var on = (i === idx);
+      t.classList.toggle("sym-active", on);
+      t.setAttribute("aria-selected", on ? "true" : "false");
+      t.setAttribute("tabindex", on ? "0" : "-1");
+    });
+    panels.forEach(function(p, i) {
+      var on = (i === idx);
+      p.classList.toggle("sym-active", on);
+      if (on) { p.removeAttribute("hidden"); } else { p.setAttribute("hidden", ""); }
+    });
+    if (typeof window.MathJax !== "undefined" && window.MathJax.typesetPromise) {
+      try { window.MathJax.typesetPromise([panels[idx]]); } catch (e) {}
+    }
+  }
+  tabs.forEach(function(t, idx) {
+    t.addEventListener("click", function() { activate(idx); t.focus(); });
+    t.addEventListener("keydown", function(e) {
+      var k = e.key;
+      var n = tabs.length;
+      var next = null;
+      if (k === "ArrowRight") next = (idx + 1) % n;
+      else if (k === "ArrowLeft") next = (idx - 1 + n) % n;
+      else if (k === "Home") next = 0;
+      else if (k === "End") next = n - 1;
+      else if (k === "Enter" || k === " ") { activate(idx); e.preventDefault(); return; }
+      if (next !== null) { activate(next); tabs[next].focus(); e.preventDefault(); }
+    });
+  });
+})();</script><style>.sym-tabs { position: relative; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; margin: 1em 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+.sym-tablist { display: flex; background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
+.sym-tab { flex: 1; text-align: center; padding: 0.6rem 0.5rem; cursor: pointer; font-weight: 600; color: #6b7280; border: 0; border-right: 1px solid #e5e7eb; background: transparent; user-select: none; font-size: 0.92rem; font-family: inherit; }
+.sym-tab:last-child { border-right: 0; }
+.sym-tab:hover { background: #fbe7e7; color: #7a2a2a; }
+.sym-tab.sym-active { background: #fff; color: #8a1f22; box-shadow: inset 0 -3px 0 #a0282b; }
+.sym-tab:focus-visible { outline: 2px solid #a0282b; outline-offset: -2px; }
+.sym-tab-marker { display: inline-block; margin-right: 0.35em; opacity: 0; transition: opacity 0.1s; }
+.sym-tab.sym-active .sym-tab-marker { opacity: 1; }
+.sym-panel { padding: 1rem 1.1rem 1.2rem; }
+.sym-panel[hidden] { display: none; }
+.sym-eq { background: #fbe7e7; border: 1px solid #a0282b; border-radius: 6px; padding: 0.7rem 1rem; margin: 0.4rem 0; text-align: center; overflow-x: auto; max-width: 100%; }
+.sym-caption { color: #6b7280; font-size: 0.85rem; margin: 0.2rem 0 0.4rem; }
+.sym-biology { color: #1f6feb; background: #f0f5ff; border-left: 3px solid #1f6feb; padding: 0.55rem 0.8rem; margin: 0.5rem 0 0.8rem; font-size: 0.95rem; line-height: 1.5; font-style: italic; }
+.sym-gloss { margin: 0.8rem 0 0.2rem; font-size: 0.9rem; color: #374151; }
+.sym-gloss > summary { cursor: pointer; font-weight: 600; color: #6b7280; padding: 0.2rem 0; }
+.sym-gloss > summary:hover { color: #8a1f22; }
+.sym-gloss-list { list-style: none; padding-left: 0.6rem; margin: 0.4rem 0 0.2rem; }
+.sym-gloss-list li { margin: 0.4rem 0; line-height: 1.7; }
+.sym-dim { color: #6b7280; font-size: 0.85rem; }
+.sym-matrix { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.78rem; line-height: 1.35; white-space: pre; overflow-x: auto; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 0.6rem 0.8rem; margin: 0.3rem 0; }
+.sym-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.sym-skip { position: absolute; top: -100px; left: 0; padding: 0.4rem 0.7rem; background: #8a1f22; color: #fff; text-decoration: none; font-size: 0.85rem; z-index: 5; }
+.sym-skip:focus { top: 0; }</style>
+<div class="sym-tabs" id="sym-lognormal-1779824207">
+<a class="sym-skip" href="#sym-lognormal-1779824207-end">Skip three-views widget</a>
+<div class="sym-tablist" role="tablist" aria-label="Three views of the model">
+<button type="button" class="sym-tab sym-active" role="tab" id="sym-lognormal-1779824207-tab-idx" aria-controls="sym-lognormal-1779824207-panel-idx" aria-selected="true" tabindex="0" data-tab="idx"><span class="sym-tab-marker" aria-hidden="true">▸</span>1. Index</button>
+<button type="button" class="sym-tab" role="tab" id="sym-lognormal-1779824207-tab-eq" aria-controls="sym-lognormal-1779824207-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq"><span class="sym-tab-marker" aria-hidden="true">▸</span>2. Matrix</button>
+<button type="button" class="sym-tab" role="tab" id="sym-lognormal-1779824207-tab-mat" aria-controls="sym-lognormal-1779824207-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat"><span class="sym-tab-marker" aria-hidden="true">▸</span>3. Equations with data</button>
+</div>
+<div class="sym-panel sym-active" role="tabpanel" id="sym-lognormal-1779824207-panel-idx" aria-labelledby="sym-lognormal-1779824207-tab-idx" data-panel="idx" tabindex="0">
+  <p class="sym-caption">What happens for each observation <em>i</em> -- the per-individual reading.</p>
+  <div class="sym-eq">$$\begin{aligned}
+y_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Lognormal}(\mu_i,\, \sigma_i^2) \quad\Longleftrightarrow\quad \log(y_i) \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
+\mu_i &amp; = \beta_{0} + \beta_{1} \, x_i \\
+\log(\sigma_i) &amp; = \gamma_{0}
+\end{aligned}$$</div>
+<details class="sym-gloss" open><summary>where:</summary><ul class="sym-gloss-list">
+<li>$y_i$ — response variable  <span class="sym-dim">$\mathbb{R}^{100}$</span>
+</li>
+<li>$x_i$ — continuous predictor  <span class="sym-dim">column of X (length 100)</span>
+</li>
+<li>$\mu_i$ — conditional mu of y  <span class="sym-dim">$\mathbb{R}^{100}$</span>
+</li>
+<li>$\sigma_i$ — conditional sigma of y  <span class="sym-dim">$\mathbb{R}^{100}$</span>
+</li>
+<li>$\beta_{0}, \beta_{1}$ — mu submodel coefficients  <span class="sym-dim">$\mathbb{R}^{2}$</span>
+</li>
+<li>$\gamma_{0}$ — sigma submodel coefficients  <span class="sym-dim">$\mathbb{R}^{1}$</span>
+</li>
+</ul></details>
+</div>
+<div class="sym-panel" role="tabpanel" id="sym-lognormal-1779824207-panel-eq" aria-labelledby="sym-lognormal-1779824207-tab-eq" data-panel="eq" hidden tabindex="0">
+  <p class="sym-caption">The same model in matrix form -- the structural contract every textbook past chapter 4 switches to.</p>
+  <div class="sym-eq">$$\begin{aligned}
+\log(\mathbf{y}) \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} &amp; \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2)) \\
+\boldsymbol{\mu} &amp; = \mathbf{X} \boldsymbol{\beta} \\
+\log(\boldsymbol{\sigma}) &amp; = \mathbf{Z} \boldsymbol{\gamma}
+\end{aligned}$$</div>
+<details class="sym-gloss" open><summary>where:</summary><ul class="sym-gloss-list">
+<li>$\mathbf{y}$ — response variable  <span class="sym-dim">$\mathbb{R}^{100}$</span>
+</li>
+<li>$\boldsymbol{\mu}$ — conditional mu of y  <span class="sym-dim">$\mathbb{R}^{100}$</span>
+</li>
+<li>$\boldsymbol{\sigma}$ — conditional sigma of y  <span class="sym-dim">$\mathbb{R}^{100}$</span>
+</li>
+<li>$\boldsymbol{\beta}$ — mu submodel coefficients  <span class="sym-dim">$\mathbb{R}^{2}$</span>
+</li>
+<li>$\boldsymbol{\gamma}$ — sigma submodel coefficients  <span class="sym-dim">$\mathbb{R}^{1}$</span>
+</li>
+<li>$\mathbf{X}$ — mu submodel design matrix  <span class="sym-dim">$\mathbb{R}^{100 \times 2}$</span>
+</li>
+<li>$\mathbf{Z}$ — sigma submodel design matrix  <span class="sym-dim">$\mathbb{R}^{100 \times 1}$</span>
+</li>
+</ul></details>
+</div>
+<div class="sym-panel" role="tabpanel" id="sym-lognormal-1779824207-panel-mat" aria-labelledby="sym-lognormal-1779824207-tab-mat" data-panel="mat" hidden tabindex="0">
+  <p class="sym-caption">The same matrix equation, with your actual numbers stacked inside the brackets -- what the computer multiplies. Showing first 5 and last 2 rows of n = 100.</p>
+  <span class="sym-sr-only">Matrix-form expansion of the model. Each row shows the response y_i and the corresponding row of the design matrix X (showing head and tail rows of the n total observations), with the coefficient vector beta listed below.</span>
+<p class="sym-caption" style="font-size:0.95em;color:#374151">For observation <em>i</em> = 1 of your data:</p>
+<div class="sym-eq">$$
+\begin{aligned}
+y_{1} &amp;= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{x}_{1} + \hat\varepsilon_{1} &amp;\quad(\text{response equation, one row of the model}) \\
+4.78 &amp;= 2.02 + -0.0136 \times 0.409 + (2.77) &amp;\quad(\text{with your numbers}) \\
+&amp;= \underbrace{2.01}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(2.77)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
+\end{aligned}
+$$</div>
+<p class="sym-caption" style="font-size:0.95em;color:#374151">Stacking the same response equation for all <em>n</em> = 100 observations:</p>
+<div class="sym-eq">$$
+\underbrace{\begin{bmatrix} 4.78 \\ 7.94 \\ 3.99 \\ 12.7 \\ 6.28 \\ \vdots \\ 6.03 \\  5.5 \end{bmatrix}}_{\textstyle\,\mathbf{y}_{\,100 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 &amp; 0.409 \\    1 &amp; 1.69 \\    1 &amp; 1.59 \\    1 &amp; -0.331 \\    1 &amp; -2.29 \\ \vdots &amp; \vdots \\    1 &amp; -0.0506 \\    1 &amp; -0.306 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,100 \times 2}\,}\, \underbrace{\begin{bmatrix} 2.02 \\ -0.0136 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,2 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} 2.77 \\ 5.95 \\    2 \\ 10.7 \\ 4.23 \\ \vdots \\ 4.02 \\ 3.48 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,100 \times 1}\;\text{(residual)}\,}
+$$</div>
+<p class="sym-caption" style="font-size:0.85em;color:#6b7280;margin-top:0.4rem"><strong>Left</strong>: observed vector $\mathbf{y}$. <strong>Middle</strong>: the prediction $\mathbf{X}\hat{\boldsymbol{\beta}} = \hat{\boldsymbol{\mu}}$. <strong>Right</strong>: the residual vector $\hat{\boldsymbol{\varepsilon}} = \mathbf{y} - \hat{\boldsymbol{\mu}}$. Every row of this matrix equation is one of the response-equation rows from the worked row above.</p>
+<p class="sym-caption" style="font-size:0.95em;color:#374151;margin-top:1.2rem">And the $\sigma$ submodel (no observed counterpart -- $\sigma$'s job is to describe the spread of $\hat{\boldsymbol{\varepsilon}}$). For the same observation <em>i</em> = 1:</p>
+<div class="sym-eq">$$
+\begin{aligned}
+\log\hat\sigma_{1} &amp;= \hat\gamma_{0} &amp;\quad(\text{sigma submodel for observation 1, log link}) \\
+\log\hat\sigma_{1} &amp;= -0.764 = -0.764 &amp;\quad(\text{with your numbers}) \\
+\hat\sigma_{1} &amp;= \exp(-0.764) \approx 0.466 &amp;\quad(\text{predicted residual SD for observation 1})
+\end{aligned}
+$$</div>
+<p class="sym-caption" style="font-size:0.95em;color:#374151">Stacking the same log-link equation for all <em>n</em> = 100 observations:</p>
+<div class="sym-eq">$$
+\log\!\underbrace{\begin{bmatrix} 0.466 \\ 0.466 \\ 0.466 \\ 0.466 \\ 0.466 \\ \vdots \\ 0.466 \\ 0.466 \end{bmatrix}}_{\textstyle\,\boldsymbol{\sigma}_{\,100 \times 1}\,} \;=\; \underbrace{\begin{bmatrix}    1 \\    1 \\    1 \\    1 \\    1 \\ \vdots \\    1 \\    1 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\sigma,\,100 \times 1}\,}\, \underbrace{\begin{bmatrix} -0.764 \end{bmatrix}}_{\textstyle\,\boldsymbol{\gamma}_{\,1 \times 1}\,}
+$$</div>
+</div>
+</div>
+<span id="sym-lognormal-1779824207-end" tabindex="-1"></span>
+<script>(function() {
+  var root = document.getElementById("sym-lognormal-1779824207");
+  if (!root) return;
+  var tabs   = Array.prototype.slice.call(root.querySelectorAll("[role=\"tab\"]"));
+  var panels = Array.prototype.slice.call(root.querySelectorAll("[role=\"tabpanel\"]"));
+  function activate(idx) {
+    tabs.forEach(function(t, i) {
+      var on = (i === idx);
+      t.classList.toggle("sym-active", on);
+      t.setAttribute("aria-selected", on ? "true" : "false");
+      t.setAttribute("tabindex", on ? "0" : "-1");
+    });
+    panels.forEach(function(p, i) {
+      var on = (i === idx);
+      p.classList.toggle("sym-active", on);
+      if (on) { p.removeAttribute("hidden"); } else { p.setAttribute("hidden", ""); }
+    });
+    if (typeof window.MathJax !== "undefined" && window.MathJax.typesetPromise) {
+      try { window.MathJax.typesetPromise([panels[idx]]); } catch (e) {}
+    }
+  }
+  tabs.forEach(function(t, idx) {
+    t.addEventListener("click", function() { activate(idx); t.focus(); });
+    t.addEventListener("keydown", function(e) {
+      var k = e.key;
+      var n = tabs.length;
+      var next = null;
+      if (k === "ArrowRight") next = (idx + 1) % n;
+      else if (k === "ArrowLeft") next = (idx - 1 + n) % n;
+      else if (k === "Home") next = 0;
+      else if (k === "End") next = n - 1;
+      else if (k === "Enter" || k === " ") { activate(idx); e.preventDefault(); return; }
+      if (next !== null) { activate(next); tabs[next].focus(); e.preventDefault(); }
+    });
+  });
+})();</script><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">pdf_alongside_html</span><span class="op">(</span><span class="va">sym</span>, <span class="st">"fig-lognormal.pdf"</span>,</span>
+<span>                   <span class="st">"Lognormal regression -- three views"</span><span class="op">)</span></span></code></pre></div>
+<p>
+<a href="fig-lognormal.pdf" class="btn btn-primary">Download as PDF</a>
+</p>
+</div>
 </div>
 <div class="section level3">
 <h3 id="gamma-positive-continuous-skewed">Gamma — positive continuous, skewed<a class="anchor" aria-label="anchor" href="#gamma-positive-continuous-skewed"></a>
@@ -198,7 +585,7 @@ excludes zero (CI method: <code>wald</code>).</em></p>
 (<code>stats::Gamma(link = "log")</code>). Coefficients are
 multiplicative on the mean response, like lognormal — but the variance
 scales as <code>mu^2 * sigma^2</code>, not <code>log(Y)</code>.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>; <span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">100</span></span>
 <span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/GammaDist.html" class="external-link">rgamma</a></span><span class="op">(</span><span class="va">n</span>, shape <span class="op">=</span> <span class="fl">2</span>, rate <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span>,</span>
 <span>                  x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span></span>
@@ -225,7 +612,7 @@ but loses the GLM toolkit.</p>
 <p><code>Y</code> is strictly between 0 and 1. Mean via logit link,
 precision via log link (large <code>sigma</code> means a
 <em>tighter</em> distribution around the mean).</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>; <span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">100</span></span>
 <span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Beta.html" class="external-link">rbeta</a></span><span class="op">(</span><span class="va">n</span>, <span class="fl">2</span>, <span class="fl">5</span><span class="op">)</span>,</span>
 <span>                  x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span></span>
@@ -240,6 +627,393 @@ y_i \mid \mu_i,\, \sigma_i \sim \mathrm{Beta}(\mu_i \sigma_i,\, (1 - \mu_i) \sig
 the <em>odds ratio</em> of the success probability. A coefficient of
 <code>0.3</code> means a unit increase in <code>x</code> multiplies the
 odds by <code>exp(0.3) ≈ 1.35</code>.</p>
+<div class="section level4">
+<h4 id="three-views-of-the-beta-fit">Three views of the Beta fit<a class="anchor" aria-label="anchor" href="#three-views-of-the-beta-fit"></a>
+</h4>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">htmltools</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/htmltools/reference/HTML.html" class="external-link">HTML</a></span><span class="op">(</span><span class="fu"><a href="../reference/as_html_three_views.html">as_html_three_views</a></span><span class="op">(</span><span class="va">sym</span>, id <span class="op">=</span> <span class="st">"beta"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<style>.sym-tabs { position: relative; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; margin: 1em 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+.sym-tablist { display: flex; background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
+.sym-tab { flex: 1; text-align: center; padding: 0.6rem 0.5rem; cursor: pointer; font-weight: 600; color: #6b7280; border: 0; border-right: 1px solid #e5e7eb; background: transparent; user-select: none; font-size: 0.92rem; font-family: inherit; }
+.sym-tab:last-child { border-right: 0; }
+.sym-tab:hover { background: #fbe7e7; color: #7a2a2a; }
+.sym-tab.sym-active { background: #fff; color: #8a1f22; box-shadow: inset 0 -3px 0 #a0282b; }
+.sym-tab:focus-visible { outline: 2px solid #a0282b; outline-offset: -2px; }
+.sym-tab-marker { display: inline-block; margin-right: 0.35em; opacity: 0; transition: opacity 0.1s; }
+.sym-tab.sym-active .sym-tab-marker { opacity: 1; }
+.sym-panel { padding: 1rem 1.1rem 1.2rem; }
+.sym-panel[hidden] { display: none; }
+.sym-eq { background: #fbe7e7; border: 1px solid #a0282b; border-radius: 6px; padding: 0.7rem 1rem; margin: 0.4rem 0; text-align: center; overflow-x: auto; max-width: 100%; }
+.sym-caption { color: #6b7280; font-size: 0.85rem; margin: 0.2rem 0 0.4rem; }
+.sym-biology { color: #1f6feb; background: #f0f5ff; border-left: 3px solid #1f6feb; padding: 0.55rem 0.8rem; margin: 0.5rem 0 0.8rem; font-size: 0.95rem; line-height: 1.5; font-style: italic; }
+.sym-gloss { margin: 0.8rem 0 0.2rem; font-size: 0.9rem; color: #374151; }
+.sym-gloss > summary { cursor: pointer; font-weight: 600; color: #6b7280; padding: 0.2rem 0; }
+.sym-gloss > summary:hover { color: #8a1f22; }
+.sym-gloss-list { list-style: none; padding-left: 0.6rem; margin: 0.4rem 0 0.2rem; }
+.sym-gloss-list li { margin: 0.4rem 0; line-height: 1.7; }
+.sym-dim { color: #6b7280; font-size: 0.85rem; }
+.sym-matrix { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.78rem; line-height: 1.35; white-space: pre; overflow-x: auto; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 0.6rem 0.8rem; margin: 0.3rem 0; }
+.sym-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.sym-skip { position: absolute; top: -100px; left: 0; padding: 0.4rem 0.7rem; background: #8a1f22; color: #fff; text-decoration: none; font-size: 0.85rem; z-index: 5; }
+.sym-skip:focus { top: 0; }</style>
+<div id="sym-beta-1779824208" class="sym-tabs">
+<a class="sym-skip" href="#sym-beta-1779824208-end">Skip three-views
+widget</a>
+<div class="sym-tablist" role="tablist" aria-label="Three views of the model">
+<button type="button" class="sym-tab sym-active" role="tab" id="sym-beta-1779824208-tab-idx" aria-controls="sym-beta-1779824208-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
+<span class="sym-tab-marker" aria-hidden="true">▸</span>1. Index
+</button>
+<button type="button" class="sym-tab" role="tab" id="sym-beta-1779824208-tab-eq" aria-controls="sym-beta-1779824208-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
+<span class="sym-tab-marker" aria-hidden="true">▸</span>2. Matrix
+</button>
+<button type="button" class="sym-tab" role="tab" id="sym-beta-1779824208-tab-mat" aria-controls="sym-beta-1779824208-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
+<span class="sym-tab-marker" aria-hidden="true">▸</span>3. Equations
+with data
+</button>
+</div>
+<div id="sym-beta-1779824208-panel-idx" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-beta-1779824208-tab-idx" data-panel="idx" tabindex="0">
+<p class="sym-caption">
+What happens for each observation <em>i</em> – the per-individual
+reading.
+</p>
+<div class="sym-eq">
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>y</mi><mi>i</mi></msub><mo>∣</mo><msub><mi>μ</mi><mi>i</mi></msub><mo>,</mo><mspace width="0.167em"></mspace><msub><mi>σ</mi><mi>i</mi></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>∼</mo><mrow><mi mathvariant="normal">B</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">a</mi></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>μ</mi><mi>i</mi></msub><msub><mi>σ</mi><mi>i</mi></msub><mo>,</mo><mspace width="0.167em"></mspace><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mi>μ</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><msub><mi>σ</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mrow><mi mathvariant="normal">l</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">g</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">t</mi></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>μ</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><msub><mi>β</mi><mn>0</mn></msub><mo>+</mo><msub><mi>β</mi><mn>1</mn></msub><mspace width="0.167em"></mspace><msub><mi>x</mi><mi>i</mi></msub></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>σ</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><msub><mi>γ</mi><mn>0</mn></msub></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+y_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Beta}(\mu_i \sigma_i,\, (1 - \mu_i) \sigma_i) \\
+\mathrm{logit}(\mu_i) &amp; = \beta_{0} + \beta_{1} \, x_i \\
+\log(\sigma_i) &amp; = \gamma_{0}
+\end{aligned}</annotation></semantics></math>
+</div>
+<details class="sym-gloss" open><summary>
+where:
+</summary><ul class="sym-gloss-list">
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>y</mi><mi>i</mi></msub><annotation encoding="application/x-tex">y_i</annotation></semantics></math>
+— response variable  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>100</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{100}</annotation></semantics></math></span>
+</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>x</mi><mi>i</mi></msub><annotation encoding="application/x-tex">x_i</annotation></semantics></math>
+— continuous predictor  <span class="sym-dim">column of X (length
+100)</span>
+</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>μ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\mu_i</annotation></semantics></math>
+— conditional mu of y  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>100</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{100}</annotation></semantics></math></span>
+</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\sigma_i</annotation></semantics></math>
+— conditional sigma of y  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>100</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{100}</annotation></semantics></math></span>
+</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mn>0</mn></msub><mo>,</mo><msub><mi>β</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">\beta_{0}, \beta_{1}</annotation></semantics></math>
+— mu submodel coefficients  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>2</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{2}</annotation></semantics></math></span>
+</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>γ</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\gamma_{0}</annotation></semantics></math>
+— sigma submodel coefficients  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>1</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{1}</annotation></semantics></math></span>
+</li>
+</ul></details>
+</div>
+<div id="sym-beta-1779824208-panel-eq" class="sym-panel" role="tabpanel" aria-labelledby="sym-beta-1779824208-tab-eq" data-panel="eq" hidden="" tabindex="0">
+<p class="sym-caption">
+The same model in matrix form – the structural contract every textbook
+past chapter 4 switches to.
+</p>
+<div class="sym-eq">
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mi>𝐲</mi><mo>∣</mo><mi>𝛍</mi><mo>,</mo><mspace width="0.167em"></mspace><mi>𝛔</mi></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>∼</mo><mrow><mi mathvariant="normal">B</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">a</mi></mrow><mo stretchy="false" form="prefix">(</mo><mi>𝛍</mi><mo>,</mo><mspace width="0.167em"></mspace><mi>𝛔</mi><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mrow><mi mathvariant="normal">l</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">g</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">t</mi></mrow><mo stretchy="false" form="prefix">(</mo><mi>𝛍</mi><mo stretchy="false" form="postfix">)</mo></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>𝐗</mi><mi>𝛃</mi></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>𝛔</mi><mo stretchy="false" form="postfix">)</mo></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>𝐙</mi><mi>𝛄</mi></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+\mathbf{y} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} &amp; \sim \mathrm{Beta}(\boldsymbol{\mu},\, \boldsymbol{\sigma}) \\
+\mathrm{logit}(\boldsymbol{\mu}) &amp; = \mathbf{X} \boldsymbol{\beta} \\
+\log(\boldsymbol{\sigma}) &amp; = \mathbf{Z} \boldsymbol{\gamma}
+\end{aligned}</annotation></semantics></math>
+</div>
+<details class="sym-gloss" open><summary>
+where:
+</summary><ul class="sym-gloss-list">
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐲</mi><annotation encoding="application/x-tex">\mathbf{y}</annotation></semantics></math>
+— response variable  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>100</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{100}</annotation></semantics></math></span>
+</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛍</mi><annotation encoding="application/x-tex">\boldsymbol{\mu}</annotation></semantics></math>
+— conditional mu of y  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>100</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{100}</annotation></semantics></math></span>
+</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛔</mi><annotation encoding="application/x-tex">\boldsymbol{\sigma}</annotation></semantics></math>
+— conditional sigma of y  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>100</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{100}</annotation></semantics></math></span>
+</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛃</mi><annotation encoding="application/x-tex">\boldsymbol{\beta}</annotation></semantics></math>
+— mu submodel coefficients  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>2</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{2}</annotation></semantics></math></span>
+</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛄</mi><annotation encoding="application/x-tex">\boldsymbol{\gamma}</annotation></semantics></math>
+— sigma submodel coefficients  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>1</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{1}</annotation></semantics></math></span>
+</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐗</mi><annotation encoding="application/x-tex">\mathbf{X}</annotation></semantics></math>
+— mu submodel design matrix  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mn>100</mn><mo>×</mo><mn>2</mn></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{100 \times 2}</annotation></semantics></math></span>
+</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐙</mi><annotation encoding="application/x-tex">\mathbf{Z}</annotation></semantics></math>
+— sigma submodel design matrix  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mn>100</mn><mo>×</mo><mn>1</mn></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{100 \times 1}</annotation></semantics></math></span>
+</li>
+</ul></details>
+</div>
+<div id="sym-beta-1779824208-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-beta-1779824208-tab-mat" data-panel="mat" hidden="" tabindex="0">
+<p class="sym-caption">
+The same matrix equation, with your actual numbers stacked inside the
+brackets – what the computer multiplies. Showing first 5 and last 2 rows
+of n = 100.
+</p>
+<span class="sym-sr-only">Matrix-form expansion of the model. Each row
+shows the response y_i and the corresponding row of the design matrix X
+(showing head and tail rows of the n total observations), with the
+coefficient vector beta listed below.</span>
+<p class="sym-caption" style="font-size:0.95em;color:#374151">
+For observation <em>i</em> = 1 of your data:
+</p>
+<div class="sym-eq">
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>y</mi><mn>1</mn></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><msub><mover><mi>β</mi><mo accent="true">̂</mo></mover><mn>0</mn></msub><mo>+</mo><msub><mover><mi>β</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mspace width="0.167em"></mspace><msub><mi mathvariant="normal">x</mi><mn>1</mn></msub><mo>+</mo><msub><mover><mi>ε</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub></mtd><mtd columnalign="right" style="text-align: right"><mspace width="1.0em"></mspace><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">response equation, one row of the model</mtext><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mn>0.175</mn></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mi>−</mi><mn>0.824</mn><mo>+</mo><mi>−</mi><mn>0.0874</mn><mo>×</mo><mn>1.43</mn><mo>+</mo><mo stretchy="false" form="prefix">(</mo><mn>1.13</mn><mo stretchy="false" form="postfix">)</mo></mtd><mtd columnalign="right" style="text-align: right"><mspace width="1.0em"></mspace><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">with your numbers</mtext><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><munder><munder><mrow><mi>−</mi><mn>0.95</mn></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mover><mi>μ</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mspace width="0.167em"></mspace><mtext mathvariant="normal">(predicted)</mtext><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.278em"></mspace><mo>+</mo><mspace width="0.278em"></mspace><munder><munder><mrow><mo stretchy="false" form="prefix">(</mo><mn>1.13</mn><mo stretchy="false" form="postfix">)</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mover><mi>ε</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mspace width="0.167em"></mspace><mtext mathvariant="normal">(residual)</mtext><mspace width="0.167em"></mspace></mrow></munder></mtd></mtr></mtable><annotation encoding="application/x-tex">
+\begin{aligned}
+y_{1} &amp;= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{x}_{1} + \hat\varepsilon_{1} &amp;\quad(\text{response equation, one row of the model}) \\
+0.175 &amp;= -0.824 + -0.0874 \times 1.43 + (1.13) &amp;\quad(\text{with your numbers}) \\
+&amp;= \underbrace{-0.95}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(1.13)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
+\end{aligned}
+</annotation></semantics></math>
+</div>
+<p class="sym-caption" style="font-size:0.95em;color:#374151">
+Stacking the same response equation for all <em>n</em> = 100
+observations:
+</p>
+<div class="sym-eq">
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mn>0.175</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.324</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.146</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.357</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.148</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.174</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.201</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mi>𝐲</mi><mrow><mspace width="0.167em"></mspace><mn>100</mn><mo>×</mo><mn>1</mn></mrow></msub><mspace width="0.278em"></mspace><mtext mathvariant="normal">(observed)</mtext><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.278em"></mspace><mo>=</mo><mspace width="0.278em"></mspace><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>1.43</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>0.651</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>0.207</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>0.393</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>0.32</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>0.164</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0.421</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mi>𝐗</mi><mrow><mspace width="0.167em"></mspace><mn>100</mn><mo>×</mo><mn>2</mn></mrow></msub><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.167em"></mspace><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>0.824</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>0.0874</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mover><mi>𝛃</mi><mo accent="true">̂</mo></mover><mrow><mspace width="0.167em"></mspace><mn>2</mn><mo>×</mo><mn>1</mn></mrow></msub><mspace width="0.278em"></mspace><mtext mathvariant="normal">(estimated)</mtext><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.278em"></mspace><mo>+</mo><mspace width="0.278em"></mspace><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mn>1.13</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1.09</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.952</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1.15</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.944</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.984</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1.06</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mover><mi>𝛆</mi><mo accent="true">̂</mo></mover><mrow><mspace width="0.167em"></mspace><mn>100</mn><mo>×</mo><mn>1</mn></mrow></msub><mspace width="0.278em"></mspace><mtext mathvariant="normal">(residual)</mtext><mspace width="0.167em"></mspace></mrow></munder></mrow><annotation encoding="application/x-tex">
+\underbrace{\begin{bmatrix} 0.175 \\ 0.324 \\ 0.146 \\ 0.357 \\ 0.148 \\ \vdots \\ 0.174 \\ 0.201 \end{bmatrix}}_{\textstyle\,\mathbf{y}_{\,100 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 &amp; 1.43 \\    1 &amp; -0.651 \\    1 &amp; -0.207 \\    1 &amp; -0.393 \\    1 &amp; -0.32 \\ \vdots &amp; \vdots \\    1 &amp; -0.164 \\    1 &amp; 0.421 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,100 \times 2}\,}\, \underbrace{\begin{bmatrix} -0.824 \\ -0.0874 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,2 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} 1.13 \\ 1.09 \\ 0.952 \\ 1.15 \\ 0.944 \\ \vdots \\ 0.984 \\ 1.06 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,100 \times 1}\;\text{(residual)}\,}
+</annotation></semantics></math>
+</div>
+<p class="sym-caption" style="font-size:0.85em;color:#6b7280;margin-top:0.4rem">
+<strong>Left</strong>: observed vector
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐲</mi><annotation encoding="application/x-tex">\mathbf{y}</annotation></semantics></math>.
+<strong>Middle</strong>: the prediction
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐗</mi><mover><mi>𝛃</mi><mo accent="true">̂</mo></mover><mo>=</mo><mover><mi>𝛍</mi><mo accent="true">̂</mo></mover></mrow><annotation encoding="application/x-tex">\mathbf{X}\hat{\boldsymbol{\beta}} = \hat{\boldsymbol{\mu}}</annotation></semantics></math>.
+<strong>Right</strong>: the residual vector
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>𝛆</mi><mo accent="true">̂</mo></mover><mo>=</mo><mi>𝐲</mi><mo>−</mo><mover><mi>𝛍</mi><mo accent="true">̂</mo></mover></mrow><annotation encoding="application/x-tex">\hat{\boldsymbol{\varepsilon}} = \mathbf{y} - \hat{\boldsymbol{\mu}}</annotation></semantics></math>.
+Every row of this matrix equation is one of the response-equation rows
+from the worked row above.
+</p>
+<p class="sym-caption" style="font-size:0.95em;color:#374151;margin-top:1.2rem">
+And the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>
+submodel (no observed counterpart –
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>’s
+job is to describe the spread of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>𝛆</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat{\boldsymbol{\varepsilon}}</annotation></semantics></math>).
+For the same observation <em>i</em> = 1:
+</p>
+<div class="sym-eq">
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><msub><mover><mi>σ</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><msub><mover><mi>γ</mi><mo accent="true">̂</mo></mover><mn>0</mn></msub></mtd><mtd columnalign="right" style="text-align: right"><mspace width="1.0em"></mspace><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">sigma submodel for observation 1, log link</mtext><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><msub><mover><mi>σ</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mi>−</mi><mn>1.04</mn><mo>=</mo><mi>−</mi><mn>1.04</mn></mtd><mtd columnalign="right" style="text-align: right"><mspace width="1.0em"></mspace><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">with your numbers</mtext><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><msub><mover><mi>σ</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>−</mi><mn>1.04</mn><mo stretchy="false" form="postfix">)</mo><mo>≈</mo><mn>0.353</mn></mtd><mtd columnalign="right" style="text-align: right"><mspace width="1.0em"></mspace><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">predicted residual SD for observation 1</mtext><mo stretchy="false" form="postfix">)</mo></mtd></mtr></mtable><annotation encoding="application/x-tex">
+\begin{aligned}
+\log\hat\sigma_{1} &amp;= \hat\gamma_{0} &amp;\quad(\text{sigma submodel for observation 1, log link}) \\
+\log\hat\sigma_{1} &amp;= -1.04 = -1.04 &amp;\quad(\text{with your numbers}) \\
+\hat\sigma_{1} &amp;= \exp(-1.04) \approx 0.353 &amp;\quad(\text{predicted residual SD for observation 1})
+\end{aligned}
+</annotation></semantics></math>
+</div>
+<p class="sym-caption" style="font-size:0.95em;color:#374151">
+Stacking the same log-link equation for all <em>n</em> = 100
+observations:
+</p>
+<div class="sym-eq">
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mspace width="-0.167em"></mspace><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mn>0.353</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.353</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.353</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.353</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.353</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.353</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.353</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mi>𝛔</mi><mrow><mspace width="0.167em"></mspace><mn>100</mn><mo>×</mo><mn>1</mn></mrow></msub><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.278em"></mspace><mo>=</mo><mspace width="0.278em"></mspace><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mi>𝐗</mi><mrow><mi>σ</mi><mo>,</mo><mspace width="0.167em"></mspace><mn>100</mn><mo>×</mo><mn>1</mn></mrow></msub><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.167em"></mspace><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>1.04</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mi>𝛄</mi><mrow><mspace width="0.167em"></mspace><mn>1</mn><mo>×</mo><mn>1</mn></mrow></msub><mspace width="0.167em"></mspace></mrow></munder></mrow><annotation encoding="application/x-tex">
+\log\!\underbrace{\begin{bmatrix} 0.353 \\ 0.353 \\ 0.353 \\ 0.353 \\ 0.353 \\ \vdots \\ 0.353 \\ 0.353 \end{bmatrix}}_{\textstyle\,\boldsymbol{\sigma}_{\,100 \times 1}\,} \;=\; \underbrace{\begin{bmatrix}    1 \\    1 \\    1 \\    1 \\    1 \\ \vdots \\    1 \\    1 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\sigma,\,100 \times 1}\,}\, \underbrace{\begin{bmatrix} -1.04 \end{bmatrix}}_{\textstyle\,\boldsymbol{\gamma}_{\,1 \times 1}\,}
+</annotation></semantics></math>
+</div>
+</div>
+</div>
+<span id="sym-beta-1779824208-end" tabindex="-1"></span>
+<script>(function() {
+  var root = document.getElementById("sym-beta-1779824208");
+  if (!root) return;
+  var tabs   = Array.prototype.slice.call(root.querySelectorAll("[role=\"tab\"]"));
+  var panels = Array.prototype.slice.call(root.querySelectorAll("[role=\"tabpanel\"]"));
+  function activate(idx) {
+    tabs.forEach(function(t, i) {
+      var on = (i === idx);
+      t.classList.toggle("sym-active", on);
+      t.setAttribute("aria-selected", on ? "true" : "false");
+      t.setAttribute("tabindex", on ? "0" : "-1");
+    });
+    panels.forEach(function(p, i) {
+      var on = (i === idx);
+      p.classList.toggle("sym-active", on);
+      if (on) { p.removeAttribute("hidden"); } else { p.setAttribute("hidden", ""); }
+    });
+    if (typeof window.MathJax !== "undefined" && window.MathJax.typesetPromise) {
+      try { window.MathJax.typesetPromise([panels[idx]]); } catch (e) {}
+    }
+  }
+  tabs.forEach(function(t, idx) {
+    t.addEventListener("click", function() { activate(idx); t.focus(); });
+    t.addEventListener("keydown", function(e) {
+      var k = e.key;
+      var n = tabs.length;
+      var next = null;
+      if (k === "ArrowRight") next = (idx + 1) % n;
+      else if (k === "ArrowLeft") next = (idx - 1 + n) % n;
+      else if (k === "Home") next = 0;
+      else if (k === "End") next = n - 1;
+      else if (k === "Enter" || k === " ") { activate(idx); e.preventDefault(); return; }
+      if (next !== null) { activate(next); tabs[next].focus(); e.preventDefault(); }
+    });
+  });
+})();</script><style>.sym-tabs { position: relative; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; margin: 1em 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+.sym-tablist { display: flex; background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
+.sym-tab { flex: 1; text-align: center; padding: 0.6rem 0.5rem; cursor: pointer; font-weight: 600; color: #6b7280; border: 0; border-right: 1px solid #e5e7eb; background: transparent; user-select: none; font-size: 0.92rem; font-family: inherit; }
+.sym-tab:last-child { border-right: 0; }
+.sym-tab:hover { background: #fbe7e7; color: #7a2a2a; }
+.sym-tab.sym-active { background: #fff; color: #8a1f22; box-shadow: inset 0 -3px 0 #a0282b; }
+.sym-tab:focus-visible { outline: 2px solid #a0282b; outline-offset: -2px; }
+.sym-tab-marker { display: inline-block; margin-right: 0.35em; opacity: 0; transition: opacity 0.1s; }
+.sym-tab.sym-active .sym-tab-marker { opacity: 1; }
+.sym-panel { padding: 1rem 1.1rem 1.2rem; }
+.sym-panel[hidden] { display: none; }
+.sym-eq { background: #fbe7e7; border: 1px solid #a0282b; border-radius: 6px; padding: 0.7rem 1rem; margin: 0.4rem 0; text-align: center; overflow-x: auto; max-width: 100%; }
+.sym-caption { color: #6b7280; font-size: 0.85rem; margin: 0.2rem 0 0.4rem; }
+.sym-biology { color: #1f6feb; background: #f0f5ff; border-left: 3px solid #1f6feb; padding: 0.55rem 0.8rem; margin: 0.5rem 0 0.8rem; font-size: 0.95rem; line-height: 1.5; font-style: italic; }
+.sym-gloss { margin: 0.8rem 0 0.2rem; font-size: 0.9rem; color: #374151; }
+.sym-gloss > summary { cursor: pointer; font-weight: 600; color: #6b7280; padding: 0.2rem 0; }
+.sym-gloss > summary:hover { color: #8a1f22; }
+.sym-gloss-list { list-style: none; padding-left: 0.6rem; margin: 0.4rem 0 0.2rem; }
+.sym-gloss-list li { margin: 0.4rem 0; line-height: 1.7; }
+.sym-dim { color: #6b7280; font-size: 0.85rem; }
+.sym-matrix { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.78rem; line-height: 1.35; white-space: pre; overflow-x: auto; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 0.6rem 0.8rem; margin: 0.3rem 0; }
+.sym-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.sym-skip { position: absolute; top: -100px; left: 0; padding: 0.4rem 0.7rem; background: #8a1f22; color: #fff; text-decoration: none; font-size: 0.85rem; z-index: 5; }
+.sym-skip:focus { top: 0; }</style>
+<div class="sym-tabs" id="sym-beta-1779824208">
+<a class="sym-skip" href="#sym-beta-1779824208-end">Skip three-views widget</a>
+<div class="sym-tablist" role="tablist" aria-label="Three views of the model">
+<button type="button" class="sym-tab sym-active" role="tab" id="sym-beta-1779824208-tab-idx" aria-controls="sym-beta-1779824208-panel-idx" aria-selected="true" tabindex="0" data-tab="idx"><span class="sym-tab-marker" aria-hidden="true">▸</span>1. Index</button>
+<button type="button" class="sym-tab" role="tab" id="sym-beta-1779824208-tab-eq" aria-controls="sym-beta-1779824208-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq"><span class="sym-tab-marker" aria-hidden="true">▸</span>2. Matrix</button>
+<button type="button" class="sym-tab" role="tab" id="sym-beta-1779824208-tab-mat" aria-controls="sym-beta-1779824208-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat"><span class="sym-tab-marker" aria-hidden="true">▸</span>3. Equations with data</button>
+</div>
+<div class="sym-panel sym-active" role="tabpanel" id="sym-beta-1779824208-panel-idx" aria-labelledby="sym-beta-1779824208-tab-idx" data-panel="idx" tabindex="0">
+  <p class="sym-caption">What happens for each observation <em>i</em> -- the per-individual reading.</p>
+  <div class="sym-eq">$$\begin{aligned}
+y_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Beta}(\mu_i \sigma_i,\, (1 - \mu_i) \sigma_i) \\
+\mathrm{logit}(\mu_i) &amp; = \beta_{0} + \beta_{1} \, x_i \\
+\log(\sigma_i) &amp; = \gamma_{0}
+\end{aligned}$$</div>
+<details class="sym-gloss" open><summary>where:</summary><ul class="sym-gloss-list">
+<li>$y_i$ — response variable  <span class="sym-dim">$\mathbb{R}^{100}$</span>
+</li>
+<li>$x_i$ — continuous predictor  <span class="sym-dim">column of X (length 100)</span>
+</li>
+<li>$\mu_i$ — conditional mu of y  <span class="sym-dim">$\mathbb{R}^{100}$</span>
+</li>
+<li>$\sigma_i$ — conditional sigma of y  <span class="sym-dim">$\mathbb{R}^{100}$</span>
+</li>
+<li>$\beta_{0}, \beta_{1}$ — mu submodel coefficients  <span class="sym-dim">$\mathbb{R}^{2}$</span>
+</li>
+<li>$\gamma_{0}$ — sigma submodel coefficients  <span class="sym-dim">$\mathbb{R}^{1}$</span>
+</li>
+</ul></details>
+</div>
+<div class="sym-panel" role="tabpanel" id="sym-beta-1779824208-panel-eq" aria-labelledby="sym-beta-1779824208-tab-eq" data-panel="eq" hidden tabindex="0">
+  <p class="sym-caption">The same model in matrix form -- the structural contract every textbook past chapter 4 switches to.</p>
+  <div class="sym-eq">$$\begin{aligned}
+\mathbf{y} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} &amp; \sim \mathrm{Beta}(\boldsymbol{\mu},\, \boldsymbol{\sigma}) \\
+\mathrm{logit}(\boldsymbol{\mu}) &amp; = \mathbf{X} \boldsymbol{\beta} \\
+\log(\boldsymbol{\sigma}) &amp; = \mathbf{Z} \boldsymbol{\gamma}
+\end{aligned}$$</div>
+<details class="sym-gloss" open><summary>where:</summary><ul class="sym-gloss-list">
+<li>$\mathbf{y}$ — response variable  <span class="sym-dim">$\mathbb{R}^{100}$</span>
+</li>
+<li>$\boldsymbol{\mu}$ — conditional mu of y  <span class="sym-dim">$\mathbb{R}^{100}$</span>
+</li>
+<li>$\boldsymbol{\sigma}$ — conditional sigma of y  <span class="sym-dim">$\mathbb{R}^{100}$</span>
+</li>
+<li>$\boldsymbol{\beta}$ — mu submodel coefficients  <span class="sym-dim">$\mathbb{R}^{2}$</span>
+</li>
+<li>$\boldsymbol{\gamma}$ — sigma submodel coefficients  <span class="sym-dim">$\mathbb{R}^{1}$</span>
+</li>
+<li>$\mathbf{X}$ — mu submodel design matrix  <span class="sym-dim">$\mathbb{R}^{100 \times 2}$</span>
+</li>
+<li>$\mathbf{Z}$ — sigma submodel design matrix  <span class="sym-dim">$\mathbb{R}^{100 \times 1}$</span>
+</li>
+</ul></details>
+</div>
+<div class="sym-panel" role="tabpanel" id="sym-beta-1779824208-panel-mat" aria-labelledby="sym-beta-1779824208-tab-mat" data-panel="mat" hidden tabindex="0">
+  <p class="sym-caption">The same matrix equation, with your actual numbers stacked inside the brackets -- what the computer multiplies. Showing first 5 and last 2 rows of n = 100.</p>
+  <span class="sym-sr-only">Matrix-form expansion of the model. Each row shows the response y_i and the corresponding row of the design matrix X (showing head and tail rows of the n total observations), with the coefficient vector beta listed below.</span>
+<p class="sym-caption" style="font-size:0.95em;color:#374151">For observation <em>i</em> = 1 of your data:</p>
+<div class="sym-eq">$$
+\begin{aligned}
+y_{1} &amp;= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{x}_{1} + \hat\varepsilon_{1} &amp;\quad(\text{response equation, one row of the model}) \\
+0.175 &amp;= -0.824 + -0.0874 \times 1.43 + (1.13) &amp;\quad(\text{with your numbers}) \\
+&amp;= \underbrace{-0.95}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(1.13)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
+\end{aligned}
+$$</div>
+<p class="sym-caption" style="font-size:0.95em;color:#374151">Stacking the same response equation for all <em>n</em> = 100 observations:</p>
+<div class="sym-eq">$$
+\underbrace{\begin{bmatrix} 0.175 \\ 0.324 \\ 0.146 \\ 0.357 \\ 0.148 \\ \vdots \\ 0.174 \\ 0.201 \end{bmatrix}}_{\textstyle\,\mathbf{y}_{\,100 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 &amp; 1.43 \\    1 &amp; -0.651 \\    1 &amp; -0.207 \\    1 &amp; -0.393 \\    1 &amp; -0.32 \\ \vdots &amp; \vdots \\    1 &amp; -0.164 \\    1 &amp; 0.421 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,100 \times 2}\,}\, \underbrace{\begin{bmatrix} -0.824 \\ -0.0874 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,2 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} 1.13 \\ 1.09 \\ 0.952 \\ 1.15 \\ 0.944 \\ \vdots \\ 0.984 \\ 1.06 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,100 \times 1}\;\text{(residual)}\,}
+$$</div>
+<p class="sym-caption" style="font-size:0.85em;color:#6b7280;margin-top:0.4rem"><strong>Left</strong>: observed vector $\mathbf{y}$. <strong>Middle</strong>: the prediction $\mathbf{X}\hat{\boldsymbol{\beta}} = \hat{\boldsymbol{\mu}}$. <strong>Right</strong>: the residual vector $\hat{\boldsymbol{\varepsilon}} = \mathbf{y} - \hat{\boldsymbol{\mu}}$. Every row of this matrix equation is one of the response-equation rows from the worked row above.</p>
+<p class="sym-caption" style="font-size:0.95em;color:#374151;margin-top:1.2rem">And the $\sigma$ submodel (no observed counterpart -- $\sigma$'s job is to describe the spread of $\hat{\boldsymbol{\varepsilon}}$). For the same observation <em>i</em> = 1:</p>
+<div class="sym-eq">$$
+\begin{aligned}
+\log\hat\sigma_{1} &amp;= \hat\gamma_{0} &amp;\quad(\text{sigma submodel for observation 1, log link}) \\
+\log\hat\sigma_{1} &amp;= -1.04 = -1.04 &amp;\quad(\text{with your numbers}) \\
+\hat\sigma_{1} &amp;= \exp(-1.04) \approx 0.353 &amp;\quad(\text{predicted residual SD for observation 1})
+\end{aligned}
+$$</div>
+<p class="sym-caption" style="font-size:0.95em;color:#374151">Stacking the same log-link equation for all <em>n</em> = 100 observations:</p>
+<div class="sym-eq">$$
+\log\!\underbrace{\begin{bmatrix} 0.353 \\ 0.353 \\ 0.353 \\ 0.353 \\ 0.353 \\ \vdots \\ 0.353 \\ 0.353 \end{bmatrix}}_{\textstyle\,\boldsymbol{\sigma}_{\,100 \times 1}\,} \;=\; \underbrace{\begin{bmatrix}    1 \\    1 \\    1 \\    1 \\    1 \\ \vdots \\    1 \\    1 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\sigma,\,100 \times 1}\,}\, \underbrace{\begin{bmatrix} -1.04 \end{bmatrix}}_{\textstyle\,\boldsymbol{\gamma}_{\,1 \times 1}\,}
+$$</div>
+</div>
+</div>
+<span id="sym-beta-1779824208-end" tabindex="-1"></span>
+<script>(function() {
+  var root = document.getElementById("sym-beta-1779824208");
+  if (!root) return;
+  var tabs   = Array.prototype.slice.call(root.querySelectorAll("[role=\"tab\"]"));
+  var panels = Array.prototype.slice.call(root.querySelectorAll("[role=\"tabpanel\"]"));
+  function activate(idx) {
+    tabs.forEach(function(t, i) {
+      var on = (i === idx);
+      t.classList.toggle("sym-active", on);
+      t.setAttribute("aria-selected", on ? "true" : "false");
+      t.setAttribute("tabindex", on ? "0" : "-1");
+    });
+    panels.forEach(function(p, i) {
+      var on = (i === idx);
+      p.classList.toggle("sym-active", on);
+      if (on) { p.removeAttribute("hidden"); } else { p.setAttribute("hidden", ""); }
+    });
+    if (typeof window.MathJax !== "undefined" && window.MathJax.typesetPromise) {
+      try { window.MathJax.typesetPromise([panels[idx]]); } catch (e) {}
+    }
+  }
+  tabs.forEach(function(t, idx) {
+    t.addEventListener("click", function() { activate(idx); t.focus(); });
+    t.addEventListener("keydown", function(e) {
+      var k = e.key;
+      var n = tabs.length;
+      var next = null;
+      if (k === "ArrowRight") next = (idx + 1) % n;
+      else if (k === "ArrowLeft") next = (idx - 1 + n) % n;
+      else if (k === "Home") next = 0;
+      else if (k === "End") next = n - 1;
+      else if (k === "Enter" || k === " ") { activate(idx); e.preventDefault(); return; }
+      if (next !== null) { activate(next); tabs[next].focus(); e.preventDefault(); }
+    });
+  });
+})();</script><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">pdf_alongside_html</span><span class="op">(</span><span class="va">sym</span>, <span class="st">"fig-beta.pdf"</span>,</span>
+<span>                   <span class="st">"Beta regression -- three views"</span><span class="op">)</span></span></code></pre></div>
+<p>
+<a href="fig-beta.pdf" class="btn btn-primary">Download as PDF</a>
+</p>
+</div>
 </div>
 <div class="section level3">
 <h3 id="beta-binomial-overdispersed-binomial-counts">Beta-binomial — overdispersed binomial counts<a class="anchor" aria-label="anchor" href="#beta-binomial-overdispersed-binomial-counts"></a>
@@ -249,7 +1023,7 @@ trials. Specify via <code>cbind(successes, failures)</code>.
 <code>sigma</code> controls overdispersion: large <code>sigma</code>
 approaches binomial (no overdispersion), small <code>sigma</code> means
 strong overdispersion.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>; <span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">80</span></span>
 <span><span class="va">trials</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">5</span><span class="op">:</span><span class="fl">20</span>, <span class="va">n</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Logistic.html" class="external-link">plogis</a></span><span class="op">(</span><span class="fl">0.5</span> <span class="op">+</span> <span class="fl">0.5</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span></span>
@@ -260,6 +1034,7 @@ strong overdispersion.</p>
 <span><span class="op">)</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://itchyshin.github.io/drmTMB/reference/drmTMB.html" class="external-link">drmTMB</a></span><span class="op">(</span><span class="fu"><a href="https://itchyshin.github.io/drmTMB/reference/drm_formula.html" class="external-link">drm_formula</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">successes</span>, <span class="va">failures</span><span class="op">)</span> <span class="op">~</span> <span class="va">x</span>, <span class="va">sigma</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span>,</span>
 <span>              family <span class="op">=</span> <span class="fu"><a href="https://itchyshin.github.io/drmTMB/reference/beta_binomial.html" class="external-link">beta_binomial</a></span><span class="op">(</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">dat</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning in sqrt(diag(cov)): NaNs produced</span></span>
 <span><span class="va">sym</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/symbolize.html">symbolize</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
 <span><span class="fu">render_math</span><span class="op">(</span><span class="va">sym</span><span class="op">$</span><span class="va">distribution</span><span class="op">$</span><span class="va">latex</span><span class="op">)</span></span></code></pre></div>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">d</mi><mo stretchy="false" form="prefix" mathvariant="normal">(</mo><mi mathvariant="normal">s</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">s</mi><mo mathvariant="normal">,</mo><mi mathvariant="normal">f</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">s</mi><mo stretchy="false" form="postfix" mathvariant="normal">)</mo></mrow><mi>i</mi></msub><mo>∣</mo><msub><mi>N</mi><mi>i</mi></msub><mo>,</mo><mspace width="0.167em"></mspace><msub><mi>μ</mi><mi>i</mi></msub><mo>,</mo><mspace width="0.167em"></mspace><msub><mi>σ</mi><mi>i</mi></msub><mo>∼</mo><mrow><mi mathvariant="normal">B</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">B</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>N</mi><mi>i</mi></msub><mo>,</mo><mspace width="0.167em"></mspace><msub><mi>μ</mi><mi>i</mi></msub><mo>,</mo><mspace width="0.167em"></mspace><msub><mi>σ</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>;</mo><mi>𝔼</mi><mo stretchy="false" form="prefix">[</mo><msub><mrow><mi mathvariant="normal">c</mi><mi mathvariant="normal">b</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">d</mi><mo stretchy="false" form="prefix" mathvariant="normal">(</mo><mi mathvariant="normal">s</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">s</mi><mo mathvariant="normal">,</mo><mi mathvariant="normal">f</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">s</mi><mo stretchy="false" form="postfix" mathvariant="normal">)</mo></mrow><mi>i</mi></msub><mo stretchy="false" form="postfix">]</mo><mo>=</mo><msub><mi>N</mi><mi>i</mi></msub><msub><mi>μ</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">
@@ -280,7 +1055,7 @@ probability.</p>
 The Poisson family forces <code>variance = mean</code>; if your data
 show overdispersion (variance &gt; mean), prefer
 <code>nbinom2</code>.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>; <span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">100</span></span>
 <span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span><span class="va">n</span>, lambda <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="fl">0.3</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>                  x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span></span>
@@ -294,6 +1069,335 @@ y_i \mid \mu_i \sim \mathrm{Poisson}(\mu_i)
 <p><strong>Coefficient reading on mu:</strong> <code>exp(beta)</code> is
 the <em>rate ratio</em> — a multiplicative effect on the expected
 count.</p>
+<div class="section level4">
+<h4 id="three-views-of-the-poisson-fit">Three views of the Poisson fit<a class="anchor" aria-label="anchor" href="#three-views-of-the-poisson-fit"></a>
+</h4>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">htmltools</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/htmltools/reference/HTML.html" class="external-link">HTML</a></span><span class="op">(</span><span class="fu"><a href="../reference/as_html_three_views.html">as_html_three_views</a></span><span class="op">(</span><span class="va">sym</span>, id <span class="op">=</span> <span class="st">"poisson"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<style>.sym-tabs { position: relative; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; margin: 1em 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+.sym-tablist { display: flex; background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
+.sym-tab { flex: 1; text-align: center; padding: 0.6rem 0.5rem; cursor: pointer; font-weight: 600; color: #6b7280; border: 0; border-right: 1px solid #e5e7eb; background: transparent; user-select: none; font-size: 0.92rem; font-family: inherit; }
+.sym-tab:last-child { border-right: 0; }
+.sym-tab:hover { background: #fbe7e7; color: #7a2a2a; }
+.sym-tab.sym-active { background: #fff; color: #8a1f22; box-shadow: inset 0 -3px 0 #a0282b; }
+.sym-tab:focus-visible { outline: 2px solid #a0282b; outline-offset: -2px; }
+.sym-tab-marker { display: inline-block; margin-right: 0.35em; opacity: 0; transition: opacity 0.1s; }
+.sym-tab.sym-active .sym-tab-marker { opacity: 1; }
+.sym-panel { padding: 1rem 1.1rem 1.2rem; }
+.sym-panel[hidden] { display: none; }
+.sym-eq { background: #fbe7e7; border: 1px solid #a0282b; border-radius: 6px; padding: 0.7rem 1rem; margin: 0.4rem 0; text-align: center; overflow-x: auto; max-width: 100%; }
+.sym-caption { color: #6b7280; font-size: 0.85rem; margin: 0.2rem 0 0.4rem; }
+.sym-biology { color: #1f6feb; background: #f0f5ff; border-left: 3px solid #1f6feb; padding: 0.55rem 0.8rem; margin: 0.5rem 0 0.8rem; font-size: 0.95rem; line-height: 1.5; font-style: italic; }
+.sym-gloss { margin: 0.8rem 0 0.2rem; font-size: 0.9rem; color: #374151; }
+.sym-gloss > summary { cursor: pointer; font-weight: 600; color: #6b7280; padding: 0.2rem 0; }
+.sym-gloss > summary:hover { color: #8a1f22; }
+.sym-gloss-list { list-style: none; padding-left: 0.6rem; margin: 0.4rem 0 0.2rem; }
+.sym-gloss-list li { margin: 0.4rem 0; line-height: 1.7; }
+.sym-dim { color: #6b7280; font-size: 0.85rem; }
+.sym-matrix { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.78rem; line-height: 1.35; white-space: pre; overflow-x: auto; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 0.6rem 0.8rem; margin: 0.3rem 0; }
+.sym-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.sym-skip { position: absolute; top: -100px; left: 0; padding: 0.4rem 0.7rem; background: #8a1f22; color: #fff; text-decoration: none; font-size: 0.85rem; z-index: 5; }
+.sym-skip:focus { top: 0; }</style>
+<div id="sym-poisson-1779824209" class="sym-tabs">
+<a class="sym-skip" href="#sym-poisson-1779824209-end">Skip three-views
+widget</a>
+<div class="sym-tablist" role="tablist" aria-label="Three views of the model">
+<button type="button" class="sym-tab sym-active" role="tab" id="sym-poisson-1779824209-tab-idx" aria-controls="sym-poisson-1779824209-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
+<span class="sym-tab-marker" aria-hidden="true">▸</span>1. Index
+</button>
+<button type="button" class="sym-tab" role="tab" id="sym-poisson-1779824209-tab-eq" aria-controls="sym-poisson-1779824209-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
+<span class="sym-tab-marker" aria-hidden="true">▸</span>2. Matrix
+</button>
+<button type="button" class="sym-tab" role="tab" id="sym-poisson-1779824209-tab-mat" aria-controls="sym-poisson-1779824209-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
+<span class="sym-tab-marker" aria-hidden="true">▸</span>3. Equations
+with data
+</button>
+</div>
+<div id="sym-poisson-1779824209-panel-idx" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-poisson-1779824209-tab-idx" data-panel="idx" tabindex="0">
+<p class="sym-caption">
+What happens for each observation <em>i</em> – the per-individual
+reading.
+</p>
+<p class="sym-biology">
+Each observation is a count; the log of the expected count may shift
+with the predictors.
+</p>
+<div class="sym-eq">
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>y</mi><mi>i</mi></msub><mo>∣</mo><msub><mi>μ</mi><mi>i</mi></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>∼</mo><mrow><mi mathvariant="normal">P</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">n</mi></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>μ</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>μ</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><msub><mi>β</mi><mn>0</mn></msub><mo>+</mo><msub><mi>β</mi><mn>1</mn></msub><mspace width="0.167em"></mspace><msub><mi>x</mi><mi>i</mi></msub></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+y_i \mid \mu_i &amp; \sim \mathrm{Poisson}(\mu_i) \\
+\log(\mu_i) &amp; = \beta_{0} + \beta_{1} \, x_i
+\end{aligned}</annotation></semantics></math>
+</div>
+<details class="sym-gloss" open><summary>
+where:
+</summary><ul class="sym-gloss-list">
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>y</mi><mi>i</mi></msub><annotation encoding="application/x-tex">y_i</annotation></semantics></math>
+— response variable  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>100</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{100}</annotation></semantics></math></span>
+</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>x</mi><mi>i</mi></msub><annotation encoding="application/x-tex">x_i</annotation></semantics></math>
+— continuous predictor  <span class="sym-dim">column of X (length
+100)</span>
+</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>μ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\mu_i</annotation></semantics></math>
+— conditional mu of y  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>100</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{100}</annotation></semantics></math></span>
+</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mn>0</mn></msub><mo>,</mo><msub><mi>β</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">\beta_{0}, \beta_{1}</annotation></semantics></math>
+— mu submodel coefficients  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>2</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{2}</annotation></semantics></math></span>
+</li>
+</ul></details>
+</div>
+<div id="sym-poisson-1779824209-panel-eq" class="sym-panel" role="tabpanel" aria-labelledby="sym-poisson-1779824209-tab-eq" data-panel="eq" hidden="" tabindex="0">
+<p class="sym-caption">
+The same model in matrix form – the structural contract every textbook
+past chapter 4 switches to.
+</p>
+<p class="sym-biology">
+Each observation is a count; the log of the expected count may shift
+with the predictors.
+</p>
+<div class="sym-eq">
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mi>𝐲</mi><mo>∣</mo><mi>𝛍</mi></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>∼</mo><mrow><mi mathvariant="normal">P</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">n</mi></mrow><mo stretchy="false" form="prefix">(</mo><mi>𝛍</mi><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>𝛍</mi><mo stretchy="false" form="postfix">)</mo></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>𝐗</mi><mi>𝛃</mi></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+\mathbf{y} \mid \boldsymbol{\mu} &amp; \sim \mathrm{Poisson}(\boldsymbol{\mu}) \\
+\log(\boldsymbol{\mu}) &amp; = \mathbf{X} \boldsymbol{\beta}
+\end{aligned}</annotation></semantics></math>
+</div>
+<details class="sym-gloss" open><summary>
+where:
+</summary><ul class="sym-gloss-list">
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐲</mi><annotation encoding="application/x-tex">\mathbf{y}</annotation></semantics></math>
+— response variable  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>100</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{100}</annotation></semantics></math></span>
+</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛍</mi><annotation encoding="application/x-tex">\boldsymbol{\mu}</annotation></semantics></math>
+— conditional mu of y  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>100</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{100}</annotation></semantics></math></span>
+</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛃</mi><annotation encoding="application/x-tex">\boldsymbol{\beta}</annotation></semantics></math>
+— mu submodel coefficients  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>2</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{2}</annotation></semantics></math></span>
+</li>
+<li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐗</mi><annotation encoding="application/x-tex">\mathbf{X}</annotation></semantics></math>
+— mu submodel design matrix  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mn>100</mn><mo>×</mo><mn>2</mn></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{100 \times 2}</annotation></semantics></math></span>
+</li>
+</ul></details>
+</div>
+<div id="sym-poisson-1779824209-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-poisson-1779824209-tab-mat" data-panel="mat" hidden="" tabindex="0">
+<p class="sym-caption">
+The same matrix equation, with your actual numbers stacked inside the
+brackets – what the computer multiplies. Showing first 5 and last 2 rows
+of n = 100.
+</p>
+<p class="sym-biology">
+Each observation is a count; the log of the expected count may shift
+with the predictors.
+</p>
+<span class="sym-sr-only">Matrix-form expansion of the model. Each row
+shows the response y_i and the corresponding row of the design matrix X
+(showing head and tail rows of the n total observations), with the
+coefficient vector beta listed below.</span>
+<p class="sym-caption" style="font-size:0.95em;color:#374151">
+For observation <em>i</em> = 1 of your data:
+</p>
+<div class="sym-eq">
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>y</mi><mn>1</mn></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><msub><mover><mi>β</mi><mo accent="true">̂</mo></mover><mn>0</mn></msub><mo>+</mo><msub><mover><mi>β</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mspace width="0.167em"></mspace><msub><mi mathvariant="normal">x</mi><mn>1</mn></msub><mo>+</mo><msub><mover><mi>ε</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub></mtd><mtd columnalign="right" style="text-align: right"><mspace width="1.0em"></mspace><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">response equation, one row of the model</mtext><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mn>1</mn></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mn>0.955</mn><mo>+</mo><mi>−</mi><mn>0.0438</mn><mo>×</mo><mn>0.45</mn><mo>+</mo><mo stretchy="false" form="prefix">(</mo><mn>0.0643</mn><mo stretchy="false" form="postfix">)</mo></mtd><mtd columnalign="right" style="text-align: right"><mspace width="1.0em"></mspace><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">with your numbers</mtext><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><munder><munder><mn>0.936</mn><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mover><mi>μ</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mspace width="0.167em"></mspace><mtext mathvariant="normal">(predicted)</mtext><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.278em"></mspace><mo>+</mo><mspace width="0.278em"></mspace><munder><munder><mrow><mo stretchy="false" form="prefix">(</mo><mn>0.0643</mn><mo stretchy="false" form="postfix">)</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mover><mi>ε</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mspace width="0.167em"></mspace><mtext mathvariant="normal">(residual)</mtext><mspace width="0.167em"></mspace></mrow></munder></mtd></mtr></mtable><annotation encoding="application/x-tex">
+\begin{aligned}
+y_{1} &amp;= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{x}_{1} + \hat\varepsilon_{1} &amp;\quad(\text{response equation, one row of the model}) \\
+   1 &amp;= 0.955 + -0.0438 \times 0.45 + (0.0643) &amp;\quad(\text{with your numbers}) \\
+&amp;= \underbrace{0.936}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(0.0643)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
+\end{aligned}
+</annotation></semantics></math>
+</div>
+<p class="sym-caption" style="font-size:0.95em;color:#374151">
+Stacking the same response equation for all <em>n</em> = 100
+observations:
+</p>
+<div class="sym-eq">
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>2</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>3</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>5</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mi>𝐲</mi><mrow><mspace width="0.167em"></mspace><mn>100</mn><mo>×</mo><mn>1</mn></mrow></msub><mspace width="0.278em"></mspace><mtext mathvariant="normal">(observed)</mtext><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.278em"></mspace><mo>=</mo><mspace width="0.278em"></mspace><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0.45</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>0.0186</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>0.318</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>0.929</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>1.49</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>0.166</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>1.02</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mi>𝐗</mi><mrow><mspace width="0.167em"></mspace><mn>100</mn><mo>×</mo><mn>2</mn></mrow></msub><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.167em"></mspace><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mn>0.955</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>0.0438</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mover><mi>𝛃</mi><mo accent="true">̂</mo></mover><mrow><mspace width="0.167em"></mspace><mn>2</mn><mo>×</mo><mn>1</mn></mrow></msub><mspace width="0.278em"></mspace><mtext mathvariant="normal">(estimated)</mtext><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.278em"></mspace><mo>+</mo><mspace width="0.278em"></mspace><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mn>0.0643</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.0437</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1.03</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>2</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>0.0207</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>0.963</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>4.09</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mover><mi>𝛆</mi><mo accent="true">̂</mo></mover><mrow><mspace width="0.167em"></mspace><mn>100</mn><mo>×</mo><mn>1</mn></mrow></msub><mspace width="0.278em"></mspace><mtext mathvariant="normal">(residual)</mtext><mspace width="0.167em"></mspace></mrow></munder></mrow><annotation encoding="application/x-tex">
+\underbrace{\begin{bmatrix}    1 \\    1 \\    2 \\    3 \\    1 \\ \vdots \\    0 \\    5 \end{bmatrix}}_{\textstyle\,\mathbf{y}_{\,100 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 &amp; 0.45 \\    1 &amp; -0.0186 \\    1 &amp; -0.318 \\    1 &amp; -0.929 \\    1 &amp; -1.49 \\ \vdots &amp; \vdots \\    1 &amp; -0.166 \\    1 &amp; 1.02 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,100 \times 2}\,}\, \underbrace{\begin{bmatrix} 0.955 \\ -0.0438 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,2 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} 0.0643 \\ 0.0437 \\ 1.03 \\    2 \\ -0.0207 \\ \vdots \\ -0.963 \\ 4.09 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,100 \times 1}\;\text{(residual)}\,}
+</annotation></semantics></math>
+</div>
+<p class="sym-caption" style="font-size:0.85em;color:#6b7280;margin-top:0.4rem">
+<strong>Left</strong>: observed vector
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐲</mi><annotation encoding="application/x-tex">\mathbf{y}</annotation></semantics></math>.
+<strong>Middle</strong>: the prediction
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐗</mi><mover><mi>𝛃</mi><mo accent="true">̂</mo></mover><mo>=</mo><mover><mi>𝛍</mi><mo accent="true">̂</mo></mover></mrow><annotation encoding="application/x-tex">\mathbf{X}\hat{\boldsymbol{\beta}} = \hat{\boldsymbol{\mu}}</annotation></semantics></math>.
+<strong>Right</strong>: the residual vector
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>𝛆</mi><mo accent="true">̂</mo></mover><mo>=</mo><mi>𝐲</mi><mo>−</mo><mover><mi>𝛍</mi><mo accent="true">̂</mo></mover></mrow><annotation encoding="application/x-tex">\hat{\boldsymbol{\varepsilon}} = \mathbf{y} - \hat{\boldsymbol{\mu}}</annotation></semantics></math>.
+Every row of this matrix equation is one of the response-equation rows
+from the worked row above.
+</p>
+</div>
+</div>
+<span id="sym-poisson-1779824209-end" tabindex="-1"></span>
+<script>(function() {
+  var root = document.getElementById("sym-poisson-1779824209");
+  if (!root) return;
+  var tabs   = Array.prototype.slice.call(root.querySelectorAll("[role=\"tab\"]"));
+  var panels = Array.prototype.slice.call(root.querySelectorAll("[role=\"tabpanel\"]"));
+  function activate(idx) {
+    tabs.forEach(function(t, i) {
+      var on = (i === idx);
+      t.classList.toggle("sym-active", on);
+      t.setAttribute("aria-selected", on ? "true" : "false");
+      t.setAttribute("tabindex", on ? "0" : "-1");
+    });
+    panels.forEach(function(p, i) {
+      var on = (i === idx);
+      p.classList.toggle("sym-active", on);
+      if (on) { p.removeAttribute("hidden"); } else { p.setAttribute("hidden", ""); }
+    });
+    if (typeof window.MathJax !== "undefined" && window.MathJax.typesetPromise) {
+      try { window.MathJax.typesetPromise([panels[idx]]); } catch (e) {}
+    }
+  }
+  tabs.forEach(function(t, idx) {
+    t.addEventListener("click", function() { activate(idx); t.focus(); });
+    t.addEventListener("keydown", function(e) {
+      var k = e.key;
+      var n = tabs.length;
+      var next = null;
+      if (k === "ArrowRight") next = (idx + 1) % n;
+      else if (k === "ArrowLeft") next = (idx - 1 + n) % n;
+      else if (k === "Home") next = 0;
+      else if (k === "End") next = n - 1;
+      else if (k === "Enter" || k === " ") { activate(idx); e.preventDefault(); return; }
+      if (next !== null) { activate(next); tabs[next].focus(); e.preventDefault(); }
+    });
+  });
+})();</script><style>.sym-tabs { position: relative; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; margin: 1em 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+.sym-tablist { display: flex; background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
+.sym-tab { flex: 1; text-align: center; padding: 0.6rem 0.5rem; cursor: pointer; font-weight: 600; color: #6b7280; border: 0; border-right: 1px solid #e5e7eb; background: transparent; user-select: none; font-size: 0.92rem; font-family: inherit; }
+.sym-tab:last-child { border-right: 0; }
+.sym-tab:hover { background: #fbe7e7; color: #7a2a2a; }
+.sym-tab.sym-active { background: #fff; color: #8a1f22; box-shadow: inset 0 -3px 0 #a0282b; }
+.sym-tab:focus-visible { outline: 2px solid #a0282b; outline-offset: -2px; }
+.sym-tab-marker { display: inline-block; margin-right: 0.35em; opacity: 0; transition: opacity 0.1s; }
+.sym-tab.sym-active .sym-tab-marker { opacity: 1; }
+.sym-panel { padding: 1rem 1.1rem 1.2rem; }
+.sym-panel[hidden] { display: none; }
+.sym-eq { background: #fbe7e7; border: 1px solid #a0282b; border-radius: 6px; padding: 0.7rem 1rem; margin: 0.4rem 0; text-align: center; overflow-x: auto; max-width: 100%; }
+.sym-caption { color: #6b7280; font-size: 0.85rem; margin: 0.2rem 0 0.4rem; }
+.sym-biology { color: #1f6feb; background: #f0f5ff; border-left: 3px solid #1f6feb; padding: 0.55rem 0.8rem; margin: 0.5rem 0 0.8rem; font-size: 0.95rem; line-height: 1.5; font-style: italic; }
+.sym-gloss { margin: 0.8rem 0 0.2rem; font-size: 0.9rem; color: #374151; }
+.sym-gloss > summary { cursor: pointer; font-weight: 600; color: #6b7280; padding: 0.2rem 0; }
+.sym-gloss > summary:hover { color: #8a1f22; }
+.sym-gloss-list { list-style: none; padding-left: 0.6rem; margin: 0.4rem 0 0.2rem; }
+.sym-gloss-list li { margin: 0.4rem 0; line-height: 1.7; }
+.sym-dim { color: #6b7280; font-size: 0.85rem; }
+.sym-matrix { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.78rem; line-height: 1.35; white-space: pre; overflow-x: auto; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 0.6rem 0.8rem; margin: 0.3rem 0; }
+.sym-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.sym-skip { position: absolute; top: -100px; left: 0; padding: 0.4rem 0.7rem; background: #8a1f22; color: #fff; text-decoration: none; font-size: 0.85rem; z-index: 5; }
+.sym-skip:focus { top: 0; }</style>
+<div class="sym-tabs" id="sym-poisson-1779824209">
+<a class="sym-skip" href="#sym-poisson-1779824209-end">Skip three-views widget</a>
+<div class="sym-tablist" role="tablist" aria-label="Three views of the model">
+<button type="button" class="sym-tab sym-active" role="tab" id="sym-poisson-1779824209-tab-idx" aria-controls="sym-poisson-1779824209-panel-idx" aria-selected="true" tabindex="0" data-tab="idx"><span class="sym-tab-marker" aria-hidden="true">▸</span>1. Index</button>
+<button type="button" class="sym-tab" role="tab" id="sym-poisson-1779824209-tab-eq" aria-controls="sym-poisson-1779824209-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq"><span class="sym-tab-marker" aria-hidden="true">▸</span>2. Matrix</button>
+<button type="button" class="sym-tab" role="tab" id="sym-poisson-1779824209-tab-mat" aria-controls="sym-poisson-1779824209-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat"><span class="sym-tab-marker" aria-hidden="true">▸</span>3. Equations with data</button>
+</div>
+<div class="sym-panel sym-active" role="tabpanel" id="sym-poisson-1779824209-panel-idx" aria-labelledby="sym-poisson-1779824209-tab-idx" data-panel="idx" tabindex="0">
+  <p class="sym-caption">What happens for each observation <em>i</em> -- the per-individual reading.</p>
+  <p class="sym-biology">Each observation is a count; the log of the expected count may shift with the predictors.</p>
+  <div class="sym-eq">$$\begin{aligned}
+y_i \mid \mu_i &amp; \sim \mathrm{Poisson}(\mu_i) \\
+\log(\mu_i) &amp; = \beta_{0} + \beta_{1} \, x_i
+\end{aligned}$$</div>
+<details class="sym-gloss" open><summary>where:</summary><ul class="sym-gloss-list">
+<li>$y_i$ — response variable  <span class="sym-dim">$\mathbb{R}^{100}$</span>
+</li>
+<li>$x_i$ — continuous predictor  <span class="sym-dim">column of X (length 100)</span>
+</li>
+<li>$\mu_i$ — conditional mu of y  <span class="sym-dim">$\mathbb{R}^{100}$</span>
+</li>
+<li>$\beta_{0}, \beta_{1}$ — mu submodel coefficients  <span class="sym-dim">$\mathbb{R}^{2}$</span>
+</li>
+</ul></details>
+</div>
+<div class="sym-panel" role="tabpanel" id="sym-poisson-1779824209-panel-eq" aria-labelledby="sym-poisson-1779824209-tab-eq" data-panel="eq" hidden tabindex="0">
+  <p class="sym-caption">The same model in matrix form -- the structural contract every textbook past chapter 4 switches to.</p>
+  <p class="sym-biology">Each observation is a count; the log of the expected count may shift with the predictors.</p>
+  <div class="sym-eq">$$\begin{aligned}
+\mathbf{y} \mid \boldsymbol{\mu} &amp; \sim \mathrm{Poisson}(\boldsymbol{\mu}) \\
+\log(\boldsymbol{\mu}) &amp; = \mathbf{X} \boldsymbol{\beta}
+\end{aligned}$$</div>
+<details class="sym-gloss" open><summary>where:</summary><ul class="sym-gloss-list">
+<li>$\mathbf{y}$ — response variable  <span class="sym-dim">$\mathbb{R}^{100}$</span>
+</li>
+<li>$\boldsymbol{\mu}$ — conditional mu of y  <span class="sym-dim">$\mathbb{R}^{100}$</span>
+</li>
+<li>$\boldsymbol{\beta}$ — mu submodel coefficients  <span class="sym-dim">$\mathbb{R}^{2}$</span>
+</li>
+<li>$\mathbf{X}$ — mu submodel design matrix  <span class="sym-dim">$\mathbb{R}^{100 \times 2}$</span>
+</li>
+</ul></details>
+</div>
+<div class="sym-panel" role="tabpanel" id="sym-poisson-1779824209-panel-mat" aria-labelledby="sym-poisson-1779824209-tab-mat" data-panel="mat" hidden tabindex="0">
+  <p class="sym-caption">The same matrix equation, with your actual numbers stacked inside the brackets -- what the computer multiplies. Showing first 5 and last 2 rows of n = 100.</p>
+  <p class="sym-biology">Each observation is a count; the log of the expected count may shift with the predictors.</p>
+  <span class="sym-sr-only">Matrix-form expansion of the model. Each row shows the response y_i and the corresponding row of the design matrix X (showing head and tail rows of the n total observations), with the coefficient vector beta listed below.</span>
+<p class="sym-caption" style="font-size:0.95em;color:#374151">For observation <em>i</em> = 1 of your data:</p>
+<div class="sym-eq">$$
+\begin{aligned}
+y_{1} &amp;= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{x}_{1} + \hat\varepsilon_{1} &amp;\quad(\text{response equation, one row of the model}) \\
+   1 &amp;= 0.955 + -0.0438 \times 0.45 + (0.0643) &amp;\quad(\text{with your numbers}) \\
+&amp;= \underbrace{0.936}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(0.0643)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
+\end{aligned}
+$$</div>
+<p class="sym-caption" style="font-size:0.95em;color:#374151">Stacking the same response equation for all <em>n</em> = 100 observations:</p>
+<div class="sym-eq">$$
+\underbrace{\begin{bmatrix}    1 \\    1 \\    2 \\    3 \\    1 \\ \vdots \\    0 \\    5 \end{bmatrix}}_{\textstyle\,\mathbf{y}_{\,100 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 &amp; 0.45 \\    1 &amp; -0.0186 \\    1 &amp; -0.318 \\    1 &amp; -0.929 \\    1 &amp; -1.49 \\ \vdots &amp; \vdots \\    1 &amp; -0.166 \\    1 &amp; 1.02 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,100 \times 2}\,}\, \underbrace{\begin{bmatrix} 0.955 \\ -0.0438 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,2 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} 0.0643 \\ 0.0437 \\ 1.03 \\    2 \\ -0.0207 \\ \vdots \\ -0.963 \\ 4.09 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,100 \times 1}\;\text{(residual)}\,}
+$$</div>
+<p class="sym-caption" style="font-size:0.85em;color:#6b7280;margin-top:0.4rem"><strong>Left</strong>: observed vector $\mathbf{y}$. <strong>Middle</strong>: the prediction $\mathbf{X}\hat{\boldsymbol{\beta}} = \hat{\boldsymbol{\mu}}$. <strong>Right</strong>: the residual vector $\hat{\boldsymbol{\varepsilon}} = \mathbf{y} - \hat{\boldsymbol{\mu}}$. Every row of this matrix equation is one of the response-equation rows from the worked row above.</p>
+</div>
+</div>
+<span id="sym-poisson-1779824209-end" tabindex="-1"></span>
+<script>(function() {
+  var root = document.getElementById("sym-poisson-1779824209");
+  if (!root) return;
+  var tabs   = Array.prototype.slice.call(root.querySelectorAll("[role=\"tab\"]"));
+  var panels = Array.prototype.slice.call(root.querySelectorAll("[role=\"tabpanel\"]"));
+  function activate(idx) {
+    tabs.forEach(function(t, i) {
+      var on = (i === idx);
+      t.classList.toggle("sym-active", on);
+      t.setAttribute("aria-selected", on ? "true" : "false");
+      t.setAttribute("tabindex", on ? "0" : "-1");
+    });
+    panels.forEach(function(p, i) {
+      var on = (i === idx);
+      p.classList.toggle("sym-active", on);
+      if (on) { p.removeAttribute("hidden"); } else { p.setAttribute("hidden", ""); }
+    });
+    if (typeof window.MathJax !== "undefined" && window.MathJax.typesetPromise) {
+      try { window.MathJax.typesetPromise([panels[idx]]); } catch (e) {}
+    }
+  }
+  tabs.forEach(function(t, idx) {
+    t.addEventListener("click", function() { activate(idx); t.focus(); });
+    t.addEventListener("keydown", function(e) {
+      var k = e.key;
+      var n = tabs.length;
+      var next = null;
+      if (k === "ArrowRight") next = (idx + 1) % n;
+      else if (k === "ArrowLeft") next = (idx - 1 + n) % n;
+      else if (k === "Home") next = 0;
+      else if (k === "End") next = n - 1;
+      else if (k === "Enter" || k === " ") { activate(idx); e.preventDefault(); return; }
+      if (next !== null) { activate(next); tabs[next].focus(); e.preventDefault(); }
+    });
+  });
+})();</script><div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">pdf_alongside_html</span><span class="op">(</span><span class="va">sym</span>, <span class="st">"fig-poisson.pdf"</span>,</span>
+<span>                   <span class="st">"Poisson regression -- three views"</span><span class="op">)</span></span></code></pre></div>
+<p>
+<a href="fig-poisson.pdf" class="btn btn-primary">Download as PDF</a>
+</p>
+</div>
 </div>
 <div class="section level3">
 <h3 id="negative-binomial-nbinom2-counts-with-overdispersion">Negative binomial (nbinom2) — counts with overdispersion<a class="anchor" aria-label="anchor" href="#negative-binomial-nbinom2-counts-with-overdispersion"></a>
@@ -303,7 +1407,7 @@ count.</p>
 <code>size = exp(sigma)</code>. Small <code>size</code> means highly
 overdispersed (much higher variance than mean); large <code>size</code>
 approaches Poisson.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>; <span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">100</span></span>
 <span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/NegBinomial.html" class="external-link">rnbinom</a></span><span class="op">(</span><span class="va">n</span>, size <span class="op">=</span> <span class="fl">3</span>, mu <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="fl">0.3</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>                  x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span></span>
@@ -324,7 +1428,7 @@ y_i \mid \mu_i,\, \sigma_i \sim \mathrm{NegBin}(\mu_i,\, \mathrm{size} = \exp(\s
 likelihood, not a data filter. The modelled <code>mu</code> is the mean
 of the <em>underlying untruncated</em> distribution; the observed
 truncated mean is larger.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>; <span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">100</span></span>
 <span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmax</a></span><span class="op">(</span><span class="fl">1L</span>, <span class="fu"><a href="https://rdrr.io/r/stats/NegBinomial.html" class="external-link">rnbinom</a></span><span class="op">(</span><span class="va">n</span>, size <span class="op">=</span> <span class="fl">2</span>, mu <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fl">1</span> <span class="op">+</span> <span class="fl">0.3</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,</span>
