@@ -179,19 +179,67 @@ symbolize.drmTMB <- function(fit, symbols = NULL, units = NULL,
                                        family = family,
                                        response_symbol_1 = response_symbol_1,
                                        response_symbol_2 = response_symbol_2)
+  # v0.21+ structured-dependence detection. drmTMB exposes phylo(),
+  # animal(), and spatial() as formula markers. The phylo() and animal()
+  # paths use the Hadfield-Nakagawa A-inverse sparse-precision
+  # representation (all-nodes); spatial() uses coords / mesh.
+  detected_signals <- character(0L)
+  has_drmtmb_phylo <- FALSE
+  has_drmtmb_spatial <- FALSE
+  for (e in entries) {
+    if (is.null(e$rhs)) next
+    rhs_text <- paste(deparse(e$rhs), collapse = " ")
+    # \\b alone is greedy on word-character boundaries; use a more
+    # targeted look-ahead for the marker followed by an open paren.
+    if (grepl("(^|[^A-Za-z._])(phylo|animal)\\s*\\(", rhs_text)) {
+      has_drmtmb_phylo <- TRUE
+    }
+    if (grepl("(^|[^A-Za-z._])spatial\\s*\\(", rhs_text)) {
+      has_drmtmb_spatial <- TRUE
+    }
+  }
+  if (has_drmtmb_phylo)   detected_signals <- c(detected_signals, "phylo")
+  if (has_drmtmb_spatial) detected_signals <- c(detected_signals, "spatial")
+  structured_matrices <- c(
+    if (has_drmtmb_phylo) list(list(
+      symbol             = "\\mathbf{A}",
+      symbol_matrix      = "\\mathbf{A}",
+      variable           = NA_character_,
+      units              = NA_character_,
+      role               = "structured_correlation_phylo",
+      dimension          = "\\mathbb{R}^{k \\times k}",
+      dimension_concrete = "\\mathbb{R}^{k \\times k}",
+      description        = "phylogenetic / pedigree correlation matrix from drmTMB::phylo() or drmTMB::animal(); Hadfield-Nakagawa A-inverse sparse-precision representation (all-nodes: latent vector spans tips and internal nodes)"
+    )),
+    if (has_drmtmb_spatial) list(list(
+      symbol             = "\\boldsymbol{\\Omega}",
+      symbol_matrix      = "\\boldsymbol{\\Omega}",
+      variable           = NA_character_,
+      units              = NA_character_,
+      role               = "structured_correlation_spatial",
+      dimension          = "\\mathbb{R}^{n_s \\times n_s}",
+      dimension_concrete = "\\mathbb{R}^{n_s \\times n_s}",
+      description        = "spatial correlation / GMRF precision built from drmTMB::spatial() coords or mesh"
+    ))
+  )
+  if (length(structured_matrices) == 0L) structured_matrices <- NULL
+
   symbol_dict  <- drm_build_symbol_dictionary(
     terms_tbl, response, response_symbol, response_symbol_matrix,
     response_units, family, submodels, units, data, n_obs, re_tbl,
     response_1 = response_1, response_2 = response_2,
     response_symbol_1 = response_symbol_1,
-    response_symbol_2 = response_symbol_2
+    response_symbol_2 = response_symbol_2,
+    structured_matrices = structured_matrices
   )
   assumptions  <- drm_build_assumptions(family, response, response_symbol, re_tbl,
                                         response_1 = response_1,
-                                        response_2 = response_2)
+                                        response_2 = response_2,
+                                        detected_signals = detected_signals)
   interp       <- drm_build_interpretation(fixed_eff, family, response, data,
                                            response_1 = response_1,
-                                           response_2 = response_2)
+                                           response_2 = response_2,
+                                           detected_signals = detected_signals)
   bridge       <- drm_build_formula_bridge(entries, components, response,
                                            response_1 = response_1,
                                            response_2 = response_2)
@@ -210,6 +258,9 @@ symbolize.drmTMB <- function(fit, symbols = NULL, units = NULL,
       symbolizer = utils::packageVersion("symbolizer"),
       drmTMB     = utils::packageVersion("drmTMB")
     ),
+    phylo_representation = if (has_drmtmb_phylo) "all_nodes" else NULL,
+    spatial_representation = if (has_drmtmb_spatial) "package_managed" else NULL,
+    detected_signals = detected_signals,
     created_by = "symbolize.drmTMB"
   )
 

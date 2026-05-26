@@ -141,11 +141,22 @@ symbolize.gllvmTMB <- function(fit, symbols = NULL, units = NULL,
     terms_tbl, response, response_symbol_scalar, response_symbol_matrix,
     response_units, n_obs, n_traits, n_sites, d_B, units, data, fit
   )
+  # v0.21+ structured-dependence signals (gllvmTMB). Covstruct kinds
+  # phylo_rr / phylo_diag / phylo_scalar / phylo_slope map to "phylo";
+  # spde / spatial map to "spatial". Package manages the matrix internally
+  # so phylo_representation is tagged "package_managed".
+  detected_signals <- character(0L)
+  has_gllvm_phylo <- any(grepl("^phylo", cs_kinds))
+  has_gllvm_spatial <- any(cs_kinds %in% c("spde", "spatial"))
+  if (has_gllvm_phylo)   detected_signals <- c(detected_signals, "phylo")
+  if (has_gllvm_spatial) detected_signals <- c(detected_signals, "spatial")
   assumptions  <- glm_build_assumptions(response, response_symbol_scalar,
                                         tpl_family = tpl_family,
-                                        response_symbol_matrix, fit)
+                                        response_symbol_matrix, fit,
+                                        detected_signals = detected_signals)
   interp       <- glm_build_interpretation(fixed_eff, loadings_tbl, response,
-                                            tpl_family = tpl_family)
+                                            tpl_family = tpl_family,
+                                            detected_signals = detected_signals)
   bridge       <- glm_build_formula_bridge(fit, response, response_symbol_matrix,
                                            d_B)
   expanded     <- glm_build_expanded(fit, trait_levels)
@@ -157,6 +168,9 @@ symbolize.gllvmTMB <- function(fit, symbols = NULL, units = NULL,
       symbolizer = utils::packageVersion("symbolizer"),
       gllvmTMB   = utils::packageVersion("gllvmTMB")
     ),
+    phylo_representation = if (has_gllvm_phylo) "package_managed" else NULL,
+    spatial_representation = if (has_gllvm_spatial) "package_managed" else NULL,
+    detected_signals = detected_signals,
     created_by = "symbolize.gllvmTMB"
   )
 
@@ -670,11 +684,20 @@ glm_build_symbol_dictionary <- function(terms_tbl, response, response_symbol,
 
 glm_build_assumptions <- function(response, response_symbol_scalar,
                                   response_symbol_matrix, fit,
-                                  tpl_family = "gllvm_gaussian") {
+                                  tpl_family = "gllvm_gaussian",
+                                  detected_signals = character(0L)) {
   tbl <- load_template("assumption-templates")
   rows <- tbl[tbl$family == tpl_family, , drop = FALSE]
   if (nrow(rows) == 0L) {
     cli::cli_abort("No assumption template rows for family {.val {tpl_family}}.")
+  }
+  # v0.21+ requires-column gating (mirrors drm_build_assumptions).
+  if ("requires" %in% names(rows)) {
+    req <- rows$requires
+    known <- c("phylo", "spatial", "animal", "temporal", "meta_analysis")
+    keep <- is.na(req) | req == "" | !(req %in% known) |
+            (req %in% detected_signals)
+    rows <- rows[keep, , drop = FALSE]
   }
   # If there is no unique() term on the unit, drop the Psi-bearing rows only
   # if they explicitly depend on Psi -- the implied_between_unit_covariance row
@@ -712,8 +735,17 @@ glm_response_symbol_root <- function(response_symbol) {
 }
 
 glm_build_interpretation <- function(fixed_eff, loadings_tbl, response,
-                                     tpl_family = "gllvm_gaussian") {
+                                     tpl_family = "gllvm_gaussian",
+                                     detected_signals = character(0L)) {
   tbl <- load_template("interpretation-templates")
+  # v0.21+ requires-column gating.
+  if ("requires" %in% names(tbl)) {
+    req <- tbl$requires
+    known <- c("phylo", "spatial", "animal", "temporal", "meta_analysis")
+    keep <- is.na(req) | req == "" | !(req %in% known) |
+            (req %in% detected_signals)
+    tbl <- tbl[keep, , drop = FALSE]
+  }
   rows <- list()
   if (nrow(fixed_eff) > 0L) {
     tpl_mu <- tbl[tbl$family == tpl_family &

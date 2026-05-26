@@ -168,19 +168,54 @@ symbolize.brmsfit <- function(fit, symbols = NULL, units = NULL,
     family = family,
     response_symbol_1 = response_symbol, response_symbol_2 = NA_character_
   )
+  # v0.21+ structured-dependence detection. brms exposes phylogenetic /
+  # known-covariance random effects via `gr(group, cov = A)` inside a
+  # (1 | gr(group, cov = A)) term. Detect by scanning fit$ranef$cov
+  # (brms's per-RE-term metadata) for non-empty / non-NA `cov`. The
+  # covariance matrix is stored in fit$data2 under the matrix name.
+  detected_signals <- character(0L)
+  brms_phylo_groups <- character(0L)
+  ranef <- tryCatch(fit$ranef, error = function(e) NULL)
+  if (!is.null(ranef) && "cov" %in% names(ranef)) {
+    for (i in seq_len(nrow(ranef))) {
+      cv <- ranef$cov[[i]]
+      if (!is.null(cv) && !is.na(cv) && nzchar(as.character(cv))) {
+        brms_phylo_groups <- c(brms_phylo_groups, as.character(ranef$group[[i]]))
+      }
+    }
+    brms_phylo_groups <- unique(brms_phylo_groups)
+  }
+  has_brms_phylo <- length(brms_phylo_groups) > 0L
+  if (has_brms_phylo) detected_signals <- c(detected_signals, "phylo")
+  structured_matrices <- if (has_brms_phylo) {
+    lapply(brms_phylo_groups, function(g) list(
+      symbol             = "\\mathbf{A}",
+      symbol_matrix      = "\\mathbf{A}",
+      variable           = g,
+      units              = NA_character_,
+      role               = "structured_correlation_phylo",
+      dimension          = "\\mathbb{R}^{k \\times k}",
+      dimension_concrete = sprintf("\\mathbb{R}^{k_{%s} \\times k_{%s}}", g, g),
+      description        = sprintf("phylogenetic correlation matrix on %s, attached via gr(%s, cov = A) (tips-only k x k representation)", g, g)
+    ))
+  } else NULL
+
   symbol_dict <- drm_build_symbol_dictionary(
     terms_tbl, response, response_symbol, response_symbol_matrix,
     response_units, family, submodels, units, data, n_obs, re_tbl,
     response_1 = response, response_2 = NA_character_,
-    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_
+    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_,
+    structured_matrices = structured_matrices
   )
   assumptions <- drm_build_assumptions(
     family, response, response_symbol, re_tbl,
-    response_1 = response, response_2 = NA_character_
+    response_1 = response, response_2 = NA_character_,
+    detected_signals = detected_signals
   )
   interp <- drm_build_interpretation(
     fixed_eff, family, response, data,
-    response_1 = response, response_2 = NA_character_
+    response_1 = response, response_2 = NA_character_,
+    detected_signals = detected_signals
   )
   bridge <- drm_build_formula_bridge(
     entries, components, response,
@@ -199,6 +234,8 @@ symbolize.brmsfit <- function(fit, symbols = NULL, units = NULL,
       symbolizer = utils::packageVersion("symbolizer"),
       brms       = utils::packageVersion("brms")
     ),
+    phylo_representation = if (has_brms_phylo) "tips_only" else NULL,
+    detected_signals = detected_signals,
     created_by = "symbolize.brmsfit"
   )
 
