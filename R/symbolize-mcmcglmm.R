@@ -157,19 +157,44 @@ symbolize.MCMCglmm <- function(fit, symbols = NULL, units = NULL,
     family = family,
     response_symbol_1 = response_symbol, response_symbol_2 = NA_character_
   )
+  # v0.21+ structured-dependence signals. MCMCglmm's ginverse path is the
+  # Hadfield-Nakagawa all-nodes representation of a phylogenetic correlation
+  # matrix (also used for pedigree-based animal models). The detected_signals
+  # vector drives the requires-column gating in the assumption /
+  # interpretation builders so phylo-specific rows fire only when phylo is
+  # actually detected.
+  detected_signals <- if (has_animal) "phylo" else character(0L)
+  structured_matrices <- if (has_animal) {
+    lapply(animal_groups, function(g) {
+      list(
+        symbol             = "\\mathbf{A}",
+        symbol_matrix      = "\\mathbf{A}",
+        variable           = g,
+        units              = NA_character_,
+        role               = "structured_correlation_phylo",
+        dimension          = "\\mathbb{R}^{k \\times k}",
+        dimension_concrete = sprintf("\\mathbb{R}^{k_{%s} \\times k_{%s}}", g, g),
+        description        = sprintf("phylogenetic / pedigree correlation matrix on %s (Hadfield-Nakagawa all-nodes sparse-precision representation, supplied via ginverse)", g)
+      )
+    })
+  } else NULL
+
   symbol_dict <- drm_build_symbol_dictionary(
     terms_tbl, response, response_symbol, response_symbol_matrix,
     response_units, family, submodels, units, data, n_obs, re_tbl,
     response_1 = response, response_2 = NA_character_,
-    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_
+    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_,
+    structured_matrices = structured_matrices
   )
   assumptions <- drm_build_assumptions(
     family, response, response_symbol, re_tbl,
-    response_1 = response, response_2 = NA_character_
+    response_1 = response, response_2 = NA_character_,
+    detected_signals = detected_signals
   )
   interp <- drm_build_interpretation(
     fixed_eff, family, response, data,
-    response_1 = response, response_2 = NA_character_
+    response_1 = response, response_2 = NA_character_,
+    detected_signals = detected_signals
   )
   bridge <- drm_build_formula_bridge(
     entries, components, response,
@@ -190,6 +215,8 @@ symbolize.MCMCglmm <- function(fit, symbols = NULL, units = NULL,
     ),
     animal_groups = animal_groups,
     heritability = heritability_tbl,
+    phylo_representation = if (has_animal) "all_nodes" else NULL,
+    detected_signals = detected_signals,
     created_by = "symbolize.MCMCglmm"
   )
 

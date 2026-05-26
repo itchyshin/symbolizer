@@ -1442,11 +1442,25 @@ drm_build_symbol_dictionary <- function(terms_tbl, response, response_symbol,
 
 drm_build_assumptions <- function(family, response, response_symbol,
                                   re_tbl = NULL,
-                                  response_1 = NULL, response_2 = NULL) {
+                                  response_1 = NULL, response_2 = NULL,
+                                  detected_signals = character(0L)) {
   tbl <- load_template("assumption-templates")
   rows <- tbl[tbl$family == family, , drop = FALSE]
   if (nrow(rows) == 0L) {
     cli::cli_abort("No assumption template rows for family {.val {family}}.")
+  }
+  # v0.21+ requires-column gating. Rows can carry a `requires` value naming
+  # a structured-dependence signal (phylo / spatial / animal / temporal /
+  # meta_analysis). Such rows fire ONLY when the extractor reports a
+  # matching signal via `detected_signals`. Rows whose `requires` is empty
+  # / NA / outside the known vocabulary fire unconditionally (the unknown
+  # case covers pre-existing field-shift parse issues in the CSV).
+  if ("requires" %in% names(rows)) {
+    req <- rows$requires
+    known <- c("phylo", "spatial", "animal", "temporal", "meta_analysis")
+    keep <- is.na(req) | req == "" | !(req %in% known) |
+            (req %in% detected_signals)
+    rows <- rows[keep, , drop = FALSE]
   }
   has_re <- !is.null(re_tbl) && nrow(re_tbl) > 0L
   drop_assumption <- if (has_re) "independence" else "independence_given_random_effects"
@@ -1555,7 +1569,8 @@ drm_interaction_subs <- function(row, data) {
 }
 
 drm_build_interpretation <- function(fixed_eff, family, response, data,
-                                     response_1 = NULL, response_2 = NULL) {
+                                     response_1 = NULL, response_2 = NULL,
+                                     detected_signals = character(0L)) {
   empty <- tibble::tibble(
     submodel = character(0),
     term_label = character(0),
@@ -1583,6 +1598,14 @@ drm_build_interpretation <- function(fixed_eff, family, response, data,
     response
   }
   tbl <- load_template("interpretation-templates")
+  # v0.21+ requires-column gating (see drm_build_assumptions for rationale).
+  if ("requires" %in% names(tbl)) {
+    req <- tbl$requires
+    known <- c("phylo", "spatial", "animal", "temporal", "meta_analysis")
+    keep <- is.na(req) | req == "" | !(req %in% known) |
+            (req %in% detected_signals)
+    tbl <- tbl[keep, , drop = FALSE]
+  }
   # Which submodels are intercept-less? A submodel is intercept-less when
   # fixed_eff has factor_contrast / predictor rows for it but no intercept
   # row. The cell_mean interpretation template fires for those.

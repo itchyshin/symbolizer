@@ -204,19 +204,41 @@ symbolize.glmmTMB <- function(fit, symbols = NULL, units = NULL,
     family = family,
     response_symbol_1 = response_symbol, response_symbol_2 = NA_character_
   )
+  # v0.21+ structured-dependence signals. glmmTMB's propto block attaches
+  # Sigma = sigma_p^2 * V on a random-effect group (the phylogenetic /
+  # pedigree / structured-covariance pattern). The detected_signals vector
+  # gates phylo assumption / interpretation rows in the CSV-driven builders.
+  detected_signals <- if (isTRUE(meta_via_glmmTMB)) "phylo" else character(0L)
+  structured_matrices <- if (isTRUE(meta_via_glmmTMB)) {
+    grp <- if (!is.null(re_tbl) && nrow(re_tbl) > 0L) re_tbl$group_var[[1L]] else "group"
+    list(list(
+      symbol             = "\\mathbf{A}",
+      symbol_matrix      = "\\mathbf{A}",
+      variable           = grp,
+      units              = NA_character_,
+      role               = "structured_correlation_phylo",
+      dimension          = "\\mathbb{R}^{k \\times k}",
+      dimension_concrete = sprintf("\\mathbb{R}^{k_{%s} \\times k_{%s}}", grp, grp),
+      description        = sprintf("structured (phylogenetic / pedigree / known-correlation) matrix on %s, attached via propto(): Sigma = sigma_p^2 * A, plus an independent residual sigma_res^2 * I unless dispformula = ~ 0", grp)
+    ))
+  } else NULL
+
   symbol_dict <- drm_build_symbol_dictionary(
     terms_tbl, response, response_symbol, response_symbol_matrix,
     response_units, family, submodels, units, data, n_obs, re_tbl,
     response_1 = response, response_2 = NA_character_,
-    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_
+    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_,
+    structured_matrices = structured_matrices
   )
   assumptions <- drm_build_assumptions(
     family, response, response_symbol, re_tbl,
-    response_1 = response, response_2 = NA_character_
+    response_1 = response, response_2 = NA_character_,
+    detected_signals = detected_signals
   )
   interp <- drm_build_interpretation(
     fixed_eff, family, response, data,
-    response_1 = response, response_2 = NA_character_
+    response_1 = response, response_2 = NA_character_,
+    detected_signals = detected_signals
   )
   bridge <- drm_build_formula_bridge(
     entries, components, response,
@@ -240,6 +262,8 @@ symbolize.glmmTMB <- function(fit, symbols = NULL, units = NULL,
     # working until the next major version.
     propto_known_corr_block  = isTRUE(meta_via_glmmTMB),
     meta_analysis_via_glmmTMB = isTRUE(meta_via_glmmTMB),  # deprecated alias
+    phylo_representation = if (isTRUE(meta_via_glmmTMB)) "tips_only" else NULL,
+    detected_signals = detected_signals,
     created_by = "symbolize.glmmTMB"
   )
 

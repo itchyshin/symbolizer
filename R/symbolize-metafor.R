@@ -379,19 +379,67 @@ symbolize.rma.mv <- function(fit, symbols = NULL, units = NULL,
     family = family,
     response_symbol_1 = response_symbol, response_symbol_2 = NA_character_
   )
+
+  # v0.21+ structured-dependence signals (rma.mv). Discriminate phylo vs
+  # spatial by R-matrix group name. Names matching the phylo lexicon ->
+  # "phylo"; spatial lexicon -> "spatial"; anything else stays
+  # "structured" (v0.13 behaviour).
+  phylo_pat <- "species|phylo|phylogeny|taxon|animal"
+  spatial_pat <- "site|location|plot|spatial|coords"
+  detected_signals <- character(0L)
+  phylo_grps <- character(0L)
+  spatial_grps <- character(0L)
+  for (gn in structured_groups) {
+    if (grepl(phylo_pat, gn, ignore.case = TRUE)) {
+      phylo_grps <- c(phylo_grps, gn)
+    } else if (grepl(spatial_pat, gn, ignore.case = TRUE)) {
+      spatial_grps <- c(spatial_grps, gn)
+    }
+  }
+  if (length(phylo_grps) > 0L)   detected_signals <- c(detected_signals, "phylo")
+  if (length(spatial_grps) > 0L) detected_signals <- c(detected_signals, "spatial")
+  structured_matrices <- c(
+    lapply(phylo_grps, function(gn) list(
+      symbol             = "\\mathbf{A}",
+      symbol_matrix      = "\\mathbf{A}",
+      variable           = gn,
+      units              = NA_character_,
+      role               = "structured_correlation_phylo",
+      dimension          = "\\mathbb{R}^{k \\times k}",
+      dimension_concrete = sprintf("\\mathbb{R}^{%d \\times %d}",
+                                   NROW(fit$R[[gn]]), NROW(fit$R[[gn]])),
+      description        = sprintf("phylogenetic correlation matrix on %s, attached via R = list(%s = A): Sigma = sigma_p^2 * A (tips-only k x k representation)", gn, gn)
+    )),
+    lapply(spatial_grps, function(gn) list(
+      symbol             = "\\boldsymbol{\\Omega}",
+      symbol_matrix      = "\\boldsymbol{\\Omega}",
+      variable           = gn,
+      units              = NA_character_,
+      role               = "structured_correlation_spatial",
+      dimension          = "\\mathbb{R}^{k \\times k}",
+      dimension_concrete = sprintf("\\mathbb{R}^{%d \\times %d}",
+                                   NROW(fit$R[[gn]]), NROW(fit$R[[gn]])),
+      description        = sprintf("spatial correlation matrix on %s, attached via R = list(%s = Omega): Sigma = sigma_omega^2 * Omega (not a Wishart precision; not a CAR/SAR weights matrix)", gn, gn)
+    ))
+  )
+  if (length(structured_matrices) == 0L) structured_matrices <- NULL
+
   symbol_dict <- drm_build_symbol_dictionary(
     terms_tbl, response, response_symbol, response_symbol_matrix,
     response_units, family, submodels, units, data, n_obs, re_tbl,
     response_1 = response, response_2 = NA_character_,
-    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_
+    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_,
+    structured_matrices = structured_matrices
   )
   assumptions <- drm_build_assumptions(
     family, response, response_symbol, re_tbl,
-    response_1 = response, response_2 = NA_character_
+    response_1 = response, response_2 = NA_character_,
+    detected_signals = detected_signals
   )
   interp <- drm_build_interpretation(
     fixed_eff, family, response, data,
-    response_1 = response, response_2 = NA_character_
+    response_1 = response, response_2 = NA_character_,
+    detected_signals = detected_signals
   )
   bridge <- drm_build_formula_bridge(
     entries, components, response,
@@ -427,6 +475,9 @@ symbolize.rma.mv <- function(fit, symbols = NULL, units = NULL,
     structured_random = structured_tbl,
     sigma2 = fit$sigma2,
     s_names = fit$s.names,
+    phylo_representation = if (length(phylo_grps) > 0L) "tips_only" else NULL,
+    spatial_representation = if (length(spatial_grps) > 0L) "tips_only" else NULL,
+    detected_signals = detected_signals,
     created_by = "symbolize.rma.mv"
   )
 
