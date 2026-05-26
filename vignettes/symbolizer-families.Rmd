@@ -21,6 +21,25 @@ knitr::opts_chunk$set(
 render_math <- function(x) {
   knitr::asis_output(paste0("\n$$\n", x, "\n$$\n"))
 }
+
+# Write a PDF rendering of the three-views widget next to the rendered
+# HTML, and emit a "Download as PDF" link. Mirrors the helper used in
+# vignettes/symbolizer-structural-dependence.Rmd -- write into the
+# chunk cwd (= vignettes/) and copy into ../docs/articles when that
+# exists (pkgdown build path) so the <a href> resolves under both
+# rmarkdown::render() and pkgdown::build_article().
+pdf_alongside_html <- function(sym, basename, title) {
+  symbolizer::as_pdf_three_views(sym, file = basename, title = title)
+  docs_articles <- "../docs/articles"
+  if (dir.exists(docs_articles)) {
+    file.copy(basename, file.path(docs_articles, basename), overwrite = TRUE)
+  }
+  cat(sprintf(
+    '<p><a href="%s" class="btn btn-primary">Download as PDF</a></p>\n',
+    basename
+  ))
+  invisible(basename)
+}
 ```
 
 > *This tour walks through the non-Gaussian distributional families
@@ -90,6 +109,17 @@ parameter_interpretation(sym, scale = "biological")
 **Coefficient reading on mu:** a unit change in `x` multiplies the
 geometric mean by `exp(beta)`.
 
+#### Three views of the lognormal fit
+
+```{r lognormal-widget, results = "asis", message = FALSE}
+htmltools::HTML(as_html_three_views(sym, id = "lognormal"))
+```
+
+```{r lognormal-pdf, results = "asis", message = FALSE}
+pdf_alongside_html(sym, "fig-lognormal.pdf",
+                   "Lognormal regression -- three views")
+```
+
 ### Gamma — positive continuous, skewed
 
 `Y > 0`, log link by convention (`stats::Gamma(link = "log")`).
@@ -133,6 +163,17 @@ render_math(sym$distribution$latex)
 **Coefficient reading on mu:** `exp(beta)` is the *odds ratio* of
 the success probability. A coefficient of `0.3` means a unit
 increase in `x` multiplies the odds by `exp(0.3) ≈ 1.35`.
+
+#### Three views of the Beta fit
+
+```{r beta-widget, results = "asis", message = FALSE}
+htmltools::HTML(as_html_three_views(sym, id = "beta"))
+```
+
+```{r beta-pdf, results = "asis", message = FALSE}
+pdf_alongside_html(sym, "fig-beta.pdf",
+                   "Beta regression -- three views")
+```
 
 ### Beta-binomial — overdispersed binomial counts
 
@@ -179,6 +220,17 @@ render_math(sym$distribution$latex)
 
 **Coefficient reading on mu:** `exp(beta)` is the *rate ratio* — a
 multiplicative effect on the expected count.
+
+#### Three views of the Poisson fit
+
+```{r poisson-widget, results = "asis", message = FALSE}
+htmltools::HTML(as_html_three_views(sym, id = "poisson"))
+```
+
+```{r poisson-pdf, results = "asis", message = FALSE}
+pdf_alongside_html(sym, "fig-poisson.pdf",
+                   "Poisson regression -- three views")
+```
 
 ### Negative binomial (nbinom2) — counts with overdispersion
 
