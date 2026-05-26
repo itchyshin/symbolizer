@@ -358,18 +358,20 @@ tibbles, ready for downstream renderers:
 ``` r
 
 sym_re$random_effects
-#> # A tibble: 1 × 11
-#>   submodel term_label lhs_expr group_var component   n_levels component_index
-#>   <chr>    <chr>      <chr>    <chr>     <chr>          <int>           <int>
-#> 1 mu       (1 | site) 1        site      (Intercept)        6               0
-#> # ℹ 4 more variables: u_symbol_index <chr>, u_symbol_matrix <chr>,
-#> #   sigma_symbol <chr>, predictor_factor <chr>
-sym_re$variance_components
-#> # A tibble: 1 × 7
-#>   submodel group_var component   parameter    symbol        n_levels description
-#>   <chr>    <chr>     <chr>       <chr>        <chr>            <int> <chr>      
-#> 1 mu       site      (Intercept) sigma_site_0 "\\sigma_{si…        6 between-si…
 ```
+
+| submodel | term               | group | levels | random effect   | between-group SD  |
+|:---------|:-------------------|:------|-------:|:----------------|:------------------|
+| mu       | `(1 \&#124; site)` | site  |      6 | $`u_{site(i)}`$ | $`\sigma_{site}`$ |
+
+``` r
+
+sym_re$variance_components
+```
+
+| parameter    |
+|:-------------|
+| sigma_site_0 |
 
 `sd(site)` is the between-site standard deviation; the symbol table
 reports it as $`\sigma_{\mathrm{site}}`$.
@@ -398,7 +400,7 @@ $`\mathbf{Z}\mathbf{u}`$ random-effect block populated from the data:
 as_html_three_views(sym_re)
 ```
 
-[Skip three-views widget](#sym-sym-1779754422-end)
+[Skip three-views widget](#sym-sym-1779801473-end)
 
 ▸1. Index
 
@@ -950,7 +952,7 @@ or reserved**, **Unsupported or blocked**.
 
 caps <- symbolizer_capabilities()
 caps[caps$class == "drmTMB", ]
-#> # A tibble: 31 × 6
+#> # A tibble: 32 × 6
 #>    class  family            component      status              since notes      
 #>    <chr>  <chr>             <chr>          <chr>               <chr> <chr>      
 #>  1 drmTMB gaussian          mu             Stable              0.1.0 Univariate…
@@ -963,7 +965,7 @@ caps[caps$class == "drmTMB", ]
 #>  8 drmTMB truncated_nbinom2 hu             First slice         0.4.0 Hurdle sub…
 #>  9 drmTMB gaussian          rho12          Planned or reserved NA    Bivariate …
 #> 10 drmTMB student           mu             First slice         0.2.2 Student-t …
-#> # ℹ 21 more rows
+#> # ℹ 22 more rows
 ```
 
 The relevant rows are:

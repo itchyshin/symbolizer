@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.20.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.20.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,6 +34,35 @@
       <small>Source: <a href="https://github.com/itchyshin/symbolizer/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.20.2" id="symbolizer-0202">symbolizer 0.20.2<a class="anchor" aria-label="anchor" href="#symbolizer-0202"></a></h2>
+<div class="section level3">
+<h3 id="v0202--pat-cleanup--phylogenetic-capability-scaffold-0-20-2">v0.20.2 – Pat cleanup + phylogenetic capability scaffold<a class="anchor" aria-label="anchor" href="#v0202--pat-cleanup--phylogenetic-capability-scaffold-0-20-2"></a></h3>
+<p>Pure cleanup release after Pat’s R-output-vs-LaTeX audit, plus the first piece of scaffolding for a unified phylogenetic + spatial meta-analysis vignette (D+E) targeted for the next release.</p>
+<div class="section level4">
+<h4 id="pat-cleanup-vignette-output-paths-now-render-math-via-knit_print-0-20-2">Pat cleanup: vignette output paths now render math via knit_print<a class="anchor" aria-label="anchor" href="#pat-cleanup-vignette-output-paths-now-render-math-via-knit_print-0-20-2"></a></h4>
+<ol style="list-style-type: decimal"><li><p><strong>Six <code>cat(as_latex(sym), "\n")</code> chunks</strong> in <code>vignettes/symbolizer-ladder.Rmd</code> (rungs 1-4) and <code>vignettes/symbolizer-meta.Rmd</code> (Face 1 and Face 2) were dumping raw LaTeX strings to the page instead of rendered MathJax. Each is now <code>equations(sym, notation = "index")</code>, which routes through the existing <code>knit_print.symbolizer_equations</code> method and produces a properly delimited <code>$$...$$</code> math block. The one <code>cat(as_latex(...))</code> chunk in <code>vignettes/symbolizer.Rmd</code> is left intact – it is a deliberate teaching demonstration of the raw string.</p></li>
+<li><p><strong>Two new <code>knit_print</code> methods</strong>: <code>knit_print.symbolizer_random_effects</code> and <code>knit_print.symbolizer_variance_components</code>. The <code>random_effects</code> tibble carries LaTeX-valued columns (<code>u_symbol_index</code>, <code>sigma_symbol</code>); the bare tibble print was leaking <code>\sigma_{site}</code>-style strings onto the page. The new methods wrap the symbol columns in <code>$...$</code> and render the table as a clean pipe-Markdown kable so MathJax / KaTeX picks them up. The underlying tbl_df / data.frame classes remain in the class chain, so all downstream tibble operations are unaffected.</p></li>
+<li><p><strong><code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> wrapper dropped</strong> around <code><a href="../reference/parameter_interpretation.html">parameter_interpretation()</a></code> in <code>vignettes/symbolizer-families.Rmd</code> so the <code>knit_print.symbolizer_interpretation</code> method runs and the biological-reading column renders as math instead of as raw text.</p></li>
+</ol></div>
+<div class="section level4">
+<h4 id="phylogenetic-capability-scaffold-de-article-preview-0-20-2">Phylogenetic capability scaffold (D+E article preview)<a class="anchor" aria-label="anchor" href="#phylogenetic-capability-scaffold-de-article-preview-0-20-2"></a></h4>
+<p>The Mizuno, Williams, Lagisz, Senior, Nakagawa tutorial unifies phylogenetic and spatial meta-analysis: they are the same multilevel random-effects model, differing only in what “distance” means (evolutionary time vs geographic distance). The next release will ship a single article that teaches both via the shared <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>∼</mo><mi>𝒩</mi><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><msubsup><mi>σ</mi><mi>p</mi><mn>2</mn></msubsup><mi>𝐌</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">p \sim \mathcal N(0, \sigma^2_p \mathbf M)</annotation></semantics></math> structure – with <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐌</mi><annotation encoding="application/x-tex">\mathbf M</annotation></semantics></math> being the phylogenetic correlation matrix <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐀</mi><annotation encoding="application/x-tex">\mathbf A</annotation></semantics></math> (phylo) or a kernel-derived spatial matrix (spatial).</p>
+<p>As a scaffold, three new <code>Planned or reserved</code> rows have been added to <code>inst/extdata/capabilities.csv</code>:</p>
+<ul><li>
+<code>drmTMB,gaussian,phylo</code> – <code>drmTMB::phylo(term, tree)</code> uses Hadfield &amp; Nakagawa (2010) A-inverse sparse-precision internally, which is the <strong>all-nodes</strong> representation (latent vector spans tips + internal nodes).</li>
+<li>
+<code>metafor,*,phylo</code> – <code>rma.mv(..., R = list(species = A))</code> with the tips-only k x k phylogenetic correlation matrix; distinct from the <code>V = V</code> fixed-sampling-covariance pattern that v0.20.0 nailed down.</li>
+<li>
+<code>brms,*,phylo</code> – <code>gr(species, cov = A)</code> with the tips-only A.</li>
+</ul><p>Existing rows for <code>gllvmTMB,*,phylo</code>, <code>glmmTMB propto</code>, and <code>MCMCglmm animal</code> already cover the rest of the phylo surface; the notes have been left as-is in this release. The extractor work that will populate <code>metadata$phylo_representation</code> (<code>"tips_only"</code> / <code>"all_nodes"</code>) is deferred to the D+E release.</p>
+</div>
+<div class="section level4">
+<h4 id="florence-visual-check-discipline-continued-0-20-2">Florence visual-check discipline (continued)<a class="anchor" aria-label="anchor" href="#florence-visual-check-discipline-continued-0-20-2"></a></h4>
+<p>Every widget-touching release must include a visual check of the live rendered page in a browser, not just <code>rcmdcheck</code>. v0.20.2 is no exception.</p>
+</div>
+</div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.20.1" id="symbolizer-0201">symbolizer 0.20.1<a class="anchor" aria-label="anchor" href="#symbolizer-0201"></a></h2>
 <div class="section level3">

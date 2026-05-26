@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.20.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.20.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -137,21 +137,56 @@ Coefficients on <code>mu</code> live on the log-response scale, so
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://itchyshin.github.io/drmTMB/reference/drmTMB.html" class="external-link">drmTMB</a></span><span class="op">(</span><span class="fu"><a href="https://itchyshin.github.io/drmTMB/reference/drm_formula.html" class="external-link">drm_formula</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x</span>, <span class="va">sigma</span> <span class="op">~</span> <span class="fl">1</span><span class="op">)</span>,</span>
 <span>              family <span class="op">=</span> <span class="fu"><a href="https://itchyshin.github.io/drmTMB/reference/lognormal.html" class="external-link">lognormal</a></span><span class="op">(</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">dat</span><span class="op">)</span></span>
 <span><span class="va">sym</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/symbolize.html">symbolize</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="../reference/parameter_interpretation.html">parameter_interpretation</a></span><span class="op">(</span><span class="va">sym</span>, scale <span class="op">=</span> <span class="st">"biological"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ── <span style="font-weight: bold;">Parameter interpretation (</span><span style="color: #0000BB; font-weight: bold;">"biological"</span><span style="font-weight: bold;">)</span> ──</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ── <span style="font-weight: bold;">submodel: mu</span></span></span>
-<span><span class="co">#&gt; <span style="font-style: italic;">(Intercept)</span> [<span style="color: #0000BB;">"intercept"</span>] estimate = <span style="color: #0000BB;">"2.02"</span> (1.93, 2.11) *</span></span>
-<span><span class="co">#&gt; biological: Baseline geometric mean of y in the reference condition is</span></span>
-<span><span class="co">#&gt; exp(2.02)</span></span>
-<span><span class="co">#&gt; <span style="font-style: italic;">x</span> [<span style="color: #0000BB;">"slope"</span>] estimate = <span style="color: #0000BB;">"-0.0136"</span> (-0.102, 0.0751)</span></span>
-<span><span class="co">#&gt; biological: A unit change in x multiplies the geometric mean of y by</span></span>
-<span><span class="co">#&gt; exp(-0.0136)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ── <span style="font-weight: bold;">submodel: sigma</span></span></span>
-<span><span class="co">#&gt; <span style="font-style: italic;">(Intercept)</span> [<span style="color: #0000BB;">"intercept"</span>] estimate = <span style="color: #0000BB;">"-0.764"</span> (-0.903, -0.626) *</span></span>
-<span><span class="co">#&gt; biological: Baseline level of unexplained variability on the log scale</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/parameter_interpretation.html">parameter_interpretation</a></span><span class="op">(</span><span class="va">sym</span>, scale <span class="op">=</span> <span class="st">"biological"</span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<colgroup>
+<col width="6%">
+<col width="8%">
+<col width="12%">
+<col width="6%">
+<col width="12%">
+<col width="52%">
+</colgroup>
+<thead><tr class="header">
+<th align="left">submodel</th>
+<th align="left">term_label</th>
+<th align="left">coefficient_role</th>
+<th align="left">estimate</th>
+<th align="left">95% CI</th>
+<th align="left">biological_reading</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">mu</td>
+<td align="left">(Intercept)</td>
+<td align="left">intercept</td>
+<td align="left">2.02</td>
+<td align="left">1.93, 2.11 *</td>
+<td align="left">Baseline geometric mean of y in the reference condition
+is exp(2.02)</td>
+</tr>
+<tr class="even">
+<td align="left">mu</td>
+<td align="left">x</td>
+<td align="left">slope</td>
+<td align="left">-0.0136</td>
+<td align="left">-0.102, 0.0751</td>
+<td align="left">A unit change in x multiplies the geometric mean of y
+by exp(-0.0136)</td>
+</tr>
+<tr class="odd">
+<td align="left">sigma</td>
+<td align="left">(Intercept)</td>
+<td align="left">intercept</td>
+<td align="left">-0.764</td>
+<td align="left">-0.903, -0.626 *</td>
+<td align="left">Baseline level of unexplained variability on the log
+scale</td>
+</tr>
+</tbody>
+</table>
+<p><em>Rows marked <code>*</code> have a 95% confidence interval that
+excludes zero (CI method: <code>wald</code>).</em></p>
 <p><strong>Coefficient reading on mu:</strong> a unit change in
 <code>x</code> multiplies the geometric mean by
 <code>exp(beta)</code>.</p>

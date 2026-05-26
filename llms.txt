@@ -201,7 +201,7 @@ with data — backed by the same `symbolized_model` object.
 as_html_three_views(sym)
 ```
 
-[Skip three-views widget](#sym-sym-1779753730-end)
+[Skip three-views widget](#sym-sym-1779794964-end)
 
 ▸1. Index
 
@@ -296,12 +296,16 @@ Stacking the same response equation for all *n* = 200 observations:
 \underbrace{\begin{bmatrix} 31.5 \\ 36.6 \\ 27.8 \\ 42.2 \\ 31.2 \\ \vdots \\ 35.5 \\ 34.3 \end{bmatrix}}_{\textstyle\,\mathbf{w}_{\,200 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 &   14 \\    1 & 15.6 \\    1 & 18.6 \\    1 & 23.6 \\    1 &   13 \\ \vdots & \vdots \\    1 & 14.8 \\    1 & 21.7 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,200 \times 2}\,}\, \underbrace{\begin{bmatrix} 30.4 \\ 0.371 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,2 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} -4.16 \\ 0.355 \\ -9.53 \\ 3.02 \\ -4.02 \\ \vdots \\ -0.364 \\ -4.23 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,200 \times 1}\;\text{(residual)}\,}
 ```
 
-**Left**: observed vector (). **Middle**: the prediction ( = ).
-**Right**: the residual vector ( = - ). Every row of this matrix
-equation is one of the response-equation rows from the worked row above.
+**Left**: observed vector $`\mathbf{w}`$. **Middle**: the prediction
+$`\mathbf{X}\hat{\boldsymbol{\beta}} = \hat{\boldsymbol{\mu}}`$.
+**Right**: the residual vector
+$`\hat{\boldsymbol{\varepsilon}} = \mathbf{w} - \hat{\boldsymbol{\mu}}`$.
+Every row of this matrix equation is one of the response-equation rows
+from the worked row above.
 
-And the () submodel (no observed counterpart – ()’s job is to describe
-the spread of ()). For the same observation *i* = 1:
+And the $`\sigma`$ submodel (no observed counterpart – $`\sigma`$’s job
+is to describe the spread of $`\hat{\boldsymbol{\varepsilon}}`$). For
+the same observation *i* = 1:
 
 ``` math
 \begin{aligned}

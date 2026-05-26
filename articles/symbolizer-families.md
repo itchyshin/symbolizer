@@ -75,22 +75,17 @@ dat <- data.frame(y = exp(rnorm(n, 2 + 0.3 * rnorm(n), 0.4)),
 fit <- drmTMB(drm_formula(y ~ x, sigma ~ 1),
               family = lognormal(), data = dat)
 sym <- symbolize(fit)
-print(parameter_interpretation(sym, scale = "biological"))
-#> 
-#> ── Parameter interpretation ("biological") ──
-#> 
-#> ── submodel: mu
-#> (Intercept) ["intercept"] estimate = "2.02" (1.93, 2.11) *
-#> biological: Baseline geometric mean of y in the reference condition is
-#> exp(2.02)
-#> x ["slope"] estimate = "-0.0136" (-0.102, 0.0751)
-#> biological: A unit change in x multiplies the geometric mean of y by
-#> exp(-0.0136)
-#> 
-#> ── submodel: sigma
-#> (Intercept) ["intercept"] estimate = "-0.764" (-0.903, -0.626) *
-#> biological: Baseline level of unexplained variability on the log scale
+parameter_interpretation(sym, scale = "biological")
 ```
+
+| submodel | term_label | coefficient_role | estimate | 95% CI | biological_reading |
+|:---|:---|:---|:---|:---|:---|
+| mu | (Intercept) | intercept | 2.02 | 1.93, 2.11 \* | Baseline geometric mean of y in the reference condition is exp(2.02) |
+| mu | x | slope | -0.0136 | -0.102, 0.0751 | A unit change in x multiplies the geometric mean of y by exp(-0.0136) |
+| sigma | (Intercept) | intercept | -0.764 | -0.903, -0.626 \* | Baseline level of unexplained variability on the log scale |
+
+*Rows marked `*` have a 95% confidence interval that excludes zero (CI
+method: `wald`).*
 
 **Coefficient reading on mu:** a unit change in `x` multiplies the
 geometric mean by `exp(beta)`.

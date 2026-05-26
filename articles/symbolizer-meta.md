@@ -86,25 +86,28 @@ The symbolic surface:
 
 ``` r
 
-cat(as_latex(sym_meta), "\n")
-#> \begin{aligned}
-#> y_i \mid \theta_i & \sim \mathrm{Normal}(\theta_i,\, v_i), \quad v_i \text{ known} \\
-#> \mu_i & = \beta_{0} + u_{study(i)} + u_{obs(i)} \\
-#> u_{study} & \sim \mathcal{N}(0,\, \sigma_{study}^2) \\
-#> u_{obs} & \sim \mathcal{N}(0,\, \sigma_{obs}^2)
-#> \end{aligned}
+equations(sym_meta, notation = "index")
+```
+
+``` math
+\begin{aligned}
+y_i \mid \theta_i \sim \mathrm{Normal}(\theta_i,\, v_i), \quad v_i \text{ known} \\
+\mu_i = \beta_{0} + u_{study(i)} + u_{obs(i)} \\
+u_{study} \sim \mathcal{N}(0,\, \sigma_{study}^2) \\
+u_{obs} \sim \mathcal{N}(0,\, \sigma_{obs}^2)
+\end{aligned}
 ```
 
 ``` r
 
 sym_meta$variance_components
-#> # A tibble: 3 × 6
-#>   parameter group    term          sd_estimate var_estimate kind             
-#>   <chr>     <chr>    <chr>               <dbl>        <dbl> <chr>            
-#> 1 mu        study    sigma^2_study      0.302       0.0910  heterogeneity    
-#> 2 mu        obs      sigma^2_obs        0.0943      0.00890 heterogeneity    
-#> 3 mu        sampling mean(v_i)          0.316       0.0999  sampling_variance
 ```
+
+| parameter | group    | term          | sd_estimate | var_estimate |
+|:----------|:---------|:--------------|:------------|:-------------|
+| mu        | study    | sigma^2_study | 0.302       | 0.0910       |
+| mu        | obs      | sigma^2_obs   | 0.0943      | 0.00890      |
+| mu        | sampling | mean(v_i)     | 0.316       | 0.0999       |
 
 The model the package teaches: `meta_normal` family, two random-effect
 tiers (study + observation), sampling variances `v_i` known.
@@ -185,12 +188,15 @@ warning_table(sym_glmm)
 
 ``` r
 
-cat(as_latex(sym_glmm), "\n")
-#> \begin{aligned}
-#> y \mid \mu_i,\, \sigma_i & \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
-#> \mu_i & = \beta_{0} + u_{study(i)} \\
-#> u_{study} & \sim \mathcal{N}(0,\, \sigma_{study}^2)
-#> \end{aligned}
+equations(sym_glmm, notation = "index")
+```
+
+``` math
+\begin{aligned}
+y \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
+\mu_i = \beta_{0} + u_{study(i)} \\
+u_{study} \sim \mathcal{N}(0,\, \sigma_{study}^2)
+\end{aligned}
 ```
 
 ### What you’d need for an actual meta-analytic glmmTMB fit

@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.20.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.20.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -531,18 +531,43 @@ predictors and the random effects</td>
 <p>The structured object also exposes the random-effect structure as
 tidy tibbles, ready for downstream renderers:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sym_re</span><span class="op">$</span><span class="va">random_effects</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 11</span></span></span>
-<span><span class="co">#&gt;   submodel term_label lhs_expr group_var component   n_levels component_index</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> mu       (1 | site) 1        site      (Intercept)        6               0</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4 more variables: u_symbol_index &lt;chr&gt;, u_symbol_matrix &lt;chr&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   sigma_symbol &lt;chr&gt;, predictor_factor &lt;chr&gt;</span></span></span>
-<span><span class="va">sym_re</span><span class="op">$</span><span class="va">variance_components</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 7</span></span></span>
-<span><span class="co">#&gt;   submodel group_var component   parameter    symbol        n_levels description</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> mu       site      (Intercept) sigma_site_0 <span style="color: #949494;">"</span>\\sigma_{si…        6 between-si…</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">sym_re</span><span class="op">$</span><span class="va">random_effects</span></span></code></pre></div>
+<table class="table">
+<colgroup>
+<col width="12%">
+<col width="26%">
+<col width="8%">
+<col width="9%">
+<col width="19%">
+<col width="23%">
+</colgroup>
+<thead><tr class="header">
+<th align="left">submodel</th>
+<th align="left">term</th>
+<th align="left">group</th>
+<th align="right">levels</th>
+<th align="left">random effect</th>
+<th align="left">between-group SD</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td align="left">mu</td>
+<td align="left"><code>(1 \&amp;#124; site)</code></td>
+<td align="left">site</td>
+<td align="right">6</td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>u</mi><mrow><mi>s</mi><mi>i</mi><mi>t</mi><mi>e</mi><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo></mrow></msub><annotation encoding="application/x-tex">u_{site(i)}</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mrow><mi>s</mi><mi>i</mi><mi>t</mi><mi>e</mi></mrow></msub><annotation encoding="application/x-tex">\sigma_{site}</annotation></semantics></math></td>
+</tr></tbody>
+</table>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sym_re</span><span class="op">$</span><span class="va">variance_components</span></span></code></pre></div>
+<table class="table">
+<thead><tr class="header">
+<th align="left">parameter</th>
+</tr></thead>
+<tbody><tr class="odd">
+<td align="left">sigma_site_0</td>
+</tr></tbody>
+</table>
 <p><code>sd(site)</code> is the between-site standard deviation; the
 symbol table reports it as
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mrow><mi mathvariant="normal">s</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">e</mi></mrow></msub><annotation encoding="application/x-tex">\sigma_{\mathrm{site}}</annotation></semantics></math>.</p>
@@ -565,7 +590,7 @@ to the actual numeric arrays — with both the
 fixed-effect block and the
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐙</mi><mi>𝐮</mi></mrow><annotation encoding="application/x-tex">\mathbf{Z}\mathbf{u}</annotation></semantics></math>
 random-effect block populated from the data:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/as_html_three_views.html">as_html_three_views</a></span><span class="op">(</span><span class="va">sym_re</span><span class="op">)</span></span></code></pre></div>
 <style>.sym-tabs { position: relative; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; margin: 1em 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
 .sym-tablist { display: flex; background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
@@ -591,22 +616,22 @@ random-effect block populated from the data:</p>
 .sym-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .sym-skip { position: absolute; top: -100px; left: 0; padding: 0.4rem 0.7rem; background: #8a1f22; color: #fff; text-decoration: none; font-size: 0.85rem; z-index: 5; }
 .sym-skip:focus { top: 0; }</style>
-<div id="sym-sym-1779754422" class="sym-tabs">
-<a class="sym-skip" href="#sym-sym-1779754422-end">Skip three-views
+<div id="sym-sym-1779801473" class="sym-tabs">
+<a class="sym-skip" href="#sym-sym-1779801473-end">Skip three-views
 widget</a>
 <div class="sym-tablist" role="tablist" aria-label="Three views of the model">
-<button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779754422-tab-idx" aria-controls="sym-sym-1779754422-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
+<button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779801473-tab-idx" aria-controls="sym-sym-1779801473-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
 <span class="sym-tab-marker" aria-hidden="true">▸</span>1. Index
 </button>
-<button type="button" class="sym-tab" role="tab" id="sym-sym-1779754422-tab-eq" aria-controls="sym-sym-1779754422-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
+<button type="button" class="sym-tab" role="tab" id="sym-sym-1779801473-tab-eq" aria-controls="sym-sym-1779801473-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
 <span class="sym-tab-marker" aria-hidden="true">▸</span>2. Matrix
 </button>
-<button type="button" class="sym-tab" role="tab" id="sym-sym-1779754422-tab-mat" aria-controls="sym-sym-1779754422-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
+<button type="button" class="sym-tab" role="tab" id="sym-sym-1779801473-tab-mat" aria-controls="sym-sym-1779801473-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
 <span class="sym-tab-marker" aria-hidden="true">▸</span>3. Equations
 with data
 </button>
 </div>
-<div id="sym-sym-1779754422-panel-idx" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-sym-1779754422-tab-idx" data-panel="idx" tabindex="0">
+<div id="sym-sym-1779801473-panel-idx" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-sym-1779801473-tab-idx" data-panel="idx" tabindex="0">
 <p class="sym-caption">
 What happens for each observation <em>i</em> – the per-individual
 reading.
@@ -664,7 +689,7 @@ form</span>
 </li>
 </ul></details>
 </div>
-<div id="sym-sym-1779754422-panel-eq" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1779754422-tab-eq" data-panel="eq" hidden="" tabindex="0">
+<div id="sym-sym-1779801473-panel-eq" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1779801473-tab-eq" data-panel="eq" hidden="" tabindex="0">
 <p class="sym-caption">
 The same model in matrix form – the structural contract every textbook
 past chapter 4 switches to.
@@ -725,7 +750,7 @@ form</span>
 </li>
 </ul></details>
 </div>
-<div id="sym-sym-1779754422-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1779754422-tab-mat" data-panel="mat" hidden="" tabindex="0">
+<div id="sym-sym-1779801473-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1779801473-tab-mat" data-panel="mat" hidden="" tabindex="0">
 <p class="sym-caption">
 The same matrix equation, with your actual numbers stacked inside the
 brackets – what the computer multiplies. Showing first 5 and last 2 rows
@@ -802,9 +827,9 @@ observations:
 </div>
 </div>
 </div>
-<span id="sym-sym-1779754422-end" tabindex="-1"></span>
+<span id="sym-sym-1779801473-end" tabindex="-1"></span>
 <script>(function() {
-  var root = document.getElementById("sym-sym-1779754422");
+  var root = document.getElementById("sym-sym-1779801473");
   if (!root) return;
   var tabs   = Array.prototype.slice.call(root.querySelectorAll("[role=\"tab\"]"));
   var panels = Array.prototype.slice.call(root.querySelectorAll("[role=\"tabpanel\"]"));
@@ -851,7 +876,7 @@ a random intercept on the mean. This section shows that the same
 <code><a href="../reference/symbolize.html">symbolize()</a></code> surfaces scale up — with two educator-facing
 surfaces (<code>formula_bridge</code> and <code>notation_bridge</code>)
 that get more interesting when the fit is more interesting.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">20260523</span><span class="op">)</span></span>
 <span><span class="va">nr</span>           <span class="op">&lt;-</span> <span class="fl">200</span></span>
 <span><span class="va">temperature</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="va">nr</span>, <span class="fl">8</span>, <span class="fl">30</span><span class="op">)</span></span>
@@ -886,7 +911,7 @@ that get more interesting when the fit is more interesting.</p>
 <p><code><a href="../reference/formula_bridge.html">formula_bridge()</a></code> is the educator-facing translation
 table from R formula syntax to mathematics. Two rows (one per submodel),
 in both notations:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/formula_bridge.html">formula_bridge</a></span><span class="op">(</span><span class="va">sym_rich</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <colgroup>
@@ -936,7 +961,7 @@ translation without doing it by hand.</p>
 <p><code><a href="../reference/notation_bridge.html">notation_bridge()</a></code> is the deeper teaching surface: every
 symbol <em>and</em> every equation pairs its index form with its matrix
 form and tags both shapes:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/notation_bridge.html">notation_bridge</a></span><span class="op">(</span><span class="va">sym_rich</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <colgroup>
@@ -1074,7 +1099,7 @@ isolation and ignores the residual correlation between them.
 responses jointly, with a residual correlation
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ρ</mi><mn>12</mn></msub><annotation encoding="application/x-tex">\rho_{12}</annotation></semantics></math>
 that itself can depend on covariates.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">20260524</span><span class="op">)</span></span>
 <span><span class="va">nb</span> <span class="op">&lt;-</span> <span class="fl">80</span></span>
 <span><span class="va">x1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">nb</span><span class="op">)</span></span>
@@ -1106,7 +1131,7 @@ that itself can depend on covariates.</p>
 <p>The <code>symbolized_model</code> carries five submodels instead of
 two. Each appears in <code><a href="../reference/formula_bridge.html">formula_bridge()</a></code> with its own R
 syntax, statistical meaning, and symbolic form:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/formula_bridge.html">formula_bridge</a></span><span class="op">(</span><span class="va">sym_biv</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <colgroup>
@@ -1176,7 +1201,7 @@ while the correlation stays in
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>−</mi><mn>1</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(-1, 1)</annotation></semantics></math>).</p>
 <p>The joint conditional distribution is rendered in both index and
 matrix forms:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/equations.html">equations</a></span><span class="op">(</span><span class="va">sym_biv</span>, notation <span class="op">=</span> <span class="st">"both"</span><span class="op">)</span></span></code></pre></div>
 <p><strong>Index form:</strong></p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><mo stretchy="false" form="prefix">(</mo><msub><mi>Y</mi><mrow><mn>1</mn><mi>i</mi></mrow></msub><mo>,</mo><msub><mi>Y</mi><mrow><mn>2</mn><mi>i</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo><mo>∣</mo><msub><mi>μ</mi><mrow><mn>1</mn><mi>i</mi></mrow></msub><mo>,</mo><mspace width="0.167em"></mspace><msub><mi>μ</mi><mrow><mn>2</mn><mi>i</mi></mrow></msub><mo>,</mo><mspace width="0.167em"></mspace><msub><mi>σ</mi><mrow><mn>1</mn><mi>i</mi></mrow></msub><mo>,</mo><mspace width="0.167em"></mspace><msub><mi>σ</mi><mrow><mn>2</mn><mi>i</mi></mrow></msub><mo>,</mo><mspace width="0.167em"></mspace><msub><mi>ρ</mi><mrow><mn>12</mn><mo>,</mo><mi>i</mi></mrow></msub><mo>∼</mo><msub><mi>𝒩</mi><mn>2</mn></msub><mspace width="-0.167em"></mspace><mrow><mo stretchy="true" form="prefix">(</mo><mo stretchy="false" form="prefix">(</mo><msub><mi>μ</mi><mrow><mn>1</mn><mi>i</mi></mrow></msub><mo>,</mo><msub><mi>μ</mi><mrow><mn>2</mn><mi>i</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo><mo>,</mo><mspace width="0.167em"></mspace><msub><mi mathvariant="normal">Σ</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>μ</mi><mrow><mn>1</mn><mi>i</mi></mrow></msub><mo>=</mo><msub><mi>β</mi><mrow><mn>1</mn><mo>,</mo><mn>0</mn></mrow></msub><mo>+</mo><msub><mi>β</mi><mrow><mn>1</mn><mo>,</mo><mn>1</mn></mrow></msub><mspace width="0.167em"></mspace><mi>x</mi><msub><mn>1</mn><mi>i</mi></msub></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>μ</mi><mrow><mn>2</mn><mi>i</mi></mrow></msub><mo>=</mo><msub><mi>β</mi><mrow><mn>2</mn><mo>,</mo><mn>0</mn></mrow></msub><mo>+</mo><msub><mi>β</mi><mrow><mn>2</mn><mo>,</mo><mn>1</mn></mrow></msub><mspace width="0.167em"></mspace><mi>x</mi><msub><mn>2</mn><mi>i</mi></msub></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>σ</mi><mrow><mn>1</mn><mi>i</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>γ</mi><mrow><mn>1</mn><mo>,</mo><mn>0</mn></mrow></msub></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>σ</mi><mrow><mn>2</mn><mi>i</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>γ</mi><mrow><mn>2</mn><mo>,</mo><mn>0</mn></mrow></msub></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><msup><mrow><mi mathvariant="normal">t</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">h</mi></mrow><mrow><mi>−</mi><mn>1</mn></mrow></msup><mo stretchy="false" form="prefix">(</mo><msub><mi>ρ</mi><mrow><mn>12</mn><mo>,</mo><mi>i</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>ρ</mi><mn>0</mn></msub></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><msub><mi mathvariant="normal">Σ</mi><mi>i</mi></msub><mo>=</mo><mrow><mo stretchy="true" form="prefix">(</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><msubsup><mi>σ</mi><mrow><mn>1</mn><mi>i</mi></mrow><mn>2</mn></msubsup></mtd><mtd columnalign="center" style="text-align: center"><msub><mi>ρ</mi><mrow><mn>12</mn><mo>,</mo><mi>i</mi></mrow></msub><msub><mi>σ</mi><mrow><mn>1</mn><mi>i</mi></mrow></msub><msub><mi>σ</mi><mrow><mn>2</mn><mi>i</mi></mrow></msub></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><msub><mi>ρ</mi><mrow><mn>12</mn><mo>,</mo><mi>i</mi></mrow></msub><msub><mi>σ</mi><mrow><mn>1</mn><mi>i</mi></mrow></msub><msub><mi>σ</mi><mrow><mn>2</mn><mi>i</mi></mrow></msub></mtd><mtd columnalign="center" style="text-align: center"><msubsup><mi>σ</mi><mrow><mn>2</mn><mi>i</mi></mrow><mn>2</mn></msubsup></mtd></mtr></mtable><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr></mtable><annotation encoding="application/x-tex">
@@ -1220,7 +1245,7 @@ other coefficient. The reading row points the reader at the Fisher-z
 scale (where the coefficient lives), the natural correlation scale
 (<code><a href="https://rdrr.io/r/base/Hyperbolic.html" class="external-link">tanh()</a></code> of the link), and the biological meaning (residual
 co-variation between the two responses):</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rho_rows</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/parameter_interpretation.html">parameter_interpretation</a></span><span class="op">(</span><span class="va">sym_biv</span><span class="op">)</span></span>
 <span><span class="va">rho_rows</span><span class="op">[</span><span class="va">rho_rows</span><span class="op">$</span><span class="va">submodel</span> <span class="op">==</span> <span class="st">"rho12"</span>, <span class="op">]</span></span></code></pre></div>
 <table style="width:100%;" class="table">
@@ -1280,7 +1305,7 @@ it is to tell the reader <em>what to look at next</em>.
 object, including a class- specific list of extraction calls. For a
 <code>drmTMB</code> fit, the extraction calls are ordered
 diagnostics-first:</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/model_card.html">model_card</a></span><span class="op">(</span><span class="va">sym</span><span class="op">)</span></span>
 <span><span class="va">mc</span><span class="op">$</span><span class="va">extraction_calls</span></span>
 <span><span class="co">#&gt;                                                 Convergence and diagnostic checks </span></span>
@@ -1328,7 +1353,7 @@ diagnostics, not before.</li>
 </ol>
 <p><code><a href="../reference/model_card.html">model_card()</a></code> also ships a set of recommended-plot
 recipes, in the same diagnostics-first order:</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mc</span><span class="op">$</span><span class="va">recommended_plots</span></span>
 <span><span class="co">#&gt;                                                                                     Residuals vs fitted </span></span>
 <span><span class="co">#&gt;                                                          "Pearson residuals vs fitted; check for trend" </span></span>
@@ -1356,7 +1381,7 @@ that matches what your model actually does. The prose is composed from a
 CSV template plus slots filled from the <code>symbolized_model</code> —
 there’s no LLM in the loop, so every phrase traces to the template
 row.</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/methods_text.html">methods_text</a></span><span class="op">(</span><span class="va">sym</span><span class="op">)</span></span></code></pre></div>
 <p>We fit a Gaussian location-scale model to 120 observations of
 body_mass (units: g) using the drmTMB package (version 0.1.3.9000) in R.
@@ -1386,7 +1411,7 @@ a structure more complex than <code>(1 | group)</code>.</li>
 </ul>
 <p>The same call works for the richer fit from Section 6 (a 4-role
 location-scale model with a random intercept):</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/methods_text.html">methods_text</a></span><span class="op">(</span><span class="va">sym_rich</span><span class="op">)</span></span></code></pre></div>
 <p>We fit a Gaussian location-scale model to 200 observations of
 body_mass (units: g) using the drmTMB package (version 0.1.3.9000) in R.
@@ -1409,7 +1434,7 @@ RE structure (random slopes, nested, crossed), reword that
 sentence.</li>
 </ul>
 <p>and for the bivariate-Gaussian fit from Section 7:</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/methods_text.html">methods_text</a></span><span class="op">(</span><span class="va">sym_biv</span><span class="op">)</span></span></code></pre></div>
 <p>We fit a bivariate Gaussian location-scale-correlation model to 80
 paired observations of growth and repro using the drmTMB package
@@ -1446,10 +1471,10 @@ edit; the reminders block is the editorial checklist.</p>
 words: <strong>Stable</strong>, <strong>First slice</strong>,
 <strong>Opt-in control</strong>, <strong>Planned or reserved</strong>,
 <strong>Unsupported or blocked</strong>.</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">caps</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/symbolizer_capabilities.html">symbolizer_capabilities</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">caps</span><span class="op">[</span><span class="va">caps</span><span class="op">$</span><span class="va">class</span> <span class="op">==</span> <span class="st">"drmTMB"</span>, <span class="op">]</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 31 × 6</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 32 × 6</span></span></span>
 <span><span class="co">#&gt;    class  family            component      status              since notes      </span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> drmTMB gaussian          mu             Stable              0.1.0 Univariate…</span></span>
@@ -1462,7 +1487,7 @@ words: <strong>Stable</strong>, <strong>First slice</strong>,
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> drmTMB truncated_nbinom2 hu             First slice         0.4.0 Hurdle sub…</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> drmTMB gaussian          rho12          Planned or reserved <span style="color: #BB0000;">NA</span>    Bivariate …</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> drmTMB student           mu             First slice         0.2.2 Student-t …</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 21 more rows</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 22 more rows</span></span></span></code></pre></div>
 <p>The relevant rows are:</p>
 <ul>
 <li>

@@ -83,11 +83,14 @@ The equation:
 
 ``` r
 
-cat(as_latex(sym1), "\n")
-#> \begin{aligned}
-#> body_mass \mid \mu_i,\, \sigma_i & \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
-#> \mu_i & = \beta_{0} + \beta_{1} \, temperature_i
-#> \end{aligned}
+equations(sym1, notation = "index")
+```
+
+``` math
+\begin{aligned}
+body_mass \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
+\mu_i = \beta_{0} + \beta_{1} \, temperature_i
+\end{aligned}
 ```
 
 The symbol dictionary, listing every variable the model uses:
@@ -139,11 +142,14 @@ sym2 <- symbolize(fit2)
 
 ``` r
 
-cat(as_latex(sym2), "\n")
-#> \begin{aligned}
-#> body_mass \mid \mu_i,\, \sigma_i & \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
-#> \mu_i & = \beta_{0} + \beta_{1} \, temperature_i + \beta_{2} \, [sex = \mathrm{M}]
-#> \end{aligned}
+equations(sym2, notation = "index")
+```
+
+``` math
+\begin{aligned}
+body_mass \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
+\mu_i = \beta_{0} + \beta_{1} \, temperature_i + \beta_{2} \, [sex = \mathrm{M}]
+\end{aligned}
 ```
 
 The equation now carries a contrast term. The symbol dictionary adds a
@@ -203,12 +209,15 @@ sym3 <- symbolize(fit3)
 
 ``` r
 
-cat(as_latex(sym3), "\n")
-#> \begin{aligned}
-#> body_mass \mid \mu_i,\, \sigma_i & \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
-#> \mu_i & = \beta_{0} + \beta_{1} \, temperature_i + \beta_{2} \, [sex = \mathrm{M}] + u_{site(i)} \\
-#> u_{site} & \sim \mathcal{N}(0,\, \sigma_{site}^2)
-#> \end{aligned}
+equations(sym3, notation = "index")
+```
+
+``` math
+\begin{aligned}
+body_mass \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
+\mu_i = \beta_{0} + \beta_{1} \, temperature_i + \beta_{2} \, [sex = \mathrm{M}] + u_{site(i)} \\
+u_{site} \sim \mathcal{N}(0,\, \sigma_{site}^2)
+\end{aligned}
 ```
 
 Two new rows in the equation block:
@@ -221,12 +230,12 @@ Variance components are now first-class:
 ``` r
 
 sym3$variance_components
-#> # A tibble: 2 × 5
-#>   parameter group    term        sd_estimate var_estimate
-#>   <chr>     <chr>    <chr>             <dbl>        <dbl>
-#> 1 mu        site     (Intercept)        1.17         1.36
-#> 2 residual  residual Residual           3.29        10.8
 ```
+
+| parameter | group    | term        | sd_estimate | var_estimate |
+|:----------|:---------|:------------|:------------|:-------------|
+| mu        | site     | (Intercept) | 1.17        | 1.36         |
+| residual  | residual | Residual    | 3.29        | 10.8         |
 
 You can read off the between-site SD and the residual SD directly. The
 fixed-effect interpretation rows for temperature and sex still read on
@@ -285,13 +294,16 @@ sym4 <- symbolize(fit4)
 
 ``` r
 
-cat(as_latex(sym4), "\n")
-#> \begin{aligned}
-#> \mathrm{body\_mass}_i \mid \mu_i,\, \sigma_i & \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
-#> \mu_i & = \beta_{0} + \beta_{1} \, temperature_i + \beta_{2} \, [sex = \mathrm{M}] + u_{site(i)} \\
-#> \log(\sigma_i) & = \gamma_{0} + \gamma_{1} \, temperature_i \\
-#> u_{site} & \sim \mathcal{N}(0,\, \sigma_{site}^2)
-#> \end{aligned}
+equations(sym4, notation = "index")
+```
+
+``` math
+\begin{aligned}
+\mathrm{body\_mass}_i \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
+\mu_i = \beta_{0} + \beta_{1} \, temperature_i + \beta_{2} \, [sex = \mathrm{M}] + u_{site(i)} \\
+\log(\sigma_i) = \gamma_{0} + \gamma_{1} \, temperature_i \\
+u_{site} \sim \mathcal{N}(0,\, \sigma_{site}^2)
+\end{aligned}
 ```
 
 The equation block grew by **one new line** — the
@@ -326,7 +338,7 @@ three-view widget:
 as_html_three_views(sym4)
 ```
 
-[Skip three-views widget](#sym-sym-1779754444-end)
+[Skip three-views widget](#sym-sym-1779801495-end)
 
 ▸1. Index
 

@@ -228,7 +228,7 @@ three tabs over the same fit.
 as_html_three_views(sym, head = 5, tail = 2)
 ```
 
-[Skip three-views widget](#sym-sym-1779754457-end)
+[Skip three-views widget](#sym-sym-1779801518-end)
 
 ▸1. Index
 
@@ -559,18 +559,20 @@ reports or other renderers:
 ``` r
 
 sym_re$random_effects
-#> # A tibble: 1 × 11
-#>   submodel term_label  lhs_expr group_var component   n_levels component_index
-#>   <chr>    <chr>       <chr>    <chr>     <chr>          <int>           <int>
-#> 1 mu       (1 | group) 1        group     (Intercept)        6               0
-#> # ℹ 4 more variables: u_symbol_index <chr>, u_symbol_matrix <chr>,
-#> #   sigma_symbol <chr>, predictor_factor <chr>
-sym_re$variance_components
-#> # A tibble: 1 × 7
-#>   submodel group_var component   parameter     symbol       n_levels description
-#>   <chr>    <chr>     <chr>       <chr>         <chr>           <int> <chr>      
-#> 1 mu       group     (Intercept) sigma_group_0 "\\sigma_{g…        6 between-gr…
 ```
+
+| submodel | term                | group | levels | random effect    | between-group SD   |
+|:---------|:--------------------|:------|-------:|:-----------------|:-------------------|
+| mu       | `(1 \&#124; group)` | group |      6 | $`u_{group(i)}`$ | $`\sigma_{group}`$ |
+
+``` r
+
+sym_re$variance_components
+```
+
+| parameter     |
+|:--------------|
+| sigma_group_0 |
 
 **Takeaway.** The same object carries everything a reader needs to
 discuss random structure — what is grouped, how many levels, and which
@@ -599,7 +601,7 @@ slice.
 ``` r
 
 symbolizer_capabilities()
-#> # A tibble: 117 × 6
+#> # A tibble: 120 × 6
 #>    class  family            component      status              since notes      
 #>    <chr>  <chr>             <chr>          <chr>               <chr> <chr>      
 #>  1 drmTMB gaussian          mu             Stable              0.1.0 Univariate…
@@ -612,7 +614,7 @@ symbolizer_capabilities()
 #>  8 drmTMB truncated_nbinom2 hu             First slice         0.4.0 Hurdle sub…
 #>  9 drmTMB gaussian          rho12          Planned or reserved NA    Bivariate …
 #> 10 drmTMB student           mu             First slice         0.2.2 Student-t …
-#> # ℹ 107 more rows
+#> # ℹ 110 more rows
 ```
 
 For the full capability matrix and what’s planned next, see
