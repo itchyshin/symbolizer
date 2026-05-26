@@ -1,3 +1,87 @@
+# symbolizer 0.21.2
+
+## v0.21.2 -- structural-dependence article: realistic phylo demo + widget + PDF rollout
+
+Targeted patch release. The v0.21 flagship article
+(`symbolizer-structural-dependence.Rmd`) has shipped with zero
+three-views widgets and a degenerate `rcoal(15)` simulation as its
+phylogeny demo. The Mizuno-style tutorial convention (Mizuno et al.
+2026 *RSM*) uses a real comparative-biology dataset for the worked
+examples; the article now matches.
+
+### Article: real Mizuno-style data
+
+- Replaces the 15-tip coalescent simulation with a 60-species subsample
+  of `metadat::dat.moura2021` (Moura et al. 2021 assortative-mating
+  size-size correlations).
+- Effect sizes computed from `(ri, ni)` via
+  `metafor::escalc(measure = "ZCOR")` (Fisher-z transform), then
+  aggregated to one mean Zr per species with
+  variance-of-the-mean. Yields realistic Zr values (median 0.25, range
+  [-0.14, 1.59]) instead of toy simulated values.
+- `A` matrix off-diagonal quantiles are 25% = 0.00, 50% = 0.03,
+  75% = 0.27, 99% = 0.86 — a real mix of close + distant phylogenetic
+  relatedness, unlike the previous degenerate
+  `rcoal(15)` where 75% of off-diagonal entries were above 0.91.
+- `A_tips` reordered to match the random sp_keep order so the head 5x5
+  in the widget visibly shows a MIX of pairwise relatedness rather
+  than a clade of closely-related species.
+
+### Widget + PDF embed below the metafor and MCMCglmm fits
+
+- Both faces (metafor and MCMCglmm) now have a three-views interactive
+  widget directly below the fit chunk, showing the same model in
+  index / matrix / matrix-with-data forms. Tab 3 carries the actual
+  `A_{60x60}` correlation matrix with real numerical entries.
+- A "Download as PDF" affordance below each widget renders a paper-
+  ready PDF via `as_pdf_three_views()` and links to it.
+
+### Bugs fixed during the Florence pass on the widget render
+
+- `pdf_three_views_worked_row()` no longer crashes on intercept-only
+  models. The `for (k in seq.int(2L, length(terms_tex)))` loop ran with
+  `length(terms_tex) == 1L`, producing `seq.int(2L, 1L) == c(2L, 1L)`
+  and a subscript-out-of-bounds error. Replaced with
+  `paste(terms_tex, collapse = " + ")` which is safe for any length.
+- `as_pdf_three_views(file = "<relative path>")` now writes to the
+  caller's working directory, not the system tempdir.
+  `normalizePath(<relative>, mustWork = FALSE)` on macOS returns the
+  relative string unchanged when the file doesn't exist;
+  `rmarkdown::render()` then interpreted the output_file relative to
+  the input Rmd in tempdir, silently writing the PDF to tempdir.
+  Patched to expand relative paths against `getwd()` first.
+- `pdf_three_views_worked_row()` now includes the random-effect
+  contribution on the rendered equation, matching
+  `three_views_worked_row()` (the HTML version). Without this, the
+  worked-row arithmetic `y_1 = X*beta + eps` doesn't close for models
+  with random effects — the residual silently absorbed the BLUP and
+  the displayed sum was mathematically wrong.
+- `symbolize.rma.mv()` now passes `structured_matrix_for_group` to
+  `drm_build_components()`. Previously the rma.mv phylo detection ran
+  AFTER components were built, so the distribution line was being
+  rendered as `u ~ N(0, sigma^2 I_n)` instead of
+  `u ~ N(0, sigma_p^2 A)`. The metafor face of the widget surfaced
+  the wrong distribution; the PDF carried it too.
+
+### Vignette helper for PDF placement
+
+The vignette defines a local `pdf_alongside_html()` shim that writes
+the PDF in the chunk cwd and, if `../docs/articles` exists (pkgdown
+build path), copies a second copy there so the `<a href>` link
+resolves whether the article is built via `rmarkdown::render()` or
+`pkgdown::build_article()`. `knitr::opts_knit$get("output.dir")`
+returns the Rmd source dir (not the HTML destination), so we cannot
+target the destination from inside the chunk in a portable way.
+
+### Honest scope notes
+
+- The `$expanded` shim for the metafor and MCMCglmm widgets is
+  scaffolding until issue #9 lands the extractor-side `expanded`
+  populator. The shim is documented inline in the vignette.
+- The widget rollout to `symbolizer-gllvm.Rmd` and
+  `symbolizer-families.Rmd` is a follow-up release.
+  `symbolizer-meta.Rmd` will archive during v0.22.
+
 # symbolizer 0.21.1
 
 ## v0.21.1 -- three-views widget patches + Florence + Rose + Darwin discipline protocols adopted

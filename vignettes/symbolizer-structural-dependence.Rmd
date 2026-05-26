@@ -60,55 +60,90 @@ Two operational representations exist:
 
 ```{r build-A, message = FALSE}
 suppressPackageStartupMessages({
-  library(ape)
-  library(MCMCglmm)
+  library(metadat); library(ape); library(metafor); library(MCMCglmm)
 })
 
-# A toy ultrametric tree with k = 15 species.
-tree <- rcoal(15, tip.label = paste0("sp", 1:15))
+# Real comparative-biology data: Mizuno et al. (2026, Research Synthesis
+# Methods; tutorial at https://ayumi-495.github.io/phylo_spatial_tutorial/)
+# use Moura et al. (2021)'s assortative-mating dataset for the phylogenetic
+# example. dat.moura2021 carries 1,828 Pearson correlations (size-size
+# assortative mating) across 341 species, plus a phylogeny. We follow the
+# Mizuno workflow: compute Fisher-z effect sizes via metafor::escalc,
+# subsample 60 species (each with at least 2 effect sizes for stable
+# aggregation), and aggregate to one mean Fisher-z per species so the
+# example is a clean phylogenetic random-intercept model on a Gaussian
+# trait. The full multilevel-meta-analytic structure (effect-size +
+# study + species_phylo + species_nonphylo random effects) is the
+# v0.22 article's topic.
+data(dat.moura2021, package = "metadat")
+moura_es <- escalc(measure = "ZCOR", ri = ri, ni = ni,
+                   data = dat.moura2021$dat)
 
-# Representation 1 -- tips-only k x k correlation matrix
+# Tree tip labels carry Open Tree of Life format ("Genus_species_ottNNN");
+# strip the suffix and convert underscores to spaces to match dat$species
+# ("Genus species"). Drop node labels (duplicated in the source tree;
+# MCMCglmm::inverseA rejects them otherwise).
+tree_raw <- dat.moura2021$tree
+tree_raw$tip.label <- gsub("_", " ", sub("_ott[0-9]+$", "", tree_raw$tip.label))
+tree_raw$node.label <- NULL
+
+n_per_sp <- table(moura_es$species)
+sp_pool  <- intersect(tree_raw$tip.label,
+                      names(n_per_sp[n_per_sp >= 2L]))
+set.seed(1)
+sp_keep  <- sample(sp_pool, 60L)
+
+# Aggregate to one mean Zr per species + variance-of-the-mean for V.
+agg <- aggregate(cbind(yi, vi) ~ species,
+                 data = moura_es[moura_es$species %in% sp_keep, ],
+                 FUN  = function(v) c(mean = mean(v), n = length(v)))
+dat <- data.frame(
+  species = factor(as.character(agg$species), levels = sp_keep),
+  Zr      = agg$yi[, "mean"],
+  vi      = (agg$vi[, "mean"] * agg$yi[, "n"]) / agg$yi[, "n"]^2,
+  n_eff   = agg$yi[, "n"]
+)
+
+tree   <- keep.tip(tree_raw, sp_keep)
 A_tips <- vcv.phylo(tree, corr = TRUE)
-dim(A_tips)
+# Reorder A_tips rows/cols to match `sp_keep` (a random sample). Without
+# this, A_tips inherits the depth-first tree-tip order, so head 5x5
+# clusters closely-related species (all passerines, all ~0.85+) and
+# hides the structural-dependence "mix of relatedness" the widget is
+# meant to demonstrate. Florence-audit 2026-05-26.
+A_tips <- A_tips[sp_keep, sp_keep]
+# Representation 2 -- all-nodes A-inverse (tips + internal nodes, sparse
+# precision; Hadfield & Nakagawa 2010). scale = FALSE because the
+# Moura tree from Open Tree of Life is not strictly ultrametric.
+A_all  <- inverseA(tree, nodes = "ALL", scale = FALSE)
 
-# Representation 2 -- all-nodes A-inverse (tips + internal nodes,
-# sparse precision; Hadfield-Nakagawa 2010).
-A_all  <- inverseA(tree, nodes = "ALL")
-dim(A_all$Ainv)
+cat("species k =", nrow(dat),
+    "  Zr range = [", round(min(dat$Zr), 2), ",", round(max(dat$Zr), 2), "]\n")
+cat("A off-diagonal quantiles (25/50/75/99%): ",
+    paste(round(quantile(A_tips[upper.tri(A_tips)], c(.25,.5,.75,.99)), 3),
+          collapse = " / "), "\n")
 ```
 
 The two representations encode the **same** Brownian-motion prior. The tips-only version is the operational default for `metafor`, `glmmTMB::propto`, and `brms::gr(cov = A)`. The all-nodes version is what `MCMCglmm` uses internally (`ginverse = list(animal = Ainv)`) and what `drmTMB::phylo()` builds under the hood (`drmTMB` cites Hadfield & Nakagawa 2010 explicitly in its `?phylo` help page). The all-nodes form is *richer*: it gives access to ancestral-state BLUPs at internal nodes; the tips-only form marginalises those out. In a balanced setup the two agree on the variance estimate $\hat\sigma_p^2$ — a result we'll return to in §"Tips vs all-nodes".
 
 ## Six packages, one phylogenetic model
 
-We simulate a small phylogenetic trait dataset, then fit the same model six different ways. The model is
+We fit the same model six different ways on the 60-species Moura-derived dataset. The model is
 
 $$
-y_i \;=\; \beta_0 + u_{p_{k[i]}} + e_i,\qquad
+\mathrm{Zr}_i \;=\; \beta_0 + u_{p_{k[i]}} + e_i,\qquad
 u_p \sim \mathcal N(\mathbf 0, \sigma_p^2\,\mathbf A),\quad
 e_i \sim \mathcal N(0, \sigma_e^2).
 $$
 
-```{r sim-phylo}
-k <- nlevels(factor(tree$tip.label))
-sigma_p <- 0.7; sigma_e <- 0.3
-u_p <- as.numeric(MASS::mvrnorm(1, mu = rep(0, k), Sigma = sigma_p^2 * A_tips))
-dat <- data.frame(
-  species = factor(tree$tip.label, levels = tree$tip.label),
-  y       = u_p + rnorm(k, 0, sigma_e)
-)
-# Sampling variance "v_i" for the meta-analysis-style fits.
-dat$vi <- runif(k, 0.05, 0.15)
-```
+The phylogenetic correlation matrix $\mathbf A$ now carries realistic biology — most species pairs are distantly related (median off-diagonal $\approx 0.03$) while a handful are close (top 1 % above 0.85). Compare with the degenerate `rcoal(15)` simulation used in earlier drafts where 75 % of pairs were above 0.91.
 
 ### Face 1: `metafor::rma.mv` with `R = list(species = A)`
 
 ```{r metafor-fit, message = FALSE}
-suppressPackageStartupMessages(library(metafor))
-
 fit_meta <- rma.mv(
-  yi      = y,
-  V       = vi,                # known sampling variances
+  yi      = Zr,
+  V       = vi,                # variance-of-the-mean per species
   random  = list(~ 1 | species),
   R       = list(species = A_tips),
   data    = dat,
@@ -129,17 +164,68 @@ The R-matrix tier's group name (`species`) matches the canonical phylogenetic le
 assumption_table(sym_meta)
 ```
 
+#### Three-views widget for the metafor fit
+
+The `as_html_three_views()` widget renders the same model three ways: per-observation index form, matrix form, and the matrix equation with the actual numerical entries of $\mathbf A$ visible. The interactive widget is below; a paper-ready PDF version of the same three views is one click away.
+
+```{r metafor-widget, results = "asis", message = FALSE}
+# Scaffolding until issue #9 lands extractor-side expanded population.
+# https://github.com/itchyshin/symbolizer/issues/9
+shim_metafor <- function(fit, A) {
+  beta <- as.numeric(fit$beta)
+  X    <- fit$X
+  re   <- ranef(fit)
+  u_named <- as.numeric(re$species$intrcpt)
+  names(u_named) <- rownames(re$species)
+  Z_g  <- model.matrix(~ species - 1, data = dat)
+  colnames(Z_g) <- sub("^species", "", colnames(Z_g))
+  u <- u_named[colnames(Z_g)]
+  # metafor's fitted() returns the MARGINAL mean (intercept only); we
+  # want the CONDITIONAL mean = X*beta + Z*u so the worked-row
+  # arithmetic closes with the displayed BLUP contribution.
+  mu_hat <- as.numeric(X %*% beta + Z_g %*% u)
+  list(y = as.numeric(fit$yi), X = X, beta = beta,
+       Z_g = Z_g, u = u, mu_hat = mu_hat,
+       fitted = mu_hat, residuals = as.numeric(fit$yi) - mu_hat,
+       M = A)
+}
+sym_meta$expanded <- shim_metafor(fit_meta, A_tips)
+htmltools::HTML(as_html_three_views(sym_meta, id = "meta"))
+```
+
+```{r metafor-pdf, results = "asis", message = FALSE}
+# Helper -- write the PDF next to the rendered HTML so the `<a href>` link
+# resolves whether the article is built by rmarkdown::render (vignettes
+# dir) or pkgdown::build_article (docs/articles). knitr's
+# `opts_knit$get("output.dir")` returns the Rmd source dir, NOT the HTML
+# destination, so we instead emit one PDF in the chunk cwd (= source
+# dir, where rmarkdown::render's link resolves) AND if a sibling
+# `../docs/articles` exists (pkgdown build), copy a second copy there.
+pdf_alongside_html <- function(sym, basename, title) {
+  as_pdf_three_views(sym, file = basename, title = title)
+  docs_articles <- "../docs/articles"
+  if (dir.exists(docs_articles)) {
+    file.copy(basename, file.path(docs_articles, basename), overwrite = TRUE)
+  }
+  cat(sprintf('<p><a href="%s" class="btn btn-primary">Download as PDF</a></p>\n', basename))
+  invisible(basename)
+}
+pdf_alongside_html(sym_meta, "fig-meta-phylo.pdf",
+                   "Phylogenetic meta-analysis (metafor) -- three views")
+```
+
 ### Face 2: `MCMCglmm` with `ginverse = list(species = Ainv)`
 
 `MCMCglmm` uses the **all-nodes** representation natively.
 
 ```{r mcmcglmm-fit, message = FALSE, results = "hide"}
 fit_mcmc <- MCMCglmm(
-  y ~ 1,
+  Zr ~ 1,
   random   = ~ species,
   ginverse = list(species = A_all$Ainv),
   data     = dat,
   family   = "gaussian",
+  pr       = TRUE,        # store the per-species BLUPs for the widget
   nitt = 5000, burnin = 1000, thin = 5, verbose = FALSE
 )
 sym_mcmc <- symbolize(fit_mcmc, data = dat)
@@ -150,6 +236,34 @@ sym_mcmc$metadata$phylo_representation   # "all_nodes"
 sym_mcmc$metadata$detected_signals       # "phylo"
 sym_mcmc$variance_components             # phylo + residual
 sym_mcmc$metadata$heritability           # h^2 derived automatically
+```
+
+#### Three-views widget for the MCMCglmm fit
+
+```{r mcmcglmm-widget, results = "asis", message = FALSE}
+shim_mcmcglmm <- function(fit, dat, A) {
+  beta_hat <- mean(fit$Sol[, "(Intercept)"])
+  sp_cols  <- grep("^species[.]", colnames(fit$Sol), value = TRUE)
+  u_named  <- colMeans(fit$Sol[, sp_cols, drop = FALSE])
+  names(u_named) <- sub("^species[.]", "", names(u_named))
+  Z_g <- model.matrix(~ species - 1, data = dat)
+  colnames(Z_g) <- sub("^species", "", colnames(Z_g))
+  u <- u_named[colnames(Z_g)]
+  X <- matrix(1, nrow = nrow(dat), ncol = 1,
+              dimnames = list(NULL, "(Intercept)"))
+  mu_hat <- as.numeric(X %*% beta_hat + Z_g %*% u)
+  list(y = dat$Zr, X = X, beta = beta_hat,
+       Z_g = Z_g, u = u, mu_hat = mu_hat,
+       fitted = mu_hat, residuals = dat$Zr - mu_hat,
+       M = A)
+}
+sym_mcmc$expanded <- shim_mcmcglmm(fit_mcmc, dat, A_tips)
+htmltools::HTML(as_html_three_views(sym_mcmc, id = "mcmc"))
+```
+
+```{r mcmcglmm-pdf, results = "asis", message = FALSE}
+pdf_alongside_html(sym_mcmc, "fig-mcmc-phylo.pdf",
+                   "Phylogenetic meta-analysis (MCMCglmm) -- three views")
 ```
 
 The same extractor branch handles **animal models** (where `A` comes from a pedigree, not a tree) — see *§Animal-model unification* below.

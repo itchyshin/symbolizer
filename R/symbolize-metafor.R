@@ -373,17 +373,15 @@ symbolize.rma.mv <- function(fit, symbols = NULL, units = NULL,
   re_tbl     <- drm_build_random_effects(re_per_entry)
   vc_tbl     <- metafor_mv_build_variance_components(fit, structured_groups)
   cov_tbl    <- drm_build_covariance_components(re_tbl)
-  components <- drm_build_components(
-    submodels, terms_tbl, re_tbl,
-    response_symbol, response_symbol_matrix,
-    family = family,
-    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_
-  )
 
   # v0.21+ structured-dependence signals (rma.mv). Discriminate phylo vs
   # spatial by R-matrix group name. Names matching the phylo lexicon ->
   # "phylo"; spatial lexicon -> "spatial"; anything else stays
-  # "structured" (v0.13 behaviour).
+  # "structured" (v0.13 behaviour). MUST run BEFORE drm_build_components
+  # so the structured-matrix symbol (A for phylo, Omega for spatial) can
+  # be passed in -- otherwise the distribution line renders as
+  # `u ~ N(0, sigma^2 I_n)` instead of `u ~ N(0, sigma_p^2 A)`.
+  # Florence-audit 2026-05-26.
   phylo_pat <- "species|phylo|phylogeny|taxon|animal"
   spatial_pat <- "site|location|plot|spatial|coords"
   detected_signals <- character(0L)
@@ -398,6 +396,19 @@ symbolize.rma.mv <- function(fit, symbols = NULL, units = NULL,
   }
   if (length(phylo_grps) > 0L)   detected_signals <- c(detected_signals, "phylo")
   if (length(spatial_grps) > 0L) detected_signals <- c(detected_signals, "spatial")
+  structured_matrix_for_group <- c(
+    stats::setNames(as.list(rep("\\mathbf{A}", length(phylo_grps))), phylo_grps),
+    stats::setNames(as.list(rep("\\boldsymbol{\\Omega}", length(spatial_grps))), spatial_grps)
+  )
+  if (length(structured_matrix_for_group) == 0L) structured_matrix_for_group <- NULL
+
+  components <- drm_build_components(
+    submodels, terms_tbl, re_tbl,
+    response_symbol, response_symbol_matrix,
+    family = family,
+    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_,
+    structured_matrix_for_group = structured_matrix_for_group
+  )
   structured_matrices <- c(
     lapply(phylo_grps, function(gn) list(
       symbol             = "\\mathbf{A}",

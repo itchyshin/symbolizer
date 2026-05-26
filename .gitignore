@@ -25,3 +25,8 @@ README.html
 /demo-*.html
 /demo-*.pdf
 /demo-*.tex
+
+# Vignette PDF artifacts emitted by `as_pdf_three_views()` during knit.
+# These are regenerated each pkgdown / vignette build; only the rendered
+# article (in docs/articles, gitignored above) needs them.
+/vignettes/fig-*.pdf

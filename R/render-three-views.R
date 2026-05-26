@@ -221,6 +221,17 @@ as_pdf_three_views.symbolized_model <- function(x, file, title = NULL,
   if (missing(file) || is.null(file) || !nzchar(file)) {
     cli::cli_abort("{.arg file} is required and must be a non-empty path.")
   }
+  # Build an absolute output path BEFORE handing it to rmarkdown::render().
+  # On macOS, normalizePath(<relative>, mustWork = FALSE) returns the
+  # relative string unchanged when the file doesn't exist (no leading
+  # working-directory expansion). Combined with rmarkdown's habit of
+  # interpreting `output_file` relative to the input Rmd's location --
+  # which we put in tempdir() -- the PDF silently lands in a tempdir
+  # and the vignette's `<a href="fig-meta-phylo.pdf">` link goes 404.
+  # Florence caught this on the v0.21.2 vignette render.
+  if (!startsWith(file, "/") && !grepl("^[A-Za-z]:[\\/]", file)) {
+    file <- file.path(getwd(), file)
+  }
   file <- normalizePath(file, mustWork = FALSE)
   if (is.null(title) || !nzchar(title)) {
     title <- sprintf("Three views of a %s model (response: %s)",
@@ -295,15 +306,33 @@ pdf_three_views_worked_row <- function(x) {
   parts <- character(0L)
   resp <- x$model$response
   resp_sym <- escape_underscores_for_latex(resp)
+  # Random-effect contribution at row i = 1, parallel to
+  # three_views_worked_row() (HTML version). Without this, the worked-row
+  # arithmetic `y_1 = X*beta + eps` doesn't close for models that have
+  # random effects -- the residual silently absorbs the BLUP and the
+  # displayed sum is mathematically wrong. Florence caught this on the
+  # v0.21.2 dat.moura2021 metafor + MCMCglmm fits.
+  has_re <- !is.null(ex$Z_g) && !is.null(ex$u)
+  re_contrib_num <- if (has_re) sum(ex$Z_g[i, ] * ex$u) else 0
   if (!is.null(X_i) && !is.null(beta) && length(X_i) == length(beta)) {
     terms_tex <- vapply(seq_along(beta), function(k) {
       bk <- fmt(beta[[k]])
       xk <- fmt(X_i[[k]])
       if (k == 1L) bk else sprintf("%s \\cdot %s", bk, xk)
     }, character(1L))
-    rhs_signed <- terms_tex[1L]
-    for (k in seq.int(2L, length(terms_tex))) {
-      rhs_signed <- paste0(rhs_signed, " + ", terms_tex[[k]])
+    # Use paste(..., collapse) instead of an explicit for-loop -- the loop
+    # `for (k in seq.int(2L, length(terms_tex)))` breaks when
+    # length(terms_tex) == 1L (intercept-only model) because seq.int(2L, 1L)
+    # returns c(2L, 1L) and tries to index a nonexistent element. Florence
+    # caught this on the v0.21.2 dat.moura2021 intercept-only metafor fit.
+    rhs_signed <- paste(terms_tex, collapse = " + ")
+    if (has_re) {
+      # Append the RE-contribution term so the arithmetic closes.
+      re_str <- if (re_contrib_num < 0)
+                  sprintf("- %s", fmt(abs(re_contrib_num)))
+                else
+                  sprintf("+ %s", fmt(re_contrib_num))
+      rhs_signed <- sprintf("%s \\;%s", rhs_signed, re_str)
     }
     rhs_full <- if (!is.na(eps_i)) {
       eps_str <- if (eps_i < 0) sprintf("- %s", fmt(abs(eps_i)))
@@ -345,10 +374,10 @@ pdf_three_views_worked_row <- function(x) {
         if (k == 1L) fmt(gamma[[k]])
         else sprintf("%s \\cdot %s", fmt(gamma[[k]]), fmt(Xs_i[[k]]))
       }, character(1L))
-      rhs_g <- terms_g[1L]
-      for (k in seq.int(2L, length(terms_g))) {
-        rhs_g <- paste0(rhs_g, " + ", terms_g[[k]])
-      }
+      # Same seq.int(2L, n) bug-class as the mu branch above; the `else`
+      # arm here is reached only when length(gamma) >= 2L so the loop is
+      # safe today, but use paste/collapse for symmetry and future safety.
+      rhs_g <- paste(terms_g, collapse = " + ")
       parts <- c(parts,
         "",
         sprintf("And the $\\sigma$ submodel at $i = 1$:"),
