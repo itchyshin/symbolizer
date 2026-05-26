@@ -228,7 +228,7 @@ three tabs over the same fit.
 as_html_three_views(sym, head = 5, tail = 2)
 ```
 
-[Skip three-views widget](#sym-sym-1779801518-end)
+[Skip three-views widget](#sym-sym-1779808229-end)
 
 ▸1. Index
 
@@ -601,7 +601,7 @@ slice.
 ``` r
 
 symbolizer_capabilities()
-#> # A tibble: 120 × 6
+#> # A tibble: 122 × 6
 #>    class  family            component      status              since notes      
 #>    <chr>  <chr>             <chr>          <chr>               <chr> <chr>      
 #>  1 drmTMB gaussian          mu             Stable              0.1.0 Univariate…
@@ -614,7 +614,7 @@ symbolizer_capabilities()
 #>  8 drmTMB truncated_nbinom2 hu             First slice         0.4.0 Hurdle sub…
 #>  9 drmTMB gaussian          rho12          Planned or reserved NA    Bivariate …
 #> 10 drmTMB student           mu             First slice         0.2.2 Student-t …
-#> # ℹ 110 more rows
+#> # ℹ 112 more rows
 ```
 
 For the full capability matrix and what’s planned next, see

@@ -1,5 +1,114 @@
 # Changelog
 
+## symbolizer 0.21.0
+
+### v0.21.0 – Structural dependence: phylogenetic, animal-model, and spatial random effects (6 packages)
+
+First article in the v0.21-v0.24 concept-axis series. v0.21 ships the
+**dependence-structure axis**: one ~3500-word vignette teaching the
+shared `b ~ N(0, sigma^2 M)` grammar, with `M = A` (phylogenetic /
+animal-model) and `M = Omega` (spatial), instantiated across all six
+backends symbolizer touches.
+
+#### New vignette
+
+`vignettes/symbolizer-structural-dependence.Rmd` – the deliverable.
+Six-package walkthrough on the same simulated phylogenetic dataset:
+metafor (`R = list(species = A)`), MCMCglmm
+(`ginverse = list(species = Ainv)`), glmmTMB
+(`propto(0 + species | g, A)`), brms (`gr(species, cov = A)`), drmTMB
+(`phylo(1 | species, tree)`), gllvmTMB (`phylo_unique(...)`). Plus
+animal-model unification, tips- vs-all-nodes equivalence, spatial
+sidebar (sdmTMB + mgcv), the phylo-vs-non-phylo identifiability warning.
+Anchored on Williams et al. 2025 bioRxiv (glmmTMB propto PGLMM),
+Hadfield & Nakagawa 2010 (all-nodes representation), Mizuno et al. 2026
+(spatial half).
+
+#### Symbol convention: context-aware M / A / Omega
+
+Symbol_dictionary now carries a `role` value
+`structured_correlation_phylo` (renders as `A`) or
+`structured_correlation_spatial` (renders as `Omega`). Cross-package
+teaching prose uses `M` as the abstract form with the alias note “M = A
+in phylo, M = Omega in spatial”. Omega’s dictionary description
+explicitly disambiguates from Wishart precision matrices and CAR / SAR
+spatial-weights matrices.
+
+#### Detection across 6 backends
+
+Every backend now populates `metadata$phylo_representation` (one of
+`tips_only` / `all_nodes` / `package_managed`) and
+`metadata$detected_signals` (used by the gating mechanism, below):
+
+| Package | Detection path | phylo_representation |
+|----|----|----|
+| MCMCglmm | `fit$ginverse` non-empty | `all_nodes` |
+| glmmTMB | propto block (blockCode 11) | `tips_only` |
+| metafor | R = list( = M) with phylo-lexicon name | `tips_only` |
+| brms | `fit$ranef$cov` non-empty | `tips_only` |
+| drmTMB | [`phylo()`](https://itchyshin.github.io/drmTMB/reference/phylo.html) / [`animal()`](https://itchyshin.github.io/drmTMB/reference/animal.html) markers in formula | `all_nodes` (HN sparse precision) |
+| gllvmTMB | covstruct kinds `phylo_*` | `package_managed` |
+
+#### Requires-column gating mechanism
+
+`inst/extdata/assumption-templates.csv` and
+`inst/extdata/interpretation-templates.csv` gained a `requires` column.
+Rows whose `requires` is in
+`c("phylo", "spatial", "animal", "temporal", "meta_analysis")` fire only
+when the extractor declares a matching signal in
+`metadata$detected_signals`. Empty / NA / unknown values fire
+unconditionally (back-compat for the existing rows).
+
+Both `drm_build_assumptions()` and `drm_build_interpretation()` gained a
+`detected_signals = character(0L)` argument and the filter logic.
+`glm_build_*` parallels in `R/symbolize-gllvmtmb.R` likewise.
+
+#### Capability registry: 6 phylo paths promoted to First slice
+
+- `gllvmTMB,*,phylo` (was Planned)
+- `drmTMB,gaussian,phylo` (was Planned)
+- `metafor,*,phylo` (was Planned)
+- `brms,*,phylo` (was Planned)
+- `MCMCglmm,*,phylo` (new row – alias for the v0.12 animal-model path)
+- `glmmTMB,*,phylo` (new row – alias for the v0.16 propto path)
+
+#### Shared helper
+
+`drm_build_symbol_dictionary()` gained a `structured_matrices = NULL`
+argument; extractors pass a list of A / Omega row specs. Per the
+AGENTS.md “no new exported helpers” rule, this extends an existing
+internal helper rather than adding a new one.
+
+#### New CSV rows
+
+- assumption-templates.csv: 14 new phylo rows (meta_normal + gaussian
+  - gllvm_gaussian), all gated `requires = phylo`.
+- interpretation-templates.csv: 7 new phylo rows (phylo_intercept,
+  variance_component, heritability across meta_normal + gaussian +
+  gllvm_gaussian), all gated `requires = phylo`.
+- warning-templates.csv: 6 new rows (phylo_detected,
+  phylo_propto_two_scalars, phylo_nonphylo_unidentifiable,
+  phylo_rank_deficiency, phylo_tree_data_mismatch, spatial_detected).
+
+#### Forward links
+
+The concept-axis series continues: - v0.22 (Meta-analysis with known
+v_i, Mizuno anchor) - v0.23 (Categorical phylogenetic models – binary,
+ordered, unordered) - v0.24 (Location-scale on M – PLSMs, Nakagawa et
+al. 2025 MEE anchor)
+
+#### Non-goals (deferred)
+
+- Per-package phylo helper fixtures + cross-package Fisher equivalence
+  test (deferred to v0.21.1; the article shows the patterns inline).
+- `drm_build_interpretation` enhancement to emit phylo_intercept /
+  variance_component / heritability rows from the variance-components
+  tibble (rows are in the CSV gated by requires = phylo but the builder
+  iterates only over fixed_eff – to fire they need an extra pass).
+- Multi-trait / cross-trait phylogenetic covariance (us(trait):species).
+- Pagel’s lambda / Blomberg’s K parameterisations (Brownian motion
+  only).
+
 ## symbolizer 0.20.2
 
 ### v0.20.2 – Pat cleanup + phylogenetic capability scaffold
@@ -1092,9 +1201,9 @@ animal-model branch with derived heritability.
 
 - [`symbolize.brmsfit()`](https://itchyshin.github.io/symbolizer/reference/symbolize.brmsfit.md)
   now handles `family = bernoulli()` and `family = poisson()`. brms’s
-  `bernoulli()` is aliased to `binomial` internally because
-  mathematically Bernoulli is just Binomial(1, p); the same templates
-  and parameterization apply.
+  [`bernoulli()`](https://paulbuerkner.com/brms/reference/brmsfamily.html)
+  is aliased to `binomial` internally because mathematically Bernoulli
+  is just Binomial(1, p); the same templates and parameterization apply.
 - New `tests/testthat/test-robustness-interactions.R` fits `y ~ x * sex`
   (continuous-by-factor interaction) in each family / class combination
   and verifies the interaction row appears in `fixed_effects` with

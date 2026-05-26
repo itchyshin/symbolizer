@@ -31,6 +31,9 @@ shared dataset.
 
 ### Cross-package bridges
 
+- [Structural dependence: phylogenetic, animal-model, and spatial random
+  effects](https://itchyshin.github.io/symbolizer/articles/symbolizer-structural-dependence.md):
+
 - [Three faces of meta-analysis: metafor, glmmTMB,
   drmTMB](https://itchyshin.github.io/symbolizer/articles/symbolizer-meta.md):
 

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.20.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,6 +34,95 @@
       <small>Source: <a href="https://github.com/itchyshin/symbolizer/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.21.0" id="symbolizer-0210">symbolizer 0.21.0<a class="anchor" aria-label="anchor" href="#symbolizer-0210"></a></h2>
+<div class="section level3">
+<h3 id="v0210--structural-dependence-phylogenetic-animal-model-and-spatial-random-effects-packages-0-21-0">v0.21.0 – Structural dependence: phylogenetic, animal-model, and spatial random effects (6 packages)<a class="anchor" aria-label="anchor" href="#v0210--structural-dependence-phylogenetic-animal-model-and-spatial-random-effects-packages-0-21-0"></a></h3>
+<p>First article in the v0.21-v0.24 concept-axis series. v0.21 ships the <strong>dependence-structure axis</strong>: one ~3500-word vignette teaching the shared <code>b ~ N(0, sigma^2 M)</code> grammar, with <code>M = A</code> (phylogenetic / animal-model) and <code>M = Omega</code> (spatial), instantiated across all six backends symbolizer touches.</p>
+<div class="section level4">
+<h4 id="new-vignette-0-21-0">New vignette<a class="anchor" aria-label="anchor" href="#new-vignette-0-21-0"></a></h4>
+<p><code>vignettes/symbolizer-structural-dependence.Rmd</code> – the deliverable. Six-package walkthrough on the same simulated phylogenetic dataset: metafor (<code>R = list(species = A)</code>), MCMCglmm (<code>ginverse = list(species = Ainv)</code>), glmmTMB (<code>propto(0 + species | g, A)</code>), brms (<code>gr(species, cov = A)</code>), drmTMB (<code>phylo(1 | species, tree)</code>), gllvmTMB (<code>phylo_unique(...)</code>). Plus animal-model unification, tips- vs-all-nodes equivalence, spatial sidebar (sdmTMB + mgcv), the phylo-vs-non-phylo identifiability warning. Anchored on Williams et al. 2025 bioRxiv (glmmTMB propto PGLMM), Hadfield &amp; Nakagawa 2010 (all-nodes representation), Mizuno et al. 2026 (spatial half).</p>
+</div>
+<div class="section level4">
+<h4 id="symbol-convention-context-aware-m--a--omega-0-21-0">Symbol convention: context-aware M / A / Omega<a class="anchor" aria-label="anchor" href="#symbol-convention-context-aware-m--a--omega-0-21-0"></a></h4>
+<p>Symbol_dictionary now carries a <code>role</code> value <code>structured_correlation_phylo</code> (renders as <code>A</code>) or <code>structured_correlation_spatial</code> (renders as <code>Omega</code>). Cross-package teaching prose uses <code>M</code> as the abstract form with the alias note “M = A in phylo, M = Omega in spatial”. Omega’s dictionary description explicitly disambiguates from Wishart precision matrices and CAR / SAR spatial-weights matrices.</p>
+</div>
+<div class="section level4">
+<h4 id="detection-across-backends-0-21-0">Detection across 6 backends<a class="anchor" aria-label="anchor" href="#detection-across-backends-0-21-0"></a></h4>
+<p>Every backend now populates <code>metadata$phylo_representation</code> (one of <code>tips_only</code> / <code>all_nodes</code> / <code>package_managed</code>) and <code>metadata$detected_signals</code> (used by the gating mechanism, below):</p>
+<table class="table"><colgroup><col width="33%"><col width="33%"><col width="33%"></colgroup><thead><tr><th>Package</th>
+<th>Detection path</th>
+<th>phylo_representation</th>
+</tr></thead><tbody><tr><td>MCMCglmm</td>
+<td>
+<code>fit$ginverse</code> non-empty</td>
+<td><code>all_nodes</code></td>
+</tr><tr><td>glmmTMB</td>
+<td>propto block (blockCode 11)</td>
+<td><code>tips_only</code></td>
+</tr><tr><td>metafor</td>
+<td>R = list(<group> = M) with phylo-lexicon name</group></td>
+<td><code>tips_only</code></td>
+</tr><tr><td>brms</td>
+<td>
+<code>fit$ranef$cov</code> non-empty</td>
+<td><code>tips_only</code></td>
+</tr><tr><td>drmTMB</td>
+<td>
+<code><a href="https://itchyshin.github.io/drmTMB/reference/phylo.html" class="external-link">phylo()</a></code> / <code><a href="https://itchyshin.github.io/drmTMB/reference/animal.html" class="external-link">animal()</a></code> markers in formula</td>
+<td>
+<code>all_nodes</code> (HN sparse precision)</td>
+</tr><tr><td>gllvmTMB</td>
+<td>covstruct kinds <code>phylo_*</code>
+</td>
+<td><code>package_managed</code></td>
+</tr></tbody></table></div>
+<div class="section level4">
+<h4 id="requires-column-gating-mechanism-0-21-0">Requires-column gating mechanism<a class="anchor" aria-label="anchor" href="#requires-column-gating-mechanism-0-21-0"></a></h4>
+<p><code>inst/extdata/assumption-templates.csv</code> and <code>inst/extdata/interpretation-templates.csv</code> gained a <code>requires</code> column. Rows whose <code>requires</code> is in <code>c("phylo", "spatial", "animal", "temporal", "meta_analysis")</code> fire only when the extractor declares a matching signal in <code>metadata$detected_signals</code>. Empty / NA / unknown values fire unconditionally (back-compat for the existing rows).</p>
+<p>Both <code>drm_build_assumptions()</code> and <code>drm_build_interpretation()</code> gained a <code>detected_signals = character(0L)</code> argument and the filter logic. <code>glm_build_*</code> parallels in <code>R/symbolize-gllvmtmb.R</code> likewise.</p>
+</div>
+<div class="section level4">
+<h4 id="capability-registry-phylo-paths-promoted-to-first-slice-0-21-0">Capability registry: 6 phylo paths promoted to First slice<a class="anchor" aria-label="anchor" href="#capability-registry-phylo-paths-promoted-to-first-slice-0-21-0"></a></h4>
+<ul><li>
+<code>gllvmTMB,*,phylo</code> (was Planned)</li>
+<li>
+<code>drmTMB,gaussian,phylo</code> (was Planned)</li>
+<li>
+<code>metafor,*,phylo</code> (was Planned)</li>
+<li>
+<code>brms,*,phylo</code> (was Planned)</li>
+<li>
+<code>MCMCglmm,*,phylo</code> (new row – alias for the v0.12 animal-model path)</li>
+<li>
+<code>glmmTMB,*,phylo</code> (new row – alias for the v0.16 propto path)</li>
+</ul></div>
+<div class="section level4">
+<h4 id="shared-helper-0-21-0">Shared helper<a class="anchor" aria-label="anchor" href="#shared-helper-0-21-0"></a></h4>
+<p><code>drm_build_symbol_dictionary()</code> gained a <code>structured_matrices = NULL</code> argument; extractors pass a list of A / Omega row specs. Per the AGENTS.md “no new exported helpers” rule, this extends an existing internal helper rather than adding a new one.</p>
+</div>
+<div class="section level4">
+<h4 id="new-csv-rows-0-21-0">New CSV rows<a class="anchor" aria-label="anchor" href="#new-csv-rows-0-21-0"></a></h4>
+<ul><li>assumption-templates.csv: 14 new phylo rows (meta_normal + gaussian
+<ul><li>gllvm_gaussian), all gated <code>requires = phylo</code>.</li>
+</ul></li>
+<li>interpretation-templates.csv: 7 new phylo rows (phylo_intercept, variance_component, heritability across meta_normal + gaussian + gllvm_gaussian), all gated <code>requires = phylo</code>.</li>
+<li>warning-templates.csv: 6 new rows (phylo_detected, phylo_propto_two_scalars, phylo_nonphylo_unidentifiable, phylo_rank_deficiency, phylo_tree_data_mismatch, spatial_detected).</li>
+</ul></div>
+<div class="section level4">
+<h4 id="forward-links-0-21-0">Forward links<a class="anchor" aria-label="anchor" href="#forward-links-0-21-0"></a></h4>
+<p>The concept-axis series continues: - v0.22 (Meta-analysis with known v_i, Mizuno anchor) - v0.23 (Categorical phylogenetic models – binary, ordered, unordered) - v0.24 (Location-scale on M – PLSMs, Nakagawa et al. 2025 MEE anchor)</p>
+</div>
+<div class="section level4">
+<h4 id="non-goals-deferred-0-21-0">Non-goals (deferred)<a class="anchor" aria-label="anchor" href="#non-goals-deferred-0-21-0"></a></h4>
+<ul><li>Per-package phylo helper fixtures + cross-package Fisher equivalence test (deferred to v0.21.1; the article shows the patterns inline).</li>
+<li>
+<code>drm_build_interpretation</code> enhancement to emit phylo_intercept / variance_component / heritability rows from the variance-components tibble (rows are in the CSV gated by requires = phylo but the builder iterates only over fixed_eff – to fire they need an extra pass).</li>
+<li>Multi-trait / cross-trait phylogenetic covariance (us(trait):species).</li>
+<li>Pagel’s lambda / Blomberg’s K parameterisations (Brownian motion only).</li>
+</ul></div>
+</div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.20.2" id="symbolizer-0202">symbolizer 0.20.2<a class="anchor" aria-label="anchor" href="#symbolizer-0202"></a></h2>
 <div class="section level3">
@@ -587,7 +676,7 @@ w_i = 1 / (v_i + tau^2)                      (inverse-variance weight)</code></p
 <div class="section level3">
 <h3 id="v0112--more-brms-families--interaction-robustness-0-11-2">v0.11.2 – more brms families + interaction robustness<a class="anchor" aria-label="anchor" href="#v0112--more-brms-families--interaction-robustness-0-11-2"></a></h3>
 <ul><li>
-<code><a href="../reference/symbolize.brmsfit.html">symbolize.brmsfit()</a></code> now handles <code>family = bernoulli()</code> and <code>family = poisson()</code>. brms’s <code>bernoulli()</code> is aliased to <code>binomial</code> internally because mathematically Bernoulli is just Binomial(1, p); the same templates and parameterization apply.</li>
+<code><a href="../reference/symbolize.brmsfit.html">symbolize.brmsfit()</a></code> now handles <code>family = bernoulli()</code> and <code>family = poisson()</code>. brms’s <code><a href="https://paulbuerkner.com/brms/reference/brmsfamily.html" class="external-link">bernoulli()</a></code> is aliased to <code>binomial</code> internally because mathematically Bernoulli is just Binomial(1, p); the same templates and parameterization apply.</li>
 <li>New <code>tests/testthat/test-robustness-interactions.R</code> fits <code>y ~ x * sex</code> (continuous-by-factor interaction) in each family / class combination and verifies the interaction row appears in <code>fixed_effects</code> with sensible estimate, CI columns are populated, and LaTeX renders. Covers lm gaussian, glm binomial / poisson / Gamma, glmmTMB poisson / binomial, lmer with random intercept, and drmTMB gaussian.</li>
 </ul></div>
 </div>
