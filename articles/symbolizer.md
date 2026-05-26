@@ -228,7 +228,7 @@ three tabs over the same fit.
 as_html_three_views(sym, head = 5, tail = 2)
 ```
 
-[Skip three-views widget](#sym-sym-1779808229-end)
+[Skip three-views widget](#sym-sym-1779818433-end)
 
 ▸1. Index
 
@@ -311,7 +311,7 @@ For observation *i* = 1 of your data:
 
 ``` math
 \begin{aligned}
-W_{1} &= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{temperature}_{1} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
+w_{1} &= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{temperature}_{1} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
 34.5 &= 29.6 + 0.492 \times   14 + (-1.94) &\quad(\text{with your numbers}) \\
 &= \underbrace{36.4}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-1.94)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
 \end{aligned}

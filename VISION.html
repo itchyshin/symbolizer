@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -106,13 +106,27 @@
 </ul></div>
 <div class="section level2">
 <h2 id="how-we-work">How we work<a class="anchor" aria-label="anchor" href="#how-we-work"></a></h2>
-<p>The team perspectives (from drmTMB’s convention, adopted as ours): <strong>Ada</strong> (orchestration), <strong>Boole</strong> (API), <strong>Gauss</strong> (numerics), <strong>Noether</strong> (math-code consistency), <strong>Darwin</strong> (biological reading), <strong>Fisher</strong> (inference), <strong>Pat</strong> (reader / tutorial), <strong>Jason</strong> (related-package landscape), <strong>Curie</strong> (tests), <strong>Emmy</strong> (S3 architecture), <strong>Grace</strong> (pkgdown / CI), <strong>Rose</strong> (audit, repeated mistakes, after-task feedback).</p>
+<p>The team perspectives (from drmTMB’s convention, adopted as ours): <strong>Ada</strong> (orchestration), <strong>Boole</strong> (API), <strong>Gauss</strong> (numerics), <strong>Noether</strong> (math-code consistency), <strong>Darwin</strong> (biological reading), <strong>Florence</strong> (scientific figure / widget / vignette visualization), <strong>Fisher</strong> (inference), <strong>Pat</strong> (reader / tutorial), <strong>Jason</strong> (related-package landscape), <strong>Curie</strong> (tests), <strong>Emmy</strong> (S3 architecture), <strong>Grace</strong> (pkgdown / CI), <strong>Rose</strong> (audit, repeated mistakes, after-task feedback).</p>
 <p>Each slice goes through these lenses, not all at once but with the ones whose stakes are highest. After-task notes record what each role saw and would flag.</p>
+<p><strong>Florence</strong> is the visual-check gate. Every user-facing rendered surface (HTML widget, vignette, README plot, pkgdown page, PDF export) must pass a Florence visual check before the surrounding work is declared done. Florence leads, but every role contributes: Pat sees reader flow, Fisher sees uncertainty honesty, Rose sees stale claims, Darwin sees biological coherence (logged traits for comparative analyses; across-species ≠ within-species), Grace sees render evidence, Boole sees syntax, Noether sees math correctness. The <code>widget-visual-audit</code> checklist in <code>CLAUDE.md</code> is the mandatory operationalisation.</p>
 </div>
 <div class="section level2">
 <h2 id="stopping-conditions">Stopping conditions<a class="anchor" aria-label="anchor" href="#stopping-conditions"></a></h2>
 <p>When something tempts us off-mission, return here. If the proposed work doesn’t serve a biologist auditing a model, doesn’t fit one of the core principles, or weakens the capability gate, push back.</p>
 <p>The vision is a service, not a constraint. It exists to make the hard product calls easier when the immediate path is unclear.</p>
+</div>
+<div class="section level2">
+<h2 id="accuracy-over-speed">Accuracy over speed<a class="anchor" aria-label="anchor" href="#accuracy-over-speed"></a></h2>
+<p>Adopted 2026-05-26 after a session in which I shipped widget demos without Florence-checking. The user found six bugs the moment they opened the rendered file — the same six bugs I would have caught by opening it myself. The discipline is non-negotiable:</p>
+<ul><li>
+<strong>Florence visual-check is mandatory.</strong> See <code>CLAUDE.md</code> top section.</li>
+<li>
+<strong>One bug → ten more in the pattern.</strong> Rose’s rule.</li>
+<li>
+<strong>Read-only audits are the default mode</strong>, not “ship it and iterate”.</li>
+<li>
+<strong>Demos must be biologically coherent.</strong> Darwin’s rule.</li>
+</ul><p>When in doubt, stop. Re-read. The maintainer’s time spent saying “this is broken” costs more than my time spent looking before I claim done.</p>
 </div>
 </div>
 

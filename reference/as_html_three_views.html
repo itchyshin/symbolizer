@@ -29,7 +29,7 @@ small tab-switching script."><meta property="og:image" content="https://itchyshi
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -71,7 +71,15 @@ small tab-switching script.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">as_html_three_views</span><span class="op">(</span><span class="va">x</span>, head <span class="op">=</span> <span class="fl">5L</span>, tail <span class="op">=</span> <span class="fl">2L</span>, id <span class="op">=</span> <span class="st">"sym"</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">as_html_three_views</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  head <span class="op">=</span> <span class="fl">5L</span>,</span>
+<span>  tail <span class="op">=</span> <span class="fl">2L</span>,</span>
+<span>  id <span class="op">=</span> <span class="st">"sym"</span>,</span>
+<span>  standalone <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  file <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -92,6 +100,19 @@ small tab-switching script.</p>
 
 <dt id="arg-id">id<a class="anchor" aria-label="anchor" href="#arg-id"></a></dt>
 <dd><p>A short identifier so multiple panels can co-exist on one page.</p></dd>
+
+
+<dt id="arg-standalone">standalone<a class="anchor" aria-label="anchor" href="#arg-standalone"></a></dt>
+<dd><p>If <code>TRUE</code>, wrap the fragment in a full HTML document
+with a MathJax CDN bootstrap so the file renders math when opened
+directly in a browser (<code>file://...</code>). Default <code>FALSE</code> returns the
+bare fragment for embedding in an Rmd / pkgdown / Quarto page where
+the host document already loads MathJax.</p></dd>
+
+
+<dt id="arg-file">file<a class="anchor" aria-label="anchor" href="#arg-file"></a></dt>
+<dd><p>If non-<code>NULL</code>, also write the HTML to this path. Returned
+value is unchanged.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

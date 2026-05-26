@@ -82,6 +82,8 @@ Numeric arrays behind the symbols, and the three-views HTML widget.
   : Expand a symbolized_model to its underlying numeric arrays
 - [`as_html_three_views()`](https://itchyshin.github.io/symbolizer/reference/as_html_three_views.md)
   : Three-views HTML rendering of a symbolized_model
+- [`as_pdf_three_views()`](https://itchyshin.github.io/symbolizer/reference/as_pdf_three_views.md)
+  : PDF rendering of a symbolized_model in three stacked sections
 
 ## Render the equations
 

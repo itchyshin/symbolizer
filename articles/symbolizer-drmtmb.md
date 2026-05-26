@@ -400,7 +400,7 @@ $`\mathbf{Z}\mathbf{u}`$ random-effect block populated from the data:
 as_html_three_views(sym_re)
 ```
 
-[Skip three-views widget](#sym-sym-1779808189-end)
+[Skip three-views widget](#sym-sym-1779818393-end)
 
 ▸1. Index
 
@@ -434,8 +434,8 @@ where:
    $`\mathbb{R}^{2}`$
 - $`\gamma_{0}, \gamma_{1}`$ — sigma submodel coefficients
    $`\mathbb{R}^{2}`$
-- $`u_{site(i)}`$ — random intercept by site  scalar; ^{6} in matrix
-  form
+- $`u_{site(i)}`$ — random intercept by site  scalar; $`\mathbb{R}^{6}`$
+  in matrix form
 - $`\sigma_{site}`$ — between-site standard deviation  scalar
 
 The same model in matrix form – the structural contract every textbook
@@ -469,8 +469,8 @@ where:
    $`\mathbb{R}^{120 \times 2}`$
 - $`\mathbf{Z}`$ — sigma submodel design matrix
    $`\mathbb{R}^{120 \times 2}`$
-- $`\mathbf{u}_{site}`$ — random intercept by site  scalar; ^{6} in
-  matrix form
+- $`\mathbf{u}_{site}`$ — random intercept by site  scalar;
+  $`\mathbb{R}^{6}`$ in matrix form
 - $`\sigma_{site}`$ — between-site standard deviation  scalar
 
 The same matrix equation, with your actual numbers stacked inside the
@@ -492,7 +492,7 @@ For observation *i* = 1 of your data:
 
 ``` math
 \begin{aligned}
-W_{1} &= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{temperature}_{1} + \hat{u}_{\mathrm{a}} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
+w_{1} &= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{temperature}_{1} + \hat{u}_{\mathrm{a}} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
 40.2 &=   29 + 0.458 \times 24.7 + (0.482) + (-0.0441) &\quad(\text{with your numbers}) \\
 &= \underbrace{40.2}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-0.0441)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
 \end{aligned}
@@ -619,7 +619,7 @@ notation_bridge(sym_rich)
 | coefficient | $`\gamma_{0}, \gamma_{1}, \gamma_{2}`$ | $`\boldsymbol{\gamma}`$ | $`\mathbb{R}^{p_\sigma}`$ | $`\mathbb{R}^{3}`$ |
 | design_matrix | — | $`\mathbf{X}`$ | $`\mathbb{R}^{n \times p_\mu}`$ | $`\mathbb{R}^{200 \times 4}`$ |
 | design_matrix | — | $`\mathbf{Z}`$ | $`\mathbb{R}^{n \times p_\sigma}`$ | $`\mathbb{R}^{200 \times 3}`$ |
-| site | $`u_{site(i)}`$ | $`\mathbf{u}_{site}`$ | $`scalar; \mathbb{R}^{G_{site}} in matrix form`$ | $`scalar; \mathbb{R}^{8} in matrix form`$ |
+| site | $`u_{site(i)}`$ | $`\mathbf{u}_{site}`$ | \$scalar; $`\mathbb{R}^{G_{site}}`$ in matrix form\$ | \$scalar; $`\mathbb{R}^{8}`$ in matrix form\$ |
 | variance_component | $`\sigma_{site}`$ | $`\sigma_{site}`$ | scalar | scalar |
 
 The `dimension` column carries the shape rule (e.g. $`\mathbb{R}^n`$,

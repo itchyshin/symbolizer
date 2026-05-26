@@ -18,7 +18,15 @@ semantic HTML, inline CSS, and a small tab-switching script.
 ## Usage
 
 ``` r
-as_html_three_views(x, head = 5L, tail = 2L, id = "sym", ...)
+as_html_three_views(
+  x,
+  head = 5L,
+  tail = 2L,
+  id = "sym",
+  standalone = FALSE,
+  file = NULL,
+  ...
+)
 ```
 
 ## Arguments
@@ -38,6 +46,19 @@ as_html_three_views(x, head = 5L, tail = 2L, id = "sym", ...)
 - id:
 
   A short identifier so multiple panels can co-exist on one page.
+
+- standalone:
+
+  If `TRUE`, wrap the fragment in a full HTML document with a MathJax
+  CDN bootstrap so the file renders math when opened directly in a
+  browser (`file://...`). Default `FALSE` returns the bare fragment for
+  embedding in an Rmd / pkgdown / Quarto page where the host document
+  already loads MathJax.
+
+- file:
+
+  If non-`NULL`, also write the HTML to this path. Returned value is
+  unchanged.
 
 - ...:
 

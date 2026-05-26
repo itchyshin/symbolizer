@@ -362,7 +362,7 @@ through:
 as_html_three_views(sym3)
 ```
 
-[Skip three-views widget](#sym-sym-1779808196-end)
+[Skip three-views widget](#sym-sym-1779818398-end)
 
 ▸1. Index
 
@@ -440,7 +440,7 @@ For observation *i* = 1 of your data:
 
 ``` math
 \begin{aligned}
-W_{1} &= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{sexmale}_{1} + \hat\beta_{2}\,\mathrm{body\_size}_{1} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
+w_{1} &= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{sexmale}_{1} + \hat\beta_{2}\,\mathrm{body\_size}_{1} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
 39.5 &= 29.9 + 5.26 \times    0 + 0.197 \times 60.5 + (-2.36) &\quad(\text{with your numbers}) \\
 &= \underbrace{41.8}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-2.36)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
 \end{aligned}

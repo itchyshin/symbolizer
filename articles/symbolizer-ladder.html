@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -184,14 +184,14 @@ body_mass \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/symbol_table.html">symbol_table</a></span><span class="op">(</span><span class="va">sym1</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <colgroup>
-<col width="14%">
-<col width="13%">
-<col width="7%">
+<col width="12%">
+<col width="11%">
+<col width="6%">
 <col width="3%">
-<col width="8%">
-<col width="18%">
-<col width="17%">
-<col width="17%">
+<col width="7%">
+<col width="20%">
+<col width="15%">
+<col width="22%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">index</th>
@@ -235,6 +235,16 @@ body_mass \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 <td align="left">conditional mu of body_mass</td>
 </tr>
 <tr class="even">
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\sigma_i</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛔</mi><annotation encoding="application/x-tex">\boldsymbol{\sigma}</annotation></semantics></math></td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="left">residual_sd</td>
+<td align="left">scalar (constant across observations)</td>
+<td align="left">scalar</td>
+<td align="left">residual standard deviation of body_mass</td>
+</tr>
+<tr class="odd">
 <td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mn>0</mn></msub><mo>,</mo><msub><mi>β</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">\beta_{0}, \beta_{1}</annotation></semantics></math></td>
 <td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛃</mi><annotation encoding="application/x-tex">\boldsymbol{\beta}</annotation></semantics></math></td>
 <td align="left">NA</td>
@@ -244,7 +254,7 @@ body_mass \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 <td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>2</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{2}</annotation></semantics></math></td>
 <td align="left">mu submodel coefficients</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">—</td>
 <td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐗</mi><annotation encoding="application/x-tex">\mathbf{X}</annotation></semantics></math></td>
 <td align="left">NA</td>
@@ -326,16 +336,16 @@ body_mass \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 a row for the dummy-encoded contrast:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/symbol_table.html">symbol_table</a></span><span class="op">(</span><span class="va">sym2</span><span class="op">)</span></span></code></pre></div>
-<table class="table">
+<table style="width:100%;" class="table">
 <colgroup>
-<col width="19%">
-<col width="12%">
+<col width="17%">
+<col width="11%">
 <col width="6%">
 <col width="3%">
-<col width="8%">
-<col width="17%">
-<col width="16%">
-<col width="16%">
+<col width="7%">
+<col width="19%">
+<col width="14%">
+<col width="21%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">index</th>
@@ -389,6 +399,16 @@ a row for the dummy-encoded contrast:</p>
 <td align="left">conditional mu of body_mass</td>
 </tr>
 <tr class="odd">
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\sigma_i</annotation></semantics></math></td>
+<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛔</mi><annotation encoding="application/x-tex">\boldsymbol{\sigma}</annotation></semantics></math></td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="left">residual_sd</td>
+<td align="left">scalar (constant across observations)</td>
+<td align="left">scalar</td>
+<td align="left">residual standard deviation of body_mass</td>
+</tr>
+<tr class="even">
 <td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mn>0</mn></msub><mo>,</mo><msub><mi>β</mi><mn>1</mn></msub><mo>,</mo><msub><mi>β</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">\beta_{0}, \beta_{1}, \beta_{2}</annotation></semantics></math></td>
 <td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛃</mi><annotation encoding="application/x-tex">\boldsymbol{\beta}</annotation></semantics></math></td>
 <td align="left">NA</td>
@@ -398,7 +418,7 @@ a row for the dummy-encoded contrast:</p>
 <td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>3</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{3}</annotation></semantics></math></td>
 <td align="left">mu submodel coefficients</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">—</td>
 <td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐗</mi><annotation encoding="application/x-tex">\mathbf{X}</annotation></semantics></math></td>
 <td align="left">NA</td>
@@ -629,22 +649,22 @@ the three-view widget:</p>
 .sym-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .sym-skip { position: absolute; top: -100px; left: 0; padding: 0.4rem 0.7rem; background: #8a1f22; color: #fff; text-decoration: none; font-size: 0.85rem; z-index: 5; }
 .sym-skip:focus { top: 0; }</style>
-<div id="sym-sym-1779808211" class="sym-tabs">
-<a class="sym-skip" href="#sym-sym-1779808211-end">Skip three-views
+<div id="sym-sym-1779818410" class="sym-tabs">
+<a class="sym-skip" href="#sym-sym-1779818410-end">Skip three-views
 widget</a>
 <div class="sym-tablist" role="tablist" aria-label="Three views of the model">
-<button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779808211-tab-idx" aria-controls="sym-sym-1779808211-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
+<button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779818410-tab-idx" aria-controls="sym-sym-1779818410-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
 <span class="sym-tab-marker" aria-hidden="true">▸</span>1. Index
 </button>
-<button type="button" class="sym-tab" role="tab" id="sym-sym-1779808211-tab-eq" aria-controls="sym-sym-1779808211-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
+<button type="button" class="sym-tab" role="tab" id="sym-sym-1779818410-tab-eq" aria-controls="sym-sym-1779818410-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
 <span class="sym-tab-marker" aria-hidden="true">▸</span>2. Matrix
 </button>
-<button type="button" class="sym-tab" role="tab" id="sym-sym-1779808211-tab-mat" aria-controls="sym-sym-1779808211-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
+<button type="button" class="sym-tab" role="tab" id="sym-sym-1779818410-tab-mat" aria-controls="sym-sym-1779818410-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
 <span class="sym-tab-marker" aria-hidden="true">▸</span>3. Equations
 with data
 </button>
 </div>
-<div id="sym-sym-1779808211-panel-idx" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-sym-1779808211-tab-idx" data-panel="idx" tabindex="0">
+<div id="sym-sym-1779818410-panel-idx" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-sym-1779818410-tab-idx" data-panel="idx" tabindex="0">
 <p class="sym-caption">
 What happens for each observation <em>i</em> – the per-individual
 reading.
@@ -698,8 +718,9 @@ where:
 </li>
 <li>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>u</mi><mrow><mi>s</mi><mi>i</mi><mi>t</mi><mi>e</mi><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo></mrow></msub><annotation encoding="application/x-tex">u_{site(i)}</annotation></semantics></math>
-— random intercept by site  <span class="sym-dim">scalar; ^{12} in
-matrix form</span>
+— random intercept by site  <span class="sym-dim">scalar;
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>12</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{12}</annotation></semantics></math>
+in matrix form</span>
 </li>
 <li>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mrow><mi>s</mi><mi>i</mi><mi>t</mi><mi>e</mi></mrow></msub><annotation encoding="application/x-tex">\sigma_{site}</annotation></semantics></math>
@@ -707,7 +728,7 @@ matrix form</span>
 </li>
 </ul></details>
 </div>
-<div id="sym-sym-1779808211-panel-eq" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1779808211-tab-eq" data-panel="eq" hidden="" tabindex="0">
+<div id="sym-sym-1779818410-panel-eq" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1779818410-tab-eq" data-panel="eq" hidden="" tabindex="0">
 <p class="sym-caption">
 The same model in matrix form – the structural contract every textbook
 past chapter 4 switches to.
@@ -759,8 +780,9 @@ where:
 </li>
 <li>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝐮</mi><mrow><mi>s</mi><mi>i</mi><mi>t</mi><mi>e</mi></mrow></msub><annotation encoding="application/x-tex">\mathbf{u}_{site}</annotation></semantics></math>
-— random intercept by site  <span class="sym-dim">scalar; ^{12} in
-matrix form</span>
+— random intercept by site  <span class="sym-dim">scalar;
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>12</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{12}</annotation></semantics></math>
+in matrix form</span>
 </li>
 <li>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mrow><mi>s</mi><mi>i</mi><mi>t</mi><mi>e</mi></mrow></msub><annotation encoding="application/x-tex">\sigma_{site}</annotation></semantics></math>
@@ -768,7 +790,7 @@ matrix form</span>
 </li>
 </ul></details>
 </div>
-<div id="sym-sym-1779808211-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1779808211-tab-mat" data-panel="mat" hidden="" tabindex="0">
+<div id="sym-sym-1779818410-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1779818410-tab-mat" data-panel="mat" hidden="" tabindex="0">
 <p class="sym-caption">
 The same matrix equation, with your actual numbers stacked inside the
 brackets – what the computer multiplies. Showing first 5 and last 2 rows
@@ -789,9 +811,9 @@ Z_g and the predicted BLUPs u are also shown.</span>
 For observation <em>i</em> = 1 of your data:
 </p>
 <div class="sym-eq">
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>W</mi><mn>1</mn></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><msub><mover><mi>β</mi><mo accent="true">̂</mo></mover><mn>0</mn></msub><mo>+</mo><msub><mover><mi>β</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mspace width="0.167em"></mspace><msub><mrow><mi mathvariant="normal">t</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">p</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi></mrow><mn>1</mn></msub><mo>+</mo><msub><mover><mi>β</mi><mo accent="true">̂</mo></mover><mn>2</mn></msub><mspace width="0.167em"></mspace><msub><mrow><mi mathvariant="normal">s</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">x</mi><mi mathvariant="normal">M</mi></mrow><mn>1</mn></msub><mo>+</mo><msub><mover><mi>u</mi><mo accent="true">̂</mo></mover><mrow><mi mathvariant="normal">S</mi><mn mathvariant="normal">01</mn></mrow></msub><mo>+</mo><msub><mover><mi>ε</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub></mtd><mtd columnalign="right" style="text-align: right"><mspace width="1.0em"></mspace><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">response equation, one row of the model</mtext><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mn>36.8</mn></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mn>32.1</mn><mo>+</mo><mn>0.3</mn><mo>×</mo><mn>23.9</mn><mo>+</mo><mn>0.757</mn><mo>×</mo><mn>0</mn><mo>+</mo><mo stretchy="false" form="prefix">(</mo><mi>−</mi><mn>1.33</mn><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mo stretchy="false" form="prefix">(</mo><mi>−</mi><mn>2.4</mn><mo stretchy="false" form="postfix">)</mo></mtd><mtd columnalign="right" style="text-align: right"><mspace width="1.0em"></mspace><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">with your numbers</mtext><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><munder><munder><mn>39.2</mn><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mover><mi>μ</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mspace width="0.167em"></mspace><mtext mathvariant="normal">(predicted)</mtext><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.278em"></mspace><mo>+</mo><mspace width="0.278em"></mspace><munder><munder><mrow><mo stretchy="false" form="prefix">(</mo><mi>−</mi><mn>2.4</mn><mo stretchy="false" form="postfix">)</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mover><mi>ε</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mspace width="0.167em"></mspace><mtext mathvariant="normal">(residual)</mtext><mspace width="0.167em"></mspace></mrow></munder></mtd></mtr></mtable><annotation encoding="application/x-tex">
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><msub><mrow><mi mathvariant="normal">b</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">d</mi><mi mathvariant="normal">y</mi><mi mathvariant="normal">_</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">s</mi></mrow><mn>1</mn></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><msub><mover><mi>β</mi><mo accent="true">̂</mo></mover><mn>0</mn></msub><mo>+</mo><msub><mover><mi>β</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mspace width="0.167em"></mspace><msub><mrow><mi mathvariant="normal">t</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">p</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">e</mi></mrow><mn>1</mn></msub><mo>+</mo><msub><mover><mi>β</mi><mo accent="true">̂</mo></mover><mn>2</mn></msub><mspace width="0.167em"></mspace><msub><mrow><mi mathvariant="normal">s</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">x</mi><mi mathvariant="normal">M</mi></mrow><mn>1</mn></msub><mo>+</mo><msub><mover><mi>u</mi><mo accent="true">̂</mo></mover><mrow><mi mathvariant="normal">S</mi><mn mathvariant="normal">01</mn></mrow></msub><mo>+</mo><msub><mover><mi>ε</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub></mtd><mtd columnalign="right" style="text-align: right"><mspace width="1.0em"></mspace><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">response equation, one row of the model</mtext><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mn>36.8</mn></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mn>32.1</mn><mo>+</mo><mn>0.3</mn><mo>×</mo><mn>23.9</mn><mo>+</mo><mn>0.757</mn><mo>×</mo><mn>0</mn><mo>+</mo><mo stretchy="false" form="prefix">(</mo><mi>−</mi><mn>1.33</mn><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mo stretchy="false" form="prefix">(</mo><mi>−</mi><mn>2.4</mn><mo stretchy="false" form="postfix">)</mo></mtd><mtd columnalign="right" style="text-align: right"><mspace width="1.0em"></mspace><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">with your numbers</mtext><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><munder><munder><mn>39.2</mn><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mover><mi>μ</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mspace width="0.167em"></mspace><mtext mathvariant="normal">(predicted)</mtext><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.278em"></mspace><mo>+</mo><mspace width="0.278em"></mspace><munder><munder><mrow><mo stretchy="false" form="prefix">(</mo><mi>−</mi><mn>2.4</mn><mo stretchy="false" form="postfix">)</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mover><mi>ε</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mspace width="0.167em"></mspace><mtext mathvariant="normal">(residual)</mtext><mspace width="0.167em"></mspace></mrow></munder></mtd></mtr></mtable><annotation encoding="application/x-tex">
 \begin{aligned}
-W_{1} &amp;= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{temperature}_{1} + \hat\beta_{2}\,\mathrm{sexM}_{1} + \hat{u}_{\mathrm{S01}} + \hat\varepsilon_{1} &amp;\quad(\text{response equation, one row of the model}) \\
+\mathrm{body\_mass}_{1} &amp;= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{temperature}_{1} + \hat\beta_{2}\,\mathrm{sexM}_{1} + \hat{u}_{\mathrm{S01}} + \hat\varepsilon_{1} &amp;\quad(\text{response equation, one row of the model}) \\
 36.8 &amp;= 32.1 +  0.3 \times 23.9 + 0.757 \times    0 + (-1.33) + (-2.4) &amp;\quad(\text{with your numbers}) \\
 &amp;= \underbrace{39.2}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-2.4)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
 \end{aligned}
@@ -808,11 +830,11 @@ observations:
 </div>
 <p class="sym-caption" style="font-size:0.85em;color:#6b7280;margin-top:0.4rem">
 <strong>Left</strong>: observed vector
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐰</mi><annotation encoding="application/x-tex">\mathbf{w}</annotation></semantics></math>.
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐛</mi><mi>𝐨</mi><mi>𝐝</mi><mi>𝐲</mi><mi mathvariant="bold">_</mi><mi>𝐦</mi><mi>𝐚</mi><mi>𝐬</mi><mi>𝐬</mi></mrow><annotation encoding="application/x-tex">\mathbf{body\_mass}</annotation></semantics></math>.
 <strong>Middle</strong>: the prediction
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐗</mi><mover><mi>𝛃</mi><mo accent="true">̂</mo></mover><mo>+</mo><mi>𝐙</mi><mover><mi>𝐮</mi><mo accent="true">̂</mo></mover><mo>=</mo><mover><mi>𝛍</mi><mo accent="true">̂</mo></mover></mrow><annotation encoding="application/x-tex">\mathbf{X}\hat{\boldsymbol{\beta}} + \mathbf{Z}\hat{\mathbf{u}} = \hat{\boldsymbol{\mu}}</annotation></semantics></math>.
 <strong>Right</strong>: the residual vector
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>𝛆</mi><mo accent="true">̂</mo></mover><mo>=</mo><mi>𝐰</mi><mo>−</mo><mover><mi>𝛍</mi><mo accent="true">̂</mo></mover></mrow><annotation encoding="application/x-tex">\hat{\boldsymbol{\varepsilon}} = \mathbf{w} - \hat{\boldsymbol{\mu}}</annotation></semantics></math>.
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>𝛆</mi><mo accent="true">̂</mo></mover><mo>=</mo><mrow><mi>𝐛</mi><mi>𝐨</mi><mi>𝐝</mi><mi>𝐲</mi><mi mathvariant="bold">_</mi><mi>𝐦</mi><mi>𝐚</mi><mi>𝐬</mi><mi>𝐬</mi></mrow><mo>−</mo><mover><mi>𝛍</mi><mo accent="true">̂</mo></mover></mrow><annotation encoding="application/x-tex">\hat{\boldsymbol{\varepsilon}} = \mathbf{body\_mass} - \hat{\boldsymbol{\mu}}</annotation></semantics></math>.
 Every row of this matrix equation is one of the response-equation rows
 from the worked row above.
 </p>
@@ -845,9 +867,9 @@ observations:
 </div>
 </div>
 </div>
-<span id="sym-sym-1779808211-end" tabindex="-1"></span>
+<span id="sym-sym-1779818410-end" tabindex="-1"></span>
 <script>(function() {
-  var root = document.getElementById("sym-sym-1779808211");
+  var root = document.getElementById("sym-sym-1779818410");
   if (!root) return;
   var tabs   = Array.prototype.slice.call(root.querySelectorAll("[role=\"tab\"]"));
   var panels = Array.prototype.slice.call(root.querySelectorAll("[role=\"tabpanel\"]"));

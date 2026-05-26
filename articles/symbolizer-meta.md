@@ -66,10 +66,10 @@ dat <- data.frame(y = y, vi = vi, study = factor(study),
                   obs = factor(id), g = factor(1))
 head(dat, 4)
 #>            y         vi study obs g
-#> 1 -0.2839669 0.05214863     1   1 1
-#> 2 -0.6689495 0.10619273     2   2 1
+#> 1 -0.1037070 0.05214863     1   1 1
+#> 2  0.2746595 0.10619273     2   2 1
 #> 3  0.1386369 0.04267655     3   3 1
-#> 4  0.6629762 0.12001508     4   4 1
+#> 4  0.4370492 0.12001508     4   4 1
 ```
 
 ## Face 1 — metafor (the canonical interface)
@@ -105,8 +105,8 @@ sym_meta$variance_components
 
 | parameter | group    | term          | sd_estimate | var_estimate |
 |:----------|:---------|:--------------|:------------|:-------------|
-| mu        | study    | sigma^2_study | 0.302       | 0.0910       |
-| mu        | obs      | sigma^2_obs   | 0.0943      | 0.00890      |
+| mu        | study    | sigma^2_study | 0.349       | 0.122        |
+| mu        | obs      | sigma^2_obs   | 0.0596      | 0.00355      |
 | mu        | sampling | mean(v_i)     | 0.316       | 0.0999       |
 
 The model the package teaches: `meta_normal` family, two random-effect
@@ -174,7 +174,15 @@ fit_glmm <- glmmTMB(
   y ~ 1 + (1 | study) + propto(0 + obs | g, V),
   data = dat, REML = TRUE
 )
+#> Warning in finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old): Model convergence
+#> problem; non-positive-definite Hessian matrix. See vignette('troubleshooting')
+#> Warning in finalizeTMB(TMBStruc, obj, fit, h, data.tmb.old): Model convergence
+#> problem; false convergence (8). See vignette('troubleshooting'),
+#> help('diagnose')
 sym_glmm <- symbolize(fit_glmm)
+#> Warning in sqrt(diag(vv)): NaNs produced
+#> Warning in sqrt(diag(object$cov.fixed)): NaNs produced
+#> Warning in sqrt(diag(object$cov.fixed)): NaNs produced
 ```
 
 ``` r

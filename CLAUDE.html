@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,6 +38,89 @@
 
 <p>@AGENTS.md</p>
 <div class="section level2">
+<h2 id="top-discipline-rule-non-negotiable-supersedes-everything-else">Top discipline rule (non-negotiable; supersedes everything else)<a class="anchor" aria-label="anchor" href="#top-discipline-rule-non-negotiable-supersedes-everything-else"></a></h2>
+<p><strong>Accuracy over speed. Never rush. Never ship without looking.</strong></p>
+<p>Repeated failure pattern: I generate user-facing HTML / widgets / vignettes, the surface compiles cleanly, I describe what it “should” look like, and I declare it shipped without opening it visually. The user then opens it, finds bugs, and I owe them an audit.</p>
+<p>Hard rule for every Claude session in this repo:</p>
+<ol style="list-style-type: decimal"><li>
+<strong>Florence visual-check is mandatory</strong> for any user-facing rendered output (HTML widget, vignette, README, pkgdown page, PDF). “Florence visual check” means: I open the actual rendered file in a browser / viewer / read the actual PDF bytes / fetch the deployed page and look at it. Not “the source looks right”. Not “the LaTeX string is what I expected”. The actual rendered page.</li>
+<li>
+<strong>One bug surfaced by the user means ten more in the same pattern.</strong> The Rose convention: if I find one mistake, scan the codebase for the same pattern before fixing the visible one. The visible bug is the tip.</li>
+<li>
+<strong>No “let me just ship it and we’ll iterate”</strong>. If something needs verification, verify it. If verification can’t be done in this session, commit only with WIP labels and explicit “not Florence-checked” in the commit message.</li>
+<li>
+<strong>Demos that show data must be biologically coherent.</strong> See Darwin’s rule in <code>.memory/MEMORY.md</code> (comparative analyses use log-transformed traits with values clustering around -2 to 2, not raw single-species ranges).</li>
+</ol><p>When in doubt, stop. Ask. Re-read. The user’s time spent telling me “this is broken” costs more than the time I would have spent looking.</p>
+</div>
+<div class="section level2">
+<h2 id="adopted-protocols-from-drmtmb--gllvmtmb-sister-repos">Adopted protocols (from drmTMB + gllvmTMB sister repos)<a class="anchor" aria-label="anchor" href="#adopted-protocols-from-drmtmb--gllvmtmb-sister-repos"></a></h2>
+<p>symbolizer follows the same review-process conventions as drmTMB and gllvmTMB. Source-of-truth files for the protocols: <code>/Users/z3437171/Dropbox/Github Local/drmTMB/AGENTS.md</code> and <code>/Users/z3437171/Dropbox/Github Local/gllvmTMB/CLAUDE.md</code>.</p>
+<div class="section level3">
+<h3 id="default-mode-read-only-audits">Default mode: read-only audits<a class="anchor" aria-label="anchor" href="#default-mode-read-only-audits"></a></h3>
+<p>Claude’s default mode in this repo is to <strong>gather evidence, write read-only audits, draft decisions, and identify the smallest safe PR shape</strong>. The maintainer chooses what ships. I do not silently expand implementation scope. I do not start large refactors without an explicit “go” from the maintainer.</p>
+</div>
+<div class="section level3">
+<h3 id="definition-of-done">Definition of Done<a class="anchor" aria-label="anchor" href="#definition-of-done"></a></h3>
+<p>A feature is done only when ALL of these are present:</p>
+<ol style="list-style-type: decimal"><li>Implementation</li>
+<li>Tests (helper fixture + per-package + cross-package where relevant)</li>
+<li>Roxygen2 documentation</li>
+<li>Examples or vignette section</li>
+<li>
+<code>rcmdcheck</code> 0 / 0 / 0</li>
+<li>
+<strong>Florence visual-check</strong> on every user-facing rendered surface</li>
+<li>After-task report under <code>.memory/reports/YYYY-MM-DD-&lt;topic&gt;.md</code>
+</li>
+<li>NEWS.md entry</li>
+</ol><p>A WIP commit is fine; “shipped” requires all 8.</p>
+</div>
+<div class="section level3">
+<h3 id="surface-review-touchpoints-at-stopping-points">Surface review touchpoints at stopping points<a class="anchor" aria-label="anchor" href="#surface-review-touchpoints-at-stopping-points"></a></h3>
+<p>At every natural stopping point — task end, waiting on CI, waiting on maintainer decision, end of phase, before switching context — surface:</p>
+<ol style="list-style-type: decimal"><li>
+<strong>Open PR links</strong> the maintainer can click to read.</li>
+<li>
+<strong>Commit hashes</strong> that landed this session (with WIP / Release tags).</li>
+<li>
+<strong>After-task report path(s)</strong> that just landed or are about to.</li>
+<li>
+<strong>Anything blocking</strong> the maintainer needs to decide. Prefix with 🔴 <strong>Needs you:</strong>
+</li>
+</ol><p>Default assumption: if a stopping point arrives and the message does not surface links, the maintainer cannot review.</p>
+</div>
+<div class="section level3">
+<h3 id="after-task-reports-are-the-closure-rule">After-task reports are the closure rule<a class="anchor" aria-label="anchor" href="#after-task-reports-are-the-closure-rule"></a></h3>
+<p>Every completed task or phase writes <code>.memory/reports/YYYY-MM-DD-&lt;short-tag&gt;.md</code> with:</p>
+<ul><li>
+<strong>Scope</strong>: what was in / out.</li>
+<li>
+<strong>Outcome</strong>: what landed (commits, tags, issues).</li>
+<li>
+<strong>Checks</strong>: which Florence checks were done; which were skipped and why.</li>
+<li>
+<strong>Follow-up</strong>: what’s deferred to the next session, what’s blocked.</li>
+</ul><p>The reports are how the shared team learns without re-reading the diff. This file is gitignored (stays local) per AGENTS.md.</p>
+</div>
+<div class="section level3">
+<h3 id="florence-is-a-named-role">Florence is a named role<a class="anchor" aria-label="anchor" href="#florence-is-a-named-role"></a></h3>
+<p>Add to the team roster (<code>.github/VISION.md</code>):</p>
+<p><strong>Florence</strong> — Scientific figure / widget / vignette visualization reviewer. Primary questions: Are rendered surfaces (HTML widgets, pkgdown pages, PDF exports, README plots) publication-quality, interpretable, accessible, and honest? Florence leads the final visual standard, but every role contributes: Pat (reader flow), Fisher (uncertainty honesty), Rose (stale claims), Darwin (biology), Grace (render evidence), Boole (syntax), Noether (math correctness).</p>
+</div>
+<div class="section level3">
+<h3 id="widget-visual-audit-protocol">widget-visual-audit protocol<a class="anchor" aria-label="anchor" href="#widget-visual-audit-protocol"></a></h3>
+<p>For every render of <code><a href="reference/as_html_three_views.html">as_html_three_views()</a></code>, <code><a href="reference/as_pdf_three_views.html">as_pdf_three_views()</a></code>, <code><a href="reference/equations.html">equations()</a></code>, <code><a href="reference/model_card.html">model_card()</a></code>, or any vignette, run this checklist BEFORE saying it’s done:</p>
+<ul class="task-list"><li><label><input type="checkbox">Open the rendered file in a browser / PDF viewer (or <code>Read</code> tool for PDF bytes).</label></li>
+<li><label><input type="checkbox">Confirm math renders (no raw <code>\(...\)</code>, <code>\sigma_{...}</code>, <code>\\begin{aligned}</code> leaking as text).</label></li>
+<li><label><input type="checkbox">Confirm symbols are consistent across panels (e.g. response symbol matches between worked-row and matrix block).</label></li>
+<li><label><input type="checkbox">Confirm captions use <code>$...$</code> delimiters (the only inline-math form the standalone HTML’s MathJax config recognises).</label></li>
+<li><label><input type="checkbox">Confirm the biology gloss matches the model context (phylo models need across-species reading; spatial models need geographic reading; default Gaussian gloss is wrong for both).</label></li>
+<li><label><input type="checkbox">Confirm data values are biologically coherent for the context (Darwin’s rule).</label></li>
+<li><label><input type="checkbox">If the structured-covariance matrix exists, confirm it’s surfaced in EVERY view (distribution line in index form, matrix form, AND data view) — not just one.</label></li>
+<li><label><input type="checkbox">Confirm <code>metadata$phylo_representation</code> / <code>metadata$spatial_representation</code> is set when expected.</label></li>
+</ul></div>
+</div>
+<div class="section level2">
 <h2 id="symbolizer-specific-notes">symbolizer-specific notes<a class="anchor" aria-label="anchor" href="#symbolizer-specific-notes"></a></h2>
 <ul><li>
 <strong>Architectural rule</strong>: every prose output is templated from <code>inst/extdata/*.csv</code>. Never write string-spliced prose in <code>R/</code>.</li>
@@ -49,7 +132,8 @@
 </ul></div>
 </div>
 
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

@@ -161,7 +161,6 @@ dat <- data.frame(
 )
 fit <- drmTMB(drm_formula(cbind(successes, failures) ~ x, sigma ~ 1),
               family = beta_binomial(), data = dat)
-#> Warning in sqrt(diag(cov)): NaNs produced
 sym <- symbolize(fit)
 render_math(sym$distribution$latex)
 ```

@@ -1,5 +1,243 @@
 # Changelog
 
+## symbolizer 0.21.2
+
+### v0.21.2 – structural-dependence article: realistic phylo demo + widget + PDF rollout
+
+Targeted patch release. The v0.21 flagship article
+(`symbolizer-structural-dependence.Rmd`) has shipped with zero
+three-views widgets and a degenerate `rcoal(15)` simulation as its
+phylogeny demo. The Mizuno-style tutorial convention (Mizuno et al. 2026
+*RSM*) uses a real comparative-biology dataset for the worked examples;
+the article now matches.
+
+#### Article: real Mizuno-style data
+
+- Replaces the 15-tip coalescent simulation with a 60-species subsample
+  of
+  [`metadat::dat.moura2021`](https://wviechtb.github.io/metadat/reference/dat.moura2021.html)
+  (Moura et al. 2021 assortative-mating size-size correlations).
+- Effect sizes computed from `(ri, ni)` via
+  `metafor::escalc(measure = "ZCOR")` (Fisher-z transform), then
+  aggregated to one mean Zr per species with variance-of-the-mean.
+  Yields realistic Zr values (median 0.25, range \[-0.14, 1.59\])
+  instead of toy simulated values.
+- `A` matrix off-diagonal quantiles are 25% = 0.00, 50% = 0.03, 75% =
+  0.27, 99% = 0.86 — a real mix of close + distant phylogenetic
+  relatedness, unlike the previous degenerate `rcoal(15)` where 75% of
+  off-diagonal entries were above 0.91.
+- `A_tips` reordered to match the random sp_keep order so the head 5x5
+  in the widget visibly shows a MIX of pairwise relatedness rather than
+  a clade of closely-related species.
+
+#### Widget + PDF embed below the metafor and MCMCglmm fits
+
+- Both faces (metafor and MCMCglmm) now have a three-views interactive
+  widget directly below the fit chunk, showing the same model in index /
+  matrix / matrix-with-data forms. Tab 3 carries the actual `A_{60x60}`
+  correlation matrix with real numerical entries.
+- A “Download as PDF” affordance below each widget renders a paper-
+  ready PDF via
+  [`as_pdf_three_views()`](https://itchyshin.github.io/symbolizer/reference/as_pdf_three_views.md)
+  and links to it.
+
+#### Bugs fixed during the Florence pass on the widget render
+
+- `pdf_three_views_worked_row()` no longer crashes on intercept-only
+  models. The `for (k in seq.int(2L, length(terms_tex)))` loop ran with
+  `length(terms_tex) == 1L`, producing `seq.int(2L, 1L) == c(2L, 1L)`
+  and a subscript-out-of-bounds error. Replaced with
+  `paste(terms_tex, collapse = " + ")` which is safe for any length.
+- `as_pdf_three_views(file = "<relative path>")` now writes to the
+  caller’s working directory, not the system tempdir.
+  `normalizePath(<relative>, mustWork = FALSE)` on macOS returns the
+  relative string unchanged when the file doesn’t exist;
+  [`rmarkdown::render()`](https://pkgs.rstudio.com/rmarkdown/reference/render.html)
+  then interpreted the output_file relative to the input Rmd in tempdir,
+  silently writing the PDF to tempdir. Patched to expand relative paths
+  against [`getwd()`](https://rdrr.io/r/base/getwd.html) first.
+- `pdf_three_views_worked_row()` now includes the random-effect
+  contribution on the rendered equation, matching
+  `three_views_worked_row()` (the HTML version). Without this, the
+  worked-row arithmetic `y_1 = X*beta + eps` doesn’t close for models
+  with random effects — the residual silently absorbed the BLUP and the
+  displayed sum was mathematically wrong.
+- [`symbolize.rma.mv()`](https://itchyshin.github.io/symbolizer/reference/symbolize.rma.mv.md)
+  now passes `structured_matrix_for_group` to `drm_build_components()`.
+  Previously the rma.mv phylo detection ran AFTER components were built,
+  so the distribution line was being rendered as `u ~ N(0, sigma^2 I_n)`
+  instead of `u ~ N(0, sigma_p^2 A)`. The metafor face of the widget
+  surfaced the wrong distribution; the PDF carried it too.
+
+#### Vignette helper for PDF placement
+
+The vignette defines a local `pdf_alongside_html()` shim that writes the
+PDF in the chunk cwd and, if `../docs/articles` exists (pkgdown build
+path), copies a second copy there so the `<a href>` link resolves
+whether the article is built via
+[`rmarkdown::render()`](https://pkgs.rstudio.com/rmarkdown/reference/render.html)
+or
+[`pkgdown::build_article()`](https://pkgdown.r-lib.org/reference/build_articles.html).
+`knitr::opts_knit$get("output.dir")` returns the Rmd source dir (not the
+HTML destination), so we cannot target the destination from inside the
+chunk in a portable way.
+
+#### Honest scope notes
+
+- The `$expanded` shim for the metafor and MCMCglmm widgets is
+  scaffolding until issue
+  [\#9](https://github.com/itchyshin/symbolizer/issues/9) lands the
+  extractor-side `expanded` populator. The shim is documented inline in
+  the vignette.
+- The widget rollout to `symbolizer-gllvm.Rmd` and
+  `symbolizer-families.Rmd` is a follow-up release.
+  `symbolizer-meta.Rmd` will archive during v0.22.
+
+## symbolizer 0.21.1
+
+### v0.21.1 – three-views widget patches + Florence + Rose + Darwin discipline protocols adopted
+
+Targeted patch release after a Florence-style audit of the three-views
+HTML widget. The maintainer opened a rendered widget and surfaced six
+bugs in one look; the Rose rule (“one bug means ten more in the
+pattern”) expanded the audit to all symbol-dictionary surfaces. This
+release closes the visible bugs AND adopts process protocols from the
+drmTMB / gllvmTMB sister repos so the underlying failure mode cannot
+recur.
+
+#### Three-views widget fixes
+
+- **Standalone HTML now self-renders math.**
+  [`as_html_three_views()`](https://itchyshin.github.io/symbolizer/reference/as_html_three_views.md)
+  gained `standalone = FALSE` (default) and `file = NULL` arguments.
+  Passing `standalone = TRUE` wraps the fragment in a full HTML document
+  with a MathJax 3 CDN bootstrap, so the resulting file renders LaTeX
+  when opened directly via `file://...` rather than needing a host
+  pkgdown / Rmd page. Without `standalone = TRUE`, writing the fragment
+  to file emits a
+  [`cli::cli_warn()`](https://cli.r-lib.org/reference/cli_abort.html) so
+  users know what they got.
+- **Captions switched from `\(...\)` to `$...$`.** Standalone MathJax
+  recognises only `$...$` by default; the widget’s captions previously
+  used the pkgdown-convention `\(...\)`, which rendered as raw text in
+  standalone mode. Captions also now interpolate the actual response
+  symbol (e.g., `$\mathbf{log\_mass}$`) instead of hardcoding
+  `\mathbf{w}`.
+- **Worked-row scalar response derived from the response symbol.**
+  Previously hardcoded as `W_{1}` regardless of the actual response
+  column. Now derives from `resp_sym`: `\mathbf{y}` -\> `y_{1}`;
+  `\mathbf{body\_mass}` -\> `\mathrm{body\_mass}_{1}`;
+  `\mathrm{log\_mass}_i` -\> `\mathrm{log\_mass}_{1}`.
+- **Phylo-aware biology gloss.** When `metadata$phylo_representation` is
+  set, the biology caption above the equation block now reads “Species
+  are not independent observations. Closely related species tend to have
+  similar trait values because of shared evolutionary history; the
+  phylogenetic correlation matrix $`\mathbf{A}`$ encodes those expected
+  similarities…” – replacing the default Gaussian “Each observation is
+  normally distributed…” gloss which was conceptually wrong for
+  comparative phylogenetic models. Same for
+  `metadata$spatial_representation`.
+- **Structured matrix surfaced on tab 3.** When `expanded$M` carries a
+  numerical correlation matrix, the “Equations with data” tab renders a
+  new equation block showing `Cov(u) = sigma_p^2 * A` with the A matrix
+  as a bmatrix of actual numbers (truncated head + tail for large
+  matrices).
+- **PDF export.** New `as_pdf_three_views(sym, file = "out.pdf")`
+  exports the same three views as a single-page PDF with three stacked
+  sections (Index form / Matrix form / Worked observation at i = 1).
+  Internally renders an Rmd stub via
+  [`rmarkdown::render()`](https://pkgs.rstudio.com/rmarkdown/reference/render.html)
+  with `pdf_document`; requires a working LaTeX install (TinyTeX or
+  system).
+- **Gloss dimensions wrapped in `$...$`.** Inline `\mathbb{R}^{...}`
+  expressions inside mixed prose (“scalar; $`\mathbb{R}^{15}`$ in matrix
+  form”) now wrap correctly.
+
+#### Phylogenetic / structural-covariance distribution line
+
+The matrix-form distribution line for random effects now reads
+`\mathbf{u}_{g} \sim \mathcal{N}(\mathbf{0}, \sigma_{g}^2\, \mathbf{A}_{k \times k})`
+when the extractor detects a structured covariance matrix on the group
+`g`. Previously rendered `\mathbf{I}_{k}` even for phylogenetic fits –
+the v0.20.0 audit’s “A is missing from the formula” complaint was
+correct.
+
+`drm_build_components()` gained a `structured_matrix_for_group`
+argument: a named list mapping group name to LaTeX matrix symbol (e.g.,
+`list(species = "\\mathbf{A}")`). Default `NULL` preserves the v0.20
+`\mathbf{I}_n` behaviour for non-structured fits. The MCMCglmm extractor
+now passes this list whenever `animal_groups` is non-empty. The
+remaining extractors (drmTMB, glmmTMB, brms, metafor, gllvmTMB, sdmTMB,
+mgcv) will adopt the same pattern in a follow-up.
+
+#### Symbol-dictionary completeness
+
+`drm_build_symbol_dictionary()` now adds a `residual_sd` row for every
+Gaussian-style family (`gaussian`, `lognormal`, `student`, `Gamma`,
+`beta`, `nbinom2`, `beta_binomial`, `truncated_nbinom2`, `meta_normal`)
+when no sigma submodel is already present. Previously extractors that
+did not promote sigma to its own submodel (lm, lmer, MCMCglmm, brms
+Gaussian, glmmTMB Gaussian, metafor) silently omitted the residual SD
+from the symbol gloss list even though the equation block contained
+`\sigma_i`. Rose-style audit found this affected 6 of 7 extractors
+tested.
+
+#### MCMCglmm response-symbol resolver
+
+`mcmcglmm_resolve_response_symbol()` now escapes underscores and wraps
+multi-character column names in `\mathrm{...}`, matching the drmTMB
+convention. Previously a `log_mass` column produced raw `log_mass` LaTeX
+which MathJax parsed as `log` with `m`, `a`, `s`, `s` as nested
+subscripts.
+
+#### Florence + Rose + Darwin protocols (from drmTMB + gllvmTMB)
+
+`CLAUDE.md` gained a top-level “Top discipline rule” section plus an
+“Adopted protocols (from drmTMB + gllvmTMB sister repos)” section
+documenting: (a) Florence visual-check is mandatory before any
+user-facing rendered surface ships; (b) Rose rule – one bug means ten
+more in the pattern, scan before patching; (c) Darwin rule – demos with
+data must be biologically coherent (comparative analyses use
+log-transformed traits clustering -2 to 2, not raw within-species
+ranges); (d) default Claude mode is read-only audits, not “ship and
+iterate”; (e) eight-condition Definition of Done including Florence
+check + after-task report; (f) widget-visual-audit checklist for every
+render.
+
+`.github/VISION.md` adds Florence as a named team role (scientific
+figure / widget / vignette visualization reviewer) and a new “Accuracy
+over speed” section.
+
+`.memory/MEMORY.md` documents the specific bug patterns from this audit;
+`.memory/check-log.md` is a new running log adopted from drmTMB;
+`.memory/reports/2026-05-26-discipline-protocols-adopted.md` is the
+after-task report covering both v0.21.0 and v0.21.1 work.
+
+#### Tests
+
+`rcmdcheck`: 0 errors / 0 warnings / 0 notes. Pre-existing
+[`Matrix::expand`](https://rdrr.io/pkg/Matrix/man/expand-methods.html)
+masking failure under `devtools::test()` only (does not occur under
+`R CMD check`); see issue
+[\#7](https://github.com/itchyshin/symbolizer/issues/7).
+
+#### Deferred to a follow-up
+
+- The structured-matrix-for-group plumbing currently only flows through
+  MCMCglmm. drmTMB / glmmTMB / brms / metafor / gllvmTMB extractors
+  still call `drm_build_components()` without it – their fits will
+  continue to show `\mathbf{I}_n` in the matrix-form distribution line.
+  Trivial to extend per-extractor; not in this release because the
+  MCMCglmm path is the primary demo target.
+- The three-views widget still needs to be embedded in the
+  structural-dependence vignette and others (issue
+  [\#9](https://github.com/itchyshin/symbolizer/issues/9)). Now safe to
+  do incrementally because the rendering bugs are closed.
+- LaTeX-copy buttons on the widget (issue
+  [\#8](https://github.com/itchyshin/symbolizer/issues/8)) remain
+  unbuilt; the standalone HTML + PDF parts of
+  [\#8](https://github.com/itchyshin/symbolizer/issues/8) are now done.
+
 ## symbolizer 0.21.0
 
 ### v0.21.0 – Structural dependence: phylogenetic, animal-model, and spatial random effects (6 packages)

@@ -105,6 +105,7 @@ symbol_table(sym1)
 | body_mass | $`\mathbf{body\_mass}`$ | body_mass | NA | response | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ | response variable |
 | temperature_i | — | temperature | NA | predictor | column of design matrix | column of X (length 200) | continuous predictor |
 | $`\mu_i`$ | $`\boldsymbol{\mu}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ | conditional mu of body_mass |
+| $`\sigma_i`$ | $`\boldsymbol{\sigma}`$ | NA | NA | residual_sd | scalar (constant across observations) | scalar | residual standard deviation of body_mass |
 | $`\beta_{0}, \beta_{1}`$ | $`\boldsymbol{\beta}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\mu}`$ | $`\mathbb{R}^{2}`$ | mu submodel coefficients |
 | — | $`\mathbf{X}`$ | NA | NA | design_matrix | $`\mathbb{R}^{n \times p_\mu}`$ | $`\mathbb{R}^{200 \times 2}`$ | mu submodel design matrix |
 
@@ -166,6 +167,7 @@ symbol_table(sym2)
 | temperature_i | — | temperature | NA | predictor | column of design matrix | column of X (length 200) | continuous predictor |
 | sex_i | — | sex | NA | factor | column of design matrix | column of X (length 200) | factor (F \[reference\], M) |
 | $`\mu_i`$ | $`\boldsymbol{\mu}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ | conditional mu of body_mass |
+| $`\sigma_i`$ | $`\boldsymbol{\sigma}`$ | NA | NA | residual_sd | scalar (constant across observations) | scalar | residual standard deviation of body_mass |
 | $`\beta_{0}, \beta_{1}, \beta_{2}`$ | $`\boldsymbol{\beta}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\mu}`$ | $`\mathbb{R}^{3}`$ | mu submodel coefficients |
 | — | $`\mathbf{X}`$ | NA | NA | design_matrix | $`\mathbb{R}^{n \times p_\mu}`$ | $`\mathbb{R}^{200 \times 3}`$ | mu submodel design matrix |
 
@@ -338,7 +340,7 @@ three-view widget:
 as_html_three_views(sym4)
 ```
 
-[Skip three-views widget](#sym-sym-1779808211-end)
+[Skip three-views widget](#sym-sym-1779818410-end)
 
 ▸1. Index
 
@@ -373,8 +375,8 @@ where:
    $`\mathbb{R}^{3}`$
 - $`\gamma_{0}, \gamma_{1}`$ — sigma submodel coefficients
    $`\mathbb{R}^{2}`$
-- $`u_{site(i)}`$ — random intercept by site  scalar; ^{12} in matrix
-  form
+- $`u_{site(i)}`$ — random intercept by site  scalar;
+  $`\mathbb{R}^{12}`$ in matrix form
 - $`\sigma_{site}`$ — between-site standard deviation  scalar
 
 The same model in matrix form – the structural contract every textbook
@@ -408,8 +410,8 @@ where:
    $`\mathbb{R}^{200 \times 3}`$
 - $`\mathbf{Z}`$ — sigma submodel design matrix
    $`\mathbb{R}^{200 \times 2}`$
-- $`\mathbf{u}_{site}`$ — random intercept by site  scalar; ^{12} in
-  matrix form
+- $`\mathbf{u}_{site}`$ — random intercept by site  scalar;
+  $`\mathbb{R}^{12}`$ in matrix form
 - $`\sigma_{site}`$ — between-site standard deviation  scalar
 
 The same matrix equation, with your actual numbers stacked inside the
@@ -431,7 +433,7 @@ For observation *i* = 1 of your data:
 
 ``` math
 \begin{aligned}
-W_{1} &= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{temperature}_{1} + \hat\beta_{2}\,\mathrm{sexM}_{1} + \hat{u}_{\mathrm{S01}} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
+\mathrm{body\_mass}_{1} &= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{temperature}_{1} + \hat\beta_{2}\,\mathrm{sexM}_{1} + \hat{u}_{\mathrm{S01}} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
 36.8 &= 32.1 +  0.3 \times 23.9 + 0.757 \times    0 + (-1.33) + (-2.4) &\quad(\text{with your numbers}) \\
 &= \underbrace{39.2}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-2.4)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
 \end{aligned}
@@ -443,10 +445,11 @@ Stacking the same response equation for all *n* = 200 observations:
 \underbrace{\begin{bmatrix} 36.8 \\ 32.9 \\ 37.7 \\ 40.2 \\ 36.1 \\ \vdots \\   38 \\ 38.3 \end{bmatrix}}_{\textstyle\,\mathbf{body\_mass}_{\,200 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 & 23.9 &    0 \\    1 & 17.7 &    0 \\    1 & 13.9 &    1 \\    1 & 10.7 &    0 \\    1 & 16.3 &    0 \\ \vdots & \vdots & \vdots \\    1 & 19.9 &    1 \\    1 & 12.1 &    1 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,200 \times 3}\,}\, \underbrace{\begin{bmatrix} 32.1 \\  0.3 \\ 0.757 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,3 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix}    1 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 \\    0 &    1 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 \\    0 &    0 &    1 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 \\    0 &    0 &    0 &    1 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 \\    0 &    0 &    0 &    0 &    1 &    0 &    0 &    0 &    0 &    0 &    0 &    0 \\ \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\    0 &    0 &    0 &    0 &    0 &    0 &    1 &    0 &    0 &    0 &    0 &    0 \\    0 &    0 &    0 &    0 &    0 &    0 &    0 &    1 &    0 &    0 &    0 &    0 \end{bmatrix}}_{\textstyle\,\mathbf{Z}_{\,200 \times 12}\,}\, \underbrace{\begin{bmatrix} -1.33 \\ 0.266 \\ -1.38 \\ 1.48 \\ 0.519 \\ -0.761 \\ -0.247 \\ 0.281 \\ -0.0776 \\ -0.728 \\ 1.75 \\ 0.233 \end{bmatrix}}_{\textstyle\,\hat{\mathbf{u}}_{\,12 \times 1}\;\text{(BLUP)}\,} \;+\; \underbrace{\begin{bmatrix} -2.4 \\ -4.5 \\ 0.678 \\  4.9 \\ -0.883 \\ \vdots \\ -0.815 \\ 1.82 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,200 \times 1}\;\text{(residual)}\,}
 ```
 
-**Left**: observed vector $`\mathbf{w}`$. **Middle**: the prediction
+**Left**: observed vector $`\mathbf{body\_mass}`$. **Middle**: the
+prediction
 $`\mathbf{X}\hat{\boldsymbol{\beta}} + \mathbf{Z}\hat{\mathbf{u}} = \hat{\boldsymbol{\mu}}`$.
 **Right**: the residual vector
-$`\hat{\boldsymbol{\varepsilon}} = \mathbf{w} - \hat{\boldsymbol{\mu}}`$.
+$`\hat{\boldsymbol{\varepsilon}} = \mathbf{body\_mass} - \hat{\boldsymbol{\mu}}`$.
 Every row of this matrix equation is one of the response-equation rows
 from the worked row above.
 
