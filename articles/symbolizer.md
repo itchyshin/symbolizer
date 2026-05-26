@@ -228,7 +228,7 @@ three tabs over the same fit.
 as_html_three_views(sym, head = 5, tail = 2)
 ```
 
-[Skip three-views widget](#sym-sym-1779752077-end)
+[Skip three-views widget](#sym-sym-1779754457-end)
 
 ▸1. Index
 
@@ -253,8 +253,8 @@ W_i \mid \mu_i,\, \sigma_i & \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 
 where:
 
-- W_i — response variable  $`\mathbb{R}^{80}`$
-- T_i — continuous predictor  column of X (length 80)
+- $`W_i`$ — response variable  $`\mathbb{R}^{80}`$
+- $`T_i`$ — continuous predictor  column of X (length 80)
 - $`\mu_i`$ — conditional mu of body_mass  $`\mathbb{R}^{80}`$
 - $`\sigma_i`$ — conditional sigma of body_mass  $`\mathbb{R}^{80}`$
 - $`\beta_{0}, \beta_{1}`$ — mu submodel coefficients

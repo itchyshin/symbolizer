@@ -362,7 +362,7 @@ through:
 as_html_three_views(sym3)
 ```
 
-[Skip three-views widget](#sym-sym-1779752048-end)
+[Skip three-views widget](#sym-sym-1779754428-end)
 
 ▸1. Index
 
@@ -385,9 +385,10 @@ W_i \mid \mu_i,\, \sigma_i & \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 
 where:
 
-- W_i — response variable  $`\mathbb{R}^{120}`$
-- sex_i — factor (female \[reference\], male)  column of X (length 120)
-- L_i — continuous predictor  column of X (length 120)
+- $`W_i`$ — response variable  $`\mathbb{R}^{120}`$
+- $`sex_i`$ — factor (female \[reference\], male)  column of X (length
+  120)
+- $`L_i`$ — continuous predictor  column of X (length 120)
 - $`\mu_i`$ — conditional mu of body_mass  $`\mathbb{R}^{120}`$
 - $`\sigma_i`$ — conditional sigma of body_mass  $`\mathbb{R}^{120}`$
 - $`\beta_{0}, \beta_{1}, \beta_{2}`$ — mu submodel coefficients

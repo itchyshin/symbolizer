@@ -398,7 +398,7 @@ $`\mathbf{Z}\mathbf{u}`$ random-effect block populated from the data:
 as_html_three_views(sym_re)
 ```
 
-[Skip three-views widget](#sym-sym-1779752042-end)
+[Skip three-views widget](#sym-sym-1779754422-end)
 
 ▸1. Index
 
@@ -424,15 +424,16 @@ u_{site} & \sim \mathcal{N}(0,\, \sigma_{site}^2)
 
 where:
 
-- W_i — response variable  $`\mathbb{R}^{120}`$
-- T_i — continuous predictor  column of X (length 120)
+- $`W_i`$ — response variable  $`\mathbb{R}^{120}`$
+- $`T_i`$ — continuous predictor  column of X (length 120)
 - $`\mu_i`$ — conditional mu of body_mass  $`\mathbb{R}^{120}`$
 - $`\sigma_i`$ — conditional sigma of body_mass  $`\mathbb{R}^{120}`$
 - $`\beta_{0}, \beta_{1}`$ — mu submodel coefficients
    $`\mathbb{R}^{2}`$
 - $`\gamma_{0}, \gamma_{1}`$ — sigma submodel coefficients
    $`\mathbb{R}^{2}`$
-- u\_{site(i)} — random intercept by site  scalar; ^{6} in matrix form
+- $`u_{site(i)}`$ — random intercept by site  scalar; ^{6} in matrix
+  form
 - $`\sigma_{site}`$ — between-site standard deviation  scalar
 
 The same model in matrix form – the structural contract every textbook

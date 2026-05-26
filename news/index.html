@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.20.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.20.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,6 +34,29 @@
       <small>Source: <a href="https://github.com/itchyshin/symbolizer/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.20.1" id="symbolizer-0201">symbolizer 0.20.1<a class="anchor" aria-label="anchor" href="#symbolizer-0201"></a></h2>
+<div class="section level3">
+<h3 id="v0201--symbol-gloss-renders-greek-letters--mathbb-properly-0-20-1">v0.20.1 – symbol gloss renders Greek letters / mathbb properly<a class="anchor" aria-label="anchor" href="#v0201--symbol-gloss-renders-greek-letters--mathbb-properly-0-20-1"></a></h3>
+<p>The “where:” symbol gloss in the three-views widget was emitting <code>\(\mu_i\)</code>-style MathJax inline-math delimiters. Pandoc processes <code>&lt;li&gt;</code> content as markdown by default, and the <code>tex_math_single_backslash</code> extension is OFF by default – so pandoc was interpreting <code>\mu</code>, <code>\sigma</code>, <code>\beta</code>, <code>\mathbb</code> as escape sequences and <strong>eating them before MathJax ever saw them</strong>. The published gloss was reading “<code>(_i) — conditional mu of body_mass</code>” where the <code>\mu</code> had vanished, “<code>({0}, {1}) — mu submodel coefficients</code>” where <code>\beta_{0}, \beta_{1}</code> collapsed (the <code>_{0}, _{1}</code> triggered italic markup, the <code>\beta</code> was eaten), and dimension labels like “<code>(^{200})</code>” with <code>\mathbb{R}</code> stripped.</p>
+<div class="section level4">
+<h4 id="the-fix-0-20-1">The fix<a class="anchor" aria-label="anchor" href="#the-fix-0-20-1"></a></h4>
+<p>Three coordinated changes in <code>three_views_symbol_gloss()</code>:</p>
+<ol style="list-style-type: decimal"><li>
+<strong>Math delimiters</strong>: switched from <code>\(...\)</code> to <code>$...$</code>. Pandoc’s <code>tex_math_dollars</code> extension is on by default, so <code>$\mu_i$</code> is recognised as inline math and the contents are preserved verbatim for MathJax to render. Pipeline verified: <code>\boldsymbol{\mu}</code>, <code>\boldsymbol{\beta}</code>, <code>\mathbb{R}^{200}</code>, <code>\mathbb{R}^{n \times p}</code> all survive R -&gt; knitr -&gt; pandoc -&gt; MathJax intact.</li>
+<li>
+<strong>Always-wrap for symbol columns</strong>: split the wrapper into two. <code>wrap_always()</code> wraps any non-empty symbol-column value (symbol columns are always LaTeX, even when they don’t start with <code>\</code> – e.g. <code>W_i</code>, <code>T_i</code>). <code>wrap_if_latex()</code> keeps the old “only wrap strings starting with <code>\</code>” heuristic for <code>dimension_concrete</code>, which is sometimes math (<code>\mathbb{R}^{200}</code>) and sometimes prose (“column of X (length 200)”). Without this split, <code>W_i</code> and <code>T_i</code> were rendering as plain ASCII while <code>\mu_i</code> and <code>\sigma_i</code> rendered as italic math – visually inconsistent within the same gloss.</li>
+<li>
+<strong>Line-height fix in <code>.sym-gloss-list li</code></strong>: MathJax-rendered subscripts are taller than ASCII text, so the default tight margin between list items caused adjacent rows to appear to overlap (the “strikethrough” effect a reader sees on the rendered page). Bumped to <code>line-height: 1.7; margin: 0.4rem 0;</code> so each row has room.</li>
+</ol></div>
+<div class="section level4">
+<h4 id="process-commitment-visual-checks-before-each-release-0-20-1">Process commitment: visual checks before each release<a class="anchor" aria-label="anchor" href="#process-commitment-visual-checks-before-each-release-0-20-1"></a></h4>
+<p>The maintainer pointed out that this bug had been visible on the live deployed page since v0.19.x and we kept missing it because <code>rcmdcheck</code> says 0/0/0 and prior audits checked the <em>intent</em> of the gloss code rather than the <em>rendered output</em>. From v0.20.1 onward:</p>
+<p><strong>Every release that touches the widget must include a visual check step</strong>: fetch the deployed HTML (<code>curl</code> the live URL or render a local preview), grep for known broken patterns (literal <code>(_i)</code>, <code>^{200}</code> outside math delimiters, raw <code>\mathbf{</code> strings), and open the rendered page in a browser before tagging. This complements <code>rcmdcheck</code>; the two answer different questions.</p>
+<p>The unfixed deferred items the v0.19.2 NEWS named as “Known remaining issues” – the scalar-symbol gloss plain-text leak and the dimension <code>^{n}</code> literal – were both symptoms of this same root cause. Naming them in NEWS without fixing them was a process failure as well as a rendering one.</p>
+</div>
+</div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.20.0" id="symbolizer-0200">symbolizer 0.20.0<a class="anchor" aria-label="anchor" href="#symbolizer-0200"></a></h2>
 <div class="section level3">

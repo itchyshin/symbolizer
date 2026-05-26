@@ -326,7 +326,7 @@ three-view widget:
 as_html_three_views(sym4)
 ```
 
-[Skip three-views widget](#sym-sym-1779752064-end)
+[Skip three-views widget](#sym-sym-1779754444-end)
 
 ▸1. Index
 
@@ -353,15 +353,16 @@ u_{site} & \sim \mathcal{N}(0,\, \sigma_{site}^2)
 where:
 
 - $`\mathrm{body\_mass}_i`$ — response variable  $`\mathbb{R}^{200}`$
-- temperature_i — continuous predictor  column of X (length 200)
-- sex_i — factor (F \[reference\], M)  column of X (length 200)
+- $`temperature_i`$ — continuous predictor  column of X (length 200)
+- $`sex_i`$ — factor (F \[reference\], M)  column of X (length 200)
 - $`\mu_i`$ — conditional mu of body_mass  $`\mathbb{R}^{200}`$
 - $`\sigma_i`$ — conditional sigma of body_mass  $`\mathbb{R}^{200}`$
 - $`\beta_{0}, \beta_{1}, \beta_{2}`$ — mu submodel coefficients
    $`\mathbb{R}^{3}`$
 - $`\gamma_{0}, \gamma_{1}`$ — sigma submodel coefficients
    $`\mathbb{R}^{2}`$
-- u\_{site(i)} — random intercept by site  scalar; ^{12} in matrix form
+- $`u_{site(i)}`$ — random intercept by site  scalar; ^{12} in matrix
+  form
 - $`\sigma_{site}`$ — between-site standard deviation  scalar
 
 The same model in matrix form – the structural contract every textbook

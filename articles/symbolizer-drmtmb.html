@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.20.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.20.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -585,28 +585,28 @@ random-effect block populated from the data:</p>
 .sym-gloss > summary { cursor: pointer; font-weight: 600; color: #6b7280; padding: 0.2rem 0; }
 .sym-gloss > summary:hover { color: #8a1f22; }
 .sym-gloss-list { list-style: none; padding-left: 0.6rem; margin: 0.4rem 0 0.2rem; }
-.sym-gloss-list li { margin: 0.18rem 0; }
+.sym-gloss-list li { margin: 0.4rem 0; line-height: 1.7; }
 .sym-dim { color: #6b7280; font-size: 0.85rem; }
 .sym-matrix { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.78rem; line-height: 1.35; white-space: pre; overflow-x: auto; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 0.6rem 0.8rem; margin: 0.3rem 0; }
 .sym-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .sym-skip { position: absolute; top: -100px; left: 0; padding: 0.4rem 0.7rem; background: #8a1f22; color: #fff; text-decoration: none; font-size: 0.85rem; z-index: 5; }
 .sym-skip:focus { top: 0; }</style>
-<div id="sym-sym-1779752042" class="sym-tabs">
-<a class="sym-skip" href="#sym-sym-1779752042-end">Skip three-views
+<div id="sym-sym-1779754422" class="sym-tabs">
+<a class="sym-skip" href="#sym-sym-1779754422-end">Skip three-views
 widget</a>
 <div class="sym-tablist" role="tablist" aria-label="Three views of the model">
-<button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779752042-tab-idx" aria-controls="sym-sym-1779752042-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
+<button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779754422-tab-idx" aria-controls="sym-sym-1779754422-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
 <span class="sym-tab-marker" aria-hidden="true">▸</span>1. Index
 </button>
-<button type="button" class="sym-tab" role="tab" id="sym-sym-1779752042-tab-eq" aria-controls="sym-sym-1779752042-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
+<button type="button" class="sym-tab" role="tab" id="sym-sym-1779754422-tab-eq" aria-controls="sym-sym-1779754422-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
 <span class="sym-tab-marker" aria-hidden="true">▸</span>2. Matrix
 </button>
-<button type="button" class="sym-tab" role="tab" id="sym-sym-1779752042-tab-mat" aria-controls="sym-sym-1779752042-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
+<button type="button" class="sym-tab" role="tab" id="sym-sym-1779754422-tab-mat" aria-controls="sym-sym-1779754422-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
 <span class="sym-tab-marker" aria-hidden="true">▸</span>3. Equations
 with data
 </button>
 </div>
-<div id="sym-sym-1779752042-panel-idx" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-sym-1779752042-tab-idx" data-panel="idx" tabindex="0">
+<div id="sym-sym-1779754422-panel-idx" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-sym-1779754422-tab-idx" data-panel="idx" tabindex="0">
 <p class="sym-caption">
 What happens for each observation <em>i</em> – the per-individual
 reading.
@@ -629,10 +629,12 @@ u_{site} &amp; \sim \mathcal{N}(0,\, \sigma_{site}^2)
 where:
 </summary><ul class="sym-gloss-list">
 <li>
-W_i — response variable  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>120</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{120}</annotation></semantics></math></span>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>W</mi><mi>i</mi></msub><annotation encoding="application/x-tex">W_i</annotation></semantics></math>
+— response variable  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>120</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{120}</annotation></semantics></math></span>
 </li>
 <li>
-T_i — continuous predictor  <span class="sym-dim">column of X (length
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>T</mi><mi>i</mi></msub><annotation encoding="application/x-tex">T_i</annotation></semantics></math>
+— continuous predictor  <span class="sym-dim">column of X (length
 120)</span>
 </li>
 <li>
@@ -652,8 +654,9 @@ T_i — continuous predictor  <span class="sym-dim">column of X (length
 — sigma submodel coefficients  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>2</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{2}</annotation></semantics></math></span>
 </li>
 <li>
-u_{site(i)} — random intercept by site  <span class="sym-dim">scalar;
-^{6} in matrix form</span>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>u</mi><mrow><mi>s</mi><mi>i</mi><mi>t</mi><mi>e</mi><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo></mrow></msub><annotation encoding="application/x-tex">u_{site(i)}</annotation></semantics></math>
+— random intercept by site  <span class="sym-dim">scalar; ^{6} in matrix
+form</span>
 </li>
 <li>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mrow><mi>s</mi><mi>i</mi><mi>t</mi><mi>e</mi></mrow></msub><annotation encoding="application/x-tex">\sigma_{site}</annotation></semantics></math>
@@ -661,7 +664,7 @@ u_{site(i)} — random intercept by site  <span class="sym-dim">scalar;
 </li>
 </ul></details>
 </div>
-<div id="sym-sym-1779752042-panel-eq" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1779752042-tab-eq" data-panel="eq" hidden="" tabindex="0">
+<div id="sym-sym-1779754422-panel-eq" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1779754422-tab-eq" data-panel="eq" hidden="" tabindex="0">
 <p class="sym-caption">
 The same model in matrix form – the structural contract every textbook
 past chapter 4 switches to.
@@ -722,7 +725,7 @@ form</span>
 </li>
 </ul></details>
 </div>
-<div id="sym-sym-1779752042-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1779752042-tab-mat" data-panel="mat" hidden="" tabindex="0">
+<div id="sym-sym-1779754422-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1779754422-tab-mat" data-panel="mat" hidden="" tabindex="0">
 <p class="sym-caption">
 The same matrix equation, with your actual numbers stacked inside the
 brackets – what the computer multiplies. Showing first 5 and last 2 rows
@@ -799,9 +802,9 @@ observations:
 </div>
 </div>
 </div>
-<span id="sym-sym-1779752042-end" tabindex="-1"></span>
+<span id="sym-sym-1779754422-end" tabindex="-1"></span>
 <script>(function() {
-  var root = document.getElementById("sym-sym-1779752042");
+  var root = document.getElementById("sym-sym-1779754422");
   if (!root) return;
   var tabs   = Array.prototype.slice.call(root.querySelectorAll("[role=\"tab\"]"));
   var panels = Array.prototype.slice.call(root.querySelectorAll("[role=\"tabpanel\"]"));

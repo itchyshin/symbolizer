@@ -201,7 +201,7 @@ with data — backed by the same `symbolized_model` object.
 as_html_three_views(sym)
 ```
 
-[Skip three-views widget](#sym-sym-1779751015-end)
+[Skip three-views widget](#sym-sym-1779753730-end)
 
 ▸1. Index
 
@@ -226,12 +226,14 @@ W_i \mid \mu_i,\, \sigma_i & \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 
 where:
 
-- W_i — response variable  (^{200})
-- T_i — continuous predictor  column of X (length 200)
-- (\_i) — conditional mu of body_mass  (^{200})
-- (\_i) — conditional sigma of body_mass  (^{200})
-- (*{0},* {1}) — mu submodel coefficients  (^{2})
-- (*{0},* {1}) — sigma submodel coefficients  (^{2})
+- $`W_i`$ — response variable  $`\mathbb{R}^{200}`$
+- $`T_i`$ — continuous predictor  column of X (length 200)
+- $`\mu_i`$ — conditional mu of body_mass  $`\mathbb{R}^{200}`$
+- $`\sigma_i`$ — conditional sigma of body_mass  $`\mathbb{R}^{200}`$
+- $`\beta_{0}, \beta_{1}`$ — mu submodel coefficients
+   $`\mathbb{R}^{2}`$
+- $`\gamma_{0}, \gamma_{1}`$ — sigma submodel coefficients
+   $`\mathbb{R}^{2}`$
 
 The same model in matrix form – the structural contract every textbook
 past chapter 4 switches to.
@@ -251,13 +253,18 @@ modeled.
 
 where:
 
-- () — response variable  (^{200})
-- () — conditional mu of body_mass  (^{200})
-- () — conditional sigma of body_mass  (^{200})
-- () — mu submodel coefficients  (^{2})
-- () — sigma submodel coefficients  (^{2})
-- () — mu submodel design matrix  (^{200 })
-- () — sigma submodel design matrix  (^{200 })
+- $`\mathbf{w}`$ — response variable  $`\mathbb{R}^{200}`$
+- $`\boldsymbol{\mu}`$ — conditional mu of body_mass
+   $`\mathbb{R}^{200}`$
+- $`\boldsymbol{\sigma}`$ — conditional sigma of body_mass
+   $`\mathbb{R}^{200}`$
+- $`\boldsymbol{\beta}`$ — mu submodel coefficients  $`\mathbb{R}^{2}`$
+- $`\boldsymbol{\gamma}`$ — sigma submodel coefficients
+   $`\mathbb{R}^{2}`$
+- $`\mathbf{X}`$ — mu submodel design matrix
+   $`\mathbb{R}^{200 \times 2}`$
+- $`\mathbf{Z}`$ — sigma submodel design matrix
+   $`\mathbb{R}^{200 \times 2}`$
 
 The same matrix equation, with your actual numbers stacked inside the
 brackets – what the computer multiplies. Showing first 5 and last 2 rows
