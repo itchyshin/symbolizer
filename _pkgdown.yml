@@ -90,6 +90,7 @@ reference:
     contents:
       - expand
       - as_html_three_views
+      - as_pdf_three_views
   - title: "Render the equations"
     desc: "LaTeX surface. Lines come from the symbolized_model; renderers only choose the layout."
     contents:
