@@ -4,7 +4,15 @@
 \alias{as_html_three_views}
 \title{Three-views HTML rendering of a symbolized_model}
 \usage{
-as_html_three_views(x, head = 5L, tail = 2L, id = "sym", ...)
+as_html_three_views(
+  x,
+  head = 5L,
+  tail = 2L,
+  id = "sym",
+  standalone = FALSE,
+  file = NULL,
+  ...
+)
 }
 \arguments{
 \item{x}{A \code{symbolized_model} with \verb{$expanded} populated.}
@@ -14,6 +22,15 @@ as_html_three_views(x, head = 5L, tail = 2L, id = "sym", ...)
 \item{tail}{Number of trailing rows to show in the matrix view (default 2).}
 
 \item{id}{A short identifier so multiple panels can co-exist on one page.}
+
+\item{standalone}{If \code{TRUE}, wrap the fragment in a full HTML document
+with a MathJax CDN bootstrap so the file renders math when opened
+directly in a browser (\verb{file://...}). Default \code{FALSE} returns the
+bare fragment for embedding in an Rmd / pkgdown / Quarto page where
+the host document already loads MathJax.}
+
+\item{file}{If non-\code{NULL}, also write the HTML to this path. Returned
+value is unchanged.}
 
 \item{...}{Reserved for future use.}
 }

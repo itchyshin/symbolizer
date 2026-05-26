@@ -20,3 +20,8 @@ README.html
 /doc/
 /Meta/
 .superpowers/
+
+# Local demo artifacts (Florence-check outputs, not part of the package)
+/demo-*.html
+/demo-*.pdf
+/demo-*.tex

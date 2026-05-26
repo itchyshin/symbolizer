@@ -141,6 +141,7 @@ Roadmap (live) is in README.md. The vision beneath the roadmap is:
 The team perspectives (from drmTMB's convention, adopted as ours):
 **Ada** (orchestration), **Boole** (API), **Gauss** (numerics),
 **Noether** (math-code consistency), **Darwin** (biological reading),
+**Florence** (scientific figure / widget / vignette visualization),
 **Fisher** (inference), **Pat** (reader / tutorial), **Jason**
 (related-package landscape), **Curie** (tests), **Emmy** (S3
 architecture), **Grace** (pkgdown / CI), **Rose** (audit, repeated
@@ -150,6 +151,17 @@ Each slice goes through these lenses, not all at once but with the
 ones whose stakes are highest. After-task notes record what each
 role saw and would flag.
 
+**Florence** is the visual-check gate. Every user-facing rendered
+surface (HTML widget, vignette, README plot, pkgdown page, PDF
+export) must pass a Florence visual check before the surrounding
+work is declared done. Florence leads, but every role contributes:
+Pat sees reader flow, Fisher sees uncertainty honesty, Rose sees
+stale claims, Darwin sees biological coherence (logged traits for
+comparative analyses; across-species ≠ within-species), Grace sees
+render evidence, Boole sees syntax, Noether sees math correctness.
+The `widget-visual-audit` checklist in `CLAUDE.md` is the
+mandatory operationalisation.
+
 ## Stopping conditions
 
 When something tempts us off-mission, return here. If the proposed
@@ -158,3 +170,19 @@ the core principles, or weakens the capability gate, push back.
 
 The vision is a service, not a constraint. It exists to make the
 hard product calls easier when the immediate path is unclear.
+
+## Accuracy over speed
+
+Adopted 2026-05-26 after a session in which I shipped widget demos
+without Florence-checking. The user found six bugs the moment they
+opened the rendered file — the same six bugs I would have caught by
+opening it myself. The discipline is non-negotiable:
+
+- **Florence visual-check is mandatory.** See `CLAUDE.md` top section.
+- **One bug → ten more in the pattern.** Rose's rule.
+- **Read-only audits are the default mode**, not "ship it and iterate".
+- **Demos must be biologically coherent.** Darwin's rule.
+
+When in doubt, stop. Re-read. The maintainer's time spent saying
+"this is broken" costs more than my time spent looking before I claim
+done.

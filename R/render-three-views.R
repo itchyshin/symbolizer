@@ -18,12 +18,20 @@
 #' @param head Number of leading rows to show in the matrix view (default 5).
 #' @param tail Number of trailing rows to show in the matrix view (default 2).
 #' @param id A short identifier so multiple panels can co-exist on one page.
+#' @param standalone If `TRUE`, wrap the fragment in a full HTML document
+#'   with a MathJax CDN bootstrap so the file renders math when opened
+#'   directly in a browser (`file://...`). Default `FALSE` returns the
+#'   bare fragment for embedding in an Rmd / pkgdown / Quarto page where
+#'   the host document already loads MathJax.
+#' @param file If non-`NULL`, also write the HTML to this path. Returned
+#'   value is unchanged.
 #' @param ... Reserved for future use.
 #'
 #' @return A character vector (HTML), invisible.
 #' @export
 as_html_three_views <- function(x, head = 5L, tail = 2L,
-                                id = "sym", ...) {
+                                id = "sym", standalone = FALSE,
+                                file = NULL, ...) {
   UseMethod("as_html_three_views")
 }
 
@@ -37,7 +45,9 @@ as_html_three_views.default <- function(x, ...) {
 
 #' @export
 as_html_three_views.symbolized_model <- function(x, head = 5L, tail = 2L,
-                                                  id = "sym", ...) {
+                                                  id = "sym",
+                                                  standalone = FALSE,
+                                                  file = NULL, ...) {
   eq_lines  <- x$components$equation_matrix
   idx_lines <- x$components$equation
   has_re <- !is.null(x$expanded) && !is.null(x$expanded$Z_g)
@@ -137,8 +147,258 @@ as_html_three_views.symbolized_model <- function(x, head = 5L, tail = 2L,
     "<span id=\"", end_id, "\" tabindex=\"-1\"></span>\n",
     "<script>", js, "</script>\n"
   )
+  if (isTRUE(standalone)) {
+    html <- three_views_standalone_wrap(html, title = "symbolizer three views")
+  }
+  if (!is.null(file)) {
+    writeLines(html, con = file)
+    if (!isTRUE(standalone)) {
+      cli::cli_warn(c(
+        "Wrote a fragment to {.path {file}} but {.arg standalone} is FALSE.",
+        i = "Opening this file directly in a browser will NOT render math.",
+        i = "Pass {.code standalone = TRUE} for a self-contained HTML page."
+      ))
+    }
+    return(invisible(html))
+  }
   cat(html)
   invisible(html)
+}
+
+#' PDF rendering of a symbolized_model in three stacked sections
+#'
+#' @description
+#' Paper-ready PDF counterpart to [as_html_three_views()]. The same three
+#' "views" of one fitted model, laid out vertically as three sections on
+#' one PDF page (no tabs):
+#'
+#' 1. **Index form** -- the per-observation equations.
+#' 2. **Matrix form** -- the same equations in matrix notation.
+#' 3. **Worked observation** -- the index-form equations evaluated at
+#'    observation i = 1 of the data, showing the coefficient estimates
+#'    plugged in and the predicted / residual decomposition.
+#'
+#' Rendered via `rmarkdown::render()` with `output_format = "pdf_document"`;
+#' a working LaTeX install (TinyTeX or system TeX) is required.
+#'
+#' The wide matrix-of-numbers view from the HTML widget's third tab is
+#' deliberately not included -- on PDF the bmatrix of n x p numbers
+#' overflows a portrait A4 page. The worked-row at i = 1 carries the
+#' same teaching content in a fits-on-one-page form.
+#'
+#' @param x A `symbolized_model`.
+#' @param file Output path (`.pdf`). Required.
+#' @param title Optional document title. Defaults to a short auto-title
+#'   built from the fit's class and response.
+#' @param keep_tex If `TRUE`, keep the intermediate `.tex` next to the PDF
+#'   for inspection. Default `FALSE`.
+#' @param ... Passed to `rmarkdown::render()`.
+#'
+#' @return The path to the rendered PDF (invisibly).
+#' @export
+as_pdf_three_views <- function(x, file, title = NULL,
+                               keep_tex = FALSE, ...) {
+  UseMethod("as_pdf_three_views")
+}
+
+#' @export
+as_pdf_three_views.default <- function(x, ...) {
+  cli::cli_abort(c(
+    "{.fn as_pdf_three_views} has no method for objects of class {.cls {class(x)[1L]}}.",
+    i = "Pass the output of {.fn symbolize}."
+  ))
+}
+
+#' @export
+as_pdf_three_views.symbolized_model <- function(x, file, title = NULL,
+                                                 keep_tex = FALSE, ...) {
+  if (!requireNamespace("rmarkdown", quietly = TRUE)) {
+    cli::cli_abort(c(
+      "{.pkg rmarkdown} is required for {.fn as_pdf_three_views}.",
+      i = "Install with {.code install.packages(\"rmarkdown\")}."
+    ))
+  }
+  if (missing(file) || is.null(file) || !nzchar(file)) {
+    cli::cli_abort("{.arg file} is required and must be a non-empty path.")
+  }
+  file <- normalizePath(file, mustWork = FALSE)
+  if (is.null(title) || !nzchar(title)) {
+    title <- sprintf("Three views of a %s model (response: %s)",
+                     x$model$class, x$model$response)
+  }
+  latex_index  <- as_latex(x, notation = "index")
+  latex_matrix <- as_latex(x, notation = "matrix")
+  worked <- pdf_three_views_worked_row(x)
+
+  rmd_path <- tempfile(fileext = ".Rmd")
+  rmd_body <- c(
+    "---",
+    sprintf("title: \"%s\"", gsub("\"", "'", title, fixed = TRUE)),
+    "geometry: margin=2cm",
+    "output:",
+    "  pdf_document:",
+    sprintf("    keep_tex: %s", if (isTRUE(keep_tex)) "true" else "false"),
+    "    latex_engine: pdflatex",
+    "header-includes:",
+    "  - \\usepackage{amsmath, amssymb, bm}",
+    "---",
+    "",
+    "# 1. Index form",
+    "",
+    "_The per-observation reading: what happens for each row $i$ of your data._",
+    "",
+    "$$",
+    latex_index,
+    "$$",
+    "",
+    "# 2. Matrix form",
+    "",
+    "_The same model in matrix notation. The structural contract every textbook past chapter 4 switches to._",
+    "",
+    "$$",
+    latex_matrix,
+    "$$",
+    "",
+    "# 3. Worked observation (i = 1)",
+    "",
+    "_The index-form equations evaluated at the first observation of your data, with coefficient estimates plugged in._",
+    "",
+    worked,
+    ""
+  )
+  writeLines(rmd_body, rmd_path)
+  out <- rmarkdown::render(
+    rmd_path,
+    output_file = file,
+    quiet = TRUE,
+    ...
+  )
+  invisible(out)
+}
+
+# Build the LaTeX content for the "worked observation" section. Pure-LaTeX
+# strings (math + prose). Returns one $$...$$ block per submodel that has
+# data populated in $expanded.
+pdf_three_views_worked_row <- function(x) {
+  ex <- x$expanded
+  if (is.null(ex) || is.null(ex$y) || length(ex$y) == 0L) {
+    return("_(This `symbolized_model` carries no `\\$expanded` numeric arrays; the worked-row view requires them.)_")
+  }
+  fmt <- function(v) formatC(v, digits = 3, format = "g")
+  i <- 1L
+  y_i <- ex$y[[i]]
+  X_i <- if (!is.null(ex$X)) ex$X[i, , drop = TRUE] else NULL
+  beta <- ex$beta
+  mu_i <- if (!is.null(ex$mu_hat)) ex$mu_hat[[i]] else NA_real_
+  eps_i <- if (!is.na(mu_i)) y_i - mu_i else NA_real_
+
+  parts <- character(0L)
+  resp <- x$model$response
+  resp_sym <- escape_underscores_for_latex(resp)
+  if (!is.null(X_i) && !is.null(beta) && length(X_i) == length(beta)) {
+    terms_tex <- vapply(seq_along(beta), function(k) {
+      bk <- fmt(beta[[k]])
+      xk <- fmt(X_i[[k]])
+      if (k == 1L) bk else sprintf("%s \\cdot %s", bk, xk)
+    }, character(1L))
+    rhs_signed <- terms_tex[1L]
+    for (k in seq.int(2L, length(terms_tex))) {
+      rhs_signed <- paste0(rhs_signed, " + ", terms_tex[[k]])
+    }
+    rhs_full <- if (!is.na(eps_i)) {
+      eps_str <- if (eps_i < 0) sprintf("- %s", fmt(abs(eps_i)))
+                 else sprintf("+ %s", fmt(eps_i))
+      sprintf("%s \\;%s = %s", rhs_signed, eps_str, fmt(y_i))
+    } else {
+      rhs_signed
+    }
+    parts <- c(parts,
+      "$$",
+      sprintf("\\underbrace{%s}_{\\text{observed}=%s} \\;=\\; %s",
+              sprintf("\\mathrm{%s}_1", resp_sym), fmt(y_i), rhs_full),
+      "$$",
+      "",
+      if (!is.na(mu_i) && !is.na(eps_i)) {
+        sprintf("_Predicted $\\hat\\mu_1 = %s$; residual $\\hat\\varepsilon_1 = %s$._",
+                fmt(mu_i), fmt(eps_i))
+      } else ""
+    )
+  }
+  if (!is.null(ex$X_sigma) && !is.null(ex$gamma) &&
+      !is.null(ex$sigma_hat) && length(ex$sigma_hat) >= 1L) {
+    Xs_i <- ex$X_sigma[i, , drop = TRUE]
+    gamma <- ex$gamma
+    log_sigma_i <- if (length(Xs_i) == length(gamma)) sum(Xs_i * gamma) else NA_real_
+    sigma_i <- exp(log_sigma_i)
+    if (length(gamma) == 1L) {
+      parts <- c(parts,
+        "",
+        sprintf("And the $\\sigma$ submodel at $i = 1$:"),
+        "",
+        "$$",
+        sprintf("\\log \\hat\\sigma_1 \\;=\\; %s \\;\\Rightarrow\\; \\hat\\sigma_1 \\;=\\; \\exp(%s) \\;\\approx\\; %s",
+                fmt(gamma[[1L]]), fmt(gamma[[1L]]), fmt(sigma_i)),
+        "$$"
+      )
+    } else {
+      terms_g <- vapply(seq_along(gamma), function(k) {
+        if (k == 1L) fmt(gamma[[k]])
+        else sprintf("%s \\cdot %s", fmt(gamma[[k]]), fmt(Xs_i[[k]]))
+      }, character(1L))
+      rhs_g <- terms_g[1L]
+      for (k in seq.int(2L, length(terms_g))) {
+        rhs_g <- paste0(rhs_g, " + ", terms_g[[k]])
+      }
+      parts <- c(parts,
+        "",
+        sprintf("And the $\\sigma$ submodel at $i = 1$:"),
+        "",
+        "$$",
+        sprintf("\\log \\hat\\sigma_1 \\;=\\; %s \\;=\\; %s \\;\\Rightarrow\\; \\hat\\sigma_1 \\;\\approx\\; %s",
+                rhs_g, fmt(log_sigma_i), fmt(sigma_i)),
+        "$$"
+      )
+    }
+  }
+  if (length(parts) == 0L) {
+    return("_(Worked-row view requires `$expanded` with `y`, `X`, `beta`, and `mu_hat`.)_")
+  }
+  paste(parts, collapse = "\n")
+}
+
+# Underscore-escape a response name for use inside \mathrm{...} in LaTeX.
+escape_underscores_for_latex <- function(s) {
+  gsub("_", "\\_", s, fixed = TRUE)
+}
+
+# Wrap a three-views fragment with a full standalone HTML document that
+# includes the MathJax CDN bootstrap, so the file renders math when
+# opened from disk (file://...). Fragment-only mode (the default) leaves
+# math rendering to the host document's MathJax / KaTeX.
+three_views_standalone_wrap <- function(fragment, title = "symbolizer three views") {
+  mathjax_config <- paste0(
+    "window.MathJax = {",
+    "tex: { inlineMath: [['$', '$']], displayMath: [['$$','$$']], processEscapes: true },",
+    "options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }",
+    "};"
+  )
+  paste0(
+    "<!DOCTYPE html>\n",
+    "<html lang=\"en\"><head>\n",
+    "<meta charset=\"utf-8\">\n",
+    "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n",
+    "<title>", title, "</title>\n",
+    "<style>body { font-family: -apple-system, BlinkMacSystemFont, ",
+    "\"Segoe UI\", Roboto, sans-serif; max-width: 980px; margin: 2rem auto; ",
+    "padding: 0 1rem; color: #111; line-height: 1.5; }</style>\n",
+    "<script>", mathjax_config, "</script>\n",
+    "<script id=\"MathJax-script\" async ",
+    "src=\"https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js\">",
+    "</script>\n",
+    "</head><body>\n",
+    fragment,
+    "\n</body></html>\n"
+  )
 }
 
 three_views_matrix_summary <- function(has_re) {
@@ -207,6 +467,15 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L) {
 
   has_sigma <- !is.null(ex$X_sigma) && !is.null(ex$gamma)
   has_re    <- !is.null(ex$Z_g)     && !is.null(ex$u)
+  has_mu    <- !is.null(ex$X)       && !is.null(ex$beta) && !is.null(ex$mu_hat)
+  has_M     <- !is.null(ex$M) && is.matrix(ex$M) && nrow(ex$M) > 0L
+  if (!has_mu) {
+    return(paste0(
+      "<p><em>The matrix-with-data view needs <code>expanded$X</code>, ",
+      "<code>expanded$beta</code>, and <code>expanded$mu_hat</code>. ",
+      "This extractor populates only the response vector. See issue #9.</em></p>\n"
+    ))
+  }
 
   # Symbol for the response: default to `\mathbf{y}`, but use whatever the
   # model card carries so the matrix block matches the equation block.
@@ -296,6 +565,70 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L) {
   worked_mu    <- three_views_worked_row(ex, resp_sym)
   worked_sigma <- three_views_worked_row_sigma(ex)
 
+  # --- Block 3: structured covariance matrix (phylo / spatial / temporal) -
+  # When the model carries a structured random effect, render
+  # Cov(u) = sigma^2 * M with M as a bmatrix of actual numbers (truncated
+  # head-and-tail when k > head + tail + 1). M's symbol and surrounding
+  # prose adapt to the detected context: A for phylogenetic / animal-model
+  # contexts; Omega for spatial; M as a fallback. The kind is read from
+  # metadata$phylo_representation / metadata$spatial_representation.
+  eq_M <- NULL
+  M_caption <- NULL
+  if (has_M) {
+    M_kind <- if (!is.null(x$metadata$phylo_representation)) "phylo"
+              else if (!is.null(x$metadata$spatial_representation)) "spatial"
+              else "structured"
+    M_sym <- switch(M_kind,
+      phylo   = "\\mathbf{A}",
+      spatial = "\\boldsymbol{\\Omega}",
+      "\\mathbf{M}"
+    )
+    sigma_sym <- switch(M_kind,
+      phylo   = "\\sigma_p^2",
+      spatial = "\\sigma_\\omega^2",
+      "\\sigma^2"
+    )
+    k <- nrow(ex$M)
+    # Truncate the M matrix for display: head x head + ldots + tail x tail
+    # for both rows and columns. For small k (<= head + tail + 1) show all.
+    if (k <= head + tail + 1L) {
+      M_idx_r <- seq_len(k); M_idx_c <- seq_len(k)
+    } else {
+      M_idx_r <- c(seq_len(head), NA_integer_, seq.int(k - tail + 1L, k))
+      M_idx_c <- c(seq_len(head), NA_integer_, seq.int(k - tail + 1L, k))
+    }
+    # latex_mat assumes a contiguous index for rows; we need full
+    # column truncation too. Local helper:
+    latex_mat_2d <- function(M, idx_r, idx_c) {
+      rows_tex <- vapply(idx_r, function(i) {
+        if (is.na(i)) {
+          paste(vapply(idx_c, function(j) "\\vdots", character(1L)),
+                collapse = " & ")
+        } else {
+          paste(vapply(idx_c, function(j) {
+            if (is.na(j)) "\\cdots" else fmt(M[i, j])
+          }, character(1L)), collapse = " & ")
+        }
+      }, character(1L))
+      paste0("\\begin{bmatrix} ",
+             paste(rows_tex, collapse = " \\\\ "),
+             " \\end{bmatrix}")
+    }
+    M_mat_tex <- latex_mat_2d(ex$M, M_idx_r, M_idx_c)
+    M_lab <- sprintf("%s_{\\,%d \\times %d}", M_sym, k, k)
+    eq_M <- sprintf(
+      "\\mathrm{Cov}(\\hat{\\mathbf{u}}) \\;=\\; %s \\cdot \\underbrace{%s}_{\\textstyle\\,%s\\,}",
+      sigma_sym, M_mat_tex, M_lab
+    )
+    M_caption <- sprintf(
+      "<p class=\"sym-caption\" style=\"font-size:0.85em;color:#6b7280;margin-top:0.4rem\">The %s random effect $u$ has covariance $%s \\cdot %s$, where $%s$ is the %d &times; %d %s correlation matrix. Showing the head + tail rows / columns; full matrix is %d &times; %d.</p>\n",
+      M_kind, sigma_sym, M_sym, M_sym, k, k,
+      switch(M_kind,
+        phylo = "phylogenetic", spatial = "spatial", "structured"),
+      k, k
+    )
+  }
+
   # --- Stitch: worked row + matrix block, paired per submodel -----------
   pieces <- c(
     if (!is.null(worked_mu)) {
@@ -307,15 +640,22 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L) {
       )
     },
     paste0("<div class=\"sym-eq\">$$\n", eq_mu, "\n$$</div>\n"),
-    paste0("<p class=\"sym-caption\" style=\"font-size:0.85em;color:#6b7280;margin-top:0.4rem\"><strong>Left</strong>: observed vector \\(\\mathbf{w}\\). <strong>Middle</strong>: the prediction \\(\\mathbf{X}\\hat{\\boldsymbol{\\beta}}",
+    paste0("<p class=\"sym-caption\" style=\"font-size:0.85em;color:#6b7280;margin-top:0.4rem\"><strong>Left</strong>: observed vector $", resp_sym, "$. <strong>Middle</strong>: the prediction $\\mathbf{X}\\hat{\\boldsymbol{\\beta}}",
            if (has_re) " + \\mathbf{Z}\\hat{\\mathbf{u}}" else "",
-           " = \\hat{\\boldsymbol{\\mu}}\\). <strong>Right</strong>: the residual vector \\(\\hat{\\boldsymbol{\\varepsilon}} = \\mathbf{w} - \\hat{\\boldsymbol{\\mu}}\\). Every row of this matrix equation is one of the response-equation rows from the worked row above.</p>\n"),
+           " = \\hat{\\boldsymbol{\\mu}}$. <strong>Right</strong>: the residual vector $\\hat{\\boldsymbol{\\varepsilon}} = ", resp_sym, " - \\hat{\\boldsymbol{\\mu}}$. Every row of this matrix equation is one of the response-equation rows from the worked row above.</p>\n"),
     if (!is.null(eq_sigma)) {
       c(
-        "<p class=\"sym-caption\" style=\"font-size:0.95em;color:#374151;margin-top:1.2rem\">And the \\(\\sigma\\) submodel (no observed counterpart -- \\(\\sigma\\)'s job is to describe the spread of \\(\\hat{\\boldsymbol{\\varepsilon}}\\)). For the same observation <em>i</em> = 1:</p>\n",
+        "<p class=\"sym-caption\" style=\"font-size:0.95em;color:#374151;margin-top:1.2rem\">And the $\\sigma$ submodel (no observed counterpart -- $\\sigma$'s job is to describe the spread of $\\hat{\\boldsymbol{\\varepsilon}}$). For the same observation <em>i</em> = 1:</p>\n",
         if (!is.null(worked_sigma)) worked_sigma else character(0),
         "<p class=\"sym-caption\" style=\"font-size:0.95em;color:#374151\">Stacking the same log-link equation for all <em>n</em> = ", n, " observations:</p>\n",
         paste0("<div class=\"sym-eq\">$$\n", eq_sigma, "\n$$</div>\n")
+      )
+    },
+    if (!is.null(eq_M)) {
+      c(
+        "<p class=\"sym-caption\" style=\"font-size:0.95em;color:#374151;margin-top:1.2rem\"><strong>And the structured-covariance prior on <code>u</code></strong>. The random effect that gives this model its structural-dependence character:</p>\n",
+        paste0("<div class=\"sym-eq\">$$\n", eq_M, "\n$$</div>\n"),
+        M_caption
       )
     }
   )
@@ -373,7 +713,36 @@ three_views_worked_row <- function(ex, resp_sym = "\\mathbf{y}") {
   }, logical(1L))
 
   # Build symbolic and numeric term lists side by side.
-  scalar_response_sym <- "W_{1}"   # i = 1 in scalar form for the response
+  # Derive the scalar response symbol from `resp_sym` (the matrix-form
+  # symbol passed in from symbol_table). Common patterns:
+  #   "\\mathbf{y}"           -> "y_{1}"
+  #   "\\mathbf{body\\_mass}" -> "\\mathrm{body\\_mass}_{1}"
+  #   "\\mathrm{log\\_mass}_i" -> "\\mathrm{log\\_mass}_{1}"
+  # Previously hardcoded to "W_{1}" -- which was wrong for every response
+  # column not named `W`. Florence-audit 2026-05-26.
+  scalar_response_sym <- {
+    s <- resp_sym
+    # strip a trailing `_i` if present
+    s <- sub("_i$", "", s)
+    # \mathbf{x} -> scalar x (lowercase italic)
+    bf_match <- regmatches(s, regexec("^\\\\mathbf\\{([^}]+)\\}$", s))[[1L]]
+    if (length(bf_match) == 2L) {
+      inner <- bf_match[[2L]]
+      if (grepl("\\\\_", inner) || grepl("\\s", inner)) {
+        # Multi-character / escaped underscore name: use \mathrm{...}.
+        sprintf("\\mathrm{%s}_{1}", inner)
+      } else {
+        # Single letter: use plain italic scalar.
+        sprintf("%s_{1}", tolower(inner))
+      }
+    } else if (grepl("^\\\\mathrm\\{", s)) {
+      # already \mathrm{name}, just append _{1}
+      sprintf("%s_{1}", s)
+    } else {
+      # fallback: assume it's a plain symbol, subscript 1
+      sprintf("%s_{1}", s)
+    }
+  }
   beta_k <- function(k) sprintf("\\hat\\beta_{%d}", k - 1L)
   # For non-intercept columns, use the column name as a Roman label
   # (sanitized for LaTeX) with subscript i = 1.
@@ -552,6 +921,41 @@ three_views_symbol_gloss <- function(x, notation = c("matrix", "index")) {
 three_views_biology_gloss <- function(x) {
   family <- tryCatch(x$model$family, error = function(e) NULL)
   if (is.null(family) || !nzchar(family)) return("")
+
+  # v0.21.1+ phylo / spatial branches. The default Gaussian biology gloss
+  # "each observation is normally distributed around a mean..." is wrong
+  # for comparative-phylogenetic and spatial models: those models exist
+  # PRECISELY because observations are NOT independent. Detect via
+  # metadata$phylo_representation / metadata$spatial_representation set by
+  # extractors when phylo / spatial structured covariance is detected.
+  phylo_rep <- tryCatch(x$metadata$phylo_representation,
+                        error = function(e) NULL)
+  spatial_rep <- tryCatch(x$metadata$spatial_representation,
+                          error = function(e) NULL)
+  if (!is.null(phylo_rep) && nzchar(phylo_rep)) {
+    sentence <- paste0(
+      "Species are not independent observations. Closely related species ",
+      "tend to have similar trait values because of shared evolutionary ",
+      "history; the phylogenetic correlation matrix $\\mathbf{A}$ encodes ",
+      "those expected similarities (cell $A_{ij}$ = fraction of shared ",
+      "branch length between species $i$ and $j$). The phylogenetic SD ",
+      "$\\sigma_p$ measures how much across-species variation remains after ",
+      "fixed-effect predictors are accounted for."
+    )
+    return(paste0("  <p class=\"sym-biology\">", sentence, "</p>\n"))
+  }
+  if (!is.null(spatial_rep) && nzchar(spatial_rep)) {
+    sentence <- paste0(
+      "Nearby locations are not independent observations. Sites close ",
+      "together tend to have similar response values because of shared ",
+      "environment; the spatial correlation matrix $\\boldsymbol{\\Omega}$ ",
+      "encodes those expected similarities via a distance kernel (cell ",
+      "$\\Omega_{ij}$ decreases with distance between locations $i$ and $j$). ",
+      "The spatial SD $\\sigma_\\omega$ measures how much across-site ",
+      "variation remains after fixed-effect predictors are accounted for."
+    )
+    return(paste0("  <p class=\"sym-biology\">", sentence, "</p>\n"))
+  }
 
   has_sigma_submodel <- !is.null(x$expanded) &&
                        !is.null(x$expanded$X_sigma) &&

@@ -1,3 +1,138 @@
+# symbolizer 0.21.1
+
+## v0.21.1 -- three-views widget patches + Florence + Rose + Darwin discipline protocols adopted
+
+Targeted patch release after a Florence-style audit of the three-views
+HTML widget. The maintainer opened a rendered widget and surfaced six
+bugs in one look; the Rose rule ("one bug means ten more in the
+pattern") expanded the audit to all symbol-dictionary surfaces. This
+release closes the visible bugs AND adopts process protocols from the
+drmTMB / gllvmTMB sister repos so the underlying failure mode cannot
+recur.
+
+### Three-views widget fixes
+
+- **Standalone HTML now self-renders math.** `as_html_three_views()`
+  gained `standalone = FALSE` (default) and `file = NULL` arguments.
+  Passing `standalone = TRUE` wraps the fragment in a full HTML
+  document with a MathJax 3 CDN bootstrap, so the resulting file
+  renders LaTeX when opened directly via `file://...` rather than
+  needing a host pkgdown / Rmd page. Without `standalone = TRUE`,
+  writing the fragment to file emits a `cli::cli_warn()` so users
+  know what they got.
+- **Captions switched from `\(...\)` to `$...$`.** Standalone MathJax
+  recognises only `$...$` by default; the widget's captions previously
+  used the pkgdown-convention `\(...\)`, which rendered as raw text
+  in standalone mode. Captions also now interpolate the actual response
+  symbol (e.g., `$\mathbf{log\_mass}$`) instead of hardcoding `\mathbf{w}`.
+- **Worked-row scalar response derived from the response symbol.**
+  Previously hardcoded as `W_{1}` regardless of the actual response
+  column. Now derives from `resp_sym`: `\mathbf{y}` -> `y_{1}`;
+  `\mathbf{body\_mass}` -> `\mathrm{body\_mass}_{1}`;
+  `\mathrm{log\_mass}_i` -> `\mathrm{log\_mass}_{1}`.
+- **Phylo-aware biology gloss.** When `metadata$phylo_representation`
+  is set, the biology caption above the equation block now reads
+  "Species are not independent observations. Closely related species
+  tend to have similar trait values because of shared evolutionary
+  history; the phylogenetic correlation matrix $\mathbf{A}$ encodes
+  those expected similarities..." -- replacing the default Gaussian
+  "Each observation is normally distributed..." gloss which was
+  conceptually wrong for comparative phylogenetic models. Same
+  for `metadata$spatial_representation`.
+- **Structured matrix surfaced on tab 3.** When `expanded$M` carries
+  a numerical correlation matrix, the "Equations with data" tab
+  renders a new equation block showing `Cov(u) = sigma_p^2 * A` with
+  the A matrix as a bmatrix of actual numbers (truncated head + tail
+  for large matrices).
+- **PDF export.** New `as_pdf_three_views(sym, file = "out.pdf")`
+  exports the same three views as a single-page PDF with three stacked
+  sections (Index form / Matrix form / Worked observation at i = 1).
+  Internally renders an Rmd stub via `rmarkdown::render()` with
+  `pdf_document`; requires a working LaTeX install (TinyTeX or system).
+- **Gloss dimensions wrapped in `$...$`.** Inline `\mathbb{R}^{...}`
+  expressions inside mixed prose ("scalar; $\mathbb{R}^{15}$ in matrix
+  form") now wrap correctly.
+
+### Phylogenetic / structural-covariance distribution line
+
+The matrix-form distribution line for random effects now reads
+`\mathbf{u}_{g} \sim \mathcal{N}(\mathbf{0}, \sigma_{g}^2\, \mathbf{A}_{k \times k})`
+when the extractor detects a structured covariance matrix on the
+group `g`. Previously rendered `\mathbf{I}_{k}` even for phylogenetic
+fits -- the v0.20.0 audit's "A is missing from the formula" complaint
+was correct.
+
+`drm_build_components()` gained a `structured_matrix_for_group`
+argument: a named list mapping group name to LaTeX matrix symbol
+(e.g., `list(species = "\\mathbf{A}")`). Default `NULL` preserves
+the v0.20 `\mathbf{I}_n` behaviour for non-structured fits. The
+MCMCglmm extractor now passes this list whenever `animal_groups` is
+non-empty. The remaining extractors (drmTMB, glmmTMB, brms, metafor,
+gllvmTMB, sdmTMB, mgcv) will adopt the same pattern in a follow-up.
+
+### Symbol-dictionary completeness
+
+`drm_build_symbol_dictionary()` now adds a `residual_sd` row for
+every Gaussian-style family (`gaussian`, `lognormal`, `student`,
+`Gamma`, `beta`, `nbinom2`, `beta_binomial`, `truncated_nbinom2`,
+`meta_normal`) when no sigma submodel is already present. Previously
+extractors that did not promote sigma to its own submodel (lm, lmer,
+MCMCglmm, brms Gaussian, glmmTMB Gaussian, metafor) silently omitted
+the residual SD from the symbol gloss list even though the equation
+block contained `\sigma_i`. Rose-style audit found this affected 6
+of 7 extractors tested.
+
+### MCMCglmm response-symbol resolver
+
+`mcmcglmm_resolve_response_symbol()` now escapes underscores and
+wraps multi-character column names in `\mathrm{...}`, matching the
+drmTMB convention. Previously a `log_mass` column produced raw
+`log_mass` LaTeX which MathJax parsed as `log` with `m`, `a`, `s`, `s`
+as nested subscripts.
+
+### Florence + Rose + Darwin protocols (from drmTMB + gllvmTMB)
+
+`CLAUDE.md` gained a top-level "Top discipline rule" section plus an
+"Adopted protocols (from drmTMB + gllvmTMB sister repos)" section
+documenting: (a) Florence visual-check is mandatory before any
+user-facing rendered surface ships; (b) Rose rule -- one bug means
+ten more in the pattern, scan before patching; (c) Darwin rule --
+demos with data must be biologically coherent (comparative analyses
+use log-transformed traits clustering -2 to 2, not raw within-species
+ranges); (d) default Claude mode is read-only audits, not "ship and
+iterate"; (e) eight-condition Definition of Done including Florence
+check + after-task report; (f) widget-visual-audit checklist for
+every render.
+
+`.github/VISION.md` adds Florence as a named team role (scientific
+figure / widget / vignette visualization reviewer) and a new "Accuracy
+over speed" section.
+
+`.memory/MEMORY.md` documents the specific bug patterns from this
+audit; `.memory/check-log.md` is a new running log adopted from
+drmTMB; `.memory/reports/2026-05-26-discipline-protocols-adopted.md`
+is the after-task report covering both v0.21.0 and v0.21.1 work.
+
+### Tests
+
+`rcmdcheck`: 0 errors / 0 warnings / 0 notes. Pre-existing
+`Matrix::expand` masking failure under `devtools::test()` only (does
+not occur under `R CMD check`); see issue #7.
+
+### Deferred to a follow-up
+
+- The structured-matrix-for-group plumbing currently only flows
+  through MCMCglmm. drmTMB / glmmTMB / brms / metafor / gllvmTMB
+  extractors still call `drm_build_components()` without it -- their
+  fits will continue to show `\mathbf{I}_n` in the matrix-form
+  distribution line. Trivial to extend per-extractor; not in this
+  release because the MCMCglmm path is the primary demo target.
+- The three-views widget still needs to be embedded in the
+  structural-dependence vignette and others (issue #9). Now safe to
+  do incrementally because the rendering bugs are closed.
+- LaTeX-copy buttons on the widget (issue #8) remain unbuilt; the
+  standalone HTML + PDF parts of #8 are now done.
+
 # symbolizer 0.21.0
 
 ## v0.21.0 -- Structural dependence: phylogenetic, animal-model, and spatial random effects (6 packages)

@@ -151,11 +151,20 @@ symbolize.MCMCglmm <- function(fit, symbols = NULL, units = NULL,
   re_tbl     <- drm_build_random_effects(re_per_entry)
   vc_tbl     <- mcmcglmm_build_variance_components(fit, animal_groups)
   cov_tbl    <- drm_build_covariance_components(re_tbl)
+  # v0.21.1+ phylo / animal-model structured-matrix mapping. When the
+  # ginverse path is active, every animal_group's matrix-form random-
+  # effect distribution line should render with \mathbf{A} instead of
+  # \mathbf{I}_n. Index form stays as the marginal N(0, sigma^2).
+  structured_matrix_for_group <- if (length(animal_groups) > 0L) {
+    stats::setNames(as.list(rep("\\mathbf{A}", length(animal_groups))),
+                    animal_groups)
+  } else NULL
   components <- drm_build_components(
     submodels, terms_tbl, re_tbl,
     response_symbol, response_symbol_matrix,
     family = family,
-    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_
+    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_,
+    structured_matrix_for_group = structured_matrix_for_group
   )
   # v0.21+ structured-dependence signals. MCMCglmm's ginverse path is the
   # Hadfield-Nakagawa all-nodes representation of a phylogenetic correlation
@@ -257,7 +266,17 @@ mcmcglmm_resolve_response_symbol <- function(response, symbols) {
   if (!is.null(symbols) && !is.null(symbols[[response]])) {
     return(as.character(symbols[[response]]))
   }
-  response
+  # v0.21.1+: escape underscores and wrap multi-character names in
+  # \mathrm{...} so MathJax doesn't parse `_` as a subscript marker.
+  # Previously returned the raw column name -- "log_mass" rendered as
+  # "log subscript m a s s" because MathJax saw the underscore as math.
+  # Mirrors drm_resolve_response_symbol() in R/symbolize-drmtmb.R.
+  esc <- gsub("_", "\\_", response, fixed = TRUE)
+  if (nchar(response) > 1L) {
+    paste0("\\mathrm{", esc, "}_i")
+  } else {
+    paste0(esc, "_i")
+  }
 }
 
 mcmcglmm_build_submodels <- function(entries, fit, param, link_mu) {

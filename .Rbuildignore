@@ -15,6 +15,9 @@
 ^\.claude$
 ^\.memory$
 ^\.superpowers$
+^demo-.*\.html$
+^demo-.*\.pdf$
+^demo-.*\.tex$
 ^README\.Rmd$
 ^README\.html$
 ^doc$

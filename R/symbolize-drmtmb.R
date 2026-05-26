@@ -1002,7 +1002,16 @@ drm_build_components <- function(submodels, terms_tbl, re_tbl, response_symbol,
                                   response_symbol_matrix,
                                   family = "gaussian",
                                   response_symbol_1 = NULL,
-                                  response_symbol_2 = NULL) {
+                                  response_symbol_2 = NULL,
+                                  structured_matrix_for_group = NULL) {
+  # v0.21.1+ `structured_matrix_for_group`: optional named list mapping
+  # random-effect group name to a LaTeX matrix symbol (e.g.,
+  # list(species = "\\mathbf{A}") for a phylogenetic random effect, or
+  # list(site = "\\boldsymbol{\\Omega}") for spatial). When the group
+  # appears in this list, the matrix-form distribution line for that
+  # random effect uses the structured matrix instead of \mathbf{I}_n.
+  # Default NULL preserves the v0.20 \mathbf{I}_n behaviour for all
+  # non-structured fits.
   is_biv <- identical(family, "biv_gaussian")
   # Distribution row LaTeX is templated from family-distributions.csv,
   # not branched per family. Adding a univariate family is a CSV-only op.
@@ -1119,15 +1128,49 @@ drm_build_components <- function(submodels, terms_tbl, re_tbl, response_symbol,
       n_levels <- re_tbl$n_levels[[sel[[1L]]]]
       if (n_comp == 1L) {
         sym <- re_tbl$sigma_symbol[[sel[[1L]]]]
+        # v0.21.1+: if this group has a structured covariance matrix
+        # registered (phylogenetic, spatial, animal), use it on the
+        # matrix form instead of the identity. The index form stays as
+        # the marginal `u_g \sim N(0, sigma^2)` since A's diagonal is 1
+        # and the per-species draw is marginally N(0, sigma^2) anyway --
+        # the structural information lives in the joint, which is the
+        # matrix form's headline.
+        struct_sym <- if (!is.null(structured_matrix_for_group) &&
+                          !is.null(structured_matrix_for_group[[g]])) {
+          structured_matrix_for_group[[g]]
+        } else NULL
+        # When a structured matrix is present, the random effect's
+        # distribution is a JOINT multivariate normal: the structure
+        # lives in the joint covariance, not the per-species marginal
+        # (A's diagonal is 1, so the marginal is just N(0, sigma^2)).
+        # Index form for non-phylo fits keeps the old scalar marginal
+        # form for back-compat (u_g ~ N(0, sigma^2)); for phylo / spatial
+        # fits the index-form line gets upgraded to bold-vector joint
+        # form because that is where the structural information lives.
+        # Matrix form always uses bold vectors. Biology gloss above the
+        # equation explains the joint reading.
+        if (!is.null(struct_sym)) {
+          eq_index <- sprintf(
+            "\\mathbf{u}_{%s} \\sim \\mathcal{N}(\\mathbf{0},\\, %s^2 %s)",
+            g, sym, struct_sym
+          )
+          eq_matrix <- sprintf(
+            "\\mathbf{u}_{%s} \\sim \\mathcal{N}(\\mathbf{0},\\, %s^2 %s_{%d \\times %d})",
+            g, sym, struct_sym, n_levels, n_levels
+          )
+        } else {
+          eq_index <- sprintf("u_{%s} \\sim \\mathcal{N}(0,\\, %s^2)", g, sym)
+          eq_matrix <- sprintf(
+            "\\mathbf{u}_{%s} \\sim \\mathcal{N}(\\mathbf{0},\\, %s^2 \\mathbf{I}_{%d})",
+            g, sym, n_levels
+          )
+        }
         rows[[length(rows) + 1L]] <- tibble::tibble(
           name = sprintf("%s_random_intercept_%s", sm, g),
           kind = "random_effect_distribution",
           submodel = sm,
-          equation = sprintf("u_{%s} \\sim \\mathcal{N}(0,\\, %s^2)", g, sym),
-          equation_matrix = sprintf(
-            "\\mathbf{u}_{%s} \\sim \\mathcal{N}(\\mathbf{0},\\, %s^2 \\mathbf{I}_{%d})",
-            g, sym, n_levels
-          ),
+          equation = eq_index,
+          equation_matrix = eq_matrix,
           status = "stated"
         )
       } else {
@@ -1415,6 +1458,49 @@ drm_build_symbol_dictionary <- function(terms_tbl, response, response_symbol,
       description = sprintf("conditional %s of %s", dpar, param_owner(dpar))
     )
   }
+  # v0.21.1+ residual-SD row.
+  # Florence + Rose audit 2026-05-26: the equation block for any
+  # Gaussian-style family carries `\sigma_i` (or its matrix-form
+  # counterpart) in the response distribution -- but extractors that
+  # don't promote sigma to its own submodel (lm, lmer, MCMCglmm, brms
+  # Gaussian, glmmTMB Gaussian, metafor) never add a row for it,
+  # so the symbol gloss list silently misses sigma. Add it once here
+  # so every Gaussian-style fit's gloss is complete. drmTMB and
+  # biv_gaussian already include sigma submodels via the loop above;
+  # we detect that and skip to avoid duplicating the row.
+  family_has_residual_sd <- family %in% c(
+    "gaussian", "lognormal", "student", "Gamma", "beta",
+    "nbinom2", "beta_binomial", "truncated_nbinom2", "meta_normal"
+  )
+  already_has_sigma <- "sigma" %in% submodels$parameter ||
+                      "sigma1" %in% submodels$parameter ||
+                      "sigma2" %in% submodels$parameter
+  if (family_has_residual_sd && !already_has_sigma) {
+    desc <- switch(family,
+      gaussian        = "residual standard deviation",
+      lognormal       = "residual standard deviation on the log scale",
+      student         = "residual scale",
+      Gamma           = "Gamma dispersion (on the log scale)",
+      beta            = "Beta precision (on the log scale)",
+      nbinom2         = "negative-binomial dispersion (size, on the log scale)",
+      beta_binomial   = "beta-binomial precision (on the log scale)",
+      truncated_nbinom2 = "negative-binomial dispersion (size, on the log scale)",
+      meta_normal     = "residual heterogeneity SD (tau)",
+      "residual scale"
+    )
+    rows[[length(rows) + 1L]] <- tibble::tibble(
+      symbol = "\\sigma_i",
+      symbol_matrix = "\\boldsymbol{\\sigma}",
+      variable = NA_character_,
+      units = NA_character_,
+      role = "residual_sd",
+      dimension = "scalar (constant across observations)",
+      dimension_concrete = "scalar",
+      description = sprintf("%s of %s",
+                            desc,
+                            response_1 %||% response %||% "y")
+    )
+  }
   # Coefficients (per submodel): scalar beta_0, beta_1 + bold vector form.
   # For biv_gaussian, coef_family carries its own subscript (e.g. "beta_{1}"),
   # which we splice as a single double subscript in the scalar form
@@ -1463,8 +1549,8 @@ drm_build_symbol_dictionary <- function(terms_tbl, response, response_symbol,
         variable           = g,
         units              = NA_character_,
         role               = "random_intercept",
-        dimension          = sprintf("scalar; \\mathbb{R}^{G_{%s}} in matrix form", g),
-        dimension_concrete = sprintf("scalar; \\mathbb{R}^{%d} in matrix form", G),
+        dimension          = sprintf("scalar; $\\mathbb{R}^{G_{%s}}$ in matrix form", g),
+        dimension_concrete = sprintf("scalar; $\\mathbb{R}^{%d}$ in matrix form", G),
         description        = sprintf("random intercept by %s", g)
       )
       rows[[length(rows) + 1L]] <- tibble::tibble(
