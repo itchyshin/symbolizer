@@ -153,6 +153,9 @@ where:
 
 | Symbol | Meaning | Status |
 |---|---|---|
+| $i$ | observation index, $i = 1, \dots, n$ — in this dataset there is one observation per species, so $i$ runs over species | index |
+| $k$ | species index — total number of species in the phylogeny, $k = 60$ here | index |
+| $k[i]$ | the species that observation $i$ belongs to (here $k[i] = i$ because one observation per species) | index |
 | $\mathrm{Zr}_i$ | Fisher-$z$ transformed correlation for species $i$ — here treated as an ordinary continuous trait | observed |
 | $\beta_0$ | global mean of $\mathrm{Zr}$ across species | **estimated** |
 | $u_{p_{k[i]}}$ | phylogenetic random effect, indexed by species $k[i]$ for observation $i$ | **estimated** (latent) |
@@ -163,7 +166,7 @@ where:
 
 Three notes that often trip up first readers:
 
-1. **$\sigma_e^2$ is estimated, not the per-effect sampling variance $v_i$.** In meta-analysis we'd also feed in $v_i$ (a *known* sampling variance per study) via `metafor::rma.mv(V = vi, ...)`. That's the model class in the v0.22 article — same $\sigma_p^2 \mathbf A$ phylogenetic term, but with $\mathbf V = \operatorname{diag}(v_i)$ added on top of $\sigma_e^2 \mathbf I$ (Cinar et al. 2021, Eq. 1–10).
+1. **$\sigma_e^2$ is estimated, not the per-effect sampling variance $v_i$.** In meta-analysis we'd also feed in $v_i$ (a *known* sampling variance per study) via `metafor::rma.mv(V = vi, ...)`. That's the model class in the v0.22 article — same $\sigma_p^2 \mathbf A$ phylogenetic term, but with $\mathbf V = \operatorname{diag}(v_i)$ added on top of $\sigma_e^2 \mathbf I$ (Cinar et al. 2022, Eq. 1–10).
 2. The Moura data was *built* as a meta-analytic dataset (one Fisher-$z$ per species, aggregated from many effect-size estimates). We use only $\mathrm{Zr}$ here; the $v_i$ column is set aside. That's a pedagogical choice — a clean phylo-LMM is easier to read than a meta-analytic phylo-LMM, and it keeps this article focused on the structural-dependence axis.
 3. `phylolm` fits a **marginalised** version of this same model: it absorbs $u_p$ into the residual to give $\mathrm{Zr} \sim \mathcal N(\beta_0 \mathbf 1, \sigma^2 \mathbf C(\alpha))$ where $\sigma^2 \mathbf C(\alpha) = \sigma_p^2 \mathbf A + \sigma_e^2 \mathbf I$ in the Pagel-$\lambda$ parametrisation. The § "Face 3" Face below makes the bridge explicit.
 
@@ -171,7 +174,7 @@ The phylogenetic correlation matrix $\mathbf A$ carries realistic biology — mo
 
 ### Face 1 (deep dive): `MCMCglmm` with `ginverse = list(species = Ainv)`
 
-`MCMCglmm` uses the **all-nodes** representation natively.
+`MCMCglmm` uses the **all-nodes** representation natively (Hadfield 2010 §8.2.1). Internally the random-effect vector spans both tip species AND internal phylogenetic nodes, so when the widget below shows a $\mathbf{Z}$ and $\mathbf{A}$ matrix you will see $116 \times 116$ blocks, not the nominal $k \times k = 60 \times 60$ tips-only form — the same prior, just an augmented coordinate system. (For a $k$-tip tree the augmentation is at most $2k-2$ rows; in this dataset two polytomies after ultrametricisation drop the count from 118 to 116.)
 
 ```{r mcmcglmm-fit, message = FALSE, results = "hide"}
 fit_mcmc <- MCMCglmm(
@@ -335,7 +338,7 @@ sym_pl$variance_components             # single sigma^2 row
 summary(fit_pl)
 ```
 
-The bridge with the RE form: take the estimated $\hat\sigma^2$ and $\hat\lambda$ from the summary above, then `sigma_p^2_hat = lambda_hat * sigma^2_hat` and `sigma_e^2_hat = (1 - lambda_hat) * sigma^2_hat`. These will be very close to the MCMCglmm / `brms` variance-component estimates (modulo MCMC sampling noise) — try it.
+The bridge with the RE form: take the estimated $\hat\sigma^2$ and $\hat\lambda$ from the summary above, then $\hat\sigma_p^2 = \hat\lambda\,\hat\sigma^2$ and $\hat\sigma_e^2 = (1-\hat\lambda)\,\hat\sigma^2$. With this dataset, those reconciled values agree with the MCMCglmm estimates on the phylogenetic variance to within a couple of percent, but the residual variance $\sigma_e^2$ can differ by 20–30 % across the three packages — the variance *split* is weakly identified when there is one observation per species (see § "When unification breaks: identifiability" below). The total $\hat\sigma_p^2 + \hat\sigma_e^2$ and the heritability $\hat H^2 = \hat\lambda$ are more stable than either component on its own.
 
 ```{r phylolm-assumptions}
 assumption_table(sym_pl)
@@ -374,7 +377,7 @@ For spatial dependence, $\mathbf M$ is built from pairwise geographic distances 
 | Squared-exponential (Gaussian) | $C(d) = \exp(-d^2/\rho^2)$ | Sharp |
 | Matérn | $C(d; \kappa, \nu)$ | Tunable smoothness |
 
-Two fits demonstrate the structurally identical grammar with $\boldsymbol\Omega$ in place of $\mathbf A$:
+Two fits *illustrate* the structurally identical grammar with $\boldsymbol\Omega$ in place of $\mathbf A$ — these are **pseudocode** (the spatial demo data + mesh would be set up in a separate spatial article, not here):
 
 ```{r spatial-show, eval = FALSE}
 library(sdmTMB)
