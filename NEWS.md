@@ -1,3 +1,117 @@
+# symbolizer 0.21.4-redo
+
+## v0.21.4-redo -- structural-dependence rescope + 3-Face article + consistency sweep
+
+A rescope of the `symbolizer-structural-dependence` article from 6
+half-working Faces to one deep-dive + two light Faces, plus a
+12-class consistency sweep across the widget renderer, the §6 model
+statement, the CSV templates, and the cross-package extractors.
+
+### Three Faces, one phylogenetic LMM
+
+- **Face 1 (deep-dive)**: `MCMCglmm` with `ginverse = list(species = Ainv)`
+  -- full three-views widget.
+- **Face 2 (light)**: `brms` with `gr(species, cov = A)` -- fitted Stan
+  model with `symbolize()` outputs (no widget).
+- **Face 3 (light)**: `phylolm::phylolm()` with Pagel's lambda -- the
+  marginalised PGLS form (no widget), with an explicit bridge to
+  Face 1's RE form.
+
+Dropped from this article (moved elsewhere): metafor (meta-analytic
+scope → v0.22), glmmTMB (propto two-scalar → defer), drmTMB
+location-scale phylo (→ v0.24), gllvmTMB community-phylo (→ separate
+arc). The §6 model statement now distinguishes the **estimated**
+$\sigma_e^2$ from the **known** sampling variance $v_i$ (Cinar et
+al. 2022, *Methods in Ecology and Evolution*).
+
+### New: `symbolize.phylolm()` extractor
+
+PGLS marginal form support. BM and Pagel's lambda evolutionary
+models. New capability rows; `metadata$phylo_representation =
+"pgls_marginal"`; `metadata$phylo_model` + `metadata$phylo_param`.
+End-to-end on the Moura data: $\hat\lambda = 0.7632$.
+
+### B6 fix (Ayumi report)
+
+`drmTMB::phylo()` formulas no longer crash `symbolize()`. The
+`drm_strip_markers()` formula walker replaces `phylo()` / `animal()` /
+`spatial()` / `gp()` markers with `call("(", arg1)` so lme4-style RE
+notation survives `stats::terms()`. Real regression-test fixture
+based on Ayumi's failing example.
+
+### drm_strip_re_terms parse-tree refactor
+
+Previously rejected RE bars containing inner parens, so
+`(1 | gr(species, cov = A))` crashed `model.frame()` with "could not
+find function 'gr'". New implementation walks the parse tree;
+handles arbitrary nesting. 7 unit tests pin the contract.
+
+### Three-views widget
+
+- **User-configurable truncation**: `as_html_three_views()` and
+  `as_pdf_three_views()` now accept `head` / `tail` (rows) and
+  `head_cols` / `tail_cols` (columns); defaults match prior
+  behaviour. 7 tests.
+- **Z elision when one obs per level**: when `n_obs == n_distinct_levels`,
+  the Tab 3 stacked block drops the random-effect incidence matrix Z
+  (which is then the identity on the observed levels and renders as
+  a wall of zeros) and emits the per-observation random effect
+  $\hat{\mathbf{u}}_{n\times 1}$ directly. Z is retained for
+  multi-obs-per-level cases (repeated measures, multi-effect-size
+  meta-analyses).
+- **All-nodes dim propagation**: when MCMCglmm's `ginverse` carries
+  the Hadfield-Nakagawa all-nodes representation, the symbol
+  dictionary + matrix-form equation now report the augmented
+  dimension (e.g. $\mathbf{A}_{116 \times 116}$ for a 60-tip tree),
+  matching what the Tab 3 stacked block shows.
+
+### Consistency sweep (12 classes)
+
+Rose-style consistency scan triggered by the maintainer's dim
+inconsistency catch. Findings + fixes filed at
+`docs/dev-log/figure-audits/v0.21-redo-rescope/rose-consistency-scan.md`
+along with V1 Florence, V2 Pat, V3 Noether audit reports. Highlights:
+
+- **assumption_table comma**: the gaussian / student / lognormal /
+  Gamma / Beta `conditional_distribution` rows previously emitted
+  `\mathrm{Normal}(\mu_i\, \sigma_i^2)` (LaTeX thin space, no comma),
+  which renders as the product `μ σ²` instead of the parameter list
+  `(μ, σ²)`. All 5 rows now use the comma form. **Bug fix**.
+- **`your_responsibility` status**: 14 CSV rows used the underscore
+  spelling, which `friendly_status()` did not map. Now mapped to
+  the displayed string "your responsibility".
+- **Tables now scroll**: `sym_kable_responsive()` wraps wide
+  `assumption_table()` / interpretation outputs in a
+  `<div class="table-responsive">` so the right-edge status column
+  scrolls instead of clipping.
+- **`σ_p` naming canonical**: §6 model, §Animal-model unification,
+  and the heritability output now all use $\sigma_p^2$ /
+  $\sigma_e^2$; the quantitative-genetics A/E alias is noted once.
+- **Hidden scaffolding**: the `pdf_alongside_html()` helper chunk
+  + the `shim_mcmcglmm()` chunk are now `echo = FALSE`; they no
+  longer leak into the article.
+- **§ typography**: 5 occurrences of `§"..."` glued together;
+  now `§ "..."` with proper space.
+- **brms convergence warnings suppressed**: `iter` bumped from 1000
+  to 2000 with `adapt_delta = 0.95`; `warning = FALSE` on the chunk.
+
+### Multi-V audit reports (committed)
+
+- `V1-florence-report.md` (visual)
+- `V2-pat-report.md` (reader flow)
+- `V3-noether-report.md` (math correctness)
+- `rose-consistency-scan.md` (cross-class consistency)
+
+### Test results
+
+`1795 pass / 0 fail / 1 pre-existing error (Matrix::expand masking #7) /
+97 pre-existing warnings (sdmTMB NaN)`. R CMD check: 0 errors / 0
+warnings / 1 NOTE (`.git` in-source). `pkgdown::build_site()` clean.
+
+### DESCRIPTION
+
+Added `phylolm` and `Matrix` to Suggests.
+
 # symbolizer 0.21.3
 
 ## v0.21.3 -- three-views widget rollout to symbolizer-families.Rmd
