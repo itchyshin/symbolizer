@@ -254,23 +254,46 @@ sym_mcmc$metadata$heritability           # h^2 derived automatically
 #### Three-views widget for the MCMCglmm fit
 
 ```{r mcmcglmm-widget, results = "asis", message = FALSE}
-shim_mcmcglmm <- function(fit, dat, A) {
-  beta_hat <- mean(fit$Sol[, "(Intercept)"])
-  sp_cols  <- grep("^species[.]", colnames(fit$Sol), value = TRUE)
-  u_named  <- colMeans(fit$Sol[, sp_cols, drop = FALSE])
+# All-nodes shim per Hadfield's course notes section 8.2.1:
+# MCMCglmm fits with `ginverse = list(species = Ainv$Ainv)` where
+# `inverseA(nodes = "ALL")` operates internally on the augmented
+# (tips + internal nodes) parameterisation. For k tips the augmented
+# random-effect vector has 2k - 2 entries (k tips + k - 1 internals -
+# 1 root that inverseA drops). MCMCglmm stores BLUPs for ALL of these
+# in `fit$Sol` when `pr = TRUE`. The Cov(u) prior is sigma^2 * A_all
+# (dense (2k-2)x(2k-2)); Z is n_obs x (2k-2) with one-hot 1s only at
+# the tip columns.
+shim_mcmcglmm <- function(fit, dat, Ainv_obj) {
+  node_order <- rownames(Ainv_obj$Ainv)         # internals first, then tips
+  n_total    <- length(node_order)              # 2k - 2 for k tips
+  beta_hat   <- mean(fit$Sol[, "(Intercept)"])
+  sp_cols    <- grep("^species[.]", colnames(fit$Sol), value = TRUE)
+  u_named    <- colMeans(fit$Sol[, sp_cols, drop = FALSE])
   names(u_named) <- sub("^species[.]", "", names(u_named))
-  Z_g <- model.matrix(~ species - 1, data = dat)
-  colnames(Z_g) <- sub("^species", "", colnames(Z_g))
-  u <- u_named[colnames(Z_g)]
+  # Align to node_order (so u entries match Cov(u) rows and Z columns)
+  u <- u_named[node_order]
+  # Z: one-hot only at tip columns for the species each observation
+  # belongs to; zeros for the n_internals - 1 internal-node columns
+  # since internals have no direct observation
+  Z_g <- matrix(0, nrow = nrow(dat), ncol = n_total,
+                dimnames = list(NULL, node_order))
+  for (i in seq_len(nrow(dat))) {
+    Z_g[i, as.character(dat$species[i])] <- 1
+  }
   X <- matrix(1, nrow = nrow(dat), ncol = 1,
               dimnames = list(NULL, "(Intercept)"))
   mu_hat <- as.numeric(X %*% beta_hat + Z_g %*% u)
+  # Cov(u) = sigma^2 * A_all, where A_all is the dense inverse of the
+  # sparse precision matrix that inverseA(nodes = "ALL") produces. This
+  # is the (2k-2)x(2k-2) augmented covariance MCMCglmm operates on.
+  M_dense <- as.matrix(Matrix::solve(Ainv_obj$Ainv))
+  dimnames(M_dense) <- list(node_order, node_order)
   list(y = dat$Zr, X = X, beta = beta_hat,
        Z_g = Z_g, u = u, mu_hat = mu_hat,
        fitted = mu_hat, residuals = dat$Zr - mu_hat,
-       M = A)
+       M = M_dense)
 }
-sym_mcmc$expanded <- shim_mcmcglmm(fit_mcmc, dat, A_tips)
+sym_mcmc$expanded <- shim_mcmcglmm(fit_mcmc, dat, A_all)
 as_html_three_views(sym_mcmc, id = "mcmc")
 ```
 
