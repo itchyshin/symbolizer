@@ -137,7 +137,7 @@ cat("A off-diagonal quantiles (25/50/75/99%): ",
           collapse = " / "), "\n")
 ```
 
-The two representations encode the **same** Brownian-motion prior. The tips-only version is the operational default for `metafor`, `glmmTMB::propto`, and `brms::gr(cov = A)`. The all-nodes version is what `MCMCglmm` uses internally (`ginverse = list(animal = Ainv)`) and what `drmTMB::phylo()` builds under the hood (`drmTMB` cites Hadfield & Nakagawa 2010 explicitly in its `?phylo` help page). The all-nodes form is *richer*: it gives access to ancestral-state BLUPs at internal nodes; the tips-only form marginalises those out. In a balanced setup the two agree on the variance estimate $\hat\sigma_p^2$ — a result we'll return to in §"Tips vs all-nodes".
+The two representations encode the **same** Brownian-motion prior. The tips-only version is the operational default for `metafor`, `glmmTMB::propto`, and `brms::gr(cov = A)`. The all-nodes version is what `MCMCglmm` uses internally (`ginverse = list(animal = Ainv)`) and what `drmTMB::phylo()` builds under the hood (`drmTMB` cites Hadfield & Nakagawa 2010 explicitly in its `?phylo` help page). The all-nodes form is *richer*: it gives access to ancestral-state BLUPs at internal nodes; the tips-only form marginalises those out. In a balanced setup the two agree on the variance estimate $\hat\sigma_p^2$ — a result we'll return to in § "Tips vs all-nodes".
 
 ## Three packages, one phylogenetic LMM
 
@@ -157,7 +157,7 @@ where:
 | $\beta_0$ | global mean of $\mathrm{Zr}$ across species | **estimated** |
 | $u_{p_{k[i]}}$ | phylogenetic random effect, indexed by species $k[i]$ for observation $i$ | **estimated** (latent) |
 | $\sigma_p^2$ | phylogenetic variance — the scale of $\mathbf u_p$ | **estimated** |
-| $\mathbf A$ | $k \times k$ tips-only phylogenetic correlation matrix derived from the tree under Brownian motion (or its all-nodes augmentation; see §"Tips-only vs all-nodes") | constructed from tree |
+| $\mathbf A$ | $k \times k$ tips-only phylogenetic correlation matrix derived from the tree under Brownian motion (or its all-nodes augmentation; see § "Tips-only vs all-nodes") | constructed from tree |
 | $e_i$ | residual on the response scale | **estimated** |
 | $\sigma_e^2$ | residual variance — what each package would call $\sigma^2_{\text{units}}$, $\sigma^2_{\text{res}}$, or the marginal $\sigma^2 (1 - \lambda)$ depending on the parameterisation | **estimated** |
 
@@ -165,7 +165,7 @@ Three notes that often trip up first readers:
 
 1. **$\sigma_e^2$ is estimated, not the per-effect sampling variance $v_i$.** In meta-analysis we'd also feed in $v_i$ (a *known* sampling variance per study) via `metafor::rma.mv(V = vi, ...)`. That's the model class in the v0.22 article — same $\sigma_p^2 \mathbf A$ phylogenetic term, but with $\mathbf V = \operatorname{diag}(v_i)$ added on top of $\sigma_e^2 \mathbf I$ (Cinar et al. 2021, Eq. 1–10).
 2. The Moura data was *built* as a meta-analytic dataset (one Fisher-$z$ per species, aggregated from many effect-size estimates). We use only $\mathrm{Zr}$ here; the $v_i$ column is set aside. That's a pedagogical choice — a clean phylo-LMM is easier to read than a meta-analytic phylo-LMM, and it keeps this article focused on the structural-dependence axis.
-3. `phylolm` fits a **marginalised** version of this same model: it absorbs $u_p$ into the residual to give $\mathrm{Zr} \sim \mathcal N(\beta_0 \mathbf 1, \sigma^2 \mathbf C(\alpha))$ where $\sigma^2 \mathbf C(\alpha) = \sigma_p^2 \mathbf A + \sigma_e^2 \mathbf I$ in the Pagel-$\lambda$ parametrisation. The §"Face 3" Face below makes the bridge explicit.
+3. `phylolm` fits a **marginalised** version of this same model: it absorbs $u_p$ into the residual to give $\mathrm{Zr} \sim \mathcal N(\beta_0 \mathbf 1, \sigma^2 \mathbf C(\alpha))$ where $\sigma^2 \mathbf C(\alpha) = \sigma_p^2 \mathbf A + \sigma_e^2 \mathbf I$ in the Pagel-$\lambda$ parametrisation. The § "Face 3" Face below makes the bridge explicit.
 
 The phylogenetic correlation matrix $\mathbf A$ carries realistic biology — most species pairs are distantly related (median off-diagonal $\approx 0.03$) while a handful are close (top 1 % above 0.85). Compare with the degenerate `rcoal(15)` simulation used in earlier drafts where 75 % of pairs were above 0.91.
 
@@ -239,7 +239,7 @@ sym_mcmc$expanded <- shim_mcmcglmm(fit_mcmc, dat, A_all)
 as_html_three_views(sym_mcmc, id = "mcmc")
 ```
 
-```{r mcmcglmm-pdf, results = "asis", message = FALSE}
+```{r mcmcglmm-pdf, results = "asis", message = FALSE, echo = FALSE}
 # Helper -- write the PDF next to the rendered HTML so the `<a href>` link
 # resolves whether the article is built by rmarkdown::render (vignettes
 # dir) or pkgdown::build_article (docs/articles). knitr's
@@ -266,7 +266,7 @@ The same extractor branch handles **animal models** (where `A` comes from a pedi
 
 `brms` (Bürkner 2017) exposes the same structured-effect model via the `gr()` group factor inside an lme4-style RE bar. The fit takes ~30 s of Stan compile-and-sample (cached after the first build).
 
-```{r brms-fit, message = FALSE, results = "hide"}
+```{r brms-fit, message = FALSE, warning = FALSE, results = "hide"}
 library(brms)
 data2_list <- list(A = A_tips)
 fit_brms <- brm(
@@ -274,8 +274,9 @@ fit_brms <- brm(
   data       = dat,
   data2      = data2_list,
   family     = gaussian(),
-  chains     = 2, iter = 1000, refresh = 0, silent = 2,
-  file       = "fig-brms-phylo-cache",       # brms auto-caches as .rds
+  chains     = 2, iter = 2000, warmup = 1000, refresh = 0, silent = 2,
+  control    = list(adapt_delta = 0.95),     # tighten leapfrog to avoid divergent transitions
+  file       = "fig-brms-phylo-cache",        # brms auto-caches as .rds
   file_refit = "on_change"
 )
 sym_brms <- symbolize(fit_brms)
@@ -312,7 +313,7 @@ $$
 \sigma_e^2 = (1 - \lambda)\,\sigma^2.
 $$
 
-So $\lambda = \sigma_p^2 / (\sigma_p^2 + \sigma_e^2)$ — the **phylogenetic heritability** $H^2$ from §"Animal-model unification" — and the two parameterisations agree on every prediction. `phylolm`'s advantage is speed: a closed-form ML fit in a fraction of a second instead of Stan's compile + sample.
+So $\lambda = \sigma_p^2 / (\sigma_p^2 + \sigma_e^2)$ — the **phylogenetic heritability** $H^2$ from § "Animal-model unification" — and the two parameterisations agree on every prediction. `phylolm`'s advantage is speed: a closed-form ML fit in a fraction of a second instead of Stan's compile + sample.
 
 ```{r phylolm-fit, message = FALSE}
 library(phylolm)
