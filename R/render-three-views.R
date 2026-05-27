@@ -15,8 +15,21 @@
 #' small tab-switching script.
 #'
 #' @param x A `symbolized_model` with `$expanded` populated.
-#' @param head Number of leading rows to show in the matrix view (default 5).
-#' @param tail Number of trailing rows to show in the matrix view (default 2).
+#' @param head Number of leading **rows** to show in the matrix view
+#'   (Tab 3 "Equations with data") before the `\\vdots` ellipsis.
+#'   Default `5`. Reasonable range 2--10; larger values produce taller
+#'   widgets.
+#' @param tail Number of trailing **rows** to show in the matrix view
+#'   after the `\\vdots`. Default `2`. Together with `head`, controls
+#'   how much per-observation data is visible: total rows shown =
+#'   `head + tail + 1` ellipsis row (or fewer if `n_obs` is small
+#'   enough to show all rows).
+#' @param head_cols Number of leading **columns** to show in any matrix
+#'   that has more than `head_cols + tail_cols` columns (e.g. the
+#'   `Z`-matrix for a 60-species fit). Default `5`. Smart-truncation
+#'   prefers non-zero columns within the visible row band.
+#' @param tail_cols Number of trailing **columns** to show after the
+#'   `\\cdots` ellipsis. Default `2`.
 #' @param id A short identifier so multiple panels can co-exist on one page.
 #' @param standalone If `TRUE`, wrap the fragment in a full HTML document
 #'   with a MathJax CDN bootstrap so the file renders math when opened
@@ -30,6 +43,7 @@
 #' @return A character vector (HTML), invisible.
 #' @export
 as_html_three_views <- function(x, head = 5L, tail = 2L,
+                                head_cols = 5L, tail_cols = 2L,
                                 id = "sym", standalone = FALSE,
                                 file = NULL, ...) {
   UseMethod("as_html_three_views")
@@ -45,17 +59,30 @@ as_html_three_views.default <- function(x, ...) {
 
 #' @export
 as_html_three_views.symbolized_model <- function(x, head = 5L, tail = 2L,
+                                                  head_cols = 5L,
+                                                  tail_cols = 2L,
                                                   id = "sym",
                                                   standalone = FALSE,
                                                   file = NULL, ...) {
   eq_lines  <- x$components$equation_matrix
   idx_lines <- x$components$equation
   has_re <- !is.null(x$expanded) && !is.null(x$expanded$Z_g)
-  matrix_block   <- three_views_matrix_block(x, head = head, tail = tail)
+  matrix_block   <- three_views_matrix_block(x, head = head, tail = tail,
+                                              head_cols = head_cols,
+                                              tail_cols = tail_cols)
   matrix_summary <- three_views_matrix_summary(has_re)
 
   uid <- paste0("sym-", gsub("[^a-zA-Z0-9]", "", id), "-",
                 as.integer(Sys.time()))
+  # Historical id naming: `idx` = Tab 1 (per-observation index form);
+  # `eq` = Tab 2 (matrix-equation form — `eq` stands for the *equation*
+  # form, not "equations with data"); `mat` = Tab 3 (matrix expansion
+  # *with numbers*). The labels read as "Index / Matrix / Equations with
+  # data" and the IDs read as "idx / eq / mat" — V1-D8 flagged that
+  # `-tab-eq` showing matrix content and `-tab-mat` showing equations
+  # reads as swapped. Kept as-is for external-anchor stability (URLs
+  # like `#sym-foo-tab-eq` are user-facing); see V1 audit for the
+  # historical naming rationale.
   tab_eq  <- paste0(uid, "-tab-eq")
   tab_idx <- paste0(uid, "-tab-idx")
   tab_mat <- paste0(uid, "-tab-mat")
@@ -115,7 +142,11 @@ as_html_three_views.symbolized_model <- function(x, head = 5L, tail = 2L,
     "</div>\n"
   )
 
-  marker <- "<span class=\"sym-tab-marker\" aria-hidden=\"true\">&#9656;</span>"
+  # Tab marker glyph. Followed by a hair space + thin space (U+200A + U+2009)
+  # so visual gap between `▸` and `1.` matches typographic convention. The
+  # CSS `margin-right` on `.sym-tab-marker` is a fallback in case pandoc
+  # strips the literal Unicode whitespace.
+  marker <- "<span class=\"sym-tab-marker\" aria-hidden=\"true\" style=\"margin-right:0.35em\">&#9656;</span>"
   # IMPORTANT: never indent inner HTML lines with 4+ leading spaces.
   # Markdown processors (pandoc, commonmark) treat any line with 4+
   # leading spaces as the start of an indented code block, which
@@ -190,6 +221,14 @@ as_html_three_views.symbolized_model <- function(x, head = 5L, tail = 2L,
 #' @param file Output path (`.pdf`). Required.
 #' @param title Optional document title. Defaults to a short auto-title
 #'   built from the fit's class and response.
+#' @param head Number of leading rows shown in any matrix block before
+#'   the `\\vdots` ellipsis (default `5`).
+#' @param tail Number of trailing rows shown after the `\\vdots` (default `2`).
+#' @param head_cols Number of leading columns shown in any matrix block
+#'   with more than `head_cols + tail_cols` columns (default `5`).
+#'   Smart-truncation prefers non-zero columns within the visible row band.
+#' @param tail_cols Number of trailing columns shown after the `\\cdots`
+#'   ellipsis (default `2`).
 #' @param keep_tex If `TRUE`, keep the intermediate `.tex` next to the PDF
 #'   for inspection. Default `FALSE`.
 #' @param ... Passed to `rmarkdown::render()`.
@@ -197,6 +236,8 @@ as_html_three_views.symbolized_model <- function(x, head = 5L, tail = 2L,
 #' @return The path to the rendered PDF (invisibly).
 #' @export
 as_pdf_three_views <- function(x, file, title = NULL,
+                               head = 5L, tail = 2L,
+                               head_cols = 5L, tail_cols = 2L,
                                keep_tex = FALSE, ...) {
   UseMethod("as_pdf_three_views")
 }
@@ -211,6 +252,9 @@ as_pdf_three_views.default <- function(x, ...) {
 
 #' @export
 as_pdf_three_views.symbolized_model <- function(x, file, title = NULL,
+                                                 head = 5L, tail = 2L,
+                                                 head_cols = 5L,
+                                                 tail_cols = 2L,
                                                  keep_tex = FALSE, ...) {
   if (!requireNamespace("rmarkdown", quietly = TRUE)) {
     cli::cli_abort(c(
@@ -283,7 +327,9 @@ as_pdf_three_views.symbolized_model <- function(x, file, title = NULL,
     # Pattern J fix (B57/B58): emit the same stacked-matrix block + Cov(u)
     # block that HTML Tab 3 shows. Column-truncated by Pattern O so the 60-
     # row matrices collapse to 8x8 and fit on the page.
-    pdf_three_views_matrix_block_latex(x, head = 5L, tail = 2L),
+    pdf_three_views_matrix_block_latex(x, head = head, tail = tail,
+                                        head_cols = head_cols,
+                                        tail_cols = tail_cols),
     ""
   )
   writeLines(rmd_body, rmd_path)
@@ -305,11 +351,15 @@ as_pdf_three_views.symbolized_model <- function(x, file, title = NULL,
 # block past the worked-row scalar arithmetic. Worked-row blocks come
 # first; eq_mu (the stacked matrix equation), eq_sigma (optional), and
 # eq_M (the structured-covariance Cov(u) block) come last.
-pdf_three_views_matrix_block_latex <- function(x, head = 5L, tail = 2L) {
+pdf_three_views_matrix_block_latex <- function(x, head = 5L, tail = 2L,
+                                                 head_cols = 5L,
+                                                 tail_cols = 2L) {
   ex <- x$expanded
   has_mu  <- !is.null(ex) && !is.null(ex$X) && !is.null(ex$beta) && !is.null(ex$mu_hat)
   if (!has_mu) return(character(0))
-  html <- three_views_matrix_block(x, head = head, tail = tail)
+  html <- three_views_matrix_block(x, head = head, tail = tail,
+                                    head_cols = head_cols,
+                                    tail_cols = tail_cols)
   # Extract every $$...$$ display-math block from the emitted HTML.
   # Use [\s\S] for "any char including newline" since R PCRE doesn't
   # support `s` flag in regex options.
@@ -519,7 +569,8 @@ three_views_matrix_summary <- function(has_re) {
   }
 }
 
-three_views_matrix_block <- function(x, head = 5L, tail = 2L) {
+three_views_matrix_block <- function(x, head = 5L, tail = 2L,
+                                      head_cols = 5L, tail_cols = 2L) {
   ex <- x$expanded
   if (is.null(ex)) {
     return("<p><em>This symbolized_model carries no expanded numeric arrays.</em></p>\n")
@@ -643,7 +694,8 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L) {
   # arithmetic. The matrix block IS the worked row, stacked n times.
   eps_hat  <- ex$y - ex$mu_hat
   y_vec    <- latex_vec(ex$y,     rows)
-  X_mat    <- latex_mat(ex$X,     rows)
+  X_mat    <- latex_mat(ex$X,     rows,
+                         col_head = head_cols, col_tail = tail_cols)
   beta_vec <- latex_vec(ex$beta)
   eps_vec  <- latex_vec(eps_hat,  rows)
   y_lab    <- sprintf("%s_{\\,%d \\times 1}\\;\\text{(observed)}",
@@ -665,8 +717,10 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L) {
     # u's row truncation must use the SAME indices so the entries align
     # in the matrix multiplication Z u. Closes B77 (u-vector untruncated)
     # and prevents the matrix product from looking malformed.
-    z_col_idx <- trunc_col_idx(ex$Z_g, rows, head = 5L, tail = 2L)
-    Zg_mat  <- latex_mat(ex$Z_g, rows)
+    z_col_idx <- trunc_col_idx(ex$Z_g, rows,
+                               head = head_cols, tail = tail_cols)
+    Zg_mat  <- latex_mat(ex$Z_g, rows,
+                         col_head = head_cols, col_tail = tail_cols)
     u_vec   <- latex_vec(ex$u, z_col_idx)
     Zg_lab  <- sprintf("\\mathbf{Z}_{\\,%d \\times %d}",
                        n, ncol(ex$Z_g))
@@ -687,7 +741,8 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L) {
   # --- Block 2: sigma submodel (only when distributional) ----------------
   eq_sigma <- if (has_sigma) {
     sigma_vec <- latex_vec(ex$sigma_hat, rows)
-    Xs_mat    <- latex_mat(ex$X_sigma, rows)
+    Xs_mat    <- latex_mat(ex$X_sigma, rows,
+                            col_head = head_cols, col_tail = tail_cols)
     gamma_vec <- latex_vec(ex$gamma)
     sigma_lab <- sprintf("\\boldsymbol{\\sigma}_{\\,%d \\times 1}", n)
     # Sigma-submodel design matrix: rename `\mathbf{Z}` -> `\mathbf{X}_\sigma`
@@ -738,13 +793,20 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L) {
       "\\sigma^2"
     )
     k <- nrow(ex$M)
-    # Truncate the M matrix for display: head x head + ldots + tail x tail
-    # for both rows and columns. For small k (<= head + tail + 1) show all.
+    # Truncate the M matrix for display. Rows use `head` / `tail`
+    # (consistent with the y / X / Z / eps row truncation); columns
+    # use `head_cols` / `tail_cols` so the user can dial cols independently
+    # of rows. For small k, show all rows / columns.
     if (k <= head + tail + 1L) {
-      M_idx_r <- seq_len(k); M_idx_c <- seq_len(k)
+      M_idx_r <- seq_len(k)
     } else {
       M_idx_r <- c(seq_len(head), NA_integer_, seq.int(k - tail + 1L, k))
-      M_idx_c <- c(seq_len(head), NA_integer_, seq.int(k - tail + 1L, k))
+    }
+    if (k <= head_cols + tail_cols + 1L) {
+      M_idx_c <- seq_len(k)
+    } else {
+      M_idx_c <- c(seq_len(head_cols), NA_integer_,
+                    seq.int(k - tail_cols + 1L, k))
     }
     # latex_mat assumes a contiguous index for rows; we need full
     # column truncation too. Local helper:

@@ -1,6 +1,9 @@
 ---
 title: "Structural dependence: phylogenetic, animal-model, and spatial random effects"
-output: rmarkdown::html_vignette
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
 vignette: >
   %\VignetteIndexEntry{Structural dependence: phylogenetic, animal-model, and spatial random effects}
   %\VignetteEngine{knitr::rmarkdown}
@@ -176,6 +179,8 @@ The phylogenetic correlation matrix $\mathbf A$ carries realistic biology — mo
 
 `MCMCglmm` uses the **all-nodes** representation natively (Hadfield 2010 §8.2.1). Internally the random-effect vector spans both tip species AND internal phylogenetic nodes, so when the widget below shows a $\mathbf{Z}$ and $\mathbf{A}$ matrix you will see $116 \times 116$ blocks, not the nominal $k \times k = 60 \times 60$ tips-only form — the same prior, just an augmented coordinate system. (For a $k$-tip tree the augmentation is at most $2k-2$ rows; in this dataset two polytomies after ultrametricisation drop the count from 118 to 116.)
 
+A note on **scalar vs vector notation** before the widget: the **Index** tab writes one row of the model for a single observation $i$, so the scalar form $\mathrm{Zr}_i$ (italic capital, with subscript) is used. The **Matrix** and **Equations with data** tabs collect all $n$ observations into the column vector $\mathbf{zr} = (\mathrm{Zr}_1, \dots, \mathrm{Zr}_n)^\top$ (bold lowercase, no subscript). Same quantity, two notations — the index form is for reading one row, the vector form is for the matrix algebra.
+
 ```{r mcmcglmm-fit, message = FALSE, results = "hide"}
 fit_mcmc <- MCMCglmm(
   Zr ~ 1,
@@ -198,7 +203,7 @@ sym_mcmc$metadata$heritability           # h^2 derived automatically
 
 #### Three-views widget for the MCMCglmm fit
 
-```{r mcmcglmm-widget, results = "asis", message = FALSE}
+```{r mcmcglmm-widget, results = "asis", message = FALSE, echo = FALSE}
 # All-nodes shim per Hadfield's course notes section 8.2.1:
 # MCMCglmm fits with `ginverse = list(species = Ainv$Ainv)` where
 # `inverseA(nodes = "ALL")` operates internally on the augmented
@@ -250,8 +255,12 @@ as_html_three_views(sym_mcmc, id = "mcmc")
 # destination, so we emit one PDF in the chunk cwd (= source dir,
 # where rmarkdown::render's link resolves) AND if a sibling
 # `../docs/articles` exists (pkgdown build), copy a second copy there.
-pdf_alongside_html <- function(sym, basename, title) {
-  as_pdf_three_views(sym, file = basename, title = title)
+pdf_alongside_html <- function(sym, basename, title,
+                               head = 5L, tail = 2L,
+                               head_cols = 5L, tail_cols = 2L) {
+  as_pdf_three_views(sym, file = basename, title = title,
+                     head = head, tail = tail,
+                     head_cols = head_cols, tail_cols = tail_cols)
   docs_articles <- "../docs/articles"
   if (dir.exists(docs_articles)) {
     file.copy(basename, file.path(docs_articles, basename), overwrite = TRUE)
@@ -351,11 +360,11 @@ The cross-package agreement story is the point: every fit above attaches the sam
 The phylogenetic random effect is the **same mathematical object** as the additive-genetic random effect in a quantitative-genetics animal model. The matrix $\mathbf A$ comes from a different source (a pedigree of dam-sire-offspring rather than a phylogenetic tree), but its meaning in the model is identical:
 
 $$
-\mathbf u_a \;\sim\; \mathcal N(\mathbf 0, \sigma_A^2\,\mathbf A),\qquad
-h^2 \;=\; \frac{\sigma_A^2}{\sigma_A^2 + \sigma_e^2}.
+\mathbf u_p \;\sim\; \mathcal N(\mathbf 0, \sigma_p^2\,\mathbf A),\qquad
+h^2 \;=\; \frac{\sigma_p^2}{\sigma_p^2 + \sigma_e^2}.
 $$
 
-The only interpretation difference is what $\sigma_A^2$ *means*: phylogenetic variance among species in a phylogenetic comparative method, additive genetic variance among individuals in a quantitative-genetics animal model. `symbolizer`'s `symbolize.MCMCglmm()` handles both via the same `ginverse` detection branch, and `drmTMB` ships separate `phylo(term, tree)` and `animal(term, pedigree)` markers that share an internal implementation. For deep-dive treatments of either case, see drmTMB's own [`structural-dependence.Rmd`](https://itchyshin.github.io/drmTMB/articles/structural-dependence.html), [`phylogenetic-models.Rmd`](https://itchyshin.github.io/drmTMB/articles/phylogenetic-models.html), and [`animal-models.Rmd`](https://itchyshin.github.io/drmTMB/articles/animal-models.html) — `symbolizer` cross-links rather than duplicates them.
+(The quantitative-genetics literature often writes the same quantities as $\mathbf u_a$, $\sigma_A^2$, and $\sigma_E^2$ — the "A" / "E" letters stand for *additive* and *environmental*. This article uses $p$ / $e$ throughout for consistency; the conversion is purely cosmetic.) The interpretation of $\sigma_p^2$ differs by domain: it's *phylogenetic* variance among species in a phylogenetic comparative method, *additive genetic* variance among individuals in a quantitative-genetics animal model. `symbolizer`'s `symbolize.MCMCglmm()` handles both via the same `ginverse` detection branch, and `drmTMB` ships separate `phylo(term, tree)` and `animal(term, pedigree)` markers that share an internal implementation. For deep-dive treatments of either case, see drmTMB's own [`structural-dependence.Rmd`](https://itchyshin.github.io/drmTMB/articles/structural-dependence.html), [`phylogenetic-models.Rmd`](https://itchyshin.github.io/drmTMB/articles/phylogenetic-models.html), and [`animal-models.Rmd`](https://itchyshin.github.io/drmTMB/articles/animal-models.html) — `symbolizer` cross-links rather than duplicates them.
 
 ## Tips-only vs all-nodes
 
@@ -425,6 +434,7 @@ the variance components $\sigma_p^2$ and $\sigma_s^2$ are *weakly identified*: t
 - Hadfield, J. D. & Nakagawa, S. (2010). General quantitative genetic methods for comparative biology: phylogenies, taxonomies and multi-trait models for continuous and categorical characters. *Journal of Evolutionary Biology*, 23, 494–508.
 - Ho, L. S. T. & Ané, C. (2014). A linear-time algorithm for Gaussian and non-Gaussian trait evolution models. *Systematic Biology*, 63(3), 397–408.
 - Lynch, M. (1991). Methods for the analysis of comparative data in evolutionary biology. *Evolution*, 45(5), 1065–1080.
+- Moura, M. R., Costa, H. C., Peixoto, M. A., Fonseca, E. M., Werneck, F. P. & Garda, A. A. (2021). Data from: Detecting the geography of size-assortative mating in the Neotropics. *Ecography*, 44(11), 1583–1594.
 - Mizuno, A., Williams, C., Lagisz, M., Senior, A. M. & Nakagawa, S. (2026). A unified framework for phylogenetic and spatial meta-analysis: concepts, implementation, and practical guidance. *Research Synthesis Methods*.
 - Nakagawa, S., Mizuno, A., Williams, C., Lagisz, M., Yang, Y. & Drobniak, S. M. (2025). Quantifying macro-evolutionary patterns of trait mean and variance with phylogenetic location-scale models. *Methods in Ecology and Evolution*, 16, 2585–2602.
 - Williams, C., McGillycuddy, M., Drobniak, S. M., Bolker, B. M., Warton, D. I. & Nakagawa, S. (2025). Fast phylogenetic generalised linear mixed-effects modelling using the `glmmTMB` R package. *bioRxiv* 2025.12.20.695312.
