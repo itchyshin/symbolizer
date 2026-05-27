@@ -51,3 +51,22 @@ Maintainer: I'm running the multi-agent visual check across every Phase 0a surfa
 - 2026-05-26 ~02:xx — Phase 0a master summary written. Rolls up all 8 surfaces (1 with full V1+V2+V3+V4+Rose, 7 with V1-only). Catalog: B1-B101 + RF1-RF4; patterns A-HH. Architectural roots named (7). Pattern↔release dependency graph updated. Rose batch sign-off line for V1-only surfaces included (cleared for pattern-fix release plan).
 - Phase 0a essentially complete (8/12 surfaces covered; remaining 4 are lower-priority articles + README which can fold into release-prep QA).
 - Updating umbrella issue #10 with summary link.
+
+# Overnight wrap-up (2026-05-27, ready for 5am)
+
+**Phase 0a essentially complete.** 8 surfaces audited; remaining 4 (compare, large, vs-others, gllvm-design, README) are lower-priority and deferred to Phase 1 release-prep QA.
+
+**Catalog**: B1–B101 + RF1–RF4 (105 defects total)
+**Patterns**: A–HH (34 pattern families)
+**Architectural roots**: 7 named (B48, B27, no-MathJax, N, Z, F, GG)
+**Commits**: 12 on v0.21-redo, all pushed to origin
+**Issues**: umbrella #10 has comprehensive closure comment; #11–#16 + drmTMB#335 unchanged from earlier session
+
+**Where to read first when you wake up**:
+1. `docs/dev-log/figure-audits/phase0a-summary.md` — the master synthesis
+2. GitHub issue #10 latest comment — public ledger summary
+3. `.memory/reports/2026-05-27-overnight-phase0a-sweep.md` — what I did and didn't do
+
+**Suggested next session**: Phase 0b (audit v0.20.2 baseline in a worktree to confirm pre-v0.21 latent bugs) OR jump to Phase 0d (write `docs/specs/*.md` first-slice specs informed by the audit findings).
+
+Both are pre-implementation. No code changes yet. Branch stays at v0.20.2 base.
