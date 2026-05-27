@@ -112,7 +112,7 @@ geometric mean by `exp(beta)`.
 #### Three views of the lognormal fit
 
 ```{r lognormal-widget, results = "asis", message = FALSE}
-htmltools::HTML(as_html_three_views(sym, id = "lognormal"))
+as_html_three_views(sym, id = "lognormal")
 ```
 
 ```{r lognormal-pdf, results = "asis", message = FALSE}
@@ -167,7 +167,7 @@ increase in `x` multiplies the odds by `exp(0.3) ≈ 1.35`.
 #### Three views of the Beta fit
 
 ```{r beta-widget, results = "asis", message = FALSE}
-htmltools::HTML(as_html_three_views(sym, id = "beta"))
+as_html_three_views(sym, id = "beta")
 ```
 
 ```{r beta-pdf, results = "asis", message = FALSE}
@@ -224,7 +224,7 @@ multiplicative effect on the expected count.
 #### Three views of the Poisson fit
 
 ```{r poisson-widget, results = "asis", message = FALSE}
-htmltools::HTML(as_html_three_views(sym, id = "poisson"))
+as_html_three_views(sym, id = "poisson")
 ```
 
 ```{r poisson-pdf, results = "asis", message = FALSE}
