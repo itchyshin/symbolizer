@@ -602,8 +602,40 @@ drm_entry_formula <- function(entry) {
 }
 
 drm_entry_rhs_formula <- function(entry) {
-  rhs_txt <- paste(deparse(entry$rhs), collapse = " ")
+  # B6 fix (Ayumi's bug): drmTMB exposes `phylo()`, `animal()`, `spatial()`,
+  # and `gp()` as formula markers wrapping a random-effect spec, e.g.
+  # `phylo(1 | species, tree = tree)`. R's `stats::terms()` /
+  # `stats::model.frame()` don't know about these markers and treat them
+  # as function calls on literal columns, crashing with
+  # "invalid type (NULL) for variable 'phylo(1 | species, tree = tree)'".
+  # Strip the marker (replace with its first argument wrapped in parens
+  # so lme4-style RE notation `(g | group)` is preserved) before handing
+  # to `stats::terms()`. The marker presence is detected separately
+  # (`has_drmtmb_phylo` etc.) and surfaced via `metadata$phylo_representation`.
+  rhs <- drm_strip_markers(entry$rhs)
+  rhs_txt <- paste(deparse(rhs), collapse = " ")
   stats::as.formula(paste("~", rhs_txt))
+}
+
+# Recursively walk an R expression and replace `phylo(<re_spec>, ...)`,
+# `animal(<re_spec>, ...)`, `spatial(<re_spec>, ...)`, `gp(<re_spec>, ...)`
+# calls with `(<re_spec>)` so downstream stats::terms() sees a normal
+# mixed-model formula.
+drm_strip_markers <- function(expr) {
+  if (is.call(expr)) {
+    fn_name <- as.character(expr[[1L]])[1L]
+    if (fn_name %in% c("phylo", "animal", "spatial", "gp",
+                       "drmTMB::phylo", "drmTMB::animal",
+                       "drmTMB::spatial", "drmTMB::gp")) {
+      # Marker call: replace with `(<first-arg>)`. First arg is the RE spec.
+      inner <- expr[[2L]]
+      return(call("(", inner))
+    }
+    for (i in seq_along(expr)[-1]) {
+      expr[[i]] <- drm_strip_markers(expr[[i]])
+    }
+  }
+  expr
 }
 
 # ---- builders ---------------------------------------------------------------

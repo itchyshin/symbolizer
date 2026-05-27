@@ -105,6 +105,18 @@ dat <- data.frame(
 )
 
 tree   <- keep.tip(tree_raw, sp_keep)
+# Ultrametricise the tree once, here, so every downstream phylogenetic
+# fit is on the SAME ultrametric tree. Brownian-motion on tips-only A
+# requires equal root-to-tip distances by construction (A_ii = 1 only
+# when tips are equidistant from the root); metafor / MCMCglmm / brms /
+# glmmTMB accept a non-ultrametric tree silently but the BM prior is
+# then misspecified. drmTMB ENFORCES ultrametricity (it errors otherwise),
+# which surfaces the assumption that the other packages let pass. The
+# Moura tree comes from Open Tree of Life with mixed-source branch
+# lengths, so we smooth it with ape::chronos() (penalised-likelihood
+# molecular-clock estimate; lambda = 1 = smoothest plausible clock).
+tree   <- ape::chronos(tree, lambda = 1, quiet = TRUE)
+class(tree) <- "phylo"
 A_tips <- vcv.phylo(tree, corr = TRUE)
 # Reorder A_tips rows/cols to match `sp_keep` (a random sample). Without
 # this, A_tips inherits the depth-first tree-tip order, so head 5x5
@@ -113,9 +125,10 @@ A_tips <- vcv.phylo(tree, corr = TRUE)
 # meant to demonstrate. Florence-audit 2026-05-26.
 A_tips <- A_tips[sp_keep, sp_keep]
 # Representation 2 -- all-nodes A-inverse (tips + internal nodes, sparse
-# precision; Hadfield & Nakagawa 2010). scale = FALSE because the
-# Moura tree from Open Tree of Life is not strictly ultrametric.
-A_all  <- inverseA(tree, nodes = "ALL", scale = FALSE)
+# precision; Hadfield & Nakagawa 2010). With the tree now ultrametric,
+# scale = TRUE works cleanly (normalises total tree depth to 1, the
+# canonical BM-prior parameterisation).
+A_all  <- inverseA(tree, nodes = "ALL", scale = TRUE)
 
 cat("species k =", nrow(dat),
     "  Zr range = [", round(min(dat$Zr), 2), ",", round(max(dat$Zr), 2), "]\n")
@@ -315,18 +328,52 @@ sym_brms$metadata$phylo_representation  # "tips_only"
 
 ### Face 5: `drmTMB::phylo()`
 
-`drmTMB` exposes the marker directly in the formula:
+`drmTMB` exposes the marker directly in the formula. As of `symbolizer`
+v0.21.4 (fixing Ayumi's report), `symbolize.drmTMB()` strips the
+`phylo()` / `animal()` / `spatial()` / `gp()` markers before passing the
+formula to `stats::terms()`, so real `drmTMB::phylo()` fits round-trip
+through the widget cleanly:
 
-```{r drmtmb-show, eval = FALSE}
+```{r drmtmb-fit, message = FALSE}
 library(drmTMB)
 fit_drm <- drmTMB(
-  y ~ phylo(1 | species, tree = tree),
+  drm_formula(Zr ~ phylo(1 | species, tree = tree)),
   family = gaussian(),
   data   = dat
 )
 sym_drm <- symbolize(fit_drm)
 sym_drm$metadata$phylo_representation  # "all_nodes" (HN sparse precision)
+sym_drm$metadata$detected_signals      # "phylo"
 ```
+
+`drmTMB::phylo()` builds the Hadfield–Nakagawa all-nodes A-inverse
+sparse-precision representation under the hood — the latent vector $u$
+spans tips AND internal nodes, which is what enables ancestral-state
+BLUPs. The `symbolizer` extractor sets
+`metadata$phylo_representation = "all_nodes"` to surface this.
+
+#### Three-views widget for the drmTMB fit
+
+```{r drmtmb-widget, results = "asis", message = FALSE}
+as_html_three_views(sym_drm, id = "drm")
+```
+
+```{r drmtmb-pdf, results = "asis", message = FALSE}
+pdf_alongside_html(sym_drm, "fig-drm-phylo.pdf",
+                   "Phylogenetic mixed model (drmTMB) -- three views")
+```
+
+> **Location-scale phylogenetic model (PLSM) — coming soon, not in drmTMB
+> yet.** The natural next step is to put phylogeny on the residual-scale
+> submodel too: `sigma ~ phylo(1 | species, tree = tree)`. That fits the
+> Nakagawa et al. 2025 *MEE* PLSM where both the trait mean and the
+> within-species variability are clade-correlated. drmTMB explicitly
+> flags this path as "planned, not implemented" at the time of writing
+> (`drm_formula(y ~ phylo(...), sigma ~ phylo(...))` returns a
+> structured-effect error). `brms` can fit it today via
+> `bf(y ~ ... + (1 | gr(species, cov = A))) + bf(sigma ~ ... + (1 | gr(species, cov = A)))`
+> — see [issue #6](https://github.com/itchyshin/symbolizer/issues/6) for the
+> tracking ticket and v0.24 PLSM article scope.
 
 ### Face 6: `gllvmTMB::phylo_unique()`
 
