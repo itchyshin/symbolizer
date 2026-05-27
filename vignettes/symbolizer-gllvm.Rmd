@@ -57,9 +57,9 @@ library(symbolizer)
 library(gllvmTMB)
 
 set.seed(20260523)
-n_ind  <- 40   # individuals
-n_tr   <- 5    # traits
-n_sess <- 3    # repeated sessions per individual
+n_ind  <- 40L  # individuals (units)
+n_sess <- 3L   # repeated sessions per individual
+n_tr   <- 5L   # traits
 
 # True between-individual loading matrix Lambda_B (5 traits x 2 latents)
 Lam_B <- matrix(c(
@@ -69,30 +69,46 @@ Lam_B <- matrix(c(
   0.0, 1.0,   # trait 4 loads on axis 2 only
   0.0, 0.7    # trait 5 loads on axis 2
 ), nrow = n_tr, byrow = TRUE)
+psi_B   <- rep(0.4, n_tr)   # trait-specific between-individual variance
+sig_eps <- sqrt(0.3)        # row-level residual SD
 
-sim <- simulate_site_trait(
-  n_sites               = n_ind,
-  n_species             = n_sess,
-  n_traits              = n_tr,
-  n_predictors          = 1,
-  mean_species_per_site = n_sess,
-  sigma2_eps            = 0.3,
-  Lambda_B              = Lam_B,
-  psi_B                 = rep(0.4, n_tr),
-  seed                  = 1
+# Simulate from the (individual, session, trait) GLLVM directly, in line.
+# The package-level `gllvmTMB::simulate_site_trait()` is intentionally
+# scoped to the (site, species, trait) functional-biogeography case
+# (with phylogenetic and spatial machinery baked in); for the generic
+# (unit, trait) design we build the data inline -- this is what the
+# `simulate_site_trait()` docstring itself recommends, and tracking issue
+# itchyshin/gllvmTMB#306 covers shipping a generic `simulate_unit_trait()`.
+# Per-individual latent scores (z_i in R^2), per-trait between-individual
+# uniqueness residual (~ N(0, psi_B[t])), and per-row within-individual
+# residual (~ N(0, sigma_eps^2)).
+z_score <- matrix(rnorm(n_ind * 2L), nrow = n_ind, ncol = 2L)
+psi_B_resid <- matrix(rnorm(n_ind * n_tr,
+                            sd = rep(sqrt(psi_B), each = n_ind)),
+                      nrow = n_ind, ncol = n_tr)
+mu_ind_trait <- z_score %*% t(Lam_B) + psi_B_resid    # (n_ind x n_tr)
+
+# Expand to long-format: one row per (individual, session, trait).
+dat <- expand.grid(
+  trait      = factor(paste0("t", seq_len(n_tr)),
+                      levels = paste0("t", seq_len(n_tr))),
+  session    = factor(seq_len(n_sess)),
+  individual = factor(seq_len(n_ind))
 )
-
-# Relabel for syndromes vocabulary
-dat <- sim$data
-dat$individual <- dat$site          # unit
-dat$session    <- dat$species       # repeated session
-dat$obs        <- dat$site_species  # one row per (individual, session)
+dat$value <- mu_ind_trait[cbind(as.integer(dat$individual),
+                                 as.integer(dat$trait))] +
+              rnorm(nrow(dat), sd = sig_eps)
+# Stable (individual, session) observation id for the unique() term.
+dat$obs <- factor(paste(dat$individual, dat$session, sep = "_"))
 head(dat, 6)
 ```
 
-`simulate_site_trait()` is the gllvmTMB recovery-test simulator. It uses
-site/species names by default; we rename them to the syndromes
-vocabulary. Each row is one (individual, session, trait) cell.
+The data block is intentionally self-contained — no
+`simulate_site_trait()` (that simulator is the site-species-trait
+functional-biogeography special case, see
+[gllvmTMB#306](https://github.com/itchyshin/gllvmTMB/issues/306) for
+the generic `simulate_unit_trait()` work). Each row is one
+(individual, session, trait) cell.
 
 **Takeaway.** Forty individuals, three sessions each, five traits — long
 format, one row per (individual, session, trait).
@@ -286,7 +302,7 @@ across-syndrome pairs are smaller.
 communalities tell you which traits live in the shared structure;
 trait-trait correlations show the syndrome blocks directly.
 
-## 7. Identifiability gotchas: rotation and sign of $\boldsymbol{\Lambda}_B$
+## 7. Identifiability gotchas: rotation and sign of Λ_B
 
 The loading matrix $\boldsymbol{\Lambda}_B$ is identified only up to
 **rotation** and **sign** when $d_B > 1$. Two fits that produce
