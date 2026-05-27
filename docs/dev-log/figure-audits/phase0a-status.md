@@ -48,3 +48,6 @@ Maintainer: I'm running the multi-agent visual check across every Phase 0a surfa
 - Phase 0a V1 sweep covers: families, drmtmb, structural-dependence, factors, gllvm, symbolizer (get-started), roadmap, index = 8 surfaces. PLUS families had full V1+V2+V3+V4+Rose.
 - Remaining surfaces (lower priority): compare.html, large.html, vs-others.html, gllvm-design.html. Plus README rendered output.
 - Next: master Phase 0a summary report rolling everything up. Then optional: V1 on remaining lower-priority articles.
+- 2026-05-26 ~02:xx — Phase 0a master summary written. Rolls up all 8 surfaces (1 with full V1+V2+V3+V4+Rose, 7 with V1-only). Catalog: B1-B101 + RF1-RF4; patterns A-HH. Architectural roots named (7). Pattern↔release dependency graph updated. Rose batch sign-off line for V1-only surfaces included (cleared for pattern-fix release plan).
+- Phase 0a essentially complete (8/12 surfaces covered; remaining 4 are lower-priority articles + README which can fold into release-prep QA).
+- Updating umbrella issue #10 with summary link.
