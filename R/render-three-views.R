@@ -184,12 +184,56 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L) {
            paste(rows_tex, collapse = " \\\\ "),
            " \\end{bmatrix}")
   }
-  latex_mat <- function(M, idx = seq_len(nrow(M))) {
+  # Column-truncation contract (Pattern O from v0.21-redo audit): when a
+  # matrix has more than `head + tail + 1` columns, show `head` leading
+  # columns, then a `\cdots` placeholder, then `tail` trailing columns.
+  # For sparse one-hot matrices (e.g. random-effects design Z whose info
+  # lives in the few 1s, not the many 0s), prefer columns that contain at
+  # least one non-zero entry within the visible row band. Falls back to
+  # plain head/tail when the matrix has no obvious sparsity story.
+  trunc_col_idx <- function(M, idx_rows, head = 5L, tail = 2L) {
     p <- ncol(M)
-    rows_tex <- vapply(idx, function(i) {
-      if (is.na(i)) paste(rep("\\vdots", p), collapse = " & ")
-      else paste(fmt(M[i, ]), collapse = " & ")
-    }, character(1L))
+    if (p <= head + tail + 1L) return(seq_len(p))
+    rows_concrete <- idx_rows[!is.na(idx_rows)]
+    informative <- if (length(rows_concrete) > 0L) {
+      col_nz <- apply(M[rows_concrete, , drop = FALSE], 2L,
+                      function(col) any(abs(col) > .Machine$double.eps^0.5))
+      which(col_nz)
+    } else integer(0L)
+    nz_head <- intersect(seq_len(min(head, p)), informative)
+    nz_tail <- intersect(seq.int(max(1L, p - tail + 1L), p), informative)
+    if (length(nz_head) > 0L || length(nz_tail) > 0L) {
+      # Smart truncation: fill head with informative cols first, then any
+      # leading cols; same for tail. Keeps the non-zero entries visible.
+      head_set <- unique(c(nz_head, head(setdiff(seq_len(p), nz_head),
+                                          head - length(nz_head))))
+      head_set <- sort(head_set)[seq_len(min(head, length(head_set)))]
+      tail_set <- unique(c(nz_tail, tail(setdiff(seq.int(max(head_set) + 1L, p),
+                                                  nz_tail),
+                                          tail - length(nz_tail))))
+      tail_set <- sort(tail_set)
+      tail_set <- tail_set[tail_set > max(head_set)]
+      tail_set <- tail(tail_set, tail)
+    } else {
+      head_set <- seq_len(head)
+      tail_set <- seq.int(p - tail + 1L, p)
+    }
+    c(head_set, NA_integer_, tail_set)
+  }
+  latex_mat <- function(M, idx = seq_len(nrow(M)),
+                        col_head = 5L, col_tail = 2L) {
+    p <- ncol(M)
+    cidx <- trunc_col_idx(M, idx, head = col_head, tail = col_tail)
+    cells <- function(i) {
+      vapply(cidx, function(j) {
+        if (is.na(i) && is.na(j)) "\\ddots"          # row-trunc x col-trunc
+        else if (is.na(i))         "\\vdots"          # row-trunc, real col
+        else if (is.na(j))         "\\cdots"          # real row, col-trunc
+        else                       fmt(M[i, j])
+      }, character(1L))
+    }
+    rows_tex <- vapply(idx, function(i) paste(cells(i), collapse = " & "),
+                       character(1L))
     paste0("\\begin{bmatrix} ",
            paste(rows_tex, collapse = " \\\\ "),
            " \\end{bmatrix}")
@@ -248,8 +292,13 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L) {
     underbrace(beta_vec, beta_lab)
   )
   if (has_re) {
+    # Pattern O cont'd: Z's columns and u's rows share the random-effect
+    # level dimension. When we truncate Z's columns (head + cdots + tail),
+    # u's row truncation must use the SAME indices so the entries align
+    # in the matrix multiplication Z u. Closes B77 (u-vector untruncated).
+    z_col_idx <- trunc_col_idx(ex$Z_g, rows, head = 5L, tail = 2L)
     Zg_mat  <- latex_mat(ex$Z_g, rows)
-    u_vec   <- latex_vec(ex$u)
+    u_vec   <- latex_vec(ex$u, z_col_idx)
     Zg_lab  <- sprintf("\\mathbf{Z}_{\\,%d \\times %d}",
                        n, ncol(ex$Z_g))
     u_lab   <- sprintf("\\hat{\\mathbf{u}}_{\\,%d \\times 1}\\;\\text{(BLUP)}",
