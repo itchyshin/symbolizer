@@ -328,13 +328,9 @@ sym_brms$metadata$phylo_representation  # "tips_only"
 
 ### Face 5: `drmTMB::phylo()`
 
-`drmTMB` exposes the marker directly in the formula. As of `symbolizer`
-v0.21.4 (fixing Ayumi's report), `symbolize.drmTMB()` strips the
-`phylo()` / `animal()` / `spatial()` / `gp()` markers before passing the
-formula to `stats::terms()`, so real `drmTMB::phylo()` fits round-trip
-through the widget cleanly:
+`drmTMB` exposes the marker directly in the formula:
 
-```{r drmtmb-fit, message = FALSE}
+```{r drmtmb-show, eval = FALSE}
 library(drmTMB)
 fit_drm <- drmTMB(
   drm_formula(Zr ~ phylo(1 | species, tree = tree)),
@@ -346,34 +342,24 @@ sym_drm$metadata$phylo_representation  # "all_nodes" (HN sparse precision)
 sym_drm$metadata$detected_signals      # "phylo"
 ```
 
+As of `symbolizer` v0.21.4 (fixing Ayumi's report), the marker no
+longer crashes `symbolize()` — `phylo()` / `animal()` / `spatial()` /
+`gp()` markers are stripped from the formula before `stats::terms()`
+sees them. The full three-views widget, however, requires more
+extractor work — the random-effect bar needs to be skipped during
+fixed-effect parsing, a synthetic RE row needs to be added to
+`re_tbl` when a phylo marker is present, and drmTMB's location-scale
+framing needs to be reconciled with the structural-dependence
+article's narrative. That work is tracked by
+[issue #9](https://github.com/itchyshin/symbolizer/issues/9) and is
+scheduled for v0.21.2(redo) under Pattern C (structured-marker
+registry). Until it lands, this face shows the formula syntax only
+and the chunk above is `eval = FALSE`.
+
 `drmTMB::phylo()` builds the Hadfield–Nakagawa all-nodes A-inverse
-sparse-precision representation under the hood — the latent vector $u$
-spans tips AND internal nodes, which is what enables ancestral-state
-BLUPs. The `symbolizer` extractor sets
-`metadata$phylo_representation = "all_nodes"` to surface this.
-
-#### Three-views widget for the drmTMB fit
-
-```{r drmtmb-widget, results = "asis", message = FALSE}
-as_html_three_views(sym_drm, id = "drm")
-```
-
-```{r drmtmb-pdf, results = "asis", message = FALSE}
-pdf_alongside_html(sym_drm, "fig-drm-phylo.pdf",
-                   "Phylogenetic mixed model (drmTMB) -- three views")
-```
-
-> **Location-scale phylogenetic model (PLSM) — coming soon, not in drmTMB
-> yet.** The natural next step is to put phylogeny on the residual-scale
-> submodel too: `sigma ~ phylo(1 | species, tree = tree)`. That fits the
-> Nakagawa et al. 2025 *MEE* PLSM where both the trait mean and the
-> within-species variability are clade-correlated. drmTMB explicitly
-> flags this path as "planned, not implemented" at the time of writing
-> (`drm_formula(y ~ phylo(...), sigma ~ phylo(...))` returns a
-> structured-effect error). `brms` can fit it today via
-> `bf(y ~ ... + (1 | gr(species, cov = A))) + bf(sigma ~ ... + (1 | gr(species, cov = A)))`
-> — see [issue #6](https://github.com/itchyshin/symbolizer/issues/6) for the
-> tracking ticket and v0.24 PLSM article scope.
+sparse-precision representation under the hood — the latent vector
+$u$ spans tips AND internal nodes, which is what enables ancestral-
+state BLUPs.
 
 ### Face 6: `gllvmTMB::phylo_unique()`
 
