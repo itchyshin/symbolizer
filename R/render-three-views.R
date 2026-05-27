@@ -561,9 +561,12 @@ three_views_matrix_summary <- function(has_re) {
     "beta listed below."
   )
   if (has_re) {
+    # Caption is read by screen readers; do not assume Z is visible (the
+    # renderer drops Z when n_obs == n_distinct_levels, since Z is then
+    # essentially the identity on the observed levels).
     paste0(base,
-           " A random-effect indicator matrix Z_g and the predicted BLUPs u ",
-           "are also shown.")
+           " The predicted random-effect contribution to each observation ",
+           "is also shown.")
   } else {
     base
   }
@@ -711,26 +714,57 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L,
     underbrace(X_mat,    X_lab),    "\\, ",
     underbrace(beta_vec, beta_lab)
   )
+  # 2026-05-27 (maintainer + Rose consistency scan): the Z incidence
+  # matrix is only informative when observations are repeated within a
+  # random-effect level (multi-obs-per-species, multi-trial-per-animal,
+  # multi-effect-size-per-study). When n_obs == n_distinct_levels (one
+  # obs per level), Z is essentially the identity on the observed
+  # levels and renders as a wall of zeros (with the 1s scattered in
+  # columns that the head/tail truncation misses). In that case, drop
+  # the Z block entirely and emit the per-observation random effect
+  # u_obs = Z * u_full directly as an n-vector. Each row of the
+  # stacked equation then reads
+  #   zr_i = β̂_0 + û_{species(i)} + ε̂_i
+  # matching Tab 1's index-notation reading. Z is reintroduced only
+  # when the data have multiple observations per level (so Z carries
+  # genuine mapping content). The flag is computed once here so the
+  # caption prose below can drop the "Z" factor too.
+  z_is_one_to_one_flag <- has_re &&
+    nrow(ex$Z_g) >= 1L &&
+    all(rowSums(ex$Z_g != 0) == 1L) &&
+    all(colSums(ex$Z_g != 0) <= 1L)
   if (has_re) {
-    # Pattern O cont'd: Z's columns and u's rows share the random-effect
-    # level dimension. When we truncate Z's columns (head + cdots + tail),
-    # u's row truncation must use the SAME indices so the entries align
-    # in the matrix multiplication Z u. Closes B77 (u-vector untruncated)
-    # and prevents the matrix product from looking malformed.
-    z_col_idx <- trunc_col_idx(ex$Z_g, rows,
-                               head = head_cols, tail = tail_cols)
-    Zg_mat  <- latex_mat(ex$Z_g, rows,
-                         col_head = head_cols, col_tail = tail_cols)
-    u_vec   <- latex_vec(ex$u, z_col_idx)
-    Zg_lab  <- sprintf("\\mathbf{Z}_{\\,%d \\times %d}",
-                       n, ncol(ex$Z_g))
-    u_lab   <- sprintf("\\hat{\\mathbf{u}}_{\\,%d \\times 1}\\;\\text{(BLUP)}",
-                       length(ex$u))
-    eq_mu <- paste0(
-      eq_mu, " \\;+\\; ",
-      underbrace(Zg_mat, Zg_lab), "\\, ",
-      underbrace(u_vec,  u_lab)
-    )
+    if (z_is_one_to_one_flag) {
+      u_per_obs <- as.numeric(ex$Z_g %*% ex$u)
+      u_obs_vec <- latex_vec(u_per_obs, rows)
+      u_obs_lab <- sprintf(
+        "\\hat{\\mathbf{u}}_{\\,%d \\times 1}\\;\\text{(per-obs species effect)}",
+        n
+      )
+      eq_mu <- paste0(
+        eq_mu, " \\;+\\; ",
+        underbrace(u_obs_vec, u_obs_lab)
+      )
+    } else {
+      # Multi-obs-per-level case: Z carries genuine mapping content.
+      # Pattern O: Z's columns and u's rows share the level dimension;
+      # truncate them with matching indices so the matrix multiplication
+      # Z u remains aligned visually.
+      z_col_idx <- trunc_col_idx(ex$Z_g, rows,
+                                 head = head_cols, tail = tail_cols)
+      Zg_mat  <- latex_mat(ex$Z_g, rows,
+                           col_head = head_cols, col_tail = tail_cols)
+      u_vec   <- latex_vec(ex$u, z_col_idx)
+      Zg_lab  <- sprintf("\\mathbf{Z}_{\\,%d \\times %d}",
+                         n, ncol(ex$Z_g))
+      u_lab   <- sprintf("\\hat{\\mathbf{u}}_{\\,%d \\times 1}\\;\\text{(BLUP)}",
+                         length(ex$u))
+      eq_mu <- paste0(
+        eq_mu, " \\;+\\; ",
+        underbrace(Zg_mat, Zg_lab), "\\, ",
+        underbrace(u_vec,  u_lab)
+      )
+    }
   }
   # Close the response equation with the residual vector.
   eq_mu <- paste0(
@@ -852,7 +886,16 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L,
     },
     paste0("<div class=\"sym-eq\">$$\n", eq_mu, "\n$$</div>\n"),
     paste0("<p class=\"sym-caption\" style=\"font-size:0.85em;color:#6b7280;margin-top:0.4rem\"><strong>Left</strong>: observed vector $", resp_sym, "$. <strong>Middle</strong>: the prediction $\\mathbf{X}\\hat{\\boldsymbol{\\beta}}",
-           if (has_re) " + \\mathbf{Z}\\hat{\\mathbf{u}}" else "",
+           if (has_re) {
+             # When Z is the identity on the observed levels (one obs per
+             # level) the renderer drops Z from the visible block, so the
+             # caption should also drop the Z factor; otherwise show Zu.
+             if (isTRUE(z_is_one_to_one_flag)) {
+               " + \\hat{\\mathbf{u}}"
+             } else {
+               " + \\mathbf{Z}\\hat{\\mathbf{u}}"
+             }
+           } else "",
            " = \\hat{\\boldsymbol{\\mu}}$. <strong>Right</strong>: the residual vector $\\hat{\\boldsymbol{\\varepsilon}} = ", resp_sym, " - \\hat{\\boldsymbol{\\mu}}$. Every row of this matrix equation is one of the response-equation rows from the worked row above.</p>\n"),
     if (!is.null(eq_sigma)) {
       c(
