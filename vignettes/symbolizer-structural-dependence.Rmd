@@ -190,7 +190,7 @@ shim_metafor <- function(fit, A) {
        M = A)
 }
 sym_meta$expanded <- shim_metafor(fit_meta, A_tips)
-htmltools::HTML(as_html_three_views(sym_meta, id = "meta"))
+as_html_three_views(sym_meta, id = "meta")
 ```
 
 ```{r metafor-pdf, results = "asis", message = FALSE}
@@ -258,7 +258,7 @@ shim_mcmcglmm <- function(fit, dat, A) {
        M = A)
 }
 sym_mcmc$expanded <- shim_mcmcglmm(fit_mcmc, dat, A_tips)
-htmltools::HTML(as_html_three_views(sym_mcmc, id = "mcmc"))
+as_html_three_views(sym_mcmc, id = "mcmc")
 ```
 
 ```{r mcmcglmm-pdf, results = "asis", message = FALSE}

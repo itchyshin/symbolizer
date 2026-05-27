@@ -279,6 +279,11 @@ as_pdf_three_views.symbolized_model <- function(x, file, title = NULL,
     "_The index-form equations evaluated at the first observation of your data, with coefficient estimates plugged in._",
     "",
     worked,
+    "",
+    # Pattern J fix (B57/B58): emit the same stacked-matrix block + Cov(u)
+    # block that HTML Tab 3 shows. Column-truncated by Pattern O so the 60-
+    # row matrices collapse to 8x8 and fit on the page.
+    pdf_three_views_matrix_block_latex(x, head = 5L, tail = 2L),
     ""
   )
   writeLines(rmd_body, rmd_path)
@@ -289,6 +294,70 @@ as_pdf_three_views.symbolized_model <- function(x, file, title = NULL,
     ...
   )
   invisible(out)
+}
+
+# Pattern J seed: extract the matrix-form LaTeX equations from the HTML
+# emitter so the PDF can re-use them. Returns a character vector of Rmd
+# lines ready to splice into the rmd_body. Equations are wrapped in
+# Pandoc-style $$...$$ display blocks.
+# Until v0.21.1(redo) lands the one-canonical-payload refactor, this
+# helper calls three_views_matrix_block() and extracts every `$$...$$`
+# block past the worked-row scalar arithmetic. Worked-row blocks come
+# first; eq_mu (the stacked matrix equation), eq_sigma (optional), and
+# eq_M (the structured-covariance Cov(u) block) come last.
+pdf_three_views_matrix_block_latex <- function(x, head = 5L, tail = 2L) {
+  ex <- x$expanded
+  has_mu  <- !is.null(ex) && !is.null(ex$X) && !is.null(ex$beta) && !is.null(ex$mu_hat)
+  if (!has_mu) return(character(0))
+  html <- three_views_matrix_block(x, head = head, tail = tail)
+  # Extract every $$...$$ display-math block from the emitted HTML.
+  # Use [\s\S] for "any char including newline" since R PCRE doesn't
+  # support `s` flag in regex options.
+  m <- gregexpr("\\$\\$[\\s\\S]+?\\$\\$", html, perl = TRUE)
+  if (m[[1]][1] == -1L) return(character(0))
+  eqs <- regmatches(html, m)[[1]]
+  # The worked-row block contains the scalar `i=1` arithmetic and is
+  # already emitted via pdf_three_views_worked_row(); skip the first N
+  # $$..$$ that have NO `\begin{bmatrix}` (those are worked-row scalars).
+  # The matrix block, sigma block, and Cov(u) block ALL contain a
+  # `\begin{bmatrix}` token. This filter is robust to worked-row variants.
+  has_matrix <- grepl("\\\\begin\\{bmatrix\\}", eqs, fixed = FALSE)
+  matrix_eqs <- eqs[has_matrix]
+  if (length(matrix_eqs) == 0L) return(character(0))
+  # Build Rmd lines. Each equation gets a short heading.
+  has_re    <- !is.null(ex$Z_g) && !is.null(ex$u)
+  has_sigma <- !is.null(ex$X_sigma) && !is.null(ex$gamma)
+  has_M     <- !is.null(ex$M) && is.matrix(ex$M) && nrow(ex$M) > 0L
+  n_obs <- length(ex$y)
+  out <- character(0L)
+  # First matrix-bearing $$..$$ is eq_mu (the stacked response equation).
+  if (length(matrix_eqs) >= 1L) {
+    out <- c(out,
+      sprintf("_Stacking the same response equation for all $n = %d$ observations:_",
+              n_obs),
+      "",
+      matrix_eqs[1L],
+      "")
+  }
+  # If a sigma submodel was emitted, it is the next matrix block.
+  idx <- 2L
+  if (has_sigma && length(matrix_eqs) >= idx) {
+    out <- c(out,
+      "_And the $\\sigma$ submodel (no observed counterpart -- $\\sigma$'s job is to describe the spread of $\\hat{\\boldsymbol{\\varepsilon}}$):_",
+      "",
+      matrix_eqs[idx],
+      "")
+    idx <- idx + 1L
+  }
+  # Finally, the structured-covariance Cov(u) block (phylo / spatial / generic).
+  if (has_M && length(matrix_eqs) >= idx) {
+    out <- c(out,
+      "_And the structured-covariance prior on $\\mathbf{u}$. The random effect that gives this model its structural-dependence character:_",
+      "",
+      matrix_eqs[idx],
+      "")
+  }
+  out
 }
 
 # Build the LaTeX content for the "worked observation" section. Pure-LaTeX
@@ -477,12 +546,53 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L) {
            paste(rows_tex, collapse = " \\\\ "),
            " \\end{bmatrix}")
   }
-  latex_mat <- function(M, idx = seq_len(nrow(M))) {
+  # Column-truncation contract (Pattern O from v0.21-redo audit): when a
+  # matrix has more than `head + tail + 1` columns, show `head` leading
+  # columns, then a `\cdots` placeholder, then `tail` trailing columns.
+  # For sparse one-hot matrices (e.g. random-effects design Z whose info
+  # lives in the few 1s, not the many 0s), prefer columns that contain at
+  # least one non-zero entry within the visible row band.
+  trunc_col_idx <- function(M, idx_rows, head = 5L, tail = 2L) {
     p <- ncol(M)
-    rows_tex <- vapply(idx, function(i) {
-      if (is.na(i)) paste(rep("\\vdots", p), collapse = " & ")
-      else paste(fmt(M[i, ]), collapse = " & ")
-    }, character(1L))
+    if (p <= head + tail + 1L) return(seq_len(p))
+    rows_concrete <- idx_rows[!is.na(idx_rows)]
+    informative <- if (length(rows_concrete) > 0L) {
+      col_nz <- apply(M[rows_concrete, , drop = FALSE], 2L,
+                      function(col) any(abs(col) > .Machine$double.eps^0.5))
+      which(col_nz)
+    } else integer(0L)
+    nz_head <- intersect(seq_len(min(head, p)), informative)
+    nz_tail <- intersect(seq.int(max(1L, p - tail + 1L), p), informative)
+    if (length(nz_head) > 0L || length(nz_tail) > 0L) {
+      head_set <- unique(c(nz_head, head(setdiff(seq_len(p), nz_head),
+                                          head - length(nz_head))))
+      head_set <- sort(head_set)[seq_len(min(head, length(head_set)))]
+      tail_set <- unique(c(nz_tail, tail(setdiff(seq.int(max(head_set) + 1L, p),
+                                                  nz_tail),
+                                          tail - length(nz_tail))))
+      tail_set <- sort(tail_set)
+      tail_set <- tail_set[tail_set > max(head_set)]
+      tail_set <- tail(tail_set, tail)
+    } else {
+      head_set <- seq_len(head)
+      tail_set <- seq.int(p - tail + 1L, p)
+    }
+    c(head_set, NA_integer_, tail_set)
+  }
+  latex_mat <- function(M, idx = seq_len(nrow(M)),
+                        col_head = 5L, col_tail = 2L) {
+    p <- ncol(M)
+    cidx <- trunc_col_idx(M, idx, head = col_head, tail = col_tail)
+    cells <- function(i) {
+      vapply(cidx, function(j) {
+        if (is.na(i) && is.na(j)) "\\ddots"
+        else if (is.na(i))         "\\vdots"
+        else if (is.na(j))         "\\cdots"
+        else                       fmt(M[i, j])
+      }, character(1L))
+    }
+    rows_tex <- vapply(idx, function(i) paste(cells(i), collapse = " & "),
+                       character(1L))
     paste0("\\begin{bmatrix} ",
            paste(rows_tex, collapse = " \\\\ "),
            " \\end{bmatrix}")
@@ -550,8 +660,14 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L) {
     underbrace(beta_vec, beta_lab)
   )
   if (has_re) {
+    # Pattern O cont'd: Z's columns and u's rows share the random-effect
+    # level dimension. When we truncate Z's columns (head + cdots + tail),
+    # u's row truncation must use the SAME indices so the entries align
+    # in the matrix multiplication Z u. Closes B77 (u-vector untruncated)
+    # and prevents the matrix product from looking malformed.
+    z_col_idx <- trunc_col_idx(ex$Z_g, rows, head = 5L, tail = 2L)
     Zg_mat  <- latex_mat(ex$Z_g, rows)
-    u_vec   <- latex_vec(ex$u)
+    u_vec   <- latex_vec(ex$u, z_col_idx)
     Zg_lab  <- sprintf("\\mathbf{Z}_{\\,%d \\times %d}",
                        n, ncol(ex$Z_g))
     u_lab   <- sprintf("\\hat{\\mathbf{u}}_{\\,%d \\times 1}\\;\\text{(BLUP)}",
