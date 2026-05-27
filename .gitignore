@@ -8,7 +8,12 @@
 *.tar.gz
 *.Rcheck/
 
-docs/
+# pkgdown site output, while keeping project design / dev-log / specs tracked
+docs/*
+!docs/dev-log/
+!docs/dev-log/**
+!docs/specs/
+!docs/specs/**
 pkgdown/*
 !pkgdown/favicon/
 !pkgdown/extra.css
