@@ -314,12 +314,15 @@ cat(sprintf("%d effects across %d species across %d studies; habitats: %s\n",
 
 ### 4.3 Face 1 — `drmTMB` (deep dive)
 
-drmTMB's native idiom uses `meta_V()` *inside* the formula (it
-replaces brms's response-side `se(sqrt(vi))`) and `phylo()` *inside*
-the formula too (it replaces brms's `gr(., cov = A)`). One important
-gotcha: drmTMB's formula parser does NOT accept namespace-qualified
-names inside the formula, so we bind the helpers to local names
-first.
+The model adds the §3 study-tier random effect to a phylogenetic
+random effect with covariance $\sigma_p^2\,\mathbf{A}$, on top of
+the known per-effect sampling variance $v_k$. In drmTMB's idiom
+that is one formula with two markers: `meta_V()` *inside* the
+formula (replacing brms's response-side `se(sqrt(vi))`) and
+`phylo()` *inside* the formula too (replacing brms's
+`gr(., cov = A)`). One gotcha: drmTMB's formula parser does NOT
+accept namespace-qualified names inside the formula, so we bind
+the helpers to local names first.
 
 ```{r drmtmb-fit-phylo, message = FALSE, warning = FALSE}
 library(drmTMB)
@@ -406,8 +409,13 @@ fit_metafor_phylo <- rma.mv(
 fit_metafor_phylo$sigma2
 ```
 
-The two `$sigma2` rows correspond to the two random-effect tiers in
-the math above.
+The two `$sigma2` rows correspond, in the listed order, to the
+phylogenetic tier $\sigma_p^2$ (first row) and the study tier
+$\sigma_{\text{study}}^2$ (second row). On the Pottier thermal
+subset, the study-level variance dominates the phylogenetic
+variance by an order of magnitude — most heterogeneity in dARR
+sits between studies rather than along the phylogeny. (Heritability
+reading: $H^2 = \sigma_p^2 / (\sigma_p^2 + \sigma_{\text{study}}^2)$.)
 
 **Takeaway.** Three packages, one math. drmTMB leads with the
 cleanest meta-analytic idiom (`meta_V` + `phylo` inside the formula);
