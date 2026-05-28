@@ -1198,30 +1198,60 @@ three_views_worked_row <- function(ex, resp_sym = "\\mathbf{y}") {
   mu1 <- ex$mu_hat[i]
   eps1 <- W1 - mu1
 
-  # If the model has a random effect, the conditional mean for
-  # observation i = 1 is `X[1,] beta + Z_g[1,] u`. The worked-row
-  # symbolic + numeric line must include the RE contribution explicitly,
-  # otherwise the arithmetic doesn't close (Pat's audit caught this:
-  # readers who try to mentally check the row see `X*beta + eps` != W).
+  # If the model has random effects, the conditional mean for
+  # observation i = 1 is `X[1,] beta + sum_g Z_g[1,] u_g`. The worked-row
+  # symbolic + numeric line must include EVERY tier's RE contribution
+  # explicitly, otherwise the arithmetic doesn't close (Pat's audit
+  # caught this: readers who try to mentally check the row see
+  # `X*beta + eps` != W).
+  #
+  # v0.22.2-discipline Slice A2: iterate ex$Z_per_tier so multi-tier
+  # fits (phylo + study, animal + litter, ...) emit ONE re_group_label
+  # and ONE re_contrib_num per tier. Single-tier fits fall back to the
+  # historic single-term shape.
   has_re <- !is.null(ex$Z_g) && !is.null(ex$u)
-  re_contrib_num <- if (has_re) sum(ex$Z_g[i, ] * ex$u) else 0
-  # Find which level of which RE group observation i = 1 belongs to (we
-  # use it to build a symbolic label `\hat{u}_{group(1)}`). For simple
-  # `(1|group)` models, Z_g is a one-hot indicator and the active column
-  # is the group label.
-  re_group_label <- NULL
-  if (has_re) {
-    active_col <- which(ex$Z_g[i, ] != 0)
-    if (length(active_col) == 1L) {
-      lvl <- colnames(ex$Z_g)[active_col]
-      if (!is.null(lvl) && nzchar(lvl)) {
-        lvl_esc <- gsub("_", "\\_", lvl, fixed = TRUE)
-        re_group_label <- sprintf("\\hat{u}_{\\mathrm{%s}}", lvl_esc)
+  per_tier_Z_wr <- if (!is.null(ex$Z_per_tier) && length(ex$Z_per_tier) > 0L) {
+    ex$Z_per_tier
+  } else if (has_re) {
+    setNames(list(ex$Z_g), "")
+  } else NULL
+  per_tier_u_wr <- if (!is.null(ex$u_per_tier) && length(ex$u_per_tier) > 0L) {
+    ex$u_per_tier
+  } else if (has_re) {
+    setNames(list(ex$u), "")
+  } else NULL
+  re_terms_sym <- character(0L)
+  re_terms_num <- character(0L)
+  if (!is.null(per_tier_Z_wr)) {
+    for (gv in names(per_tier_Z_wr)) {
+      Z_gv <- per_tier_Z_wr[[gv]]
+      u_gv <- per_tier_u_wr[[gv]]
+      if (is.null(Z_gv) || is.null(u_gv)) next
+      contrib <- sum(Z_gv[i, ] * u_gv)
+      active_col <- which(Z_gv[i, ] != 0)
+      lvl <- if (length(active_col) == 1L) colnames(Z_gv)[active_col] else NULL
+      lvl_esc <- if (!is.null(lvl) && nzchar(lvl)) {
+        gsub("_", "\\_", lvl, fixed = TRUE)
+      } else NULL
+      group_label <- if (nzchar(gv)) {
+        # Multi-tier: subscript both the tier name and the level
+        # (e.g. \hat{u}_{study_ID,\,3} or \hat{u}_{phylogeny,\,Myzus\_persicae})
+        gv_esc <- gsub("_", "\\_", gv, fixed = TRUE)
+        if (!is.null(lvl_esc)) {
+          sprintf("\\hat{u}_{\\mathrm{%s},\\,\\mathrm{%s}}", gv_esc, lvl_esc)
+        } else {
+          sprintf("\\hat{u}_{\\mathrm{%s},\\,\\mathrm{group}(1)}", gv_esc)
+        }
       } else {
-        re_group_label <- "\\hat{u}_{\\,\\mathrm{group}(1)}"
+        # Single-tier back-compat: historic shape (no tier subscript)
+        if (!is.null(lvl_esc)) {
+          sprintf("\\hat{u}_{\\mathrm{%s}}", lvl_esc)
+        } else {
+          "\\hat{u}_{\\,\\mathrm{group}(1)}"
+        }
       }
-    } else {
-      re_group_label <- "\\hat{u}_{\\,\\mathrm{group}(1)}"
+      re_terms_sym <- c(re_terms_sym, group_label)
+      re_terms_num <- c(re_terms_num, sprintf("(%s)", fmt(contrib)))
     }
   }
 
@@ -1284,11 +1314,13 @@ three_views_worked_row <- function(ex, resp_sym = "\\mathbf{y}") {
       num_terms[k] <- paste0(fmt(ex$beta[k]), " \\times ", fmt(X1[k]))
     }
   }
-  # Append the RE term to both lists when present so the symbolic and
-  # numeric rows close arithmetically.
-  if (has_re) {
-    sym_terms <- c(sym_terms, re_group_label)
-    num_terms <- c(num_terms, sprintf("(%s)", fmt(re_contrib_num)))
+  # Append every tier's RE term to both lists so the symbolic and
+  # numeric rows close arithmetically. Multi-tier fits emit multiple
+  # \hat{u}_{...} terms in series; single-tier emits exactly one as
+  # in the v0.22.1 shape.
+  if (length(re_terms_sym) > 0L) {
+    sym_terms <- c(sym_terms, re_terms_sym)
+    num_terms <- c(num_terms, re_terms_num)
   }
   sym_rhs <- paste(sym_terms, collapse = " + ")
   num_rhs <- paste(num_terms, collapse = " + ")

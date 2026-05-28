@@ -1,3 +1,101 @@
+# symbolizer 0.22.2
+
+## v0.22.2 -- multi-tier random-effects in Tab 3 (Slice A1 + A2 + worked-row polish)
+
+Closes the second of the two bugs the maintainer's Fisher pass
+surfaced on 2026-05-28: the phylogenetic random-effect tier was
+silently invisible in Tab 3 of the meta-multilevel widget, because
+`drm_build_expanded()` extracted only the first random-effect tier
+via `re_per_entry[[which(has_re)[1L]]]`. For phylo + study fits, the
+35-species phylogenetic tier (the article's central thesis) was
+hidden behind a single bare `Z` aggregate that actually held only
+the iid study tier.
+
+This release replaces the single-tier extraction path with a
+per-tier one. Every random-effect tier present in `re_per_entry`
+is now surfaced into the `$expanded$Z_per_tier` and
+`$expanded$u_per_tier` slots, with kinds tagged in
+`$expanded$tier_kind` (`"iid"` or `"structured"`). The Tab 3
+stacked matrix block iterates these slots so every tier shows up
+in the equation; the worked-row at observation 1 likewise
+expands to include each tier's BLUP. Single-tier fits keep the
+historic shape (no `_g` subscripts, no per-tier subscript on
+`\hat{u}`) for back-compat.
+
+### Numerical contract
+
+Per the Fisher protocol from `docs/specs/import-from-sisters.md`:
+
+$$\mathbf{X}\hat{\boldsymbol{\beta}} + \sum_g \mathbf{Z}_g \hat{\mathbf{u}}_g = \hat{\boldsymbol{\mu}}$$
+
+verified to 2.5e-14 on the Pottier thermal subset (35 species
+× 39 studies × 164 effects), well under the protocol tolerance
+of 1e-9. Closure holds for both the iid tier (study) and the
+structured tier (phylogeny, where BLUPs are extracted from
+`fit$obj$report()$u_phylo[1:n_tips]` in factor-level order).
+
+### Renderer changes
+
+- `as_html_three_views()` Tab 3 stacked block iterates
+  `$expanded$Z_per_tier` and emits one `\mathbf{Z}_g
+  \hat{\mathbf{u}}_g` block per tier with `\text{...}`-wrapped
+  subscripts so multi-character group names like `study_ID`
+  render legibly.
+- The worked-row helper (`three_views_worked_row()`) iterates the
+  same per-tier slots and emits one `\hat{u}_{g,\,\text{level}(1)}`
+  term per tier. On the Pottier widget, observation 1 now shows
+  `+ \hat{u}_{\text{study\_ID},\,3}
+   + \hat{u}_{\text{phylogeny},\,\text{Myzus\_persicae}}`,
+  carrying the BLUP for each tier so the scalar arithmetic closes.
+- Pattern O smart-column-truncation now promotes informative MIDDLE
+  columns into the visible head/tail when neither structural head
+  nor tail contains any 1s within the visible row band. The phylo
+  Z column on the Pottier fit (visible species: Myzus_persicae
+  at col 18, Oreochromis_niloticus at col 20 of 35) now displays
+  the 1s rather than all zeros.
+
+### Extractor changes
+
+- `drm_build_expanded()` now accepts a
+  `structured_matrix_for_group` argument and threads it through
+  to flag structured tiers (where BLUPs come from
+  `fit$obj$report()$u_phylo` rather than
+  `fit$random_effects$mu$terms`).
+- The factor-coercion-before-`model.matrix` discipline from
+  v0.22.1.3 applies per-tier; numeric grouping variables for
+  ANY tier are correctly turned into one-hot incidence matrices.
+
+### Tests
+
+- New `tests/testthat/test-symbolize-drmtmb-per-tier-Z.R` (30
+  expectations): two-tier iid fit surfaces both Z, Pottier
+  meta-multilevel surfaces study + phylogeny with full Fisher
+  closure at 1e-9, single-RE back-compat $Z_g/$u alias semantics.
+- `tests/testthat/test-expand.R` updated to list the new slot
+  names on `$expanded`.
+- Full suite: `FAIL 0 | SKIP 0 | PASS 1891` (+30 from new tests
+  beyond 1861).
+
+### Audit trail
+
+- `docs/dev-log/figure-audits/v0.22.1-meta-phylo/claude-fisher-audit.md`
+  is the numerical Fisher pass that surfaced both bugs.
+- `docs/specs/import-from-sisters.md` is the synthesis of three
+  sister-repo scouts (drmTMB / glmmTMB / gllvmTMB) into a
+  discipline-import spec. This release implements Priority 1
+  (Z-matrix bug class) and part of Priority 2 (Fisher closure
+  baked into a regression test).
+
+### Known residuals
+
+- Codex CLI Fisher-pass demo is still pending a CLI upgrade
+  (`codex-cli 0.120.0` does not yet support the backend's `gpt-5.5`
+  routing). The Claude-authored Fisher pass substitutes; live
+  Codex demo deferred.
+- The remaining Priority 3-6 imports (V-agent registry expansion,
+  after-task `_TEMPLATE.md`, `tools/` enforcement scripts,
+  `.codex/agents/` stubs) are deferred to v0.22.3-discipline.
+
 # symbolizer 0.22.1.3
 
 ## v0.22.1.3 -- drmTMB Z_g extractor fix (numeric group_var)
