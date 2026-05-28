@@ -132,6 +132,53 @@ as_html_three_views.symbolized_model <- function(x, head = 5L, tail = 2L,
     gloss_matrix,
     "</div>\n"
   )
+  # Implied-covariance blocks (gllvm two-tier widget). For a Widget-1
+  # gllvm fit (between only) emit just the B-tier block; for a Widget-2
+  # gllvm fit (two-tier) emit B then W, plus a per-trait repeatability
+  # row. The latex_implied_cov_block() emitter returns NULL when the
+  # matrices are absent, so the conditional below is naturally inert
+  # for any non-gllvm fit.
+  ex <- x$expanded
+  sigma_B_block <- latex_implied_cov_block(
+    tier = "B",
+    Sigma = ex$Sigma_B, Lambda = ex$Lambda_B, Psi = ex$Psi_B
+  )
+  sigma_W_block <- latex_implied_cov_block(
+    tier = "W",
+    Sigma = ex$Sigma_W, Lambda = ex$Lambda_W, Psi = ex$Psi_W
+  )
+  implied_cov_html <- ""
+  if (!is.null(sigma_B_block)) {
+    implied_cov_html <- paste0(implied_cov_html,
+      "<p class=\"sym-caption\" style=\"font-size:0.95em;color:#374151\">",
+      "Implied between-individual trait covariance ",
+      "$\\boldsymbol{\\Sigma}_B$ ",
+      "decomposes into a shared low-rank part and per-trait uniquenesses:",
+      "</p>\n<div class=\"sym-eq\">", sigma_B_block, "</div>\n")
+  }
+  if (!is.null(sigma_W_block)) {
+    implied_cov_html <- paste0(implied_cov_html,
+      "<p class=\"sym-caption\" style=\"font-size:0.95em;color:#374151\">",
+      "Implied within-individual trait covariance ",
+      "$\\boldsymbol{\\Sigma}_W$ ",
+      "(replaces the $\\sigma^2_\\epsilon$ row-level residual in this fit):",
+      "</p>\n<div class=\"sym-eq\">", sigma_W_block, "</div>\n")
+    # Per-trait repeatability row when both tiers present.
+    if (!is.null(ex$Repeatability)) {
+      R_vec <- ex$Repeatability
+      R_txt <- paste(vapply(R_vec, function(v)
+        formatC(v, digits = 3, format = "g"), character(1L)),
+        collapse = ", ")
+      implied_cov_html <- paste0(implied_cov_html,
+        "<p class=\"sym-caption\" style=\"font-size:0.95em;color:#374151\">",
+        "Per-trait repeatability $R_t = (\\Sigma_B)_{tt} / ",
+        "[(\\Sigma_B)_{tt} + (\\Sigma_W)_{tt}]$: $[",
+        R_txt,
+        "]$. Each $R_t$ is the share of trait $t$'s total variance that ",
+        "lives at the <em>between-individual</em> tier.",
+        "</p>\n")
+    }
+  }
   mat_panel <- paste0(
     "<div class=\"sym-panel\" role=\"tabpanel\" id=\"", pan_mat,
     "\" aria-labelledby=\"", tab_mat, "\" data-panel=\"mat\" hidden tabindex=\"0\">\n",
@@ -139,6 +186,7 @@ as_html_three_views.symbolized_model <- function(x, head = 5L, tail = 2L,
     bio_gloss,
     "  <span class=\"sym-sr-only\">", matrix_summary, "</span>\n",
     matrix_block,
+    implied_cov_html,
     "</div>\n"
   )
 
