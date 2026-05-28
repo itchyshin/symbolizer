@@ -818,6 +818,24 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L,
     } else integer(0L)
     nz_head <- intersect(seq_len(min(head, p)), informative)
     nz_tail <- intersect(seq.int(max(1L, p - tail + 1L), p), informative)
+    # v0.22.2-discipline Slice A2 polish: when the informative columns
+    # sit in the MIDDLE of a wide matrix (e.g. Z_phylo for a species
+    # that's alphabetically mid-list), nz_head and nz_tail are both
+    # empty and the old code fell to the structural head/tail (all
+    # zeros for sparse one-hot). Surface middle informative cols by
+    # promoting them into the head/tail sets so the visible window
+    # contains the 1s the reader needs to see.
+    nz_middle <- setdiff(informative, c(nz_head, nz_tail))
+    if (length(nz_head) == 0L && length(nz_middle) > 0L) {
+      take <- min(length(nz_middle), head)
+      nz_head   <- nz_middle[seq_len(take)]
+      nz_middle <- nz_middle[-seq_len(take)]
+    }
+    if (length(nz_tail) == 0L && length(nz_middle) > 0L) {
+      take <- min(length(nz_middle), tail)
+      nz_tail <- nz_middle[seq.int(length(nz_middle) - take + 1L,
+                                    length(nz_middle))]
+    }
     if (length(nz_head) > 0L || length(nz_tail) > 0L) {
       head_set <- unique(c(nz_head, head(setdiff(seq_len(p), nz_head),
                                           head - length(nz_head))))
