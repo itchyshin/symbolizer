@@ -1,3 +1,73 @@
+# symbolizer 0.22.1
+
+## v0.22.1 -- meta-analysis Widget 2 (phylogenetic multilevel)
+
+Second slice of the v0.22 meta-analysis article (design anchored on
+Nakagawa et al. 2025 *Global Change Biology* e70204 "Bonus 2"). Adds
+§4 of `vignettes/symbolizer-meta-analysis.Rmd` -- phylogenetic
+multilevel meta-analysis with three Faces:
+
+- **Face 1 (deep)**: `drmTMB::drmTMB(drm_formula(es ~ x + meta_V(V = vi) + phylo(1 | species, tree = ...) + (1 | study), sigma ~ 1))` -- the GCB-aligned native idiom that replaces brms `se(sqrt(vi))` and `gr(., cov = A)`.
+- **Face 2 (light)**: `brms::brm(bf(es | se(sqrt(vi)) ~ ... + (1 | gr(species, cov = mat))))` -- the GCB paper's reference syntax.
+- **Face 3 (light)**: `metafor::rma.mv(yi, V = vi, random = list(~1|phylogeny, ~1|study), R = list(phylogeny = A))`.
+
+Widget 2 (id = `sym-phylomultilevel-...`) renders the per-tier
+$\boldsymbol{\Sigma}$ decomposition in Tab 3, mirroring the
+v0.21.6-redo gllvm Σ-block layout. The article switches data from
+the §3 BCG fixture to a 35-species / 164-effect subset of the
+Pottier et al. (2022) thermal acclimation data shipped at
+`inst/extdata/thermal_subset.csv`.
+
+### Extractor additions
+
+- `symbolize.drmTMB()` detects `meta_V()` inside the formula and
+  tags `metadata$context = "meta_analysis"`. Two production-code
+  fixes (`drm_strip_re_terms` + `drm_entry_rhs_formula`) ensure
+  drm-formula parsing handles `meta_V()` and `phylo()` markers
+  cleanly.
+- `symbolize.brms()` detects `se(...)` on the response and tags
+  `metadata$context = "meta_analysis"`.
+
+### Data
+
+- `inst/extdata/thermal_subset.csv` (164 effects, 35 species, 39
+  studies; seed = `20260528L`).
+- `inst/extdata/thermal_subset_tree.tre` (ultrametric phylogeny
+  matching the subset).
+- `data-raw/make-thermal-subset.R` (reproducible build script).
+
+### Tests
+
+- `tests/testthat/test-symbolize-drmtmb-meta-multilevel.R` (5
+  passing + 1 documented skip).
+- `tests/testthat/test-symbolize-brms-meta.R` (3 passing).
+- `tests/testthat/helper-meta-fits.R` adds three fixtures:
+  `fit_drmtmb_phylo_multilevel()`, `fit_brms_phylo_meta()`,
+  `fit_metafor_phylo_meta()`.
+
+### Capabilities + assumptions
+
+- 4 new rows in `inst/extdata/capabilities.csv`: drmTMB / brms /
+  metafor × meta-analytic + phylo-multilevel.
+- 7 new rows in `inst/extdata/assumption-templates.csv` for
+  `family = gaussian` with `requires = meta_analysis`: the
+  meta-analytic likelihood ($y_k \mid \theta_k \sim
+  \mathrm{Normal}(\theta_k,\, v_k)$), the known-sampling-variance
+  caveat ($v_k$ is an input, not a parameter), the moderator
+  + random-effect linear predictor for $\theta_k$, conditional
+  independence, and three reader-responsibilities (no publication
+  bias, correct effect metric, no missing-at-random). Rows fire
+  only when `symbolize.drmTMB()` or `symbolize.brms()` reports
+  `detected_signals` including `"meta_analysis"`.
+
+### Out of scope (deferred)
+
+- §5 location-scale Widget 3 (v0.22.2).
+- PDF widgets via `as_pdf_three_views()` (v0.22.3).
+- Updating §2/§3 to use the thermal dataset (currently still BCG;
+  the §4 transition paragraph documents the switch).
+- MCMCglmm `mev = vi` bridge (lands later if scope allows).
+
 # symbolizer 0.21.6-redo
 
 ## v0.21.6-redo -- gllvm two-tier widget: syndromes + integrated plasticity

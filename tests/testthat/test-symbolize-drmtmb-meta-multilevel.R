@@ -35,13 +35,6 @@ test_that("variance_components includes the phylogeny + study tiers", {
 })
 
 test_that("assumption_table mentions the known sampling variance v_k", {
-  # The gaussian assumption templates have no meta_analysis-gated rows
-  # (those live under the meta_normal family). Adding meta_analysis rows to
-  # the gaussian templates in assumption-templates.csv is a separate slice
-  # per the architectural rule (all prose from inst/extdata/*.csv).
-  # Also: assumption_table() columns are expression_latex / biological_meaning,
-  # not expression / reading.
-  testthat::skip("meta_analysis gaussian assumption rows deferred: requires new rows in inst/extdata/assumption-templates.csv for family=gaussian with requires=meta_analysis")
   fit <- fit_drmtmb_phylo_multilevel()
   sym <- symbolize(fit)
   at <- assumption_table(sym)
