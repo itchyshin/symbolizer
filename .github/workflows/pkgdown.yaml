@@ -26,7 +26,11 @@ jobs:
       - uses: r-lib/actions/setup-tinytex@v2
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::pkgdown, local::.
+          # BH (Boost headers) and RcppEigen are runtime deps of brms /
+          # rstan that the runner image does not auto-install; without
+          # them, structural-dependence.Rmd's brms-fit chunk halts the
+          # build with "Boost not found".
+          extra-packages: any::pkgdown, any::BH, any::RcppEigen, local::.
           needs: website
       - name: Move dev-log artefacts aside (tracked under docs/ but not pkgdown-built; clean_site() would refuse)
         run: |
