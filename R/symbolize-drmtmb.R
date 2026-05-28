@@ -186,6 +186,7 @@ symbolize.drmTMB <- function(fit, symbols = NULL, units = NULL,
   detected_signals <- character(0L)
   has_drmtmb_phylo <- FALSE
   has_drmtmb_spatial <- FALSE
+  has_drmtmb_meta_v <- FALSE
   for (e in entries) {
     if (is.null(e$rhs)) next
     rhs_text <- paste(deparse(e$rhs), collapse = " ")
@@ -197,9 +198,14 @@ symbolize.drmTMB <- function(fit, symbols = NULL, units = NULL,
     if (grepl("(^|[^A-Za-z._])spatial\\s*\\(", rhs_text)) {
       has_drmtmb_spatial <- TRUE
     }
+    # v0.22.1: detect meta_V() sampling-variance marker (meta-analysis).
+    if (grepl("(^|[^A-Za-z._])meta_V\\s*\\(", rhs_text)) {
+      has_drmtmb_meta_v <- TRUE
+    }
   }
   if (has_drmtmb_phylo)   detected_signals <- c(detected_signals, "phylo")
   if (has_drmtmb_spatial) detected_signals <- c(detected_signals, "spatial")
+  if (has_drmtmb_meta_v)  detected_signals <- c(detected_signals, "meta_analysis")
   structured_matrices <- c(
     if (has_drmtmb_phylo) list(list(
       symbol             = "\\mathbf{A}",
@@ -245,9 +251,19 @@ symbolize.drmTMB <- function(fit, symbols = NULL, units = NULL,
                                            response_2 = response_2)
   expanded     <- drm_build_expanded(fit, re_per_entry, has_re)
 
+  # v0.22.1: meta_V() detection overrides the caller-supplied context so
+  # that the meta-analytic context is always tagged when the marker is
+  # present. The caller's explicit context (if any) is preserved in the
+  # fallback so non-meta fits are unaffected.
+  resolved_context <- if (isTRUE(has_drmtmb_meta_v)) {
+    "meta_analysis"
+  } else {
+    context %||% ""
+  }
+
   metadata <- list(
     call = fit$call,
-    context = context %||% "",
+    context = resolved_context,
     ci_method = ci_method,
     # The fit is retained by reference so downstream accessors that need to
     # re-query the original object (e.g. group_means / group_slopes via
@@ -400,15 +416,17 @@ drm_assert_supported_re <- function(re_tbl, dpar) {
 }
 
 drm_strip_re_terms <- function(rhs_expr) {
-  # Walk the parse tree to remove `(... | ...)` random-effect bars,
-  # leaving only fixed-effect terms. The previous regex-based
-  # implementation explicitly rejected inner parens, so brms's
+  # Walk the parse tree to remove `(... | ...)` random-effect bars AND
+  # drmTMB special-call markers (`meta_V(...)`, etc.) that stats::terms()
+  # cannot evaluate, leaving only fixed-effect terms. The previous regex-
+  # based implementation explicitly rejected inner parens, so brms's
   # `(1 | gr(species, cov = A))` survived the strip and crashed
   # `stats::model.frame()` with "could not find function 'gr'".
   # The tree walker handles arbitrary nesting inside the grouping
   # expression.
   terms <- .drm_decompose_plus(rhs_expr)
-  keep <- !vapply(terms, .drm_is_re_bar, logical(1L))
+  keep <- !vapply(terms, .drm_is_re_bar, logical(1L)) &
+          !vapply(terms, .drm_is_meta_v_term, logical(1L))
   kept <- terms[keep]
   if (length(kept) == 0L) return(quote(1))
   Reduce(function(a, b) call("+", a, b), kept)
@@ -434,6 +452,17 @@ drm_strip_re_terms <- function(rhs_expr) {
   if (!identical(expr[[1L]], as.name("("))) return(FALSE)
   inner <- expr[[2L]]
   is.call(inner) && identical(inner[[1L]], as.name("|"))
+}
+
+.drm_is_meta_v_term <- function(expr) {
+  # v0.22.1: meta_V(V = ...) is a drmTMB sampling-variance marker.
+  # stats::terms() / stats::model.frame() cannot evaluate it (the function
+  # lives in drmTMB, not in base R), so strip it from the fixed-effect rhs
+  # before passing to extract_terms(). The marker presence is detected
+  # separately (via deparsed formula grep) and recorded in metadata$context.
+  if (!is.call(expr)) return(FALSE)
+  fn_name <- as.character(expr[[1L]])[1L]
+  fn_name %in% c("meta_V", "drmTMB::meta_V")
 }
 
 drm_coef_family_for <- function(dpar) {
@@ -638,7 +667,12 @@ drm_entry_rhs_formula <- function(entry) {
   # so lme4-style RE notation `(g | group)` is preserved) before handing
   # to `stats::terms()`. The marker presence is detected separately
   # (`has_drmtmb_phylo` etc.) and surfaced via `metadata$phylo_representation`.
+  #
+  # v0.22.1: after drm_strip_markers() converts e.g. `phylo(1 | phylogeny)`
+  # → `(1 | phylogeny)`, those newly exposed RE bars must be stripped too so
+  # stats::model.frame() doesn't try to evaluate `1 | phylogeny`.
   rhs <- drm_strip_markers(entry$rhs)
+  rhs <- drm_strip_re_terms(rhs)
   rhs_txt <- paste(deparse(rhs), collapse = " ")
   stats::as.formula(paste("~", rhs_txt))
 }
