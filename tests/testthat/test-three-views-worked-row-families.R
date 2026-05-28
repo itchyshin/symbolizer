@@ -79,6 +79,39 @@ test_that("Beta sigma worked row labels the dispersion as precision phi, not SD"
   expect_false(grepl("predicted residual SD", html, fixed = TRUE))
 })
 
+test_that("Lognormal sigma caption uses plain prose (no backslash commands inside text)", {
+  # Backslash commands like `\log y` or `\hat\phi_{1}` inside `\text{...}`
+  # break pandoc's math-block parser and the whole $$...$$ block is
+  # emitted as raw text instead of rendered as MathJax. Maintainer's
+  # screenshot on v0.22.3 caught both Lognormal and Beta sigma blocks
+  # rendering as raw LaTeX source for this reason.
+  skip_if_not_installed("drmTMB")
+  source(test_path("helper-drmtmb-fits.R"), local = TRUE)
+  fit <- suppressWarnings(fit_drm_lognormal())
+  sym <- symbolize(fit)
+  html <- as_html_three_views(sym, id = "test-ln-sigma")
+
+  # No backslash command inside any \text{...} caption.
+  text_chunks <- regmatches(html, gregexpr("\\\\text\\{[^}]*\\}", html))[[1L]]
+  bad <- grep("\\\\(log|hat|exp|alpha|beta|gamma|sigma|phi|mu|eta|sin|cos)",
+              text_chunks, value = TRUE)
+  expect_equal(bad, character(0L),
+               info = "Backslash LaTeX commands found inside \\text{}; will break pandoc")
+})
+
+test_that("Beta sigma caption uses plain prose for the precision parameter", {
+  skip_if_not_installed("drmTMB")
+  source(test_path("helper-drmtmb-fits.R"), local = TRUE)
+  fit <- suppressWarnings(fit_drm_beta())
+  sym <- symbolize(fit)
+  html <- as_html_three_views(sym, id = "test-beta-sigma-text")
+
+  text_chunks <- regmatches(html, gregexpr("\\\\text\\{[^}]*\\}", html))[[1L]]
+  bad <- grep("\\\\(log|hat|exp|alpha|beta|gamma|sigma|phi|mu|eta|sin|cos)",
+              text_chunks, value = TRUE)
+  expect_equal(bad, character(0L))
+})
+
 test_that("Gaussian-identity worked row keeps the historic y = Xb + eps shape", {
   # Back-compat: Gaussian-identity is the ONLY family that legitimately
   # has y = X*beta + eps on the linear-predictor scale. Don't break it.

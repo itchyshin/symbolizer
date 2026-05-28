@@ -1474,12 +1474,17 @@ three_views_worked_row_sigma <- function(ex, family = "gaussian") {
   # parameter, NOT an SD). Gamma: dispersion. NegBinom: size parameter k.
   # Fisher pass on symbolizer-families.html flagged the Beta and
   # Lognormal mislabels as Pattern D.
+  # NOTE: keep backslash commands OUT of these captions -- they sit
+  # inside `\\text{...}` and any inline LaTeX (`\\log y`, `\\hat\\phi_{1}`,
+  # etc.) breaks pandoc's math-block parser and the whole $$ aligned $$
+  # block renders as raw source. Maintainer caught this on v0.22.3 with
+  # the Lognormal + Beta widgets. Plain prose only.
   sigma_meaning <- switch(
     tolower(as.character(family)),
     gaussian  = "predicted residual SD for observation 1",
     student   = "predicted residual SD for observation 1",
-    lognormal = "predicted log-scale residual SD for observation 1 (SD of \\log y)",
-    beta      = "predicted precision \\hat\\phi_{1} for observation 1 (not an SD)",
+    lognormal = "predicted log-scale residual SD for observation 1 (SD of log y)",
+    beta      = "predicted precision parameter for observation 1 (positive shape, not an SD)",
     gamma     = "predicted dispersion for observation 1",
     nbinom1   = "predicted dispersion (size parameter k) for observation 1",
     nbinom2   = "predicted dispersion (size parameter k) for observation 1",
