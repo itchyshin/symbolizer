@@ -4,6 +4,7 @@ test_that("expand() returns the underlying numeric arrays", {
   ex <- expand(sym)
   expect_s3_class(ex, "symbolized_expanded")
   expect_named(ex, c("y", "X", "beta", "X_sigma", "gamma", "Z_g", "u",
+                     "Z_per_tier", "u_per_tier", "tier_kind",
                      "e", "mu_hat", "sigma_hat"))
   expect_length(ex$y, sym$model$n_obs)
   expect_equal(dim(ex$X), c(sym$model$n_obs, 2L))

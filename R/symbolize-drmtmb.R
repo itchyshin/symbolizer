@@ -319,7 +319,9 @@ symbolize.drmTMB <- function(fit, symbols = NULL, units = NULL,
   bridge       <- drm_build_formula_bridge(entries, components, response,
                                            response_1 = response_1,
                                            response_2 = response_2)
-  expanded     <- drm_build_expanded(fit, re_per_entry, has_re)
+  expanded     <- drm_build_expanded(fit, re_per_entry, has_re,
+                                     structured_matrix_for_group =
+                                       structured_matrix_for_group)
 
   # v0.22.1: meta_V() detection overrides the caller-supplied context so
   # that the meta-analytic context is always tagged when the marker is
@@ -1001,7 +1003,8 @@ drm_build_fixed_effects <- function(terms_tbl, fit, ci_method = "wald") {
   )
 }
 
-drm_build_expanded <- function(fit, re_per_entry, has_re) {
+drm_build_expanded <- function(fit, re_per_entry, has_re,
+                                structured_matrix_for_group = NULL) {
   # Univariate Gaussian path: `fit$model$y`, `fit$model$X$mu`, etc. all exist
   # and are non-NULL. For biv_gaussian the design is per-dpar (X$mu1, X$mu2,
   # ...), and these names are NULL, so the multiplications below quietly
@@ -1017,59 +1020,103 @@ drm_build_expanded <- function(fit, re_per_entry, has_re) {
     exp(drop(X_sigma %*% gamma))
   } else NULL
   e <- tryCatch(as.numeric(stats::residuals(fit)), error = function(...) NULL)
-  Z_g <- NULL; u <- NULL
+
+  # v0.22.2-discipline Slice A1: per-tier Z surfacing.
+  # The pre-v0.22.2 build extracted only `re_per_entry[[which(has_re)[1]]]`
+  # -- silently dropping every random-effect tier beyond the first. For
+  # phylo + study fits, that hid the phylogenetic tier (the article
+  # thesis) from Tab 3's numeric expansion. The maintainer's
+  # Fisher-pass surfaced this bug on 2026-05-28.
+  #
+  # The fix iterates EVERY tier across EVERY submodel that has random
+  # effects, builds per-tier Z via factor-coerced model.matrix (see
+  # v0.22.1.3 fix for why factor coercion matters), and stores per-tier
+  # BLUPs in `u_per_tier`. iid tiers' BLUPs come from
+  # `fit$random_effects$mu$terms`; structured tiers' BLUPs come from
+  # `fit$obj$report()$u_phylo` (all-nodes encoding; the first n_tips
+  # entries are the tip BLUPs in factor-level order).
+  #
+  # Back-compat: `Z_g` and `u` keep their existing semantics (= first
+  # tier) so existing renderer code that reads them keeps working.
+  Z_per_tier <- list()
+  u_per_tier <- list()
+  tier_kind  <- character(0L)
   if (any(has_re)) {
-    re_info <- re_per_entry[[which(has_re)[1L]]]
-    if (!is.null(re_info) && nrow(re_info) > 0L) {
-      g_var <- re_info$group_var[[1L]]
-      term_label <- re_info$term_label[[1L]]
-      if (g_var %in% names(fit$data)) {
-        # CRITICAL: force factor conversion before model.matrix.
-        # model.matrix(~ 0 + g) on a NUMERIC g_var (e.g. integer
-        # study_ID codes) does NOT build a one-hot incidence matrix --
-        # it returns a single-column matrix carrying the literal
-        # integer values. The renderer then displays a 165 x 1 column
-        # of integers next to a k-vector of BLUPs, and the Z u
-        # arithmetic is meaningless. This was a latent extractor bug
-        # affecting every drmTMB fit with a numeric grouping
-        # variable; surfaced by the maintainer's Fisher-pass on the
-        # v0.22.1.2 rendered widget.
+    for (i in which(has_re)) {
+      re_info <- re_per_entry[[i]]
+      if (is.null(re_info) || nrow(re_info) == 0L) next
+      for (gv in unique(re_info$group_var)) {
+        if (!(gv %in% names(fit$data))) next
+        # Factor-coerce before model.matrix (v0.22.1.3 discipline).
         data_local <- fit$data
-        data_local[[g_var]] <- factor(data_local[[g_var]])
-        levels_g <- levels(data_local[[g_var]])
-        Z_g <- stats::model.matrix(
-          stats::reformulate(paste0("0+", g_var)),
+        data_local[[gv]] <- factor(data_local[[gv]])
+        levels_g <- levels(data_local[[gv]])
+        Zg <- stats::model.matrix(
+          stats::reformulate(paste0("0+", gv)),
           data = data_local
         )
-        # rename columns from `<g_var><level>` to bare level if possible
-        cn <- colnames(Z_g)
-        bare <- sub(paste0("^", g_var), "", cn)
-        if (length(bare) == length(levels_g)) colnames(Z_g) <- bare
-      }
-      blups <- fit$random_effects$mu$terms[[term_label]]
-      if (!is.null(blups)) {
-        # Order BLUPs to match Z_g column ordering so Z_g %*% u is
-        # well-defined. drmTMB names BLUPs by level (verified via
-        # names(blups) on the Pottier fit). Reorder to factor levels.
-        if (!is.null(Z_g) && !is.null(names(blups)) &&
-            all(colnames(Z_g) %in% names(blups))) {
-          blups <- blups[colnames(Z_g)]
+        cn <- colnames(Zg)
+        bare <- sub(paste0("^", gv), "", cn)
+        if (length(bare) == length(levels_g)) colnames(Zg) <- bare
+        Z_per_tier[[gv]] <- Zg
+
+        is_structured <- !is.null(structured_matrix_for_group) &&
+                         !is.null(structured_matrix_for_group[[gv]])
+        tier_kind[[gv]] <- if (is_structured) "structured" else "iid"
+
+        u_g <- NULL
+        if (is_structured) {
+          # Structured tier (phylo): drmTMB stores BLUPs in
+          # fit$obj$report()$u_phylo under the all-nodes encoding:
+          # length = n_tips + n_internal_nodes. The first n_tips
+          # entries are the tip-level BLUPs, ordered by the factor's
+          # levels (which matches `levels_g` above when phylogeny is
+          # stored alphabetically in the tree).
+          rep_obj <- tryCatch(fit$obj$report(),
+                              error = function(...) NULL)
+          if (!is.null(rep_obj) && !is.null(rep_obj$u_phylo)) {
+            u_phylo_all <- as.numeric(rep_obj$u_phylo)
+            n_tips      <- length(levels_g)
+            if (length(u_phylo_all) >= n_tips) {
+              u_g <- u_phylo_all[seq_len(n_tips)]
+            }
+          }
+        } else {
+          # iid tier: drmTMB stores BLUPs by level name in
+          # fit$random_effects$mu$terms[[term_label]].
+          term_label <- sprintf("(1 | %s)", gv)
+          blups <- fit$random_effects$mu$terms[[term_label]]
+          if (!is.null(blups)) {
+            if (!is.null(names(blups)) &&
+                all(colnames(Zg) %in% names(blups))) {
+              blups <- blups[colnames(Zg)]
+            }
+            u_g <- as.numeric(blups)
+          }
         }
-        u <- as.numeric(blups)
+        u_per_tier[[gv]] <- u_g
       }
     }
   }
+
+  # Back-compat aliases: first tier becomes Z_g / u.
+  Z_g <- if (length(Z_per_tier) > 0L) Z_per_tier[[1L]] else NULL
+  u   <- if (length(u_per_tier) > 0L) u_per_tier[[1L]] else NULL
+
   list(
-    y         = y,
-    X         = X,
-    beta      = if (is.null(beta)) NULL else as.numeric(beta),
-    X_sigma   = X_sigma,
-    gamma     = if (is.null(gamma)) NULL else as.numeric(gamma),
-    Z_g       = Z_g,
-    u         = u,
-    e         = e,
-    mu_hat    = mu_hat,
-    sigma_hat = sigma_hat
+    y          = y,
+    X          = X,
+    beta       = if (is.null(beta))  NULL else as.numeric(beta),
+    X_sigma    = X_sigma,
+    gamma      = if (is.null(gamma)) NULL else as.numeric(gamma),
+    Z_g        = Z_g,
+    u          = u,
+    Z_per_tier = Z_per_tier,
+    u_per_tier = u_per_tier,
+    tier_kind  = tier_kind,
+    e          = e,
+    mu_hat     = mu_hat,
+    sigma_hat  = sigma_hat
   )
 }
 
