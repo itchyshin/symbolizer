@@ -1,3 +1,83 @@
+# symbolizer 0.21.6-redo
+
+## v0.21.6-redo -- gllvm two-tier widget: syndromes + integrated plasticity
+
+A pedagogical rewrite of `symbolizer-gllvm.html` around the
+Nakagawa et al. (in prep) framework: behavioural syndromes
+($\boldsymbol{\Sigma}_B = \boldsymbol{\Lambda}_B \boldsymbol{\Lambda}_B^\top + \boldsymbol{\Psi}_B$)
+plus integrated plasticity
+($\boldsymbol{\Sigma}_W = \boldsymbol{\Lambda}_W \boldsymbol{\Lambda}_W^\top + \boldsymbol{\Psi}_W$).
+The previous v0.21.5-redo two-widget split (between-only without Psi_B
+vs with Psi_B) was a toy and is removed; the new widgets build up
+across **tiers** instead.
+
+### Article structure (11 sections)
+
+- §1 Biological question -- now names both syndromes (between-individual)
+  and integrated plasticity (within-individual) up front.
+- §2 Data -- 40 individuals × 3 sessions × 5 traits with simulated truth
+  carrying both Lambda_B (5×2) and Lambda_W (5×1).
+- §3 NEW -- univariate motivation via `lme4::lmer`; classical
+  repeatability $R = \sigma^2_u / (\sigma^2_u + \sigma^2_e)$ (Nakagawa
+  & Schielzeth 2010).
+- §4 NEW -- factor-analytic motivation: $T(T+1)/2$ vs $T(d+1) -
+  d(d-1)/2$ parameter counting.
+- §5 The model in symbols -- long form / wide form, both tiers explicit.
+- §6 **Widget 1** -- behavioural syndromes ($\Sigma_B$ only).
+- §7 **Widget 2** -- adds integrated plasticity ($\Sigma_W$). Documents
+  gllvmTMB's $\sigma_\varepsilon$ auto-suppression when
+  `unique(0 + trait | obs)` is present.
+- §8 Reading biologically -- $c^2$ + $\psi^*$ per tier, $R_t$
+  per-trait, phenotypic-correlation decomposition
+  $r_P = r_B\sqrt{R_t R_m} + r_W\sqrt{(1-R_t)(1-R_m)}$ (Dingemanse &
+  Dochtermann 2013).
+- §9 Identifiability -- rotation, sign, AND $\sigma_\varepsilon$
+  auto-suppression as expected behaviour.
+- §10 NEW -- the `glmmTMB` bridge: `latent()`/`unique()` ↔ `rr()`/`diag()`
+  syntax equivalence so readers from the Nakagawa et al. paper see the
+  same math.
+- §11 Capability list -- updated to reflect v0.21.6-redo.
+
+### Extractor extensions (`symbolize.gllvmTMB`)
+
+`$expanded` now carries the two-tier widget contract:
+
+- `Lambda_W` ($n_\text{traits} \times d_W$) -- within-individual
+  reduced-rank loadings.
+- `Z_W` ($n_\text{obs} \times d_W$) -- per-observation latent scores
+  (expanded from gllvmTMB's `unit_obs`-level via `site_species_id`).
+- `Psi_W` (length $n_\text{traits}$) -- per-trait within-individual
+  uniqueness SDs.
+- `Sigma_W` ($n_\text{traits} \times n_\text{traits}$) -- algebraic
+  closure $\Lambda_W \Lambda_W^\top + \mathrm{diag}(\Psi_W^2)$.
+- `Repeatability` (length $n_\text{traits}$) -- per-trait
+  $R_t = (\Sigma_B)_{tt} / [(\Sigma_B)_{tt} + (\Sigma_W)_{tt}]$.
+
+Sigma_B now prefers the algebraic closure $\Lambda_B \Lambda_B^\top +
+\mathrm{diag}(\Psi_B^2)$ over `fit$report$Sigma_B` (which only
+contains $\Lambda_B \Lambda_B^\top$ -- the Psi_B diagonal was being
+dropped under the prior behaviour).
+
+### Renderer extension (`as_html_three_views` Tab 3)
+
+A new `latex_implied_cov_block(tier, Sigma, Lambda, Psi)` emitter
+conditionally appends an implied-covariance block per tier when the
+relevant slots are populated. Widget 1 (between-only) shows the
+$\Sigma_B$ block; Widget 2 (two-tier) shows both $\Sigma_B$ and
+$\Sigma_W$ blocks plus a per-trait $R_t$ row. Non-gllvm fits are
+unaffected (the emitter returns NULL when the slots are absent).
+
+### Tests (TDD-first)
+
+- `tests/testthat/test-symbolize-gllvmtmb-two-tier.R` -- 36
+  assertions covering the two-tier extractor contract, closure
+  equalities to $10^{-6}$, repeatability formula, between-only
+  graceful NULL.
+- `tests/testthat/test-render-implied-cov.R` -- 11 assertions on the
+  emitter's tier / NULL-safety / labels.
+- `tests/testthat/test-three-views-implied-cov.R` -- 10 assertions on
+  Tab 3 integration; ensures non-gllvm fits stay unaffected.
+
 # symbolizer 0.21.4-redo
 
 ## v0.21.4-redo -- structural-dependence rescope + 3-Face article + consistency sweep

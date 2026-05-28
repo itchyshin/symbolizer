@@ -364,6 +364,9 @@ message auto-suppressing $\sigma_\epsilon$:
 
 > ℹ Auto-suppressing `sigma_eps`: `unique(0 + trait | obs)` is at the
 > per-row level, so it already absorbs the observation residual.
+> • Fixed at 0.00111 (~1/1000 of sd(y)) to keep the Gaussian density
+> well-defined; the row-level residual variance is fully captured by
+> `unique()`.
 
 This is intended — the row-level residual variance is now structured
 per-trait in $\boldsymbol{\Psi}_W$ rather than carried by a single

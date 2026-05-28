@@ -125,17 +125,21 @@ symbolize.gllvmTMB <- function(fit, symbols = NULL, units = NULL,
     n_obs = n_obs
   )
 
+  has_within <- isTRUE(glm_has_within_unit(fit))
   distribution <- glm_build_distribution(response_symbol_scalar,
                                          response_symbol_matrix,
                                          tpl_family = tpl_family,
-                                         link = fit$family$link %||% "identity")
+                                         link = fit$family$link %||% "identity",
+                                         has_within = has_within)
   submodels    <- glm_build_submodels(d_B)
   terms_tbl    <- glm_build_terms(fit, data, symbols, trait_levels)
   fixed_eff    <- glm_build_fixed_effects(terms_tbl, fit, trait_levels)
   loadings_tbl <- glm_build_loadings(fit, trait_levels)
   vc_tbl       <- glm_build_variance_components(fit)
+  d_W_int <- as.integer(fit$tmb_data$d_W %||% 0L)
   components   <- glm_build_components(
-    response_symbol_scalar, response_symbol_matrix, d_B, fit
+    response_symbol_scalar, response_symbol_matrix, d_B, fit,
+    has_within = has_within, d_W = d_W_int
   )
   symbol_dict  <- glm_build_symbol_dictionary(
     terms_tbl, response, response_symbol_scalar, response_symbol_matrix,
@@ -264,8 +268,33 @@ glm_compute_repeatability <- function(Sigma_B, Sigma_W) {
 
 glm_build_distribution <- function(response_symbol, response_symbol_matrix,
                                    tpl_family = "gllvm_gaussian",
-                                   link = "identity") {
+                                   link = "identity",
+                                   has_within = FALSE) {
   if (identical(tpl_family, "gllvm_binomial")) {
+    if (isTRUE(has_within)) {
+      return(tibble::tibble(
+        family = tpl_family,
+        response_symbol = response_symbol,
+        response_symbol_matrix = response_symbol_matrix,
+        parameters = "mu, Lambda_B, (Psi_B), Lambda_W, (Psi_W)",
+        latex = paste0(
+          response_symbol,
+          " \\mid \\mu_{t(j)}, \\boldsymbol{\\Lambda}_B, \\mathbf{z}_{B,i},",
+          " \\boldsymbol{\\Lambda}_W, \\mathbf{z}_{W,ij} \\sim ",
+          "\\mathrm{Bernoulli}(\\mathrm{logit}^{-1}(\\mu_{t(j)} + ",
+          "(\\boldsymbol{\\Lambda}_B \\mathbf{z}_{B,i})_{t(j)} + ",
+          "(\\boldsymbol{\\Lambda}_W \\mathbf{z}_{W,ij})_{t(j)}))"
+        ),
+        latex_matrix = paste0(
+          response_symbol_matrix,
+          " \\mid \\boldsymbol{\\mu}, \\boldsymbol{\\Lambda}_B, \\mathbf{Z}_B,",
+          " \\boldsymbol{\\Lambda}_W, \\mathbf{Z}_W \\sim ",
+          "\\mathrm{Bernoulli}(\\mathrm{logit}^{-1}(",
+          "\\mathbf{1}_n \\boldsymbol{\\mu}^\\top + \\mathbf{Z}_B \\boldsymbol{\\Lambda}_B^\\top + ",
+          "\\mathbf{Z}_W \\boldsymbol{\\Lambda}_W^\\top))"
+        )
+      ))
+    }
     return(tibble::tibble(
       family = tpl_family,
       response_symbol = response_symbol,
@@ -285,7 +314,34 @@ glm_build_distribution <- function(response_symbol, response_symbol_matrix,
       )
     ))
   }
-  # Default: gllvm_gaussian shape.
+  # gllvm_gaussian, two-tier (Widget 2: with within-individual reduced-rank).
+  # sigma_eps is auto-suppressed by gllvmTMB; the row-level conditional
+  # covariance becomes Sigma_W = Lambda_W Lambda_W^T + Psi_W.
+  if (isTRUE(has_within)) {
+    return(tibble::tibble(
+      family = tpl_family,
+      response_symbol = response_symbol,
+      response_symbol_matrix = response_symbol_matrix,
+      parameters = "mu, Lambda_B, (Psi_B), Lambda_W, Psi_W",
+      latex = paste0(
+        response_symbol,
+        " \\mid \\mu_{t(j)}, \\boldsymbol{\\Lambda}_B, \\mathbf{z}_{B,i},",
+        " \\boldsymbol{\\Lambda}_W, \\mathbf{z}_{W,ij}, \\boldsymbol{\\Psi}_W \\sim ",
+        "\\mathrm{Normal}\\!\\left(\\mu_{t(j)} + (\\boldsymbol{\\Lambda}_B \\mathbf{z}_{B,i})_{t(j)} + ",
+        "(\\boldsymbol{\\Lambda}_W \\mathbf{z}_{W,ij})_{t(j)},\\; ",
+        "\\psi_{W,t(j)}^2 + (\\boldsymbol{\\Lambda}_W \\boldsymbol{\\Lambda}_W^\\top)_{t(j),t(j)}\\right)"
+      ),
+      latex_matrix = paste0(
+        response_symbol_matrix,
+        " \\mid \\boldsymbol{\\mu}, \\boldsymbol{\\Lambda}_B, \\mathbf{Z}_B,",
+        " \\boldsymbol{\\Lambda}_W, \\mathbf{Z}_W, \\boldsymbol{\\Sigma}_W \\sim ",
+        "\\mathcal{MN}(\\mathbf{1}_n \\boldsymbol{\\mu}^\\top + \\mathbf{Z}_B \\boldsymbol{\\Lambda}_B^\\top + ",
+        "\\mathbf{Z}_W \\boldsymbol{\\Lambda}_W^\\top,\\; \\mathbf{I}_n,\\; \\boldsymbol{\\Sigma}_W),",
+        "\\quad \\boldsymbol{\\Sigma}_W = \\boldsymbol{\\Lambda}_W \\boldsymbol{\\Lambda}_W^\\top + \\boldsymbol{\\Psi}_W"
+      )
+    ))
+  }
+  # gllvm_gaussian, between-only (Widget 1).
   tibble::tibble(
     family = tpl_family,
     response_symbol = response_symbol,
@@ -497,39 +553,74 @@ glm_build_variance_components <- function(fit) {
 }
 
 glm_build_components <- function(response_symbol, response_symbol_matrix,
-                                  d_B, fit) {
+                                  d_B, fit, has_within = FALSE, d_W = 0L) {
   rows <- list()
-  # Distribution
-  rows[[length(rows) + 1L]] <- tibble::tibble(
-    name = "distribution",
-    kind = "distribution",
-    submodel = NA_character_,
-    equation = paste0(
-      response_symbol,
-      " \\mid \\mu_{t(j)}, \\boldsymbol{\\Lambda}_B, \\mathbf{z}_{B,i},",
-      " \\sigma_\\epsilon \\sim ",
-      "\\mathrm{Normal}(\\mu_{t(j)} + (\\boldsymbol{\\Lambda}_B \\mathbf{z}_{B,i})_{t(j)},",
-      " \\sigma_\\epsilon^2)"
-    ),
-    equation_matrix = paste0(
-      response_symbol_matrix,
-      " \\mid \\boldsymbol{\\mu}, \\boldsymbol{\\Lambda}_B, \\mathbf{Z}_B,",
-      " \\sigma_\\epsilon \\sim ",
-      "\\mathcal{MN}(\\mathbf{1}_n \\boldsymbol{\\mu}^\\top + \\mathbf{Z}_B \\boldsymbol{\\Lambda}_B^\\top,",
-      " \\sigma_\\epsilon^2 \\mathbf{I}_n, \\mathbf{I}_T)"
-    ),
-    status = "stated"
-  )
-  # mu linear predictor (index + matrix form)
+  # Distribution. When the fit carries a within-tier (Widget 2), the
+  # conditional mean adds (Lambda_W z_{W,ij})_{t(j)} and sigma_eps is
+  # auto-suppressed by gllvmTMB -- the row-level conditional covariance
+  # becomes Sigma_W = Lambda_W Lambda_W^T + Psi_W.
+  if (isTRUE(has_within)) {
+    rows[[length(rows) + 1L]] <- tibble::tibble(
+      name = "distribution",
+      kind = "distribution",
+      submodel = NA_character_,
+      equation = paste0(
+        response_symbol,
+        " \\mid \\mu_{t(j)}, \\boldsymbol{\\Lambda}_B, \\mathbf{z}_{B,i},",
+        " \\boldsymbol{\\Lambda}_W, \\mathbf{z}_{W,ij}, \\boldsymbol{\\Psi}_W \\sim ",
+        "\\mathrm{Normal}\\!\\left(\\mu_{t(j)} + (\\boldsymbol{\\Lambda}_B \\mathbf{z}_{B,i})_{t(j)} + ",
+        "(\\boldsymbol{\\Lambda}_W \\mathbf{z}_{W,ij})_{t(j)},\\; ",
+        "\\psi_{W,t(j)}^2 + (\\boldsymbol{\\Lambda}_W \\boldsymbol{\\Lambda}_W^\\top)_{t(j),t(j)}\\right)"
+      ),
+      equation_matrix = paste0(
+        response_symbol_matrix,
+        " \\mid \\boldsymbol{\\mu}, \\boldsymbol{\\Lambda}_B, \\mathbf{Z}_B,",
+        " \\boldsymbol{\\Lambda}_W, \\mathbf{Z}_W, \\boldsymbol{\\Sigma}_W \\sim ",
+        "\\mathcal{MN}(\\mathbf{1}_n \\boldsymbol{\\mu}^\\top + \\mathbf{Z}_B \\boldsymbol{\\Lambda}_B^\\top + ",
+        "\\mathbf{Z}_W \\boldsymbol{\\Lambda}_W^\\top,\\; \\mathbf{I}_n,\\; \\boldsymbol{\\Sigma}_W)"
+      ),
+      status = "stated"
+    )
+  } else {
+    rows[[length(rows) + 1L]] <- tibble::tibble(
+      name = "distribution",
+      kind = "distribution",
+      submodel = NA_character_,
+      equation = paste0(
+        response_symbol,
+        " \\mid \\mu_{t(j)}, \\boldsymbol{\\Lambda}_B, \\mathbf{z}_{B,i},",
+        " \\sigma_\\epsilon \\sim ",
+        "\\mathrm{Normal}(\\mu_{t(j)} + (\\boldsymbol{\\Lambda}_B \\mathbf{z}_{B,i})_{t(j)},",
+        " \\sigma_\\epsilon^2)"
+      ),
+      equation_matrix = paste0(
+        response_symbol_matrix,
+        " \\mid \\boldsymbol{\\mu}, \\boldsymbol{\\Lambda}_B, \\mathbf{Z}_B,",
+        " \\sigma_\\epsilon \\sim ",
+        "\\mathcal{MN}(\\mathbf{1}_n \\boldsymbol{\\mu}^\\top + \\mathbf{Z}_B \\boldsymbol{\\Lambda}_B^\\top,",
+        " \\sigma_\\epsilon^2 \\mathbf{I}_n, \\mathbf{I}_T)"
+      ),
+      status = "stated"
+    )
+  }
+  # mu linear predictor (index + matrix form). When two-tier, append the
+  # within-individual reduced-rank contribution.
   rhs_idx <- if (d_B > 0L) {
     "\\mu_{t(j)} + \\sum_{k=1}^{d_B} \\lambda_{B,t(j)k} z_{B,ik}"
   } else {
     "\\mu_{t(j)}"
   }
+  if (isTRUE(has_within) && d_W > 0L) {
+    rhs_idx <- paste0(rhs_idx,
+      " + \\sum_{\\ell=1}^{d_W} \\lambda_{W,t(j)\\ell} z_{W,ij\\ell}")
+  }
   rhs_mat <- if (d_B > 0L) {
     "\\mathbf{1}_n \\boldsymbol{\\mu}^\\top + \\mathbf{Z}_B \\boldsymbol{\\Lambda}_B^\\top"
   } else {
     "\\mathbf{1}_n \\boldsymbol{\\mu}^\\top"
+  }
+  if (isTRUE(has_within) && d_W > 0L) {
+    rhs_mat <- paste0(rhs_mat, " + \\mathbf{Z}_W \\boldsymbol{\\Lambda}_W^\\top")
   }
   rows[[length(rows) + 1L]] <- tibble::tibble(
     name = "mu_linear_predictor",
@@ -539,7 +630,7 @@ glm_build_components <- function(response_symbol, response_symbol_matrix,
     equation_matrix = paste("\\boldsymbol{\\eta} =", rhs_mat),
     status = "stated"
   )
-  # Latent-score distribution
+  # Latent-score distribution(s)
   if (d_B > 0L) {
     rows[[length(rows) + 1L]] <- tibble::tibble(
       name = "latent_score_distribution",
@@ -567,6 +658,26 @@ glm_build_components <- function(response_symbol, response_symbol_matrix,
       submodel = "Lambda_B",
       equation = paste("\\Sigma_{B,tt'} =", rhs_cov_idx),
       equation_matrix = paste("\\boldsymbol{\\Sigma}_B =", rhs_cov_mat),
+      status = "implied"
+    )
+  }
+  # Within-tier (W) rows for Widget 2 fits.
+  if (isTRUE(has_within) && d_W > 0L) {
+    rows[[length(rows) + 1L]] <- tibble::tibble(
+      name = "latent_score_distribution_W",
+      kind = "latent_distribution",
+      submodel = "Lambda_W",
+      equation = "z_{W,ij\\ell} \\sim \\mathcal{N}(0, 1)",
+      equation_matrix = "\\mathbf{z}_{W,ij} \\sim \\mathcal{N}(\\mathbf{0}, \\mathbf{I}_{d_W})",
+      status = "stated"
+    )
+    rows[[length(rows) + 1L]] <- tibble::tibble(
+      name = "implied_within_unit_covariance",
+      kind = "implied_covariance",
+      submodel = "Lambda_W",
+      equation = paste("\\Sigma_{W,tt'} =",
+                       "\\sum_{\\ell=1}^{d_W} \\lambda_{W,t\\ell} \\lambda_{W,t'\\ell} + \\psi_{W,t} \\delta_{tt'}"),
+      equation_matrix = "\\boldsymbol{\\Sigma}_W = \\boldsymbol{\\Lambda}_W \\boldsymbol{\\Lambda}_W^\\top + \\boldsymbol{\\Psi}_W",
       status = "implied"
     )
   }
