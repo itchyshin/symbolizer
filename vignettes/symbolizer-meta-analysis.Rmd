@@ -248,6 +248,15 @@ bridges (`se(sqrt(vi))`, `mev = vi`).
 
 ## 4. Phylogenetic multilevel meta-analysis
 
+**Dataset switch.** The 13-trial BCG dataset of §3 was great for
+showing traditional pooling, but it has only one study per row — so
+no species-level or phylogenetic structure to model. For §4 and §5
+we move to a richer dataset: a 35-species, 164-effect subset of the
+Pottier et al. (2022) thermal acclimation meta-dataset, with `dARR`
+as the effect size and `habitat` (aquatic vs terrestrial) as the
+moderator. The subset is shipped with the package so the vignette
+is fully reproducible.
+
 When studies are on related species, the between-study tier splits
 into a phylogenetic piece (constrained by the phylogeny via
 $\mathbf{A}$) and a non-phylogenetic study tier.
