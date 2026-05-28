@@ -58,7 +58,7 @@
       -- Assumptions --
       
       conditional_distribution
-      expression: `W_i \mid \mu_i\, \sigma_i \sim \mathrm{Normal}(\mu_i\,
+      expression: `W_i \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\,
       \sigma_i^2)`
       meaning: body_mass varies normally around its expected value
       status: ["explicit"]
