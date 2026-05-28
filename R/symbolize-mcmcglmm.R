@@ -151,6 +151,27 @@ symbolize.MCMCglmm <- function(fit, symbols = NULL, units = NULL,
   re_tbl     <- drm_build_random_effects(re_per_entry)
   vc_tbl     <- mcmcglmm_build_variance_components(fit, animal_groups)
   cov_tbl    <- drm_build_covariance_components(re_tbl)
+  # v0.21.4-rescope: MCMCglmm's ginverse path uses the Hadfield-Nakagawa
+  # all-nodes augmentation (tips + internal nodes). For a k-tip tree the
+  # augmented dimension is at most 2k - 2; polytomies after ultrametric
+  # smoothing can lower it. The actual dim is `nrow(fit$ginverse[[g]])`.
+  # Override re_tbl$n_levels for phylo groups so the matrix-form
+  # equation (\mathbf{u}_g \sim N(0, sigma^2 A_{n x n})) and the
+  # symbol_dictionary's dimension_concrete render the all-nodes count,
+  # not the tip count. This matches what the widget Tab 3 shim emits
+  # and keeps Tab 2 ~ Tab 3 internally consistent (Rose consistency
+  # scan 2026-05-27).
+  if (length(animal_groups) > 0L && !is.null(fit$ginverse)) {
+    for (gname in animal_groups) {
+      Ainv_g <- fit$ginverse[[gname]]
+      if (!is.null(Ainv_g) && nrow(Ainv_g) > 0L) {
+        idx <- which(re_tbl$group_var == gname)
+        if (length(idx) > 0L) {
+          re_tbl$n_levels[idx] <- as.integer(nrow(Ainv_g))
+        }
+      }
+    }
+  }
   # v0.21.1+ phylo / animal-model structured-matrix mapping. When the
   # ginverse path is active, every animal_group's matrix-form random-
   # effect distribution line should render with \mathbf{A} instead of
@@ -474,7 +495,7 @@ mcmcglmm_heritability_row <- function(vc_tbl) {
       variance_E    = var_e,
       heritability  = h2,
       reading       = sprintf(
-        "Heritability h^2 = sigma^2_A / (sigma^2_A + sigma^2_E) = %.3f -- the proportion of phenotypic variation in %s attributable to additive-genetic effects.",
+        "Heritability h^2 = sigma^2_p / (sigma^2_p + sigma^2_e) = %.3f -- the proportion of phenotypic variation in %s attributable to phylogenetic / additive-genetic effects (in animal-model literature this is also written sigma^2_A / (sigma^2_A + sigma^2_E)).",
         h2, animal_rows$group[[i]]
       )
     )

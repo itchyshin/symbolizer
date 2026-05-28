@@ -80,6 +80,7 @@ reference:
       - symbolize.rma.uni
       - symbolize.rma.mv
       - symbolize.gam
+      - symbolize.phylolm
       - symbolizer_capabilities
   - title: "Read both notations"
     desc: "Educator-facing bridge between index and matrix forms."

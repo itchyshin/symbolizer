@@ -8,6 +8,8 @@ as_html_three_views(
   x,
   head = 5L,
   tail = 2L,
+  head_cols = 5L,
+  tail_cols = 2L,
   id = "sym",
   standalone = FALSE,
   file = NULL,
@@ -17,9 +19,24 @@ as_html_three_views(
 \arguments{
 \item{x}{A \code{symbolized_model} with \verb{$expanded} populated.}
 
-\item{head}{Number of leading rows to show in the matrix view (default 5).}
+\item{head}{Number of leading \strong{rows} to show in the matrix view
+(Tab 3 "Equations with data") before the \verb{\\\\vdots} ellipsis.
+Default \code{5}. Reasonable range 2--10; larger values produce taller
+widgets.}
 
-\item{tail}{Number of trailing rows to show in the matrix view (default 2).}
+\item{tail}{Number of trailing \strong{rows} to show in the matrix view
+after the \verb{\\\\vdots}. Default \code{2}. Together with \code{head}, controls
+how much per-observation data is visible: total rows shown =
+\code{head + tail + 1} ellipsis row (or fewer if \code{n_obs} is small
+enough to show all rows).}
+
+\item{head_cols}{Number of leading \strong{columns} to show in any matrix
+that has more than \code{head_cols + tail_cols} columns (e.g. the
+\code{Z}-matrix for a 60-species fit). Default \code{5}. Smart-truncation
+prefers non-zero columns within the visible row band.}
+
+\item{tail_cols}{Number of trailing \strong{columns} to show after the
+\verb{\\\\cdots} ellipsis. Default \code{2}.}
 
 \item{id}{A short identifier so multiple panels can co-exist on one page.}
 

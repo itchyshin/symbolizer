@@ -8,7 +8,9 @@
 *.tar.gz
 *.Rcheck/
 
-docs/
+docs/*
+!docs/dev-log/
+!docs/specs/
 pkgdown/*
 !pkgdown/favicon/
 !pkgdown/extra.css

@@ -4,7 +4,17 @@
 \alias{as_pdf_three_views}
 \title{PDF rendering of a symbolized_model in three stacked sections}
 \usage{
-as_pdf_three_views(x, file, title = NULL, keep_tex = FALSE, ...)
+as_pdf_three_views(
+  x,
+  file,
+  title = NULL,
+  head = 5L,
+  tail = 2L,
+  head_cols = 5L,
+  tail_cols = 2L,
+  keep_tex = FALSE,
+  ...
+)
 }
 \arguments{
 \item{x}{A \code{symbolized_model}.}
@@ -13,6 +23,18 @@ as_pdf_three_views(x, file, title = NULL, keep_tex = FALSE, ...)
 
 \item{title}{Optional document title. Defaults to a short auto-title
 built from the fit's class and response.}
+
+\item{head}{Number of leading rows shown in any matrix block before
+the \verb{\\\\vdots} ellipsis (default \code{5}).}
+
+\item{tail}{Number of trailing rows shown after the \verb{\\\\vdots} (default \code{2}).}
+
+\item{head_cols}{Number of leading columns shown in any matrix block
+with more than \code{head_cols + tail_cols} columns (default \code{5}).
+Smart-truncation prefers non-zero columns within the visible row band.}
+
+\item{tail_cols}{Number of trailing columns shown after the \verb{\\\\cdots}
+ellipsis (default \code{2}).}
 
 \item{keep_tex}{If \code{TRUE}, keep the intermediate \code{.tex} next to the PDF
 for inspection. Default \code{FALSE}.}

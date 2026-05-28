@@ -39,6 +39,25 @@ sym_kable <- function(df, col.names = NULL) {
   }
 }
 
+# Wrap a knitr::kable() output in a Bootstrap `.table-responsive` container
+# so wide tables (assumption_table is the chronic offender; V1-D4 / V2-F4)
+# get a horizontal scrollbar instead of silently clipping the right edge.
+# The HTML output is asis-emitted; pandoc passes it through untouched. We
+# emit a blank line before AND after the div so pandoc treats it as a
+# block-level element (otherwise the leading `|` of the pipe table can
+# be parsed as inline text inside the div).
+#' @keywords internal
+sym_kable_responsive <- function(df, col.names = NULL) {
+  kab <- sym_kable(df, col.names = col.names)
+  paste(c("",
+          "<div class=\"table-responsive\" style=\"overflow-x:auto;\">",
+          "",
+          kab,
+          "",
+          "</div>",
+          ""), collapse = "\n")
+}
+
 #' @exportS3Method knitr::knit_print
 knit_print.symbolizer_symbol_table <- function(x, ...) {
   df <- as.data.frame(x, stringsAsFactors = FALSE)
@@ -71,8 +90,8 @@ knit_print.symbolizer_assumption_table <- function(x, ...) {
   col.names <- c(assumption = "assumption", expression_latex = "expression",
                  biological_meaning = "biological meaning",
                  status = "status")[cols]
-  kab <- sym_kable(df[, cols, drop = FALSE], col.names = unname(col.names))
-  knitr::asis_output(paste(c("", kab, ""), collapse = "\n"))
+  kab <- sym_kable_responsive(df[, cols, drop = FALSE], col.names = unname(col.names))
+  knitr::asis_output(kab)
 }
 
 #' @exportS3Method knitr::knit_print

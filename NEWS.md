@@ -1,3 +1,197 @@
+# symbolizer 0.21.6-redo
+
+## v0.21.6-redo -- gllvm two-tier widget: syndromes + integrated plasticity
+
+A pedagogical rewrite of `symbolizer-gllvm.html` around the
+Nakagawa et al. (in prep) framework: behavioural syndromes
+($\boldsymbol{\Sigma}_B = \boldsymbol{\Lambda}_B \boldsymbol{\Lambda}_B^\top + \boldsymbol{\Psi}_B$)
+plus integrated plasticity
+($\boldsymbol{\Sigma}_W = \boldsymbol{\Lambda}_W \boldsymbol{\Lambda}_W^\top + \boldsymbol{\Psi}_W$).
+The previous v0.21.5-redo two-widget split (between-only without Psi_B
+vs with Psi_B) was a toy and is removed; the new widgets build up
+across **tiers** instead.
+
+### Article structure (11 sections)
+
+- §1 Biological question -- now names both syndromes (between-individual)
+  and integrated plasticity (within-individual) up front.
+- §2 Data -- 40 individuals × 3 sessions × 5 traits with simulated truth
+  carrying both Lambda_B (5×2) and Lambda_W (5×1).
+- §3 NEW -- univariate motivation via `lme4::lmer`; classical
+  repeatability $R = \sigma^2_u / (\sigma^2_u + \sigma^2_e)$ (Nakagawa
+  & Schielzeth 2010).
+- §4 NEW -- factor-analytic motivation: $T(T+1)/2$ vs $T(d+1) -
+  d(d-1)/2$ parameter counting.
+- §5 The model in symbols -- long form / wide form, both tiers explicit.
+- §6 **Widget 1** -- behavioural syndromes ($\Sigma_B$ only).
+- §7 **Widget 2** -- adds integrated plasticity ($\Sigma_W$). Documents
+  gllvmTMB's $\sigma_\varepsilon$ auto-suppression when
+  `unique(0 + trait | obs)` is present.
+- §8 Reading biologically -- $c^2$ + $\psi^*$ per tier, $R_t$
+  per-trait, phenotypic-correlation decomposition
+  $r_P = r_B\sqrt{R_t R_m} + r_W\sqrt{(1-R_t)(1-R_m)}$ (Dingemanse &
+  Dochtermann 2013).
+- §9 Identifiability -- rotation, sign, AND $\sigma_\varepsilon$
+  auto-suppression as expected behaviour.
+- §10 NEW -- the `glmmTMB` bridge: `latent()`/`unique()` ↔ `rr()`/`diag()`
+  syntax equivalence so readers from the Nakagawa et al. paper see the
+  same math.
+- §11 Capability list -- updated to reflect v0.21.6-redo.
+
+### Extractor extensions (`symbolize.gllvmTMB`)
+
+`$expanded` now carries the two-tier widget contract:
+
+- `Lambda_W` ($n_\text{traits} \times d_W$) -- within-individual
+  reduced-rank loadings.
+- `Z_W` ($n_\text{obs} \times d_W$) -- per-observation latent scores
+  (expanded from gllvmTMB's `unit_obs`-level via `site_species_id`).
+- `Psi_W` (length $n_\text{traits}$) -- per-trait within-individual
+  uniqueness SDs.
+- `Sigma_W` ($n_\text{traits} \times n_\text{traits}$) -- algebraic
+  closure $\Lambda_W \Lambda_W^\top + \mathrm{diag}(\Psi_W^2)$.
+- `Repeatability` (length $n_\text{traits}$) -- per-trait
+  $R_t = (\Sigma_B)_{tt} / [(\Sigma_B)_{tt} + (\Sigma_W)_{tt}]$.
+
+Sigma_B now prefers the algebraic closure $\Lambda_B \Lambda_B^\top +
+\mathrm{diag}(\Psi_B^2)$ over `fit$report$Sigma_B` (which only
+contains $\Lambda_B \Lambda_B^\top$ -- the Psi_B diagonal was being
+dropped under the prior behaviour).
+
+### Renderer extension (`as_html_three_views` Tab 3)
+
+A new `latex_implied_cov_block(tier, Sigma, Lambda, Psi)` emitter
+conditionally appends an implied-covariance block per tier when the
+relevant slots are populated. Widget 1 (between-only) shows the
+$\Sigma_B$ block; Widget 2 (two-tier) shows both $\Sigma_B$ and
+$\Sigma_W$ blocks plus a per-trait $R_t$ row. Non-gllvm fits are
+unaffected (the emitter returns NULL when the slots are absent).
+
+### Tests (TDD-first)
+
+- `tests/testthat/test-symbolize-gllvmtmb-two-tier.R` -- 36
+  assertions covering the two-tier extractor contract, closure
+  equalities to $10^{-6}$, repeatability formula, between-only
+  graceful NULL.
+- `tests/testthat/test-render-implied-cov.R` -- 11 assertions on the
+  emitter's tier / NULL-safety / labels.
+- `tests/testthat/test-three-views-implied-cov.R` -- 10 assertions on
+  Tab 3 integration; ensures non-gllvm fits stay unaffected.
+
+# symbolizer 0.21.4-redo
+
+## v0.21.4-redo -- structural-dependence rescope + 3-Face article + consistency sweep
+
+A rescope of the `symbolizer-structural-dependence` article from 6
+half-working Faces to one deep-dive + two light Faces, plus a
+12-class consistency sweep across the widget renderer, the §6 model
+statement, the CSV templates, and the cross-package extractors.
+
+### Three Faces, one phylogenetic LMM
+
+- **Face 1 (deep-dive)**: `MCMCglmm` with `ginverse = list(species = Ainv)`
+  -- full three-views widget.
+- **Face 2 (light)**: `brms` with `gr(species, cov = A)` -- fitted Stan
+  model with `symbolize()` outputs (no widget).
+- **Face 3 (light)**: `phylolm::phylolm()` with Pagel's lambda -- the
+  marginalised PGLS form (no widget), with an explicit bridge to
+  Face 1's RE form.
+
+Dropped from this article (moved elsewhere): metafor (meta-analytic
+scope → v0.22), glmmTMB (propto two-scalar → defer), drmTMB
+location-scale phylo (→ v0.24), gllvmTMB community-phylo (→ separate
+arc). The §6 model statement now distinguishes the **estimated**
+$\sigma_e^2$ from the **known** sampling variance $v_i$ (Cinar et
+al. 2022, *Methods in Ecology and Evolution*).
+
+### New: `symbolize.phylolm()` extractor
+
+PGLS marginal form support. BM and Pagel's lambda evolutionary
+models. New capability rows; `metadata$phylo_representation =
+"pgls_marginal"`; `metadata$phylo_model` + `metadata$phylo_param`.
+End-to-end on the Moura data: $\hat\lambda = 0.7632$.
+
+### B6 fix (Ayumi report)
+
+`drmTMB::phylo()` formulas no longer crash `symbolize()`. The
+`drm_strip_markers()` formula walker replaces `phylo()` / `animal()` /
+`spatial()` / `gp()` markers with `call("(", arg1)` so lme4-style RE
+notation survives `stats::terms()`. Real regression-test fixture
+based on Ayumi's failing example.
+
+### drm_strip_re_terms parse-tree refactor
+
+Previously rejected RE bars containing inner parens, so
+`(1 | gr(species, cov = A))` crashed `model.frame()` with "could not
+find function 'gr'". New implementation walks the parse tree;
+handles arbitrary nesting. 7 unit tests pin the contract.
+
+### Three-views widget
+
+- **User-configurable truncation**: `as_html_three_views()` and
+  `as_pdf_three_views()` now accept `head` / `tail` (rows) and
+  `head_cols` / `tail_cols` (columns); defaults match prior
+  behaviour. 7 tests.
+- **Z elision when one obs per level**: when `n_obs == n_distinct_levels`,
+  the Tab 3 stacked block drops the random-effect incidence matrix Z
+  (which is then the identity on the observed levels and renders as
+  a wall of zeros) and emits the per-observation random effect
+  $\hat{\mathbf{u}}_{n\times 1}$ directly. Z is retained for
+  multi-obs-per-level cases (repeated measures, multi-effect-size
+  meta-analyses).
+- **All-nodes dim propagation**: when MCMCglmm's `ginverse` carries
+  the Hadfield-Nakagawa all-nodes representation, the symbol
+  dictionary + matrix-form equation now report the augmented
+  dimension (e.g. $\mathbf{A}_{116 \times 116}$ for a 60-tip tree),
+  matching what the Tab 3 stacked block shows.
+
+### Consistency sweep (12 classes)
+
+Rose-style consistency scan triggered by the maintainer's dim
+inconsistency catch. Findings + fixes filed at
+`docs/dev-log/figure-audits/v0.21-redo-rescope/rose-consistency-scan.md`
+along with V1 Florence, V2 Pat, V3 Noether audit reports. Highlights:
+
+- **assumption_table comma**: the gaussian / student / lognormal /
+  Gamma / Beta `conditional_distribution` rows previously emitted
+  `\mathrm{Normal}(\mu_i\, \sigma_i^2)` (LaTeX thin space, no comma),
+  which renders as the product `μ σ²` instead of the parameter list
+  `(μ, σ²)`. All 5 rows now use the comma form. **Bug fix**.
+- **`your_responsibility` status**: 14 CSV rows used the underscore
+  spelling, which `friendly_status()` did not map. Now mapped to
+  the displayed string "your responsibility".
+- **Tables now scroll**: `sym_kable_responsive()` wraps wide
+  `assumption_table()` / interpretation outputs in a
+  `<div class="table-responsive">` so the right-edge status column
+  scrolls instead of clipping.
+- **`σ_p` naming canonical**: §6 model, §Animal-model unification,
+  and the heritability output now all use $\sigma_p^2$ /
+  $\sigma_e^2$; the quantitative-genetics A/E alias is noted once.
+- **Hidden scaffolding**: the `pdf_alongside_html()` helper chunk
+  + the `shim_mcmcglmm()` chunk are now `echo = FALSE`; they no
+  longer leak into the article.
+- **§ typography**: 5 occurrences of `§"..."` glued together;
+  now `§ "..."` with proper space.
+- **brms convergence warnings suppressed**: `iter` bumped from 1000
+  to 2000 with `adapt_delta = 0.95`; `warning = FALSE` on the chunk.
+
+### Multi-V audit reports (committed)
+
+- `V1-florence-report.md` (visual)
+- `V2-pat-report.md` (reader flow)
+- `V3-noether-report.md` (math correctness)
+- `rose-consistency-scan.md` (cross-class consistency)
+
+### Test results
+
+`1795 pass / 0 fail / 1 pre-existing error (Matrix::expand masking #7) /
+97 pre-existing warnings (sdmTMB NaN)`. R CMD check: 0 errors / 0
+warnings / 1 NOTE (`.git` in-source). `pkgdown::build_site()` clean.
+
+### DESCRIPTION
+
+Added `phylolm` and `Matrix` to Suggests.
+
 # symbolizer 0.21.3
 
 ## v0.21.3 -- three-views widget rollout to symbolizer-families.Rmd

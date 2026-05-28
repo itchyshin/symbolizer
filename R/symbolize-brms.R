@@ -298,11 +298,19 @@ brms_response_name <- function(fit) {
 }
 
 # Symbol for the response (user override or default to variable name).
+# Mirrors mcmcglmm_resolve_response_symbol / phylolm_resolve_response_symbol:
+# escape underscores and append `_i`, wrapping multi-character names in
+# \mathrm{...} so MathJax does not parse `_` as a subscript marker.
 brms_resolve_response_symbol <- function(response, symbols) {
   if (!is.null(symbols) && !is.null(symbols[[response]])) {
     return(as.character(symbols[[response]]))
   }
-  response
+  esc <- gsub("_", "\\_", response, fixed = TRUE)
+  if (nchar(response) > 1L) {
+    paste0("\\mathrm{", esc, "}_i")
+  } else {
+    paste0(esc, "_i")
+  }
 }
 
 # Submodels tibble: one row for the conditional submodel.

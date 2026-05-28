@@ -90,3 +90,44 @@ fit_gllvm_binomial <- function(seed = 1L) {
     trait = "trait", unit = "site", silent = TRUE
   )
 }
+
+fit_gllvm_two_tier <- function(seed = 20260523L) {
+  testthat::skip_if_not_installed("gllvmTMB")
+  set.seed(seed)
+  n_ind  <- 40L; n_sess <- 3L; n_tr <- 5L
+  Lam_B <- matrix(c(1.0, 0.0, 0.7, 0.0, 0.6, 0.0,
+                    0.0, 1.0, 0.0, 0.7),
+                  nrow = n_tr, byrow = TRUE)
+  psi_B   <- rep(0.4, n_tr); sig_eps <- sqrt(0.3)
+  z_score <- matrix(rnorm(n_ind * 2L), nrow = n_ind, ncol = 2L)
+  psi_B_resid <- matrix(rnorm(n_ind * n_tr,
+                              sd = rep(sqrt(psi_B), each = n_ind)),
+                        nrow = n_ind, ncol = n_tr)
+  mu_ind_trait <- z_score %*% t(Lam_B) + psi_B_resid
+  dat <- expand.grid(
+    trait      = factor(paste0("t", seq_len(n_tr)),
+                        levels = paste0("t", seq_len(n_tr))),
+    session    = factor(seq_len(n_sess)),
+    individual = factor(seq_len(n_ind))
+  )
+  dat$value <- mu_ind_trait[cbind(as.integer(dat$individual),
+                                   as.integer(dat$trait))] +
+                rnorm(nrow(dat), sd = sig_eps)
+  dat$obs <- factor(paste(dat$individual, dat$session, sep = "_"))
+  .glllvm_with_keywords(quote(
+    gllvmTMB::gllvmTMB(
+      value ~ 0 + trait +
+              latent(0 + trait | individual, d = 2) +
+              `unique`(0 + trait | individual) +
+              latent(0 + trait | obs, d = 1) +
+              `unique`(0 + trait | obs),
+      data     = dat,
+      family   = stats::gaussian(),
+      trait    = "trait",
+      unit     = "individual",
+      unit_obs = "obs",
+      cluster  = "session",
+      silent   = TRUE
+    )
+  ))
+}

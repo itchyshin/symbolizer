@@ -166,18 +166,29 @@ test_that("matrix panel includes a screen-reader summary", {
   expect_false(grepl("<pre class=\"sym-matrix\"", html, fixed = TRUE))
 })
 
-test_that("matrix summary mentions Z_g only when RE is present", {
+test_that("matrix summary mentions the RE contribution only when RE is present", {
+  # v0.21.4 update: the matrix summary (a sym-sr-only block read by
+  # screen readers) used to mention "Z_g" by name. Since the renderer
+  # now drops Z from the visible stacked block when n_obs ==
+  # n_distinct_levels (one obs per level), the summary was updated to
+  # say "the predicted random-effect contribution to each observation
+  # is also shown" without naming Z. This test was updated to the new
+  # contract: presence of RE prose in the summary, not a literal Z_g.
   fit_re <- fit_drm_with_re()
   sym_re <- symbolize(fit_re, symbols = c(body_mass = "W_i"))
   html_re <- withr::with_output_sink(tempfile(), as_html_three_views(sym_re))
-  expect_match(html_re, "Z_g", fixed = TRUE)
+  sr_block_re <- regmatches(
+    html_re,
+    regexpr("class=\"sym-sr-only\">[^<]*</span>", html_re)
+  )
+  expect_match(sr_block_re, "random-effect", fixed = TRUE)
 
   fit_fe <- fit_drm_location_scale()
   sym_fe <- symbolize(fit_fe)
   html_fe <- withr::with_output_sink(tempfile(), as_html_three_views(sym_fe))
-  sr_block <- regmatches(
+  sr_block_fe <- regmatches(
     html_fe,
     regexpr("class=\"sym-sr-only\">[^<]*</span>", html_fe)
   )
-  expect_false(grepl("Z_g", sr_block, fixed = TRUE))
+  expect_false(grepl("random-effect", sr_block_fe, fixed = TRUE))
 })

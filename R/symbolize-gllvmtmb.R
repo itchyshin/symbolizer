@@ -125,17 +125,21 @@ symbolize.gllvmTMB <- function(fit, symbols = NULL, units = NULL,
     n_obs = n_obs
   )
 
+  has_within <- isTRUE(glm_has_within_unit(fit))
   distribution <- glm_build_distribution(response_symbol_scalar,
                                          response_symbol_matrix,
                                          tpl_family = tpl_family,
-                                         link = fit$family$link %||% "identity")
+                                         link = fit$family$link %||% "identity",
+                                         has_within = has_within)
   submodels    <- glm_build_submodels(d_B)
   terms_tbl    <- glm_build_terms(fit, data, symbols, trait_levels)
   fixed_eff    <- glm_build_fixed_effects(terms_tbl, fit, trait_levels)
   loadings_tbl <- glm_build_loadings(fit, trait_levels)
   vc_tbl       <- glm_build_variance_components(fit)
+  d_W_int <- as.integer(fit$tmb_data$d_W %||% 0L)
   components   <- glm_build_components(
-    response_symbol_scalar, response_symbol_matrix, d_B, fit
+    response_symbol_scalar, response_symbol_matrix, d_B, fit,
+    has_within = has_within, d_W = d_W_int
   )
   symbol_dict  <- glm_build_symbol_dictionary(
     terms_tbl, response, response_symbol_scalar, response_symbol_matrix,
@@ -246,12 +250,51 @@ glm_has_unique_unit <- function(fit) {
   }, logical(1L)))
 }
 
+glm_has_within_unit <- function(fit) {
+  cs <- fit$covstructs %||% list()
+  unit_col <- fit$unit_col %||% ""
+  any(vapply(cs, function(e) {
+    g_txt <- if (is.null(e$group)) "" else paste(deparse(e$group), collapse = " ")
+    identical(e$kind, "rr") && !identical(g_txt, unit_col)
+  }, logical(1L)))
+}
+
+glm_compute_repeatability <- function(Sigma_B, Sigma_W) {
+  if (is.null(Sigma_W) || is.null(Sigma_B)) return(NULL)
+  diag(Sigma_B) / (diag(Sigma_B) + diag(Sigma_W))
+}
+
 # ---- builders ---------------------------------------------------------------
 
 glm_build_distribution <- function(response_symbol, response_symbol_matrix,
                                    tpl_family = "gllvm_gaussian",
-                                   link = "identity") {
+                                   link = "identity",
+                                   has_within = FALSE) {
   if (identical(tpl_family, "gllvm_binomial")) {
+    if (isTRUE(has_within)) {
+      return(tibble::tibble(
+        family = tpl_family,
+        response_symbol = response_symbol,
+        response_symbol_matrix = response_symbol_matrix,
+        parameters = "mu, Lambda_B, (Psi_B), Lambda_W, (Psi_W)",
+        latex = paste0(
+          response_symbol,
+          " \\mid \\mu_{t(j)}, \\boldsymbol{\\Lambda}_B, \\mathbf{z}_{B,i},",
+          " \\boldsymbol{\\Lambda}_W, \\mathbf{z}_{W,ij} \\sim ",
+          "\\mathrm{Bernoulli}(\\mathrm{logit}^{-1}(\\mu_{t(j)} + ",
+          "(\\boldsymbol{\\Lambda}_B \\mathbf{z}_{B,i})_{t(j)} + ",
+          "(\\boldsymbol{\\Lambda}_W \\mathbf{z}_{W,ij})_{t(j)}))"
+        ),
+        latex_matrix = paste0(
+          response_symbol_matrix,
+          " \\mid \\boldsymbol{\\mu}, \\boldsymbol{\\Lambda}_B, \\mathbf{Z}_B,",
+          " \\boldsymbol{\\Lambda}_W, \\mathbf{Z}_W \\sim ",
+          "\\mathrm{Bernoulli}(\\mathrm{logit}^{-1}(",
+          "\\mathbf{1}_n \\boldsymbol{\\mu}^\\top + \\mathbf{Z}_B \\boldsymbol{\\Lambda}_B^\\top + ",
+          "\\mathbf{Z}_W \\boldsymbol{\\Lambda}_W^\\top))"
+        )
+      ))
+    }
     return(tibble::tibble(
       family = tpl_family,
       response_symbol = response_symbol,
@@ -271,7 +314,34 @@ glm_build_distribution <- function(response_symbol, response_symbol_matrix,
       )
     ))
   }
-  # Default: gllvm_gaussian shape.
+  # gllvm_gaussian, two-tier (Widget 2: with within-individual reduced-rank).
+  # sigma_eps is auto-suppressed by gllvmTMB; the row-level conditional
+  # covariance becomes Sigma_W = Lambda_W Lambda_W^T + Psi_W.
+  if (isTRUE(has_within)) {
+    return(tibble::tibble(
+      family = tpl_family,
+      response_symbol = response_symbol,
+      response_symbol_matrix = response_symbol_matrix,
+      parameters = "mu, Lambda_B, (Psi_B), Lambda_W, Psi_W",
+      latex = paste0(
+        response_symbol,
+        " \\mid \\mu_{t(j)}, \\boldsymbol{\\Lambda}_B, \\mathbf{z}_{B,i},",
+        " \\boldsymbol{\\Lambda}_W, \\mathbf{z}_{W,ij}, \\boldsymbol{\\Psi}_W \\sim ",
+        "\\mathrm{Normal}\\!\\left(\\mu_{t(j)} + (\\boldsymbol{\\Lambda}_B \\mathbf{z}_{B,i})_{t(j)} + ",
+        "(\\boldsymbol{\\Lambda}_W \\mathbf{z}_{W,ij})_{t(j)},\\; ",
+        "\\psi_{W,t(j)}^2 + (\\boldsymbol{\\Lambda}_W \\boldsymbol{\\Lambda}_W^\\top)_{t(j),t(j)}\\right)"
+      ),
+      latex_matrix = paste0(
+        response_symbol_matrix,
+        " \\mid \\boldsymbol{\\mu}, \\boldsymbol{\\Lambda}_B, \\mathbf{Z}_B,",
+        " \\boldsymbol{\\Lambda}_W, \\mathbf{Z}_W, \\boldsymbol{\\Sigma}_W \\sim ",
+        "\\mathcal{MN}(\\mathbf{1}_n \\boldsymbol{\\mu}^\\top + \\mathbf{Z}_B \\boldsymbol{\\Lambda}_B^\\top + ",
+        "\\mathbf{Z}_W \\boldsymbol{\\Lambda}_W^\\top,\\; \\mathbf{I}_n,\\; \\boldsymbol{\\Sigma}_W),",
+        "\\quad \\boldsymbol{\\Sigma}_W = \\boldsymbol{\\Lambda}_W \\boldsymbol{\\Lambda}_W^\\top + \\boldsymbol{\\Psi}_W"
+      )
+    ))
+  }
+  # gllvm_gaussian, between-only (Widget 1).
   tibble::tibble(
     family = tpl_family,
     response_symbol = response_symbol,
@@ -483,39 +553,74 @@ glm_build_variance_components <- function(fit) {
 }
 
 glm_build_components <- function(response_symbol, response_symbol_matrix,
-                                  d_B, fit) {
+                                  d_B, fit, has_within = FALSE, d_W = 0L) {
   rows <- list()
-  # Distribution
-  rows[[length(rows) + 1L]] <- tibble::tibble(
-    name = "distribution",
-    kind = "distribution",
-    submodel = NA_character_,
-    equation = paste0(
-      response_symbol,
-      " \\mid \\mu_{t(j)}, \\boldsymbol{\\Lambda}_B, \\mathbf{z}_{B,i},",
-      " \\sigma_\\epsilon \\sim ",
-      "\\mathrm{Normal}(\\mu_{t(j)} + (\\boldsymbol{\\Lambda}_B \\mathbf{z}_{B,i})_{t(j)},",
-      " \\sigma_\\epsilon^2)"
-    ),
-    equation_matrix = paste0(
-      response_symbol_matrix,
-      " \\mid \\boldsymbol{\\mu}, \\boldsymbol{\\Lambda}_B, \\mathbf{Z}_B,",
-      " \\sigma_\\epsilon \\sim ",
-      "\\mathcal{MN}(\\mathbf{1}_n \\boldsymbol{\\mu}^\\top + \\mathbf{Z}_B \\boldsymbol{\\Lambda}_B^\\top,",
-      " \\sigma_\\epsilon^2 \\mathbf{I}_n, \\mathbf{I}_T)"
-    ),
-    status = "stated"
-  )
-  # mu linear predictor (index + matrix form)
+  # Distribution. When the fit carries a within-tier (Widget 2), the
+  # conditional mean adds (Lambda_W z_{W,ij})_{t(j)} and sigma_eps is
+  # auto-suppressed by gllvmTMB -- the row-level conditional covariance
+  # becomes Sigma_W = Lambda_W Lambda_W^T + Psi_W.
+  if (isTRUE(has_within)) {
+    rows[[length(rows) + 1L]] <- tibble::tibble(
+      name = "distribution",
+      kind = "distribution",
+      submodel = NA_character_,
+      equation = paste0(
+        response_symbol,
+        " \\mid \\mu_{t(j)}, \\boldsymbol{\\Lambda}_B, \\mathbf{z}_{B,i},",
+        " \\boldsymbol{\\Lambda}_W, \\mathbf{z}_{W,ij}, \\boldsymbol{\\Psi}_W \\sim ",
+        "\\mathrm{Normal}\\!\\left(\\mu_{t(j)} + (\\boldsymbol{\\Lambda}_B \\mathbf{z}_{B,i})_{t(j)} + ",
+        "(\\boldsymbol{\\Lambda}_W \\mathbf{z}_{W,ij})_{t(j)},\\; ",
+        "\\psi_{W,t(j)}^2 + (\\boldsymbol{\\Lambda}_W \\boldsymbol{\\Lambda}_W^\\top)_{t(j),t(j)}\\right)"
+      ),
+      equation_matrix = paste0(
+        response_symbol_matrix,
+        " \\mid \\boldsymbol{\\mu}, \\boldsymbol{\\Lambda}_B, \\mathbf{Z}_B,",
+        " \\boldsymbol{\\Lambda}_W, \\mathbf{Z}_W, \\boldsymbol{\\Sigma}_W \\sim ",
+        "\\mathcal{MN}(\\mathbf{1}_n \\boldsymbol{\\mu}^\\top + \\mathbf{Z}_B \\boldsymbol{\\Lambda}_B^\\top + ",
+        "\\mathbf{Z}_W \\boldsymbol{\\Lambda}_W^\\top,\\; \\mathbf{I}_n,\\; \\boldsymbol{\\Sigma}_W)"
+      ),
+      status = "stated"
+    )
+  } else {
+    rows[[length(rows) + 1L]] <- tibble::tibble(
+      name = "distribution",
+      kind = "distribution",
+      submodel = NA_character_,
+      equation = paste0(
+        response_symbol,
+        " \\mid \\mu_{t(j)}, \\boldsymbol{\\Lambda}_B, \\mathbf{z}_{B,i},",
+        " \\sigma_\\epsilon \\sim ",
+        "\\mathrm{Normal}(\\mu_{t(j)} + (\\boldsymbol{\\Lambda}_B \\mathbf{z}_{B,i})_{t(j)},",
+        " \\sigma_\\epsilon^2)"
+      ),
+      equation_matrix = paste0(
+        response_symbol_matrix,
+        " \\mid \\boldsymbol{\\mu}, \\boldsymbol{\\Lambda}_B, \\mathbf{Z}_B,",
+        " \\sigma_\\epsilon \\sim ",
+        "\\mathcal{MN}(\\mathbf{1}_n \\boldsymbol{\\mu}^\\top + \\mathbf{Z}_B \\boldsymbol{\\Lambda}_B^\\top,",
+        " \\sigma_\\epsilon^2 \\mathbf{I}_n, \\mathbf{I}_T)"
+      ),
+      status = "stated"
+    )
+  }
+  # mu linear predictor (index + matrix form). When two-tier, append the
+  # within-individual reduced-rank contribution.
   rhs_idx <- if (d_B > 0L) {
     "\\mu_{t(j)} + \\sum_{k=1}^{d_B} \\lambda_{B,t(j)k} z_{B,ik}"
   } else {
     "\\mu_{t(j)}"
   }
+  if (isTRUE(has_within) && d_W > 0L) {
+    rhs_idx <- paste0(rhs_idx,
+      " + \\sum_{\\ell=1}^{d_W} \\lambda_{W,t(j)\\ell} z_{W,ij\\ell}")
+  }
   rhs_mat <- if (d_B > 0L) {
     "\\mathbf{1}_n \\boldsymbol{\\mu}^\\top + \\mathbf{Z}_B \\boldsymbol{\\Lambda}_B^\\top"
   } else {
     "\\mathbf{1}_n \\boldsymbol{\\mu}^\\top"
+  }
+  if (isTRUE(has_within) && d_W > 0L) {
+    rhs_mat <- paste0(rhs_mat, " + \\mathbf{Z}_W \\boldsymbol{\\Lambda}_W^\\top")
   }
   rows[[length(rows) + 1L]] <- tibble::tibble(
     name = "mu_linear_predictor",
@@ -525,7 +630,7 @@ glm_build_components <- function(response_symbol, response_symbol_matrix,
     equation_matrix = paste("\\boldsymbol{\\eta} =", rhs_mat),
     status = "stated"
   )
-  # Latent-score distribution
+  # Latent-score distribution(s)
   if (d_B > 0L) {
     rows[[length(rows) + 1L]] <- tibble::tibble(
       name = "latent_score_distribution",
@@ -553,6 +658,26 @@ glm_build_components <- function(response_symbol, response_symbol_matrix,
       submodel = "Lambda_B",
       equation = paste("\\Sigma_{B,tt'} =", rhs_cov_idx),
       equation_matrix = paste("\\boldsymbol{\\Sigma}_B =", rhs_cov_mat),
+      status = "implied"
+    )
+  }
+  # Within-tier (W) rows for Widget 2 fits.
+  if (isTRUE(has_within) && d_W > 0L) {
+    rows[[length(rows) + 1L]] <- tibble::tibble(
+      name = "latent_score_distribution_W",
+      kind = "latent_distribution",
+      submodel = "Lambda_W",
+      equation = "z_{W,ij\\ell} \\sim \\mathcal{N}(0, 1)",
+      equation_matrix = "\\mathbf{z}_{W,ij} \\sim \\mathcal{N}(\\mathbf{0}, \\mathbf{I}_{d_W})",
+      status = "stated"
+    )
+    rows[[length(rows) + 1L]] <- tibble::tibble(
+      name = "implied_within_unit_covariance",
+      kind = "implied_covariance",
+      submodel = "Lambda_W",
+      equation = paste("\\Sigma_{W,tt'} =",
+                       "\\sum_{\\ell=1}^{d_W} \\lambda_{W,t\\ell} \\lambda_{W,t'\\ell} + \\psi_{W,t} \\delta_{tt'}"),
+      equation_matrix = "\\boldsymbol{\\Sigma}_W = \\boldsymbol{\\Lambda}_W \\boldsymbol{\\Lambda}_W^\\top + \\boldsymbol{\\Psi}_W",
       status = "implied"
     )
   }
@@ -871,13 +996,18 @@ glm_build_formula_bridge <- function(fit, response, response_symbol_matrix,
 }
 
 glm_build_expanded <- function(fit, trait_levels) {
-  y_long <- fit$tmb_data$y
+  y_long   <- fit$tmb_data$y
+  n_obs    <- length(y_long)
+  n_traits <- as.integer(fit$n_traits %||% NA_integer_)
+  n_sites  <- as.integer(fit$n_sites  %||% NA_integer_)
+
+  trait_id <- if (!is.null(fit$tmb_data$trait_id))
+    as.integer(fit$tmb_data$trait_id) + 1L else NULL
+  site_id  <- if (!is.null(fit$tmb_data$site_id))
+    as.integer(fit$tmb_data$site_id)  + 1L else NULL
+
   # Reshape long y into the n_sites x n_traits Y matrix if possible.
   Y <- tryCatch({
-    site_id  <- fit$tmb_data$site_id + 1L
-    trait_id <- fit$tmb_data$trait_id + 1L
-    n_sites <- as.integer(fit$n_sites)
-    n_traits <- as.integer(fit$n_traits)
     M <- matrix(NA_real_, n_sites, n_traits)
     for (r in seq_along(y_long)) {
       M[site_id[r], trait_id[r]] <- y_long[r]
@@ -888,22 +1018,123 @@ glm_build_expanded <- function(fit, trait_levels) {
     M
   }, error = function(...) NULL)
 
-  Lambda_B <- if (!is.null(fit$report$Lambda_B)) as.matrix(fit$report$Lambda_B) else NULL
-  Sigma_B  <- if (!is.null(fit$report$Sigma_B))  as.matrix(fit$report$Sigma_B)  else NULL
+  Lambda_B  <- if (!is.null(fit$report$Lambda_B))  as.matrix(fit$report$Lambda_B)  else NULL
   sigma_eps <- if (!is.null(fit$report$sigma_eps)) as.numeric(fit$report$sigma_eps) else NULL
   Z_B <- tryCatch(as.matrix(gllvmTMB::getLV(fit, level = "unit")),
                   error = function(...) NULL)
   eta <- if (!is.null(fit$report$eta)) as.numeric(fit$report$eta) else NULL
 
+  # ---- widget-shape slots ---------------------------------------------------
+  # The three-views renderer (R/render-three-views.R) needs to emit a
+  # response-equation row of the shape `y_r = (X beta)_r + u_r + epsilon_r`,
+  # and a stacked block `[y]_{n x 1} = [X]_{n x T}[beta] + [u]_{n x 1}`. The
+  # eight slots below close that contract for a Gaussian-identity fit.
+
+  # X: one-hot trait indicator for each observation (n_obs x n_traits). The
+  # canonical formula is `value ~ 0 + trait + latent(...)`, so the trait
+  # column is the only fixed-effect design column. We label the columns
+  # by their trait level so the worked-row renderer's predictor_label()
+  # doesn't fall back to "x_{k}" (which then mis-escapes `_` to `\_`).
+  X <- if (!is.null(trait_id) && !is.na(n_traits))
+    diag(n_traits)[trait_id, , drop = FALSE] else NULL
+  if (!is.null(X)) {
+    colnames(X) <- if (length(trait_levels) == n_traits) trait_levels else
+      paste0("trait", seq_len(n_traits))
+  }
+
+  # beta: trait intercepts. b_fix may carry slope columns when the formula
+  # adds predictors; the widget displays only the first n_traits trait
+  # intercepts (the slope-bearing case is out of scope for the first slice).
+  beta_full <- if (!is.null(fit$opt$par))
+    unname(fit$opt$par[names(fit$opt$par) == "b_fix"]) else NULL
+  beta <- if (!is.null(beta_full) && length(beta_full) >= n_traits)
+    beta_full[seq_len(n_traits)] else NULL
+
+  # u: per-observation random-effect contribution. By construction
+  # eta = X beta + u for the canonical formula, so we recover u as the
+  # gap between eta and the fixed part. This is the renderer's u_{n x 1}.
+  u <- if (!is.null(eta) && !is.null(X) && !is.null(beta))
+    as.numeric(eta - as.numeric(X %*% beta)) else NULL
+
+  # mu_hat / fitted / residuals: Gaussian identity link, so mu_hat = eta,
+  # fitted = mu_hat, residuals = y - fitted.
+  mu_hat    <- eta
+  fitted    <- mu_hat
+  residuals <- if (!is.null(fitted)) as.numeric(y_long) - fitted else NULL
+
+  # Z_g: identity-on-observations marker. The renderer's Z-drop logic uses
+  # n_obs == n_distinct_levels to fold Z u into the bare u_{n x 1} column
+  # instead of emitting a wall of zeros. gllvm has one observation per
+  # (unit, trait) row, so the right Z to advertise is I_n. We give Z_g
+  # per-observation column names so the worked-row's RE label reads
+  # `\hat{u}_{1}` rather than the generic `\hat{u}_{\mathrm{group}(1)}`.
+  Z_g <- if (n_obs >= 1L) {
+    M <- diag(n_obs)
+    colnames(M) <- as.character(seq_len(n_obs))
+    M
+  } else NULL
+
+  # Psi_B: per-trait diagonal uniqueness, populated only when the fit has a
+  # unique(0 + trait | unit) term. gllvmTMB exposes the diagonal SD vector
+  # as report$sd_B (length n_traits).
+  Psi_B <- if (isTRUE(glm_has_unique_unit(fit)) && !is.null(fit$report$sd_B))
+    as.numeric(fit$report$sd_B) else NULL
+  Sigma_B <- if (!is.null(Lambda_B) && !is.null(Psi_B))
+    Lambda_B %*% t(Lambda_B) + diag(Psi_B^2)
+  else if (!is.null(fit$report$Sigma_B))
+    as.matrix(fit$report$Sigma_B)
+  else NULL
+
+  # Within-unit (obs-level) tier — populated only when the fit carries
+  # rr() and/or diag() covstructs whose grouping factor differs from
+  # the unit. gllvmTMB exposes them via `fit$report$Lambda_W` and
+  # `sd_W`; the per-obs latent scores Z_W via `gllvmTMB::getLV(level =
+  # "unit_obs")`.
+  Lambda_W <- if (isTRUE(glm_has_within_unit(fit)) &&
+                  !is.null(fit$report$Lambda_W))
+    as.matrix(fit$report$Lambda_W) else NULL
+  Z_W <- if (isTRUE(glm_has_within_unit(fit)))
+    tryCatch({
+      zw_unit <- as.matrix(gllvmTMB::getLV(fit, level = "unit_obs"))
+      # Expand from unit_obs-level (one row per obs group) to observation-level
+      # (one row per data row) using the 0-indexed site_species_id lookup.
+      uo_id <- fit$tmb_data$site_species_id
+      if (!is.null(uo_id) && nrow(zw_unit) == max(uo_id) + 1L) {
+        zw_unit[uo_id + 1L, , drop = FALSE]
+      } else {
+        zw_unit
+      }
+    }, error = function(...) NULL) else NULL
+  Psi_W <- if (isTRUE(glm_has_within_unit(fit)) &&
+               !is.null(fit$report$sd_W))
+    as.numeric(fit$report$sd_W) else NULL
+  Sigma_W <- if (!is.null(Lambda_W) && !is.null(Psi_W))
+    Lambda_W %*% t(Lambda_W) + diag(Psi_W^2) else NULL
+  Repeatability <- glm_compute_repeatability(Sigma_B, Sigma_W)
+
   list(
     y         = as.numeric(y_long),
     Y         = Y,
-    mu        = if (!is.null(fit$opt$par)) unname(fit$opt$par[names(fit$opt$par) == "b_fix"]) else NULL,
+    mu        = beta_full,
     Lambda_B  = Lambda_B,
     Z_B       = Z_B,
     Sigma_B   = Sigma_B,
     sigma_eps = sigma_eps,
-    eta       = eta
+    eta       = eta,
+    # widget-shape slots (added in v0.21.5-redo for the three-views renderer):
+    X         = X,
+    beta      = beta,
+    u         = u,
+    Z_g       = Z_g,
+    mu_hat    = mu_hat,
+    fitted    = fitted,
+    residuals = residuals,
+    Psi_B     = Psi_B,
+    Lambda_W      = Lambda_W,
+    Z_W           = Z_W,
+    Psi_W         = Psi_W,
+    Sigma_W       = Sigma_W,
+    Repeatability = Repeatability
   )
 }
 

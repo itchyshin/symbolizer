@@ -148,9 +148,11 @@ assumption_table.symbolized_model <- function(x, ...) {
 #' @keywords internal
 friendly_status <- function(status) {
   map <- c(
-    stated      = "explicit",
-    implied     = "follows from the formula",
-    not_checked = "your responsibility"
+    stated              = "explicit",
+    implied             = "follows from the formula",
+    derived             = "derived",
+    not_checked         = "your responsibility",
+    your_responsibility = "your responsibility"
   )
   out <- map[status]
   unknown <- is.na(out)

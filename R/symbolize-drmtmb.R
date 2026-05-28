@@ -400,14 +400,40 @@ drm_assert_supported_re <- function(re_tbl, dpar) {
 }
 
 drm_strip_re_terms <- function(rhs_expr) {
-  txt <- paste(deparse(rhs_expr), collapse = " ")
-  # Remove " + (...| ...)" / "(... | ...) + " / standalone "(... | ...)".
-  txt <- gsub("\\+\\s*\\([^()]*\\|[^()]*\\)", "", txt)
-  txt <- gsub("\\([^()]*\\|[^()]*\\)\\s*\\+", "", txt)
-  txt <- gsub("\\([^()]*\\|[^()]*\\)", "", txt)
-  txt <- trimws(txt)
-  if (!nzchar(txt)) txt <- "1"
-  parse(text = txt)[[1L]]
+  # Walk the parse tree to remove `(... | ...)` random-effect bars,
+  # leaving only fixed-effect terms. The previous regex-based
+  # implementation explicitly rejected inner parens, so brms's
+  # `(1 | gr(species, cov = A))` survived the strip and crashed
+  # `stats::model.frame()` with "could not find function 'gr'".
+  # The tree walker handles arbitrary nesting inside the grouping
+  # expression.
+  terms <- .drm_decompose_plus(rhs_expr)
+  keep <- !vapply(terms, .drm_is_re_bar, logical(1L))
+  kept <- terms[keep]
+  if (length(kept) == 0L) return(quote(1))
+  Reduce(function(a, b) call("+", a, b), kept)
+}
+
+.drm_decompose_plus <- function(expr) {
+  # Recursively split an additive expression into a list of `+`-separated
+  # terms. Non-`+` expressions are returned as singletons.
+  if (is.call(expr) && identical(expr[[1L]], as.name("+")) &&
+      length(expr) == 3L) {
+    c(.drm_decompose_plus(expr[[2L]]), list(expr[[3L]]))
+  } else {
+    list(expr)
+  }
+}
+
+.drm_is_re_bar <- function(expr) {
+  # An RE bar is `( <stuff> | <stuff> )` — outer call is `(`, inner is `|`.
+  # This matches both lme4-style `(1 | g)` and brms-style
+  # `(1 | gr(species, cov = A))` because `inner` is just whatever R parsed
+  # between the parens; we check only its root operator.
+  if (!is.call(expr)) return(FALSE)
+  if (!identical(expr[[1L]], as.name("("))) return(FALSE)
+  inner <- expr[[2L]]
+  is.call(inner) && identical(inner[[1L]], as.name("|"))
 }
 
 drm_coef_family_for <- function(dpar) {
@@ -602,8 +628,40 @@ drm_entry_formula <- function(entry) {
 }
 
 drm_entry_rhs_formula <- function(entry) {
-  rhs_txt <- paste(deparse(entry$rhs), collapse = " ")
+  # B6 fix (Ayumi's bug): drmTMB exposes `phylo()`, `animal()`, `spatial()`,
+  # and `gp()` as formula markers wrapping a random-effect spec, e.g.
+  # `phylo(1 | species, tree = tree)`. R's `stats::terms()` /
+  # `stats::model.frame()` don't know about these markers and treat them
+  # as function calls on literal columns, crashing with
+  # "invalid type (NULL) for variable 'phylo(1 | species, tree = tree)'".
+  # Strip the marker (replace with its first argument wrapped in parens
+  # so lme4-style RE notation `(g | group)` is preserved) before handing
+  # to `stats::terms()`. The marker presence is detected separately
+  # (`has_drmtmb_phylo` etc.) and surfaced via `metadata$phylo_representation`.
+  rhs <- drm_strip_markers(entry$rhs)
+  rhs_txt <- paste(deparse(rhs), collapse = " ")
   stats::as.formula(paste("~", rhs_txt))
+}
+
+# Recursively walk an R expression and replace `phylo(<re_spec>, ...)`,
+# `animal(<re_spec>, ...)`, `spatial(<re_spec>, ...)`, `gp(<re_spec>, ...)`
+# calls with `(<re_spec>)` so downstream stats::terms() sees a normal
+# mixed-model formula.
+drm_strip_markers <- function(expr) {
+  if (is.call(expr)) {
+    fn_name <- as.character(expr[[1L]])[1L]
+    if (fn_name %in% c("phylo", "animal", "spatial", "gp",
+                       "drmTMB::phylo", "drmTMB::animal",
+                       "drmTMB::spatial", "drmTMB::gp")) {
+      # Marker call: replace with `(<first-arg>)`. First arg is the RE spec.
+      inner <- expr[[2L]]
+      return(call("(", inner))
+    }
+    for (i in seq_along(expr)[-1]) {
+      expr[[i]] <- drm_strip_markers(expr[[i]])
+    }
+  }
+  expr
 }
 
 # ---- builders ---------------------------------------------------------------
