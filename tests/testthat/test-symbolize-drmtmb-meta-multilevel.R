@@ -53,6 +53,36 @@ test_that("structured_matrices metadata names the phylo A correlation matrix", {
   expect_true(any(grepl("phylo", roles)))
 })
 
+test_that("latex_marginal_cov_block emits one term per tier + diag(v)", {
+  # v0.22.1.2: Tab 3 of the widget should *show* the marginal-covariance
+  # decomposition (V2 Pat flow break 2). The helper returns a LaTeX
+  # `Cov(y) = sigma_p^2 A + sigma_study^2 ZZ^T + diag(v)` block.
+  fit <- fit_drmtmb_phylo_multilevel()
+  sym <- symbolize(fit)
+  block <- symbolizer:::latex_marginal_cov_block(sym)
+  expect_true(!is.null(block))
+  # Structured phylo tier carries A.
+  expect_match(block, "\\\\mathbf\\{A\\}", perl = TRUE)
+  # Unstructured study tier carries Z Z^T.
+  expect_match(block, "\\\\mathbf\\{Z\\}_\\{study_ID\\}", perl = TRUE)
+  # Meta-analytic sampling-variance tier carries diag(v).
+  expect_match(block, "\\\\mathrm\\{diag\\}\\(\\\\mathbf\\{v\\}\\)",
+               perl = TRUE)
+  # LHS is Cov(y) underbraced with n.
+  expect_match(block, "\\\\mathrm\\{Cov\\}\\(\\\\mathbf\\{y\\}\\)",
+               perl = TRUE)
+})
+
+test_that("latex_marginal_cov_block returns NULL for single-RE non-meta fits", {
+  # Standard textbook decomposition; nothing pedagogically interesting
+  # to add over what the per-RE distribution row already shows.
+  fit <- drmTMB::drmTMB(drmTMB::drm_formula(mpg ~ wt + (1 | cyl),
+                                            sigma ~ 1),
+                       data = mtcars)
+  sym <- symbolize(fit)
+  expect_null(symbolizer:::latex_marginal_cov_block(sym))
+})
+
 test_that("assumption_table mentions the known sampling variance v_k", {
   fit <- fit_drmtmb_phylo_multilevel()
   sym <- symbolize(fit)

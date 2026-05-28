@@ -347,6 +347,7 @@ symbolize.drmTMB <- function(fit, symbols = NULL, units = NULL,
     phylo_representation = if (has_drmtmb_phylo) "all_nodes" else NULL,
     spatial_representation = if (has_drmtmb_spatial) "package_managed" else NULL,
     structured_matrices = structured_matrices,
+    structured_matrix_for_group = structured_matrix_for_group,
     detected_signals = detected_signals,
     created_by = "symbolize.drmTMB"
   )

@@ -1,3 +1,47 @@
+# symbolizer 0.22.1.2
+
+## v0.22.1.2 -- Tab 3 marginal-covariance decomposition
+
+Closes V2 Pat-lens flow break #2 on
+`symbolizer-meta-analysis.Rmd` §4: Tab 3 of the widget now
+*shows* the marginal-covariance decomposition rather than just
+announcing it in prose.
+
+### What changed
+
+New helper `latex_marginal_cov_block(x)` in
+`R/render-three-views.R` emits a LaTeX `Cov(y) = ...` block
+of the form
+
+$$\underbrace{\mathrm{Cov}(\mathbf{y})}_{n \times n} = \underbrace{\sigma_g^2\, \mathbf{A}}_{\text{phylogeny tier}} + \underbrace{\sigma_g^2\, \mathbf{Z}_g\,\mathbf{Z}_g^{\!\top}}_{\text{study tier}} + \underbrace{\mathrm{diag}(\mathbf{v})}_{\text{known sampling}}$$
+
+with one underbrace-labeled term per random-effect tier (structured
+tiers carry $\mathbf{A}$; unstructured tiers use $\mathbf{Z}_g\mathbf{Z}_g^\top$)
+plus a `diag(v)` term when `meta_V()` is detected. The helper
+returns `NULL` for trivial cases (single iid RE without `meta_V`)
+so simple fits aren't cluttered.
+
+Wired into `as_html_three_views.symbolized_model` Tab 3. Mutually
+exclusive with the existing gllvm $\boldsymbol{\Sigma}_B$ /
+$\boldsymbol{\Sigma}_W$ stacked block — gllvm fits never carry
+`meta_analysis` in `detected_signals` and never expose
+`metadata$structured_matrix_for_group`, so the new block fires
+only on meta-analysis / multilevel widgets.
+
+`symbolize.drmTMB()` now also exposes
+`metadata$structured_matrix_for_group` (a named list mapping
+each detected structured group to its LaTeX matrix symbol, e.g.
+`list(phylogeny = "\\mathbf{A}")`) so the renderer can match
+structured tiers to their group_vars.
+
+### Tests
+
+Two new tests in `test-symbolize-drmtmb-meta-multilevel.R`:
+one assertion on a meta-multilevel fit (block contains the three
+tier symbols + the `Cov(y)` LHS), and one assertion that
+single-RE non-meta fits return `NULL`. Suite at
+`FAIL 0 | SKIP 0 | PASS 1847`.
+
 # symbolizer 0.22.1.1
 
 ## v0.22.1.1 -- phylo tier propagated into widget equations

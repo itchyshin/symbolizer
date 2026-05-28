@@ -148,6 +148,31 @@ as_html_three_views.symbolized_model <- function(x, head = 5L, tail = 2L,
     Sigma = ex$Sigma_W, Lambda = ex$Lambda_W, Psi = ex$Psi_W
   )
   implied_cov_html <- ""
+  # v0.22.1.2: marginal-covariance decomposition for meta-analytic and
+  # multilevel fits. Mutually exclusive with the gllvm Sigma_B / Sigma_W
+  # path -- gllvm fits never carry `meta_analysis` in detected_signals
+  # and never expose `metadata$structured_matrix_for_group`, so this
+  # block fires only on the meta-analysis / multilevel widget path.
+  marginal_block <- latex_marginal_cov_block(x)
+  if (!is.null(marginal_block)) {
+    has_meta <- !is.null(x$metadata$detected_signals) &&
+                "meta_analysis" %in% x$metadata$detected_signals
+    caption <- if (has_meta) {
+      paste0(
+        "Marginal covariance of the response decomposes into the ",
+        "(known) sampling tier plus one term per random-effect group. ",
+        "Structured tiers carry their correlation matrix; ",
+        "unstructured tiers use the identity via $\\mathbf{Z}_g\\mathbf{Z}_g^{\\!\\top}$:")
+    } else {
+      paste0(
+        "Marginal covariance of the response is the sum of one term ",
+        "per random-effect group:")
+    }
+    implied_cov_html <- paste0(implied_cov_html,
+      "<p class=\"sym-caption\" style=\"font-size:0.95em;color:#374151\">",
+      caption,
+      "</p>\n<div class=\"sym-eq\">", marginal_block, "</div>\n")
+  }
   if (!is.null(sigma_B_block)) {
     implied_cov_html <- paste0(implied_cov_html,
       "<p class=\"sym-caption\" style=\"font-size:0.95em;color:#374151\">",
@@ -656,6 +681,73 @@ underbrace <- function(content, label)
 # Λ Λ^T + diag(Ψ²) decomposition. Returns a character string suitable
 # for inclusion inside a `$$ ... $$` MathJax block, or NULL when any
 # matrix is missing.
+# Emit the symbolic marginal-covariance decomposition for a multilevel
+# / meta-analytic fit. Returns a LaTeX `$$...$$` block of the shape
+#
+#   Cov(y) = sigma_p^2 A         (phylo tier, structured)
+#          + sigma_study^2 Z Z^T (study tier, unstructured)
+#          + diag(v)              (sampling variance, when meta_V present)
+#
+# with `\underbrace{...}_{label}` annotations naming each tier. Returns
+# NULL when there's no meta-analytic context, no random effects, and no
+# structured matrix -- i.e. when the decomposition is trivially
+# `sigma^2 I` and would carry no pedagogy.
+#
+# Lives inside Tab 3 of the three-views widget. The widget already shows
+# per-tier distribution rows on Tabs 1 + 2; this block makes the
+# *implied* marginal covariance explicit, mirroring what V2 Pat's audit
+# of the meta-analysis Widget 2 asked for: "Tab 3 should *show* the
+# decomposition, not just announce it."
+latex_marginal_cov_block <- function(x) {
+  has_meta <- !is.null(x$metadata$detected_signals) &&
+              "meta_analysis" %in% x$metadata$detected_signals
+  re_tbl   <- x$random_effects
+  has_re   <- !is.null(re_tbl) && nrow(re_tbl) > 0L
+  # No work to do when the model has neither known sampling variance
+  # nor a random-effect structure beyond residual.
+  if (!has_meta && !has_re) return(NULL)
+  # When there's a single iid RE and no meta_V, the decomposition
+  # collapses to `sigma^2 Z Z^T + sigma_eps^2 I`, which is the standard
+  # textbook form already shown in §1 of every regression chapter. Skip
+  # to avoid cluttering simple fits.
+  if (!has_meta && has_re && nrow(re_tbl) == 1L) return(NULL)
+
+  smfg <- x$metadata$structured_matrix_for_group
+  is_structured <- function(gv) {
+    !is.null(smfg) && !is.null(smfg[[gv]])
+  }
+
+  # One term per random-effect group (mu submodel only -- variance-
+  # submodel terms enter via the link function, not the marginal
+  # covariance of y).
+  re_mu <- re_tbl[re_tbl$submodel == "mu", , drop = FALSE]
+  groups <- unique(re_mu$group_var)
+  re_terms <- vapply(groups, function(gv) {
+    sel    <- which(re_mu$group_var == gv)[[1L]]
+    sigma  <- re_mu$sigma_symbol[[sel]]
+    if (is_structured(gv)) {
+      struct_sym <- smfg[[gv]]
+      body  <- sprintf("%s^2\\, %s", sigma, struct_sym)
+      label <- sprintf("\\text{%s tier}", gv)
+    } else {
+      body  <- sprintf("%s^2\\, \\mathbf{Z}_{%s}\\mathbf{Z}_{%s}^{\\!\\top}",
+                       sigma, gv, gv)
+      label <- sprintf("\\text{%s tier}", gv)
+    }
+    underbrace(body, label)
+  }, character(1L))
+
+  meta_term <- if (has_meta) {
+    underbrace("\\mathrm{diag}(\\mathbf{v})",
+               "\\text{known sampling}")
+  } else NULL
+
+  rhs <- paste(c(re_terms, meta_term), collapse = " \\;+\\; ")
+  lhs <- underbrace("\\mathrm{Cov}(\\mathbf{y})",
+                    sprintf("n \\times n,\\; n = %d", x$model$n_obs))
+  paste0("$$\n", lhs, " \\;=\\; ", rhs, "\n$$\n")
+}
+
 latex_implied_cov_block <- function(tier = c("B", "W"), Sigma, Lambda, Psi) {
   tier <- match.arg(tier)
   if (is.null(Sigma) || is.null(Lambda) || is.null(Psi)) return(NULL)
