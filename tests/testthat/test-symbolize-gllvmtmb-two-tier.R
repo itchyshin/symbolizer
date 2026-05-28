@@ -49,3 +49,24 @@ test_that("expanded$Lambda_W / Z_W / Psi_W stay NULL on a between-only fit", {
   expect_null(sym$expanded$Z_W)
   expect_null(sym$expanded$Psi_W)
 })
+
+test_that("expanded$Sigma_W closes Λ_W Λ_W^T + diag(Ψ_W²) to 1e-6", {
+  fit <- fit_gllvm_two_tier()
+  sym <- symbolize(fit)
+  expect_true(!is.null(sym$expanded$Sigma_W))
+  expect_true(is.matrix(sym$expanded$Sigma_W))
+  T_n <- as.integer(fit$n_traits)
+  expect_equal(dim(sym$expanded$Sigma_W), c(T_n, T_n))
+  closure <- sym$expanded$Lambda_W %*% t(sym$expanded$Lambda_W) +
+             diag(sym$expanded$Psi_W^2)
+  expect_equal(sym$expanded$Sigma_W, closure, tolerance = 1e-6)
+})
+
+test_that("expanded$Sigma_B closes Λ_B Λ_B^T + diag(Ψ_B²) to 1e-6", {
+  fit <- fit_gllvm_two_tier()
+  sym <- symbolize(fit)
+  expect_true(!is.null(sym$expanded$Sigma_B))
+  closure <- sym$expanded$Lambda_B %*% t(sym$expanded$Lambda_B) +
+             diag(sym$expanded$Psi_B^2)
+  expect_equal(sym$expanded$Sigma_B, closure, tolerance = 1e-6)
+})

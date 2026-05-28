@@ -903,7 +903,6 @@ glm_build_expanded <- function(fit, trait_levels) {
   }, error = function(...) NULL)
 
   Lambda_B  <- if (!is.null(fit$report$Lambda_B))  as.matrix(fit$report$Lambda_B)  else NULL
-  Sigma_B   <- if (!is.null(fit$report$Sigma_B))   as.matrix(fit$report$Sigma_B)   else NULL
   sigma_eps <- if (!is.null(fit$report$sigma_eps)) as.numeric(fit$report$sigma_eps) else NULL
   Z_B <- tryCatch(as.matrix(gllvmTMB::getLV(fit, level = "unit")),
                   error = function(...) NULL)
@@ -964,6 +963,11 @@ glm_build_expanded <- function(fit, trait_levels) {
   # as report$sd_B (length n_traits).
   Psi_B <- if (isTRUE(glm_has_unique_unit(fit)) && !is.null(fit$report$sd_B))
     as.numeric(fit$report$sd_B) else NULL
+  Sigma_B <- if (!is.null(Lambda_B) && !is.null(Psi_B))
+    Lambda_B %*% t(Lambda_B) + diag(Psi_B^2)
+  else if (!is.null(fit$report$Sigma_B))
+    as.matrix(fit$report$Sigma_B)
+  else NULL
 
   # Within-unit (obs-level) tier — populated only when the fit carries
   # rr() and/or diag() covstructs whose grouping factor differs from
@@ -988,6 +992,8 @@ glm_build_expanded <- function(fit, trait_levels) {
   Psi_W <- if (isTRUE(glm_has_within_unit(fit)) &&
                !is.null(fit$report$sd_W))
     as.numeric(fit$report$sd_W) else NULL
+  Sigma_W <- if (!is.null(Lambda_W) && !is.null(Psi_W))
+    Lambda_W %*% t(Lambda_W) + diag(Psi_W^2) else NULL
 
   list(
     y         = as.numeric(y_long),
@@ -1009,7 +1015,8 @@ glm_build_expanded <- function(fit, trait_levels) {
     Psi_B     = Psi_B,
     Lambda_W  = Lambda_W,
     Z_W       = Z_W,
-    Psi_W     = Psi_W
+    Psi_W     = Psi_W,
+    Sigma_W   = Sigma_W
   )
 }
 
