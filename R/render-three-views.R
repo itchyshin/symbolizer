@@ -572,6 +572,67 @@ three_views_matrix_summary <- function(has_re) {
   }
 }
 
+# ---------------------------------------------------------------------------
+# Module-level LaTeX helpers used by latex_implied_cov_block and others.
+# These are intentionally minimal — no row/column truncation beyond what
+# the caller requests. The local versions inside three_views_matrix_block()
+# are richer (Pattern O column selection); these serve the stand-alone
+# tier-decomposition emitter.
+# ---------------------------------------------------------------------------
+
+# Emit \begin{bmatrix} ... \end{bmatrix} from a numeric matrix, displaying
+# only the rows indicated by `rows` (a integer vector; NAs become \vdots).
+# Columns are not truncated here; callers pass a pre-selected row index.
+latex_mat <- function(M, rows = seq_len(nrow(M))) {
+  fmt <- function(v) formatC(v, digits = 3, format = "g")
+  rows_tex <- vapply(rows, function(i) {
+    if (is.na(i)) {
+      paste(rep("\\vdots", ncol(M)), collapse = " & ")
+    } else {
+      paste(vapply(seq_len(ncol(M)), function(j) fmt(M[i, j]), character(1L)),
+            collapse = " & ")
+    }
+  }, character(1L))
+  paste0("\\begin{bmatrix} ",
+         paste(rows_tex, collapse = " \\\\ "),
+         " \\end{bmatrix}")
+}
+
+# Wrap `content` in a LaTeX \underbrace{...}_{label} with \textstyle so
+# the annotation renders at readable size in MathJax display math.
+underbrace <- function(content, label)
+  sprintf("\\underbrace{%s}_{\\textstyle\\,%s\\,}", content, label)
+
+# Emit the implied-covariance block for one tier (B or W) of a gllvm
+# fit: a stacked equation showing the numerical Σ matrix next to its
+# Λ Λ^T + diag(Ψ²) decomposition. Returns a character string suitable
+# for inclusion inside a `$$ ... $$` MathJax block, or NULL when any
+# matrix is missing.
+latex_implied_cov_block <- function(tier = c("B", "W"), Sigma, Lambda, Psi) {
+  tier <- match.arg(tier)
+  if (is.null(Sigma) || is.null(Lambda) || is.null(Psi)) return(NULL)
+  caption <- if (identical(tier, "B"))
+    "between-individual implied covariance"
+  else
+    "within-individual implied covariance"
+  T_n <- nrow(Sigma); d <- ncol(Lambda)
+  sigma_mat <- latex_mat(Sigma, rows = seq_len(min(T_n, 7L)))
+  lam_mat   <- latex_mat(Lambda, rows = seq_len(min(T_n, 7L)))
+  psi_mat   <- latex_mat(diag(Psi^2), rows = seq_len(min(T_n, 7L)))
+  sigma_lab <- sprintf("\\boldsymbol{\\Sigma}_%s\\;\\text{(%s)}",
+                       tier, caption)
+  lam_lab   <- sprintf("\\boldsymbol{\\Lambda}_%s\\,\\boldsymbol{\\Lambda}_%s^{\\!\\top}",
+                       tier, tier)
+  psi_lab   <- sprintf("\\boldsymbol{\\Psi}_%s^{\\,2}", tier)
+  paste0(
+    "$$\n",
+    underbrace(sigma_mat, sigma_lab),
+    " \\;=\\; ", underbrace(lam_mat, lam_lab),
+    " \\;+\\; ", underbrace(psi_mat, psi_lab),
+    "\n$$\n"
+  )
+}
+
 three_views_matrix_block <- function(x, head = 5L, tail = 2L,
                                       head_cols = 5L, tail_cols = 2L) {
   ex <- x$expanded
