@@ -70,3 +70,36 @@ test_that("expanded$Sigma_B closes Λ_B Λ_B^T + diag(Ψ_B²) to 1e-6", {
              diag(sym$expanded$Psi_B^2)
   expect_equal(sym$expanded$Sigma_B, closure, tolerance = 1e-6)
 })
+
+# ---- Task 5 ----
+test_that("glm_compute_repeatability returns the per-trait R_t formula", {
+  Sigma_B <- diag(c(0.62, 0.45, 0.58, 0.31, 0.40))
+  Sigma_W <- diag(c(0.38, 0.55, 0.42, 0.69, 0.60))
+  rep_v   <- symbolizer:::glm_compute_repeatability(Sigma_B, Sigma_W)
+  expect_equal(rep_v, diag(Sigma_B) / (diag(Sigma_B) + diag(Sigma_W)),
+               tolerance = 1e-12)
+  expect_equal(length(rep_v), 5L)
+})
+
+test_that("glm_compute_repeatability returns NULL when Sigma_W is NULL", {
+  Sigma_B <- diag(c(0.62, 0.45, 0.58))
+  expect_null(symbolizer:::glm_compute_repeatability(Sigma_B, NULL))
+})
+
+# ---- Task 6 ----
+test_that("expanded$Repeatability is the per-trait R_t vector on a two-tier fit", {
+  fit <- fit_gllvm_two_tier()
+  sym <- symbolize(fit)
+  expect_true(!is.null(sym$expanded$Repeatability))
+  expect_equal(length(sym$expanded$Repeatability),
+               as.integer(fit$n_traits))
+  expected_R <- diag(sym$expanded$Sigma_B) /
+                (diag(sym$expanded$Sigma_B) + diag(sym$expanded$Sigma_W))
+  expect_equal(sym$expanded$Repeatability, expected_R, tolerance = 1e-12)
+})
+
+test_that("expanded$Repeatability stays NULL on a between-only fit", {
+  fit <- fit_gllvm_with_unique()
+  sym <- symbolize(fit)
+  expect_null(sym$expanded$Repeatability)
+})

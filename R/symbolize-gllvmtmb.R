@@ -255,6 +255,11 @@ glm_has_within_unit <- function(fit) {
   }, logical(1L)))
 }
 
+glm_compute_repeatability <- function(Sigma_B, Sigma_W) {
+  if (is.null(Sigma_W) || is.null(Sigma_B)) return(NULL)
+  diag(Sigma_B) / (diag(Sigma_B) + diag(Sigma_W))
+}
+
 # ---- builders ---------------------------------------------------------------
 
 glm_build_distribution <- function(response_symbol, response_symbol_matrix,
@@ -994,6 +999,7 @@ glm_build_expanded <- function(fit, trait_levels) {
     as.numeric(fit$report$sd_W) else NULL
   Sigma_W <- if (!is.null(Lambda_W) && !is.null(Psi_W))
     Lambda_W %*% t(Lambda_W) + diag(Psi_W^2) else NULL
+  Repeatability <- glm_compute_repeatability(Sigma_B, Sigma_W)
 
   list(
     y         = as.numeric(y_long),
@@ -1013,10 +1019,11 @@ glm_build_expanded <- function(fit, trait_levels) {
     fitted    = fitted,
     residuals = residuals,
     Psi_B     = Psi_B,
-    Lambda_W  = Lambda_W,
-    Z_W       = Z_W,
-    Psi_W     = Psi_W,
-    Sigma_W   = Sigma_W
+    Lambda_W      = Lambda_W,
+    Z_W           = Z_W,
+    Psi_W         = Psi_W,
+    Sigma_W       = Sigma_W,
+    Repeatability = Repeatability
   )
 }
 
