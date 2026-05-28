@@ -1003,6 +1003,27 @@ drm_build_fixed_effects <- function(terms_tbl, fit, ci_method = "wald") {
   )
 }
 
+# v0.22.2.1: link inverse mapping for drmTMB families. Returns the
+# response-scale predicted value given the linear predictor eta_hat.
+# drmTMB family$link is a vector; the mu-submodel link is element [[1L]].
+# For Lognormal the mu link is "identity" (drmTMB's mu parameterises
+# E[log Y]); callers needing the response-scale E[Y] = exp(mu + sigma^2/2)
+# compute it from mu_hat + sigma_hat downstream.
+drm_apply_link_inverse <- function(eta_hat, link) {
+  switch(
+    link,
+    identity = eta_hat,
+    log      = exp(eta_hat),
+    logit    = stats::plogis(eta_hat),
+    probit   = stats::pnorm(eta_hat),
+    cloglog  = -expm1(-exp(eta_hat)),
+    inverse  = 1 / eta_hat,
+    # Fallback: assume identity. Matches the pre-v0.22.2.1 behaviour
+    # for any link name we haven't catalogued yet.
+    eta_hat
+  )
+}
+
 drm_build_expanded <- function(fit, re_per_entry, has_re,
                                 structured_matrix_for_group = NULL) {
   # Univariate Gaussian path: `fit$model$y`, `fit$model$X$mu`, etc. all exist
@@ -1015,7 +1036,11 @@ drm_build_expanded <- function(fit, re_per_entry, has_re,
   X_sigma <- fit$model$X$sigma
   beta    <- fit$coefficients$mu
   gamma   <- fit$coefficients$sigma
-  mu_hat <- if (!is.null(X) && !is.null(beta)) drop(X %*% beta) else NULL
+  # v0.22.2.1: store the LINEAR PREDICTOR (eta_hat) here; mu_hat
+  # (response-scale predicted mean) is derived later after Z*u is added
+  # and the link inverse is applied. For identity-link families
+  # (Gaussian, drmTMB Lognormal-on-log-Y) mu_hat == eta_hat.
+  eta_hat <- if (!is.null(X) && !is.null(beta)) drop(X %*% beta) else NULL
   sigma_hat <- if (!is.null(X_sigma) && !is.null(gamma)) {
     exp(drop(X_sigma %*% gamma))
   } else NULL
@@ -1103,23 +1128,35 @@ drm_build_expanded <- function(fit, re_per_entry, has_re,
   Z_g <- if (length(Z_per_tier) > 0L) Z_per_tier[[1L]] else NULL
   u   <- if (length(u_per_tier) > 0L) u_per_tier[[1L]] else NULL
 
-  # v0.22.2.1: include EVERY random-effect tier's contribution in mu_hat
-  # so the internal contract `e = y - mu_hat` closes. Pre-2026-05-28
-  # behaviour computed `mu_hat = X*beta` only; the residual `e` came from
+  # v0.22.2.1: include EVERY random-effect tier's contribution in eta_hat
+  # so the linear-predictor is complete. Pre-2026-05-28 behaviour
+  # computed mu_hat = X*beta only; the residual e came from
   # stats::residuals(fit) which IS y - (X*beta + sum_g Z_g*u_g). That
-  # mismatch broke Tab 3's worked row (it showed mu_hat = X*beta but the
-  # caption said Xbeta + Zu = mu_hat) and broke the stacked block's
-  # residual column (it computed eps_hat = y - mu_hat, which was y - Xbeta,
-  # NOT the proper RE-adjusted residual). Surfaced by the v0.22.2 Fisher
-  # pass on the symbolizer-drmtmb article (NEEDS FIXES verdict).
-  if (!is.null(mu_hat) && length(Z_per_tier) > 0L) {
+  # mismatch broke Tab 3's worked row. Add Zu to eta_hat per tier.
+  if (!is.null(eta_hat) && length(Z_per_tier) > 0L) {
     for (gv in names(Z_per_tier)) {
       Z_gv <- Z_per_tier[[gv]]
       u_gv <- u_per_tier[[gv]]
       if (!is.null(Z_gv) && !is.null(u_gv)) {
-        mu_hat <- mu_hat + drop(Z_gv %*% u_gv)
+        eta_hat <- eta_hat + drop(Z_gv %*% u_gv)
       }
     }
+  }
+
+  # v0.22.2.1 part 2: apply the link inverse so mu_hat carries the
+  # RESPONSE-scale predicted value (not the linear predictor). Surfaced
+  # by the Fisher pass on symbolizer-families.html: Beta widget displayed
+  # mu_hat = -0.95, an impossible value for a Beta mean. After this fix
+  # mu_hat = plogis(eta_hat) = 0.279 ∈ (0,1) as required.
+  #
+  # Family / link mapping. drmTMB stores link as a length-vector with
+  # the mu-submodel link in position [[1L]]. For Lognormal drmTMB's
+  # mu parameterises E[log Y] (identity link on mu), so identity is
+  # correct -- the response-scale E[Y] = exp(mu + sigma^2/2) is a
+  # separate derived quantity that callers compute downstream.
+  mu_hat <- if (is.null(eta_hat)) NULL else {
+    link <- if (!is.null(fit$family$link)) as.character(fit$family$link[[1L]]) else "identity"
+    drm_apply_link_inverse(eta_hat, link)
   }
 
   list(
@@ -1134,6 +1171,7 @@ drm_build_expanded <- function(fit, re_per_entry, has_re,
     u_per_tier = u_per_tier,
     tier_kind  = tier_kind,
     e          = e,
+    eta_hat    = eta_hat,
     mu_hat     = mu_hat,
     sigma_hat  = sigma_hat
   )

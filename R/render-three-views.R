@@ -1066,7 +1066,8 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L,
   # with numbers, then back-transformed to sigma_1 in original units.
   # Both anchor the matrix algebra immediately below: each matrix equation
   # is the corresponding worked row stacked n times.
-  worked_mu    <- three_views_worked_row(ex, resp_sym)
+  family_str <- if (!is.null(x$model$family)) as.character(x$model$family[[1L]]) else "gaussian"
+  worked_mu    <- three_views_worked_row(ex, resp_sym, family = family_str)
   worked_sigma <- three_views_worked_row_sigma(ex)
 
   # --- Block 3: structured covariance matrix (phylo / spatial / temporal) -
@@ -1186,7 +1187,8 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L,
 # `W_1 = beta_0 + beta_1 T_1 + ... + eps_1` once symbolically and once
 # with the actual numbers. Returns a `$$ ... $$` MathJax block, or NULL
 # if the model doesn't have enough structure to write a meaningful row.
-three_views_worked_row <- function(ex, resp_sym = "\\mathbf{y}") {
+three_views_worked_row <- function(ex, resp_sym = "\\mathbf{y}",
+                                    family = "gaussian") {
   if (is.null(ex$y) || is.null(ex$X) || is.null(ex$beta) || is.null(ex$mu_hat))
     return(NULL)
   if (length(ex$y) < 1L || nrow(ex$X) < 1L) return(NULL)
@@ -1195,7 +1197,12 @@ three_views_worked_row <- function(ex, resp_sym = "\\mathbf{y}") {
   i  <- 1L
   X1 <- ex$X[i, ]
   W1 <- ex$y[i]
-  mu1 <- ex$mu_hat[i]
+  # v0.22.2.1: mu_hat is now on response scale (link-inverted); eta_hat
+  # is on linear-predictor scale. For Gaussian-additive families
+  # (identity link, additive Gaussian noise) the two are equal. For
+  # generalized families they differ and the worked row must show both.
+  eta1 <- if (!is.null(ex$eta_hat)) ex$eta_hat[i] else ex$mu_hat[i]
+  mu1  <- ex$mu_hat[i]
   eps1 <- W1 - mu1
 
   # If the model has random effects, the conditional mean for
@@ -1325,18 +1332,95 @@ three_views_worked_row <- function(ex, resp_sym = "\\mathbf{y}") {
   sym_rhs <- paste(sym_terms, collapse = " + ")
   num_rhs <- paste(num_terms, collapse = " + ")
 
-  paste0(
-    "<div class=\"sym-eq\">$$\n\\begin{aligned}\n",
-    scalar_response_sym, " &= ", sym_rhs, " + \\hat\\varepsilon_{1} ",
-    "&\\quad(\\text{response equation, one row of the model}) \\\\\n",
-    fmt(W1), " &= ", num_rhs, " + (", fmt(eps1), ") ",
-    "&\\quad(\\text{with your numbers}) \\\\\n",
-    "&= \\underbrace{", fmt(mu1),
-    "}_{\\textstyle\\,\\hat\\mu_{1}\\,\\text{(predicted)}\\,} \\;+\\; ",
-    "\\underbrace{(", fmt(eps1),
-    ")}_{\\textstyle\\,\\hat\\varepsilon_{1}\\,\\text{(residual)}\\,}",
-    "\n\\end{aligned}\n$$</div>\n"
+  # v0.22.2.1: family-aware worked-row shape. Three patterns:
+  #   "additive_gaussian"  -- y = X*beta + eps (Gaussian identity link)
+  #   "additive_log"       -- log(y) = X*beta + eps_log (Lognormal,
+  #                            additive Gaussian noise on log scale)
+  #   "generalized"        -- eta = X*beta; mu = link_inv(eta);
+  #                            y ~ Family(mu, ...); no additive eps
+  # The bug surfaced by the Fisher pass on symbolizer-families.html was
+  # that every family fell through to "additive_gaussian" -- mixing
+  # link-scale and response-scale quantities additively and emitting a
+  # meaningless ε for Poisson / Beta.
+  shape <- switch(
+    tolower(as.character(family)),
+    gaussian      = "additive_gaussian",
+    student       = "additive_gaussian",
+    lognormal     = "additive_log",
+    "generalized"
   )
+
+  if (shape == "additive_gaussian") {
+    paste0(
+      "<div class=\"sym-eq\">$$\n\\begin{aligned}\n",
+      scalar_response_sym, " &= ", sym_rhs, " + \\hat\\varepsilon_{1} ",
+      "&\\quad(\\text{response equation, one row of the model}) \\\\\n",
+      fmt(W1), " &= ", num_rhs, " + (", fmt(eps1), ") ",
+      "&\\quad(\\text{with your numbers}) \\\\\n",
+      "&= \\underbrace{", fmt(mu1),
+      "}_{\\textstyle\\,\\hat\\mu_{1}\\,\\text{(predicted)}\\,} \\;+\\; ",
+      "\\underbrace{(", fmt(eps1),
+      ")}_{\\textstyle\\,\\hat\\varepsilon_{1}\\,\\text{(residual)}\\,}",
+      "\n\\end{aligned}\n$$</div>\n"
+    )
+  } else if (shape == "additive_log") {
+    # Lognormal: drmTMB parameterises log(Y) ~ Normal(mu, sigma^2). The
+    # additive noise is on the LOG scale; the linear-predictor equals
+    # the mean of log(y). Show the log-scale residual explicitly so the
+    # arithmetic closes without scale-mixing.
+    log_W1   <- log(W1)
+    eps_log1 <- log_W1 - mu1
+    paste0(
+      "<div class=\"sym-eq\">$$\n\\begin{aligned}\n",
+      "\\log(", scalar_response_sym, ") &= ", sym_rhs,
+      " + \\hat\\varepsilon_{1}^{(\\log)} ",
+      "&\\quad(\\text{response equation, log scale}) \\\\\n",
+      fmt(log_W1), " &= ", num_rhs, " + (", fmt(eps_log1), ") ",
+      "&\\quad(\\text{with your numbers, on } \\log y) \\\\\n",
+      "&= \\underbrace{", fmt(mu1),
+      "}_{\\textstyle\\,\\hat\\mu_{1}\\,\\text{(log-scale mean)}\\,}",
+      " \\;+\\; \\underbrace{(", fmt(eps_log1),
+      ")}_{\\textstyle\\,\\hat\\varepsilon_{1}^{(\\log)}\\,\\text{(log-scale residual)}\\,}",
+      "\n\\end{aligned}\n$$</div>\n"
+    )
+  } else {
+    # Generalized: no additive noise on the linear predictor. Show
+    # eta_hat (linear predictor), mu_hat (response scale via link
+    # inverse), and the distributional declaration.
+    link_str <- switch(
+      tolower(as.character(family)),
+      poisson    = "\\exp",
+      binomial   = "\\mathrm{logistic}",
+      beta       = "\\mathrm{logistic}",
+      gamma      = "\\exp",
+      nbinom1    = "\\exp",
+      nbinom2    = "\\exp",
+      "\\mathrm{link}^{-1}"
+    )
+    family_label <- switch(
+      tolower(as.character(family)),
+      poisson    = "\\mathrm{Poisson}",
+      binomial   = "\\mathrm{Binomial}",
+      beta       = "\\mathrm{Beta}",
+      gamma      = "\\mathrm{Gamma}",
+      nbinom1    = "\\mathrm{NegBinom}_1",
+      nbinom2    = "\\mathrm{NegBinom}_2",
+      paste0("\\mathrm{", family, "}")
+    )
+    paste0(
+      "<div class=\"sym-eq\">$$\n\\begin{aligned}\n",
+      "\\hat\\eta_{1} &= ", sym_rhs,
+      "&\\quad(\\text{linear predictor, link scale}) \\\\\n",
+      fmt(eta1), " &= ", num_rhs,
+      "&\\quad(\\text{with your numbers}) \\\\\n",
+      "\\hat\\mu_{1} &= ", link_str, "(\\hat\\eta_{1}) = ",
+      link_str, "(", fmt(eta1), ") \\approx ", fmt(mu1),
+      "&\\quad(\\text{response scale, predicted}) \\\\\n",
+      scalar_response_sym, " &\\sim ", family_label, "(\\hat\\mu_{1}, \\ldots)",
+      "&\\quad(\\text{likelihood; no additive }\\varepsilon\\text{ here})",
+      "\n\\end{aligned}\n$$</div>\n"
+    )
+  }
 }
 
 # Worked-row for the sigma submodel, parallel to three_views_worked_row().
