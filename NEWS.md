@@ -1,3 +1,103 @@
+# symbolizer 0.22.3
+
+## v0.22.3 -- family-aware Tab 3 worked row for non-Gaussian families
+
+Closes the BLOCKER on `symbolizer-families.html` surfaced by the v0.22.2
+Fisher pass
+(`docs/dev-log/figure-audits/v0.22.2-audit-pass/families-fisher.md`).
+
+Before this release the Tab 3 worked-row helper hardcoded the Gaussian
+template
+
+$$y_1 = \beta_0 + \beta_1 x_1 + \hat{\varepsilon}_1$$
+
+for every family. For non-identity-link families the displayed
+$\hat{\mu}_1$ was the **linear predictor** $\hat{\eta}_1$ not the
+**response-scale predicted mean**, the additive $\hat{\varepsilon}_1$
+was meaningless (Poisson has no residual in its likelihood at all), and
+the rendered values were either off by orders of magnitude or
+mathematically impossible. The Beta widget displayed
+$\hat{\mu}_1 = -0.95$ -- impossible for a Beta mean which must be in
+$(0,1)$; the correct response-scale value is
+$\mathrm{logistic}(-0.95) = 0.279$.
+
+### Three slices (TDD)
+
+**Slice 1 -- `R/symbolize-drmtmb.R`:** `drm_build_expanded()` now stores
+the linear predictor in a new `$expanded$eta_hat` slot and applies the
+mu-submodel link inverse to obtain `$expanded$mu_hat` on the response
+scale. Helper `drm_apply_link_inverse(eta_hat, link)` covers
+identity, log, logit, probit, cloglog, and inverse. For
+Gaussian-identity and the drmTMB Lognormal-on-mu-of-log-Y convention,
+`mu_hat == eta_hat` and the historic behaviour is preserved.
+
+**Slice 2 -- `R/render-three-views.R`:** the Tab 3 worked-row helper
+becomes family-aware and emits one of three shapes:
+
+- **Additive Gaussian** (Gaussian, Student-t):
+  $y_1 = \beta_0 + \beta_1 x_1 + \hat{\varepsilon}_1$ -- the historic
+  form, kept for back-compat.
+- **Additive log** (Lognormal):
+  $\log(y_1) = \beta_0 + \beta_1 x_1 + \hat{\varepsilon}_1^{(\log)}$
+  -- the residual is on the log scale where the Gaussian noise lives.
+- **Generalized** (Poisson, Beta, Binomial, Gamma, NegBinom):
+  $\hat{\eta}_1 = \beta_0 + \beta_1 x_1$, then
+  $\hat{\mu}_1 = \mathrm{link}^{-1}(\hat{\eta}_1)$, then
+  $y_1 \sim \mathrm{Family}(\hat{\mu}_1, \ldots)$ -- no spurious
+  additive $\hat{\varepsilon}_1$.
+
+**Slice 3 -- `R/render-three-views.R` (sigma submodel):**
+`three_views_worked_row_sigma()` takes the family argument and labels
+the $\hat{\sigma}_1$ submodel correctly per family:
+
+- gaussian / student: predicted residual SD (unchanged)
+- lognormal: log-scale residual SD (SD of $\log y$)
+- beta: predicted **precision $\hat{\phi}_1$** (NOT an SD)
+- gamma: predicted dispersion
+- nbinom1 / nbinom2: predicted dispersion (size parameter $k$)
+
+### Tests
+
+- `tests/testthat/test-symbolize-drmtmb-link-scale.R` (9 expectations):
+  Poisson $\hat{\mu}_1 = \exp(\hat{\eta}_1)$; Beta $\hat{\mu}_1 \in (0,1)$;
+  Lognormal $\hat{\mu}_1 = \hat{\eta}_1$ (drmTMB identity-on-mu);
+  Gaussian back-compat.
+- `tests/testthat/test-three-views-worked-row-families.R` (5
+  expectations): Poisson drops spurious $\varepsilon$; Poisson shows
+  $\exp$ back-transform; Beta shows response-scale $\hat{\mu}_1$
+  matching $\sym$expanded$mu_hat[[1]]$; Beta $\sigma$ row labelled as
+  precision $\phi$; Gaussian-identity keeps the historic shape.
+- `tests/testthat/test-expand.R`: slot list updated to include
+  `eta_hat`.
+
+Full suite: `FAIL 0 | SKIP 0 | PASS 1908` (+13 from new tests beyond
+the 1893 in v0.22.2-mu_hat-with-Zu).
+
+### Rendered HTML verification
+
+Spot-checks on `docs/articles/symbolizer-families.html`:
+
+```
+Poisson \hat{\eta}_{1} line:              4 matches
+Poisson \exp() back-transform:            7 matches
+Poisson y ~ Poisson(...) declaration:    11 matches
+Beta logistic link in worked row:         2 matches
+Beta "precision \phi" label:              2 matches
+Lognormal \log scale references:         19 matches
+Lognormal "log-scale residual SD" label:  3 matches
+Beta misleading "predicted residual SD":  0 matches  ← was the bug
+```
+
+### Out of scope (deferred to a separate slice)
+
+- The other extractors (gllvmTMB, glmmTMB, lme4, brms, MCMCglmm,
+  metafor, phylolm, mgcv, sdmTMB) have not been audited under the
+  Fisher protocol yet. The two-tier and structural-dependence widgets
+  may have analogous bugs; both Codex audits started during v0.22.2
+  were killed by the maintainer mid-run.
+- CRAN submission is paused per maintainer direction
+  (2026-05-28 21:55): focus on families correctness first.
+
 # symbolizer 0.22.2
 
 ## v0.22.2 -- multi-tier random-effects in Tab 3 (Slice A1 + A2 + worked-row polish)

@@ -1,6 +1,6 @@
 Package: symbolizer
 Title: Structured Symbolic Specifications, Interpretations, and Teachable Stories for Modern Statistical Models
-Version: 0.22.2
+Version: 0.22.3
 Authors@R: c(
     person("Shinichi", "Nakagawa", email = "itchyshin@gmail.com",
            role = c("aut", "cre", "cph"),
