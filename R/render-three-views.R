@@ -738,7 +738,7 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L,
       u_per_obs <- as.numeric(ex$Z_g %*% ex$u)
       u_obs_vec <- latex_vec(u_per_obs, rows)
       u_obs_lab <- sprintf(
-        "\\hat{\\mathbf{u}}_{\\,%d \\times 1}\\;\\text{(per-obs species effect)}",
+        "\\hat{\\mathbf{u}}_{\\,%d \\times 1}\\;\\text{(per-obs random effect)}",
         n
       )
       eq_mu <- paste0(

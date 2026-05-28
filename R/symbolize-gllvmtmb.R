@@ -871,13 +871,18 @@ glm_build_formula_bridge <- function(fit, response, response_symbol_matrix,
 }
 
 glm_build_expanded <- function(fit, trait_levels) {
-  y_long <- fit$tmb_data$y
+  y_long   <- fit$tmb_data$y
+  n_obs    <- length(y_long)
+  n_traits <- as.integer(fit$n_traits %||% NA_integer_)
+  n_sites  <- as.integer(fit$n_sites  %||% NA_integer_)
+
+  trait_id <- if (!is.null(fit$tmb_data$trait_id))
+    as.integer(fit$tmb_data$trait_id) + 1L else NULL
+  site_id  <- if (!is.null(fit$tmb_data$site_id))
+    as.integer(fit$tmb_data$site_id)  + 1L else NULL
+
   # Reshape long y into the n_sites x n_traits Y matrix if possible.
   Y <- tryCatch({
-    site_id  <- fit$tmb_data$site_id + 1L
-    trait_id <- fit$tmb_data$trait_id + 1L
-    n_sites <- as.integer(fit$n_sites)
-    n_traits <- as.integer(fit$n_traits)
     M <- matrix(NA_real_, n_sites, n_traits)
     for (r in seq_along(y_long)) {
       M[site_id[r], trait_id[r]] <- y_long[r]
@@ -888,22 +893,87 @@ glm_build_expanded <- function(fit, trait_levels) {
     M
   }, error = function(...) NULL)
 
-  Lambda_B <- if (!is.null(fit$report$Lambda_B)) as.matrix(fit$report$Lambda_B) else NULL
-  Sigma_B  <- if (!is.null(fit$report$Sigma_B))  as.matrix(fit$report$Sigma_B)  else NULL
+  Lambda_B  <- if (!is.null(fit$report$Lambda_B))  as.matrix(fit$report$Lambda_B)  else NULL
+  Sigma_B   <- if (!is.null(fit$report$Sigma_B))   as.matrix(fit$report$Sigma_B)   else NULL
   sigma_eps <- if (!is.null(fit$report$sigma_eps)) as.numeric(fit$report$sigma_eps) else NULL
   Z_B <- tryCatch(as.matrix(gllvmTMB::getLV(fit, level = "unit")),
                   error = function(...) NULL)
   eta <- if (!is.null(fit$report$eta)) as.numeric(fit$report$eta) else NULL
 
+  # ---- widget-shape slots ---------------------------------------------------
+  # The three-views renderer (R/render-three-views.R) needs to emit a
+  # response-equation row of the shape `y_r = (X beta)_r + u_r + epsilon_r`,
+  # and a stacked block `[y]_{n x 1} = [X]_{n x T}[beta] + [u]_{n x 1}`. The
+  # eight slots below close that contract for a Gaussian-identity fit.
+
+  # X: one-hot trait indicator for each observation (n_obs x n_traits). The
+  # canonical formula is `value ~ 0 + trait + latent(...)`, so the trait
+  # column is the only fixed-effect design column. We label the columns
+  # by their trait level so the worked-row renderer's predictor_label()
+  # doesn't fall back to "x_{k}" (which then mis-escapes `_` to `\_`).
+  X <- if (!is.null(trait_id) && !is.na(n_traits))
+    diag(n_traits)[trait_id, , drop = FALSE] else NULL
+  if (!is.null(X)) {
+    colnames(X) <- if (length(trait_levels) == n_traits) trait_levels else
+      paste0("trait", seq_len(n_traits))
+  }
+
+  # beta: trait intercepts. b_fix may carry slope columns when the formula
+  # adds predictors; the widget displays only the first n_traits trait
+  # intercepts (the slope-bearing case is out of scope for the first slice).
+  beta_full <- if (!is.null(fit$opt$par))
+    unname(fit$opt$par[names(fit$opt$par) == "b_fix"]) else NULL
+  beta <- if (!is.null(beta_full) && length(beta_full) >= n_traits)
+    beta_full[seq_len(n_traits)] else NULL
+
+  # u: per-observation random-effect contribution. By construction
+  # eta = X beta + u for the canonical formula, so we recover u as the
+  # gap between eta and the fixed part. This is the renderer's u_{n x 1}.
+  u <- if (!is.null(eta) && !is.null(X) && !is.null(beta))
+    as.numeric(eta - as.numeric(X %*% beta)) else NULL
+
+  # mu_hat / fitted / residuals: Gaussian identity link, so mu_hat = eta,
+  # fitted = mu_hat, residuals = y - fitted.
+  mu_hat    <- eta
+  fitted    <- mu_hat
+  residuals <- if (!is.null(fitted)) as.numeric(y_long) - fitted else NULL
+
+  # Z_g: identity-on-observations marker. The renderer's Z-drop logic uses
+  # n_obs == n_distinct_levels to fold Z u into the bare u_{n x 1} column
+  # instead of emitting a wall of zeros. gllvm has one observation per
+  # (unit, trait) row, so the right Z to advertise is I_n. We give Z_g
+  # per-observation column names so the worked-row's RE label reads
+  # `\hat{u}_{1}` rather than the generic `\hat{u}_{\mathrm{group}(1)}`.
+  Z_g <- if (n_obs >= 1L) {
+    M <- diag(n_obs)
+    colnames(M) <- as.character(seq_len(n_obs))
+    M
+  } else NULL
+
+  # Psi_B: per-trait diagonal uniqueness, populated only when the fit has a
+  # unique(0 + trait | unit) term. gllvmTMB exposes the diagonal SD vector
+  # as report$sd_B (length n_traits).
+  Psi_B <- if (isTRUE(glm_has_unique_unit(fit)) && !is.null(fit$report$sd_B))
+    as.numeric(fit$report$sd_B) else NULL
+
   list(
     y         = as.numeric(y_long),
     Y         = Y,
-    mu        = if (!is.null(fit$opt$par)) unname(fit$opt$par[names(fit$opt$par) == "b_fix"]) else NULL,
+    mu        = beta_full,
     Lambda_B  = Lambda_B,
     Z_B       = Z_B,
     Sigma_B   = Sigma_B,
     sigma_eps = sigma_eps,
-    eta       = eta
+    eta       = eta,
+    # widget-shape slots (added in v0.21.5-redo for the three-views renderer):
+    X         = X,
+    beta      = beta,
+    u         = u,
+    Z_g       = Z_g,
+    mu_hat    = mu_hat,
+    fitted    = fitted,
+    residuals = residuals,
+    Psi_B     = Psi_B
   )
 }
 
