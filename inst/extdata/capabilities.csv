@@ -126,3 +126,7 @@ glmmTMB,*,phylo,First slice,0.21.0,"Phylogenetic random effect detected via prop
 phylolm,gaussian,mu,First slice,0.21.4,"Phylogenetic GLS via phylolm::phylolm() with Gaussian outcome and identity link. PGLS marginal form: y = X*beta + e, e ~ N(0, sigma^2 * C(alpha)) where C(alpha) is a tree-derived correlation matrix. BM and Pagel's lambda first-slice; OU / EB / kappa / delta / trend deferred."
 phylolm,*,phylo,First slice,0.21.4,"Phylogenetic correlation is the residual structure -- no separate u_p random effect; phylolm marginalizes u_p into e. Extractor sets metadata$phylo_representation = ""pgls_marginal"" and records the evolutionary model in metadata$phylo_model."
 phylolm,*,*,Planned or reserved,,"OU / EB / kappa / delta / trend phylo models for phylolm and phyloglm GLM-family extractor planned for a later release."
+drmTMB,gaussian,meta_known_vi,First slice,0.22.1,Meta-analytic bridge via meta_V(V = vi); replaces brms se(sqrt(vi)).
+drmTMB,gaussian,meta_phylo_multilevel,First slice,0.22.1,"Phylo + multilevel meta-analysis via phylo(.|species) + multiple (.|group)."
+brms,gaussian,meta_known_vi,First slice,0.22.1,Meta-analytic bridge via se(sqrt(vi)).
+metafor,*,meta_phylo_multilevel,First slice,0.22.1,"rma.mv with V = vi + random = list(... ~ phylogeny) + R = list(phylogeny = A)."
