@@ -246,6 +246,15 @@ glm_has_unique_unit <- function(fit) {
   }, logical(1L)))
 }
 
+glm_has_within_unit <- function(fit) {
+  cs <- fit$covstructs %||% list()
+  unit_col <- fit$unit_col %||% ""
+  any(vapply(cs, function(e) {
+    g_txt <- if (is.null(e$group)) "" else paste(deparse(e$group), collapse = " ")
+    identical(e$kind, "rr") && !identical(g_txt, unit_col)
+  }, logical(1L)))
+}
+
 # ---- builders ---------------------------------------------------------------
 
 glm_build_distribution <- function(response_symbol, response_symbol_matrix,
