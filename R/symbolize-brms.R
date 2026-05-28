@@ -223,9 +223,30 @@ symbolize.brmsfit <- function(fit, symbols = NULL, units = NULL,
   )
   expanded <- brms_build_expanded(fit)
 
+  # v0.22.1: detect meta-analytic context. brms expresses known sampling
+  # variance via the response-side `se(...)` marker, e.g.
+  # `bf(y | se(sqrt(vi)) ~ ...)`. The canonical detection is to deparse
+  # the brms formula tree and grep for the `se(` marker on the response.
+  brms_formula_text <- tryCatch({
+    ff <- fit$formula
+    # brms stores the formula via brmsformula; deparse the top form
+    paste(deparse(ff), collapse = " ")
+  }, error = function(...) "")
+  # Fall back to deparsing fit$call$formula if fit$formula is opaque
+  if (!nzchar(brms_formula_text) || !grepl("\\|", brms_formula_text)) {
+    brms_formula_text <- tryCatch(
+      paste(deparse(fit$call$formula), collapse = " "),
+      error = function(...) brms_formula_text
+    )
+  }
+  has_se <- grepl("\\bse\\s*\\(", brms_formula_text)
+  detected_context <- if (isTRUE(has_se)) "meta_analysis" else NA_character_
+
   metadata <- list(
     call = fit$call,
-    context = context %||% "",
+    context = if (!is.null(context) && nzchar(context)) context
+              else if (!is.na(detected_context)) detected_context
+              else "",
     # brms gives credible intervals (Bayesian), not confidence intervals.
     # Downstream renderers can use ci_method to phrase the band correctly.
     ci_method = "credible",

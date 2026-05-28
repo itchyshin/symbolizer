@@ -51,8 +51,11 @@ fit_brms_phylo_meta <- function() {
   dat  <- .read_thermal_subset()
   tree <- .read_thermal_tree()
   A_phylo <- ape::vcv.phylo(tree, corr = TRUE)
+  # brms addition terms (se, trials, etc.) are parsed inside bf() by brms
+  # itself once the brms namespace is attached. Use the cached fit path so
+  # the formula is read back from the .rds file rather than re-evaluated.
   brms::brm(
-    brms::bf(dARR | brms::se(sqrt(Var_dARR)) ~ 1 + habitat
+    brms::bf(dARR | se(sqrt(Var_dARR)) ~ 1 + habitat
                 + (1 | study_ID)
                 + (1 | gr(phylogeny, cov = mat))),
     data   = dat,
