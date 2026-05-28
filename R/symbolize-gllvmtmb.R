@@ -965,6 +965,30 @@ glm_build_expanded <- function(fit, trait_levels) {
   Psi_B <- if (isTRUE(glm_has_unique_unit(fit)) && !is.null(fit$report$sd_B))
     as.numeric(fit$report$sd_B) else NULL
 
+  # Within-unit (obs-level) tier — populated only when the fit carries
+  # rr() and/or diag() covstructs whose grouping factor differs from
+  # the unit. gllvmTMB exposes them via `fit$report$Lambda_W` and
+  # `sd_W`; the per-obs latent scores Z_W via `gllvmTMB::getLV(level =
+  # "unit_obs")`.
+  Lambda_W <- if (isTRUE(glm_has_within_unit(fit)) &&
+                  !is.null(fit$report$Lambda_W))
+    as.matrix(fit$report$Lambda_W) else NULL
+  Z_W <- if (isTRUE(glm_has_within_unit(fit)))
+    tryCatch({
+      zw_unit <- as.matrix(gllvmTMB::getLV(fit, level = "unit_obs"))
+      # Expand from unit_obs-level (one row per obs group) to observation-level
+      # (one row per data row) using the 0-indexed site_species_id lookup.
+      uo_id <- fit$tmb_data$site_species_id
+      if (!is.null(uo_id) && nrow(zw_unit) == max(uo_id) + 1L) {
+        zw_unit[uo_id + 1L, , drop = FALSE]
+      } else {
+        zw_unit
+      }
+    }, error = function(...) NULL) else NULL
+  Psi_W <- if (isTRUE(glm_has_within_unit(fit)) &&
+               !is.null(fit$report$sd_W))
+    as.numeric(fit$report$sd_W) else NULL
+
   list(
     y         = as.numeric(y_long),
     Y         = Y,
@@ -982,7 +1006,10 @@ glm_build_expanded <- function(fit, trait_levels) {
     mu_hat    = mu_hat,
     fitted    = fitted,
     residuals = residuals,
-    Psi_B     = Psi_B
+    Psi_B     = Psi_B,
+    Lambda_W  = Lambda_W,
+    Z_W       = Z_W,
+    Psi_W     = Psi_W
   )
 }
 

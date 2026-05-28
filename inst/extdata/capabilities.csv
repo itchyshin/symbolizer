@@ -35,8 +35,8 @@ gllvmTMB,gaussian,Lambda_B,First slice,0.1.0,Between-unit reduced-rank loading m
 gllvmTMB,gaussian,Sigma_B,First slice,0.1.0,"Implied between-unit covariance Lambda_B Lambda_B^T (+ Psi_B when unique term present)."
 gllvmTMB,gaussian,Psi_B,First slice,0.1.0,Per-trait unique variance via unique(0 + trait | unit).
 gllvmTMB,gaussian,sigma_eps,First slice,0.1.0,Shared row-level residual SD.
-gllvmTMB,*,Lambda_W,Planned or reserved,,Within-unit reduced-rank loadings.
-gllvmTMB,*,Psi_W,Planned or reserved,,Per-trait within-unit unique variance.
+gllvmTMB,*,Lambda_W,First slice,0.21.6,Within-unit reduced-rank loadings via obs-level latent() covstruct.
+gllvmTMB,*,Psi_W,First slice,0.21.6,Per-trait within-unit unique variance via obs-level unique() covstruct.
 gllvmTMB,*,phylo,First slice,0.21.0,"Phylogenetic covstructs (phylo_rr / phylo_diag / phylo_scalar / phylo_slope); extractor surfaces metadata$phylo_representation = ""package_managed""."
 gllvmTMB,*,spatial,Planned or reserved,,Spatial covstructs.
 gllvmTMB,*,Sigma,Planned or reserved,,
