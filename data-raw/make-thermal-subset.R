@@ -31,11 +31,25 @@ species_keep <- sample(species_pool, 35L)
 
 dat_sub <- dat_full %>%
   filter(unique_name %in% species_keep) %>%
+  # Drop rows with zero sampling variance (cause boundary collapse on
+  # the drmTMB fit; the Pottier data has a few rows where Var_dARR is
+  # effectively zero -- these are not interpretable in a meta-analytic
+  # likelihood).
+  filter(Var_dARR > 1e-6) %>%
   group_by(unique_name) %>%
   slice_sample(n = 10L, replace = FALSE) %>%   # up to 10 effects per species (groups smaller than 10 use all rows)
   ungroup() %>%
   arrange(study_ID, unique_name)
 if (nrow(dat_sub) > 250L) dat_sub <- dat_sub[seq_len(250L), ]
+
+# Rename for the article + tests (phylogeny is the convention that
+# matches the tree tip labels), and SUBSET to only the columns the
+# vignette + tests use. Keeps the committed CSV small (5 columns) and
+# clean (no NA-padded rows from the wider Pottier dataset).
+dat_sub <- dat_sub %>%
+  mutate(phylogeny = unique_name) %>%
+  select(dARR, Var_dARR, phylogeny, study_ID, habitat)
+dat_sub <- dat_sub[complete.cases(dat_sub), ]
 
 tree_sub <- ape::keep.tip(tree_full, species_keep)
 tree_sub <- ape::chronos(tree_sub, lambda = 1)
@@ -46,5 +60,5 @@ ape::write.tree(tree_sub, "inst/extdata/thermal_subset_tree.tre")
 
 cat(sprintf("Wrote %d effects across %d species across %d studies.\n",
             nrow(dat_sub),
-            length(unique(dat_sub$unique_name)),
+            length(unique(dat_sub$phylogeny)),
             length(unique(dat_sub$study_ID))))
