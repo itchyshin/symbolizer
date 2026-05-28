@@ -353,16 +353,13 @@ as_html_three_views(sym_drm_phylo, id = "phylo-multilevel")
 
 The widget's **Tab 3** decomposes the marginal variance into the known
 sampling tier $v_{kt}$ and the two estimated tiers
-($\sigma_{\text{study}}^2$, $\sigma_p^2\,\mathbf{A}_{kk}$).
-
-*Known limitation (v0.22.1):* the widget's per-tab equations currently
-surface only the iid random-effect tier (`study_ID`); the phylogenetic
-tier `phylo(1 | phylogeny, tree = ...)` is detected in
-`sym$metadata$phylo_representation` but its variance row is not yet
-propagated to the `$random_effects` table that drives Tabs 1–3. The
-**math** in §4.1 above and the `metafor` Face below are the
-authoritative views of the full two-tier random-effect structure.
-Fixing this is tracked as a v0.22.1.1 follow-up.
+($\sigma_{\text{study}}^2$, $\sigma_p^2\,\mathbf{A}_{kk}$). Tabs 1
+and 2 carry the matching index- and matrix-form equations, including
+the phylogenetic line $\mathbf{u}_p \sim \mathcal{N}(\mathbf{0},\,
+\sigma_p^2\,\mathbf{A})$ — drmTMB consumes `phylo()` into its
+internal sparse-precision pipeline rather than `fit$random_effects`,
+and `symbolize.drmTMB()` synthesises the structured tier so the
+widget renders the full two-tier model (v0.22.1.1).
 
 ### 4.4 Face 2 — `brms` (light, with `se(sqrt(vi))` + `gr(., cov = A)`)
 

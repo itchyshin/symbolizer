@@ -1,3 +1,55 @@
+# symbolizer 0.22.1.1
+
+## v0.22.1.1 -- phylo tier propagated into widget equations
+
+Closes the V2 Pat-lens blocker on `symbolizer-meta-analysis.Rmd`
+§4: the article's central thesis equation -- the phylogenetic
+random effect $\mathbf{u}_p \sim \mathcal{N}(\mathbf{0},\,
+\sigma_p^2\,\mathbf{A})$ -- now appears in the rendered widget
+across all three tabs.
+
+### What changed
+
+`symbolize.drmTMB()` now synthesises a random-effect row for each
+`phylo()` / `animal()` marker in the formula so the equation
+renderer, `variance_components`, symbol dictionary, and assumption
+gate all see the structured tier. Previously the tier was detected
+in `metadata$phylo_representation` and `metadata$structured_matrices`
+but never reached `$random_effects` (because drmTMB consumes
+`phylo()` into its internal sparse-precision pipeline rather than
+`fit$random_effects`).
+
+`drm_build_components()` now receives `structured_matrix_for_group`
+and emits $\mathbf{u}_g \sim \mathcal{N}(\mathbf{0},\, \sigma_g^2\,
+\mathbf{A}_{k \times k})$ (matrix form) and $\mathbf{u}_g \sim
+\mathcal{N}(\mathbf{0},\, \sigma_g^2\, \mathbf{A})$ (index form)
+for any structured tier, instead of falling through to
+$\mathbf{I}_n$.
+
+The linear-predictor matrix form disambiguates multiple
+intercept-only RE groups: single-RE fits keep the historic bare
+$\mathbf{u}$, multi-RE fits emit $\mathbf{u}_{g_1} + \mathbf{u}_{g_2}$
+so the multilevel structure is visible.
+
+`sym$metadata$structured_matrices` is now populated when drmTMB
+detects `phylo()` / `animal()` / `spatial()`, exposing the matrix
+symbol, role tag, and dimensions for downstream consumers.
+
+### Tests
+
+`test-symbolize-drmtmb-meta-multilevel.R` gains two un-skipped
+tests covering the variance_components phylo tier and the matrix-
+form equation row $\mathbf{u}_{\text{phylogeny}} \sim
+\mathcal{N}(\mathbf{0},\, \sigma_{\text{phylogeny}}^2\,
+\mathbf{A}_{35 \times 35})$, plus a new test for
+`metadata$structured_matrices`. Suite at FAIL 0 | SKIP 0 | PASS 1845.
+
+### Vignette
+
+`vignettes/symbolizer-meta-analysis.Rmd` §4.3 drops the
+"Known limitation (v0.22.1)" caveat (the cause is fixed) and
+documents the synthesis path.
+
 # symbolizer 0.22.1
 
 ## v0.22.1 -- meta-analysis Widget 2 (phylogenetic multilevel)

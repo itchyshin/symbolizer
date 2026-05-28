@@ -21,17 +21,36 @@ test_that("metadata$phylo_representation is tagged when phylo() is in the formul
 })
 
 test_that("variance_components includes the phylogeny + study tiers", {
-  # phylo() random effects are surfaced via metadata$phylo_representation and
-  # structured_matrices, not via the standard variance_components table (which
-  # only captures fit$random_effects entries). Surfacing phylo variance
-  # components in variance_components requires a separate extraction slice.
-  testthat::skip("phylo variance tier in variance_components deferred: phylo(1 | phylogeny) is handled via structured_matrices, not fit$random_effects; separate extraction slice needed")
   fit <- fit_drmtmb_phylo_multilevel()
   sym <- symbolize(fit)
   vc <- sym$variance_components
   joined <- paste(vc$group_var, collapse = " ")
   expect_match(joined, "phylogeny|species", perl = TRUE)
   expect_match(joined, "study_ID|study", perl = TRUE)
+})
+
+test_that("equations show the structured phylo tier u_p ~ N(0, sigma_p^2 A)", {
+  # V2 Pat blocker on symbolizer-meta-analysis.Rmd Sec 4: the article's
+  # central thesis equation (phylogenetic random effect with the A
+  # correlation matrix) must appear in the widget. Tests the matrix-form
+  # equation rather than the index form because A only shows up on the
+  # matrix side when the structured tier has it.
+  fit <- fit_drmtmb_phylo_multilevel()
+  sym <- symbolize(fit)
+  eqs <- equations(sym, notation = "matrix")
+  joined <- paste(eqs$matrix, collapse = " ")
+  expect_match(joined, "\\\\mathbf\\{u\\}_\\{phylogeny\\}", perl = TRUE)
+  expect_match(joined, "\\\\mathbf\\{A\\}", perl = TRUE)
+})
+
+test_that("structured_matrices metadata names the phylo A correlation matrix", {
+  fit <- fit_drmtmb_phylo_multilevel()
+  sym <- symbolize(fit)
+  sm <- sym$metadata$structured_matrices
+  expect_true(!is.null(sm))
+  expect_true(length(sm) >= 1L)
+  roles <- vapply(sm, function(x) x$role %||% NA_character_, character(1L))
+  expect_true(any(grepl("phylo", roles)))
 })
 
 test_that("assumption_table mentions the known sampling variance v_k", {

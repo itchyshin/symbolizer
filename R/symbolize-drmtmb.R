@@ -112,6 +112,98 @@ symbolize.drmTMB <- function(fit, symbols = NULL, units = NULL,
     }
   }
 
+  # v0.22.1.1: detect drmTMB structured-dependence markers (phylo, animal,
+  # spatial, meta_V) and synthesise random-effect rows for structured tiers
+  # that drmTMB absorbs into its internal sparse-precision pipeline rather
+  # than fit$random_effects. Without this, phylo(1 | species, tree = ...)
+  # detected via metadata$phylo_representation never reaches the equation
+  # renderer, so the central thesis equation (u_p ~ N(0, sigma_p^2 A)) is
+  # silently missing from the rendered widget (V2 Pat-lens blocker on
+  # symbolizer-meta-analysis.Rmd Sec 4).
+  detected_signals <- character(0L)
+  has_drmtmb_phylo <- FALSE
+  has_drmtmb_spatial <- FALSE
+  has_drmtmb_meta_v <- FALSE
+  phylo_groups_per_dpar <- list()   # named list: dpar -> character vector of group_vars
+  for (e in entries) {
+    if (is.null(e$rhs)) next
+    rhs_text <- paste(deparse(e$rhs), collapse = " ")
+    if (grepl("(^|[^A-Za-z._])(phylo|animal)\\s*\\(", rhs_text)) {
+      has_drmtmb_phylo <- TRUE
+      # Parse `phylo(<lhs> | group, ...)` / `animal(<lhs> | group, ...)`
+      # marker(s) and pull the group-var. There can be more than one
+      # phylo() block on the same submodel (rare but legal).
+      hits <- gregexpr(
+        "(?:phylo|animal)\\s*\\(\\s*[^|]+\\|\\s*([A-Za-z._][A-Za-z0-9._]*)",
+        rhs_text, perl = TRUE)[[1L]]
+      if (hits[[1L]] > 0L) {
+        starts <- as.integer(hits)
+        lens   <- attr(hits, "match.length")
+        for (h in seq_along(starts)) {
+          m <- substr(rhs_text, starts[[h]], starts[[h]] + lens[[h]] - 1L)
+          gv <- sub(".*\\|\\s*", "", m)
+          phylo_groups_per_dpar[[e$dpar]] <-
+            c(phylo_groups_per_dpar[[e$dpar]] %||% character(0L), gv)
+        }
+      }
+    }
+    if (grepl("(^|[^A-Za-z._])spatial\\s*\\(", rhs_text)) {
+      has_drmtmb_spatial <- TRUE
+    }
+    # v0.22.1: detect meta_V() sampling-variance marker (meta-analysis).
+    if (grepl("(^|[^A-Za-z._])meta_V\\s*\\(", rhs_text)) {
+      has_drmtmb_meta_v <- TRUE
+    }
+  }
+  if (has_drmtmb_phylo)   detected_signals <- c(detected_signals, "phylo")
+  if (has_drmtmb_spatial) detected_signals <- c(detected_signals, "spatial")
+  if (has_drmtmb_meta_v)  detected_signals <- c(detected_signals, "meta_analysis")
+
+  # Inject synthetic phylo random-effect rows into re_per_entry so the
+  # equation renderer, variance_components, symbol table, and assumption
+  # gate all see them. From symbolizer's standpoint, phylo(1 | species)
+  # IS a random effect on the submodel even though drmTMB stores it via
+  # the structured-precision pipeline (fit$random_effects holds only
+  # unstructured tiers).
+  structured_matrix_for_group <- list()
+  if (has_drmtmb_phylo) {
+    for (i in seq_along(entries)) {
+      dpar <- entries[[i]]$dpar
+      gvs  <- phylo_groups_per_dpar[[dpar]]
+      if (is.null(gvs) || length(gvs) == 0L) next
+      for (gv in unique(gvs)) {
+        # Skip when an unstructured (1 | gv) tier already exists for this
+        # dpar -- the user-facing structured information lives in the
+        # structured-matrix decoration, not in a duplicate row.
+        existing <- re_per_entry[[i]]
+        already  <- !is.null(existing) &&
+                    any(existing$group_var == gv & existing$submodel == dpar)
+        if (already) {
+          structured_matrix_for_group[[gv]] <- "\\mathbf{A}"
+          next
+        }
+        n_levels <- if (gv %in% names(data)) {
+          length(unique(data[[gv]]))
+        } else NA_integer_
+        synth <- tibble::tibble(
+          submodel   = dpar,
+          term_label = sprintf("(1 | %s)", gv),
+          lhs_expr   = "1",
+          group_var  = gv,
+          component  = "(Intercept)",
+          n_levels   = as.integer(n_levels)
+        )
+        re_per_entry[[i]] <- if (is.null(existing)) synth else rbind(existing, synth)
+        structured_matrix_for_group[[gv]] <- "\\mathbf{A}"
+      }
+    }
+    has_re <- vapply(re_per_entry, function(x) !is.null(x) && nrow(x) > 0L,
+                     logical(1L))
+  }
+  if (length(structured_matrix_for_group) == 0L) {
+    structured_matrix_for_group <- NULL
+  }
+
   param <- get_parameterization(family)
   index <- list(observation = "i", individual = "j",
                 group = "g", trait = "k", time = "t")
@@ -178,34 +270,12 @@ symbolize.drmTMB <- function(fit, symbols = NULL, units = NULL,
                                        response_symbol, response_symbol_matrix,
                                        family = family,
                                        response_symbol_1 = response_symbol_1,
-                                       response_symbol_2 = response_symbol_2)
-  # v0.21+ structured-dependence detection. drmTMB exposes phylo(),
-  # animal(), and spatial() as formula markers. The phylo() and animal()
-  # paths use the Hadfield-Nakagawa A-inverse sparse-precision
-  # representation (all-nodes); spatial() uses coords / mesh.
-  detected_signals <- character(0L)
-  has_drmtmb_phylo <- FALSE
-  has_drmtmb_spatial <- FALSE
-  has_drmtmb_meta_v <- FALSE
-  for (e in entries) {
-    if (is.null(e$rhs)) next
-    rhs_text <- paste(deparse(e$rhs), collapse = " ")
-    # \\b alone is greedy on word-character boundaries; use a more
-    # targeted look-ahead for the marker followed by an open paren.
-    if (grepl("(^|[^A-Za-z._])(phylo|animal)\\s*\\(", rhs_text)) {
-      has_drmtmb_phylo <- TRUE
-    }
-    if (grepl("(^|[^A-Za-z._])spatial\\s*\\(", rhs_text)) {
-      has_drmtmb_spatial <- TRUE
-    }
-    # v0.22.1: detect meta_V() sampling-variance marker (meta-analysis).
-    if (grepl("(^|[^A-Za-z._])meta_V\\s*\\(", rhs_text)) {
-      has_drmtmb_meta_v <- TRUE
-    }
-  }
-  if (has_drmtmb_phylo)   detected_signals <- c(detected_signals, "phylo")
-  if (has_drmtmb_spatial) detected_signals <- c(detected_signals, "spatial")
-  if (has_drmtmb_meta_v)  detected_signals <- c(detected_signals, "meta_analysis")
+                                       response_symbol_2 = response_symbol_2,
+                                       structured_matrix_for_group =
+                                         structured_matrix_for_group)
+  # v0.21+ structured-dependence symbol-dictionary scaffolding. detected_*
+  # booleans and detected_signals are set early so re_per_entry can be
+  # augmented before re_tbl / components / variance_components build.
   structured_matrices <- c(
     if (has_drmtmb_phylo) list(list(
       symbol             = "\\mathbf{A}",
@@ -276,6 +346,7 @@ symbolize.drmTMB <- function(fit, symbols = NULL, units = NULL,
     ),
     phylo_representation = if (has_drmtmb_phylo) "all_nodes" else NULL,
     spatial_representation = if (has_drmtmb_spatial) "package_managed" else NULL,
+    structured_matrices = structured_matrices,
     detected_signals = detected_signals,
     created_by = "symbolize.drmTMB"
   )
@@ -1181,13 +1252,22 @@ drm_build_components <- function(submodels, terms_tbl, re_tbl, response_symbol,
       rhs <- if (nzchar(rhs)) paste(rhs, "+", re_idx) else re_idx
       # Matrix form: for intercept-only groups, render the bare \mathbf{u};
       # for multi-component groups, use \mathbf{Z}_g \mathbf{u}_g per group.
+      # When there's more than one random-effect group, disambiguate the
+      # intercept-only term with \mathbf{u}_g so the multilevel structure
+      # is visible (otherwise the linear predictor collapses to repeated
+      # bare \mathbf{u} terms, which is unreadable).
       groups <- unique(re_for_dpar$group_var)
       mat_terms <- vapply(groups, function(gv) {
         sel <- which(re_for_dpar$group_var == gv)
         if (length(sel) == 1L &&
             is.na(re_for_dpar$predictor_factor[[sel[[1L]]]])) {
-          # Intercept-only group: bare \mathbf{u} (historic notation).
-          re_for_dpar$u_symbol_matrix[[sel[[1L]]]]
+          # Intercept-only group: bare \mathbf{u} when there's only one
+          # group (historic notation); group-subscripted otherwise.
+          if (length(groups) == 1L) {
+            re_for_dpar$u_symbol_matrix[[sel[[1L]]]]
+          } else {
+            sprintf("\\mathbf{u}_{%s}", gv)
+          }
         } else {
           # Multi-component (random intercept + slopes): \mathbf{Z}_g \mathbf{u}_g.
           sprintf("\\mathbf{Z}_{%s}\\, \\mathbf{u}_{%s}", gv, gv)
