@@ -45,6 +45,7 @@ articles:
   - title: "Cross-package bridges"
     contents:
       - symbolizer-structural-dependence
+      - symbolizer-meta-analysis
       - symbolizer-meta
   - title: "Where we're going"
     contents:
