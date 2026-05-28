@@ -116,6 +116,26 @@ test_that("Pottier meta-multilevel fit surfaces both study AND phylogeny tiers",
                tolerance = 1e-9)
 })
 
+test_that("mu_hat includes RE contribution: e == y - mu_hat for multi-tier", {
+  # v0.22.2.1 contract restoration. Pre-fix, mu_hat = X*beta only;
+  # e = stats::residuals(fit) = y - (X*beta + sum_g Z*u). Internal
+  # contract e == y - mu_hat was broken, and Tab 3's stacked residual
+  # column showed the wrong thing. Closure required to ship.
+  skip_if_not_installed("ape")
+  source(test_path("helper-meta-fits.R"), local = TRUE)
+  fit <- suppressWarnings(fit_drmtmb_phylo_multilevel())
+  sym <- symbolize(fit)
+  ex  <- sym$expanded
+
+  expect_equal(unname(ex$e),
+               unname(ex$y - ex$mu_hat),
+               tolerance = 1e-9)
+  # And mu_hat must equal the full fit$obj$report()$mu, not just X*beta.
+  expect_equal(unname(ex$mu_hat),
+               unname(as.numeric(fit$obj$report()$mu)),
+               tolerance = 1e-9)
+})
+
 test_that("single-RE fits keep the back-compat $Z_g and $u slots populated", {
   # Critical: the v0.22.1.3 fix path is single-tier. Existing renderer
   # code reads ex$Z_g and ex$u directly. The refactor must keep these

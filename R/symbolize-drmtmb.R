@@ -1103,6 +1103,25 @@ drm_build_expanded <- function(fit, re_per_entry, has_re,
   Z_g <- if (length(Z_per_tier) > 0L) Z_per_tier[[1L]] else NULL
   u   <- if (length(u_per_tier) > 0L) u_per_tier[[1L]] else NULL
 
+  # v0.22.2.1: include EVERY random-effect tier's contribution in mu_hat
+  # so the internal contract `e = y - mu_hat` closes. Pre-2026-05-28
+  # behaviour computed `mu_hat = X*beta` only; the residual `e` came from
+  # stats::residuals(fit) which IS y - (X*beta + sum_g Z_g*u_g). That
+  # mismatch broke Tab 3's worked row (it showed mu_hat = X*beta but the
+  # caption said Xbeta + Zu = mu_hat) and broke the stacked block's
+  # residual column (it computed eps_hat = y - mu_hat, which was y - Xbeta,
+  # NOT the proper RE-adjusted residual). Surfaced by the v0.22.2 Fisher
+  # pass on the symbolizer-drmtmb article (NEEDS FIXES verdict).
+  if (!is.null(mu_hat) && length(Z_per_tier) > 0L) {
+    for (gv in names(Z_per_tier)) {
+      Z_gv <- Z_per_tier[[gv]]
+      u_gv <- u_per_tier[[gv]]
+      if (!is.null(Z_gv) && !is.null(u_gv)) {
+        mu_hat <- mu_hat + drop(Z_gv %*% u_gv)
+      }
+    }
+  }
+
   list(
     y          = y,
     X          = X,
