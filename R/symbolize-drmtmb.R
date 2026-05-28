@@ -1024,16 +1024,39 @@ drm_build_expanded <- function(fit, re_per_entry, has_re) {
       g_var <- re_info$group_var[[1L]]
       term_label <- re_info$term_label[[1L]]
       if (g_var %in% names(fit$data)) {
-        levels_g <- levels(factor(fit$data[[g_var]]))
-        Z_g <- stats::model.matrix(stats::reformulate(paste0("0+", g_var)),
-                                   data = fit$data)
+        # CRITICAL: force factor conversion before model.matrix.
+        # model.matrix(~ 0 + g) on a NUMERIC g_var (e.g. integer
+        # study_ID codes) does NOT build a one-hot incidence matrix --
+        # it returns a single-column matrix carrying the literal
+        # integer values. The renderer then displays a 165 x 1 column
+        # of integers next to a k-vector of BLUPs, and the Z u
+        # arithmetic is meaningless. This was a latent extractor bug
+        # affecting every drmTMB fit with a numeric grouping
+        # variable; surfaced by the maintainer's Fisher-pass on the
+        # v0.22.1.2 rendered widget.
+        data_local <- fit$data
+        data_local[[g_var]] <- factor(data_local[[g_var]])
+        levels_g <- levels(data_local[[g_var]])
+        Z_g <- stats::model.matrix(
+          stats::reformulate(paste0("0+", g_var)),
+          data = data_local
+        )
         # rename columns from `<g_var><level>` to bare level if possible
         cn <- colnames(Z_g)
         bare <- sub(paste0("^", g_var), "", cn)
         if (length(bare) == length(levels_g)) colnames(Z_g) <- bare
       }
       blups <- fit$random_effects$mu$terms[[term_label]]
-      if (!is.null(blups)) u <- as.numeric(blups)
+      if (!is.null(blups)) {
+        # Order BLUPs to match Z_g column ordering so Z_g %*% u is
+        # well-defined. drmTMB names BLUPs by level (verified via
+        # names(blups) on the Pottier fit). Reorder to factor levels.
+        if (!is.null(Z_g) && !is.null(names(blups)) &&
+            all(colnames(Z_g) %in% names(blups))) {
+          blups <- blups[colnames(Z_g)]
+        }
+        u <- as.numeric(blups)
+      }
     }
   }
   list(

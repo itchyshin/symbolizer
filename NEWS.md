@@ -1,3 +1,42 @@
+# symbolizer 0.22.1.3
+
+## v0.22.1.3 -- drmTMB Z_g extractor fix (numeric group_var)
+
+**Bug fix.** `drm_build_expanded()$Z_g` was being constructed via
+`stats::model.matrix(~ 0 + g_var, data = fit$data)` without coercing
+`g_var` to factor. When `g_var` is a NUMERIC variable in `fit$data`
+(very common -- `study_ID`, `site_id`, `animal_id` codes are
+typically integer-coded), `model.matrix` does NOT build a one-hot
+incidence matrix. It returns a single-column matrix carrying the
+literal integer values. The widget Tab 3 then displayed a
+`164 x 1` Z column of raw study integers `[3, 3, 3, ..., 147, 147]`
+next to a `39`-vector of BLUPs, and the displayed
+$\mathbf{Z}\hat{\mathbf{u}}$ arithmetic in the worked row was
+meaningless (`3.29e-18` instead of the true BLUP value `9.74e-11`
+for study_ID = 3).
+
+Surfaced by the maintainer's Fisher-pass on the v0.22.1.2 rendered
+widget -- the V1 Florence and V3 Noether audits had both
+rubber-stamped Tab 3 without checking that Z was actually a
+one-hot matrix. The bug had been latent in `drm_build_expanded()`
+since v0.1 and affects every drmTMB fit where the grouping
+variable is stored as numeric in `fit$data`.
+
+**Fix.** One-line change in `R/symbolize-drmtmb.R`: convert
+`g_var` to factor before `model.matrix` so the one-hot matrix is
+emitted correctly. The companion `u` vector is then re-ordered by
+factor levels so `Z_g %*% u` gives the correct per-observation
+random-effect contribution.
+
+**Regression coverage** added in
+`tests/testthat/test-symbolize-drmtmb-Zg-numeric-group.R`:
+- `Z_g` is `n x k` with row-sums all 1 and values in {0, 1} for
+  numeric group_var
+- `Z_g %*% u` equals the per-row BLUP indexed by the row's group
+- factor input path (previously already correct) still works
+
+Full suite: `FAIL 0 | SKIP 0 | PASS 1861` (+16 from new tests).
+
 # symbolizer 0.22.1.2
 
 ## v0.22.1.2 -- Tab 3 marginal-covariance decomposition
