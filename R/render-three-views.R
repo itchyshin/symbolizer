@@ -1319,6 +1319,36 @@ three_views_biology_gloss <- function(x) {
     )
     return(paste0("  <p class=\"sym-biology\">", sentence, "</p>\n"))
   }
+  # GLLVM (latent-variable) branch: detect via Lambda_B on $expanded.
+  # Tailor the sentence to Widget 1 (between-only) vs Widget 2 (two-tier).
+  has_Lambda_B <- !is.null(x$expanded) && !is.null(x$expanded$Lambda_B)
+  has_Lambda_W <- !is.null(x$expanded) && !is.null(x$expanded$Lambda_W)
+  if (has_Lambda_B) {
+    sentence <- if (has_Lambda_W) {
+      paste0(
+        "Each observation is normally distributed around its trait's grand ",
+        "mean shifted by <em>two</em> latent-axis contributions: the ",
+        "individual's position on the shared between-individual axes ",
+        "($\\boldsymbol{\\Lambda}_B \\mathbf{z}_{B,i}$) <em>and</em> the ",
+        "(individual, session)'s position on the shared within-individual ",
+        "axes ($\\boldsymbol{\\Lambda}_W \\mathbf{z}_{W,ij}$). Per-tier ",
+        "trait-specific uniquenesses ($\\boldsymbol{\\Psi}_B$, ",
+        "$\\boldsymbol{\\Psi}_W$) absorb the residual variance each tier's ",
+        "shared axes do not explain."
+      )
+    } else {
+      paste0(
+        "Each observation is normally distributed around its trait's grand ",
+        "mean shifted by the individual's position on the shared ",
+        "between-individual axes ($\\boldsymbol{\\Lambda}_B \\mathbf{z}_{B,i}$). ",
+        "Trait-specific between-individual uniquenesses ($\\boldsymbol{\\Psi}_B$) ",
+        "absorb the residual variance the shared axes do not explain; the ",
+        "scalar $\\sigma_\\epsilon^2$ captures within-individual ",
+        "occasion-to-occasion noise."
+      )
+    }
+    return(paste0("  <p class=\"sym-biology\">", sentence, "</p>\n"))
+  }
 
   has_sigma_submodel <- !is.null(x$expanded) &&
                        !is.null(x$expanded$X_sigma) &&

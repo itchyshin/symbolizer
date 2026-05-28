@@ -106,7 +106,12 @@ psi_W_resid <- matrix(rnorm(n_ind * n_sess * n_tr,
                       nrow = n_ind * n_sess, ncol = n_tr)
 within_state <- z_W %*% t(Lam_W) + psi_W_resid    # (n_ind * n_sess) x n_tr
 
-# Expand to long-format: one row per (individual, session, trait).
+# Expand to long-format: one row per (individual, session, trait). Trait
+# labels are short codes (t1..t5) for the math; their biological readings
+# from §1 are:
+#   t1 = boldness          t4 = activity
+#   t2 = exploration       t5 = time-out-of-shelter
+#   t3 = aggression
 dat <- expand.grid(
   trait      = factor(paste0("t", seq_len(n_tr)),
                       levels = paste0("t", seq_len(n_tr))),
@@ -450,6 +455,14 @@ trait at that tier.
 extract_communality(fit_two_tier)
 ```
 
+Mapping back to §1's named behaviours: **t1 = boldness, t2 =
+exploration, t3 = aggression, t4 = activity, t5 = time-out-of-shelter**.
+So a high $c^2_B$ for *t1* (boldness) means the between-individual
+component of boldness is well-explained by the shared two-axis
+syndrome structure; a low $c^2_B$ for *t3* (aggression) would mean
+aggression's between-individual variation is mostly trait-idiosyncratic
+($\boldsymbol{\Psi}_B$), not part of the shared syndromes.
+
 A trait with high $c^2_B$ and high $c^2_W$ is *integrated at both
 tiers*: both its between-individual position and its within-individual
 fluctuation share the syndrome structure. A trait with high $c^2_B$ but
@@ -531,6 +544,22 @@ $\boldsymbol{\Psi}_W$ already captures per-trait within-individual
 residual variance; a free $\sigma_\epsilon^2$ scalar on top would
 double-count. Reading the auto-suppression message in the fit output
 is the expected behaviour, not a warning to worry about.
+
+A third category: **$\boldsymbol{\Psi}_B$ or $\boldsymbol{\Psi}_W$
+entries near zero**. When a trait's between-individual (or
+within-individual) variance is already fully explained by the shared
+$\boldsymbol{\Lambda}\boldsymbol{\Lambda}^{\!\top}$ structure, the
+optimiser pins that trait's uniqueness $\psi$ to the boundary (~10⁻⁴
+or smaller). Widget 1's reported $\boldsymbol{\Psi}_B = (0.00004,
+0.56, 0.48, 0.93, 0.41)$ for the simulated fit reads as: *trait 1
+(boldness) is fully captured by the shared between-individual axes,
+so its trait-specific uniqueness disappears.* This is **not** a fit
+failure — it is the model telling you which traits sit fully on the
+shared structure. The implied covariance
+$\boldsymbol{\Sigma}_B = \boldsymbol{\Lambda}_B
+\boldsymbol{\Lambda}_B^{\!\top} + \boldsymbol{\Psi}_B$ remains
+well-defined; only the *decomposition* loses its uniqueness piece
+for that trait.
 
 **Takeaway.** Rotation and sign of $\boldsymbol{\Lambda}$ are *stated
 assumptions*, not bugs. The implied covariances are invariant; the
