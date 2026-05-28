@@ -57,6 +57,28 @@ test_that("Beta worked row shows response-scale mu in (0,1), not raw eta", {
                            "to appear in the rendered Tab 3"))
 })
 
+test_that("Beta sigma worked row labels the dispersion as precision phi, not SD", {
+  # Fisher pass families-fisher.md Pattern D: Beta's "sigma" parameter
+  # is the precision phi (a positive shape parameter), NOT a residual
+  # standard deviation. Labelling it "residual SD" is wrong twice
+  # over (it isn't an SD, and Beta has no residual structure on the
+  # linear predictor).
+  skip_if_not_installed("drmTMB")
+  source(test_path("helper-drmtmb-fits.R"), local = TRUE)
+  fit <- suppressWarnings(fit_drm_beta())
+  sym <- symbolize(fit)
+  html <- as_html_three_views(sym, id = "test-beta-sigma")
+
+  # Either the dispersion line is omitted (acceptable -- it's redundant
+  # with Tab 1) OR it labels the parameter as precision phi.
+  has_label <- grepl("precision", html) ||
+               grepl("\\\\hat\\\\phi", html) ||
+               !grepl("predicted residual SD", html)
+  expect_true(has_label)
+  # And the misleading caption must be gone.
+  expect_false(grepl("predicted residual SD", html, fixed = TRUE))
+})
+
 test_that("Gaussian-identity worked row keeps the historic y = Xb + eps shape", {
   # Back-compat: Gaussian-identity is the ONLY family that legitimately
   # has y = X*beta + eps on the linear-predictor scale. Don't break it.

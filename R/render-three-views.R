@@ -1068,7 +1068,7 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L,
   # is the corresponding worked row stacked n times.
   family_str <- if (!is.null(x$model$family)) as.character(x$model$family[[1L]]) else "gaussian"
   worked_mu    <- three_views_worked_row(ex, resp_sym, family = family_str)
-  worked_sigma <- three_views_worked_row_sigma(ex)
+  worked_sigma <- three_views_worked_row_sigma(ex, family = family_str)
 
   # --- Block 3: structured covariance matrix (phylo / spatial / temporal) -
   # When the model carries a structured random effect, render
@@ -1429,7 +1429,7 @@ three_views_worked_row <- function(ex, resp_sym = "\\mathbf{y}",
 # in symbolic form, with numbers, and the back-transformed sigma_hat_1.
 # Returns NULL if the model has no sigma submodel; matrix-block stitcher
 # then skips this section.
-three_views_worked_row_sigma <- function(ex) {
+three_views_worked_row_sigma <- function(ex, family = "gaussian") {
   if (is.null(ex$X_sigma) || is.null(ex$gamma) || is.null(ex$sigma_hat))
     return(NULL)
   if (length(ex$sigma_hat) < 1L || nrow(ex$X_sigma) < 1L) return(NULL)
@@ -1468,6 +1468,23 @@ three_views_worked_row_sigma <- function(ex) {
   sym_rhs <- paste(sym_terms, collapse = " + ")
   num_rhs <- paste(num_terms, collapse = " + ")
 
+  # v0.22.2.1: per-family label for what the sigma submodel actually
+  # parameterises. Gaussian/Student-t: residual SD. Lognormal: log-scale
+  # residual SD (the SD of log y). Beta: precision phi (positive shape
+  # parameter, NOT an SD). Gamma: dispersion. NegBinom: size parameter k.
+  # Fisher pass on symbolizer-families.html flagged the Beta and
+  # Lognormal mislabels as Pattern D.
+  sigma_meaning <- switch(
+    tolower(as.character(family)),
+    gaussian  = "predicted residual SD for observation 1",
+    student   = "predicted residual SD for observation 1",
+    lognormal = "predicted log-scale residual SD for observation 1 (SD of \\log y)",
+    beta      = "predicted precision \\hat\\phi_{1} for observation 1 (not an SD)",
+    gamma     = "predicted dispersion for observation 1",
+    nbinom1   = "predicted dispersion (size parameter k) for observation 1",
+    nbinom2   = "predicted dispersion (size parameter k) for observation 1",
+    "predicted dispersion parameter for observation 1"
+  )
   paste0(
     "<div class=\"sym-eq\">$$\n\\begin{aligned}\n",
     "\\log\\hat\\sigma_{1} &= ", sym_rhs, " ",
@@ -1475,7 +1492,7 @@ three_views_worked_row_sigma <- function(ex) {
     "\\log\\hat\\sigma_{1} &= ", num_rhs, " = ", fmt(log_sig1), " ",
     "&\\quad(\\text{with your numbers}) \\\\\n",
     "\\hat\\sigma_{1} &= \\exp(", fmt(log_sig1), ") \\approx ", fmt(sigma1), " ",
-    "&\\quad(\\text{predicted residual SD for observation 1})",
+    "&\\quad(\\text{", sigma_meaning, "})",
     "\n\\end{aligned}\n$$</div>\n"
   )
 }
