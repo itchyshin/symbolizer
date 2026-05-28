@@ -9,7 +9,8 @@ vignette: >
 
 ```{r setup, include = FALSE}
 has_pkgs <- requireNamespace("gllvmTMB", quietly = TRUE) &&
-            requireNamespace("drmTMB",   quietly = TRUE)
+            requireNamespace("drmTMB",   quietly = TRUE) &&
+            requireNamespace("lme4",     quietly = TRUE)
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment  = "#>",
@@ -23,70 +24,87 @@ A behavioural ecologist measures five traits — boldness in a novel arena,
 exploration in a maze, aggression to a mirror, activity in the home cage,
 and time-out-of-shelter — on each of forty fish, three times each. Two
 themes keep coming up in the data. Bolder fish also tend to be more
-exploratory. Active fish tend to spend more time out of shelter. The
-question is not whether any single pair of traits correlates, but whether
-the **whole battery of traits is organised by a small number of stable
-axes of among-individual variation** — the things the syndromes literature
-calls *behavioural syndromes* (Sih et al. 2004) or, in a broader trait
-context, *phenotypic integration* (Pigliucci 2003).
+exploratory. Active fish tend to spend more time out of shelter. There
+is *also* a second pattern: when an individual fish is bolder than usual
+on a given day, it tends to be more exploratory and more aggressive on
+that *same* day. The first pattern is about stable differences between
+individuals; the second is about coordinated within-individual
+fluctuations.
 
-This is the natural job for a generalised linear latent variable model
-(GLLVM). Each trait gets its own intercept and its own residual variance.
-A small number of unobserved latent variables — two, say — describe the
-shared structure: each trait *loads* on each latent axis, and an
-individual's score on each axis is what makes their trait values move
-together. The output a biologist wants is the loading matrix
-$\boldsymbol{\Lambda}_B$, the proportion of each trait's
-between-individual variance that the shared axes explain (the
-*communality*), and the residual trait-trait correlation matrix.
+The literature names them separately:
 
-**Takeaway.** The biological question is *what stable axes of
-among-individual variation organise these traits*, and the answer is a
-loading matrix plus a communality vector.
+- *Behavioural syndromes* (Sih et al. 2004; Dingemanse & Dochtermann
+  2013): the **between-individual** axes that organise trait values
+  across the population — what makes individual A's boldness reliably
+  predict individual A's exploration.
+- *Integrated plasticity* (Dingemanse & Dochtermann 2013; Mathot &
+  Dingemanse 2015): the **within-individual** axes that organise
+  trait fluctuations across occasions for the *same* individual.
+
+Both are factor-analytic objects in the same model. The output a
+biologist wants is **two loading matrices** ($\boldsymbol{\Lambda}_B$
+for between, $\boldsymbol{\Lambda}_W$ for within), the per-trait
+**communality** at each tier, and the per-trait **repeatability**
+$R_t = (\boldsymbol{\Sigma}_B)_{tt} / [(\boldsymbol{\Sigma}_B)_{tt} +
+(\boldsymbol{\Sigma}_W)_{tt}]$.
+
+**Takeaway.** The biological question splits into two layers:
+*syndromes* (between) and *integrated plasticity* (within). One
+generalised linear latent-variable model (GLLVM) writes both layers in
+one fit.
 
 ## 2. The data
 
-We simulate from a known truth so the biological reading at the end can
-be checked. The truth puts traits 1-3 on a first axis (the
-*boldness-exploration-aggression* syndrome) and traits 4-5 on a second
-axis (the *activity-shelter-use* syndrome), with extra
-trait-specific between-individual variance on top.
+We simulate from a known truth so the biological reading at the end
+can be checked. The truth puts traits 1-3 on a first between-individual
+axis (the *boldness-exploration-aggression* syndrome), traits 4-5 on a
+second between-individual axis (the *activity-shelter-use* syndrome),
+and adds a single shared **within-individual** axis (a coordinated
+state-shift that moves all five behaviours together across occasions).
 
 ```{r data}
 library(symbolizer)
 library(gllvmTMB)
+library(lme4)
 
 set.seed(20260523)
 n_ind  <- 40L  # individuals (units)
 n_sess <- 3L   # repeated sessions per individual
 n_tr   <- 5L   # traits
 
-# True between-individual loading matrix Lambda_B (5 traits x 2 latents)
-Lam_B <- matrix(c(
-  1.0, 0.0,   # trait 1 loads on axis 1 only
-  0.7, 0.0,   # trait 2 loads on axis 1
-  0.6, 0.0,   # trait 3 loads on axis 1
-  0.0, 1.0,   # trait 4 loads on axis 2 only
-  0.0, 0.7    # trait 5 loads on axis 2
-), nrow = n_tr, byrow = TRUE)
-psi_B   <- rep(0.4, n_tr)   # trait-specific between-individual variance
-sig_eps <- sqrt(0.3)        # row-level residual SD
+# True BETWEEN-individual loading matrix Lambda_B (5 traits x 2 latents).
+# Traits 1-3 load on axis 1 (the bold-explore-aggress syndrome); traits
+# 4-5 load on axis 2 (the activity-shelter syndrome).
+Lam_B <- matrix(c(1.0, 0.0,
+                  0.7, 0.0,
+                  0.6, 0.0,
+                  0.0, 1.0,
+                  0.0, 0.7),
+                nrow = n_tr, ncol = 2L)
+psi_B <- rep(0.4, n_tr)   # trait-specific between-individual uniqueness SD
 
-# Simulate from the (individual, session, trait) GLLVM directly, in line.
-# The package-level `gllvmTMB::simulate_site_trait()` is intentionally
-# scoped to the (site, species, trait) functional-biogeography case
-# (with phylogenetic and spatial machinery baked in); for the generic
-# (unit, trait) design we build the data inline -- this is what the
-# `simulate_site_trait()` docstring itself recommends, and tracking issue
-# itchyshin/gllvmTMB#306 covers shipping a generic `simulate_unit_trait()`.
-# Per-individual latent scores (z_i in R^2), per-trait between-individual
-# uniqueness residual (~ N(0, psi_B[t])), and per-row within-individual
-# residual (~ N(0, sigma_eps^2)).
-z_score <- matrix(rnorm(n_ind * 2L), nrow = n_ind, ncol = 2L)
+# True WITHIN-individual loading vector Lambda_W (5 traits x 1 latent).
+# A single state-shift axis: when an individual is "up" today, all five
+# behaviours move together by trait-specific amounts. This is what
+# integrated-plasticity literature calls a coordinated state.
+Lam_W <- matrix(c(0.5, 0.3, 0.4, 0.3, 0.4), nrow = n_tr, ncol = 1L)
+psi_W <- rep(0.2, n_tr)   # trait-specific within-individual uniqueness SD
+
+# Per-individual between-latent scores z_B in R^2 (one per individual).
+z_B <- matrix(rnorm(n_ind * 2L), nrow = n_ind, ncol = 2L)
 psi_B_resid <- matrix(rnorm(n_ind * n_tr,
-                            sd = rep(sqrt(psi_B), each = n_ind)),
+                            sd = rep(psi_B, each = n_ind)),
                       nrow = n_ind, ncol = n_tr)
-mu_ind_trait <- z_score %*% t(Lam_B) + psi_B_resid    # (n_ind x n_tr)
+# Between-individual trait mean (per individual, per trait).
+mu_ind_trait <- z_B %*% t(Lam_B) + psi_B_resid
+
+# Per-observation within-latent scores z_W in R^1 (one per (ind, sess)).
+n_obs_per_ind <- n_sess
+z_W <- matrix(rnorm(n_ind * n_sess), nrow = n_ind * n_sess, ncol = 1L)
+psi_W_resid <- matrix(rnorm(n_ind * n_sess * n_tr,
+                            sd = rep(psi_W, each = n_ind * n_sess)),
+                      nrow = n_ind * n_sess, ncol = n_tr)
+within_state <- z_W %*% t(Lam_W) + psi_W_resid    # (n_ind * n_sess) x n_tr
 
 # Expand to long-format: one row per (individual, session, trait).
 dat <- expand.grid(
@@ -95,31 +113,123 @@ dat <- expand.grid(
   session    = factor(seq_len(n_sess)),
   individual = factor(seq_len(n_ind))
 )
+# Look up the row index in `within_state` for each (individual, session).
+obs_idx <- as.integer(dat$individual) * n_sess - n_sess +
+           as.integer(dat$session)
 dat$value <- mu_ind_trait[cbind(as.integer(dat$individual),
                                  as.integer(dat$trait))] +
-              rnorm(nrow(dat), sd = sig_eps)
-# Stable (individual, session) observation id for the unique() term.
+              within_state[cbind(obs_idx,
+                                  as.integer(dat$trait))]
+# Stable (individual, session) observation id for the obs-level term.
 dat$obs <- factor(paste(dat$individual, dat$session, sep = "_"))
 head(dat, 6)
 ```
 
-The data block is intentionally self-contained — no
-`simulate_site_trait()` (that simulator is the site-species-trait
-functional-biogeography special case, see
-[gllvmTMB#306](https://github.com/itchyshin/gllvmTMB/issues/306) for
-the generic `simulate_unit_trait()` work). Each row is one
-(individual, session, trait) cell.
+The DGP carries both layers: a stable between-individual structure
+($\boldsymbol{\Lambda}_B, \boldsymbol{\Psi}_B$) and a coordinated
+within-individual structure ($\boldsymbol{\Lambda}_W,
+\boldsymbol{\Psi}_W$). When we fit Widget 2 below we will recover both.
 
-**Takeaway.** Forty individuals, three sessions each, five traits — long
-format, one row per (individual, session, trait).
+**Takeaway.** Forty individuals, three sessions each, five traits —
+long format, one row per (individual, session, trait). The simulated
+truth has *both* a between-individual two-axis structure and a
+within-individual one-axis structure.
 
-## 3. The model in symbols
+## 3. The univariate root: one trait at a time
+
+Before we model five traits jointly, recall the univariate mixed model
+behavioural ecologists already know. For one trait $y$ measured on $N$
+individuals at $J_i$ occasions:
+
+$$
+y_{ij} = \mu + u_i + e_{ij}, \qquad
+u_i \sim \mathcal{N}(0, \sigma^2_u), \qquad
+e_{ij} \sim \mathcal{N}(0, \sigma^2_e).
+$$
+
+The classical repeatability (Nakagawa & Schielzeth 2010) is
+
+$$
+R = \frac{\sigma^2_u}{\sigma^2_u + \sigma^2_e}.
+$$
+
+In `lme4` syntax, fit one trait at a time:
+
+```{r univariate}
+fit_uni <- lmer(value ~ 1 + (1 | individual),
+                data = subset(dat, trait == "t1"))
+vc <- as.data.frame(VarCorr(fit_uni))
+vc[, c("grp", "vcov")]
+sigma2_u <- vc$vcov[vc$grp == "individual"]
+sigma2_e <- vc$vcov[vc$grp == "Residual"]
+R_t1 <- sigma2_u / (sigma2_u + sigma2_e)
+cat("Repeatability for t1:", round(R_t1, 3), "\n")
+```
+
+The random intercept `(1 | individual)` captures stable between-individual
+variation; everything else lands in the residual. The repeatability $R$
+is the between-individual share of total variance — computed
+trait-by-trait, it's the univariate readout that the GLLVM upgrades to
+two structured matrices.
+
+**Takeaway.** Univariate $R = \sigma^2_u / (\sigma^2_u + \sigma^2_e)$ is
+the trait-by-trait readout the multivariate model generalises. The
+GLLVM upgrade replaces the two scalars with two $T \times T$ matrices
+$\boldsymbol{\Sigma}_B, \boldsymbol{\Sigma}_W$ — and decomposes each
+factor-analytically.
+
+## 4. Why factor-analytic? The curse-of-dimensionality argument
+
+A fully parameterised multivariate covariance for $T$ traits requires
+$T(T+1)/2$ free parameters. For $T = 5$ traits at one tier that's 15
+parameters; with both between and within tiers that doubles to 30. At
+$T = 10$ traits per tier we'd need 110 covariance parameters before any
+fixed effects enter. Animal-personality studies typically have
+$N \approx 40$–$200$ individuals; the resulting likelihood is *flat* —
+convergence is unstable and standard errors are wide enough that
+interpretation becomes risky (McGillycuddy et al. 2025).
+
+The **factor-analytic** answer is to decompose
+
+$$
+\boldsymbol{\Sigma}_B = \boldsymbol{\Lambda}_B \boldsymbol{\Lambda}_B^{\!\top} + \boldsymbol{\Psi}_B,
+$$
+
+with $\boldsymbol{\Lambda}_B \in \mathbb{R}^{T \times d_B}$ a reduced-rank
+loading matrix ($d_B \ll T$) and $\boldsymbol{\Psi}_B$ a diagonal of
+trait-specific uniquenesses. The parameter count drops from $T(T+1)/2$ to
+
+$$
+T(d_B + 1) - d_B(d_B - 1)/2.
+$$
+
+For $T = 5, d_B = 2$: $15 \to 14$; for $T = 10, d_B = 2$: $55 \to 29$;
+for $T = 10$ at both tiers with $d_B = d_W = 2$: $110 \to 58$. The
+reduction is modest when $T$ is small and dramatic as $T$ grows.
+
+The *interpretive* payoff is the same shape both directions. The shared
+loadings $\boldsymbol{\Lambda}_B$ *name* the between-individual axes —
+the syndromes. The uniquenesses $\boldsymbol{\Psi}_B$ name what the
+shared axes do not explain — trait-specific between-individual variance.
+At the within-individual tier, $\boldsymbol{\Lambda}_W$ names the
+coordinated states; $\boldsymbol{\Psi}_W$ names the trait-specific
+within-individual residual variance. **Both tiers are factor-analytic
+in the same way**; that's the unifying move.
+
+**Takeaway.** Reduced-rank decomposition
+$\boldsymbol{\Sigma} = \boldsymbol{\Lambda}\boldsymbol{\Lambda}^{\!\top} + \boldsymbol{\Psi}$
+stabilises the fit *and* surfaces the biology — and it applies to both
+tiers without changing form.
+
+## 5. The model in symbols
 
 The same model can be written two ways. The **long form** matches the
 way `gllvmTMB()` actually fits the data — one row per (individual,
 occasion, trait) cell, with a scalar response. The **wide form**
-matches the factor-analytic textbooks — one row per observation, with a
-trait-vector response. The two panels below place them side by side.
+matches the factor-analytic textbooks — one row per observation, with
+a trait-vector response. The two panels below place them side by side;
+both decompose each tier's covariance via
+$\boldsymbol{\Sigma} = \boldsymbol{\Lambda}\boldsymbol{\Lambda}^{\!\top} + \boldsymbol{\Psi}$.
 
 ```{r model-long-wide, results = 'asis', echo = FALSE, eval = TRUE}
 cat('<div style="display: flex; gap: 1rem; flex-wrap: wrap; margin: 1em 0;">
@@ -132,8 +242,9 @@ Each row of the data is one (individual, occasion, trait) cell. The
 scalar response is $y_{ijt}$.
 
 $$
-y_{ijt} \\mid \\boldsymbol{\\mu},\\, \\boldsymbol{\\Lambda},\\, \\mathbf{z}_i,\\, \\boldsymbol{\\Psi}
-  \\sim \\mathcal{N}\\!\\left(\\mu_t + \\sum_{k=1}^{d_B} \\lambda_{tk}\\, z_{ik},\\; \\sigma^2_{e}\\right)
+y_{ijt} \\mid \\boldsymbol{\\mu},\\, \\boldsymbol{\\Lambda}_B,\\, \\mathbf{z}_{B,i},\\, \\boldsymbol{\\Lambda}_W,\\, \\mathbf{z}_{W,ij},\\, \\boldsymbol{\\Psi}
+  \\sim \\mathcal{N}\\!\\left(\\mu_t + (\\boldsymbol{\\Lambda}_B \\mathbf{z}_{B,i})_t + (\\boldsymbol{\\Lambda}_W \\mathbf{z}_{W,ij})_t,\\;
+   \\psi_{W,t}^2 + (\\boldsymbol{\\Lambda}_W \\boldsymbol{\\Lambda}_W^{\\!\\top})_{tt}\\right)
 $$
 
 Native to `gllvmTMB`\'s formula interface. Each row\'s contribution is a
@@ -149,14 +260,15 @@ Each row is one observation; the response is a $T$-vector
 $\\mathbf{Y}_{ij}$.
 
 $$
-\\mathbf{Y}_{ij} \\mid \\boldsymbol{\\mu},\\, \\boldsymbol{\\Lambda},\\, \\mathbf{z}_i,\\, \\boldsymbol{\\Psi}
-  \\sim \\mathcal{MN}\\!\\left(\\boldsymbol{\\mu} + \\boldsymbol{\\Lambda}\\,\\mathbf{z}_i,\\; \\boldsymbol{\\Sigma}\\right),
-\\quad \\boldsymbol{\\Sigma} = \\boldsymbol{\\Lambda}\\boldsymbol{\\Lambda}^{\\!\\top} + \\boldsymbol{\\Psi}
+\\mathbf{Y}_{ij} \\mid \\boldsymbol{\\mu},\\, \\boldsymbol{\\Lambda}_B,\\, \\mathbf{z}_{B,i},\\, \\boldsymbol{\\Sigma}_W
+  \\sim \\mathcal{MN}\\!\\left(\\boldsymbol{\\mu} + \\boldsymbol{\\Lambda}_B\\,\\mathbf{z}_{B,i},\\; \\boldsymbol{\\Sigma}_W\\right),
+\\quad \\boldsymbol{\\Sigma}_W = \\boldsymbol{\\Lambda}_W\\boldsymbol{\\Lambda}_W^{\\!\\top} + \\boldsymbol{\\Psi}_W
 $$
 
-Native to factor-analytic textbooks. The covariance decomposition
-$\\boldsymbol{\\Sigma} = \\boldsymbol{\\Lambda}\\boldsymbol{\\Lambda}^{\\!\\top} + \\boldsymbol{\\Psi}$
-is the headline result.
+Native to factor-analytic textbooks. The within-individual conditional
+covariance $\\boldsymbol{\\Sigma}_W = \\boldsymbol{\\Lambda}_W\\boldsymbol{\\Lambda}_W^{\\!\\top} + \\boldsymbol{\\Psi}_W$
+replaces the scalar $\\sigma_\\epsilon^2 \\mathbf{I}_T$ row-level
+residual when the within-tier is structured.
 
 </div>
 
@@ -168,34 +280,104 @@ is the headline result.
 the covariance decomposition explicit; the long form is what
 `gllvmTMB()` actually fits.
 
-Index $i$ ranges over individuals, $j$ over occasions, $t$ (or $j$ in
-the wide form) over traits, $k$ over latent axes. $\mu_t$ is the trait
-$t$ mean; $\lambda_{tk}$ is the loading of trait $t$ on axis $k$;
-$z_{ik}$ is individual $i$'s position on axis $k$;
-$\boldsymbol{\Psi} = \mathrm{diag}(\psi_1^2, \ldots, \psi_T^2)$ collects
-the trait-specific between-individual uniquenesses; $\sigma^2_e$ is
-the residual scalar variance in the long form.
+Index $i$ ranges over individuals, $j$ over occasions, $t$ over traits,
+$k = 1, \ldots, d_B$ over between-axes, $\ell = 1, \ldots, d_W$ over
+within-axes. $\mu_t$ is the trait $t$ grand mean; $\lambda_{B,tk}$ is
+the loading of trait $t$ on between-axis $k$; $\lambda_{W,t\ell}$ is
+the loading of trait $t$ on within-axis $\ell$; $z_{B,ik}$ is individual
+$i$'s position on between-axis $k$; $z_{W,ij\ell}$ is (individual $i$,
+session $j$)'s position on within-axis $\ell$;
+$\boldsymbol{\Psi}_B = \mathrm{diag}(\psi_{B,1}^2, \ldots, \psi_{B,T}^2)$
+collects the trait-specific between-individual uniquenesses; similarly
+$\boldsymbol{\Psi}_W$ for within-individual.
 
 **Takeaway.** Long form is one scalar equation per (individual,
-occasion, trait); wide form is one $T$-vector equation per observation,
-with the covariance decomposition written explicitly. Same model, two
-notations.
+occasion, trait); wide form is one $T$-vector equation per observation.
+Each tier has its own $\boldsymbol{\Lambda}\boldsymbol{\Lambda}^{\!\top} + \boldsymbol{\Psi}$
+decomposition. Same model, two notations.
 
-## 4. The fit
+## 6. Widget 1 — Behavioural syndromes
 
-`gllvmTMB()` takes a long-format frame and a glmmTMB-style formula.
-`latent(0 + trait | individual, d = 2)` is the between-individual
-reduced-rank decomposition with two latent axes. `unique(0 + trait |
-individual)` adds the trait-specific between-individual uniqueness
-$\boldsymbol{\Psi}_B$. The within-individual (across-session) residual
-is absorbed into the row-level $\sigma^2_e$ that `gllvmTMB` carries
-for the Gaussian family.
+The first fit decomposes the **between-individual** trait covariance
+only. Each trait gets its own grand mean; the shared between-individual
+structure is captured by a rank-$d_B$ loading matrix
+$\boldsymbol{\Lambda}_B$ plus per-trait uniquenesses
+$\boldsymbol{\Psi}_B$:
 
-```{r fit}
-fit <- gllvmTMB(
+$$
+\boldsymbol{\Sigma}_B = \boldsymbol{\Lambda}_B \boldsymbol{\Lambda}_B^{\!\top} + \boldsymbol{\Psi}_B.
+$$
+
+The within-individual residual is the shared row-level Gaussian
+$\sigma_\epsilon^2$ — a single scalar, unstructured.
+
+```{r fit-syndromes}
+fit_syndromes <- gllvmTMB(
   value ~ 0 + trait +
           latent(0 + trait | individual, d = 2) +
           unique(0 + trait | individual),
+  data     = dat,
+  family   = gaussian(),
+  trait    = "trait",
+  unit     = "individual",
+  silent   = TRUE
+)
+sym_syndromes <- symbolize(
+  fit_syndromes,
+  symbols = c(value = "y_{ij}", trait = "j", individual = "i"),
+  context = "behavioural syndromes (between-individual only)"
+)
+```
+
+### Three views — syndromes
+
+```{r widget-syndromes, results = 'asis', echo = FALSE, message = FALSE}
+as_html_three_views(sym_syndromes, id = "syndromes")
+```
+
+The widget's **Tab 3 — Equations with data** carries the new
+implied-covariance block: a $5 \times 5$ numerical
+$\boldsymbol{\Sigma}_B$ shown next to its decomposition
+$\boldsymbol{\Lambda}_B \boldsymbol{\Lambda}_B^{\!\top} +
+\boldsymbol{\Psi}_B^{\,2}$. The arithmetic closes element-by-element
+to within rounding.
+
+**Takeaway.** Widget 1 is the canonical *behavioural syndromes* fit.
+The two-axis $\boldsymbol{\Lambda}_B$ names the syndromes (which traits
+move together between individuals); $\boldsymbol{\Psi}_B$ captures the
+leftover per-trait between-individual variance.
+
+## 7. Widget 2 — Adding integrated plasticity
+
+The second fit adds the **within-individual** reduced-rank structure.
+$\boldsymbol{\Lambda}_W$ captures shared within-individual axes (how
+traits covary across occasions, within an individual);
+$\boldsymbol{\Psi}_W$ captures per-trait within-individual uniquenesses.
+Together:
+
+$$
+\boldsymbol{\Sigma}_W = \boldsymbol{\Lambda}_W \boldsymbol{\Lambda}_W^{\!\top} + \boldsymbol{\Psi}_W.
+$$
+
+When `unique(0 + trait | obs)` is added, `gllvmTMB` prints an info
+message auto-suppressing $\sigma_\epsilon$:
+
+> ℹ Auto-suppressing `sigma_eps`: `unique(0 + trait | obs)` is at the
+> per-row level, so it already absorbs the observation residual.
+
+This is intended — the row-level residual variance is now structured
+per-trait in $\boldsymbol{\Psi}_W$ rather than carried by a single
+scalar $\sigma_\epsilon^2$. The package handles the constraint for you;
+no `dispformula = ~0` ceremony required (that's the `glmmTMB`
+equivalent, covered in §10).
+
+```{r fit-two-tier, message = FALSE, warning = FALSE}
+fit_two_tier <- gllvmTMB(
+  value ~ 0 + trait +
+          latent(0 + trait | individual, d = 2) +
+          unique(0 + trait | individual) +
+          latent(0 + trait | obs, d = 1) +
+          unique(0 + trait | obs),
   data     = dat,
   family   = gaussian(),
   trait    = "trait",
@@ -204,209 +386,246 @@ fit <- gllvmTMB(
   cluster  = "session",
   silent   = TRUE
 )
-class(fit)
-```
-
-The fit returns a `gllvmTMB_multi` object — the multi-trait variant.
-Convergence takes about a second on this dataset; the recovery-test
-simulator is intentionally well-posed.
-
-**Takeaway.** One `gllvmTMB()` call. The formula carries three things:
-trait intercepts, a 2-axis between-individual latent decomposition,
-and trait-specific between-individual uniquenesses. The row-level
-$\sigma^2_e$ collects the within-individual residual; a separate
-trait-specific within-individual uniqueness ($\boldsymbol{\Psi}_W$) is
-on the roadmap but not in this first slice.
-
-## 5. Symbolize it
-
-`symbolize.gllvmTMB` covers the Gaussian and binomial latent-variable
-families (First slice since v0.4 – v0.5):
-
-```{r symbolize}
-sym <- symbolize(
-  fit,
+sym_two_tier <- symbolize(
+  fit_two_tier,
   symbols = c(value = "y_{ij}", trait = "j", individual = "i"),
-  context = "behavioural-syndromes GLLVM"
+  context = "syndromes + integrated plasticity (two-tier)"
 )
 ```
 
-The returned `symbolized_model` carries the same surfaces as the
-`drmTMB` examples in the other vignettes:
+### Three views — two-tier
 
-- `equations(sym)` returns one row for the conditional distribution,
-  one for the linear predictor, and one for the latent variable
-  distribution $\mathbf{z}_i \sim \mathcal{N}(\mathbf{0},
-  \mathbf{I}_{d_B})$.
-- `symbol_table(sym)` lists each symbol — $\mathbf{Y}$,
-  $\boldsymbol{\Lambda}$, $\mathbf{Z}$, $\boldsymbol{\mu}$, $\mathbf{S}$
-  — with its abstract dimension and its concrete dimension for this fit.
-- `assumption_table(sym)` states the standard-Gaussian prior on the
-  latent variables, the trait-specific Gaussian residuals, and the
-  lower-triangular identification convention on
-  $\boldsymbol{\Lambda}$.
-- `parameter_interpretation(sym)` reads each loading as the
-  contribution of a one-SD shift on axis $k$ to trait $j$.
-
-```{r symbolize-outputs}
-equations(sym)
+```{r widget-two-tier, results = 'asis', echo = FALSE, message = FALSE}
+as_html_three_views(sym_two_tier, id = "two-tier")
 ```
 
-The structural-symbolic surface is the same `symbolize()` call the
-package uses for every other model class. Section 6 below reads the
-loadings directly from `gllvmTMB`'s native accessors for comparison.
+What changes between Widget 1 and Widget 2:
 
-## 6. Reading the latent axes biologically
+- **Tab 1 (Index)**: the conditional mean gains
+  $(\boldsymbol{\Lambda}_W \mathbf{z}_{W,ij})_t$. The conditional residual
+  variance loses $\sigma_\epsilon^2$ and gains
+  $\psi_{W,t}^2 + (\boldsymbol{\Lambda}_W \boldsymbol{\Lambda}_W^{\!\top})_{tt}$
+  per trait.
+- **Tab 2 (Matrix)**: the matrix-Normal carries both shared structures —
+  $\boldsymbol{\eta} = \mathbf{1}_n \boldsymbol{\mu}^{\!\top} +
+  \mathbf{Z}_B \boldsymbol{\Lambda}_B^{\!\top} +
+  \mathbf{Z}_W \boldsymbol{\Lambda}_W^{\!\top}$, and the across-trait
+  conditional covariance becomes $\boldsymbol{\Sigma}_W$ instead of
+  $\sigma_\epsilon^2 \mathbf{I}_T$.
+- **Tab 3 (Equations with data)**: gains a second implied-covariance
+  block for $\boldsymbol{\Sigma}_W$, plus a per-trait repeatability row
+  $R_t = (\boldsymbol{\Sigma}_B)_{tt} /
+  [(\boldsymbol{\Sigma}_B)_{tt} + (\boldsymbol{\Sigma}_W)_{tt}]$.
 
-The raw loading matrix is identified only up to rotation when $d_B >
-1$, which is the usual factor-analysis story. A varimax rotation makes
-the axes interpretable: each axis tries to load strongly on a small set
-of traits and near zero on the rest.
+**Takeaway.** Widget 2 carries the full two-tier model. The reader can
+*see* the syndromes ($\boldsymbol{\Lambda}_B$, $\boldsymbol{\Sigma}_B$),
+the integrated plasticity ($\boldsymbol{\Lambda}_W$,
+$\boldsymbol{\Sigma}_W$), and the per-trait repeatability — all in one
+widget, with arithmetic that closes.
 
-```{r loadings}
-getLoadings(fit, rotate = "varimax")
-```
+## 8. Reading the latent axes biologically
 
-Reading down the columns of the rotated loading matrix, the first axis
-loads on traits 4 and 5 (the *activity-shelter-use* syndrome in the
-simulated truth); the second axis loads on traits 1, 2, and 3 (the
-*boldness-exploration-aggression* syndrome). The numerical labels swap
-because varimax does not preserve column order — but the *block
-structure* matches the truth.
+Two payoffs once you have $\boldsymbol{\Lambda}_B, \boldsymbol{\Psi}_B,
+\boldsymbol{\Lambda}_W, \boldsymbol{\Psi}_W$ in hand.
 
-The communality is the proportion of each trait's between-individual
-variance that the shared axes capture:
+### 8.1 Communality and uniqueness at each tier
+
+For trait $t$ at tier $g \in \{B, W\}$:
+
+$$
+c^2_{g,t} = \frac{\sum_{k} \lambda_{g,tk}^2}{(\boldsymbol{\Sigma}_g)_{tt}},
+\qquad
+\psi^*_{g,t} = \frac{(\boldsymbol{\Psi}_g)_{tt}}{(\boldsymbol{\Sigma}_g)_{tt}},
+\qquad c^2_{g,t} + \psi^*_{g,t} = 1.
+$$
+
+$c^2_{g,t}$ is the share of trait $t$'s total variance at tier $g$ that
+the shared axes explain; $\psi^*_{g,t}$ is what's idiosyncratic to that
+trait at that tier.
 
 ```{r communality}
-extract_communality(fit)
+extract_communality(fit_two_tier)
 ```
 
-Traits with communality near 1 are well-explained by the shared axes;
-traits with low communality have most of their between-individual
-variability in the trait-specific uniqueness $s_j^2$.
+A trait with high $c^2_B$ and high $c^2_W$ is *integrated at both
+tiers*: both its between-individual position and its within-individual
+fluctuation share the syndrome structure. A trait with high $c^2_B$ but
+low $c^2_W$ is *syndromatic but not plastically integrated* —
+individuals' average levels align, but their occasion-to-occasion
+fluctuations don't.
 
-The residual between-individual correlation matrix on the latent scale
-falls out of `extract_correlations()`:
+### 8.2 Repeatability and phenotypic-correlation decomposition
+
+Per-trait repeatability already appears at the bottom of Widget 2's
+Tab 3:
+
+$$
+R_t = \frac{(\boldsymbol{\Sigma}_B)_{tt}}{(\boldsymbol{\Sigma}_B)_{tt} + (\boldsymbol{\Sigma}_W)_{tt}}.
+$$
+
+The phenotypic correlation between traits $t$ and $m$ decomposes as
+
+$$
+r_{P,tm} = r_{B,tm}\sqrt{R_t R_m} + r_{W,tm}\sqrt{(1 - R_t)(1 - R_m)},
+$$
+
+so the phenotypic-level correlation is a *weighted mix* of the
+between-individual and within-individual correlations, weighted by how
+much of each trait's variance lives at each tier (Dingemanse &
+Dochtermann 2013). Symbolizer's `extract_correlations(fit)` returns
+all three matrices ($\boldsymbol{C}_B, \boldsymbol{C}_W,
+\boldsymbol{C}_P$) so a reader can verify this empirically:
 
 ```{r correlations}
-co <- extract_correlations(fit)
-co_B <- co[co$tier == "B", c("trait_i", "trait_j", "correlation", "lower", "upper")]
-co_B
+co <- extract_correlations(fit_two_tier)
+co_B <- co[co$tier == "B", c("trait_i", "trait_j", "correlation")]
+co_W <- co[co$tier == "W", c("trait_i", "trait_j", "correlation")]
+head(co_B)
+head(co_W)
 ```
 
-The two within-syndrome correlations (traits 1-2-3 among themselves and
-traits 4-5 among themselves) are clearly positive; the
-across-syndrome pairs are smaller.
+**Takeaway.** $c^2$ and $\psi^*$ per tier are the trait-level integration
+summaries; $R_t$ is the per-trait repeatability; phenotypic correlations
+decompose as a weighted mix of between and within. All three readings
+fall out of the same two fitted matrices.
 
-**Takeaway.** Two rotated axes pull apart the two simulated syndromes;
-communalities tell you which traits live in the shared structure;
-trait-trait correlations show the syndrome blocks directly.
+## 9. Identifiability gotchas: rotation, sign, and the within-tier σ_ε
 
-## 7. Identifiability gotchas: rotation and sign of Λ_B
+The loading matrices $\boldsymbol{\Lambda}_B, \boldsymbol{\Lambda}_W$
+are identified only up to **rotation** and **sign** when their rank
+exceeds 1. Two fits that produce indistinguishable likelihoods can have
+entirely different-looking $\boldsymbol{\Lambda}_B$ — this is the
+classical factor-analysis identifiability problem. The implied
+covariance $\boldsymbol{\Sigma}_B = \boldsymbol{\Lambda}_B
+\boldsymbol{\Lambda}_B^{\!\top} + \boldsymbol{\Psi}_B$ is invariant
+under rotation; $\boldsymbol{\Lambda}_B$ itself is not.
 
-The loading matrix $\boldsymbol{\Lambda}_B$ is identified only up to
-**rotation** and **sign** when $d_B > 1$. Two fits that produce
-indistinguishable likelihoods can have entirely different-looking
-$\boldsymbol{\Lambda}_B$. This is the classical factor-analysis
-identifiability problem. The implied between-unit covariance
-$\boldsymbol{\Sigma}_B = \boldsymbol{\Lambda}_B \boldsymbol{\Lambda}_B^\top
-+ \boldsymbol{\Psi}_B$ is invariant under rotation;
-$\boldsymbol{\Lambda}_B$ itself is not. The biologist's task is to
-read the *block structure* of $\boldsymbol{\Lambda}_B$, not the
-specific numbers in any one cell.
+Two practical conventions, both surfaced in
+`assumption_table(sym)`:
 
-A symbolizer surface is explicit about this. Two practical
-conventions exist, both surfaced in `assumption_table(sym)`:
+- **Lower-triangular** $\boldsymbol{\Lambda}_B$ for *confirmatory* use —
+  pin the upper triangle to zero so each column has a designated
+  leading trait. This is the default identification `gllvmTMB` uses on
+  fitting.
+- **Varimax-rotated** $\boldsymbol{\Lambda}_B$ for *interpretation* —
+  rotate the fitted loadings so each axis loads strongly on a small set
+  of traits and near zero on the rest. Applied *after* fitting;
+  preserves $\boldsymbol{\Sigma}_B$. The column labels may reorder under
+  rotation; the **block structure** is what the reader interprets.
 
-- **Lower-triangular $\boldsymbol{\Lambda}_B$** for *confirmatory* use
-  — pin the upper triangle to zero so each column has a designated
-  leading trait. This is the default identification gllvmTMB uses on
-  fitting. It produces a unique solution but its columns are not
-  maximally interpretable.
-- **Varimax-rotated $\boldsymbol{\Lambda}_B$** for *interpretation* —
-  rotate the fitted loadings so each axis loads strongly on a small
-  set of traits and near zero on the rest. The rotation is applied
-  *after* fitting and preserves $\boldsymbol{\Sigma}_B$. The column
-  labels may reorder under rotation; the block structure is what the
-  reader interprets.
+```{r loadings}
+getLoadings(fit_two_tier, rotate = "varimax")
+```
 
-`symbolize.gllvmTMB()` returns the as-fit (lower-triangular)
-$\boldsymbol{\Lambda}_B$ in `sym$loadings`. The assumption rows for
-the fit carry a sentence each on the rotation and sign conventions
-so a reader does not mistake non-uniqueness for non-replicability.
-The varimax-rotated matrix shown earlier in Section 6 is the
-reader-facing presentation; the lower-triangular form is what the
-likelihood actually identifies.
+A second category of identifiability concerns the **row-level residual
+variance**. When both `latent(0 + trait | obs, ...)` and
+`unique(0 + trait | obs)` are present (Widget 2), `gllvmTMB`
+auto-suppresses $\sigma_\epsilon^2$ — pinning it to ~10⁻³ to keep the
+Gaussian density well-defined. This is *not* a defect; it's the
+package's way of preventing a known collinearity between two
+parametrisations of the same row-level variance. The within-tier
+$\boldsymbol{\Psi}_W$ already captures per-trait within-individual
+residual variance; a free $\sigma_\epsilon^2$ scalar on top would
+double-count. Reading the auto-suppression message in the fit output
+is the expected behaviour, not a warning to worry about.
 
-**Takeaway.** Rotation and sign ambiguity are *stated assumptions*,
-not bugs. The implied covariance is invariant; the loadings are not.
-Read the block structure, not the cell values.
+**Takeaway.** Rotation and sign of $\boldsymbol{\Lambda}$ are *stated
+assumptions*, not bugs. The implied covariances are invariant; the
+loadings are not. Read the block structure, not the cell values. And
+the within-tier $\sigma_\epsilon$ auto-suppression is by design.
 
-## 8. Where the symbolized story helps
+## 10. The glmmTMB bridge
 
-With five traits and two latents, the per-element index form
-$y_{ij} = \mu_j + \sum_{k} \lambda_{jk} z_{ik} + \epsilon_{ij}$ requires
-the reader to mentally instantiate fifty equations (forty individuals
-times five traits, with two latents apiece). The matrix block
+`gllvmTMB` is purpose-built for generalised linear *latent-variable*
+models. `glmmTMB` is a general-purpose GLMM package that, since
+McGillycuddy et al. (2025), can fit the same math via the `rr()` and
+`diag()` keywords. The Nakagawa et al. (in prep) framework uses the
+`glmmTMB` route; for readers coming from there, the two-tier fit
+translates one-to-one:
 
-$$
-\mathbf{Y} = \mathbf{1}\boldsymbol{\mu}^{\!\top} + \mathbf{Z}\,\boldsymbol{\Lambda}^{\!\top} + \mathbf{E}
-$$
+```{r glmmtmb-equivalence, eval = FALSE}
+# gllvmTMB (this article's path)
+fit_two_tier <- gllvmTMB(value ~ 0 + trait +
+  latent(0 + trait | individual, d = 2) + unique(0 + trait | individual) +
+  latent(0 + trait | obs, d = 1) + unique(0 + trait | obs),
+  data = dat, family = gaussian(),
+  trait = "trait", unit = "individual",
+  unit_obs = "obs", cluster = "session")
 
-says exactly the same thing in one line. A biologist can *see* that
-$\mathbf{Z}$ stores one row of latent scores per individual,
-$\boldsymbol{\Lambda}$ stores one row of loadings per trait, and the
-product is the deterministic part of the trait matrix.
+# glmmTMB (Nakagawa-paper path)
+fit_two_tier_glmm <- glmmTMB::glmmTMB(value ~ 0 + trait +
+  rr(0 + trait | individual, d = 2) + diag(0 + trait | individual) +
+  rr(0 + trait | obs, d = 1) + diag(0 + trait | obs),
+  data = dat, family = gaussian(),
+  dispformula = ~0)
+```
 
-This is the educator-first surface symbolizer is built around: the
-structural object always carries both notations, and the
-`symbol_table()` always carries both abstract and concrete dimensions.
-For latent-variable models, where the matrix form is genuinely the more
-readable one, that bridge is where the package earns its keep.
+| `gllvmTMB` | `glmmTMB` | Math |
+|---|---|---|
+| `latent(0 + trait \| g, d = k)` | `rr(0 + trait \| g, d = k)` | $\boldsymbol{\Lambda}_g$ of rank $k$ |
+| `unique(0 + trait \| g)` | `diag(0 + trait \| g)` | $\boldsymbol{\Psi}_g$ diagonal |
+| auto-suppression of $\sigma_\epsilon$ on `unique(.\|obs)` | `dispformula = ~0` | both prevent double-counting $\boldsymbol{\Psi}_W$ vs $\sigma_\epsilon^2$ |
 
-**Takeaway.** Index form scales like $n \times T$; matrix form scales
-like one block. For GLLVMs the matrix form is the reader-friendly one.
+Both packages return the same fitted $\boldsymbol{\Lambda},
+\boldsymbol{\Psi}, \boldsymbol{\Sigma}$ matrices to numerical
+precision. The article path leads with `gllvmTMB` because it ships
+GLLVM-specific accessors (`getLoadings()`, `extract_communality()`,
+`extract_correlations()`) and a wide/long dual interface that
+`glmmTMB` doesn't have.
 
-## 9. What's available now, what's next
+**Takeaway.** Same math; different syntax. Use `gllvmTMB` when you want
+GLLVM-specific accessors; use `glmmTMB` when your model also needs
+zero-inflation or dispersion modelling and you're happy to reconstruct
+$\boldsymbol{\Sigma}$ manually.
 
-The accessors in Section 6 — `getLoadings()`, `extract_communality()`,
-`extract_correlations()` — are gllvmTMB-side. The symbolizer surface
-wraps the Gaussian latent-variable case as a **First slice**: every
-piece walked above is shipped today, and the matrix-form story is
-fully populated.
+## 11. What's available now, what's next
 
-**Shipped today:**
+The accessors in §8 — `getLoadings()`, `extract_communality()`,
+`extract_correlations()` — are `gllvmTMB`-side. The symbolizer surface
+wraps the Gaussian latent-variable case as a **First slice** at the
+two-tier level: every piece walked above is shipped today.
 
-- `symbolize.gllvmTMB()` for Gaussian and binomial latent-variable
-  families: mu, $\boldsymbol{\Lambda}_B$, $\boldsymbol{\Sigma}_B$,
-  $\boldsymbol{\Psi}_B$, and the within-unit residual SD
-  $\sigma_\varepsilon$ (Gaussian only). First slice since
-  v0.4 – v0.5.
-- `compare_symbolic(fit_d1, fit_d2)` — diffs the structural
-  specifications of $d_B = 1$ versus $d_B = 2$ side by side
-  (which lines change, which assumption rows change), and with
-  `metrics = TRUE` also returns AIC / BIC / log-likelihood / df
-  with the delta. See `vignette("symbolizer-compare")` for the
-  worked example.
+**Shipped today (v0.21.6-redo):**
+
+- `symbolize.gllvmTMB()` populates the widget-shape slots `Lambda_B`,
+  `Psi_B`, `Sigma_B`, `Lambda_W`, `Psi_W`, `Sigma_W`, `Repeatability`
+  for the Gaussian latent-variable family.
+- `as_html_three_views()` Tab 3 emits a numerical implied-covariance
+  block per tier plus a per-trait repeatability row when both tiers
+  are present.
+- The two-tier `latent(0 + trait | obs, d = d_W) + unique(0 + trait | obs)`
+  syntax is fully tested. gllvmTMB's σ_ε auto-suppression is
+  documented in `assumption_table(sym)`.
+- `compare_symbolic(fit_d1, fit_d2)` diffs the structural specifications
+  of $d_B = 1$ versus $d_B = 2$ (or any rank-pair). See
+  `vignette("symbolizer-compare")`.
 
 **Still planned:**
 
-1. **Other non-Gaussian gllvmTMB families** (count, Tweedie,
-   ordinal) — each adds a link to the linear predictor and reshapes
-   the loadings interpretation.
-2. **Automated syndromes reading** —
-   `parameter_interpretation(sym, scale = "biological")` produces
-   one row per (trait, axis) pair today; a later slice will add the
-   natural-scale reading for the remaining families.
-3. **Uncertainty on $\boldsymbol{\Lambda}$.** `bootstrap_Sigma()`
-   from gllvmTMB returns parametric-bootstrap draws of the loading
-   matrix; a future slice will surface these through `symbolize()`
-   so the `symbol_table()` rows for $\boldsymbol{\Lambda}$ and
-   $\boldsymbol{\Sigma}_B$ carry confidence regions, not just
-   point estimates.
-4. **Within-unit decomposition** ($\boldsymbol{\Sigma}_W$,
-   $\boldsymbol{\Lambda}_W$) for repeated-measures behaviour /
-   trait data — `gllvmTMB_multi`.
+1. **Non-Gaussian gllvmTMB families** (count, Tweedie, ordinal) at the
+   two-tier level — each adds a link to the linear predictor and
+   reshapes the loadings interpretation.
+2. **Uncertainty on $\boldsymbol{\Lambda}$.** `bootstrap_Sigma()` from
+   `gllvmTMB` returns parametric-bootstrap draws of the loading matrix;
+   a future slice will surface these so the `symbol_table()` rows for
+   $\boldsymbol{\Lambda}$ and $\boldsymbol{\Sigma}$ carry confidence
+   regions, not just point estimates.
+3. **Rank selection.** A simple AIC + interpretability grid over
+   $d_B, d_W \in \{0, 1, 2, 3\}$ is the standard practical move; a
+   future slice will ship this as a helper.
+4. **Reaction-norm / sex-specific extensions** (Appendices B.1 / B.2 of
+   the Nakagawa et al. (in prep) framework) — fold these into the
+   same $\boldsymbol{\Lambda} \boldsymbol{\Lambda}^{\!\top} +
+   \boldsymbol{\Psi}$ structure on an augmented random-effect vector.
 
-See `vignette("symbolizer-roadmap")` for the full capability
-matrix and what's planned beyond gllvmTMB.
+See `vignette("symbolizer-roadmap")` for the full capability matrix.
+
+## References
+
+- Dingemanse, N. J., & Dochtermann, N. A. (2013). Quantifying individual variation in behaviour: mixed-effect modelling approaches. *Journal of Animal Ecology* 82: 39-54.
+- Mathot, K. J., & Dingemanse, N. A. (2015). Energetics and behaviour: unrequited needs and new directions. *Trends in Ecology & Evolution* 30: 199-206.
+- McGillycuddy, M., et al. (2025). Reduced-rank covariance structures in `glmmTMB`. (Forthcoming methods paper.)
+- Nakagawa, S., & Schielzeth, H. (2010). Repeatability for Gaussian and non-Gaussian data: a practical guide for biologists. *Biological Reviews* 85: 935-956.
+- Nakagawa, S., Mathot, K., Dinnage, R., et al. (in prep). Quantifying between- and within-individual correlations and the degree of trait integration: leveraging latent variable modeling to study behavioural syndromes and other phenotypic integration.
+- Pigliucci, M. (2003). Phenotypic integration: studying the ecology and evolution of complex phenotypes. *Ecology Letters* 6: 265-272.
+- Sih, A., Bell, A., & Johnson, J. C. (2004). Behavioral syndromes: an ecological and evolutionary overview. *Trends in Ecology & Evolution* 19: 372-378.
