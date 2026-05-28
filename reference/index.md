@@ -64,6 +64,8 @@ context here.
 - [`symbolize(`*`<gam>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.gam.md)
   : Symbolize an mgcv gam / bam fit (additive grammar, v0.14 first
   slice)
+- [`symbolize(`*`<phylolm>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.phylolm.md)
+  : Symbolize a phylolm fit (Gaussian PGLS, v0.21.4 first slice)
 - [`symbolizer_capabilities()`](https://itchyshin.github.io/symbolizer/reference/symbolizer_capabilities.md)
   : Symbolizer capability registry
 

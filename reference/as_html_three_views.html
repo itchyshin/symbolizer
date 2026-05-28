@@ -29,7 +29,7 @@ small tab-switching script."><meta property="og:image" content="https://itchyshi
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -75,6 +75,8 @@ small tab-switching script.</p>
 <span>  <span class="va">x</span>,</span>
 <span>  head <span class="op">=</span> <span class="fl">5L</span>,</span>
 <span>  tail <span class="op">=</span> <span class="fl">2L</span>,</span>
+<span>  head_cols <span class="op">=</span> <span class="fl">5L</span>,</span>
+<span>  tail_cols <span class="op">=</span> <span class="fl">2L</span>,</span>
 <span>  id <span class="op">=</span> <span class="st">"sym"</span>,</span>
 <span>  standalone <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  file <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -91,11 +93,30 @@ small tab-switching script.</p>
 
 
 <dt id="arg-head">head<a class="anchor" aria-label="anchor" href="#arg-head"></a></dt>
-<dd><p>Number of leading rows to show in the matrix view (default 5).</p></dd>
+<dd><p>Number of leading <strong>rows</strong> to show in the matrix view
+(Tab 3 "Equations with data") before the <code>\\vdots</code> ellipsis.
+Default <code>5</code>. Reasonable range 2–10; larger values produce taller
+widgets.</p></dd>
 
 
 <dt id="arg-tail">tail<a class="anchor" aria-label="anchor" href="#arg-tail"></a></dt>
-<dd><p>Number of trailing rows to show in the matrix view (default 2).</p></dd>
+<dd><p>Number of trailing <strong>rows</strong> to show in the matrix view
+after the <code>\\vdots</code>. Default <code>2</code>. Together with <code>head</code>, controls
+how much per-observation data is visible: total rows shown =
+<code>head + tail + 1</code> ellipsis row (or fewer if <code>n_obs</code> is small
+enough to show all rows).</p></dd>
+
+
+<dt id="arg-head-cols">head_cols<a class="anchor" aria-label="anchor" href="#arg-head-cols"></a></dt>
+<dd><p>Number of leading <strong>columns</strong> to show in any matrix
+that has more than <code>head_cols + tail_cols</code> columns (e.g. the
+<code>Z</code>-matrix for a 60-species fit). Default <code>5</code>. Smart-truncation
+prefers non-zero columns within the visible row band.</p></dd>
+
+
+<dt id="arg-tail-cols">tail_cols<a class="anchor" aria-label="anchor" href="#arg-tail-cols"></a></dt>
+<dd><p>Number of trailing <strong>columns</strong> to show after the
+<code>\\cdots</code> ellipsis. Default <code>2</code>.</p></dd>
 
 
 <dt id="arg-id">id<a class="anchor" aria-label="anchor" href="#arg-id"></a></dt>

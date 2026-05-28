@@ -5,8 +5,11 @@ If you have ever written `(1 | species)` for an animal model,
 process, you have been writing the **same model** three times — only the
 matrix that encodes the dependence changes. This article is the first in
 `symbolizer`’s **concept-axis series**; it teaches the
-*dependence-structure* axis of GLMM grammar through five worked examples
-across six R packages.
+*dependence-structure* axis of GLMM grammar through one **deep-dive**
+Face and two **light** Faces across three R packages: `MCMCglmm`,
+`brms`, and `phylolm`. The scope is the **phylogenetic LMM** with
+$`\sigma_e^2`$ estimated; the *meta-analytic* form (with $`v_i`$ known
+sampling variances) is its own surface in the v0.22 article.
 
 ## The shared grammar
 
@@ -108,6 +111,18 @@ dat <- data.frame(
 )
 
 tree   <- keep.tip(tree_raw, sp_keep)
+# Ultrametricise the tree once, here, so every downstream phylogenetic
+# fit is on the SAME ultrametric tree. Brownian-motion on tips-only A
+# requires equal root-to-tip distances by construction (A_ii = 1 only
+# when tips are equidistant from the root); metafor / MCMCglmm / brms /
+# glmmTMB accept a non-ultrametric tree silently but the BM prior is
+# then misspecified. drmTMB ENFORCES ultrametricity (it errors otherwise),
+# which surfaces the assumption that the other packages let pass. The
+# Moura tree comes from Open Tree of Life with mixed-source branch
+# lengths, so we smooth it with ape::chronos() (penalised-likelihood
+# molecular-clock estimate; lambda = 1 = smoothest plausible clock).
+tree   <- ape::chronos(tree, lambda = 1, quiet = TRUE)
+class(tree) <- "phylo"
 A_tips <- vcv.phylo(tree, corr = TRUE)
 # Reorder A_tips rows/cols to match `sp_keep` (a random sample). Without
 # this, A_tips inherits the depth-first tree-tip order, so head 5x5
@@ -116,9 +131,10 @@ A_tips <- vcv.phylo(tree, corr = TRUE)
 # meant to demonstrate. Florence-audit 2026-05-26.
 A_tips <- A_tips[sp_keep, sp_keep]
 # Representation 2 -- all-nodes A-inverse (tips + internal nodes, sparse
-# precision; Hadfield & Nakagawa 2010). scale = FALSE because the
-# Moura tree from Open Tree of Life is not strictly ultrametric.
-A_all  <- inverseA(tree, nodes = "ALL", scale = FALSE)
+# precision; Hadfield & Nakagawa 2010). With the tree now ultrametric,
+# scale = TRUE works cleanly (normalises total tree depth to 1, the
+# canonical BM-prior parameterisation).
+A_all  <- inverseA(tree, nodes = "ALL", scale = TRUE)
 
 cat("species k =", nrow(dat),
     "  Zr range = [", round(min(dat$Zr), 2), ",", round(max(dat$Zr), 2), "]\n")
@@ -126,7 +142,7 @@ cat("species k =", nrow(dat),
 cat("A off-diagonal quantiles (25/50/75/99%): ",
     paste(round(quantile(A_tips[upper.tri(A_tips)], c(.25,.5,.75,.99)), 3),
           collapse = " / "), "\n")
-#> A off-diagonal quantiles (25/50/75/99%):  0 / 0.03 / 0.275 / 0.86
+#> A off-diagonal quantiles (25/50/75/99%):  0 / 0.095 / 0.228 / 0.866
 ```
 
 The two representations encode the **same** Brownian-motion prior. The
@@ -136,465 +152,92 @@ what `MCMCglmm` uses internally (`ginverse = list(animal = Ainv)`) and
 what
 [`drmTMB::phylo()`](https://itchyshin.github.io/drmTMB/reference/phylo.html)
 builds under the hood (`drmTMB` cites Hadfield & Nakagawa 2010
-explicitly in its
-[`?phylo`](https://itchyshin.github.io/gllvmTMB/reference/phylo.html)
+explicitly in its [`?phylo`](https://rdrr.io/pkg/ape/man/read.tree.html)
 help page). The all-nodes form is *richer*: it gives access to
 ancestral-state BLUPs at internal nodes; the tips-only form marginalises
 those out. In a balanced setup the two agree on the variance estimate
-$`\hat\sigma_p^2`$ — a result we’ll return to in §“Tips vs all-nodes”.
+$`\hat\sigma_p^2`$ — a result we’ll return to in § “Tips vs all-nodes”.
 
-## Six packages, one phylogenetic model
+## Three packages, one phylogenetic LMM
 
-We fit the same model six different ways on the 60-species Moura-derived
-dataset. The model is
+We fit the same model three different ways on the 60-species
+Moura-derived dataset. The model is
 
 ``` math
 \mathrm{Zr}_i \;=\; \beta_0 + u_{p_{k[i]}} + e_i,\qquad
-u_p \sim \mathcal N(\mathbf 0, \sigma_p^2\,\mathbf A),\quad
-e_i \sim \mathcal N(0, \sigma_e^2).
+u_p \sim \mathcal N(\mathbf 0,\; \sigma_p^2\,\mathbf A),\quad
+e_i \sim \mathcal N(0,\; \sigma_e^2),
 ```
 
-The phylogenetic correlation matrix $`\mathbf A`$ now carries realistic
+where:
+
+| Symbol | Meaning | Status |
+|----|----|----|
+| $`i`$ | observation index, $`i = 1, \dots, n`$ — in this dataset there is one observation per species, so $`i`$ runs over species | index |
+| $`k`$ | species index — total number of species in the phylogeny, $`k = 60`$ here | index |
+| $`k[i]`$ | the species that observation $`i`$ belongs to (here $`k[i] = i`$ because one observation per species) | index |
+| $`\mathrm{Zr}_i`$ | Fisher-$`z`$ transformed correlation for species $`i`$ — here treated as an ordinary continuous trait | observed |
+| $`\beta_0`$ | global mean of $`\mathrm{Zr}`$ across species | **estimated** |
+| $`u_{p_{k[i]}}`$ | phylogenetic random effect, indexed by species $`k[i]`$ for observation $`i`$ | **estimated** (latent) |
+| $`\sigma_p^2`$ | phylogenetic variance — the scale of $`\mathbf u_p`$ | **estimated** |
+| $`\mathbf A`$ | $`k \times k`$ tips-only phylogenetic correlation matrix derived from the tree under Brownian motion (or its all-nodes augmentation; see § “Tips-only vs all-nodes”) | constructed from tree |
+| $`e_i`$ | residual on the response scale | **estimated** |
+| $`\sigma_e^2`$ | residual variance — what each package would call $`\sigma^2_{\text{units}}`$, $`\sigma^2_{\text{res}}`$, or the marginal $`\sigma^2 (1 - \lambda)`$ depending on the parameterisation | **estimated** |
+
+Three notes that often trip up first readers:
+
+1.  **$`\sigma_e^2`$ is estimated, not the per-effect sampling variance
+    $`v_i`$.** In meta-analysis we’d also feed in $`v_i`$ (a *known*
+    sampling variance per study) via `metafor::rma.mv(V = vi, ...)`.
+    That’s the model class in the v0.22 article — same
+    $`\sigma_p^2 \mathbf A`$ phylogenetic term, but with
+    $`\mathbf V = \operatorname{diag}(v_i)`$ added on top of
+    $`\sigma_e^2 \mathbf I`$ (Cinar et al. 2022, Eq. 1–10).
+2.  The Moura data was *built* as a meta-analytic dataset (one
+    Fisher-$`z`$ per species, aggregated from many effect-size
+    estimates). We use only $`\mathrm{Zr}`$ here; the $`v_i`$ column is
+    set aside. That’s a pedagogical choice — a clean phylo-LMM is easier
+    to read than a meta-analytic phylo-LMM, and it keeps this article
+    focused on the structural-dependence axis.
+3.  `phylolm` fits a **marginalised** version of this same model: it
+    absorbs $`u_p`$ into the residual to give
+    $`\mathrm{Zr} \sim \mathcal N(\beta_0 \mathbf 1, \sigma^2 \mathbf C(\alpha))`$
+    where
+    $`\sigma^2 \mathbf C(\alpha) = \sigma_p^2 \mathbf A + \sigma_e^2 \mathbf I`$
+    in the Pagel-$`\lambda`$ parametrisation. The § “Face 3” Face below
+    makes the bridge explicit.
+
+The phylogenetic correlation matrix $`\mathbf A`$ carries realistic
 biology — most species pairs are distantly related (median off-diagonal
 $`\approx 0.03`$) while a handful are close (top 1 % above 0.85).
 Compare with the degenerate `rcoal(15)` simulation used in earlier
 drafts where 75 % of pairs were above 0.91.
 
-### Face 1: `metafor::rma.mv` with `R = list(species = A)`
-
-``` r
-
-fit_meta <- rma.mv(
-  yi      = Zr,
-  V       = vi,                # variance-of-the-mean per species
-  random  = list(~ 1 | species),
-  R       = list(species = A_tips),
-  data    = dat,
-  sparse  = TRUE
-)
-sym_meta <- symbolize(fit_meta)
-sym_meta$metadata$phylo_representation
-#> [1] "tips_only"
-sym_meta$metadata$detected_signals
-#> [1] "phylo"
-```
-
-``` r
-
-equations(sym_meta, notation = "index")
-```
-
-``` math
-\begin{aligned}
-y_i \mid \theta_i \sim \mathrm{Normal}(\theta_i,\, v_i), \quad v_i \text{ known} \\
-\mu_i = \beta_{0} + u_{species(i)} \\
-\mathbf{u}_{species} \sim \mathcal{N}(\mathbf{0},\, \sigma_{species}^2 \mathbf{A})
-\end{aligned}
-```
-
-The R-matrix tier’s group name (`species`) matches the canonical
-phylogenetic lexicon, so `symbolizer`’s `metafor` extractor sets
-`metadata$phylo_representation = "tips_only"`, declares
-`detected_signals = "phylo"`, and adds a row to the symbol dictionary
-for $`\mathbf A`$ with role `structured_correlation_phylo`. The
-assumption table now lists the phylogenetic prior assumptions (Brownian
-motion, ultrametricity, branch-length scale — your responsibility):
-
-``` r
-
-assumption_table(sym_meta)
-```
-
-| assumption | expression | biological meaning | status |
-|:---|:---|:---|:---|
-| conditional_distribution | $`y_i \mid \theta_i \sim \mathrm{Normal}(\theta_i,\, v_i)`$ | Each observed effect size is normally distributed around its true effect with KNOWN sampling variance | explicit |
-| known_sampling_variance | $`v_i \text{ is known (not estimated)}`$ | Sampling variances v_i come from each primary study (or from escalc()); they are inputs, not parameters | your_responsibility |
-| linear_predictor | $`\theta_i = \beta_0 + \sum_k \beta_k X_{ki} + u_i`$ | True effects are a linear combination of moderators plus a study-level random effect | explicit |
-| random_effects_distribution | $`u_i \sim \mathrm{Normal}(0,\, \tau^2)`$ | The between-study true effects vary around the grand mean with variance tau^2 | explicit |
-| inverse_variance_weights | $`w_i = 1 / (v_i + \tau^2)`$ | Each study is weighted by the inverse of (sampling variance + heterogeneity) | explicit |
-| no_publication_bias | — | The included effect sizes are not preferentially the larger / significant ones; if they are, tau^2 / beta are biased | your_responsibility |
-| correct_effect_metric | — | The metric (log RR, log OR, SMD, Fisher-z r, …) is appropriate for the outcome and is calculated consistently across studies | your_responsibility |
-| no_missing_at_random | — | Studies are not missing in a way that depends on their unobserved true effect | your responsibility |
-| phylo_random_effect | $`\mathbf{u}_p \sim \mathcal{N}(\mathbf{0}, \sigma_p^2 \mathbf{A})`$ | Species-level random effect with covariance proportional to the phylogenetic correlation matrix A | explicit |
-| phylo_A_positive_definite | $`\mathbf{A} \succ 0`$ | A is positive-definite by construction: the k x k phylogenetic correlation matrix derived from a rooted tree under Brownian motion | follows from the formula |
-| phylo_tips_only_representation | $`A_{ij} = T_{ij}/T`$ | Tips-only k x k representation: A\_{ij} is the proportion of shared branch length between species i and j divided by total tree height (Hadfield 2010) | follows from the formula |
-| phylo_brownian_motion | $`\mathrm{Var}(u_p) \propto \mathrm{time}`$ | Brownian motion: phylogenetic variance accumulates linearly with branch length. If OU or Pagel’s lambda is intended, refit with that correlation structure | your_responsibility |
-| phylo_ultrametric_tree | — | Tree is ultrametric (all tips equidistant from the root); non-ultrametric trees still give a valid A but break the strict Brownian-motion variance interpretation | your_responsibility |
-| phylo_branch_lengths_meaningful | — | Branch lengths are on a meaningful evolutionary scale (time, substitutions per site); symbolizer cannot verify this from the fitted object | your_responsibility |
-| phylo_nonphylo_identifiability | — | When both a phylogenetic and a non-phylogenetic species-level tier are estimated, the variance components are weakly identified – see warning_table() (Hadfield & Nakagawa 2010 section 3.2; Mizuno et al. 2026 section 4) | your_responsibility |
-| heritability_reading | $`H^2 = \sigma_p^2 / (\sigma_p^2 + \sigma_e^2)`$ | Phylogenetic heritability: proportion of among-species variance attributable to shared evolutionary history | derived |
-
-#### Three-views widget for the metafor fit
-
-The
-[`as_html_three_views()`](https://itchyshin.github.io/symbolizer/reference/as_html_three_views.md)
-widget renders the same model three ways: per-observation index form,
-matrix form, and the matrix equation with the actual numerical entries
-of $`\mathbf A`$ visible. The interactive widget is below; a paper-ready
-PDF version of the same three views is one click away.
-
-``` r
-
-# Scaffolding until issue #9 lands extractor-side expanded population.
-# https://github.com/itchyshin/symbolizer/issues/9
-shim_metafor <- function(fit, A) {
-  beta <- as.numeric(fit$beta)
-  X    <- fit$X
-  re   <- ranef(fit)
-  u_named <- as.numeric(re$species$intrcpt)
-  names(u_named) <- rownames(re$species)
-  Z_g  <- model.matrix(~ species - 1, data = dat)
-  colnames(Z_g) <- sub("^species", "", colnames(Z_g))
-  u <- u_named[colnames(Z_g)]
-  # metafor's fitted() returns the MARGINAL mean (intercept only); we
-  # want the CONDITIONAL mean = X*beta + Z*u so the worked-row
-  # arithmetic closes with the displayed BLUP contribution.
-  mu_hat <- as.numeric(X %*% beta + Z_g %*% u)
-  list(y = as.numeric(fit$yi), X = X, beta = beta,
-       Z_g = Z_g, u = u, mu_hat = mu_hat,
-       fitted = mu_hat, residuals = as.numeric(fit$yi) - mu_hat,
-       M = A)
-}
-sym_meta$expanded <- shim_metafor(fit_meta, A_tips)
-htmltools::HTML(as_html_three_views(sym_meta, id = "meta"))
-```
-
-[Skip three-views widget](#sym-meta-1779824232-end)
-
-▸1. Index
-
-▸2. Matrix
-
-▸3. Equations with data
-
-What happens for each observation *i* – the per-individual reading.
-
-Species are not independent observations. Closely related species tend
-to have similar trait values because of shared evolutionary history; the
-phylogenetic correlation matrix $`\mathbf{A}`$ encodes those expected
-similarities (cell $`A_{ij}`$ = fraction of shared branch length between
-species $`i`$ and $`j`$). The phylogenetic SD $`\sigma_p`$ measures how
-much across-species variation remains after fixed-effect predictors are
-accounted for.
-
-``` math
-\begin{aligned}
-y_i \mid \theta_i & \sim \mathrm{Normal}(\theta_i,\, v_i), \quad v_i \text{ known} \\
-\mu_i & = \beta_{0} + u_{species(i)} \\
-\mathbf{u}_{species} & \sim \mathcal{N}(\mathbf{0},\, \sigma_{species}^2 \mathbf{A})
-\end{aligned}
-```
-
-where:
-
-- $`y`$ — response variable  $`\mathbb{R}^{60}`$
-- $`\mu_i`$ — conditional mu of yi  $`\mathbb{R}^{60}`$
-- $`\sigma_i`$ — residual heterogeneity SD (tau) of yi  scalar
-- $`\beta_{0}`$ — mu submodel coefficients  $`\mathbb{R}^{1}`$
-- $`u_{species(i)}`$ — random intercept by species  scalar;
-  $`\mathbb{R}^{60}`$ in matrix form
-- $`\sigma_{species}`$ — between-species standard deviation  scalar
-- $`\mathbf{A}`$ — phylogenetic correlation matrix on species, attached
-  via R = list(species = A): Sigma = sigma_p^2 \* A (tips-only k x k
-  representation)  $`\mathbb{R}^{60 \times 60}`$
-
-The same model in matrix form – the structural contract every textbook
-past chapter 4 switches to.
-
-Species are not independent observations. Closely related species tend
-to have similar trait values because of shared evolutionary history; the
-phylogenetic correlation matrix $`\mathbf{A}`$ encodes those expected
-similarities (cell $`A_{ij}`$ = fraction of shared branch length between
-species $`i`$ and $`j`$). The phylogenetic SD $`\sigma_p`$ measures how
-much across-species variation remains after fixed-effect predictors are
-accounted for.
-
-``` math
-\begin{aligned}
-\mathbf{y} \mid \boldsymbol{\theta},\, V & \sim \mathcal{N}(\boldsymbol{\theta},\, V),\quad V \text{ known} \\
-\boldsymbol{\mu} & = \mathbf{X} \boldsymbol{\beta} + \mathbf{u} \\
-\mathbf{u}_{species} & \sim \mathcal{N}(\mathbf{0},\, \sigma_{species}^2 \mathbf{A}_{60 \times 60})
-\end{aligned}
-```
-
-where:
-
-- $`\mathbf{y}`$ — response variable  $`\mathbb{R}^{60}`$
-- $`\boldsymbol{\mu}`$ — conditional mu of yi  $`\mathbb{R}^{60}`$
-- $`\boldsymbol{\sigma}`$ — residual heterogeneity SD (tau) of yi
-   scalar
-- $`\boldsymbol{\beta}`$ — mu submodel coefficients  $`\mathbb{R}^{1}`$
-- $`\mathbf{X}`$ — mu submodel design matrix
-   $`\mathbb{R}^{60 \times 1}`$
-- $`\mathbf{u}_{species}`$ — random intercept by species  scalar;
-  $`\mathbb{R}^{60}`$ in matrix form
-- $`\sigma_{species}`$ — between-species standard deviation  scalar
-- $`\mathbf{A}`$ — phylogenetic correlation matrix on species, attached
-  via R = list(species = A): Sigma = sigma_p^2 \* A (tips-only k x k
-  representation)  $`\mathbb{R}^{60 \times 60}`$
-
-The same matrix equation, with your actual numbers stacked inside the
-brackets – what the computer multiplies. Showing first 5 and last 2 rows
-of n = 60.
-
-Species are not independent observations. Closely related species tend
-to have similar trait values because of shared evolutionary history; the
-phylogenetic correlation matrix $`\mathbf{A}`$ encodes those expected
-similarities (cell $`A_{ij}`$ = fraction of shared branch length between
-species $`i`$ and $`j`$). The phylogenetic SD $`\sigma_p`$ measures how
-much across-species variation remains after fixed-effect predictors are
-accounted for.
-
-Matrix-form expansion of the model. Each row shows the response y_i and
-the corresponding row of the design matrix X (showing head and tail rows
-of the n total observations), with the coefficient vector beta listed
-below. A random-effect indicator matrix Z_g and the predicted BLUPs u
-are also shown.
-
-For observation *i* = 1 of your data:
-
-``` math
-\begin{aligned}
-y_{1} &= \hat\beta_{0} + \hat{u}_{\mathrm{Alca torda}} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
-0.166 &= 0.374 + (-0.201) + (-0.00696) &\quad(\text{with your numbers}) \\
-&= \underbrace{0.173}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-0.00696)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
-\end{aligned}
-```
-
-Stacking the same response equation for all *n* = 60 observations:
-
-``` math
-\underbrace{\begin{bmatrix} 0.166 \\ 1.12 \\ 0.66 \\ 1.05 \\ 0.676 \\ \vdots \\ 0.172 \\ 0.0853 \end{bmatrix}}_{\textstyle\,\mathbf{y}_{\,60 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 \\    1 \\    1 \\    1 \\    1 \\ \vdots \\    1 \\    1 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,60 \times 1}\,}\, \underbrace{\begin{bmatrix} 0.374 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,1 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix}    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    1 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 \\    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    1 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 \\    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    1 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 \\    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    1 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 \\    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    1 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 \\ \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    1 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 \\    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    1 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 \end{bmatrix}}_{\textstyle\,\mathbf{Z}_{\,60 \times 60}\,}\, \underbrace{\begin{bmatrix} 0.418 \\ 0.105 \\ -0.121 \\ -0.342 \\ -0.191 \\ -0.0211 \\ -0.108 \\ -0.212 \\ 0.356 \\ -0.332 \\ 0.607 \\ -0.259 \\ -0.177 \\ -0.176 \\ -0.184 \\ -0.271 \\ 0.382 \\ -0.171 \\ 0.122 \\ 0.056 \\ -0.0736 \\ -0.196 \\ -0.226 \\ -0.191 \\ 0.301 \\ 0.0879 \\ -0.185 \\ -0.00762 \\ -0.049 \\ -0.228 \\ -0.31 \\ 4.36e-06 \\ 0.089 \\ -0.214 \\ 0.0593 \\ -0.121 \\ 0.73 \\ -0.201 \\ 0.106 \\ -0.113 \\ 0.045 \\ 0.171 \\ -0.342 \\ 0.0127 \\ -0.273 \\ -0.0168 \\ -0.18 \\ -0.168 \\ -0.138 \\ -0.101 \\ -0.289 \\ -0.194 \\ -0.252 \\ 1.15 \\ -0.288 \\ 0.461 \\ -0.371 \\ -0.288 \\ -0.0504 \\ -0.0761 \end{bmatrix}}_{\textstyle\,\hat{\mathbf{u}}_{\,60 \times 1}\;\text{(BLUP)}\,} \;+\; \underbrace{\begin{bmatrix} -0.00696 \\ 0.0154 \\ -0.015 \\ 0.0695 \\ 0.246 \\ \vdots \\ -0.0184 \\ -0.0176 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,60 \times 1}\;\text{(residual)}\,}
-```
-
-**Left**: observed vector $`\mathbf{y}`$. **Middle**: the prediction
-$`\mathbf{X}\hat{\boldsymbol{\beta}} + \mathbf{Z}\hat{\mathbf{u}} = \hat{\boldsymbol{\mu}}`$.
-**Right**: the residual vector
-$`\hat{\boldsymbol{\varepsilon}} = \mathbf{y} - \hat{\boldsymbol{\mu}}`$.
-Every row of this matrix equation is one of the response-equation rows
-from the worked row above.
-
-**And the structured-covariance prior on `u`**. The random effect that
-gives this model its structural-dependence character:
-
-``` math
-\mathrm{Cov}(\hat{\mathbf{u}}) \;=\; \sigma_p^2 \cdot \underbrace{\begin{bmatrix}    1 &    0 & 0.17 & 0.185 & 0.187 & \cdots &    0 & 0.176 \\    0 &    1 &    0 &    0 &    0 & \cdots & 0.485 &    0 \\ 0.17 &    0 &    1 & 0.254 & 0.561 & \cdots &    0 & 0.792 \\ 0.185 &    0 & 0.254 &    1 & 0.279 & \cdots &    0 & 0.262 \\ 0.187 &    0 & 0.561 & 0.279 &    1 & \cdots &    0 & 0.579 \\ \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\    0 & 0.485 &    0 &    0 &    0 & \cdots &    1 &    0 \\ 0.176 &    0 & 0.792 & 0.262 & 0.579 & \cdots &    0 &    1 \end{bmatrix}}_{\textstyle\,\mathbf{A}_{\,60 \times 60}\,}
-```
-
-The phylo random effect $`u`$ has covariance
-$`\sigma_p^2 \cdot \mathbf{A}`$, where $`\mathbf{A}`$ is the 60 × 60
-phylogenetic correlation matrix. Showing the head + tail rows / columns;
-full matrix is 60 × 60.
-
-[Skip three-views widget](#sym-meta-1779824232-end)
-
-▸1. Index
-
-▸2. Matrix
-
-▸3. Equations with data
-
-What happens for each observation *i* -- the per-individual reading.
-
-Species are not independent observations. Closely related species tend
-to have similar trait values because of shared evolutionary history; the
-phylogenetic correlation matrix \$\mathbf{A}\$ encodes those expected
-similarities (cell \$A\_{ij}\$ = fraction of shared branch length
-between species \$i\$ and \$j\$). The phylogenetic SD \$\sigma_p\$
-measures how much across-species variation remains after fixed-effect
-predictors are accounted for.
-
-\$\$\begin{aligned} y_i \mid \theta_i & \sim \mathrm{Normal}(\theta_i,\\
-v_i), \quad v_i \text{ known} \\ \mu_i & = \beta\_{0} + u\_{species(i)}
-\\ \mathbf{u}\_{species} & \sim \mathcal{N}(\mathbf{0},\\
-\sigma\_{species}^2 \mathbf{A}) \end{aligned}\$\$
-
-where:
-
-- \$y\$ — response variable  \$\mathbb{R}^{60}\$
-- \$\mu_i\$ — conditional mu of yi  \$\mathbb{R}^{60}\$
-- \$\sigma_i\$ — residual heterogeneity SD (tau) of yi  scalar
-- \$\beta\_{0}\$ — mu submodel coefficients  \$\mathbb{R}^{1}\$
-- \$u\_{species(i)}\$ — random intercept by species  scalar;
-  \$\mathbb{R}^{60}\$ in matrix form
-- \$\sigma\_{species}\$ — between-species standard deviation  scalar
-- \$\mathbf{A}\$ — phylogenetic correlation matrix on species, attached
-  via R = list(species = A): Sigma = sigma_p^2 \* A (tips-only k x k
-  representation)  \$\mathbb{R}^{60 \times 60}\$
-
-The same model in matrix form -- the structural contract every textbook
-past chapter 4 switches to.
-
-Species are not independent observations. Closely related species tend
-to have similar trait values because of shared evolutionary history; the
-phylogenetic correlation matrix \$\mathbf{A}\$ encodes those expected
-similarities (cell \$A\_{ij}\$ = fraction of shared branch length
-between species \$i\$ and \$j\$). The phylogenetic SD \$\sigma_p\$
-measures how much across-species variation remains after fixed-effect
-predictors are accounted for.
-
-\$\$\begin{aligned} \mathbf{y} \mid \boldsymbol{\theta},\\ V & \sim
-\mathcal{N}(\boldsymbol{\theta},\\ V),\quad V \text{ known} \\
-\boldsymbol{\mu} & = \mathbf{X} \boldsymbol{\beta} + \mathbf{u} \\
-\mathbf{u}\_{species} & \sim \mathcal{N}(\mathbf{0},\\
-\sigma\_{species}^2 \mathbf{A}\_{60 \times 60}) \end{aligned}\$\$
-
-where:
-
-- \$\mathbf{y}\$ — response variable  \$\mathbb{R}^{60}\$
-- \$\boldsymbol{\mu}\$ — conditional mu of yi  \$\mathbb{R}^{60}\$
-- \$\boldsymbol{\sigma}\$ — residual heterogeneity SD (tau) of yi
-   scalar
-- \$\boldsymbol{\beta}\$ — mu submodel coefficients  \$\mathbb{R}^{1}\$
-- \$\mathbf{X}\$ — mu submodel design matrix  \$\mathbb{R}^{60 \times
-  1}\$
-- \$\mathbf{u}\_{species}\$ — random intercept by species  scalar;
-  \$\mathbb{R}^{60}\$ in matrix form
-- \$\sigma\_{species}\$ — between-species standard deviation  scalar
-- \$\mathbf{A}\$ — phylogenetic correlation matrix on species, attached
-  via R = list(species = A): Sigma = sigma_p^2 \* A (tips-only k x k
-  representation)  \$\mathbb{R}^{60 \times 60}\$
-
-The same matrix equation, with your actual numbers stacked inside the
-brackets -- what the computer multiplies. Showing first 5 and last 2
-rows of n = 60.
-
-Species are not independent observations. Closely related species tend
-to have similar trait values because of shared evolutionary history; the
-phylogenetic correlation matrix \$\mathbf{A}\$ encodes those expected
-similarities (cell \$A\_{ij}\$ = fraction of shared branch length
-between species \$i\$ and \$j\$). The phylogenetic SD \$\sigma_p\$
-measures how much across-species variation remains after fixed-effect
-predictors are accounted for.
-
-Matrix-form expansion of the model. Each row shows the response y_i and
-the corresponding row of the design matrix X (showing head and tail rows
-of the n total observations), with the coefficient vector beta listed
-below. A random-effect indicator matrix Z_g and the predicted BLUPs u
-are also shown.
-
-For observation *i* = 1 of your data:
-
-\$\$ \begin{aligned} y\_{1} &= \hat\beta\_{0} + \hat{u}\_{\mathrm{Alca
-torda}} + \hat\varepsilon\_{1} &\quad(\text{response equation, one row
-of the model}) \\ 0.166 &= 0.374 + (-0.201) + (-0.00696)
-&\quad(\text{with your numbers}) \\ &=
-\underbrace{0.173}\_{\textstyle\\\hat\mu\_{1}\\\text{(predicted)}\\}
-\\+\\
-\underbrace{(-0.00696)}\_{\textstyle\\\hat\varepsilon\_{1}\\\text{(residual)}\\}
-\end{aligned} \$\$
-
-Stacking the same response equation for all *n* = 60 observations:
-
-\$\$ \underbrace{\begin{bmatrix} 0.166 \\ 1.12 \\ 0.66 \\ 1.05 \\ 0.676
-\\ \vdots \\ 0.172 \\ 0.0853
-\end{bmatrix}}\_{\textstyle\\\mathbf{y}\_{\\60 \times
-1}\\\text{(observed)}\\} \\=\\ \underbrace{\begin{bmatrix} 1 \\ 1 \\ 1
-\\ 1 \\ 1 \\ \vdots \\ 1 \\ 1
-\end{bmatrix}}\_{\textstyle\\\mathbf{X}\_{\\60 \times 1}\\}\\
-\underbrace{\begin{bmatrix} 0.374
-\end{bmatrix}}\_{\textstyle\\\hat{\boldsymbol{\beta}}\_{\\1 \times
-1}\\\text{(estimated)}\\} \\+\\ \underbrace{\begin{bmatrix} 0 & 0 & 0 &
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 &
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &
-0 & 0 & 0 \\ 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &
-0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 &
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ 0 & 0 & 0 &
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &
-0 & 0 & 0 \\ 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &
-0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \vdots & \vdots & \vdots & \vdots &
-\vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots &
-\vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots &
-\vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots &
-\vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots &
-\vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots &
-\vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots &
-\vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 &
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &
-0 & 0 & 0 & 0 & 0 & 0 \\ 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &
-0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0
-\end{bmatrix}}\_{\textstyle\\\mathbf{Z}\_{\\60 \times 60}\\}\\
-\underbrace{\begin{bmatrix} 0.418 \\ 0.105 \\ -0.121 \\ -0.342 \\ -0.191
-\\ -0.0211 \\ -0.108 \\ -0.212 \\ 0.356 \\ -0.332 \\ 0.607 \\ -0.259 \\
--0.177 \\ -0.176 \\ -0.184 \\ -0.271 \\ 0.382 \\ -0.171 \\ 0.122 \\
-0.056 \\ -0.0736 \\ -0.196 \\ -0.226 \\ -0.191 \\ 0.301 \\ 0.0879 \\
--0.185 \\ -0.00762 \\ -0.049 \\ -0.228 \\ -0.31 \\ 4.36e-06 \\ 0.089 \\
--0.214 \\ 0.0593 \\ -0.121 \\ 0.73 \\ -0.201 \\ 0.106 \\ -0.113 \\ 0.045
-\\ 0.171 \\ -0.342 \\ 0.0127 \\ -0.273 \\ -0.0168 \\ -0.18 \\ -0.168 \\
--0.138 \\ -0.101 \\ -0.289 \\ -0.194 \\ -0.252 \\ 1.15 \\ -0.288 \\
-0.461 \\ -0.371 \\ -0.288 \\ -0.0504 \\ -0.0761
-\end{bmatrix}}\_{\textstyle\\\hat{\mathbf{u}}\_{\\60 \times
-1}\\\text{(BLUP)}\\} \\+\\ \underbrace{\begin{bmatrix} -0.00696 \\
-0.0154 \\ -0.015 \\ 0.0695 \\ 0.246 \\ \vdots \\ -0.0184 \\ -0.0176
-\end{bmatrix}}\_{\textstyle\\\hat{\boldsymbol{\varepsilon}}\_{\\60
-\times 1}\\\text{(residual)}\\} \$\$
-
-**Left**: observed vector \$\mathbf{y}\$. **Middle**: the prediction
-\$\mathbf{X}\hat{\boldsymbol{\beta}} + \mathbf{Z}\hat{\mathbf{u}} =
-\hat{\boldsymbol{\mu}}\$. **Right**: the residual vector
-\$\hat{\boldsymbol{\varepsilon}} = \mathbf{y} -
-\hat{\boldsymbol{\mu}}\$. Every row of this matrix equation is one of
-the response-equation rows from the worked row above.
-
-**And the structured-covariance prior on `u`**. The random effect that
-gives this model its structural-dependence character:
-
-\$\$ \mathrm{Cov}(\hat{\mathbf{u}}) \\=\\ \sigma_p^2 \cdot
-\underbrace{\begin{bmatrix} 1 & 0 & 0.17 & 0.185 & 0.187 & \cdots & 0 &
-0.176 \\ 0 & 1 & 0 & 0 & 0 & \cdots & 0.485 & 0 \\ 0.17 & 0 & 1 & 0.254
-& 0.561 & \cdots & 0 & 0.792 \\ 0.185 & 0 & 0.254 & 1 & 0.279 & \cdots &
-0 & 0.262 \\ 0.187 & 0 & 0.561 & 0.279 & 1 & \cdots & 0 & 0.579 \\
-\vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\
-0 & 0.485 & 0 & 0 & 0 & \cdots & 1 & 0 \\ 0.176 & 0 & 0.792 & 0.262 &
-0.579 & \cdots & 0 & 1 \end{bmatrix}}\_{\textstyle\\\mathbf{A}\_{\\60
-\times 60}\\} \$\$
-
-The phylo random effect \$u\$ has covariance \$\sigma_p^2 \cdot
-\mathbf{A}\$, where \$\mathbf{A}\$ is the 60 × 60 phylogenetic
-correlation matrix. Showing the head + tail rows / columns; full matrix
-is 60 × 60.
-
-``` r
-
-# Helper -- write the PDF next to the rendered HTML so the `<a href>` link
-# resolves whether the article is built by rmarkdown::render (vignettes
-# dir) or pkgdown::build_article (docs/articles). knitr's
-# `opts_knit$get("output.dir")` returns the Rmd source dir, NOT the HTML
-# destination, so we instead emit one PDF in the chunk cwd (= source
-# dir, where rmarkdown::render's link resolves) AND if a sibling
-# `../docs/articles` exists (pkgdown build), copy a second copy there.
-pdf_alongside_html <- function(sym, basename, title) {
-  as_pdf_three_views(sym, file = basename, title = title)
-  docs_articles <- "../docs/articles"
-  if (dir.exists(docs_articles)) {
-    file.copy(basename, file.path(docs_articles, basename), overwrite = TRUE)
-  }
-  cat(sprintf('<p><a href="%s" class="btn btn-primary">Download as PDF</a></p>\n', basename))
-  invisible(basename)
-}
-pdf_alongside_html(sym_meta, "fig-meta-phylo.pdf",
-                   "Phylogenetic meta-analysis (metafor) -- three views")
-```
-
-[Download as
-PDF](https://itchyshin.github.io/symbolizer/articles/fig-meta-phylo.pdf)
-
-### Face 2: `MCMCglmm` with `ginverse = list(species = Ainv)`
-
-`MCMCglmm` uses the **all-nodes** representation natively.
+### Face 1 (deep dive): `MCMCglmm` with `ginverse = list(species = Ainv)`
+
+`MCMCglmm` uses the **all-nodes** representation natively (Hadfield 2010
+§8.2.1). Internally the random-effect vector spans both tip species AND
+internal phylogenetic nodes, so when the widget below shows the
+$`\mathbf{A}`$ matrix you will see a $`116 \times 116`$ block, not the
+nominal $`k \times k = 60 \times 60`$ tips-only form — the same prior,
+just an augmented coordinate system. (For a $`k`$-tip tree the
+augmentation is at most $`2k-2`$ rows; in this dataset two polytomies
+after ultrametricisation drop the count from 118 to 116.) The Moura
+dataset has one observation per species, so the random-effect incidence
+matrix $`\mathbf{Z}`$ is the identity on the observed species and the
+widget elides it from Tab 3’s stacked block — each row shows the
+predicted per-observation random effect $`\hat u_{\text{species}(i)}`$
+directly. ($`\mathbf{Z}`$ is reintroduced in articles where multiple
+observations share a species or study.)
+
+A note on **scalar vs vector notation** before the widget: the **Index**
+tab writes one row of the model for a single observation $`i`$, so the
+scalar form $`\mathrm{Zr}_i`$ (italic capital, with subscript) is used.
+The **Matrix** and **Equations with data** tabs collect all $`n`$
+observations into the column vector
+$`\mathbf{zr} = (\mathrm{Zr}_1, \dots, \mathrm{Zr}_n)^\top`$ (bold
+lowercase, no subscript). Same quantity, two notations — the index form
+is for reading one row, the vector form is for the matrix algebra.
 
 ``` r
 
@@ -621,8 +264,8 @@ sym_mcmc$variance_components             # phylo + residual
 
 | parameter | group    | term        | sd_estimate | var_estimate |
 |:----------|:---------|:------------|:------------|:-------------|
-| mu        | species  | (Intercept) | 0.0794      | 0.00630      |
-| residual  | residual | Residual    | 0.133       | 0.0177       |
+| mu        | species  | (Intercept) | 0.325       | 0.105        |
+| residual  | residual | Residual    | 0.215       | 0.0460       |
 
 ``` r
 
@@ -630,34 +273,12 @@ sym_mcmc$metadata$heritability           # h^2 derived automatically
 #> # A tibble: 1 × 5
 #>   group   variance_A variance_E heritability reading                            
 #>   <chr>        <dbl>      <dbl>        <dbl> <chr>                              
-#> 1 species    0.00630     0.0177        0.262 Heritability h^2 = sigma^2_A / (si…
+#> 1 species      0.105     0.0460        0.696 Heritability h^2 = sigma^2_p / (si…
 ```
 
 #### Three-views widget for the MCMCglmm fit
 
-``` r
-
-shim_mcmcglmm <- function(fit, dat, A) {
-  beta_hat <- mean(fit$Sol[, "(Intercept)"])
-  sp_cols  <- grep("^species[.]", colnames(fit$Sol), value = TRUE)
-  u_named  <- colMeans(fit$Sol[, sp_cols, drop = FALSE])
-  names(u_named) <- sub("^species[.]", "", names(u_named))
-  Z_g <- model.matrix(~ species - 1, data = dat)
-  colnames(Z_g) <- sub("^species", "", colnames(Z_g))
-  u <- u_named[colnames(Z_g)]
-  X <- matrix(1, nrow = nrow(dat), ncol = 1,
-              dimnames = list(NULL, "(Intercept)"))
-  mu_hat <- as.numeric(X %*% beta_hat + Z_g %*% u)
-  list(y = dat$Zr, X = X, beta = beta_hat,
-       Z_g = Z_g, u = u, mu_hat = mu_hat,
-       fitted = mu_hat, residuals = dat$Zr - mu_hat,
-       M = A)
-}
-sym_mcmc$expanded <- shim_mcmcglmm(fit_mcmc, dat, A_tips)
-htmltools::HTML(as_html_three_views(sym_mcmc, id = "mcmc"))
-```
-
-[Skip three-views widget](#sym-mcmc-1779824233-end)
+[Skip three-views widget](#sym-mcmc-1779968778-end)
 
 ▸1. Index
 
@@ -690,7 +311,7 @@ where:
 - $`\sigma_i`$ — residual standard deviation of Zr  scalar
 - $`\beta_{0}`$ — mu submodel coefficients  $`\mathbb{R}^{1}`$
 - $`u_{species(i)}`$ — random intercept by species  scalar;
-  $`\mathbb{R}^{60}`$ in matrix form
+  $`\mathbb{R}^{116}`$ in matrix form
 - $`\sigma_{species}`$ — between-species standard deviation  scalar
 - $`\mathbf{A}`$ — phylogenetic / pedigree correlation matrix on species
   (Hadfield-Nakagawa all-nodes sparse-precision representation, supplied
@@ -711,7 +332,7 @@ accounted for.
 \begin{aligned}
 \mathbf{zr} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} & \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2)) \\
 \boldsymbol{\mu} & = \mathbf{X} \boldsymbol{\beta} + \mathbf{u} \\
-\mathbf{u}_{species} & \sim \mathcal{N}(\mathbf{0},\, \sigma_{species}^2 \mathbf{A}_{60 \times 60})
+\mathbf{u}_{species} & \sim \mathcal{N}(\mathbf{0},\, \sigma_{species}^2 \mathbf{A}_{116 \times 116})
 \end{aligned}
 ```
 
@@ -724,7 +345,7 @@ where:
 - $`\mathbf{X}`$ — mu submodel design matrix
    $`\mathbb{R}^{60 \times 1}`$
 - $`\mathbf{u}_{species}`$ — random intercept by species  scalar;
-  $`\mathbb{R}^{60}`$ in matrix form
+  $`\mathbb{R}^{116}`$ in matrix form
 - $`\sigma_{species}`$ — between-species standard deviation  scalar
 - $`\mathbf{A}`$ — phylogenetic / pedigree correlation matrix on species
   (Hadfield-Nakagawa all-nodes sparse-precision representation, supplied
@@ -745,27 +366,27 @@ accounted for.
 Matrix-form expansion of the model. Each row shows the response y_i and
 the corresponding row of the design matrix X (showing head and tail rows
 of the n total observations), with the coefficient vector beta listed
-below. A random-effect indicator matrix Z_g and the predicted BLUPs u
-are also shown.
+below. The predicted random-effect contribution to each observation is
+also shown.
 
 For observation *i* = 1 of your data:
 
 ``` math
 \begin{aligned}
 zr_{1} &= \hat\beta_{0} + \hat{u}_{\mathrm{Alca torda}} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
-0.166 &= 0.409 + (-0.221) + (-0.0214) &\quad(\text{with your numbers}) \\
-&= \underbrace{0.188}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-0.0214)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
+0.166 &= 0.366 + (-0.151) + (-0.0485) &\quad(\text{with your numbers}) \\
+&= \underbrace{0.215}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-0.0485)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
 \end{aligned}
 ```
 
 Stacking the same response equation for all *n* = 60 observations:
 
 ``` math
-\underbrace{\begin{bmatrix} 0.166 \\ 1.12 \\ 0.66 \\ 1.05 \\ 0.676 \\ \vdots \\ 0.172 \\ 0.0853 \end{bmatrix}}_{\textstyle\,\mathbf{zr}_{\,60 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 \\    1 \\    1 \\    1 \\    1 \\ \vdots \\    1 \\    1 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,60 \times 1}\,}\, \underbrace{\begin{bmatrix} 0.409 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,1 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix}    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    1 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 \\    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    1 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 \\    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    1 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 \\    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    1 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 \\    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    1 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 \\ \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    1 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 \\    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    1 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 \end{bmatrix}}_{\textstyle\,\mathbf{Z}_{\,60 \times 60}\,}\, \underbrace{\begin{bmatrix} 0.361 \\ 0.0573 \\ -0.179 \\ -0.37 \\ -0.203 \\ -0.0656 \\ -0.147 \\ -0.225 \\  0.3 \\ -0.351 \\ 0.533 \\ -0.298 \\ -0.204 \\ -0.187 \\ -0.183 \\ -0.28 \\ 0.345 \\ -0.162 \\ 0.072 \\ 0.136 \\ -0.109 \\ -0.219 \\ -0.243 \\ -0.209 \\ 0.245 \\ 0.0515 \\ -0.2 \\ -0.0587 \\ -0.0609 \\ -0.244 \\ -0.316 \\ -0.0205 \\ 0.0496 \\ -0.226 \\ 0.0221 \\ -0.154 \\ 0.584 \\ -0.221 \\ 0.0267 \\ -0.141 \\ 0.0111 \\ 0.0982 \\ -0.383 \\ 0.0334 \\ -0.292 \\ -0.0419 \\ -0.185 \\ -0.264 \\ -0.171 \\ -0.14 \\ -0.407 \\ -0.211 \\ -0.244 \\ 0.918 \\ -0.27 \\ 0.44 \\ -0.367 \\ -0.311 \\ -0.0526 \\ -0.0991 \end{bmatrix}}_{\textstyle\,\hat{\mathbf{u}}_{\,60 \times 1}\;\text{(BLUP)}\,} \;+\; \underbrace{\begin{bmatrix} -0.0214 \\ 0.127 \\ 0.00686 \\ 0.109 \\ 0.132 \\ \vdots \\ -0.0543 \\ -0.0433 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,60 \times 1}\;\text{(residual)}\,}
+\underbrace{\begin{bmatrix} 0.166 \\ 1.12 \\ 0.66 \\ 1.05 \\ 0.676 \\ \vdots \\ 0.172 \\ 0.0853 \end{bmatrix}}_{\textstyle\,\mathbf{zr}_{\,60 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 \\    1 \\    1 \\    1 \\    1 \\ \vdots \\    1 \\    1 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,60 \times 1}\,}\, \underbrace{\begin{bmatrix} 0.366 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,1 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} -0.151 \\ 0.403 \\ 0.237 \\ 0.396 \\ 0.026 \\ \vdots \\ -0.0165 \\ -0.185 \end{bmatrix}}_{\textstyle\,\hat{\mathbf{u}}_{\,60 \times 1}\;\text{(per-obs random effect)}\,} \;+\; \underbrace{\begin{bmatrix} -0.0485 \\ 0.351 \\ 0.057 \\ 0.289 \\ 0.285 \\ \vdots \\ -0.178 \\ -0.0958 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,60 \times 1}\;\text{(residual)}\,}
 ```
 
 **Left**: observed vector $`\mathbf{zr}`$. **Middle**: the prediction
-$`\mathbf{X}\hat{\boldsymbol{\beta}} + \mathbf{Z}\hat{\mathbf{u}} = \hat{\boldsymbol{\mu}}`$.
+$`\mathbf{X}\hat{\boldsymbol{\beta}} + \hat{\mathbf{u}} = \hat{\boldsymbol{\mu}}`$.
 **Right**: the residual vector
 $`\hat{\boldsymbol{\varepsilon}} = \mathbf{zr} - \hat{\boldsymbol{\mu}}`$.
 Every row of this matrix equation is one of the response-equation rows
@@ -775,201 +396,13 @@ from the worked row above.
 gives this model its structural-dependence character:
 
 ``` math
-\mathrm{Cov}(\hat{\mathbf{u}}) \;=\; \sigma_p^2 \cdot \underbrace{\begin{bmatrix}    1 &    0 & 0.17 & 0.185 & 0.187 & \cdots &    0 & 0.176 \\    0 &    1 &    0 &    0 &    0 & \cdots & 0.485 &    0 \\ 0.17 &    0 &    1 & 0.254 & 0.561 & \cdots &    0 & 0.792 \\ 0.185 &    0 & 0.254 &    1 & 0.279 & \cdots &    0 & 0.262 \\ 0.187 &    0 & 0.561 & 0.279 &    1 & \cdots &    0 & 0.579 \\ \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\    0 & 0.485 &    0 &    0 &    0 & \cdots &    1 &    0 \\ 0.176 &    0 & 0.792 & 0.262 & 0.579 & \cdots &    0 &    1 \end{bmatrix}}_{\textstyle\,\mathbf{A}_{\,60 \times 60}\,}
+\mathrm{Cov}(\hat{\mathbf{u}}) \;=\; \sigma_p^2 \cdot \underbrace{\begin{bmatrix} 0.161 &    0 & 0.161 & 0.161 & 0.161 & \cdots &    0 &    0 \\    0 & 0.0946 &    0 &    0 &    0 & \cdots & 0.0946 & 0.0946 \\ 0.161 &    0 & 0.228 & 0.228 & 0.228 & \cdots &    0 &    0 \\ 0.161 &    0 & 0.228 & 0.298 & 0.298 & \cdots &    0 &    0 \\ 0.161 &    0 & 0.228 & 0.298 & 0.565 & \cdots &    0 &    0 \\ \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\    0 & 0.0946 &    0 &    0 &    0 & \cdots &    1 & 0.867 \\    0 & 0.0946 &    0 &    0 &    0 & \cdots & 0.867 &    1 \end{bmatrix}}_{\textstyle\,\mathbf{A}_{\,116 \times 116}\,}
 ```
 
 The phylo random effect $`u`$ has covariance
-$`\sigma_p^2 \cdot \mathbf{A}`$, where $`\mathbf{A}`$ is the 60 × 60
+$`\sigma_p^2 \cdot \mathbf{A}`$, where $`\mathbf{A}`$ is the 116 × 116
 phylogenetic correlation matrix. Showing the head + tail rows / columns;
-full matrix is 60 × 60.
-
-[Skip three-views widget](#sym-mcmc-1779824233-end)
-
-▸1. Index
-
-▸2. Matrix
-
-▸3. Equations with data
-
-What happens for each observation *i* -- the per-individual reading.
-
-Species are not independent observations. Closely related species tend
-to have similar trait values because of shared evolutionary history; the
-phylogenetic correlation matrix \$\mathbf{A}\$ encodes those expected
-similarities (cell \$A\_{ij}\$ = fraction of shared branch length
-between species \$i\$ and \$j\$). The phylogenetic SD \$\sigma_p\$
-measures how much across-species variation remains after fixed-effect
-predictors are accounted for.
-
-\$\$\begin{aligned} \mathrm{Zr}\_i \mid \mu_i,\\ \sigma_i & \sim
-\mathrm{Normal}(\mu_i,\\ \sigma_i^2) \\ \mu_i & = \beta\_{0} +
-u\_{species(i)} \\ \mathbf{u}\_{species} & \sim
-\mathcal{N}(\mathbf{0},\\ \sigma\_{species}^2 \mathbf{A})
-\end{aligned}\$\$
-
-where:
-
-- \$\mathrm{Zr}\_i\$ — response variable  \$\mathbb{R}^{60}\$
-- \$\mu_i\$ — conditional mu of Zr  \$\mathbb{R}^{60}\$
-- \$\sigma_i\$ — residual standard deviation of Zr  scalar
-- \$\beta\_{0}\$ — mu submodel coefficients  \$\mathbb{R}^{1}\$
-- \$u\_{species(i)}\$ — random intercept by species  scalar;
-  \$\mathbb{R}^{60}\$ in matrix form
-- \$\sigma\_{species}\$ — between-species standard deviation  scalar
-- \$\mathbf{A}\$ — phylogenetic / pedigree correlation matrix on species
-  (Hadfield-Nakagawa all-nodes sparse-precision representation, supplied
-  via ginverse)  \$\mathbb{R}^{k\_{species} \times k\_{species}}\$
-
-The same model in matrix form -- the structural contract every textbook
-past chapter 4 switches to.
-
-Species are not independent observations. Closely related species tend
-to have similar trait values because of shared evolutionary history; the
-phylogenetic correlation matrix \$\mathbf{A}\$ encodes those expected
-similarities (cell \$A\_{ij}\$ = fraction of shared branch length
-between species \$i\$ and \$j\$). The phylogenetic SD \$\sigma_p\$
-measures how much across-species variation remains after fixed-effect
-predictors are accounted for.
-
-\$\$\begin{aligned} \mathbf{zr} \mid \boldsymbol{\mu},\\
-\boldsymbol{\sigma} & \sim \mathcal{N}(\boldsymbol{\mu},\\
-\mathrm{diag}(\boldsymbol{\sigma}^2)) \\ \boldsymbol{\mu} & = \mathbf{X}
-\boldsymbol{\beta} + \mathbf{u} \\ \mathbf{u}\_{species} & \sim
-\mathcal{N}(\mathbf{0},\\ \sigma\_{species}^2 \mathbf{A}\_{60 \times
-60}) \end{aligned}\$\$
-
-where:
-
-- \$\mathbf{zr}\$ — response variable  \$\mathbb{R}^{60}\$
-- \$\boldsymbol{\mu}\$ — conditional mu of Zr  \$\mathbb{R}^{60}\$
-- \$\boldsymbol{\sigma}\$ — residual standard deviation of Zr  scalar
-- \$\boldsymbol{\beta}\$ — mu submodel coefficients  \$\mathbb{R}^{1}\$
-- \$\mathbf{X}\$ — mu submodel design matrix  \$\mathbb{R}^{60 \times
-  1}\$
-- \$\mathbf{u}\_{species}\$ — random intercept by species  scalar;
-  \$\mathbb{R}^{60}\$ in matrix form
-- \$\sigma\_{species}\$ — between-species standard deviation  scalar
-- \$\mathbf{A}\$ — phylogenetic / pedigree correlation matrix on species
-  (Hadfield-Nakagawa all-nodes sparse-precision representation, supplied
-  via ginverse)  \$\mathbb{R}^{k\_{species} \times k\_{species}}\$
-
-The same matrix equation, with your actual numbers stacked inside the
-brackets -- what the computer multiplies. Showing first 5 and last 2
-rows of n = 60.
-
-Species are not independent observations. Closely related species tend
-to have similar trait values because of shared evolutionary history; the
-phylogenetic correlation matrix \$\mathbf{A}\$ encodes those expected
-similarities (cell \$A\_{ij}\$ = fraction of shared branch length
-between species \$i\$ and \$j\$). The phylogenetic SD \$\sigma_p\$
-measures how much across-species variation remains after fixed-effect
-predictors are accounted for.
-
-Matrix-form expansion of the model. Each row shows the response y_i and
-the corresponding row of the design matrix X (showing head and tail rows
-of the n total observations), with the coefficient vector beta listed
-below. A random-effect indicator matrix Z_g and the predicted BLUPs u
-are also shown.
-
-For observation *i* = 1 of your data:
-
-\$\$ \begin{aligned} zr\_{1} &= \hat\beta\_{0} + \hat{u}\_{\mathrm{Alca
-torda}} + \hat\varepsilon\_{1} &\quad(\text{response equation, one row
-of the model}) \\ 0.166 &= 0.409 + (-0.221) + (-0.0214)
-&\quad(\text{with your numbers}) \\ &=
-\underbrace{0.188}\_{\textstyle\\\hat\mu\_{1}\\\text{(predicted)}\\}
-\\+\\
-\underbrace{(-0.0214)}\_{\textstyle\\\hat\varepsilon\_{1}\\\text{(residual)}\\}
-\end{aligned} \$\$
-
-Stacking the same response equation for all *n* = 60 observations:
-
-\$\$ \underbrace{\begin{bmatrix} 0.166 \\ 1.12 \\ 0.66 \\ 1.05 \\ 0.676
-\\ \vdots \\ 0.172 \\ 0.0853
-\end{bmatrix}}\_{\textstyle\\\mathbf{zr}\_{\\60 \times
-1}\\\text{(observed)}\\} \\=\\ \underbrace{\begin{bmatrix} 1 \\ 1 \\ 1
-\\ 1 \\ 1 \\ \vdots \\ 1 \\ 1
-\end{bmatrix}}\_{\textstyle\\\mathbf{X}\_{\\60 \times 1}\\}\\
-\underbrace{\begin{bmatrix} 0.409
-\end{bmatrix}}\_{\textstyle\\\hat{\boldsymbol{\beta}}\_{\\1 \times
-1}\\\text{(estimated)}\\} \\+\\ \underbrace{\begin{bmatrix} 0 & 0 & 0 &
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 &
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &
-0 & 0 & 0 \\ 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &
-0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 &
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ 0 & 0 & 0 &
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &
-0 & 0 & 0 \\ 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &
-0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\ \vdots & \vdots & \vdots & \vdots &
-\vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots &
-\vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots &
-\vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots &
-\vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots &
-\vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots &
-\vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots &
-\vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 &
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &
-0 & 0 & 0 & 0 & 0 & 0 \\ 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &
-0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &
-0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0
-\end{bmatrix}}\_{\textstyle\\\mathbf{Z}\_{\\60 \times 60}\\}\\
-\underbrace{\begin{bmatrix} 0.361 \\ 0.0573 \\ -0.179 \\ -0.37 \\ -0.203
-\\ -0.0656 \\ -0.147 \\ -0.225 \\ 0.3 \\ -0.351 \\ 0.533 \\ -0.298 \\
--0.204 \\ -0.187 \\ -0.183 \\ -0.28 \\ 0.345 \\ -0.162 \\ 0.072 \\ 0.136
-\\ -0.109 \\ -0.219 \\ -0.243 \\ -0.209 \\ 0.245 \\ 0.0515 \\ -0.2 \\
--0.0587 \\ -0.0609 \\ -0.244 \\ -0.316 \\ -0.0205 \\ 0.0496 \\ -0.226 \\
-0.0221 \\ -0.154 \\ 0.584 \\ -0.221 \\ 0.0267 \\ -0.141 \\ 0.0111 \\
-0.0982 \\ -0.383 \\ 0.0334 \\ -0.292 \\ -0.0419 \\ -0.185 \\ -0.264 \\
--0.171 \\ -0.14 \\ -0.407 \\ -0.211 \\ -0.244 \\ 0.918 \\ -0.27 \\ 0.44
-\\ -0.367 \\ -0.311 \\ -0.0526 \\ -0.0991
-\end{bmatrix}}\_{\textstyle\\\hat{\mathbf{u}}\_{\\60 \times
-1}\\\text{(BLUP)}\\} \\+\\ \underbrace{\begin{bmatrix} -0.0214 \\ 0.127
-\\ 0.00686 \\ 0.109 \\ 0.132 \\ \vdots \\ -0.0543 \\ -0.0433
-\end{bmatrix}}\_{\textstyle\\\hat{\boldsymbol{\varepsilon}}\_{\\60
-\times 1}\\\text{(residual)}\\} \$\$
-
-**Left**: observed vector \$\mathbf{zr}\$. **Middle**: the prediction
-\$\mathbf{X}\hat{\boldsymbol{\beta}} + \mathbf{Z}\hat{\mathbf{u}} =
-\hat{\boldsymbol{\mu}}\$. **Right**: the residual vector
-\$\hat{\boldsymbol{\varepsilon}} = \mathbf{zr} -
-\hat{\boldsymbol{\mu}}\$. Every row of this matrix equation is one of
-the response-equation rows from the worked row above.
-
-**And the structured-covariance prior on `u`**. The random effect that
-gives this model its structural-dependence character:
-
-\$\$ \mathrm{Cov}(\hat{\mathbf{u}}) \\=\\ \sigma_p^2 \cdot
-\underbrace{\begin{bmatrix} 1 & 0 & 0.17 & 0.185 & 0.187 & \cdots & 0 &
-0.176 \\ 0 & 1 & 0 & 0 & 0 & \cdots & 0.485 & 0 \\ 0.17 & 0 & 1 & 0.254
-& 0.561 & \cdots & 0 & 0.792 \\ 0.185 & 0 & 0.254 & 1 & 0.279 & \cdots &
-0 & 0.262 \\ 0.187 & 0 & 0.561 & 0.279 & 1 & \cdots & 0 & 0.579 \\
-\vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\
-0 & 0.485 & 0 & 0 & 0 & \cdots & 1 & 0 \\ 0.176 & 0 & 0.792 & 0.262 &
-0.579 & \cdots & 0 & 1 \end{bmatrix}}\_{\textstyle\\\mathbf{A}\_{\\60
-\times 60}\\} \$\$
-
-The phylo random effect \$u\$ has covariance \$\sigma_p^2 \cdot
-\mathbf{A}\$, where \$\mathbf{A}\$ is the 60 × 60 phylogenetic
-correlation matrix. Showing the head + tail rows / columns; full matrix
-is 60 × 60.
-
-``` r
-
-pdf_alongside_html(sym_mcmc, "fig-mcmc-phylo.pdf",
-                   "Phylogenetic meta-analysis (MCMCglmm) -- three views")
-```
+full matrix is 116 × 116.
 
 [Download as
 PDF](https://itchyshin.github.io/symbolizer/articles/fig-mcmc-phylo.pdf)
@@ -977,107 +410,194 @@ PDF](https://itchyshin.github.io/symbolizer/articles/fig-mcmc-phylo.pdf)
 The same extractor branch handles **animal models** (where `A` comes
 from a pedigree, not a tree) — see *§Animal-model unification* below.
 
-### Face 3: `glmmTMB::propto`
+### Face 2 (light): `brms::gr(species, cov = A)`
 
-`glmmTMB` attaches $`\mathbf A`$ via the `propto()` covariance
-structure. There is one subtle catch: `propto()` parameterises
-$`\boldsymbol\Sigma = \sigma_p^2\,\mathbf A`$ with
-$`\sigma_p^2`$**estimated as a free scalar**, and `glmmTMB` adds an
-independent residual $`\sigma_\text{res}^2\,\mathbf I`$ unless you pass
-`dispformula = ~ 0`. So the full conditional covariance under a propto
-fit is
-
-``` math
-\operatorname{Cov}(\mathbf y \mid \mathbf u) \;=\; \sigma_p^2\,\mathbf A + \sigma_\text{res}^2\,\mathbf I,
-```
-
-i.e. **two** free scalars on top of $`\mathbf A`$. This is the
-**phylogenetic / pedigree** pattern (Hadfield & Nakagawa 2010; Williams
-et al. 2025, bioRxiv) — *not* the meta-analysis pattern. The
-meta-analysis pattern is $`\boldsymbol\Sigma = \mathbf V`$ exactly (no
-scalar multiplier) — `glmmTMB`’s reserved `equalto()` will deliver that,
-but `equalto` isn’t yet implemented as of `glmmTMB` ≤ 1.1.11.
-
-``` r
-
-library(glmmTMB)
-dat$g <- factor(1)
-A_blk <- A_tips
-rownames(A_blk) <- colnames(A_blk) <- dat$species
-
-fit_glmm <- glmmTMB(
-  y ~ 1 + propto(0 + species | g, A_blk),
-  data = dat
-)
-sym_glmm <- symbolize(fit_glmm)
-sym_glmm$metadata$phylo_representation  # "tips_only"
-warning_table(sym_glmm)                 # propto_two_scalars info row
-```
-
-### Face 4: `brms::gr(species, cov = A)`
-
-`brms` exposes the same matrix via the
-[`gr()`](https://itchyshin.github.io/gllvmTMB/reference/gr.html) group
-factor:
+`brms` (Bürkner 2017) exposes the same structured-effect model via the
+[`gr()`](https://paulbuerkner.com/brms/reference/gr.html) group factor
+inside an lme4-style RE bar. The fit takes ~30 s of Stan
+compile-and-sample (cached after the first build).
 
 ``` r
 
 library(brms)
-A_blk <- A_tips
-data2 <- list(A = A_blk)
-
+data2_list <- list(A = A_tips)
 fit_brms <- brm(
-  y ~ 1 + (1 | gr(species, cov = A)),
-  data   = dat,
-  data2  = data2,
-  family = gaussian(),
-  chains = 2, iter = 2000, refresh = 0
+  Zr ~ 1 + (1 | gr(species, cov = A)),
+  data       = dat,
+  data2      = data2_list,
+  family     = gaussian(),
+  chains     = 2, iter = 2000, warmup = 1000, refresh = 0, silent = 2,
+  control    = list(adapt_delta = 0.95),     # tighten leapfrog to avoid divergent transitions
+  file       = "fig-brms-phylo-cache",        # brms auto-caches as .rds
+  file_refit = "on_change"
 )
 sym_brms <- symbolize(fit_brms)
-sym_brms$metadata$phylo_representation  # "tips_only"
 ```
-
-### Face 5: `drmTMB::phylo()`
-
-`drmTMB` exposes the marker directly in the formula:
 
 ``` r
 
-library(drmTMB)
-fit_drm <- drmTMB(
-  y ~ phylo(1 | species, tree = tree),
-  family = gaussian(),
-  data   = dat
-)
-sym_drm <- symbolize(fit_drm)
-sym_drm$metadata$phylo_representation  # "all_nodes" (HN sparse precision)
+sym_brms$metadata$phylo_representation   # "tips_only"
+#> [1] "tips_only"
+sym_brms$metadata$detected_signals       # "phylo"
+#> [1] "phylo"
+sym_brms$variance_components             # species + residual
 ```
 
-### Face 6: `gllvmTMB::phylo_unique()`
+| parameter | group    | term        | sd_estimate | var_estimate |
+|:----------|:---------|:------------|:------------|:-------------|
+| mu        | species  | (Intercept) | 0.364       | 0.132        |
+| residual  | residual | Residual    | 0.170       | 0.0289       |
 
-`gllvmTMB` adds the phylogenetic layer to a latent-variable structure
-(community phylogenetics; Williams et al. 2025, *MEE*). The latent axes
-themselves are phylogenetically structured:
+`symbolizer` reports `phylo_representation = "tips_only"` because `brms`
+works directly with the $`k \times k`$ tips-only $`\mathbf A`$ — no
+internal-node augmentation. Compare with the MCMCglmm Face above where
+`phylo_representation = "all_nodes"`; the variance estimate
+$`\hat\sigma_p^2`$ is the same in expectation.
 
 ``` r
 
-library(gllvmTMB)
-fit_gllvm <- gllvmTMB(
-  y_long ~ 0 + trait + phylo_unique(0 + trait | species, tree = tree),
-  family = gaussian(),
-  data   = dat_long
-)
-sym_gllvm <- symbolize(fit_gllvm)
-sym_gllvm$metadata$phylo_representation  # "package_managed"
+assumption_table(sym_brms)
 ```
+
+| assumption | expression | biological meaning | status |
+|:---|:---|:---|:---|
+| conditional_distribution | $`\mathrm{Zr}_i \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2)`$ | Zr varies normally around its expected value | explicit |
+| linear_predictor | $`\mu_i = \beta_0 + \sum_k \beta_k X_{ki}`$ | Expected Zr is a linear combination of the mean-model predictors | explicit |
+| linear_predictor | $`\log(\sigma_i) = \gamma_0 + \sum_k \gamma_k Z_{ki}`$ | Log residual SD of Zr is a linear combination of the scale-model predictors | explicit |
+| independence_given_random_effects | $`\mathrm{Zr}_i \perp \mathrm{Zr}_j \mid X\, \mathbf{u} \text{ for } i \ne j`$ | Observations are conditionally independent given the predictors and the random effects | explicit |
+| positivity | $`\sigma_i > 0`$ | Residual SD is constrained positive via the log link | follows from the formula |
+| no_missing_at_random | — | Observations are assumed not missing in a way that depends on the unobserved response | your responsibility |
+| phylo_random_effect | $`\mathbf{u}_p \sim \mathcal{N}(\mathbf{0}, \sigma_p^2 \mathbf{A})`$ | Species-level random effect with covariance proportional to the phylogenetic correlation matrix A | explicit |
+| phylo_A_positive_definite | $`\mathbf{A} \succ 0`$ | A is positive-definite k x k phylogenetic correlation matrix derived from a rooted tree under Brownian motion | follows from the formula |
+| phylo_tips_only_representation | $`A_{ij} = T_{ij}/T`$ | Tips-only k x k representation: A\_{ij} is shared branch length between species i and j divided by total tree height (Hadfield 2010) | follows from the formula |
+| phylo_brownian_motion | $`\mathrm{Var}(u_p) \propto \mathrm{time}`$ | Brownian motion prior: phylogenetic variance accumulates linearly with branch length | your responsibility |
+| phylo_ultrametric_tree | — | Tree is ultrametric – non-ultrametric trees still produce a valid A but break the strict Brownian-motion variance interpretation | your responsibility |
+
+### Face 3 (light): `phylolm::phylolm()` — the marginal PGLS form
+
+`phylolm` (Ho & Ané 2014) fits the same conceptual model in a
+*marginalised* form: instead of writing $`y = \beta_0 + u_p + e`$ with
+two separate variance components, `phylolm` absorbs $`u_p`$ into the
+residual to give
+
+``` math
+\mathrm{Zr}_i \;=\; \beta_0 + e'_i,\quad
+\mathbf e' \sim \mathcal N(\mathbf 0,\; \sigma^2\,\mathbf C(\alpha))
+```
+
+where $`\mathbf C(\alpha)`$ is a tree-derived correlation matrix. For
+Pagel’s $`\lambda`$ model the connection to the RE form is precise:
+
+``` math
+\mathbf C(\lambda) = \lambda\,\mathbf A + (1 - \lambda)\,\mathbf I,
+\qquad
+\sigma_p^2 = \lambda\,\sigma^2,
+\qquad
+\sigma_e^2 = (1 - \lambda)\,\sigma^2.
+```
+
+So $`\lambda = \sigma_p^2 / (\sigma_p^2 + \sigma_e^2)`$ — the
+**phylogenetic heritability** $`H^2`$ from § “Animal-model unification”
+— and the two parameterisations agree on every prediction. `phylolm`’s
+advantage is speed: a closed-form ML fit in a fraction of a second
+instead of Stan’s compile + sample.
+
+``` r
+
+library(phylolm)
+dat_pl <- dat
+rownames(dat_pl) <- dat_pl$species
+fit_pl <- phylolm(Zr ~ 1, data = dat_pl, phy = tree, model = "lambda")
+sym_pl <- symbolize(fit_pl, data = dat_pl)
+```
+
+``` r
+
+sym_pl$metadata$phylo_representation   # "pgls_marginal"
+#> [1] "pgls_marginal"
+sym_pl$metadata$phylo_model            # "lambda"
+#> [1] "lambda"
+sym_pl$metadata$phylo_param            # estimated lambda
+#> [1] 0.7631645
+sym_pl$metadata$detected_signals       # "phylo"
+#> [1] "phylo"
+sym_pl$variance_components             # single sigma^2 row
+```
+
+| parameter | group | term                   | sd_estimate | var_estimate |
+|:----------|:------|:-----------------------|:------------|:-------------|
+| residual  | phylo | sigma^2 (phylogenetic) | 0.376       | 0.141        |
+
+``` r
+
+summary(fit_pl)
+#> 
+#> Call:
+#> phylolm(formula = Zr ~ 1, data = dat_pl, phy = tree, model = "lambda")
+#> 
+#>    AIC logLik 
+#>  27.13 -10.57 
+#> 
+#> Raw residuals:
+#>      Min       1Q   Median       3Q      Max 
+#> -0.51914 -0.23479 -0.12683  0.05359  1.20643 
+#> 
+#> Mean tip height: 1
+#> Parameter estimate(s) using ML:
+#> lambda : 0.7631645
+#> sigma2: 0.141141 
+#> 
+#> Coefficients:
+#>             Estimate  StdErr t.value  p.value   
+#> (Intercept)  0.38077 0.13955  2.7285 0.008369 **
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#> 
+#> R-squared:     0 Adjusted R-squared:     0 
+#> 
+#> Note: p-values and R-squared are conditional on lambda=0.7631645.
+```
+
+The bridge with the RE form: take the estimated $`\hat\sigma^2`$ and
+$`\hat\lambda`$ from the summary above, then
+$`\hat\sigma_p^2 = \hat\lambda\,\hat\sigma^2`$ and
+$`\hat\sigma_e^2 = (1-\hat\lambda)\,\hat\sigma^2`$. With this dataset,
+those reconciled values agree with the MCMCglmm estimates on the
+phylogenetic variance to within a couple of percent, but the residual
+variance $`\sigma_e^2`$ can differ by 20–30 % across the three packages
+— the variance *split* is weakly identified when there is one
+observation per species (see § “When unification breaks:
+identifiability” below). The total $`\hat\sigma_p^2 + \hat\sigma_e^2`$
+and the heritability $`\hat H^2 = \hat\lambda`$ are more stable than
+either component on its own.
+
+``` r
+
+assumption_table(sym_pl)
+```
+
+| assumption | expression | biological meaning | status |
+|:---|:---|:---|:---|
+| conditional_distribution | $`\mathrm{Zr}_i \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2)`$ | Zr varies normally around its expected value | explicit |
+| linear_predictor | $`\mu_i = \beta_0 + \sum_k \beta_k X_{ki}`$ | Expected Zr is a linear combination of the mean-model predictors | explicit |
+| linear_predictor | $`\log(\sigma_i) = \gamma_0 + \sum_k \gamma_k Z_{ki}`$ | Log residual SD of Zr is a linear combination of the scale-model predictors | explicit |
+| independence | $`\mathrm{Zr}_i \perp \mathrm{Zr}_j \mid X \text{ for } i \ne j`$ | Observations are conditionally independent given the predictors | follows from the formula |
+| positivity | $`\sigma_i > 0`$ | Residual SD is constrained positive via the log link | follows from the formula |
+| no_missing_at_random | — | Observations are assumed not missing in a way that depends on the unobserved response | your responsibility |
+| phylo_random_effect | $`\mathbf{u}_p \sim \mathcal{N}(\mathbf{0}, \sigma_p^2 \mathbf{A})`$ | Species-level random effect with covariance proportional to the phylogenetic correlation matrix A | explicit |
+| phylo_A_positive_definite | $`\mathbf{A} \succ 0`$ | A is positive-definite k x k phylogenetic correlation matrix derived from a rooted tree under Brownian motion | follows from the formula |
+| phylo_tips_only_representation | $`A_{ij} = T_{ij}/T`$ | Tips-only k x k representation: A\_{ij} is shared branch length between species i and j divided by total tree height (Hadfield 2010) | follows from the formula |
+| phylo_brownian_motion | $`\mathrm{Var}(u_p) \propto \mathrm{time}`$ | Brownian motion prior: phylogenetic variance accumulates linearly with branch length | your responsibility |
+| phylo_ultrametric_tree | — | Tree is ultrametric – non-ultrametric trees still produce a valid A but break the strict Brownian-motion variance interpretation | your responsibility |
 
 The cross-package agreement story is the point: every fit above attaches
 the same conceptual object — a phylogenetic correlation matrix
-$`\mathbf A`$ on a random-effect block — even though the syntactic
-surface looks different in each package. `symbolizer` produces the same
-`metadata$detected_signals = "phylo"`, the same symbol-dictionary row
-for $`\mathbf A`$, the same gated phylogenetic assumption rows, no
-matter which package fitted the model.
+$`\mathbf A`$ — even though the syntactic surface differs (RE bar in
+`MCMCglmm` and `brms`, marginalised residual covariance in `phylolm`).
+`symbolizer` produces the same `metadata$detected_signals = "phylo"`,
+the same symbol-dictionary row for $`\mathbf A`$, the same gated
+phylogenetic assumption rows, no matter which parameterisation fitted
+the model.
 
 ## Animal-model unification
 
@@ -1088,13 +608,17 @@ pedigree of dam-sire-offspring rather than a phylogenetic tree), but its
 meaning in the model is identical:
 
 ``` math
-\mathbf u_a \;\sim\; \mathcal N(\mathbf 0, \sigma_A^2\,\mathbf A),\qquad
-h^2 \;=\; \frac{\sigma_A^2}{\sigma_A^2 + \sigma_e^2}.
+\mathbf u_p \;\sim\; \mathcal N(\mathbf 0, \sigma_p^2\,\mathbf A),\qquad
+h^2 \;=\; \frac{\sigma_p^2}{\sigma_p^2 + \sigma_e^2}.
 ```
 
-The only interpretation difference is what $`\sigma_A^2`$*means*:
-phylogenetic variance among species in a phylogenetic comparative
-method, additive genetic variance among individuals in a
+(The quantitative-genetics literature often writes the same quantities
+as $`\mathbf u_a`$, $`\sigma_A^2`$, and $`\sigma_E^2`$ — the “A” / “E”
+letters stand for *additive* and *environmental*. This article uses
+$`p`$ / $`e`$ throughout for consistency; the conversion is purely
+cosmetic.) The interpretation of $`\sigma_p^2`$ differs by domain: it’s
+*phylogenetic* variance among species in a phylogenetic comparative
+method, *additive genetic* variance among individuals in a
 quantitative-genetics animal model. `symbolizer`’s
 [`symbolize.MCMCglmm()`](https://itchyshin.github.io/symbolizer/reference/symbolize.MCMCglmm.md)
 handles both via the same `ginverse` detection branch, and `drmTMB`
@@ -1139,8 +663,10 @@ distances and a kernel. The standard choices are:
 | Squared-exponential (Gaussian) | $`C(d) = \exp(-d^2/\rho^2)`$ | Sharp |
 | Matérn | $`C(d; \kappa, \nu)`$ | Tunable smoothness |
 
-Two fits demonstrate the structurally identical grammar with
-$`\boldsymbol\Omega`$ in place of $`\mathbf A`$:
+Two fits *illustrate* the structurally identical grammar with
+$`\boldsymbol\Omega`$ in place of $`\mathbf A`$ — these are
+**pseudocode** (the spatial demo data + mesh would be set up in a
+separate spatial article, not here):
 
 ``` r
 
@@ -1209,6 +735,12 @@ resolve.
 
 ## References
 
+- Bürkner, P.-C. (2017). brms: An R Package for Bayesian multilevel
+  models using Stan. *Journal of Statistical Software*, 80(1), 1–28.
+- Cinar, O., Nakagawa, S. & Viechtbauer, W. (2022). Phylogenetic
+  multilevel meta-analysis: A simulation study on the importance of
+  modelling the phylogeny. *Methods in Ecology and Evolution*, 13,
+  383–395.
 - Hadfield, J. D. (2010). MCMC methods for multi-response generalized
   linear mixed models: the `MCMCglmm` R package. *Journal of Statistical
   Software*, 33(2), 1–22.
@@ -1216,8 +748,15 @@ resolve.
   methods for comparative biology: phylogenies, taxonomies and
   multi-trait models for continuous and categorical characters. *Journal
   of Evolutionary Biology*, 23, 494–508.
+- Ho, L. S. T. & Ané, C. (2014). A linear-time algorithm for Gaussian
+  and non-Gaussian trait evolution models. *Systematic Biology*, 63(3),
+  397–408.
 - Lynch, M. (1991). Methods for the analysis of comparative data in
   evolutionary biology. *Evolution*, 45(5), 1065–1080.
+- Moura, M. R., Costa, H. C., Peixoto, M. A., Fonseca, E. M.,
+  Werneck, F. P. & Garda, A. A. (2021). Data from: Detecting the
+  geography of size-assortative mating in the Neotropics. *Ecography*,
+  44(11), 1583–1594.
 - Mizuno, A., Williams, C., Lagisz, M., Senior, A. M. & Nakagawa, S.
   (2026). A unified framework for phylogenetic and spatial
   meta-analysis: concepts, implementation, and practical guidance.

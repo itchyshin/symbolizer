@@ -472,6 +472,8 @@ context here.
 - [`symbolize(`*`<gam>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.gam.md)
   : Symbolize an mgcv gam / bam fit (additive grammar, v0.14 first
   slice)
+- [`symbolize(`*`<phylolm>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.phylolm.md)
+  : Symbolize a phylolm fit (Gaussian PGLS, v0.21.4 first slice)
 - [`symbolizer_capabilities()`](https://itchyshin.github.io/symbolizer/reference/symbolizer_capabilities.md)
   : Symbolizer capability registry
 
@@ -665,6 +667,9 @@ shared dataset.
 
 - [Structural dependence: phylogenetic, animal-model, and spatial random
   effects](https://itchyshin.github.io/symbolizer/articles/symbolizer-structural-dependence.md):
+
+- [Three flavors of meta-analysis: a cross-package
+  tour](https://itchyshin.github.io/symbolizer/articles/symbolizer-meta-analysis.md):
 
 - [Three faces of meta-analysis: metafor, glmmTMB,
   drmTMB](https://itchyshin.github.io/symbolizer/articles/symbolizer-meta.md):

@@ -228,7 +228,7 @@ three tabs over the same fit.
 as_html_three_views(sym, head = 5, tail = 2)
 ```
 
-[Skip three-views widget](#sym-sym-1779824242-end)
+[Skip three-views widget](#sym-sym-1779968861-end)
 
 ▸1. Index
 
@@ -398,7 +398,7 @@ assumption_table(sym)
 
 | assumption | expression | biological meaning | status |
 |:---|:---|:---|:---|
-| conditional_distribution | $`W_i \mid \mu_i\, \sigma_i \sim \mathrm{Normal}(\mu_i\, \sigma_i^2)`$ | body_mass varies normally around its expected value | explicit |
+| conditional_distribution | $`W_i \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2)`$ | body_mass varies normally around its expected value | explicit |
 | linear_predictor | $`\mu_i = \beta_0 + \sum_k \beta_k X_{ki}`$ | Expected body_mass is a linear combination of the mean-model predictors | explicit |
 | linear_predictor | $`\log(\sigma_i) = \gamma_0 + \sum_k \gamma_k Z_{ki}`$ | Log residual SD of body_mass is a linear combination of the scale-model predictors | explicit |
 | independence | $`W_i \perp W_j \mid X \text{ for } i \ne j`$ | Observations are conditionally independent given the predictors | follows from the formula |
@@ -601,7 +601,7 @@ slice.
 ``` r
 
 symbolizer_capabilities()
-#> # A tibble: 122 × 6
+#> # A tibble: 127 × 6
 #>    class  family            component      status              since notes      
 #>    <chr>  <chr>             <chr>          <chr>               <chr> <chr>      
 #>  1 drmTMB gaussian          mu             Stable              0.1.0 Univariate…
@@ -614,7 +614,7 @@ symbolizer_capabilities()
 #>  8 drmTMB truncated_nbinom2 hu             First slice         0.4.0 Hurdle sub…
 #>  9 drmTMB gaussian          rho12          Planned or reserved NA    Bivariate …
 #> 10 drmTMB student           mu             First slice         0.2.2 Student-t …
-#> # ℹ 112 more rows
+#> # ℹ 117 more rows
 ```
 
 For the full capability matrix and what’s planned next, see

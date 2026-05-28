@@ -22,6 +22,8 @@ as_html_three_views(
   x,
   head = 5L,
   tail = 2L,
+  head_cols = 5L,
+  tail_cols = 2L,
   id = "sym",
   standalone = FALSE,
   file = NULL,
@@ -37,11 +39,28 @@ as_html_three_views(
 
 - head:
 
-  Number of leading rows to show in the matrix view (default 5).
+  Number of leading **rows** to show in the matrix view (Tab 3
+  "Equations with data") before the `\\vdots` ellipsis. Default `5`.
+  Reasonable range 2–10; larger values produce taller widgets.
 
 - tail:
 
-  Number of trailing rows to show in the matrix view (default 2).
+  Number of trailing **rows** to show in the matrix view after the
+  `\\vdots`. Default `2`. Together with `head`, controls how much
+  per-observation data is visible: total rows shown = `head + tail + 1`
+  ellipsis row (or fewer if `n_obs` is small enough to show all rows).
+
+- head_cols:
+
+  Number of leading **columns** to show in any matrix that has more than
+  `head_cols + tail_cols` columns (e.g. the `Z`-matrix for a 60-species
+  fit). Default `5`. Smart-truncation prefers non-zero columns within
+  the visible row band.
+
+- tail_cols:
+
+  Number of trailing **columns** to show after the `\\cdots` ellipsis.
+  Default `2`.
 
 - id:
 

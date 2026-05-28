@@ -34,6 +34,9 @@ shared dataset.
 - [Structural dependence: phylogenetic, animal-model, and spatial random
   effects](https://itchyshin.github.io/symbolizer/articles/symbolizer-structural-dependence.md):
 
+- [Three flavors of meta-analysis: a cross-package
+  tour](https://itchyshin.github.io/symbolizer/articles/symbolizer-meta-analysis.md):
+
 - [Three faces of meta-analysis: metafor, glmmTMB,
   drmTMB](https://itchyshin.github.io/symbolizer/articles/symbolizer-meta.md):
 

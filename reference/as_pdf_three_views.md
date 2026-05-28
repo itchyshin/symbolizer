@@ -26,7 +26,17 @@ teaching content in a fits-on-one-page form.
 ## Usage
 
 ``` r
-as_pdf_three_views(x, file, title = NULL, keep_tex = FALSE, ...)
+as_pdf_three_views(
+  x,
+  file,
+  title = NULL,
+  head = 5L,
+  tail = 2L,
+  head_cols = 5L,
+  tail_cols = 2L,
+  keep_tex = FALSE,
+  ...
+)
 ```
 
 ## Arguments
@@ -43,6 +53,26 @@ as_pdf_three_views(x, file, title = NULL, keep_tex = FALSE, ...)
 
   Optional document title. Defaults to a short auto-title built from the
   fit's class and response.
+
+- head:
+
+  Number of leading rows shown in any matrix block before the `\\vdots`
+  ellipsis (default `5`).
+
+- tail:
+
+  Number of trailing rows shown after the `\\vdots` (default `2`).
+
+- head_cols:
+
+  Number of leading columns shown in any matrix block with more than
+  `head_cols + tail_cols` columns (default `5`). Smart-truncation
+  prefers non-zero columns within the visible row band.
+
+- tail_cols:
+
+  Number of trailing columns shown after the `\\cdots` ellipsis (default
+  `2`).
 
 - keep_tex:
 

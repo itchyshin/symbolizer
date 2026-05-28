@@ -220,7 +220,7 @@ assumption_table(sym)
 
 | assumption | expression | biological meaning | status |
 |:---|:---|:---|:---|
-| conditional_distribution | $`W_i \mid \mu_i\, \sigma_i \sim \mathrm{Normal}(\mu_i\, \sigma_i^2)`$ | body_mass varies normally around its expected value | explicit |
+| conditional_distribution | $`W_i \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2)`$ | body_mass varies normally around its expected value | explicit |
 | linear_predictor | $`\mu_i = \beta_0 + \sum_k \beta_k X_{ki}`$ | Expected body_mass is a linear combination of the mean-model predictors | explicit |
 | linear_predictor | $`\log(\sigma_i) = \gamma_0 + \sum_k \gamma_k Z_{ki}`$ | Log residual SD of body_mass is a linear combination of the scale-model predictors | explicit |
 | independence | $`W_i \perp W_j \mid X \text{ for } i \ne j`$ | Observations are conditionally independent given the predictors | follows from the formula |
@@ -400,7 +400,7 @@ $`\mathbf{Z}\mathbf{u}`$ random-effect block populated from the data:
 as_html_three_views(sym_re)
 ```
 
-[Skip three-views widget](#sym-sym-1779824193-end)
+[Skip three-views widget](#sym-sym-1779968733-end)
 
 ▸1. Index
 
@@ -485,8 +485,8 @@ are modeled.
 Matrix-form expansion of the model. Each row shows the response y_i and
 the corresponding row of the design matrix X (showing head and tail rows
 of the n total observations), with the coefficient vector beta listed
-below. A random-effect indicator matrix Z_g and the predicted BLUPs u
-are also shown.
+below. The predicted random-effect contribution to each observation is
+also shown.
 
 For observation *i* = 1 of your data:
 

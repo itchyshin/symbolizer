@@ -340,7 +340,7 @@ three-view widget:
 as_html_three_views(sym4)
 ```
 
-[Skip three-views widget](#sym-sym-1779824219-end)
+[Skip three-views widget](#sym-sym-1779968762-end)
 
 ▸1. Index
 
@@ -426,8 +426,8 @@ are modeled.
 Matrix-form expansion of the model. Each row shows the response y_i and
 the corresponding row of the design matrix X (showing head and tail rows
 of the n total observations), with the coefficient vector beta listed
-below. A random-effect indicator matrix Z_g and the predicted BLUPs u
-are also shown.
+below. The predicted random-effect contribution to each observation is
+also shown.
 
 For observation *i* = 1 of your data:
 
@@ -442,7 +442,7 @@ For observation *i* = 1 of your data:
 Stacking the same response equation for all *n* = 200 observations:
 
 ``` math
-\underbrace{\begin{bmatrix} 36.8 \\ 32.9 \\ 37.7 \\ 40.2 \\ 36.1 \\ \vdots \\   38 \\ 38.3 \end{bmatrix}}_{\textstyle\,\mathbf{body\_mass}_{\,200 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 & 23.9 &    0 \\    1 & 17.7 &    0 \\    1 & 13.9 &    1 \\    1 & 10.7 &    0 \\    1 & 16.3 &    0 \\ \vdots & \vdots & \vdots \\    1 & 19.9 &    1 \\    1 & 12.1 &    1 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,200 \times 3}\,}\, \underbrace{\begin{bmatrix} 32.1 \\  0.3 \\ 0.757 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,3 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix}    1 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 \\    0 &    1 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 \\    0 &    0 &    1 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 \\    0 &    0 &    0 &    1 &    0 &    0 &    0 &    0 &    0 &    0 &    0 &    0 \\    0 &    0 &    0 &    0 &    1 &    0 &    0 &    0 &    0 &    0 &    0 &    0 \\ \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\    0 &    0 &    0 &    0 &    0 &    0 &    1 &    0 &    0 &    0 &    0 &    0 \\    0 &    0 &    0 &    0 &    0 &    0 &    0 &    1 &    0 &    0 &    0 &    0 \end{bmatrix}}_{\textstyle\,\mathbf{Z}_{\,200 \times 12}\,}\, \underbrace{\begin{bmatrix} -1.33 \\ 0.266 \\ -1.38 \\ 1.48 \\ 0.519 \\ -0.761 \\ -0.247 \\ 0.281 \\ -0.0776 \\ -0.728 \\ 1.75 \\ 0.233 \end{bmatrix}}_{\textstyle\,\hat{\mathbf{u}}_{\,12 \times 1}\;\text{(BLUP)}\,} \;+\; \underbrace{\begin{bmatrix} -2.4 \\ -4.5 \\ 0.678 \\  4.9 \\ -0.883 \\ \vdots \\ -0.815 \\ 1.82 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,200 \times 1}\;\text{(residual)}\,}
+\underbrace{\begin{bmatrix} 36.8 \\ 32.9 \\ 37.7 \\ 40.2 \\ 36.1 \\ \vdots \\   38 \\ 38.3 \end{bmatrix}}_{\textstyle\,\mathbf{body\_mass}_{\,200 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 & 23.9 &    0 \\    1 & 17.7 &    0 \\    1 & 13.9 &    1 \\    1 & 10.7 &    0 \\    1 & 16.3 &    0 \\ \vdots & \vdots & \vdots \\    1 & 19.9 &    1 \\    1 & 12.1 &    1 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,200 \times 3}\,}\, \underbrace{\begin{bmatrix} 32.1 \\  0.3 \\ 0.757 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,3 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix}    1 &    0 &    0 &    0 &    0 & \cdots &    0 &    0 \\    0 &    1 &    0 &    0 &    0 & \cdots &    0 &    0 \\    0 &    0 &    1 &    0 &    0 & \cdots &    0 &    0 \\    0 &    0 &    0 &    1 &    0 & \cdots &    0 &    0 \\    0 &    0 &    0 &    0 &    1 & \cdots &    0 &    0 \\ \vdots & \vdots & \vdots & \vdots & \vdots & \ddots & \vdots & \vdots \\    0 &    0 &    0 &    0 &    0 & \cdots &    0 &    0 \\    0 &    0 &    0 &    0 &    0 & \cdots &    0 &    0 \end{bmatrix}}_{\textstyle\,\mathbf{Z}_{\,200 \times 12}\,}\, \underbrace{\begin{bmatrix} -1.33 \\ 0.266 \\ -1.38 \\ 1.48 \\ 0.519 \\ \vdots \\ 1.75 \\ 0.233 \end{bmatrix}}_{\textstyle\,\hat{\mathbf{u}}_{\,12 \times 1}\;\text{(BLUP)}\,} \;+\; \underbrace{\begin{bmatrix} -2.4 \\ -4.5 \\ 0.678 \\  4.9 \\ -0.883 \\ \vdots \\ -0.815 \\ 1.82 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,200 \times 1}\;\text{(residual)}\,}
 ```
 
 **Left**: observed vector $`\mathbf{body\_mass}`$. **Middle**: the
