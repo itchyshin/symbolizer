@@ -930,43 +930,90 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L,
   # when the data have multiple observations per level (so Z carries
   # genuine mapping content). The flag is computed once here so the
   # caption prose below can drop the "Z" factor too.
+  # v0.22.2-discipline Slice A2: per-tier Tab 3 rendering. When the
+  # extractor surfaced more than one random-effect tier (e.g. phylo +
+  # study), emit one Z * u group PER tier so the article's multilevel
+  # structure is visible in the matrix block, not hidden behind a
+  # single bare `Z` aggregate. Single-tier fits fall through to the
+  # historic shape (no `_g` subscripts on Z / u) for back-compat.
+  per_tier_Z <- if (!is.null(ex$Z_per_tier) && length(ex$Z_per_tier) > 0L) {
+    ex$Z_per_tier
+  } else if (has_re) {
+    setNames(list(ex$Z_g), "")  # single-tier fallback, no subscript
+  } else NULL
+  per_tier_u <- if (!is.null(ex$u_per_tier) && length(ex$u_per_tier) > 0L) {
+    ex$u_per_tier
+  } else if (has_re) {
+    setNames(list(ex$u), "")
+  } else NULL
+  if (!is.null(per_tier_Z)) {
+    # Sanitize a group_var name into a LaTeX-safe subscript. The
+    # subscript is rendered in `\text{...}` so multi-character labels
+    # like `study_ID` come through legibly; underscores are escaped so
+    # they don't trigger subscript-of-subscript.
+    latex_subscript <- function(gv) {
+      if (!nzchar(gv)) return("")
+      paste0("\\text{", gsub("_", "\\\\_", gv, fixed = FALSE), "}")
+    }
+    for (gv in names(per_tier_Z)) {
+      Z_gv <- per_tier_Z[[gv]]
+      u_gv <- per_tier_u[[gv]]
+      if (is.null(Z_gv) || is.null(u_gv)) next
+      sub_tex <- latex_subscript(gv)
+      sub_with_comma <- if (nzchar(sub_tex)) paste0(sub_tex, ",\\,") else ""
+      z_one_to_one <-
+        nrow(Z_gv) >= 1L &&
+        all(rowSums(Z_gv != 0) == 1L) &&
+        all(colSums(Z_gv != 0) <= 1L)
+      if (z_one_to_one) {
+        u_per_obs <- as.numeric(Z_gv %*% u_gv)
+        u_obs_vec <- latex_vec(u_per_obs, rows)
+        u_obs_lab <- if (nzchar(sub_tex)) {
+          sprintf(
+            "\\hat{\\mathbf{u}}_{%s,\\,%d \\times 1}\\;\\text{(per-obs %s effect)}",
+            sub_tex, n, gv
+          )
+        } else {
+          sprintf(
+            "\\hat{\\mathbf{u}}_{\\,%d \\times 1}\\;\\text{(per-obs random effect)}",
+            n
+          )
+        }
+        eq_mu <- paste0(
+          eq_mu, " \\;+\\; ",
+          underbrace(u_obs_vec, u_obs_lab)
+        )
+      } else {
+        z_col_idx <- trunc_col_idx(Z_gv, rows,
+                                   head = head_cols, tail = tail_cols)
+        Zg_mat  <- latex_mat(Z_gv, rows,
+                             col_head = head_cols, col_tail = tail_cols)
+        u_vec   <- latex_vec(u_gv, z_col_idx)
+        Zg_lab  <- sprintf("\\mathbf{Z}_{%s\\,%d \\times %d}",
+                           sub_with_comma, n, ncol(Z_gv))
+        u_lab   <- if (nzchar(sub_tex)) {
+          sprintf("\\hat{\\mathbf{u}}_{%s,\\,%d \\times 1}\\;\\text{(BLUP)}",
+                  sub_tex, length(u_gv))
+        } else {
+          sprintf("\\hat{\\mathbf{u}}_{\\,%d \\times 1}\\;\\text{(BLUP)}",
+                  length(u_gv))
+        }
+        eq_mu <- paste0(
+          eq_mu, " \\;+\\; ",
+          underbrace(Zg_mat, Zg_lab), "\\, ",
+          underbrace(u_vec,  u_lab)
+        )
+      }
+    }
+  }
+  # Preserve the old single-tier "Z is identity-on-obs" flag for the
+  # caption prose below (the caption decides whether to mention Z by
+  # name based on whether ANY tier actually emitted a Z block).
   z_is_one_to_one_flag <- has_re &&
+    !is.null(ex$Z_g) &&
     nrow(ex$Z_g) >= 1L &&
     all(rowSums(ex$Z_g != 0) == 1L) &&
     all(colSums(ex$Z_g != 0) <= 1L)
-  if (has_re) {
-    if (z_is_one_to_one_flag) {
-      u_per_obs <- as.numeric(ex$Z_g %*% ex$u)
-      u_obs_vec <- latex_vec(u_per_obs, rows)
-      u_obs_lab <- sprintf(
-        "\\hat{\\mathbf{u}}_{\\,%d \\times 1}\\;\\text{(per-obs random effect)}",
-        n
-      )
-      eq_mu <- paste0(
-        eq_mu, " \\;+\\; ",
-        underbrace(u_obs_vec, u_obs_lab)
-      )
-    } else {
-      # Multi-obs-per-level case: Z carries genuine mapping content.
-      # Pattern O: Z's columns and u's rows share the level dimension;
-      # truncate them with matching indices so the matrix multiplication
-      # Z u remains aligned visually.
-      z_col_idx <- trunc_col_idx(ex$Z_g, rows,
-                                 head = head_cols, tail = tail_cols)
-      Zg_mat  <- latex_mat(ex$Z_g, rows,
-                           col_head = head_cols, col_tail = tail_cols)
-      u_vec   <- latex_vec(ex$u, z_col_idx)
-      Zg_lab  <- sprintf("\\mathbf{Z}_{\\,%d \\times %d}",
-                         n, ncol(ex$Z_g))
-      u_lab   <- sprintf("\\hat{\\mathbf{u}}_{\\,%d \\times 1}\\;\\text{(BLUP)}",
-                         length(ex$u))
-      eq_mu <- paste0(
-        eq_mu, " \\;+\\; ",
-        underbrace(Zg_mat, Zg_lab), "\\, ",
-        underbrace(u_vec,  u_lab)
-      )
-    }
-  }
   # Close the response equation with the residual vector.
   eq_mu <- paste0(
     eq_mu, " \\;+\\; ",
