@@ -28,9 +28,18 @@ jobs:
         with:
           extra-packages: any::pkgdown, local::.
           needs: website
+      - name: Move dev-log artefacts aside (tracked under docs/ but not pkgdown-built; clean_site() would refuse)
+        run: |
+          mkdir -p /tmp/symbolizer-devlog
+          if [ -d docs/dev-log ]; then mv docs/dev-log /tmp/symbolizer-devlog/dev-log; fi
+          if [ -d docs/specs   ]; then mv docs/specs   /tmp/symbolizer-devlog/specs;   fi
       - name: Build site
         run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
         shell: Rscript {0}
+      - name: Restore dev-log artefacts alongside the pkgdown site
+        run: |
+          if [ -d /tmp/symbolizer-devlog/dev-log ]; then mv /tmp/symbolizer-devlog/dev-log docs/dev-log; fi
+          if [ -d /tmp/symbolizer-devlog/specs   ]; then mv /tmp/symbolizer-devlog/specs   docs/specs;   fi
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4.8.0
         with:
