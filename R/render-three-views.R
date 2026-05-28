@@ -957,12 +957,12 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L,
   per_tier_Z <- if (!is.null(ex$Z_per_tier) && length(ex$Z_per_tier) > 0L) {
     ex$Z_per_tier
   } else if (has_re) {
-    setNames(list(ex$Z_g), "")  # single-tier fallback, no subscript
+    stats::setNames(list(ex$Z_g), "")  # single-tier fallback, no subscript
   } else NULL
   per_tier_u <- if (!is.null(ex$u_per_tier) && length(ex$u_per_tier) > 0L) {
     ex$u_per_tier
   } else if (has_re) {
-    setNames(list(ex$u), "")
+    stats::setNames(list(ex$u), "")
   } else NULL
   if (!is.null(per_tier_Z)) {
     # Sanitize a group_var name into a LaTeX-safe subscript. The
@@ -1213,12 +1213,12 @@ three_views_worked_row <- function(ex, resp_sym = "\\mathbf{y}") {
   per_tier_Z_wr <- if (!is.null(ex$Z_per_tier) && length(ex$Z_per_tier) > 0L) {
     ex$Z_per_tier
   } else if (has_re) {
-    setNames(list(ex$Z_g), "")
+    stats::setNames(list(ex$Z_g), "")
   } else NULL
   per_tier_u_wr <- if (!is.null(ex$u_per_tier) && length(ex$u_per_tier) > 0L) {
     ex$u_per_tier
   } else if (has_re) {
-    setNames(list(ex$u), "")
+    stats::setNames(list(ex$u), "")
   } else NULL
   re_terms_sym <- character(0L)
   re_terms_num <- character(0L)
