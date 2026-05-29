@@ -35,6 +35,15 @@ TDD slices.
 * **Partial-pooling caption (S4).** The Tab 3 worked-row BLUP block carries a
   prose-only caption explaining that the random-effect estimates are shrunk
   toward zero (partial pooling); no numbers.
+* **GLMM repeatability demo + `knit_print` (S5).** New `knit_print` methods for
+  `variance_partition()` / `icc()` render the bar + numbers table + the
+  scale-labelled ICC reading as HTML in a knitted document, so the bar travels
+  outside the three-views widget. New vignette
+  `vignette("symbolizer-variance-components")` ("Where the variation lives: ICC
+  and repeatability") walks a Gaussian `lme4::lmer`, a binomial `lme4::glmer`
+  (latent-scale ICC), and a `glmmTMB` refit (same reading, different engine),
+  framed as repeatability in the rptR tradition, with an explicit account of
+  when the ICC is `NA` and why.
 
 All reader-facing prose is templated from
 `inst/extdata/variance-readings.csv` (no string-spliced prose in R). Point
