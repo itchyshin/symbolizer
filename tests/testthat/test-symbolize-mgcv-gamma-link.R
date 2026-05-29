@@ -29,6 +29,22 @@ test_that("inverse-link Gamma prose is link-honest, not log (MAJOR)", {
                         ignore.case = TRUE)))
 })
 
+test_that("inverse-link override does not leak into the sigma submodel row (regression)", {
+  # mgcv-2a regression guard: the mu link override (drm_build_assumptions) must
+  # rewrite ONLY the mu-submodel linear_predictor row, never the sigma-submodel
+  # row. A first cut matched every linear_predictor row, so the sigma row wrongly
+  # showed "1/mu_i = ... / inverse link on mu".
+  skip_if_not_installed("mgcv")
+  set.seed(1L); n <- 150L; x <- runif(n); z <- runif(n)
+  d <- data.frame(ygam = rgamma(n, shape = 4, rate = 4 / exp(1 + 0.7 * x)),
+                  x = x, z = z)
+  fit <- mgcv::gam(ygam ~ x + z, family = Gamma(), data = d, method = "REML")
+  a <- symbolize(fit)$assumptions
+  sig_lp <- a[a$submodel == "sigma" & a$assumption == "linear_predictor", , drop = FALSE]
+  expect_false(any(grepl("inverse link on mu", sig_lp$biological_meaning, fixed = TRUE)))
+  expect_false(any(grepl("\\frac{1}{\\mu_i}", sig_lp$expression_latex, fixed = TRUE)))
+})
+
 test_that("log-link Gamma prose is unchanged (no regression)", {
   skip_if_not_installed("mgcv")
   set.seed(1L); n <- 150L; x <- runif(n); z <- runif(n)

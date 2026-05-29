@@ -1991,7 +1991,10 @@ drm_build_assumptions <- function(family, response, response_symbol,
   if (drm_link_overrides_default(family, link_mu)) {
     lr <- drm_link_reading(link_mu)
     if (!is.null(lr)) {
-      lp <- which(out$assumption == "linear_predictor")
+      # Only the mean submodel's linear predictor names the mu link; the sigma
+      # submodel row keeps its own log(sigma_i) = ... template.
+      lp <- which(out$assumption == "linear_predictor" &
+                    out$submodel %in% c("mu", "mu1", "mu2"))
       if (length(lp) >= 1L) {
         out$expression_latex[lp] <- paste0(lr$lp_lhs[[1L]],
           " = \\beta_0 + \\sum_k \\beta_k X_{ki}")
