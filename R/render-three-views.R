@@ -114,8 +114,10 @@ as_html_three_views.symbolized_model <- function(x, head = 5L, tail = 2L,
   # (Tab 1, where coefficients are introduced) so it travels with PDF
   # export and a Methods-section paste instead of being orphaned in the
   # surrounding article prose.
-  coef_reading_txt <- three_views_coef_reading(tryCatch(x$model$family,
-                                                        error = function(e) NULL))
+  coef_reading_txt <- three_views_coef_reading(
+    tryCatch(x$model$family, error = function(e) NULL),
+    link = tryCatch(x$submodels$link[[1L]], error = function(e) NULL),
+    response = tryCatch(x$distribution$response_symbol[[1L]], error = function(e) NULL))
   coef_gloss <- if (nzchar(coef_reading_txt)) {
     paste0("  <p class=\"sym-biology\"><strong>Coefficient reading.</strong> ",
            coef_reading_txt, "</p>\n")
@@ -404,7 +406,9 @@ pdf_three_views_rmd_body <- function(x, head = 5L, tail = 2L,
   # v0.22.4 #6: response-scale coefficient reading, carried into the PDF
   # so it survives export (it used to live only in the article prose).
   coef_txt <- three_views_coef_reading(
-    tryCatch(x$model$family, error = function(e) NULL))
+    tryCatch(x$model$family, error = function(e) NULL),
+    link = tryCatch(x$submodels$link[[1L]], error = function(e) NULL),
+    response = tryCatch(x$distribution$response_symbol[[1L]], error = function(e) NULL))
   coef_line <- if (nzchar(coef_txt)) {
     c(sprintf("_**Coefficient reading.** %s_", coef_txt), "")
   } else character(0L)
@@ -1941,8 +1945,18 @@ three_views_symbol_gloss <- function(x, notation = c("matrix", "index")) {
 # inst/extdata/coef-readings.csv (architectural rule: no string-spliced
 # prose in R). Returns "" for families without a clean single-slope
 # reading (latent-variable / ordinal), so the caller emits nothing.
-three_views_coef_reading <- function(family) {
+three_views_coef_reading <- function(family, link = NULL, response = NULL) {
   if (is.null(family) || !nzchar(family)) return("")
+  # Link-honesty: a non-default link makes the family-default response-scale
+  # reading wrong (e.g. mgcv Gamma's inverse link is not "exp(beta) multiplies
+  # the mean"). Emit the actual link's honest natural-scale reading instead.
+  if (!is.null(link) && nzchar(link) && drm_link_overrides_default(family, link)) {
+    lr <- drm_link_reading(link)
+    if (!is.null(lr)) {
+      resp <- if (!is.null(response) && nzchar(response)) response else "the response"
+      return(gsub("{response}", resp, lr$natural_scale_reading[[1L]], fixed = TRUE))
+    }
+  }
   tbl <- tryCatch(load_template("coef-readings"), error = function(e) NULL)
   if (is.null(tbl) || !"family" %in% names(tbl)) return("")
   hit <- tbl[tbl$family == family, , drop = FALSE]

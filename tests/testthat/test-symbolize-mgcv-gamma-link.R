@@ -45,6 +45,31 @@ test_that("inverse-link override does not leak into the sigma submodel row (regr
   expect_false(any(grepl("\\frac{1}{\\mu_i}", sig_lp$expression_latex, fixed = TRUE)))
 })
 
+test_that("three-views coefficient-reading box is link-honest for inverse Gamma (MAJOR)", {
+  # render-three-views.R three_views_coef_reading() was family-keyed only, so an
+  # inverse-link Gamma widget showed "exp(beta) multiplies the mean (log link)"
+  # above an equation that reads inverse(mu_i). The box must consult the link.
+  skip_if_not_installed("mgcv")
+  set.seed(1L); n <- 150L; x <- runif(n); z <- runif(n)
+  d <- data.frame(ygam = rgamma(n, shape = 4, rate = 4 / exp(1 + 0.7 * x)),
+                  x = x, z = z)
+  fit <- mgcv::gam(ygam ~ x + z, family = Gamma(), data = d, method = "REML")
+  html <- as_html_three_views(symbolize(fit))
+  expect_false(grepl("multiplies the mean of the response", html, fixed = TRUE))
+  expect_true(grepl("no single exp(beta) multiplier", html, fixed = TRUE))
+})
+
+test_that("three-views coefficient-reading box unchanged for log-link Gamma (regression)", {
+  skip_if_not_installed("mgcv")
+  set.seed(1L); n <- 150L; x <- runif(n); z <- runif(n)
+  d <- data.frame(ygam = rgamma(n, shape = 4, rate = 4 / exp(1 + 0.7 * x)),
+                  x = x, z = z)
+  fit <- mgcv::gam(ygam ~ x + z, family = Gamma(link = "log"), data = d,
+                   method = "REML")
+  html <- as_html_three_views(symbolize(fit))
+  expect_true(grepl("multiplies the mean of the response", html, fixed = TRUE))
+})
+
 test_that("log-link Gamma prose is unchanged (no regression)", {
   skip_if_not_installed("mgcv")
   set.seed(1L); n <- 150L; x <- runif(n); z <- runif(n)
