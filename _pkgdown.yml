@@ -114,6 +114,11 @@ reference:
     contents:
       - group_means
       - group_slopes
+  - title: "Variance components"
+    desc: "Where the variation lives, and how repeatable a trait is (ICC / repeatability)."
+    contents:
+      - variance_partition
+      - icc
   - title: "Compare two models"
     desc: "Structural diff between two symbolized_model objects: which submodels, which terms, which assumption statuses differ."
     contents:
