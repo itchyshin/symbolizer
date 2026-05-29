@@ -663,30 +663,29 @@ pdf_three_views_worked_row <- function(x) {
     lp_disp <- sum(num_vals)
 
     if (shape == "additive_gaussian") {
-      eps_disp <- as.numeric(fmt(y_i)) - lp_disp
-      eps_str  <- if (eps_disp < 0) sprintf("- %s", fmt(abs(eps_disp)))
-                  else sprintf("+ %s", fmt(eps_disp))
+      # #155: LP build with \approx, then the TRUE residual y - mu_hat
+      # (matches the stacked matrix block, no balancing fudge).
+      eps_true <- y_i - mu_i
       parts <- c(parts, "$$",
-        sprintf("\\underbrace{%s}_{\\text{observed}=%s} \\;=\\; %s \\;%s",
-                resp1, fmt(y_i), rhs_lp, eps_str),
+        sprintf("\\hat\\mu_1 \\;=\\; %s \\;\\approx\\; %s", rhs_lp, fmt(mu_i)),
         "$$", "",
-        sprintf(paste0("_Predicted $\\hat\\mu_1 = %s$ (response scale); ",
-                       "residual $\\hat\\varepsilon_1 = %s$._"),
-                fmt(mu_i), fmt(eps_disp)))
+        sprintf(paste0("_Observed $%s = %s$; predicted mean $\\hat\\mu_1 = %s$ ",
+                       "(response scale); residual $\\hat\\varepsilon_1 = %s$ ",
+                       "(observed = mean + residual)._"),
+                resp1, fmt(y_i), fmt(mu_i), fmt(eps_true)))
     } else if (shape == "additive_log") {
       log_y    <- log(y_i)
-      eps_disp <- as.numeric(fmt(log_y)) - lp_disp
-      eps_str  <- if (eps_disp < 0) sprintf("- %s", fmt(abs(eps_disp)))
-                  else sprintf("+ %s", fmt(eps_disp))
+      eps_true <- log_y - mu_i
       parts <- c(parts, "$$",
-        sprintf("\\underbrace{\\log %s}_{\\log\\,\\text{observed}=%s} \\;=\\; %s \\;%s",
-                resp1, fmt(log_y), rhs_lp, eps_str),
+        sprintf("\\hat\\mu_1 \\;=\\; %s \\;\\approx\\; %s", rhs_lp, fmt(mu_i)),
         "$$", "",
-        sprintf(paste0("_Predicted log-scale mean $\\hat\\mu_1 = %s$; ",
-                       "log-scale residual $\\hat\\varepsilon_1^{(\\log)} = %s$. ",
-                       "Back-transform to the response-scale mean with ",
+        sprintf(paste0("_Observed $\\log %s = %s$ (log scale); predicted log-scale ",
+                       "mean $\\hat\\mu_1 = %s$; log-scale residual ",
+                       "$\\hat\\varepsilon_1^{(\\log)} = %s$ ",
+                       "(observed = mean + residual). Back-transform to the ",
+                       "response-scale mean with ",
                        "$\\mathbb{E}[%s] = \\exp(\\hat\\mu_1 + \\hat\\sigma_1^2/2)$._"),
-                fmt(mu_i), fmt(eps_disp), resp1))
+                resp1, fmt(log_y), fmt(mu_i), fmt(eps_true), resp1))
     } else {
       # generalized: link-scale linear predictor, response-scale mean via
       # the inverse link, then the likelihood. No additive error term.
@@ -1688,44 +1687,51 @@ three_views_worked_row <- function(ex, resp_sym = "\\mathbf{y}",
   shape <- fam_spec_wr$shape
 
   if (shape == "additive_gaussian") {
-    # Residual displayed as the balancing figure so the PRINTED numbers
-    # reconcile at display precision (punch-list #5): observed minus the
-    # reader-facing linear predictor lp_disp.
-    eps_disp <- as.numeric(fmt(W1)) - lp_disp
+    # v0.22.4 #155: separate the linear-predictor build (row 2, shown with
+    # \approx because the rounded terms only approximate mu_hat) from the
+    # decomposition (row 3). The residual displayed is the TRUE residual
+    # y - mu_hat -- identical to what the stacked matrix block shows -- so
+    # the worked row and the matrix block agree on observation 1. (The old
+    # #5 fix used a balancing figure that closed the explicit equation but
+    # diverged from the matrix block's true residual; you cannot round a,
+    # b and a+b independently and have all of {expanded row closes, true
+    # residual shown, matrix block matches} hold, so we drop the
+    # falsifiable numeric closure and keep the true, consistent residual.)
+    eps_true <- W1 - mu1
     paste0(
       "<div class=\"sym-eq\">$$\n\\begin{aligned}\n",
       scalar_response_sym, " &= ", sym_rhs, " + \\hat\\varepsilon_{1} ",
       "&\\quad(\\text{response equation, one row of the model}) \\\\\n",
-      fmt(W1), " &= ", num_rhs, " + (", fmt(eps_disp), ") ",
-      "&\\quad(\\text{with your numbers}) \\\\\n",
-      "&= \\underbrace{", fmt(mu1),
+      "\\hat\\mu_{1} &= ", num_rhs, " \\approx ", fmt(mu1), " ",
+      "&\\quad(\\text{predicted mean} = \\text{linear predictor}) \\\\\n",
+      scalar_response_sym, " &= \\underbrace{", fmt(mu1),
       "}_{\\textstyle\\,\\hat\\mu_{1}\\,\\text{(predicted)}\\,} \\;+\\; ",
-      "\\underbrace{(", fmt(eps_disp),
+      "\\underbrace{(", fmt(eps_true),
       ")}_{\\textstyle\\,\\hat\\varepsilon_{1}\\,\\text{(residual)}\\,} ",
-      "&\\quad(\\text{predicted mean} + \\text{residual})",
+      "&\\quad(\\text{observed} = \\text{predicted mean} + \\text{residual})",
       "\n\\end{aligned}\n$$</div>\n"
     )
   } else if (shape == "additive_log") {
     # Lognormal: drmTMB parameterises log(Y) ~ Normal(mu, sigma^2). The
-    # additive noise is on the LOG scale; the linear-predictor equals
-    # the mean of log(y). Show the log-scale residual explicitly so the
-    # arithmetic closes without scale-mixing. The residual is the
-    # balancing figure against lp_disp so the printed equation closes
-    # at display precision (punch-list #5).
+    # additive noise is on the LOG scale; the linear predictor equals the
+    # mean of log(y). Same structure as additive_gaussian (#155): an
+    # \approx linear-predictor build, then a decomposition that shows the
+    # TRUE log-scale residual log(y) - mu_hat -- identical to the stacked
+    # matrix block, so the two agree on observation 1.
     log_W1   <- log(W1)
-    eps_disp <- as.numeric(fmt(log_W1)) - lp_disp
+    eps_true <- log_W1 - mu1
     paste0(
       "<div class=\"sym-eq\">$$\n\\begin{aligned}\n",
       "\\log(", scalar_response_sym, ") &= ", sym_rhs,
       " + \\hat\\varepsilon_{1}^{(\\log)} ",
       "&\\quad(\\text{response equation, log scale}) \\\\\n",
-      fmt(log_W1), " &= ", num_rhs, " + (", fmt(eps_disp), ") ",
-      "&\\quad(\\text{with your numbers, on } \\log y) \\\\\n",
-      "&= \\underbrace{", fmt(mu1),
+      "\\hat\\mu_{1} &= ", num_rhs, " \\approx ", fmt(mu1), " ",
+      "&\\quad(\\text{log-scale mean} = \\text{linear predictor}) \\\\\n",
+      "\\log(", scalar_response_sym, ") &= \\underbrace{", fmt(mu1),
       "}_{\\textstyle\\,\\hat\\mu_{1}\\,\\text{(log-scale mean)}\\,}",
-      " \\;+\\; \\underbrace{(", fmt(eps_disp),
+      " \\;+\\; \\underbrace{(", fmt(eps_true),
       ")}_{\\textstyle\\,\\hat\\varepsilon_{1}^{(\\log)}\\,\\text{(log-scale residual)}\\,} ",
-      "&\\quad(\\text{log-scale mean} + \\text{residual})",
+      "&\\quad(\\text{observed} = \\text{mean} + \\text{residual})",
       "\n\\end{aligned}\n$$</div>\n"
     )
   } else {

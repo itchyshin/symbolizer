@@ -171,25 +171,64 @@ test_that("Lognormal worked-row 'with your numbers' equation closes at display p
   block <- .extract_additive_log_block(html)
   expect_true(nzchar(block), info = "additive_log worked-row block not found")
 
-  # Pull the "with your numbers" row: starts with a decimal, has &=, \times.
+  # v0.22.4 #155: the worked row now separates the linear-predictor build
+  # (row 2, "mu_hat = <terms> \approx <value>") from the decomposition
+  # (row 3). The LP-build row's displayed terms must re-sum to the
+  # displayed mu_hat (the `\approx` value).
   rows <- strsplit(block, "\\\\\\\\")[[1L]]
-  num_row <- rows[grepl("&=", rows) & grepl("times", rows)]
-  expect_length(num_row, 1L)
+  lp_row <- rows[grepl("hat\\\\mu_\\{1\\}", rows) & grepl("times", rows) &
+                   grepl("approx", rows)]
+  expect_length(lp_row, 1L)
 
-  # LHS = the number before &= ; RHS = between &= and the &\quad caption.
-  lhs <- sub("^[^0-9.-]*(-?[0-9.]+)\\s*&=.*$", "\\1", num_row)
-  rhs <- sub("^.*&=\\s*(.*?)\\s*&\\\\quad.*$", "\\1", num_row)
-  # Turn the displayed RHS into an evaluable arithmetic expression.
+  # RHS = terms between &= and \approx ; target = the value after \approx.
+  rhs    <- sub("^.*&=\\s*(.*?)\\s*\\\\approx.*$", "\\1", lp_row)
+  target <- sub("^.*\\\\approx\\s*(-?[0-9.]+).*$", "\\1", lp_row)
   expr <- gsub("\\\\times", "*", rhs, fixed = FALSE)
   expr <- gsub("\\\\,", "", expr, fixed = FALSE)
   expr <- gsub("[^0-9.+*()\\-]", "", expr)
   rhs_val <- eval(parse(text = expr), envir = new.env())
 
-  # The reader-summed RHS, formatted as the renderer formats numbers,
-  # must equal the printed LHS string.
-  expect_equal(formatC(rhs_val, digits = 3, format = "g"), lhs,
-               info = paste0("Lognormal worked row does not close: LHS=", lhs,
-                             " but RHS re-sums to ", rhs_val))
+  expect_equal(formatC(rhs_val, digits = 3, format = "g"), target,
+               info = paste0("Lognormal LP build does not reach mu_hat: terms re-sum to ",
+                             rhs_val, " but mu_hat shown as ", target))
+})
+
+test_that("worked-row residual equals the true residual shown in the stacked matrix block", {
+  # Punch-list #155: the worked-row residual must be the TRUE residual
+  # (log(y_1) - mu_hat_1 on log scale; y_1 - mu_hat_1 on response scale),
+  # identical to what the stacked matrix block displays, so the two views
+  # agree on observation 1. (Earlier the worked row used a balancing
+  # figure that diverged from the matrix block by a 3rd significant figure.)
+  skip_if_not_installed("drmTMB")
+  source(test_path("helper-drmtmb-fits.R"), local = TRUE)
+
+  # Lognormal (additive_log): residual on the log scale.
+  fit_ln <- suppressWarnings(fit_drm_lognormal())
+  sym_ln <- symbolize(fit_ln)
+  ex_ln  <- sym_ln$expanded
+  true_eps_ln <- formatC(log(ex_ln$y[[1L]]) - ex_ln$mu_hat[[1L]],
+                         digits = 3, format = "g")
+  html_ln <- as_html_three_views(sym_ln, id = "test-ln-resid")
+  wr_ln   <- .extract_additive_log_block(html_ln)
+  expect_true(grepl(true_eps_ln, wr_ln, fixed = TRUE),
+              info = paste("Lognormal worked row should show the true residual",
+                           true_eps_ln))
+  # And the matrix block (panel-mat) shows the same value.
+  pos <- regexpr("panel-mat", html_ln)
+  panel_mat <- substr(html_ln, pos[[1L]], nchar(html_ln))
+  expect_true(grepl(true_eps_ln, panel_mat, fixed = TRUE),
+              info = "matrix block should show the same true residual")
+
+  # Gaussian (additive_gaussian): residual on the response scale.
+  fit_g <- suppressWarnings(fit_drm_location_scale())
+  sym_g <- symbolize(fit_g)
+  ex_g  <- sym_g$expanded
+  true_eps_g <- formatC(ex_g$y[[1L]] - ex_g$mu_hat[[1L]], digits = 3, format = "g")
+  html_g <- as_html_three_views(sym_g, id = "test-g-resid")
+  # The worked-row decomposition underbrace residual must be the true one.
+  expect_true(grepl(paste0("(", true_eps_g, ")"), html_g, fixed = TRUE),
+              info = paste("Gaussian worked row should show the true residual",
+                           true_eps_g))
 })
 
 test_that("Lognormal worked-row aligned block has uniform alignment-cell counts", {
