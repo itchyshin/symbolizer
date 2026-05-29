@@ -389,6 +389,23 @@ mgcv_build_variance_components <- function(fit) {
       kind         = "residual"
     )
   }
+  # Non-Gaussian families with an estimated scale (e.g. Gamma, scat) carry a
+  # single constant dispersion phi = fit$sig2 = summary(fit)$dispersion. In the
+  # drmTMB Gamma parameterisation the equation's sigma_i satisfies
+  # sigma_i^2 = phi (Var = sigma^2 * mu^2), so var_estimate = phi = sigma_i^2 and
+  # sd_estimate = sqrt(phi) = sigma_i. Fixed-scale families (poisson, binomial:
+  # scale.estimated FALSE) carry no scale parameter and get no row.
+  if (!identical(fit$family$family, "gaussian") &&
+      !is.null(fit$sig2) && isTRUE(fit$scale.estimated)) {
+    rows[[length(rows) + 1L]] <- tibble::tibble(
+      parameter    = "sigma",
+      group        = "dispersion",
+      term         = "Dispersion (scale)",
+      sd_estimate  = sqrt(as.numeric(fit$sig2)),
+      var_estimate = as.numeric(fit$sig2),
+      kind         = "dispersion"
+    )
+  }
   if (!is.null(fit$sp) && length(fit$sp) > 0L) {
     for (i in seq_along(fit$sp)) {
       rows[[length(rows) + 1L]] <- tibble::tibble(
