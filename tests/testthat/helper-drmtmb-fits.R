@@ -67,6 +67,33 @@ fit_drm_with_re <- function(seed = 2L, n = 80L, n_groups = 6L) {
   )
 }
 
+# Homoscedastic random-intercept Gaussian (sigma ~ 1): a single residual
+# SD, so the data-scale ICC sigma^2_group / (sigma^2_group + sigma^2_eps)
+# is well defined. Sibling of fit_drm_with_re(), which is location-scale
+# (sigma ~ temperature) and therefore has no single within-group variance.
+fit_drm_re_homosked <- function(seed = 3L, n = 80L, n_groups = 6L) {
+  testthat::skip_if_not_installed("drmTMB")
+  set.seed(seed)
+  group <- factor(rep(letters[seq_len(n_groups)], length.out = n))
+  temperature <- runif(n, 10, 25)
+  re <- rnorm(n_groups, sd = 1)
+  dat <- data.frame(
+    body_mass = rnorm(
+      n,
+      30 + 0.4 * temperature + re[as.integer(group)],
+      exp(0.5)
+    ),
+    temperature = temperature,
+    group = group
+  )
+  drmTMB::drmTMB(
+    drmTMB::drm_formula(body_mass ~ temperature + (1 | group),
+                        sigma ~ 1),
+    family = stats::gaussian(),
+    data   = dat
+  )
+}
+
 fit_drm_student <- function(seed = 20260524L, n = 80L) {
   testthat::skip_if_not_installed("drmTMB")
   set.seed(seed)
