@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.22.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,6 +34,239 @@
       <small>Source: <a href="https://github.com/itchyshin/symbolizer/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="development version" id="symbolizer-development-version">symbolizer (development version)<a class="anchor" aria-label="anchor" href="#symbolizer-development-version"></a></h2>
+<div class="section level3">
+<h3 id="variance-components-surface--where-does-the-variation-live-development-version">Variance-components surface – “where does the variation live?”<a class="anchor" aria-label="anchor" href="#variance-components-surface--where-does-the-variation-live-development-version"></a></h3>
+<p>A mixed model’s payoff for a biologist is <em>where the variation lives</em> and <em>how repeatable a trait is</em>. symbolizer computed the variance components and then dropped them. This surface closes that gap, Gaussian-first, with a hard honesty contract. Spec: <code>docs/specs/variance-components.md</code>. Built in four TDD slices.</p>
+<ul><li>
+<strong>Numbers, not just symbols (S1).</strong> Every mixed-model extractor’s <code>variance_components</code> tibble now carries numeric <code>sd_estimate</code> / <code>var_estimate</code>; the drmTMB builder, which previously carried only symbols, was fixed to populate them from <code>fit$sdpars</code>. <code><a href="../reference/explain.html">explain()</a></code> and <code><a href="../reference/model_card.html">model_card()</a></code> now surface a “How the variation splits” section whenever the fit has random effects.</li>
+<li>
+<strong>New accessor <code><a href="../reference/variance_partition.html">variance_partition()</a></code> (S2).</strong> One row per variance source (<code>component</code>, <code>variance</code>, <code>sd</code>, <code>pct</code>), with a residual row and <code>pct</code> shares that sum to 1 when the residual variance is defined; otherwise the variances are shown and <code>pct</code> is <code>NA</code> with a reason.</li>
+<li>
+<strong>New accessor <code><a href="../reference/icc.html">icc()</a></code> (S2).</strong> The intraclass correlation / repeatability, carrying an explicit <code>scale</code> attribute. Gaussian-identity single random intercept gives a <strong>data-scale</strong> ICC (a true proportion of variance); binomial gives a <strong>latent-scale</strong> ICC (logit residual , probit residual 1) with a mandatory “not a proportion of variance in the observed outcome” caption. Any other family, a location-scale Gaussian whose residual SD varies, or more than one random-effect term returns <code>NA</code> with a human-readable reason rather than a misleading number.</li>
+<li>
+<strong>Widget panel (S3).</strong> The three-views Index tab now shows a “where does the variation live?” panel beneath the random-effects glossary: a plain-CSS bar (a stacked between/within bar for two components, per-component bars for three or more), one sentence, and the ICC line. No bar – only the table and the “ICC not available on this scale yet” line – when the ICC is undefined.</li>
+<li>
+<strong>Partial-pooling caption (S4).</strong> The Tab 3 worked-row BLUP block carries a prose-only caption explaining that the random-effect estimates are shrunk toward zero (partial pooling); no numbers.</li>
+<li>
+<strong>GLMM repeatability demo + <code>knit_print</code> (S5).</strong> New <code>knit_print</code> methods for <code><a href="../reference/variance_partition.html">variance_partition()</a></code> / <code><a href="../reference/icc.html">icc()</a></code> render the bar + numbers table + the scale-labelled ICC reading as HTML in a knitted document, so the bar travels outside the three-views widget. New vignette <code><a href="../articles/symbolizer-variance-components.html">vignette("symbolizer-variance-components")</a></code> (“Where the variation lives: ICC and repeatability”) walks a Gaussian <code><a href="https://rdrr.io/pkg/lme4/man/lmer.html" class="external-link">lme4::lmer</a></code>, a binomial <code><a href="https://rdrr.io/pkg/lme4/man/glmer.html" class="external-link">lme4::glmer</a></code> (latent-scale ICC), and a <code>glmmTMB</code> refit (same reading, different engine), framed as repeatability in the rptR tradition, with an explicit account of when the ICC is <code>NA</code> and why.</li>
+</ul><p>All reader-facing prose is templated from <code>inst/extdata/variance-readings.csv</code> (no string-spliced prose in R). Point estimates only; no confidence intervals. The panel and caption ship in the HTML widget; PDF/HTML parity for the variance surface is deferred to the Pattern J payload rebuild (see the spec’s scope-boundary note).</p>
+</div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.22.3" id="symbolizer-0223">symbolizer 0.22.3<a class="anchor" aria-label="anchor" href="#symbolizer-0223"></a></h2>
+<div class="section level3">
+<h3 id="v0223--family-aware-tab-worked-row-for-non-gaussian-families-0-22-3">v0.22.3 – family-aware Tab 3 worked row for non-Gaussian families<a class="anchor" aria-label="anchor" href="#v0223--family-aware-tab-worked-row-for-non-gaussian-families-0-22-3"></a></h3>
+<p>Closes the BLOCKER on <code>symbolizer-families.html</code> surfaced by the v0.22.2 Fisher pass (<code>docs/dev-log/figure-audits/v0.22.2-audit-pass/families-fisher.md</code>).</p>
+<p>Before this release the Tab 3 worked-row helper hardcoded the Gaussian template</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mn>1</mn></msub><mo>=</mo><msub><mi>β</mi><mn>0</mn></msub><mo>+</mo><msub><mi>β</mi><mn>1</mn></msub><msub><mi>x</mi><mn>1</mn></msub><mo>+</mo><msub><mover><mi>ε</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">y_1 = \beta_0 + \beta_1 x_1 + \hat{\varepsilon}_1</annotation></semantics></math></p>
+<p>for every family. For non-identity-link families the displayed <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>μ</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><annotation encoding="application/x-tex">\hat{\mu}_1</annotation></semantics></math> was the <strong>linear predictor</strong> <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>η</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><annotation encoding="application/x-tex">\hat{\eta}_1</annotation></semantics></math> not the <strong>response-scale predicted mean</strong>, the additive <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>ε</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><annotation encoding="application/x-tex">\hat{\varepsilon}_1</annotation></semantics></math> was meaningless (Poisson has no residual in its likelihood at all), and the rendered values were either off by orders of magnitude or mathematically impossible. The Beta widget displayed <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>μ</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mo>=</mo><mi>−</mi><mn>0.95</mn></mrow><annotation encoding="application/x-tex">\hat{\mu}_1 = -0.95</annotation></semantics></math> – impossible for a Beta mean which must be in <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(0,1)</annotation></semantics></math>; the correct response-scale value is <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">l</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">g</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">c</mi></mrow><mo stretchy="false" form="prefix">(</mo><mi>−</mi><mn>0.95</mn><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>0.279</mn></mrow><annotation encoding="application/x-tex">\mathrm{logistic}(-0.95) = 0.279</annotation></semantics></math>.</p>
+<div class="section level4">
+<h4 id="three-slices-tdd-0-22-3">Three slices (TDD)<a class="anchor" aria-label="anchor" href="#three-slices-tdd-0-22-3"></a></h4>
+<p><strong>Slice 1 – <code>R/symbolize-drmtmb.R</code>:</strong> <code>drm_build_expanded()</code> now stores the linear predictor in a new <code>$expanded$eta_hat</code> slot and applies the mu-submodel link inverse to obtain <code>$expanded$mu_hat</code> on the response scale. Helper <code>drm_apply_link_inverse(eta_hat, link)</code> covers identity, log, logit, probit, cloglog, and inverse. For Gaussian-identity and the drmTMB Lognormal-on-mu-of-log-Y convention, <code>mu_hat == eta_hat</code> and the historic behaviour is preserved.</p>
+<p><strong>Slice 2 – <code>R/render-three-views.R</code>:</strong> the Tab 3 worked-row helper becomes family-aware and emits one of three shapes:</p>
+<ul><li>
+<strong>Additive Gaussian</strong> (Gaussian, Student-t): <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mn>1</mn></msub><mo>=</mo><msub><mi>β</mi><mn>0</mn></msub><mo>+</mo><msub><mi>β</mi><mn>1</mn></msub><msub><mi>x</mi><mn>1</mn></msub><mo>+</mo><msub><mover><mi>ε</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">y_1 = \beta_0 + \beta_1 x_1 + \hat{\varepsilon}_1</annotation></semantics></math> – the historic form, kept for back-compat.</li>
+<li>
+<strong>Additive log</strong> (Lognormal): <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>y</mi><mn>1</mn></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>β</mi><mn>0</mn></msub><mo>+</mo><msub><mi>β</mi><mn>1</mn></msub><msub><mi>x</mi><mn>1</mn></msub><mo>+</mo><msubsup><mover><mi>ε</mi><mo accent="true">̂</mo></mover><mn>1</mn><mrow><mo stretchy="false" form="prefix">(</mo><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="postfix">)</mo></mrow></msubsup></mrow><annotation encoding="application/x-tex">\log(y_1) = \beta_0 + \beta_1 x_1 + \hat{\varepsilon}_1^{(\log)}</annotation></semantics></math> – the residual is on the log scale where the Gaussian noise lives.</li>
+<li>
+<strong>Generalized</strong> (Poisson, Beta, Binomial, Gamma, NegBinom): <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>η</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mo>=</mo><msub><mi>β</mi><mn>0</mn></msub><mo>+</mo><msub><mi>β</mi><mn>1</mn></msub><msub><mi>x</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">\hat{\eta}_1 = \beta_0 + \beta_1 x_1</annotation></semantics></math>, then <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>μ</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mo>=</mo><msup><mrow><mi mathvariant="normal">l</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">k</mi></mrow><mrow><mi>−</mi><mn>1</mn></mrow></msup><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>η</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\hat{\mu}_1 = \mathrm{link}^{-1}(\hat{\eta}_1)</annotation></semantics></math>, then <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mn>1</mn></msub><mo>∼</mo><mrow><mi mathvariant="normal">F</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">y</mi></mrow><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>μ</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mo>,</mo><mi>…</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">y_1 \sim \mathrm{Family}(\hat{\mu}_1, \ldots)</annotation></semantics></math> – no spurious additive <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>ε</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><annotation encoding="application/x-tex">\hat{\varepsilon}_1</annotation></semantics></math>.</li>
+</ul><p><strong>Slice 3 – <code>R/render-three-views.R</code> (sigma submodel):</strong> <code>three_views_worked_row_sigma()</code> takes the family argument and labels the <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>σ</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><annotation encoding="application/x-tex">\hat{\sigma}_1</annotation></semantics></math> submodel correctly per family:</p>
+<ul><li>gaussian / student: predicted residual SD (unchanged)</li>
+<li>lognormal: log-scale residual SD (SD of <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mi>y</mi></mrow><annotation encoding="application/x-tex">\log y</annotation></semantics></math>)</li>
+<li>beta: predicted <strong>precision <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>ϕ</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><annotation encoding="application/x-tex">\hat{\phi}_1</annotation></semantics></math></strong> (NOT an SD)</li>
+<li>gamma: predicted dispersion</li>
+<li>nbinom1 / nbinom2: predicted dispersion (size parameter <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>)</li>
+</ul></div>
+<div class="section level4">
+<h4 id="tests-0-22-3">Tests<a class="anchor" aria-label="anchor" href="#tests-0-22-3"></a></h4>
+<ul><li>
+<code>tests/testthat/test-symbolize-drmtmb-link-scale.R</code> (9 expectations): Poisson <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>μ</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mo>=</mo><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>η</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\hat{\mu}_1 = \exp(\hat{\eta}_1)</annotation></semantics></math>; Beta <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>μ</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mo>∈</mo><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\hat{\mu}_1 \in (0,1)</annotation></semantics></math>; Lognormal <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>μ</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mo>=</mo><msub><mover><mi>η</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">\hat{\mu}_1 = \hat{\eta}_1</annotation></semantics></math> (drmTMB identity-on-mu); Gaussian back-compat.</li>
+<li>
+<code>tests/testthat/test-three-views-worked-row-families.R</code> (5 expectations): Poisson drops spurious <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ε</mi><annotation encoding="application/x-tex">\varepsilon</annotation></semantics></math>; Poisson shows <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi mathvariant="normal">exp</mi><annotation encoding="application/x-tex">\exp</annotation></semantics></math> back-transform; Beta shows response-scale <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>μ</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><annotation encoding="application/x-tex">\hat{\mu}_1</annotation></semantics></math> matching <span class="math inline">$\sym$</span>expanded<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi><msub><mi>u</mi><mi>h</mi></msub><mi>a</mi><mi>t</mi><mo stretchy="false" form="prefix">[</mo><mo stretchy="false" form="prefix">[</mo><mn>1</mn><mo stretchy="false" form="postfix">]</mo><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">mu_hat[[1]]</annotation></semantics></math>; Beta <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math> row labelled as precision <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ϕ</mi><annotation encoding="application/x-tex">\phi</annotation></semantics></math>; Gaussian-identity keeps the historic shape.</li>
+<li>
+<code>tests/testthat/test-expand.R</code>: slot list updated to include <code>eta_hat</code>.</li>
+</ul><p>Full suite: <code>FAIL 0 | SKIP 0 | PASS 1908</code> (+13 from new tests beyond the 1893 in v0.22.2-mu_hat-with-Zu).</p>
+</div>
+<div class="section level4">
+<h4 id="rendered-html-verification-0-22-3">Rendered HTML verification<a class="anchor" aria-label="anchor" href="#rendered-html-verification-0-22-3"></a></h4>
+<p>Spot-checks on <code>docs/articles/symbolizer-families.html</code>:</p>
+<pre><code>Poisson \hat{\eta}_{1} line:              4 matches
+Poisson \exp() back-transform:            7 matches
+Poisson y ~ Poisson(...) declaration:    11 matches
+Beta logistic link in worked row:         2 matches
+Beta "precision \phi" label:              2 matches
+Lognormal \log scale references:         19 matches
+Lognormal "log-scale residual SD" label:  3 matches
+Beta misleading "predicted residual SD":  0 matches  ← was the bug</code></pre>
+</div>
+<div class="section level4">
+<h4 id="out-of-scope-deferred-to-a-separate-slice-0-22-3">Out of scope (deferred to a separate slice)<a class="anchor" aria-label="anchor" href="#out-of-scope-deferred-to-a-separate-slice-0-22-3"></a></h4>
+<ul><li>The other extractors (gllvmTMB, glmmTMB, lme4, brms, MCMCglmm, metafor, phylolm, mgcv, sdmTMB) have not been audited under the Fisher protocol yet. The two-tier and structural-dependence widgets may have analogous bugs; both Codex audits started during v0.22.2 were killed by the maintainer mid-run.</li>
+<li>CRAN submission is paused per maintainer direction (2026-05-28 21:55): focus on families correctness first.</li>
+</ul></div>
+</div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.22.2" id="symbolizer-0222">symbolizer 0.22.2<a class="anchor" aria-label="anchor" href="#symbolizer-0222"></a></h2>
+<div class="section level3">
+<h3 id="v0222--multi-tier-random-effects-in-tab-slice-a1--a2--worked-row-polish-0-22-2">v0.22.2 – multi-tier random-effects in Tab 3 (Slice A1 + A2 + worked-row polish)<a class="anchor" aria-label="anchor" href="#v0222--multi-tier-random-effects-in-tab-slice-a1--a2--worked-row-polish-0-22-2"></a></h3>
+<p>Closes the second of the two bugs the maintainer’s Fisher pass surfaced on 2026-05-28: the phylogenetic random-effect tier was silently invisible in Tab 3 of the meta-multilevel widget, because <code>drm_build_expanded()</code> extracted only the first random-effect tier via <code>re_per_entry[[which(has_re)[1L]]]</code>. For phylo + study fits, the 35-species phylogenetic tier (the article’s central thesis) was hidden behind a single bare <code>Z</code> aggregate that actually held only the iid study tier.</p>
+<p>This release replaces the single-tier extraction path with a per-tier one. Every random-effect tier present in <code>re_per_entry</code> is now surfaced into the <code>$expanded$Z_per_tier</code> and <code>$expanded$u_per_tier</code> slots, with kinds tagged in <code>$expanded$tier_kind</code> (<code>"iid"</code> or <code>"structured"</code>). The Tab 3 stacked matrix block iterates these slots so every tier shows up in the equation; the worked-row at observation 1 likewise expands to include each tier’s BLUP. Single-tier fits keep the historic shape (no <code>_g</code> subscripts, no per-tier subscript on <code>\hat{u}</code>) for back-compat.</p>
+<div class="section level4">
+<h4 id="numerical-contract-0-22-2">Numerical contract<a class="anchor" aria-label="anchor" href="#numerical-contract-0-22-2"></a></h4>
+<p>Per the Fisher protocol from <code>docs/specs/import-from-sisters.md</code>:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐗</mi><mover><mi>𝛃</mi><mo accent="true">̂</mo></mover><mo>+</mo><munder><mo>∑</mo><mi>g</mi></munder><msub><mi>𝐙</mi><mi>g</mi></msub><msub><mover><mi>𝐮</mi><mo accent="true">̂</mo></mover><mi>g</mi></msub><mo>=</mo><mover><mi>𝛍</mi><mo accent="true">̂</mo></mover></mrow><annotation encoding="application/x-tex">\mathbf{X}\hat{\boldsymbol{\beta}} + \sum_g \mathbf{Z}_g \hat{\mathbf{u}}_g = \hat{\boldsymbol{\mu}}</annotation></semantics></math></p>
+<p>verified to 2.5e-14 on the Pottier thermal subset (35 species × 39 studies × 164 effects), well under the protocol tolerance of 1e-9. Closure holds for both the iid tier (study) and the structured tier (phylogeny, where BLUPs are extracted from <code>fit$obj$report()$u_phylo[1:n_tips]</code> in factor-level order).</p>
+</div>
+<div class="section level4">
+<h4 id="renderer-changes-0-22-2">Renderer changes<a class="anchor" aria-label="anchor" href="#renderer-changes-0-22-2"></a></h4>
+<ul><li>
+<code><a href="../reference/as_html_three_views.html">as_html_three_views()</a></code> Tab 3 stacked block iterates <code>$expanded$Z_per_tier</code> and emits one <code>\mathbf{Z}_g \hat{\mathbf{u}}_g</code> block per tier with <code>\text{...}</code>-wrapped subscripts so multi-character group names like <code>study_ID</code> render legibly.</li>
+<li>The worked-row helper (<code>three_views_worked_row()</code>) iterates the same per-tier slots and emits one <code>\hat{u}_{g,\,\text{level}(1)}</code> term per tier. On the Pottier widget, observation 1 now shows `+ _{,,3}
+<ul><li>_{,,}`, carrying the BLUP for each tier so the scalar arithmetic closes.</li>
+</ul></li>
+<li>Pattern O smart-column-truncation now promotes informative MIDDLE columns into the visible head/tail when neither structural head nor tail contains any 1s within the visible row band. The phylo Z column on the Pottier fit (visible species: Myzus_persicae at col 18, Oreochromis_niloticus at col 20 of 35) now displays the 1s rather than all zeros.</li>
+</ul></div>
+<div class="section level4">
+<h4 id="extractor-changes-0-22-2">Extractor changes<a class="anchor" aria-label="anchor" href="#extractor-changes-0-22-2"></a></h4>
+<ul><li>
+<code>drm_build_expanded()</code> now accepts a <code>structured_matrix_for_group</code> argument and threads it through to flag structured tiers (where BLUPs come from <code>fit$obj$report()$u_phylo</code> rather than <code>fit$random_effects$mu$terms</code>).</li>
+<li>The factor-coercion-before-<code>model.matrix</code> discipline from v0.22.1.3 applies per-tier; numeric grouping variables for ANY tier are correctly turned into one-hot incidence matrices.</li>
+</ul></div>
+<div class="section level4">
+<h4 id="tests-0-22-2">Tests<a class="anchor" aria-label="anchor" href="#tests-0-22-2"></a></h4>
+<ul><li>New <code>tests/testthat/test-symbolize-drmtmb-per-tier-Z.R</code> (30 expectations): two-tier iid fit surfaces both Z, Pottier meta-multilevel surfaces study + phylogeny with full Fisher closure at 1e-9, single-RE back-compat <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Z</mi><mi>g</mi></msub><mi>/</mi></mrow><annotation encoding="application/x-tex">Z_g/</annotation></semantics></math>u alias semantics.</li>
+<li>
+<code>tests/testthat/test-expand.R</code> updated to list the new slot names on <code>$expanded</code>.</li>
+<li>Full suite: <code>FAIL 0 | SKIP 0 | PASS 1891</code> (+30 from new tests beyond 1861).</li>
+</ul></div>
+<div class="section level4">
+<h4 id="audit-trail-0-22-2">Audit trail<a class="anchor" aria-label="anchor" href="#audit-trail-0-22-2"></a></h4>
+<ul><li>
+<code>docs/dev-log/figure-audits/v0.22.1-meta-phylo/claude-fisher-audit.md</code> is the numerical Fisher pass that surfaced both bugs.</li>
+<li>
+<code>docs/specs/import-from-sisters.md</code> is the synthesis of three sister-repo scouts (drmTMB / glmmTMB / gllvmTMB) into a discipline-import spec. This release implements Priority 1 (Z-matrix bug class) and part of Priority 2 (Fisher closure baked into a regression test).</li>
+</ul></div>
+<div class="section level4">
+<h4 id="known-residuals-0-22-2">Known residuals<a class="anchor" aria-label="anchor" href="#known-residuals-0-22-2"></a></h4>
+<ul><li>Codex CLI Fisher-pass demo is still pending a CLI upgrade (<code>codex-cli 0.120.0</code> does not yet support the backend’s <code>gpt-5.5</code> routing). The Claude-authored Fisher pass substitutes; live Codex demo deferred.</li>
+<li>The remaining Priority 3-6 imports (V-agent registry expansion, after-task <code>_TEMPLATE.md</code>, <code>tools/</code> enforcement scripts, <code>.codex/agents/</code> stubs) are deferred to v0.22.3-discipline.</li>
+</ul></div>
+</div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.22.1.3" id="symbolizer-02213">symbolizer 0.22.1.3<a class="anchor" aria-label="anchor" href="#symbolizer-02213"></a></h2>
+<div class="section level3">
+<h3 id="v02213--drmtmb-z_g-extractor-fix-numeric-group_var-0-22-1-3">v0.22.1.3 – drmTMB Z_g extractor fix (numeric group_var)<a class="anchor" aria-label="anchor" href="#v02213--drmtmb-z_g-extractor-fix-numeric-group_var-0-22-1-3"></a></h3>
+<p><strong>Bug fix.</strong> <code>drm_build_expanded()$Z_g</code> was being constructed via <code>stats::model.matrix(~ 0 + g_var, data = fit$data)</code> without coercing <code>g_var</code> to factor. When <code>g_var</code> is a NUMERIC variable in <code>fit$data</code> (very common – <code>study_ID</code>, <code>site_id</code>, <code>animal_id</code> codes are typically integer-coded), <code>model.matrix</code> does NOT build a one-hot incidence matrix. It returns a single-column matrix carrying the literal integer values. The widget Tab 3 then displayed a <code>164 x 1</code> Z column of raw study integers <code>[3, 3, 3, ..., 147, 147]</code> next to a <code>39</code>-vector of BLUPs, and the displayed <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐙</mi><mover><mi>𝐮</mi><mo accent="true">̂</mo></mover></mrow><annotation encoding="application/x-tex">\mathbf{Z}\hat{\mathbf{u}}</annotation></semantics></math> arithmetic in the worked row was meaningless (<code>3.29e-18</code> instead of the true BLUP value <code>9.74e-11</code> for study_ID = 3).</p>
+<p>Surfaced by the maintainer’s Fisher-pass on the v0.22.1.2 rendered widget – the V1 Florence and V3 Noether audits had both rubber-stamped Tab 3 without checking that Z was actually a one-hot matrix. The bug had been latent in <code>drm_build_expanded()</code> since v0.1 and affects every drmTMB fit where the grouping variable is stored as numeric in <code>fit$data</code>.</p>
+<p><strong>Fix.</strong> One-line change in <code>R/symbolize-drmtmb.R</code>: convert <code>g_var</code> to factor before <code>model.matrix</code> so the one-hot matrix is emitted correctly. The companion <code>u</code> vector is then re-ordered by factor levels so <code>Z_g %*% u</code> gives the correct per-observation random-effect contribution.</p>
+<p><strong>Regression coverage</strong> added in <code>tests/testthat/test-symbolize-drmtmb-Zg-numeric-group.R</code>: - <code>Z_g</code> is <code>n x k</code> with row-sums all 1 and values in {0, 1} for numeric group_var - <code>Z_g %*% u</code> equals the per-row BLUP indexed by the row’s group - factor input path (previously already correct) still works</p>
+<p>Full suite: <code>FAIL 0 | SKIP 0 | PASS 1861</code> (+16 from new tests).</p>
+</div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.22.1.2" id="symbolizer-02212">symbolizer 0.22.1.2<a class="anchor" aria-label="anchor" href="#symbolizer-02212"></a></h2>
+<div class="section level3">
+<h3 id="v02212--tab-marginal-covariance-decomposition-0-22-1-2">v0.22.1.2 – Tab 3 marginal-covariance decomposition<a class="anchor" aria-label="anchor" href="#v02212--tab-marginal-covariance-decomposition-0-22-1-2"></a></h3>
+<p>Closes V2 Pat-lens flow break <a href="https://github.com/itchyshin/symbolizer/issues/2" class="external-link">#2</a> on <code>symbolizer-meta-analysis.Rmd</code> §4: Tab 3 of the widget now <em>shows</em> the marginal-covariance decomposition rather than just announcing it in prose.</p>
+<div class="section level4">
+<h4 id="what-changed-0-22-1-2">What changed<a class="anchor" aria-label="anchor" href="#what-changed-0-22-1-2"></a></h4>
+<p>New helper <code>latex_marginal_cov_block(x)</code> in <code>R/render-three-views.R</code> emits a LaTeX <code>Cov(y) = ...</code> block of the form</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><munder><munder><mrow><mrow><mi mathvariant="normal">C</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">v</mi></mrow><mo stretchy="false" form="prefix">(</mo><mi>𝐲</mi><mo stretchy="false" form="postfix">)</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mi>n</mi><mo>×</mo><mi>n</mi></mrow></munder><mo>=</mo><munder><munder><mrow><msubsup><mi>σ</mi><mi>g</mi><mn>2</mn></msubsup><mspace width="0.167em"></mspace><mi>𝐀</mi></mrow><mo accent="true">⏟</mo></munder><mtext mathvariant="normal">phylogeny tier</mtext></munder><mo>+</mo><munder><munder><mrow><msubsup><mi>σ</mi><mi>g</mi><mn>2</mn></msubsup><mspace width="0.167em"></mspace><msub><mi>𝐙</mi><mi>g</mi></msub><mspace width="0.167em"></mspace><msubsup><mi>𝐙</mi><mi>g</mi><mrow><mspace width="-0.167em"></mspace><mi>⊤</mi></mrow></msubsup></mrow><mo accent="true">⏟</mo></munder><mtext mathvariant="normal">study tier</mtext></munder><mo>+</mo><munder><munder><mrow><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">g</mi></mrow><mo stretchy="false" form="prefix">(</mo><mi>𝐯</mi><mo stretchy="false" form="postfix">)</mo></mrow><mo accent="true">⏟</mo></munder><mtext mathvariant="normal">known sampling</mtext></munder></mrow><annotation encoding="application/x-tex">\underbrace{\mathrm{Cov}(\mathbf{y})}_{n \times n} = \underbrace{\sigma_g^2\, \mathbf{A}}_{\text{phylogeny tier}} + \underbrace{\sigma_g^2\, \mathbf{Z}_g\,\mathbf{Z}_g^{\!\top}}_{\text{study tier}} + \underbrace{\mathrm{diag}(\mathbf{v})}_{\text{known sampling}}</annotation></semantics></math></p>
+<p>with one underbrace-labeled term per random-effect tier (structured tiers carry <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐀</mi><annotation encoding="application/x-tex">\mathbf{A}</annotation></semantics></math>; unstructured tiers use <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>𝐙</mi><mi>g</mi></msub><msubsup><mi>𝐙</mi><mi>g</mi><mi>⊤</mi></msubsup></mrow><annotation encoding="application/x-tex">\mathbf{Z}_g\mathbf{Z}_g^\top</annotation></semantics></math>) plus a <code>diag(v)</code> term when <code><a href="https://itchyshin.github.io/drmTMB/reference/meta_V.html" class="external-link">meta_V()</a></code> is detected. The helper returns <code>NULL</code> for trivial cases (single iid RE without <code>meta_V</code>) so simple fits aren’t cluttered.</p>
+<p>Wired into <code>as_html_three_views.symbolized_model</code> Tab 3. Mutually exclusive with the existing gllvm <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝚺</mi><mi>B</mi></msub><annotation encoding="application/x-tex">\boldsymbol{\Sigma}_B</annotation></semantics></math> / <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝚺</mi><mi>W</mi></msub><annotation encoding="application/x-tex">\boldsymbol{\Sigma}_W</annotation></semantics></math> stacked block — gllvm fits never carry <code>meta_analysis</code> in <code>detected_signals</code> and never expose <code>metadata$structured_matrix_for_group</code>, so the new block fires only on meta-analysis / multilevel widgets.</p>
+<p><code><a href="../reference/symbolize.drmTMB.html">symbolize.drmTMB()</a></code> now also exposes <code>metadata$structured_matrix_for_group</code> (a named list mapping each detected structured group to its LaTeX matrix symbol, e.g. <code>list(phylogeny = "\\mathbf{A}")</code>) so the renderer can match structured tiers to their group_vars.</p>
+</div>
+<div class="section level4">
+<h4 id="tests-0-22-1-2">Tests<a class="anchor" aria-label="anchor" href="#tests-0-22-1-2"></a></h4>
+<p>Two new tests in <code>test-symbolize-drmtmb-meta-multilevel.R</code>: one assertion on a meta-multilevel fit (block contains the three tier symbols + the <code>Cov(y)</code> LHS), and one assertion that single-RE non-meta fits return <code>NULL</code>. Suite at <code>FAIL 0 | SKIP 0 | PASS 1847</code>.</p>
+</div>
+</div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.22.1.1" id="symbolizer-02211">symbolizer 0.22.1.1<a class="anchor" aria-label="anchor" href="#symbolizer-02211"></a></h2>
+<div class="section level3">
+<h3 id="v02211--phylo-tier-propagated-into-widget-equations-0-22-1-1">v0.22.1.1 – phylo tier propagated into widget equations<a class="anchor" aria-label="anchor" href="#v02211--phylo-tier-propagated-into-widget-equations-0-22-1-1"></a></h3>
+<p>Closes the V2 Pat-lens blocker on <code>symbolizer-meta-analysis.Rmd</code> §4: the article’s central thesis equation – the phylogenetic random effect <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>𝐮</mi><mi>p</mi></msub><mo>∼</mo><mi>𝒩</mi><mo stretchy="false" form="prefix">(</mo><mn>𝟎</mn><mo>,</mo><mspace width="0.167em"></mspace><msubsup><mi>σ</mi><mi>p</mi><mn>2</mn></msubsup><mspace width="0.167em"></mspace><mi>𝐀</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\mathbf{u}_p \sim \mathcal{N}(\mathbf{0},\,
+\sigma_p^2\,\mathbf{A})</annotation></semantics></math> – now appears in the rendered widget across all three tabs.</p>
+<div class="section level4">
+<h4 id="what-changed-0-22-1-1">What changed<a class="anchor" aria-label="anchor" href="#what-changed-0-22-1-1"></a></h4>
+<p><code><a href="../reference/symbolize.drmTMB.html">symbolize.drmTMB()</a></code> now synthesises a random-effect row for each <code><a href="https://itchyshin.github.io/drmTMB/reference/phylo.html" class="external-link">phylo()</a></code> / <code><a href="https://itchyshin.github.io/drmTMB/reference/animal.html" class="external-link">animal()</a></code> marker in the formula so the equation renderer, <code>variance_components</code>, symbol dictionary, and assumption gate all see the structured tier. Previously the tier was detected in <code>metadata$phylo_representation</code> and <code>metadata$structured_matrices</code> but never reached <code>$random_effects</code> (because drmTMB consumes <code><a href="https://itchyshin.github.io/drmTMB/reference/phylo.html" class="external-link">phylo()</a></code> into its internal sparse-precision pipeline rather than <code>fit$random_effects</code>).</p>
+<p><code>drm_build_components()</code> now receives <code>structured_matrix_for_group</code> and emits <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>𝐮</mi><mi>g</mi></msub><mo>∼</mo><mi>𝒩</mi><mo stretchy="false" form="prefix">(</mo><mn>𝟎</mn><mo>,</mo><mspace width="0.167em"></mspace><msubsup><mi>σ</mi><mi>g</mi><mn>2</mn></msubsup><mspace width="0.167em"></mspace><msub><mi>𝐀</mi><mrow><mi>k</mi><mo>×</mo><mi>k</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\mathbf{u}_g \sim \mathcal{N}(\mathbf{0},\, \sigma_g^2\,
+\mathbf{A}_{k \times k})</annotation></semantics></math> (matrix form) and <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>𝐮</mi><mi>g</mi></msub><mo>∼</mo><mi>𝒩</mi><mo stretchy="false" form="prefix">(</mo><mn>𝟎</mn><mo>,</mo><mspace width="0.167em"></mspace><msubsup><mi>σ</mi><mi>g</mi><mn>2</mn></msubsup><mspace width="0.167em"></mspace><mi>𝐀</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\mathbf{u}_g \sim
+\mathcal{N}(\mathbf{0},\, \sigma_g^2\, \mathbf{A})</annotation></semantics></math> (index form) for any structured tier, instead of falling through to <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝐈</mi><mi>n</mi></msub><annotation encoding="application/x-tex">\mathbf{I}_n</annotation></semantics></math>.</p>
+<p>The linear-predictor matrix form disambiguates multiple intercept-only RE groups: single-RE fits keep the historic bare <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐮</mi><annotation encoding="application/x-tex">\mathbf{u}</annotation></semantics></math>, multi-RE fits emit <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>𝐮</mi><msub><mi>g</mi><mn>1</mn></msub></msub><mo>+</mo><msub><mi>𝐮</mi><msub><mi>g</mi><mn>2</mn></msub></msub></mrow><annotation encoding="application/x-tex">\mathbf{u}_{g_1} + \mathbf{u}_{g_2}</annotation></semantics></math> so the multilevel structure is visible.</p>
+<p><code>sym$metadata$structured_matrices</code> is now populated when drmTMB detects <code><a href="https://itchyshin.github.io/drmTMB/reference/phylo.html" class="external-link">phylo()</a></code> / <code><a href="https://itchyshin.github.io/drmTMB/reference/animal.html" class="external-link">animal()</a></code> / <code><a href="https://itchyshin.github.io/drmTMB/reference/spatial.html" class="external-link">spatial()</a></code>, exposing the matrix symbol, role tag, and dimensions for downstream consumers.</p>
+</div>
+<div class="section level4">
+<h4 id="tests-0-22-1-1">Tests<a class="anchor" aria-label="anchor" href="#tests-0-22-1-1"></a></h4>
+<p><code>test-symbolize-drmtmb-meta-multilevel.R</code> gains two un-skipped tests covering the variance_components phylo tier and the matrix- form equation row <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>𝐮</mi><mtext mathvariant="normal">phylogeny</mtext></msub><mo>∼</mo><mi>𝒩</mi><mo stretchy="false" form="prefix">(</mo><mn>𝟎</mn><mo>,</mo><mspace width="0.167em"></mspace><msubsup><mi>σ</mi><mtext mathvariant="normal">phylogeny</mtext><mn>2</mn></msubsup><mspace width="0.167em"></mspace><msub><mi>𝐀</mi><mrow><mn>35</mn><mo>×</mo><mn>35</mn></mrow></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\mathbf{u}_{\text{phylogeny}} \sim
+\mathcal{N}(\mathbf{0},\, \sigma_{\text{phylogeny}}^2\,
+\mathbf{A}_{35 \times 35})</annotation></semantics></math>, plus a new test for <code>metadata$structured_matrices</code>. Suite at FAIL 0 | SKIP 0 | PASS 1845.</p>
+</div>
+<div class="section level4">
+<h4 id="vignette-0-22-1-1">Vignette<a class="anchor" aria-label="anchor" href="#vignette-0-22-1-1"></a></h4>
+<p><code>vignettes/symbolizer-meta-analysis.Rmd</code> §4.3 drops the “Known limitation (v0.22.1)” caveat (the cause is fixed) and documents the synthesis path.</p>
+</div>
+</div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.22.1" id="symbolizer-0221">symbolizer 0.22.1<a class="anchor" aria-label="anchor" href="#symbolizer-0221"></a></h2>
+<div class="section level3">
+<h3 id="v0221--meta-analysis-widget-phylogenetic-multilevel-0-22-1">v0.22.1 – meta-analysis Widget 2 (phylogenetic multilevel)<a class="anchor" aria-label="anchor" href="#v0221--meta-analysis-widget-phylogenetic-multilevel-0-22-1"></a></h3>
+<p>Second slice of the v0.22 meta-analysis article (design anchored on Nakagawa et al. 2025 <em>Global Change Biology</em> e70204 “Bonus 2”). Adds §4 of <code>vignettes/symbolizer-meta-analysis.Rmd</code> – phylogenetic multilevel meta-analysis with three Faces:</p>
+<ul><li>
+<strong>Face 1 (deep)</strong>: <code>drmTMB::drmTMB(drm_formula(es ~ x + meta_V(V = vi) + phylo(1 | species, tree = ...) + (1 | study), sigma ~ 1))</code> – the GCB-aligned native idiom that replaces brms <code>se(sqrt(vi))</code> and <code>gr(., cov = A)</code>.</li>
+<li>
+<strong>Face 2 (light)</strong>: <code>brms::brm(bf(es | se(sqrt(vi)) ~ ... + (1 | gr(species, cov = mat))))</code> – the GCB paper’s reference syntax.</li>
+<li>
+<strong>Face 3 (light)</strong>: <code>metafor::rma.mv(yi, V = vi, random = list(~1|phylogeny, ~1|study), R = list(phylogeny = A))</code>.</li>
+</ul><p>Widget 2 (id = <code>sym-phylomultilevel-...</code>) renders the per-tier <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝚺</mi><annotation encoding="application/x-tex">\boldsymbol{\Sigma}</annotation></semantics></math> decomposition in Tab 3, mirroring the v0.21.6-redo gllvm Σ-block layout. The article switches data from the §3 BCG fixture to a 35-species / 164-effect subset of the Pottier et al. (2022) thermal acclimation data shipped at <code>inst/extdata/thermal_subset.csv</code>.</p>
+<div class="section level4">
+<h4 id="extractor-additions-0-22-1">Extractor additions<a class="anchor" aria-label="anchor" href="#extractor-additions-0-22-1"></a></h4>
+<ul><li>
+<code><a href="../reference/symbolize.drmTMB.html">symbolize.drmTMB()</a></code> detects <code><a href="https://itchyshin.github.io/drmTMB/reference/meta_V.html" class="external-link">meta_V()</a></code> inside the formula and tags <code>metadata$context = "meta_analysis"</code>. Two production-code fixes (<code>drm_strip_re_terms</code> + <code>drm_entry_rhs_formula</code>) ensure drm-formula parsing handles <code><a href="https://itchyshin.github.io/drmTMB/reference/meta_V.html" class="external-link">meta_V()</a></code> and <code><a href="https://itchyshin.github.io/drmTMB/reference/phylo.html" class="external-link">phylo()</a></code> markers cleanly.</li>
+<li>
+<code>symbolize.brms()</code> detects <code>se(...)</code> on the response and tags <code>metadata$context = "meta_analysis"</code>.</li>
+</ul></div>
+<div class="section level4">
+<h4 id="data-0-22-1">Data<a class="anchor" aria-label="anchor" href="#data-0-22-1"></a></h4>
+<ul><li>
+<code>inst/extdata/thermal_subset.csv</code> (164 effects, 35 species, 39 studies; seed = <code>20260528L</code>).</li>
+<li>
+<code>inst/extdata/thermal_subset_tree.tre</code> (ultrametric phylogeny matching the subset).</li>
+<li>
+<code>data-raw/make-thermal-subset.R</code> (reproducible build script).</li>
+</ul></div>
+<div class="section level4">
+<h4 id="tests-0-22-1">Tests<a class="anchor" aria-label="anchor" href="#tests-0-22-1"></a></h4>
+<ul><li>
+<code>tests/testthat/test-symbolize-drmtmb-meta-multilevel.R</code> (5 passing + 1 documented skip).</li>
+<li>
+<code>tests/testthat/test-symbolize-brms-meta.R</code> (3 passing).</li>
+<li>
+<code>tests/testthat/helper-meta-fits.R</code> adds three fixtures: <code>fit_drmtmb_phylo_multilevel()</code>, <code>fit_brms_phylo_meta()</code>, <code>fit_metafor_phylo_meta()</code>.</li>
+</ul></div>
+<div class="section level4">
+<h4 id="capabilities--assumptions-0-22-1">Capabilities + assumptions<a class="anchor" aria-label="anchor" href="#capabilities--assumptions-0-22-1"></a></h4>
+<ul><li>4 new rows in <code>inst/extdata/capabilities.csv</code>: drmTMB / brms / metafor × meta-analytic + phylo-multilevel.</li>
+<li>7 new rows in <code>inst/extdata/assumption-templates.csv</code> for <code>family = gaussian</code> with <code>requires = meta_analysis</code>: the meta-analytic likelihood (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mi>k</mi></msub><mo>∣</mo><msub><mi>θ</mi><mi>k</mi></msub><mo>∼</mo><mrow><mi mathvariant="normal">N</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>θ</mi><mi>k</mi></msub><mo>,</mo><mspace width="0.167em"></mspace><msub><mi>v</mi><mi>k</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">y_k \mid \theta_k \sim
+\mathrm{Normal}(\theta_k,\, v_k)</annotation></semantics></math>), the known-sampling-variance caveat (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>v</mi><mi>k</mi></msub><annotation encoding="application/x-tex">v_k</annotation></semantics></math> is an input, not a parameter), the moderator
+<ul><li>random-effect linear predictor for <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>θ</mi><mi>k</mi></msub><annotation encoding="application/x-tex">\theta_k</annotation></semantics></math>, conditional independence, and three reader-responsibilities (no publication bias, correct effect metric, no missing-at-random). Rows fire only when <code><a href="../reference/symbolize.drmTMB.html">symbolize.drmTMB()</a></code> or <code>symbolize.brms()</code> reports <code>detected_signals</code> including <code>"meta_analysis"</code>.</li>
+</ul></li>
+</ul></div>
+<div class="section level4">
+<h4 id="out-of-scope-deferred-0-22-1">Out of scope (deferred)<a class="anchor" aria-label="anchor" href="#out-of-scope-deferred-0-22-1"></a></h4>
+<ul><li>§5 location-scale Widget 3 (v0.22.2).</li>
+<li>PDF widgets via <code><a href="../reference/as_pdf_three_views.html">as_pdf_three_views()</a></code> (v0.22.3).</li>
+<li>Updating §2/§3 to use the thermal dataset (currently still BCG; the §4 transition paragraph documents the switch).</li>
+<li>MCMCglmm <code>mev = vi</code> bridge (lands later if scope allows).</li>
+</ul></div>
+</div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.21.6" id="symbolizer-0216-redo">symbolizer 0.21.6-redo<a class="anchor" aria-label="anchor" href="#symbolizer-0216-redo"></a></h2>
 <div class="section level3">
@@ -637,11 +870,11 @@ d(d-1)/2</annotation></semantics></math> parameter counting.</li>
 <h3 id="v0182--three-views-widget-tab-switching-works-again-0-18-2">v0.18.2 – three-views widget tab switching works again<a class="anchor" aria-label="anchor" href="#v0182--three-views-widget-tab-switching-works-again-0-18-2"></a></h3>
 <p>The interactive <code><a href="../reference/as_html_three_views.html">as_html_three_views()</a></code> widget rendered correctly in v0.18.1 (after the indented-code-block fix) but the <strong>tabs did not switch on click</strong>. Only the first panel (“Equation”) was reachable on the deployed pkgdown article and any knitted vignette.</p>
 <p>Root cause: the inline JavaScript that wires up <code>click</code> and <code>keydown</code> handlers was written as a literal R string with embedded <code>\"</code> escape sequences inside the two <code>querySelectorAll</code> selectors:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="bu">root</span><span class="op">.</span><span class="fu">querySelectorAll</span>(<span class="st">"[role=</span><span class="sc">\"</span><span class="st">tab</span><span class="sc">\"</span><span class="st">]"</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="bu">root</span><span class="op">.</span><span class="fu">querySelectorAll</span>(<span class="st">"[role=</span><span class="sc">\"</span><span class="st">tabpanel</span><span class="sc">\"</span><span class="st">]"</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="bu">root</span><span class="op">.</span><span class="fu">querySelectorAll</span>(<span class="st">"[role=</span><span class="sc">\"</span><span class="st">tab</span><span class="sc">\"</span><span class="st">]"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="bu">root</span><span class="op">.</span><span class="fu">querySelectorAll</span>(<span class="st">"[role=</span><span class="sc">\"</span><span class="st">tabpanel</span><span class="sc">\"</span><span class="st">]"</span>)</span></code></pre></div>
 <p>R’s string parser <strong>does</strong> process <code>\"</code> inside both single- and double-quoted strings, stripping the backslash. After R parsing, the emitted JavaScript became:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="bu">root</span><span class="op">.</span><span class="fu">querySelectorAll</span>(<span class="st">"[role="</span>tab<span class="st">"]"</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="bu">root</span><span class="op">.</span><span class="fu">querySelectorAll</span>(<span class="st">"[role="</span>tabpanel<span class="st">"]"</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode js"><code class="sourceCode javascript"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="bu">root</span><span class="op">.</span><span class="fu">querySelectorAll</span>(<span class="st">"[role="</span>tab<span class="st">"]"</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="bu">root</span><span class="op">.</span><span class="fu">querySelectorAll</span>(<span class="st">"[role="</span>tabpanel<span class="st">"]"</span>)</span></code></pre></div>
 <p>which is a JS syntax error. The IIFE failed silently, no event handlers were installed, and the panel-switching logic never ran.</p>
 <p>Fix: the JS body is now wrapped in an R raw string (<code>r"---(...)---"</code>, available since R 4.0; the package’s <code>Depends</code> is R &gt;= 4.1.0). Raw strings do not process escape sequences, so the <code>\"</code> survives verbatim into the rendered <code>&lt;script&gt;</code> block.</p>
 <p>A regression test (<code>test-three-views.R::"emitted JS preserves the escaped CSS selector quotes"</code>) asserts both that the <strong>escaped</strong> form <code>querySelectorAll("[role=\"tab\"]")</code> appears, and that the <strong>broken</strong> un-escaped form <code>querySelectorAll("[role="tab"]")</code> does not. This catches any future regression to plain-quoted R strings.</p>

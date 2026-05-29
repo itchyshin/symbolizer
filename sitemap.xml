@@ -15,6 +15,7 @@
 <url><loc>https://itchyshin.github.io/symbolizer/articles/symbolizer-meta.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/articles/symbolizer-roadmap.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/articles/symbolizer-structural-dependence.html</loc></url>
+<url><loc>https://itchyshin.github.io/symbolizer/articles/symbolizer-variance-components.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/articles/symbolizer.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/authors.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/index.html</loc></url>
@@ -40,6 +41,7 @@
 <url><loc>https://itchyshin.github.io/symbolizer/reference/get_parameterization.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/reference/group_means.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/reference/group_slopes.html</loc></url>
+<url><loc>https://itchyshin.github.io/symbolizer/reference/icc.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/reference/index.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/reference/load_template.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/reference/methods_text.html</loc></url>
@@ -68,6 +70,7 @@
 <url><loc>https://itchyshin.github.io/symbolizer/reference/symbolizer-package.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/reference/symbolizer_capabilities.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/reference/validate_symbolized_model.html</loc></url>
+<url><loc>https://itchyshin.github.io/symbolizer/reference/variance_partition.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/reference/warning_table.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/reference/wrap_aligned.html</loc></url>
 <url><loc>https://itchyshin.github.io/symbolizer/reference/wrap_env.html</loc></url>

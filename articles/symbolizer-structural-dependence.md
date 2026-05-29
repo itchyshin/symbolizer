@@ -278,7 +278,7 @@ sym_mcmc$metadata$heritability           # h^2 derived automatically
 
 #### Three-views widget for the MCMCglmm fit
 
-[Skip three-views widget](#sym-mcmc-1779968778-end)
+[Skip three-views widget](#sym-mcmc-1780075488-end)
 
 ▸1. Index
 
@@ -295,6 +295,10 @@ similarities (cell $`A_{ij}`$ = fraction of shared branch length between
 species $`i`$ and $`j`$). The phylogenetic SD $`\sigma_p`$ measures how
 much across-species variation remains after fixed-effect predictors are
 accounted for.
+
+**Coefficient reading.** On the response scale, $`\hat\beta`$ is the
+additive change in the mean of the response for a one-unit increase in
+the predictor (identity link – no back-transformation needed).
 
 ``` math
 \begin{aligned}
@@ -316,6 +320,17 @@ where:
 - $`\mathbf{A}`$ — phylogenetic / pedigree correlation matrix on species
   (Hadfield-Nakagawa all-nodes sparse-precision representation, supplied
   via ginverse)  $`\mathbb{R}^{k_{species} \times k_{species}}`$
+
+**Where does the variation live?** Where the variation lives – each row
+is one source of variance, shown as a share of the total.
+
+    <div style="width:69.6%;background:#2c7fb8;color:#fff;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="species">species 69.6%</div>
+    <div style="width:30.4%;background:#d9d9d9;color:#333;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="Residual (within-group)">Residual (within-group) 30.4%</div>
+
+**ICC (data scale):** 0.696. Data-scale ICC: the share of total variance
+that lies between groups – a genuine proportion of variance.
+
+Point estimates only; uncertainty not shown.
 
 The same model in matrix form – the structural contract every textbook
 past chapter 4 switches to.
@@ -373,16 +388,16 @@ For observation *i* = 1 of your data:
 
 ``` math
 \begin{aligned}
-zr_{1} &= \hat\beta_{0} + \hat{u}_{\mathrm{Alca torda}} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
-0.166 &= 0.366 + (-0.151) + (-0.0485) &\quad(\text{with your numbers}) \\
-&= \underbrace{0.215}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-0.0485)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
+zr_{1} &= \hat\beta_{0} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
+\hat\mu_{1} &= 0.366 \approx 0.215 &\quad(\text{predicted mean} = \text{linear predictor}) \\
+zr_{1} &= \underbrace{0.215}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-0.0485)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,} &\quad(\text{observed} = \text{predicted mean} + \text{residual})
 \end{aligned}
 ```
 
 Stacking the same response equation for all *n* = 60 observations:
 
 ``` math
-\underbrace{\begin{bmatrix} 0.166 \\ 1.12 \\ 0.66 \\ 1.05 \\ 0.676 \\ \vdots \\ 0.172 \\ 0.0853 \end{bmatrix}}_{\textstyle\,\mathbf{zr}_{\,60 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 \\    1 \\    1 \\    1 \\    1 \\ \vdots \\    1 \\    1 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,60 \times 1}\,}\, \underbrace{\begin{bmatrix} 0.366 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,1 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} -0.151 \\ 0.403 \\ 0.237 \\ 0.396 \\ 0.026 \\ \vdots \\ -0.0165 \\ -0.185 \end{bmatrix}}_{\textstyle\,\hat{\mathbf{u}}_{\,60 \times 1}\;\text{(per-obs random effect)}\,} \;+\; \underbrace{\begin{bmatrix} -0.0485 \\ 0.351 \\ 0.057 \\ 0.289 \\ 0.285 \\ \vdots \\ -0.178 \\ -0.0958 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,60 \times 1}\;\text{(residual)}\,}
+\underbrace{\begin{bmatrix} 0.166 \\ 1.12 \\ 0.66 \\ 1.05 \\ 0.676 \\ \vdots \\ 0.172 \\ 0.0853 \end{bmatrix}}_{\textstyle\,\mathbf{zr}_{\,60 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 \\    1 \\    1 \\    1 \\    1 \\ \vdots \\    1 \\    1 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,60 \times 1}\,}\, \underbrace{\begin{bmatrix} 0.366 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,1 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} -0.0485 \\ 0.351 \\ 0.057 \\ 0.289 \\ 0.285 \\ \vdots \\ -0.178 \\ -0.0958 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,60 \times 1}\;\text{(residual)}\,}
 ```
 
 **Left**: observed vector $`\mathbf{zr}`$. **Middle**: the prediction
@@ -391,6 +406,12 @@ $`\mathbf{X}\hat{\boldsymbol{\beta}} + \hat{\mathbf{u}} = \hat{\boldsymbol{\mu}}
 $`\hat{\boldsymbol{\varepsilon}} = \mathbf{zr} - \hat{\boldsymbol{\mu}}`$.
 Every row of this matrix equation is one of the response-equation rows
 from the worked row above.
+
+**Partial pooling.** The random-effect estimates shown here (the BLUPs)
+are partially pooled: each group’s estimate is shrunk toward zero by an
+amount that grows when the group has little data and shrinks when the
+between-group variance is large. Groups with the least data are pulled
+hardest toward the overall mean.
 
 **And the structured-covariance prior on `u`**. The random effect that
 gives this model its structural-dependence character:

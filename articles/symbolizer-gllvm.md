@@ -333,7 +333,7 @@ sym_syndromes <- symbolize(
 
 ### Three views — syndromes
 
-[Skip three-views widget](#sym-syndromes-1779968753-end)
+[Skip three-views widget](#sym-syndromes-1780075459-end)
 
 ▸1. Index
 
@@ -350,6 +350,10 @@ between-individual uniquenesses ($`\boldsymbol{\Psi}_B`$) absorb the
 residual variance the shared axes do not explain; the scalar
 $`\sigma_\epsilon^2`$ captures within-individual occasion-to-occasion
 noise.
+
+**Coefficient reading.** On the response scale, $`\hat\beta`$ is the
+additive change in the mean of the response for a one-unit increase in
+the predictor (identity link – no back-transformation needed).
 
 ``` math
 \begin{aligned}
@@ -435,16 +439,16 @@ For observation *i* = 1 of your data:
 
 ``` math
 \begin{aligned}
-y_{ij}_{1} &= \hat\beta_{0}\,\mathrm{t1}_{1} + \hat\beta_{1}\,\mathrm{t2}_{1} + \hat\beta_{2}\,\mathrm{t3}_{1} + \hat\beta_{3}\,\mathrm{t4}_{1} + \hat\beta_{4}\,\mathrm{t5}_{1} + \hat{u}_{\mathrm{1}} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
-0.581 &= 0.168 \times    1 + 0.0558 \times    0 + -0.0138 \times    0 + -0.102 \times    0 + 0.128 \times    0 + (0.226) + (0.188) &\quad(\text{with your numbers}) \\
-&= \underbrace{0.393}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(0.188)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
+y_{ij}_{1} &= \hat\beta_{0}\,\mathrm{t1}_{1} + \hat\beta_{1}\,\mathrm{t2}_{1} + \hat\beta_{2}\,\mathrm{t3}_{1} + \hat\beta_{3}\,\mathrm{t4}_{1} + \hat\beta_{4}\,\mathrm{t5}_{1} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
+\hat\mu_{1} &= 0.168 \times    1 + 0.0558 \times    0 - 0.0138 \times    0 - 0.102 \times    0 + 0.128 \times    0 \approx 0.393 &\quad(\text{predicted mean} = \text{linear predictor}) \\
+y_{ij}_{1} &= \underbrace{0.393}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(0.188)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,} &\quad(\text{observed} = \text{predicted mean} + \text{residual})
 \end{aligned}
 ```
 
 Stacking the same response equation for all *n* = 600 observations:
 
 ``` math
-\underbrace{\begin{bmatrix} 0.581 \\ -0.315 \\ -0.173 \\ 0.575 \\ 0.365 \\ \vdots \\ -0.31 \\   -1 \end{bmatrix}}_{\textstyle\,y_{ij}_{\,600 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 &    0 &    0 &    0 &    0 \\    0 &    1 &    0 &    0 &    0 \\    0 &    0 &    1 &    0 &    0 \\    0 &    0 &    0 &    1 &    0 \\    0 &    0 &    0 &    0 &    1 \\ \vdots & \vdots & \vdots & \vdots & \vdots \\    0 &    0 &    0 &    1 &    0 \\    0 &    0 &    0 &    0 &    1 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,600 \times 5}\,}\, \underbrace{\begin{bmatrix} 0.168 \\ 0.0558 \\ -0.0138 \\ -0.102 \\ 0.128 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,5 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} 0.226 \\ -0.179 \\ -0.267 \\ 0.205 \\ 0.107 \\ \vdots \\ -0.28 \\ -0.635 \end{bmatrix}}_{\textstyle\,\hat{\mathbf{u}}_{\,600 \times 1}\;\text{(per-obs random effect)}\,} \;+\; \underbrace{\begin{bmatrix} 0.188 \\ -0.192 \\ 0.107 \\ 0.472 \\ 0.131 \\ \vdots \\ 0.0713 \\ -0.496 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,600 \times 1}\;\text{(residual)}\,}
+\underbrace{\begin{bmatrix} 0.581 \\ -0.315 \\ -0.173 \\ 0.575 \\ 0.365 \\ \vdots \\ -0.31 \\   -1 \end{bmatrix}}_{\textstyle\,y_{ij}_{\,600 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 &    0 &    0 &    0 &    0 \\    0 &    1 &    0 &    0 &    0 \\    0 &    0 &    1 &    0 &    0 \\    0 &    0 &    0 &    1 &    0 \\    0 &    0 &    0 &    0 &    1 \\ \vdots & \vdots & \vdots & \vdots & \vdots \\    0 &    0 &    0 &    1 &    0 \\    0 &    0 &    0 &    0 &    1 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,600 \times 5}\,}\, \underbrace{\begin{bmatrix} 0.168 \\ 0.0558 \\ -0.0138 \\ -0.102 \\ 0.128 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,5 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} 0.188 \\ -0.192 \\ 0.107 \\ 0.472 \\ 0.131 \\ \vdots \\ 0.0713 \\ -0.496 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,600 \times 1}\;\text{(residual)}\,}
 ```
 
 **Left**: observed vector $`y_{ij}`$. **Middle**: the prediction
@@ -453,6 +457,12 @@ $`\mathbf{X}\hat{\boldsymbol{\beta}} + \hat{\mathbf{u}} = \hat{\boldsymbol{\mu}}
 $`\hat{\boldsymbol{\varepsilon}} = y_{ij} - \hat{\boldsymbol{\mu}}`$.
 Every row of this matrix equation is one of the response-equation rows
 from the worked row above.
+
+**Partial pooling.** The random-effect estimates shown here (the BLUPs)
+are partially pooled: each group’s estimate is shrunk toward zero by an
+amount that grows when the group has little data and shrinks when the
+between-group variance is large. Groups with the least data are pulled
+hardest toward the overall mean.
 
 Implied between-individual trait covariance $`\boldsymbol{\Sigma}_B`$
 decomposes into a shared low-rank part and per-trait uniquenesses:
@@ -525,7 +535,7 @@ sym_two_tier <- symbolize(
 
 ### Three views — two-tier
 
-[Skip three-views widget](#sym-twotier-1779968755-end)
+[Skip three-views widget](#sym-twotier-1780075461-end)
 
 ▸1. Index
 
@@ -543,6 +553,10 @@ session)’s position on the shared within-individual axes
 ($`\boldsymbol{\Lambda}_W \mathbf{z}_{W,ij}`$). Per-tier trait-specific
 uniquenesses ($`\boldsymbol{\Psi}_B`$, $`\boldsymbol{\Psi}_W`$) absorb
 the residual variance each tier’s shared axes do not explain.
+
+**Coefficient reading.** On the response scale, $`\hat\beta`$ is the
+additive change in the mean of the response for a one-unit increase in
+the predictor (identity link – no back-transformation needed).
 
 ``` math
 \begin{aligned}
@@ -634,16 +648,16 @@ For observation *i* = 1 of your data:
 
 ``` math
 \begin{aligned}
-y_{ij}_{1} &= \hat\beta_{0}\,\mathrm{t1}_{1} + \hat\beta_{1}\,\mathrm{t2}_{1} + \hat\beta_{2}\,\mathrm{t3}_{1} + \hat\beta_{3}\,\mathrm{t4}_{1} + \hat\beta_{4}\,\mathrm{t5}_{1} + \hat{u}_{\mathrm{1}} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
-0.581 &= 0.168 \times    1 + 0.0558 \times    0 + -0.0138 \times    0 + -0.102 \times    0 + 0.128 \times    0 + (0.413) + (-1.62e-06) &\quad(\text{with your numbers}) \\
-&= \underbrace{0.581}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-1.62e-06)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
+y_{ij}_{1} &= \hat\beta_{0}\,\mathrm{t1}_{1} + \hat\beta_{1}\,\mathrm{t2}_{1} + \hat\beta_{2}\,\mathrm{t3}_{1} + \hat\beta_{3}\,\mathrm{t4}_{1} + \hat\beta_{4}\,\mathrm{t5}_{1} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
+\hat\mu_{1} &= 0.168 \times    1 + 0.0558 \times    0 - 0.0138 \times    0 - 0.102 \times    0 + 0.128 \times    0 \approx 0.581 &\quad(\text{predicted mean} = \text{linear predictor}) \\
+y_{ij}_{1} &= \underbrace{0.581}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-1.62e-06)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,} &\quad(\text{observed} = \text{predicted mean} + \text{residual})
 \end{aligned}
 ```
 
 Stacking the same response equation for all *n* = 600 observations:
 
 ``` math
-\underbrace{\begin{bmatrix} 0.581 \\ -0.315 \\ -0.173 \\ 0.575 \\ 0.365 \\ \vdots \\ -0.31 \\   -1 \end{bmatrix}}_{\textstyle\,y_{ij}_{\,600 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 &    0 &    0 &    0 &    0 \\    0 &    1 &    0 &    0 &    0 \\    0 &    0 &    1 &    0 &    0 \\    0 &    0 &    0 &    1 &    0 \\    0 &    0 &    0 &    0 &    1 \\ \vdots & \vdots & \vdots & \vdots & \vdots \\    0 &    0 &    0 &    1 &    0 \\    0 &    0 &    0 &    0 &    1 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,600 \times 5}\,}\, \underbrace{\begin{bmatrix} 0.168 \\ 0.0558 \\ -0.0138 \\ -0.102 \\ 0.128 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,5 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} 0.413 \\ -0.371 \\ -0.16 \\ 0.677 \\ 0.237 \\ \vdots \\ -0.208 \\ -1.13 \end{bmatrix}}_{\textstyle\,\hat{\mathbf{u}}_{\,600 \times 1}\;\text{(per-obs random effect)}\,} \;+\; \underbrace{\begin{bmatrix} -1.62e-06 \\ -2.88e-06 \\ 1.08e-06 \\ 7.73e-06 \\ -1.64e-06 \\ \vdots \\ 8.14e-06 \\ -3.67e-06 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,600 \times 1}\;\text{(residual)}\,}
+\underbrace{\begin{bmatrix} 0.581 \\ -0.315 \\ -0.173 \\ 0.575 \\ 0.365 \\ \vdots \\ -0.31 \\   -1 \end{bmatrix}}_{\textstyle\,y_{ij}_{\,600 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 &    0 &    0 &    0 &    0 \\    0 &    1 &    0 &    0 &    0 \\    0 &    0 &    1 &    0 &    0 \\    0 &    0 &    0 &    1 &    0 \\    0 &    0 &    0 &    0 &    1 \\ \vdots & \vdots & \vdots & \vdots & \vdots \\    0 &    0 &    0 &    1 &    0 \\    0 &    0 &    0 &    0 &    1 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,600 \times 5}\,}\, \underbrace{\begin{bmatrix} 0.168 \\ 0.0558 \\ -0.0138 \\ -0.102 \\ 0.128 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,5 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} -1.62e-06 \\ -2.88e-06 \\ 1.08e-06 \\ 7.73e-06 \\ -1.64e-06 \\ \vdots \\ 8.14e-06 \\ -3.67e-06 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,600 \times 1}\;\text{(residual)}\,}
 ```
 
 **Left**: observed vector $`y_{ij}`$. **Middle**: the prediction
@@ -652,6 +666,12 @@ $`\mathbf{X}\hat{\boldsymbol{\beta}} + \hat{\mathbf{u}} = \hat{\boldsymbol{\mu}}
 $`\hat{\boldsymbol{\varepsilon}} = y_{ij} - \hat{\boldsymbol{\mu}}`$.
 Every row of this matrix equation is one of the response-equation rows
 from the worked row above.
+
+**Partial pooling.** The random-effect estimates shown here (the BLUPs)
+are partially pooled: each group’s estimate is shrunk toward zero by an
+amount that grows when the group has little data and shrinks when the
+between-group variance is large. Groups with the least data are pulled
+hardest toward the overall mean.
 
 Implied between-individual trait covariance $`\boldsymbol{\Sigma}_B`$
 decomposes into a shared low-rank part and per-trait uniquenesses:

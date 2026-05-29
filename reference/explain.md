@@ -27,6 +27,9 @@ together with the six reader-facing pieces already rendered:
   [`parameter_interpretation()`](https://itchyshin.github.io/symbolizer/reference/parameter_interpretation.md)
   result
 
+- `variance_components` – where the variation lives (NULL when the model
+  has no random effects)
+
 - `notation_bridge` – the
   [`notation_bridge()`](https://itchyshin.github.io/symbolizer/reference/notation_bridge.md)
   result
@@ -76,4 +79,5 @@ explain(fit, symbols = NULL, units = NULL, context = NULL, ...)
 
 A `symbolized_explanation` object with elements `model` (the underlying
 `symbolized_model`), `equations`, `symbols`, `assumptions`, `bridge`,
-`interpretation`, `notation_bridge`.
+`interpretation`, `variance_components` (NULL when the model has no
+random effects), `notation_bridge`.

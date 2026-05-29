@@ -1,0 +1,50 @@
+<!DOCTYPE html><html><head><meta charset='utf-8'><title>VC panels</title></head><body style='max-width:760px;margin:1.5rem auto;font-family:sans-serif'><h3 style='font-family:sans-serif'>Gaussian, (1|Subject) -- expect stacked bar + data-scale ICC</h3>
+<div class="sym-vc-panel" style="margin-top:1rem;border-top:1px solid #eee;padding-top:0.7rem">
+  <p class="sym-caption"><strong>Where does the variation live?</strong> Where the variation lives -- each row is one source of variance, shown as a share of the total.</p>
+  <div class="sym-vc-bar sym-vc-stacked" role="img" aria-label="variance partition" style="display:flex;width:100%;height:1.8rem;border-radius:4px;overflow:hidden;font-size:0.78rem;line-height:1.8rem;margin:0.4rem 0">
+    <div style="width:58.9%;background:#2c7fb8;color:#fff;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="Subject">Subject 58.9%</div>
+    <div style="width:41.1%;background:#d9d9d9;color:#333;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="Residual (within-group)">Residual (within-group) 41.1%</div>
+  </div>
+  <p class="sym-vc-icc" style="margin:0.4rem 0"><strong>ICC (data scale):</strong> 0.589. <span style="color:#6b7280;font-style:italic">Data-scale ICC: the share of total variance that lies between groups -- a genuine proportion of variance.</span></p>
+  <p class="sym-caption" style="font-size:0.8em;color:#9ca3af;margin-top:0.3rem">Point estimates only; uncertainty not shown.</p>
+</div>
+<hr/><h3 style='font-family:sans-serif'>Binomial logit, (1|herd) -- expect stacked bar + latent ICC + caption</h3>
+<div class="sym-vc-panel" style="margin-top:1rem;border-top:1px solid #eee;padding-top:0.7rem">
+  <p class="sym-caption"><strong>Where does the variation live?</strong> Where the variation lives -- each row is one source of variance, shown as a share of the total.</p>
+  <div class="sym-vc-bar sym-vc-stacked" role="img" aria-label="variance partition" style="display:flex;width:100%;height:1.8rem;border-radius:4px;overflow:hidden;font-size:0.78rem;line-height:1.8rem;margin:0.4rem 0">
+    <div style="width:11.1%;background:#2c7fb8;color:#fff;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="herd">herd 11.1%</div>
+    <div style="width:88.9%;background:#d9d9d9;color:#333;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="Residual (latent scale)">Residual (latent scale) 88.9%</div>
+  </div>
+  <p class="sym-vc-icc" style="margin:0.4rem 0"><strong>ICC (latent scale):</strong> 0.111. <span style="color:#6b7280;font-style:italic">Latent-scale ICC: not a proportion of variance in the observed outcome -- it is the repeatability on the link (latent) scale.</span></p>
+  <p class="sym-caption" style="font-size:0.8em;color:#9ca3af;margin-top:0.3rem">Point estimates only; uncertainty not shown.</p>
+</div>
+<hr/><h3 style='font-family:sans-serif'>Poisson, (1|herd) -- expect NO bar, list + 'not available'</h3>
+<div class="sym-vc-panel" style="margin-top:1rem;border-top:1px solid #eee;padding-top:0.7rem">
+  <p class="sym-caption"><strong>Where does the variation live?</strong> Where the variation lives -- each row is one source of variance, shown as a share of the total.</p>
+  <ul class="sym-vc-list" style="font-size:0.82rem;color:#374151;margin:0.3rem 0;padding-left:1.1rem">
+    <li>herd: variance = 0</li>
+  </ul>
+  <p class="sym-vc-icc" style="margin:0.4rem 0"><strong>ICC:</strong> ICC not available on this scale yet. <span style="color:#9ca3af">(no known residual-variance constant for the poisson family on the data scale, so the ICC is not defined here.)</span></p>
+  <p class="sym-caption" style="font-size:0.8em;color:#9ca3af;margin-top:0.3rem">Point estimates only; uncertainty not shown.</p>
+</div>
+<hr/><h3 style='font-family:sans-serif'>3 components, (1|plate)+(1|sample) -- expect per-component bars</h3>
+<div class="sym-vc-panel" style="margin-top:1rem;border-top:1px solid #eee;padding-top:0.7rem">
+  <p class="sym-caption"><strong>Where does the variation live?</strong> Where the variation lives -- each row is one source of variance, shown as a share of the total.</p>
+  <div class="sym-vc-bar sym-vc-bars" role="img" aria-label="variance partition" style="margin:0.4rem 0">
+    <div class="sym-vc-row" style="display:flex;align-items:center;margin:0.25rem 0;font-size:0.8rem">
+      <span style="flex:0 0 38%;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">plate</span>
+      <span style="flex:1;background:#f3f4f6;border-radius:3px;overflow:hidden"><span style="display:block;width:15.1%;background:#2c7fb8;color:#fff;padding:0.1rem 0.35rem;white-space:nowrap;box-sizing:border-box">15.1%</span></span>
+    </div>
+    <div class="sym-vc-row" style="display:flex;align-items:center;margin:0.25rem 0;font-size:0.8rem">
+      <span style="flex:0 0 38%;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">sample</span>
+      <span style="flex:1;background:#f3f4f6;border-radius:3px;overflow:hidden"><span style="display:block;width:78.5%;background:#7fcdbb;color:#fff;padding:0.1rem 0.35rem;white-space:nowrap;box-sizing:border-box">78.5%</span></span>
+    </div>
+    <div class="sym-vc-row" style="display:flex;align-items:center;margin:0.25rem 0;font-size:0.8rem">
+      <span style="flex:0 0 38%;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Residual (within-group)</span>
+      <span style="flex:1;background:#f3f4f6;border-radius:3px;overflow:hidden"><span style="display:block;width:6.4%;background:#d9d9d9;color:#fff;padding:0.1rem 0.35rem;white-space:nowrap;box-sizing:border-box">6.4%</span></span>
+    </div>
+  </div>
+  <p class="sym-vc-icc" style="margin:0.4rem 0"><strong>ICC:</strong> ICC not available on this scale yet. <span style="color:#9ca3af">(more than one random-effect term, so a single-number ICC is not defined -- read the full variance partition instead.)</span></p>
+  <p class="sym-caption" style="font-size:0.8em;color:#9ca3af;margin-top:0.3rem">Point estimates only; uncertainty not shown.</p>
+</div>
+<hr/></body></html>

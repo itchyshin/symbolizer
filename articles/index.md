@@ -24,6 +24,8 @@ shared dataset.
   interactions](https://itchyshin.github.io/symbolizer/articles/symbolizer-factors.md):
 - [A tour of non-Gaussian
   families](https://itchyshin.github.io/symbolizer/articles/symbolizer-families.md):
+- [Where the variation lives: ICC and
+  repeatability](https://itchyshin.github.io/symbolizer/articles/symbolizer-variance-components.md):
 - [Latent variables in ecology: a gllvmTMB worked
   example](https://itchyshin.github.io/symbolizer/articles/symbolizer-gllvm.md):
 - [Comparing two symbolized

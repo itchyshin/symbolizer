@@ -89,7 +89,7 @@ symbol_table(sym1)
 | $`W_i`$ | $`\mathbf{w}`$ | body_mass | g | response | $`\mathbb{R}^n`$ | $`\mathbb{R}^{120}`$ | response variable |
 | sex_i | — | sex | NA | factor | column of design matrix | column of X (length 120) | factor (female \[reference\], male) |
 | $`\mu_i`$ | $`\boldsymbol{\mu}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{120}`$ | conditional mu of body_mass |
-| $`\sigma_i`$ | $`\boldsymbol{\sigma}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{120}`$ | conditional sigma of body_mass |
+| $`\sigma_i`$ | $`\boldsymbol{\sigma}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{120}`$ | residual standard deviation |
 | $`\beta_{0}, \beta_{1}`$ | $`\boldsymbol{\beta}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\mu}`$ | $`\mathbb{R}^{2}`$ | mu submodel coefficients |
 | $`\gamma_{0}`$ | $`\boldsymbol{\gamma}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\sigma}`$ | $`\mathbb{R}^{1}`$ | sigma submodel coefficients |
 | — | $`\mathbf{X}`$ | NA | NA | design_matrix | $`\mathbb{R}^{n \times p_\mu}`$ | $`\mathbb{R}^{120 \times 2}`$ | mu submodel design matrix |
@@ -195,7 +195,7 @@ symbol_table(sym2)
 | $`W_i`$ | $`\mathbf{w}`$ | body_mass | g | response | $`\mathbb{R}^n`$ | $`\mathbb{R}^{120}`$ | response variable |
 | site_i | — | site | NA | factor | column of design matrix | column of X (length 120) | factor (A \[reference\], B, C, D) |
 | $`\mu_i`$ | $`\boldsymbol{\mu}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{120}`$ | conditional mu of body_mass |
-| $`\sigma_i`$ | $`\boldsymbol{\sigma}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{120}`$ | conditional sigma of body_mass |
+| $`\sigma_i`$ | $`\boldsymbol{\sigma}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{120}`$ | residual standard deviation |
 | $`\beta_{0}, \beta_{1}, \beta_{2}, \beta_{3}`$ | $`\boldsymbol{\beta}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\mu}`$ | $`\mathbb{R}^{4}`$ | mu submodel coefficients |
 | $`\gamma_{0}`$ | $`\boldsymbol{\gamma}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\sigma}`$ | $`\mathbb{R}^{1}`$ | sigma submodel coefficients |
 | — | $`\mathbf{X}`$ | NA | NA | design_matrix | $`\mathbb{R}^{n \times p_\mu}`$ | $`\mathbb{R}^{120 \times 4}`$ | mu submodel design matrix |
@@ -297,7 +297,7 @@ symbol_table(sym3)
 | sex_i | — | sex | NA | factor | column of design matrix | column of X (length 120) | factor (female \[reference\], male) |
 | $`L_i`$ | — | body_size | mm | predictor | column of design matrix | column of X (length 120) | continuous predictor |
 | $`\mu_i`$ | $`\boldsymbol{\mu}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{120}`$ | conditional mu of body_mass |
-| $`\sigma_i`$ | $`\boldsymbol{\sigma}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{120}`$ | conditional sigma of body_mass |
+| $`\sigma_i`$ | $`\boldsymbol{\sigma}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{120}`$ | residual standard deviation |
 | $`\beta_{0}, \beta_{1}, \beta_{2}`$ | $`\boldsymbol{\beta}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\mu}`$ | $`\mathbb{R}^{3}`$ | mu submodel coefficients |
 | $`\gamma_{0}`$ | $`\boldsymbol{\gamma}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\sigma}`$ | $`\mathbb{R}^{1}`$ | sigma submodel coefficients |
 | — | $`\mathbf{X}`$ | NA | NA | design_matrix | $`\mathbb{R}^{n \times p_\mu}`$ | $`\mathbb{R}^{120 \times 3}`$ | mu submodel design matrix |
@@ -362,7 +362,7 @@ through:
 as_html_three_views(sym3)
 ```
 
-[Skip three-views widget](#sym-sym-1779968740-end)
+[Skip three-views widget](#sym-sym-1780075446-end)
 
 ▸1. Index
 
@@ -374,6 +374,10 @@ What happens for each observation *i* – the per-individual reading.
 
 Each observation is normally distributed around a mean that may shift
 with the predictors; the residual SD is constant across observations.
+
+**Coefficient reading.** On the response scale, $`\hat\beta`$ is the
+additive change in the mean of the response for a one-unit increase in
+the predictor (identity link – no back-transformation needed).
 
 ``` math
 \begin{aligned}
@@ -390,7 +394,7 @@ where:
   120)
 - $`L_i`$ — continuous predictor  column of X (length 120)
 - $`\mu_i`$ — conditional mu of body_mass  $`\mathbb{R}^{120}`$
-- $`\sigma_i`$ — conditional sigma of body_mass  $`\mathbb{R}^{120}`$
+- $`\sigma_i`$ — residual standard deviation  $`\mathbb{R}^{120}`$
 - $`\beta_{0}, \beta_{1}, \beta_{2}`$ — mu submodel coefficients
    $`\mathbb{R}^{3}`$
 - $`\gamma_{0}`$ — sigma submodel coefficients  $`\mathbb{R}^{1}`$
@@ -414,7 +418,7 @@ where:
 - $`\mathbf{w}`$ — response variable  $`\mathbb{R}^{120}`$
 - $`\boldsymbol{\mu}`$ — conditional mu of body_mass
    $`\mathbb{R}^{120}`$
-- $`\boldsymbol{\sigma}`$ — conditional sigma of body_mass
+- $`\boldsymbol{\sigma}`$ — residual standard deviation
    $`\mathbb{R}^{120}`$
 - $`\boldsymbol{\beta}`$ — mu submodel coefficients  $`\mathbb{R}^{3}`$
 - $`\boldsymbol{\gamma}`$ — sigma submodel coefficients
@@ -441,8 +445,8 @@ For observation *i* = 1 of your data:
 ``` math
 \begin{aligned}
 w_{1} &= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{sexmale}_{1} + \hat\beta_{2}\,\mathrm{body\_size}_{1} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
-39.5 &= 29.9 + 5.26 \times    0 + 0.197 \times 60.5 + (-2.36) &\quad(\text{with your numbers}) \\
-&= \underbrace{41.8}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-2.36)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
+\hat\mu_{1} &= 29.9 + 5.26 \times    0 + 0.197 \times 60.5 \approx 41.8 &\quad(\text{predicted mean} = \text{linear predictor}) \\
+w_{1} &= \underbrace{41.8}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-2.36)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,} &\quad(\text{observed} = \text{predicted mean} + \text{residual})
 \end{aligned}
 ```
 
@@ -466,7 +470,7 @@ the same observation *i* = 1:
 ``` math
 \begin{aligned}
 \log\hat\sigma_{1} &= \hat\gamma_{0} &\quad(\text{sigma submodel for observation 1, log link}) \\
-\log\hat\sigma_{1} &= 1.17 = 1.17 &\quad(\text{with your numbers}) \\
+\log\hat\sigma_{1} &= 1.17 &\quad(\text{with your numbers}) \\
 \hat\sigma_{1} &= \exp(1.17) \approx 3.21 &\quad(\text{predicted residual SD for observation 1})
 \end{aligned}
 ```
@@ -919,7 +923,7 @@ symbol_table(sym_p1)
 | sex_i | — | sex | NA | factor | column of design matrix | column of X (length 80) | factor (female \[reference\], male) |
 | body_size_i | — | body_size | NA | predictor | column of design matrix | column of X (length 80) | continuous predictor |
 | $`\mu_i`$ | $`\boldsymbol{\mu}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | conditional mu of body_mass |
-| $`\sigma_i`$ | $`\boldsymbol{\sigma}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | conditional sigma of body_mass |
+| $`\sigma_i`$ | $`\boldsymbol{\sigma}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | residual standard deviation |
 | $`\beta_{0}, \beta_{1}, \beta_{2}`$ | $`\boldsymbol{\beta}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\mu}`$ | $`\mathbb{R}^{3}`$ | mu submodel coefficients |
 | $`\gamma_{0}`$ | $`\boldsymbol{\gamma}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\sigma}`$ | $`\mathbb{R}^{1}`$ | sigma submodel coefficients |
 | — | $`\mathbf{X}`$ | NA | NA | design_matrix | $`\mathbb{R}^{n \times p_\mu}`$ | $`\mathbb{R}^{80 \times 3}`$ | mu submodel design matrix |
@@ -1169,7 +1173,7 @@ symbol_table(sym_p6_poly)
 | $`\mathrm{body\_mass}_i`$ | $`\mathbf{body\_mass}`$ | body_mass | NA | response | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | response variable |
 | body_size, 2_i | — | body_size, 2 | NA | transformation | column of design matrix | column of X (length 80) | predictor (poly-transformed) |
 | $`\mu_i`$ | $`\boldsymbol{\mu}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | conditional mu of body_mass |
-| $`\sigma_i`$ | $`\boldsymbol{\sigma}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | conditional sigma of body_mass |
+| $`\sigma_i`$ | $`\boldsymbol{\sigma}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | residual standard deviation |
 | $`\beta_{0}, \beta_{1}, \beta_{2}`$ | $`\boldsymbol{\beta}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\mu}`$ | $`\mathbb{R}^{3}`$ | mu submodel coefficients |
 | $`\gamma_{0}`$ | $`\boldsymbol{\gamma}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\sigma}`$ | $`\mathbb{R}^{1}`$ | sigma submodel coefficients |
 | — | $`\mathbf{X}`$ | NA | NA | design_matrix | $`\mathbb{R}^{n \times p_\mu}`$ | $`\mathbb{R}^{80 \times 3}`$ | mu submodel design matrix |
@@ -1186,7 +1190,7 @@ symbol_table(sym_p6_raw)
 | body_size_i | — | body_size | NA | predictor | column of design matrix | column of X (length 80) | continuous predictor |
 | body_size^2_i | — | body_size^2 | NA | transformation | column of design matrix | column of X (length 80) | predictor (I-transformed) |
 | $`\mu_i`$ | $`\boldsymbol{\mu}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | conditional mu of body_mass |
-| $`\sigma_i`$ | $`\boldsymbol{\sigma}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | conditional sigma of body_mass |
+| $`\sigma_i`$ | $`\boldsymbol{\sigma}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | residual standard deviation |
 | $`\beta_{0}, \beta_{1}, \beta_{2}`$ | $`\boldsymbol{\beta}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\mu}`$ | $`\mathbb{R}^{3}`$ | mu submodel coefficients |
 | $`\gamma_{0}`$ | $`\boldsymbol{\gamma}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\sigma}`$ | $`\mathbb{R}^{1}`$ | sigma submodel coefficients |
 | — | $`\mathbf{X}`$ | NA | NA | design_matrix | $`\mathbb{R}^{n \times p_\mu}`$ | $`\mathbb{R}^{80 \times 3}`$ | mu submodel design matrix |

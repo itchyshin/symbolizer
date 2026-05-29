@@ -97,7 +97,7 @@ geometric mean by `exp(beta)`.
 as_html_three_views(sym, id = "lognormal")
 ```
 
-[Skip three-views widget](#sym-lognormal-1779968746-end)
+[Skip three-views widget](#sym-lognormal-1780075452-end)
 
 ▸1. Index
 
@@ -106,6 +106,11 @@ as_html_three_views(sym, id = "lognormal")
 ▸3. Equations with data
 
 What happens for each observation *i* – the per-individual reading.
+
+**Coefficient reading.** On the response scale, $`\exp(\hat\beta)`$ is
+the multiplicative effect on the geometric mean (the median) of the
+response: a one-unit increase multiplies the median by
+$`\exp(\hat\beta)`$.
 
 ``` math
 \begin{aligned}
@@ -120,7 +125,7 @@ where:
 - $`y_i`$ — response variable  $`\mathbb{R}^{100}`$
 - $`x_i`$ — continuous predictor  column of X (length 100)
 - $`\mu_i`$ — conditional mu of y  $`\mathbb{R}^{100}`$
-- $`\sigma_i`$ — conditional sigma of y  $`\mathbb{R}^{100}`$
+- $`\sigma_i`$ — scale on the log-response  $`\mathbb{R}^{100}`$
 - $`\beta_{0}, \beta_{1}`$ — mu submodel coefficients
    $`\mathbb{R}^{2}`$
 - $`\gamma_{0}`$ — sigma submodel coefficients  $`\mathbb{R}^{1}`$
@@ -140,7 +145,8 @@ where:
 
 - $`\mathbf{y}`$ — response variable  $`\mathbb{R}^{100}`$
 - $`\boldsymbol{\mu}`$ — conditional mu of y  $`\mathbb{R}^{100}`$
-- $`\boldsymbol{\sigma}`$ — conditional sigma of y  $`\mathbb{R}^{100}`$
+- $`\boldsymbol{\sigma}`$ — scale on the log-response
+   $`\mathbb{R}^{100}`$
 - $`\boldsymbol{\beta}`$ — mu submodel coefficients  $`\mathbb{R}^{2}`$
 - $`\boldsymbol{\gamma}`$ — sigma submodel coefficients
    $`\mathbb{R}^{1}`$
@@ -162,34 +168,37 @@ For observation *i* = 1 of your data:
 
 ``` math
 \begin{aligned}
-y_{1} &= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{x}_{1} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
-4.78 &= 2.02 + -0.0136 \times 0.409 + (2.77) &\quad(\text{with your numbers}) \\
-&= \underbrace{2.01}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(2.77)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
+\log(y_{1}) &= \hat\beta_{0} + \hat\beta_{1}\,x_{1} + \hat\varepsilon_{1}^{(\log)} &\quad(\text{response equation, log scale}) \\
+\hat\mu_{1} &= 2.02 - 0.0136 \times 0.409 \approx 2.01 &\quad(\text{log-scale mean} = \text{linear predictor}) \\
+\log(y_{1}) &= \underbrace{2.01}_{\textstyle\,\hat\mu_{1}\,\text{(log-scale mean)}\,} \;+\; \underbrace{(-0.448)}_{\textstyle\,\hat\varepsilon_{1}^{(\log)}\,\text{(log-scale residual)}\,} &\quad(\text{observed} = \text{mean} + \text{residual})
 \end{aligned}
 ```
 
 Stacking the same response equation for all *n* = 100 observations:
 
 ``` math
-\underbrace{\begin{bmatrix} 4.78 \\ 7.94 \\ 3.99 \\ 12.7 \\ 6.28 \\ \vdots \\ 6.03 \\  5.5 \end{bmatrix}}_{\textstyle\,\mathbf{y}_{\,100 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 & 0.409 \\    1 & 1.69 \\    1 & 1.59 \\    1 & -0.331 \\    1 & -2.29 \\ \vdots & \vdots \\    1 & -0.0506 \\    1 & -0.306 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,100 \times 2}\,}\, \underbrace{\begin{bmatrix} 2.02 \\ -0.0136 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,2 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} 2.77 \\ 5.95 \\    2 \\ 10.7 \\ 4.23 \\ \vdots \\ 4.02 \\ 3.48 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,100 \times 1}\;\text{(residual)}\,}
+\underbrace{\begin{bmatrix} 1.56 \\ 2.07 \\ 1.38 \\ 2.54 \\ 1.84 \\ \vdots \\  1.8 \\ 1.71 \end{bmatrix}}_{\textstyle\,\log(\mathbf{y})_{\,100 \times 1}\;\text{(observed, log scale)}\,} \;=\; \underbrace{\begin{bmatrix}    1 & 0.409 \\    1 & 1.69 \\    1 & 1.59 \\    1 & -0.331 \\    1 & -2.29 \\ \vdots & \vdots \\    1 & -0.0506 \\    1 & -0.306 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,100 \times 2}\,}\, \underbrace{\begin{bmatrix} 2.02 \\ -0.0136 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,2 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} -0.448 \\ 0.0769 \\ -0.611 \\ 0.519 \\ -0.212 \\ \vdots \\ -0.221 \\ -0.317 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}^{(\log)}_{\,100 \times 1}\;\text{(log-scale residual)}\,}
 ```
 
-**Left**: observed vector $`\mathbf{y}`$. **Middle**: the prediction
-$`\mathbf{X}\hat{\boldsymbol{\beta}} = \hat{\boldsymbol{\mu}}`$.
-**Right**: the residual vector
-$`\hat{\boldsymbol{\varepsilon}} = \mathbf{y} - \hat{\boldsymbol{\mu}}`$.
-Every row of this matrix equation is one of the response-equation rows
-from the worked row above.
+**Left**: log-scale observed vector $`\log(\mathbf{y})`$. **Middle**:
+the log-scale linear predictor $`\mathbf{X}\hat{\boldsymbol{\beta}}`$ —
+this is $`\hat{\boldsymbol{\mu}}`$, the mean of $`\log \mathbf{y}`$ (as
+Tab 1 states). **Right**: the log-scale residual vector
+$`\hat{\boldsymbol{\varepsilon}}^{(\log)} = \log(\mathbf{y}) - \hat{\boldsymbol{\mu}}`$.
+Each row matches the log-scale worked row above; back-transform via
+$`E[\mathbf{y}] = \exp(\hat{\mu} + \hat{\sigma}^2 / 2)`$ to recover the
+response-scale mean.
 
 And the $`\sigma`$ submodel (no observed counterpart – $`\sigma`$’s job
-is to describe the spread of $`\hat{\boldsymbol{\varepsilon}}`$). For
-the same observation *i* = 1:
+is to describe the spread of the log-scale residual
+$`\hat{\boldsymbol{\varepsilon}}^{(\log)}`$, i.e. the SD of
+$`\log \mathbf{y}`$). For the same observation *i* = 1:
 
 ``` math
 \begin{aligned}
 \log\hat\sigma_{1} &= \hat\gamma_{0} &\quad(\text{sigma submodel for observation 1, log link}) \\
-\log\hat\sigma_{1} &= -0.764 = -0.764 &\quad(\text{with your numbers}) \\
-\hat\sigma_{1} &= \exp(-0.764) \approx 0.466 &\quad(\text{predicted residual SD for observation 1})
+\log\hat\sigma_{1} &= -0.764 &\quad(\text{with your numbers}) \\
+\hat\sigma_{1} &= \exp(-0.764) \approx 0.466 &\quad(\text{predicted log-scale residual SD for observation 1 (SD of log y)})
 \end{aligned}
 ```
 
@@ -267,7 +276,7 @@ multiplies the odds by `exp(0.3) ≈ 1.35`.
 as_html_three_views(sym, id = "beta")
 ```
 
-[Skip three-views widget](#sym-beta-1779968747-end)
+[Skip three-views widget](#sym-beta-1780075453-end)
 
 ▸1. Index
 
@@ -276,6 +285,17 @@ as_html_three_views(sym, id = "beta")
 ▸3. Equations with data
 
 What happens for each observation *i* – the per-individual reading.
+
+**Coefficient reading.** On the response scale, $`\exp(\hat\beta)`$ is
+the odds ratio for the mean proportion: a one-unit increase multiplies
+the odds $`\mu/(1-\mu)`$ by $`\exp(\hat\beta)`$ (logit link).
+
+Heads-up – both implied shape parameters are below 1 here
+($`\hat\alpha = \hat\mu\hat\sigma \approx 0.098`$ and
+$`\hat\beta = (1-\hat\mu)\hat\sigma \approx 0.25`$), so the fitted Beta
+is **U-shaped**: its density piles up near 0 and 1 rather than peaking
+at the mean. A precision $`\hat\sigma < 1`$ does that. Worth checking
+whether a U-shape matches your data.
 
 ``` math
 \begin{aligned}
@@ -290,7 +310,8 @@ where:
 - $`y_i`$ — response variable  $`\mathbb{R}^{100}`$
 - $`x_i`$ — continuous predictor  column of X (length 100)
 - $`\mu_i`$ — conditional mu of y  $`\mathbb{R}^{100}`$
-- $`\sigma_i`$ — conditional sigma of y  $`\mathbb{R}^{100}`$
+- $`\sigma_i`$ — Beta precision (larger sigma -\> distribution tighter
+  around mu)  $`\mathbb{R}^{100}`$
 - $`\beta_{0}, \beta_{1}`$ — mu submodel coefficients
    $`\mathbb{R}^{2}`$
 - $`\gamma_{0}`$ — sigma submodel coefficients  $`\mathbb{R}^{1}`$
@@ -300,7 +321,7 @@ past chapter 4 switches to.
 
 ``` math
 \begin{aligned}
-\mathbf{y} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} & \sim \mathrm{Beta}(\boldsymbol{\mu},\, \boldsymbol{\sigma}) \\
+\mathbf{y} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} & \sim \mathrm{Beta}(\boldsymbol{\mu} \odot \boldsymbol{\sigma},\, (1 - \boldsymbol{\mu}) \odot \boldsymbol{\sigma}) \\
 \mathrm{logit}(\boldsymbol{\mu}) & = \mathbf{X} \boldsymbol{\beta} \\
 \log(\boldsymbol{\sigma}) & = \mathbf{Z} \boldsymbol{\gamma}
 \end{aligned}
@@ -310,7 +331,8 @@ where:
 
 - $`\mathbf{y}`$ — response variable  $`\mathbb{R}^{100}`$
 - $`\boldsymbol{\mu}`$ — conditional mu of y  $`\mathbb{R}^{100}`$
-- $`\boldsymbol{\sigma}`$ — conditional sigma of y  $`\mathbb{R}^{100}`$
+- $`\boldsymbol{\sigma}`$ — Beta precision (larger sigma -\>
+  distribution tighter around mu)  $`\mathbb{R}^{100}`$
 - $`\boldsymbol{\beta}`$ — mu submodel coefficients  $`\mathbb{R}^{2}`$
 - $`\boldsymbol{\gamma}`$ — sigma submodel coefficients
    $`\mathbb{R}^{1}`$
@@ -332,34 +354,38 @@ For observation *i* = 1 of your data:
 
 ``` math
 \begin{aligned}
-y_{1} &= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{x}_{1} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
-0.175 &= -0.824 + -0.0874 \times 1.43 + (1.13) &\quad(\text{with your numbers}) \\
-&= \underbrace{-0.95}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(1.13)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
+\hat\eta_{1} &= \hat\beta_{0} + \hat\beta_{1}\,x_{1}&\quad(\text{linear predictor, link scale}) \\
+-0.95 &= -0.824 - 0.0874 \times 1.43&\quad(\text{with your numbers}) \\
+\hat\mu_{1} &= \mathrm{logistic}(\hat\eta_{1}) = \mathrm{logistic}(-0.95) \approx 0.279&\quad(\text{response scale, predicted}) \\
+y_{1} &\sim \mathrm{Beta}(\hat\mu_{1}\hat\sigma_{1},\, (1 - \hat\mu_{1})\hat\sigma_{1})&\quad(\text{likelihood; no additive }\varepsilon\text{ here})
 \end{aligned}
 ```
 
 Stacking the same response equation for all *n* = 100 observations:
 
 ``` math
-\underbrace{\begin{bmatrix} 0.175 \\ 0.324 \\ 0.146 \\ 0.357 \\ 0.148 \\ \vdots \\ 0.174 \\ 0.201 \end{bmatrix}}_{\textstyle\,\mathbf{y}_{\,100 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 & 1.43 \\    1 & -0.651 \\    1 & -0.207 \\    1 & -0.393 \\    1 & -0.32 \\ \vdots & \vdots \\    1 & -0.164 \\    1 & 0.421 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,100 \times 2}\,}\, \underbrace{\begin{bmatrix} -0.824 \\ -0.0874 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,2 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} 1.13 \\ 1.09 \\ 0.952 \\ 1.15 \\ 0.944 \\ \vdots \\ 0.984 \\ 1.06 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,100 \times 1}\;\text{(residual)}\,}
+\underbrace{\begin{bmatrix} -0.95 \\ -0.768 \\ -0.806 \\ -0.79 \\ -0.797 \\ \vdots \\ -0.81 \\ -0.861 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\eta}}_{\,100 \times 1}\;\text{(linear predictor, link scale)}\,} \;=\; \underbrace{\begin{bmatrix}    1 & 1.43 \\    1 & -0.651 \\    1 & -0.207 \\    1 & -0.393 \\    1 & -0.32 \\ \vdots & \vdots \\    1 & -0.164 \\    1 & 0.421 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,100 \times 2}\,}\, \underbrace{\begin{bmatrix} -0.824 \\ -0.0874 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,2 \times 1}\;\text{(estimated)}\,}
 ```
 
-**Left**: observed vector $`\mathbf{y}`$. **Middle**: the prediction
-$`\mathbf{X}\hat{\boldsymbol{\beta}} = \hat{\boldsymbol{\mu}}`$.
-**Right**: the residual vector
-$`\hat{\boldsymbol{\varepsilon}} = \mathbf{y} - \hat{\boldsymbol{\mu}}`$.
-Every row of this matrix equation is one of the response-equation rows
-from the worked row above.
+**Left**: linear predictor $`\hat{\boldsymbol{\eta}}`$ on the link
+scale. **Right**: $`\mathbf{X}\hat{\boldsymbol{\beta}}`$ — the same
+linear predictor in matrix form. There is no additive residual on the
+link scale: each $`\mathbf{y}_i`$ has its own likelihood row above,
+$`\mathbf{y}_i \sim \mathrm{Family}(\hat{\mu}_i)`$, with the
+response-scale mean recovered as
+$`\hat{\boldsymbol{\mu}} = g^{-1}(\hat{\boldsymbol{\eta}})`$ (the
+inverse-link back-transform shown in the worked row).
 
-And the $`\sigma`$ submodel (no observed counterpart – $`\sigma`$’s job
-is to describe the spread of $`\hat{\boldsymbol{\varepsilon}}`$). For
-the same observation *i* = 1:
+And the $`\sigma`$ submodel (no observed counterpart – $`\sigma`$ here
+is the family’s spread parameter and is not a residual SD; see Tab 1 for
+its specific role in this distribution). For the same observation *i* =
+1:
 
 ``` math
 \begin{aligned}
 \log\hat\sigma_{1} &= \hat\gamma_{0} &\quad(\text{sigma submodel for observation 1, log link}) \\
-\log\hat\sigma_{1} &= -1.04 = -1.04 &\quad(\text{with your numbers}) \\
-\hat\sigma_{1} &= \exp(-1.04) \approx 0.353 &\quad(\text{predicted residual SD for observation 1})
+\log\hat\sigma_{1} &= -1.04 &\quad(\text{with your numbers}) \\
+\hat\sigma_{1} &= \exp(-1.04) \approx 0.353 &\quad(\text{predicted precision parameter for observation 1 (positive shape, not an SD)})
 \end{aligned}
 ```
 
@@ -442,7 +468,7 @@ multiplicative effect on the expected count.
 as_html_three_views(sym, id = "poisson")
 ```
 
-[Skip three-views widget](#sym-poisson-1779968748-end)
+[Skip three-views widget](#sym-poisson-1780075454-end)
 
 ▸1. Index
 
@@ -454,6 +480,10 @@ What happens for each observation *i* – the per-individual reading.
 
 Each observation is a count; the log of the expected count may shift
 with the predictors.
+
+**Coefficient reading.** On the response scale, $`\exp(\hat\beta)`$ is
+the rate ratio: a one-unit increase in the predictor multiplies the
+expected count by $`\exp(\hat\beta)`$ (log link).
 
 ``` math
 \begin{aligned}
@@ -507,24 +537,27 @@ For observation *i* = 1 of your data:
 
 ``` math
 \begin{aligned}
-y_{1} &= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{x}_{1} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
-   1 &= 0.955 + -0.0438 \times 0.45 + (0.0643) &\quad(\text{with your numbers}) \\
-&= \underbrace{0.936}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(0.0643)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
+\hat\eta_{1} &= \hat\beta_{0} + \hat\beta_{1}\,x_{1}&\quad(\text{linear predictor, link scale}) \\
+0.936 &= 0.955 - 0.0438 \times 0.45&\quad(\text{with your numbers}) \\
+\hat\mu_{1} &= \exp(\hat\eta_{1}) = \exp(0.936) \approx 2.55&\quad(\text{response scale, predicted}) \\
+y_{1} &\sim \mathrm{Poisson}(\hat\mu_{1})&\quad(\text{likelihood; no additive }\varepsilon\text{ here})
 \end{aligned}
 ```
 
 Stacking the same response equation for all *n* = 100 observations:
 
 ``` math
-\underbrace{\begin{bmatrix}    1 \\    1 \\    2 \\    3 \\    1 \\ \vdots \\    0 \\    5 \end{bmatrix}}_{\textstyle\,\mathbf{y}_{\,100 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 & 0.45 \\    1 & -0.0186 \\    1 & -0.318 \\    1 & -0.929 \\    1 & -1.49 \\ \vdots & \vdots \\    1 & -0.166 \\    1 & 1.02 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,100 \times 2}\,}\, \underbrace{\begin{bmatrix} 0.955 \\ -0.0438 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,2 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} 0.0643 \\ 0.0437 \\ 1.03 \\    2 \\ -0.0207 \\ \vdots \\ -0.963 \\ 4.09 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,100 \times 1}\;\text{(residual)}\,}
+\underbrace{\begin{bmatrix} 0.936 \\ 0.956 \\ 0.969 \\ 0.996 \\ 1.02 \\ \vdots \\ 0.963 \\ 0.911 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\eta}}_{\,100 \times 1}\;\text{(linear predictor, link scale)}\,} \;=\; \underbrace{\begin{bmatrix}    1 & 0.45 \\    1 & -0.0186 \\    1 & -0.318 \\    1 & -0.929 \\    1 & -1.49 \\ \vdots & \vdots \\    1 & -0.166 \\    1 & 1.02 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,100 \times 2}\,}\, \underbrace{\begin{bmatrix} 0.955 \\ -0.0438 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,2 \times 1}\;\text{(estimated)}\,}
 ```
 
-**Left**: observed vector $`\mathbf{y}`$. **Middle**: the prediction
-$`\mathbf{X}\hat{\boldsymbol{\beta}} = \hat{\boldsymbol{\mu}}`$.
-**Right**: the residual vector
-$`\hat{\boldsymbol{\varepsilon}} = \mathbf{y} - \hat{\boldsymbol{\mu}}`$.
-Every row of this matrix equation is one of the response-equation rows
-from the worked row above.
+**Left**: linear predictor $`\hat{\boldsymbol{\eta}}`$ on the link
+scale. **Right**: $`\mathbf{X}\hat{\boldsymbol{\beta}}`$ — the same
+linear predictor in matrix form. There is no additive residual on the
+link scale: each $`\mathbf{y}_i`$ has its own likelihood row above,
+$`\mathbf{y}_i \sim \mathrm{Family}(\hat{\mu}_i)`$, with the
+response-scale mean recovered as
+$`\hat{\boldsymbol{\mu}} = g^{-1}(\hat{\boldsymbol{\eta}})`$ (the
+inverse-link back-transform shown in the worked row).
 
 ``` r
 

@@ -340,7 +340,7 @@ three-view widget:
 as_html_three_views(sym4)
 ```
 
-[Skip three-views widget](#sym-sym-1779968762-end)
+[Skip three-views widget](#sym-sym-1780075467-end)
 
 ▸1. Index
 
@@ -354,6 +354,10 @@ Each observation is normally distributed around a mean that may shift
 with the fixed-effect predictors and a group offset, with a residual SD
 that may also shift with its own predictors – both location and spread
 are modeled.
+
+**Coefficient reading.** On the response scale, $`\hat\beta`$ is the
+additive change in the mean of the response for a one-unit increase in
+the predictor (identity link – no back-transformation needed).
 
 ``` math
 \begin{aligned}
@@ -370,7 +374,7 @@ where:
 - $`temperature_i`$ — continuous predictor  column of X (length 200)
 - $`sex_i`$ — factor (F \[reference\], M)  column of X (length 200)
 - $`\mu_i`$ — conditional mu of body_mass  $`\mathbb{R}^{200}`$
-- $`\sigma_i`$ — conditional sigma of body_mass  $`\mathbb{R}^{200}`$
+- $`\sigma_i`$ — residual standard deviation  $`\mathbb{R}^{200}`$
 - $`\beta_{0}, \beta_{1}, \beta_{2}`$ — mu submodel coefficients
    $`\mathbb{R}^{3}`$
 - $`\gamma_{0}, \gamma_{1}`$ — sigma submodel coefficients
@@ -378,6 +382,17 @@ where:
 - $`u_{site(i)}`$ — random intercept by site  scalar;
   $`\mathbb{R}^{12}`$ in matrix form
 - $`\sigma_{site}`$ — between-site standard deviation  scalar
+
+**Where does the variation live?** Where the variation lives – each row
+is one source of variance, shown as a share of the total.
+
+- site: variance = 1.28
+
+**ICC:** ICC not available on this scale yet. (the residual SD varies
+across observations (a location-scale model), so there is no single
+within-group variance to form the ICC.)
+
+Point estimates only; uncertainty not shown.
 
 The same model in matrix form – the structural contract every textbook
 past chapter 4 switches to.
@@ -401,7 +416,7 @@ where:
 - $`\mathbf{body\_mass}`$ — response variable  $`\mathbb{R}^{200}`$
 - $`\boldsymbol{\mu}`$ — conditional mu of body_mass
    $`\mathbb{R}^{200}`$
-- $`\boldsymbol{\sigma}`$ — conditional sigma of body_mass
+- $`\boldsymbol{\sigma}`$ — residual standard deviation
    $`\mathbb{R}^{200}`$
 - $`\boldsymbol{\beta}`$ — mu submodel coefficients  $`\mathbb{R}^{3}`$
 - $`\boldsymbol{\gamma}`$ — sigma submodel coefficients
@@ -433,16 +448,16 @@ For observation *i* = 1 of your data:
 
 ``` math
 \begin{aligned}
-\mathrm{body\_mass}_{1} &= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{temperature}_{1} + \hat\beta_{2}\,\mathrm{sexM}_{1} + \hat{u}_{\mathrm{S01}} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
-36.8 &= 32.1 +  0.3 \times 23.9 + 0.757 \times    0 + (-1.33) + (-2.4) &\quad(\text{with your numbers}) \\
-&= \underbrace{39.2}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-2.4)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
+\mathrm{body\_mass}_{1} &= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{temperature}_{1} + \hat\beta_{2}\,\mathrm{sexM}_{1} + \hat{u}_{\mathrm{site},\,\mathrm{S01}} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
+\hat\mu_{1} &= 32.1 +  0.3 \times 23.9 + 0.757 \times    0 + (-1.33) \approx 37.9 &\quad(\text{predicted mean} = \text{linear predictor}) \\
+\mathrm{body\_mass}_{1} &= \underbrace{37.9}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-1.06)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,} &\quad(\text{observed} = \text{predicted mean} + \text{residual})
 \end{aligned}
 ```
 
 Stacking the same response equation for all *n* = 200 observations:
 
 ``` math
-\underbrace{\begin{bmatrix} 36.8 \\ 32.9 \\ 37.7 \\ 40.2 \\ 36.1 \\ \vdots \\   38 \\ 38.3 \end{bmatrix}}_{\textstyle\,\mathbf{body\_mass}_{\,200 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 & 23.9 &    0 \\    1 & 17.7 &    0 \\    1 & 13.9 &    1 \\    1 & 10.7 &    0 \\    1 & 16.3 &    0 \\ \vdots & \vdots & \vdots \\    1 & 19.9 &    1 \\    1 & 12.1 &    1 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,200 \times 3}\,}\, \underbrace{\begin{bmatrix} 32.1 \\  0.3 \\ 0.757 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,3 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix}    1 &    0 &    0 &    0 &    0 & \cdots &    0 &    0 \\    0 &    1 &    0 &    0 &    0 & \cdots &    0 &    0 \\    0 &    0 &    1 &    0 &    0 & \cdots &    0 &    0 \\    0 &    0 &    0 &    1 &    0 & \cdots &    0 &    0 \\    0 &    0 &    0 &    0 &    1 & \cdots &    0 &    0 \\ \vdots & \vdots & \vdots & \vdots & \vdots & \ddots & \vdots & \vdots \\    0 &    0 &    0 &    0 &    0 & \cdots &    0 &    0 \\    0 &    0 &    0 &    0 &    0 & \cdots &    0 &    0 \end{bmatrix}}_{\textstyle\,\mathbf{Z}_{\,200 \times 12}\,}\, \underbrace{\begin{bmatrix} -1.33 \\ 0.266 \\ -1.38 \\ 1.48 \\ 0.519 \\ \vdots \\ 1.75 \\ 0.233 \end{bmatrix}}_{\textstyle\,\hat{\mathbf{u}}_{\,12 \times 1}\;\text{(BLUP)}\,} \;+\; \underbrace{\begin{bmatrix} -2.4 \\ -4.5 \\ 0.678 \\  4.9 \\ -0.883 \\ \vdots \\ -0.815 \\ 1.82 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,200 \times 1}\;\text{(residual)}\,}
+\underbrace{\begin{bmatrix} 36.8 \\ 32.9 \\ 37.7 \\ 40.2 \\ 36.1 \\ \vdots \\   38 \\ 38.3 \end{bmatrix}}_{\textstyle\,\mathbf{body\_mass}_{\,200 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 & 23.9 &    0 \\    1 & 17.7 &    0 \\    1 & 13.9 &    1 \\    1 & 10.7 &    0 \\    1 & 16.3 &    0 \\ \vdots & \vdots & \vdots \\    1 & 19.9 &    1 \\    1 & 12.1 &    1 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,200 \times 3}\,}\, \underbrace{\begin{bmatrix} 32.1 \\  0.3 \\ 0.757 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,3 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix}    1 &    0 &    0 &    0 &    0 & \cdots &    0 &    0 \\    0 &    1 &    0 &    0 &    0 & \cdots &    0 &    0 \\    0 &    0 &    1 &    0 &    0 & \cdots &    0 &    0 \\    0 &    0 &    0 &    1 &    0 & \cdots &    0 &    0 \\    0 &    0 &    0 &    0 &    1 & \cdots &    0 &    0 \\ \vdots & \vdots & \vdots & \vdots & \vdots & \ddots & \vdots & \vdots \\    0 &    0 &    0 &    0 &    0 & \cdots &    1 &    0 \\    0 &    0 &    0 &    0 &    0 & \cdots &    0 &    1 \end{bmatrix}}_{\textstyle\,\mathbf{Z}_{\text{site},\,\,200 \times 12}\,}\, \underbrace{\begin{bmatrix} -1.33 \\ 0.266 \\ -1.38 \\ 1.48 \\ 0.519 \\ \vdots \\ -0.247 \\ 0.281 \end{bmatrix}}_{\textstyle\,\hat{\mathbf{u}}_{\text{site},\,12 \times 1}\;\text{(BLUP)}\,} \;+\; \underbrace{\begin{bmatrix} -1.06 \\ -4.76 \\ 2.06 \\ 3.42 \\ -1.4 \\ \vdots \\ -0.568 \\ 1.54 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,200 \times 1}\;\text{(residual)}\,}
 ```
 
 **Left**: observed vector $`\mathbf{body\_mass}`$. **Middle**: the
@@ -452,6 +467,12 @@ $`\mathbf{X}\hat{\boldsymbol{\beta}} + \mathbf{Z}\hat{\mathbf{u}} = \hat{\boldsy
 $`\hat{\boldsymbol{\varepsilon}} = \mathbf{body\_mass} - \hat{\boldsymbol{\mu}}`$.
 Every row of this matrix equation is one of the response-equation rows
 from the worked row above.
+
+**Partial pooling.** The random-effect estimates shown here (the BLUPs)
+are partially pooled: each group’s estimate is shrunk toward zero by an
+amount that grows when the group has little data and shrinks when the
+between-group variance is large. Groups with the least data are pulled
+hardest toward the overall mean.
 
 And the $`\sigma`$ submodel (no observed counterpart – $`\sigma`$’s job
 is to describe the spread of $`\hat{\boldsymbol{\varepsilon}}`$). For

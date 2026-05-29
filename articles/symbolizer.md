@@ -228,7 +228,7 @@ three tabs over the same fit.
 as_html_three_views(sym, head = 5, tail = 2)
 ```
 
-[Skip three-views widget](#sym-sym-1779968861-end)
+[Skip three-views widget](#sym-sym-1780075572-end)
 
 ▸1. Index
 
@@ -243,6 +243,10 @@ with the predictors, and a residual SD that may also shift with its own
 predictors – so both the centre and the spread of the response are
 modeled.
 
+**Coefficient reading.** On the response scale, $`\hat\beta`$ is the
+additive change in the mean of the response for a one-unit increase in
+the predictor (identity link – no back-transformation needed).
+
 ``` math
 \begin{aligned}
 W_i \mid \mu_i,\, \sigma_i & \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
@@ -256,7 +260,7 @@ where:
 - $`W_i`$ — response variable  $`\mathbb{R}^{80}`$
 - $`T_i`$ — continuous predictor  column of X (length 80)
 - $`\mu_i`$ — conditional mu of body_mass  $`\mathbb{R}^{80}`$
-- $`\sigma_i`$ — conditional sigma of body_mass  $`\mathbb{R}^{80}`$
+- $`\sigma_i`$ — residual standard deviation  $`\mathbb{R}^{80}`$
 - $`\beta_{0}, \beta_{1}`$ — mu submodel coefficients
    $`\mathbb{R}^{2}`$
 - $`\gamma_{0}, \gamma_{1}`$ — sigma submodel coefficients
@@ -283,7 +287,7 @@ where:
 - $`\mathbf{w}`$ — response variable  $`\mathbb{R}^{80}`$
 - $`\boldsymbol{\mu}`$ — conditional mu of body_mass
    $`\mathbb{R}^{80}`$
-- $`\boldsymbol{\sigma}`$ — conditional sigma of body_mass
+- $`\boldsymbol{\sigma}`$ — residual standard deviation
    $`\mathbb{R}^{80}`$
 - $`\boldsymbol{\beta}`$ — mu submodel coefficients  $`\mathbb{R}^{2}`$
 - $`\boldsymbol{\gamma}`$ — sigma submodel coefficients
@@ -312,8 +316,8 @@ For observation *i* = 1 of your data:
 ``` math
 \begin{aligned}
 w_{1} &= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{temperature}_{1} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
-34.5 &= 29.6 + 0.492 \times   14 + (-1.94) &\quad(\text{with your numbers}) \\
-&= \underbrace{36.4}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-1.94)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
+\hat\mu_{1} &= 29.6 + 0.492 \times   14 \approx 36.4 &\quad(\text{predicted mean} = \text{linear predictor}) \\
+w_{1} &= \underbrace{36.4}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-1.94)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,} &\quad(\text{observed} = \text{predicted mean} + \text{residual})
 \end{aligned}
 ```
 
@@ -378,7 +382,7 @@ symbol_table(sym)
 | $`W_i`$ | $`\mathbf{w}`$ | body_mass | g | response | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | response variable |
 | $`T_i`$ | — | temperature | C | predictor | column of design matrix | column of X (length 80) | continuous predictor |
 | $`\mu_i`$ | $`\boldsymbol{\mu}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | conditional mu of body_mass |
-| $`\sigma_i`$ | $`\boldsymbol{\sigma}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | conditional sigma of body_mass |
+| $`\sigma_i`$ | $`\boldsymbol{\sigma}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | residual standard deviation |
 | $`\beta_{0}, \beta_{1}`$ | $`\boldsymbol{\beta}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\mu}`$ | $`\mathbb{R}^{2}`$ | mu submodel coefficients |
 | $`\gamma_{0}, \gamma_{1}`$ | $`\boldsymbol{\gamma}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\sigma}`$ | $`\mathbb{R}^{2}`$ | sigma submodel coefficients |
 | — | $`\mathbf{X}`$ | NA | NA | design_matrix | $`\mathbb{R}^{n \times p_\mu}`$ | $`\mathbb{R}^{80 \times 2}`$ | mu submodel design matrix |
@@ -570,9 +574,9 @@ sym_re$random_effects
 sym_re$variance_components
 ```
 
-| parameter     |
-|:--------------|
-| sigma_group_0 |
+| parameter     | sd_estimate | var_estimate |
+|:--------------|:------------|:-------------|
+| sigma_group_0 | 0.613       | 0.376        |
 
 **Takeaway.** The same object carries everything a reader needs to
 discuss random structure — what is grouped, how many levels, and which
@@ -601,7 +605,7 @@ slice.
 ``` r
 
 symbolizer_capabilities()
-#> # A tibble: 127 × 6
+#> # A tibble: 131 × 6
 #>    class  family            component      status              since notes      
 #>    <chr>  <chr>             <chr>          <chr>               <chr> <chr>      
 #>  1 drmTMB gaussian          mu             Stable              0.1.0 Univariate…
@@ -614,7 +618,7 @@ symbolizer_capabilities()
 #>  8 drmTMB truncated_nbinom2 hu             First slice         0.4.0 Hurdle sub…
 #>  9 drmTMB gaussian          rho12          Planned or reserved NA    Bivariate …
 #> 10 drmTMB student           mu             First slice         0.2.2 Student-t …
-#> # ℹ 117 more rows
+#> # ℹ 121 more rows
 ```
 
 For the full capability matrix and what’s planned next, see

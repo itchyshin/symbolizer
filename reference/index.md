@@ -127,6 +127,16 @@ rows.
 - [`group_slopes()`](https://itchyshin.github.io/symbolizer/reference/group_slopes.md)
   : Per-group slopes for a continuous predictor
 
+## Variance components
+
+Where the variation lives, and how repeatable a trait is (ICC /
+repeatability).
+
+- [`variance_partition()`](https://itchyshin.github.io/symbolizer/reference/variance_partition.md)
+  : Where the variation lives: a variance partition for a mixed model
+- [`icc()`](https://itchyshin.github.io/symbolizer/reference/icc.md) :
+  Intraclass correlation (repeatability) for a mixed model
+
 ## Compare two models
 
 Structural diff between two symbolized_model objects: which submodels,

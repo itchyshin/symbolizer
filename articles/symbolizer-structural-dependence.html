@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.22.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -533,21 +533,21 @@ algebra.</p>
 .sym-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .sym-skip { position: absolute; top: -100px; left: 0; padding: 0.4rem 0.7rem; background: #8a1f22; color: #fff; text-decoration: none; font-size: 0.85rem; z-index: 5; }
 .sym-skip:focus { top: 0; }</style>
-<div id="sym-mcmc-1779968778" class="sym-tabs">
-<a class="sym-skip" href="#sym-mcmc-1779968778-end">Skip three-views
+<div id="sym-mcmc-1780075488" class="sym-tabs">
+<a class="sym-skip" href="#sym-mcmc-1780075488-end">Skip three-views
 widget</a>
 <div class="sym-tablist" role="tablist" aria-label="Three views of the model">
-<button type="button" class="sym-tab sym-active" role="tab" id="sym-mcmc-1779968778-tab-idx" aria-controls="sym-mcmc-1779968778-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
+<button type="button" class="sym-tab sym-active" role="tab" id="sym-mcmc-1780075488-tab-idx" aria-controls="sym-mcmc-1780075488-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>1. Index
 </button>
-<button type="button" class="sym-tab" role="tab" id="sym-mcmc-1779968778-tab-eq" aria-controls="sym-mcmc-1779968778-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
+<button type="button" class="sym-tab" role="tab" id="sym-mcmc-1780075488-tab-eq" aria-controls="sym-mcmc-1780075488-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>2. Matrix
 </button>
-<button type="button" class="sym-tab" role="tab" id="sym-mcmc-1779968778-tab-mat" aria-controls="sym-mcmc-1779968778-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
+<button type="button" class="sym-tab" role="tab" id="sym-mcmc-1780075488-tab-mat" aria-controls="sym-mcmc-1780075488-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>3. Equations with data
 </button>
 </div>
-<div id="sym-mcmc-1779968778-panel-idx" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-mcmc-1779968778-tab-idx" data-panel="idx" tabindex="0">
+<div id="sym-mcmc-1780075488-panel-idx" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-mcmc-1780075488-tab-idx" data-panel="idx" tabindex="0">
 <p class="sym-caption">
 What happens for each observation <em>i</em> – the per-individual
 reading.
@@ -567,6 +567,13 @@ The phylogenetic SD
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>p</mi></msub><annotation encoding="application/x-tex">\sigma_p</annotation></semantics></math>
 measures how much across-species variation remains after fixed-effect
 predictors are accounted for.
+</p>
+<p class="sym-biology">
+<strong>Coefficient reading.</strong> On the response scale,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>β</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat\beta</annotation></semantics></math>
+is the additive change in the mean of the response for a one-unit
+increase in the predictor (identity link – no back-transformation
+needed).
 </p>
 <div class="sym-eq">
 <math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mrow><mi mathvariant="normal">Z</mi><mi mathvariant="normal">r</mi></mrow><mi>i</mi></msub><mo>∣</mo><msub><mi>μ</mi><mi>i</mi></msub><mo>,</mo><mspace width="0.167em"></mspace><msub><mi>σ</mi><mi>i</mi></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>∼</mo><mrow><mi mathvariant="normal">N</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>μ</mi><mi>i</mi></msub><mo>,</mo><mspace width="0.167em"></mspace><msubsup><mi>σ</mi><mi>i</mi><mn>2</mn></msubsup><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>μ</mi><mi>i</mi></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><msub><mi>β</mi><mn>0</mn></msub><mo>+</mo><msub><mi>u</mi><mrow><mi>s</mi><mi>p</mi><mi>e</mi><mi>c</mi><mi>i</mi><mi>e</mi><mi>s</mi><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo></mrow></msub></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>𝐮</mi><mrow><mi>s</mi><mi>p</mi><mi>e</mi><mi>c</mi><mi>i</mi><mi>e</mi><mi>s</mi></mrow></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>∼</mo><mi>𝒩</mi><mo stretchy="false" form="prefix">(</mo><mn>𝟎</mn><mo>,</mo><mspace width="0.167em"></mspace><msubsup><mi>σ</mi><mrow><mi>s</mi><mi>p</mi><mi>e</mi><mi>c</mi><mi>i</mi><mi>e</mi><mi>s</mi></mrow><mn>2</mn></msubsup><mi>𝐀</mi><mo stretchy="false" form="postfix">)</mo></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
@@ -610,9 +617,27 @@ in matrix form</span>
 (Hadfield-Nakagawa all-nodes sparse-precision representation, supplied
 via ginverse)  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><msub><mi>k</mi><mrow><mi>s</mi><mi>p</mi><mi>e</mi><mi>c</mi><mi>i</mi><mi>e</mi><mi>s</mi></mrow></msub><mo>×</mo><msub><mi>k</mi><mrow><mi>s</mi><mi>p</mi><mi>e</mi><mi>c</mi><mi>i</mi><mi>e</mi><mi>s</mi></mrow></msub></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{k_{species} \times k_{species}}</annotation></semantics></math></span>
 </li>
-</ul></details>
+</ul></details><div class="sym-vc-panel" style="margin-top:1rem;border-top:1px solid #eee;padding-top:0.7rem">
+<p class="sym-caption">
+<strong>Where does the variation live?</strong> Where the variation
+lives – each row is one source of variance, shown as a share of the
+total.
+</p>
+<div class="sym-vc-bar sym-vc-stacked" role="img" aria-label="variance partition" style="display:flex;width:100%;height:1.8rem;border-radius:4px;overflow:hidden;font-size:0.78rem;line-height:1.8rem;margin:0.4rem 0">
+<pre><code>&lt;div style="width:69.6%;background:#2c7fb8;color:#fff;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="species"&gt;species 69.6%&lt;/div&gt;
+&lt;div style="width:30.4%;background:#d9d9d9;color:#333;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="Residual (within-group)"&gt;Residual (within-group) 30.4%&lt;/div&gt;</code></pre>
 </div>
-<div id="sym-mcmc-1779968778-panel-eq" class="sym-panel" role="tabpanel" aria-labelledby="sym-mcmc-1779968778-tab-eq" data-panel="eq" hidden="" tabindex="0">
+<p class="sym-vc-icc" style="margin:0.4rem 0">
+<strong>ICC (data scale):</strong> 0.696. <span style="color:#6b7280;font-style:italic">Data-scale ICC: the share of
+total variance that lies between groups – a genuine proportion of
+variance.</span>
+</p>
+<p class="sym-caption" style="font-size:0.8em;color:#9ca3af;margin-top:0.3rem">
+Point estimates only; uncertainty not shown.
+</p>
+</div>
+</div>
+<div id="sym-mcmc-1780075488-panel-eq" class="sym-panel" role="tabpanel" aria-labelledby="sym-mcmc-1780075488-tab-eq" data-panel="eq" hidden="" tabindex="0">
 <p class="sym-caption">
 The same model in matrix form – the structural contract every textbook
 past chapter 4 switches to.
@@ -681,7 +706,7 @@ via ginverse)  <span class="sym-dim"><math display="inline" xmlns="http://www.w
 </li>
 </ul></details>
 </div>
-<div id="sym-mcmc-1779968778-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-mcmc-1779968778-tab-mat" data-panel="mat" hidden="" tabindex="0">
+<div id="sym-mcmc-1780075488-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-mcmc-1780075488-tab-mat" data-panel="mat" hidden="" tabindex="0">
 <p class="sym-caption">
 The same matrix equation, with your actual numbers stacked inside the
 brackets – what the computer multiplies. Showing first 5 and last 2 rows
@@ -712,11 +737,11 @@ contribution to each observation is also shown.</span>
 For observation <em>i</em> = 1 of your data:
 </p>
 <div class="sym-eq">
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><mi>z</mi><msub><mi>r</mi><mn>1</mn></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><msub><mover><mi>β</mi><mo accent="true">̂</mo></mover><mn>0</mn></msub><mo>+</mo><msub><mover><mi>u</mi><mo accent="true">̂</mo></mover><mrow><mi mathvariant="normal">A</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">d</mi><mi mathvariant="normal">a</mi></mrow></msub><mo>+</mo><msub><mover><mi>ε</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub></mtd><mtd columnalign="right" style="text-align: right"><mspace width="1.0em"></mspace><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">response equation, one row of the model</mtext><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mn>0.166</mn></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mn>0.366</mn><mo>+</mo><mo stretchy="false" form="prefix">(</mo><mi>−</mi><mn>0.151</mn><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mo stretchy="false" form="prefix">(</mo><mi>−</mi><mn>0.0485</mn><mo stretchy="false" form="postfix">)</mo></mtd><mtd columnalign="right" style="text-align: right"><mspace width="1.0em"></mspace><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">with your numbers</mtext><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><munder><munder><mn>0.215</mn><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mover><mi>μ</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mspace width="0.167em"></mspace><mtext mathvariant="normal">(predicted)</mtext><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.278em"></mspace><mo>+</mo><mspace width="0.278em"></mspace><munder><munder><mrow><mo stretchy="false" form="prefix">(</mo><mi>−</mi><mn>0.0485</mn><mo stretchy="false" form="postfix">)</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mover><mi>ε</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mspace width="0.167em"></mspace><mtext mathvariant="normal">(residual)</mtext><mspace width="0.167em"></mspace></mrow></munder></mtd></mtr></mtable><annotation encoding="application/x-tex">
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><mi>z</mi><msub><mi>r</mi><mn>1</mn></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><msub><mover><mi>β</mi><mo accent="true">̂</mo></mover><mn>0</mn></msub><mo>+</mo><msub><mover><mi>ε</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub></mtd><mtd columnalign="right" style="text-align: right"><mspace width="1.0em"></mspace><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">response equation, one row of the model</mtext><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><msub><mover><mi>μ</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mn>0.366</mn><mo>≈</mo><mn>0.215</mn></mtd><mtd columnalign="right" style="text-align: right"><mspace width="1.0em"></mspace><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">predicted mean</mtext><mo>=</mo><mtext mathvariant="normal">linear predictor</mtext><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>z</mi><msub><mi>r</mi><mn>1</mn></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><munder><munder><mn>0.215</mn><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mover><mi>μ</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mspace width="0.167em"></mspace><mtext mathvariant="normal">(predicted)</mtext><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.278em"></mspace><mo>+</mo><mspace width="0.278em"></mspace><munder><munder><mrow><mo stretchy="false" form="prefix">(</mo><mi>−</mi><mn>0.0485</mn><mo stretchy="false" form="postfix">)</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mover><mi>ε</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mspace width="0.167em"></mspace><mtext mathvariant="normal">(residual)</mtext><mspace width="0.167em"></mspace></mrow></munder></mtd><mtd columnalign="right" style="text-align: right"><mspace width="1.0em"></mspace><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">observed</mtext><mo>=</mo><mtext mathvariant="normal">predicted mean</mtext><mo>+</mo><mtext mathvariant="normal">residual</mtext><mo stretchy="false" form="postfix">)</mo></mtd></mtr></mtable><annotation encoding="application/x-tex">
 \begin{aligned}
-zr_{1} &amp;= \hat\beta_{0} + \hat{u}_{\mathrm{Alca torda}} + \hat\varepsilon_{1} &amp;\quad(\text{response equation, one row of the model}) \\
-0.166 &amp;= 0.366 + (-0.151) + (-0.0485) &amp;\quad(\text{with your numbers}) \\
-&amp;= \underbrace{0.215}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-0.0485)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
+zr_{1} &amp;= \hat\beta_{0} + \hat\varepsilon_{1} &amp;\quad(\text{response equation, one row of the model}) \\
+\hat\mu_{1} &amp;= 0.366 \approx 0.215 &amp;\quad(\text{predicted mean} = \text{linear predictor}) \\
+zr_{1} &amp;= \underbrace{0.215}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-0.0485)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,} &amp;\quad(\text{observed} = \text{predicted mean} + \text{residual})
 \end{aligned}
 </annotation></semantics></math>
 </div>
@@ -725,8 +750,8 @@ Stacking the same response equation for all <em>n</em> = 60
 observations:
 </p>
 <div class="sym-eq">
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mn>0.166</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1.12</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.66</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1.05</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.676</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.172</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.0853</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mrow><mi>𝐳</mi><mi>𝐫</mi></mrow><mrow><mspace width="0.167em"></mspace><mn>60</mn><mo>×</mo><mn>1</mn></mrow></msub><mspace width="0.278em"></mspace><mtext mathvariant="normal">(observed)</mtext><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.278em"></mspace><mo>=</mo><mspace width="0.278em"></mspace><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mi>𝐗</mi><mrow><mspace width="0.167em"></mspace><mn>60</mn><mo>×</mo><mn>1</mn></mrow></msub><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.167em"></mspace><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mn>0.366</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mover><mi>𝛃</mi><mo accent="true">̂</mo></mover><mrow><mspace width="0.167em"></mspace><mn>1</mn><mo>×</mo><mn>1</mn></mrow></msub><mspace width="0.278em"></mspace><mtext mathvariant="normal">(estimated)</mtext><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.278em"></mspace><mo>+</mo><mspace width="0.278em"></mspace><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>0.151</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.403</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.237</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.396</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.026</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>0.0165</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>0.185</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mover><mi>𝐮</mi><mo accent="true">̂</mo></mover><mrow><mspace width="0.167em"></mspace><mn>60</mn><mo>×</mo><mn>1</mn></mrow></msub><mspace width="0.278em"></mspace><mtext mathvariant="normal">(per-obs random effect)</mtext><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.278em"></mspace><mo>+</mo><mspace width="0.278em"></mspace><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>0.0485</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.351</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.057</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.289</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.285</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>0.178</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>0.0958</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mover><mi>𝛆</mi><mo accent="true">̂</mo></mover><mrow><mspace width="0.167em"></mspace><mn>60</mn><mo>×</mo><mn>1</mn></mrow></msub><mspace width="0.278em"></mspace><mtext mathvariant="normal">(residual)</mtext><mspace width="0.167em"></mspace></mrow></munder></mrow><annotation encoding="application/x-tex">
-\underbrace{\begin{bmatrix} 0.166 \\ 1.12 \\ 0.66 \\ 1.05 \\ 0.676 \\ \vdots \\ 0.172 \\ 0.0853 \end{bmatrix}}_{\textstyle\,\mathbf{zr}_{\,60 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 \\    1 \\    1 \\    1 \\    1 \\ \vdots \\    1 \\    1 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,60 \times 1}\,}\, \underbrace{\begin{bmatrix} 0.366 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,1 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} -0.151 \\ 0.403 \\ 0.237 \\ 0.396 \\ 0.026 \\ \vdots \\ -0.0165 \\ -0.185 \end{bmatrix}}_{\textstyle\,\hat{\mathbf{u}}_{\,60 \times 1}\;\text{(per-obs random effect)}\,} \;+\; \underbrace{\begin{bmatrix} -0.0485 \\ 0.351 \\ 0.057 \\ 0.289 \\ 0.285 \\ \vdots \\ -0.178 \\ -0.0958 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,60 \times 1}\;\text{(residual)}\,}
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mn>0.166</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1.12</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.66</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1.05</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.676</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.172</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.0853</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mrow><mi>𝐳</mi><mi>𝐫</mi></mrow><mrow><mspace width="0.167em"></mspace><mn>60</mn><mo>×</mo><mn>1</mn></mrow></msub><mspace width="0.278em"></mspace><mtext mathvariant="normal">(observed)</mtext><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.278em"></mspace><mo>=</mo><mspace width="0.278em"></mspace><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mi>𝐗</mi><mrow><mspace width="0.167em"></mspace><mn>60</mn><mo>×</mo><mn>1</mn></mrow></msub><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.167em"></mspace><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mn>0.366</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mover><mi>𝛃</mi><mo accent="true">̂</mo></mover><mrow><mspace width="0.167em"></mspace><mn>1</mn><mo>×</mo><mn>1</mn></mrow></msub><mspace width="0.278em"></mspace><mtext mathvariant="normal">(estimated)</mtext><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.278em"></mspace><mo>+</mo><mspace width="0.278em"></mspace><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>0.0485</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.351</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.057</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.289</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.285</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>0.178</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>0.0958</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mover><mi>𝛆</mi><mo accent="true">̂</mo></mover><mrow><mspace width="0.167em"></mspace><mn>60</mn><mo>×</mo><mn>1</mn></mrow></msub><mspace width="0.278em"></mspace><mtext mathvariant="normal">(residual)</mtext><mspace width="0.167em"></mspace></mrow></munder></mrow><annotation encoding="application/x-tex">
+\underbrace{\begin{bmatrix} 0.166 \\ 1.12 \\ 0.66 \\ 1.05 \\ 0.676 \\ \vdots \\ 0.172 \\ 0.0853 \end{bmatrix}}_{\textstyle\,\mathbf{zr}_{\,60 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 \\    1 \\    1 \\    1 \\    1 \\ \vdots \\    1 \\    1 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,60 \times 1}\,}\, \underbrace{\begin{bmatrix} 0.366 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,1 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} -0.0485 \\ 0.351 \\ 0.057 \\ 0.289 \\ 0.285 \\ \vdots \\ -0.178 \\ -0.0958 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,60 \times 1}\;\text{(residual)}\,}
 </annotation></semantics></math>
 </div>
 <p class="sym-caption" style="font-size:0.85em;color:#6b7280;margin-top:0.4rem">
@@ -738,6 +763,13 @@ observations:
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>𝛆</mi><mo accent="true">̂</mo></mover><mo>=</mo><mrow><mi>𝐳</mi><mi>𝐫</mi></mrow><mo>−</mo><mover><mi>𝛍</mi><mo accent="true">̂</mo></mover></mrow><annotation encoding="application/x-tex">\hat{\boldsymbol{\varepsilon}} = \mathbf{zr} - \hat{\boldsymbol{\mu}}</annotation></semantics></math>.
 Every row of this matrix equation is one of the response-equation rows
 from the worked row above.
+</p>
+<p class="sym-caption" style="font-size:0.85em;color:#6b7280;margin-top:0.3rem">
+<strong>Partial pooling.</strong> The random-effect estimates shown here
+(the BLUPs) are partially pooled: each group’s estimate is shrunk toward
+zero by an amount that grows when the group has little data and shrinks
+when the between-group variance is large. Groups with the least data are
+pulled hardest toward the overall mean.
 </p>
 <p class="sym-caption" style="font-size:0.95em;color:#374151;margin-top:1.2rem">
 <strong>And the structured-covariance prior on <code>u</code></strong>.
@@ -761,9 +793,9 @@ tail rows / columns; full matrix is 116 × 116.
 </p>
 </div>
 </div>
-<span id="sym-mcmc-1779968778-end" tabindex="-1"></span>
+<span id="sym-mcmc-1780075488-end" tabindex="-1"></span>
 <script>(function() {
-  var root = document.getElementById("sym-mcmc-1779968778");
+  var root = document.getElementById("sym-mcmc-1780075488");
   if (!root) return;
   var tabs   = Array.prototype.slice.call(root.querySelectorAll("[role=\"tab\"]"));
   var panels = Array.prototype.slice.call(root.querySelectorAll("[role=\"tabpanel\"]"));
@@ -812,7 +844,7 @@ tail rows / columns; full matrix is 116 × 116.
 model via the <code><a href="https://paulbuerkner.com/brms/reference/gr.html" class="external-link">gr()</a></code> group factor inside an lme4-style RE
 bar. The fit takes ~30 s of Stan compile-and-sample (cached after the
 first build).</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/paul-buerkner/brms" class="external-link">brms</a></span><span class="op">)</span></span>
 <span><span class="va">data2_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>A <span class="op">=</span> <span class="va">A_tips</span><span class="op">)</span></span>
 <span><span class="va">fit_brms</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://paulbuerkner.com/brms/reference/brm.html" class="external-link">brm</a></span><span class="op">(</span></span>
@@ -826,7 +858,7 @@ first build).</p>
 <span>  file_refit <span class="op">=</span> <span class="st">"on_change"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">sym_brms</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/symbolize.html">symbolize</a></span><span class="op">(</span><span class="va">fit_brms</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sym_brms</span><span class="op">$</span><span class="va">metadata</span><span class="op">$</span><span class="va">phylo_representation</span>   <span class="co"># "tips_only"</span></span>
 <span><span class="co">#&gt; [1] "tips_only"</span></span>
 <span><span class="va">sym_brms</span><span class="op">$</span><span class="va">metadata</span><span class="op">$</span><span class="va">detected_signals</span>       <span class="co"># "phylo"</span></span>
@@ -868,7 +900,7 @@ where <code>phylo_representation = "all_nodes"</code>; the variance
 estimate
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mover><mi>σ</mi><mo accent="true">̂</mo></mover><mi>p</mi><mn>2</mn></msubsup><annotation encoding="application/x-tex">\hat\sigma_p^2</annotation></semantics></math>
 is the same in expectation.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/assumption_table.html">assumption_table</a></span><span class="op">(</span><span class="va">sym_brms</span><span class="op">)</span></span></code></pre></div>
 <div class="table-responsive" style="overflow-x:auto;">
 <table class="table">
@@ -1001,13 +1033,13 @@ from § “Animal-model unification” — and the two parameterisations agree
 on every prediction. <code>phylolm</code>’s advantage is speed: a
 closed-form ML fit in a fraction of a second instead of Stan’s compile +
 sample.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/lamho86/phylolm" class="external-link">phylolm</a></span><span class="op">)</span></span>
 <span><span class="va">dat_pl</span> <span class="op">&lt;-</span> <span class="va">dat</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">dat_pl</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">dat_pl</span><span class="op">$</span><span class="va">species</span></span>
 <span><span class="va">fit_pl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/phylolm/man/phylolm.html" class="external-link">phylolm</a></span><span class="op">(</span><span class="va">Zr</span> <span class="op">~</span> <span class="fl">1</span>, data <span class="op">=</span> <span class="va">dat_pl</span>, phy <span class="op">=</span> <span class="va">tree</span>, model <span class="op">=</span> <span class="st">"lambda"</span><span class="op">)</span></span>
 <span><span class="va">sym_pl</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/symbolize.html">symbolize</a></span><span class="op">(</span><span class="va">fit_pl</span>, data <span class="op">=</span> <span class="va">dat_pl</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sym_pl</span><span class="op">$</span><span class="va">metadata</span><span class="op">$</span><span class="va">phylo_representation</span>   <span class="co"># "pgls_marginal"</span></span>
 <span><span class="co">#&gt; [1] "pgls_marginal"</span></span>
 <span><span class="va">sym_pl</span><span class="op">$</span><span class="va">metadata</span><span class="op">$</span><span class="va">phylo_model</span>            <span class="co"># "lambda"</span></span>
@@ -1033,7 +1065,7 @@ sample.</p>
 <td align="left">0.141</td>
 </tr></tbody>
 </table>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit_pl</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Call:</span></span>
@@ -1080,7 +1112,7 @@ total
 and the heritability
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mover><mi>H</mi><mo accent="true">̂</mo></mover><mn>2</mn></msup><mo>=</mo><mover><mi>λ</mi><mo accent="true">̂</mo></mover></mrow><annotation encoding="application/x-tex">\hat H^2 = \hat\lambda</annotation></semantics></math>
 are more stable than either component on its own.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/assumption_table.html">assumption_table</a></span><span class="op">(</span><span class="va">sym_pl</span><span class="op">)</span></span></code></pre></div>
 <div class="table-responsive" style="overflow-x:auto;">
 <table class="table">
@@ -1298,7 +1330,7 @@ in place of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐀</mi><annotation encoding="application/x-tex">\mathbf A</annotation></semantics></math>
 — these are <strong>pseudocode</strong> (the spatial demo data + mesh
 would be set up in a separate spatial article, not here):</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://sdmTMB.github.io/sdmTMB/" class="external-link">sdmTMB</a></span><span class="op">)</span></span>
 <span><span class="va">fit_sp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://sdmTMB.github.io/sdmTMB/reference/sdmTMB.html" class="external-link">sdmTMB</a></span><span class="op">(</span></span>
 <span>  <span class="va">y</span> <span class="op">~</span> <span class="fl">1</span>,</span>

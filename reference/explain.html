@@ -8,6 +8,8 @@ symbols          – the symbol_table() result
 assumptions      – the assumption_table() result
 bridge           – the formula_bridge() result
 interpretation   – the parameter_interpretation() result
+variance_components – where the variation lives (NULL when the model
+has no random effects)
 notation_bridge  – the notation_bridge() result
 
 
@@ -24,6 +26,8 @@ symbols          – the symbol_table() result
 assumptions      – the assumption_table() result
 bridge           – the formula_bridge() result
 interpretation   – the parameter_interpretation() result
+variance_components – where the variation lives (NULL when the model
+has no random effects)
 notation_bridge  – the notation_bridge() result
 
 
@@ -39,7 +43,7 @@ walkthrough without re-running symbolize()."><meta property="og:image" content="
 
     <a class="navbar-brand me-2" href="../index.html">symbolizer</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.21.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.22.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -76,6 +80,8 @@ with the six reader-facing pieces already rendered:</p><ul><li><p><code>equation
 <li><p><code>assumptions</code>      – the <code><a href="assumption_table.html">assumption_table()</a></code> result</p></li>
 <li><p><code>bridge</code>           – the <code><a href="formula_bridge.html">formula_bridge()</a></code> result</p></li>
 <li><p><code>interpretation</code>   – the <code><a href="parameter_interpretation.html">parameter_interpretation()</a></code> result</p></li>
+<li><p><code>variance_components</code> – where the variation lives (NULL when the model
+has no random effects)</p></li>
 <li><p><code>notation_bridge</code>  – the <code><a href="notation_bridge.html">notation_bridge()</a></code> result</p></li>
 </ul><p>Print the result at the console for a walkthrough led by a plain-English
 paragraph, or knit it inside a Quarto / R Markdown document for a
@@ -120,7 +126,8 @@ units, e.g. <code>c(body_mass = "g", temperature = "C")</code>.</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A <code>symbolized_explanation</code> object with elements <code>model</code> (the
 underlying <code>symbolized_model</code>), <code>equations</code>, <code>symbols</code>, <code>assumptions</code>,
-<code>bridge</code>, <code>interpretation</code>, <code>notation_bridge</code>.</p>
+<code>bridge</code>, <code>interpretation</code>, <code>variance_components</code> (NULL when the model
+has no random effects), <code>notation_bridge</code>.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
