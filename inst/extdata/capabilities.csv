@@ -116,7 +116,9 @@ gam,gaussian,smooth,First slice,0.14.0,"Smooth terms (s(x), s(x, by = factor), t
 gam,poisson,mu,First slice,0.14.0,mgcv gam / bam Poisson additive model (log link).
 gam,binomial,mu,First slice,0.14.0,mgcv gam / bam Binomial additive model (logit link).
 gam,Gamma,mu,First slice,0.14.0,mgcv gam / bam Gamma additive model (log link).
-gam,*,*,Planned or reserved,,"Other families (tw, nb, scat, multinom, ziP, ...) and non-default smooths still planned."
+gam,poisson,smooth,First slice,0.22.5,"Smooth terms (s(x), te(x, z)) in a Poisson additive model (log link); summarised by basis dimension and edf in metadata$smooths."
+gam,binomial,smooth,First slice,0.22.5,"Smooth terms (s(x), te(x, z)) in a Binomial additive model (logit link); summarised by basis dimension and edf in metadata$smooths."
+gam,*,*,Planned or reserved,,"Other families (Gamma smooths pending link-aware prose; tw, nb, scat, multinom, ziP, ...) and non-default smooths still planned."
 bam,*,*,Planned or reserved,,bam inherits from gam; see gam capability rows.
 drmTMB,gaussian,phylo,First slice,0.21.0,"drmTMB::phylo(term, tree) and drmTMB::animal(term, pedigree) markers. Internally uses Hadfield & Nakagawa (2010) A-inverse sparse-precision (all-nodes: latent vector spans tips + internal nodes). Extractor sets metadata$phylo_representation = ""all_nodes""."
 metafor,*,phylo,First slice,0.21.0,"Phylogenetic meta-analysis via rma.mv(..., R = list(species = A)) where A is the k x k tips-only phylogenetic correlation matrix (Sigma_species = sigma^2_p * A, with sigma^2_p estimated). Distinct from V = V (fixed sampling covariance). Extractor discriminates phylo vs spatial vs generic by R-matrix group name."
