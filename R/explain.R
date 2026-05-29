@@ -21,6 +21,8 @@
 #' * `assumptions`      -- the [`assumption_table()`] result
 #' * `bridge`           -- the [`formula_bridge()`] result
 #' * `interpretation`   -- the [`parameter_interpretation()`] result
+#' * `variance_components` -- where the variation lives (NULL when the model
+#'   has no random effects)
 #' * `notation_bridge`  -- the [`notation_bridge()`] result
 #'
 #' Print the result at the console for a walkthrough led by a plain-English
@@ -34,7 +36,8 @@
 #'
 #' @return A `symbolized_explanation` object with elements `model` (the
 #'   underlying `symbolized_model`), `equations`, `symbols`, `assumptions`,
-#'   `bridge`, `interpretation`, `notation_bridge`.
+#'   `bridge`, `interpretation`, `variance_components` (NULL when the model
+#'   has no random effects), `notation_bridge`.
 #' @export
 explain <- function(fit, symbols = NULL, units = NULL, context = NULL, ...) {
   sym <- symbolize(fit, symbols = symbols, units = units,
@@ -56,6 +59,9 @@ new_symbolized_explanation <- function(sym) {
     assumptions     = assumption_table(sym),
     bridge          = formula_bridge(sym, notation = "both"),
     interpretation  = parameter_interpretation(sym, scale = "all"),
+    # v0.22.x: surface where the variation lives. Previously dropped even
+    # though every mixed-model extractor computes the variance components.
+    variance_components = sym$variance_components,
     notation_bridge = notation_bridge(sym)
   )
   class(out) <- c("symbolized_explanation", "list")
@@ -87,6 +93,11 @@ print.symbolized_explanation <- function(x, ...) {
   cli::cli_h2("What each coefficient means")
   print(x$interpretation)
 
+  if (!is.null(x$variance_components) && nrow(x$variance_components) > 0L) {
+    cli::cli_h2("How the variation splits")
+    print(x$variance_components)
+  }
+
   cli::cli_h2("Index vs matrix notation")
   print(x$notation_bridge)
 
@@ -106,8 +117,11 @@ knit_print.symbolized_explanation <- function(x, ...) {
     list(title = "What's assumed", obj = x$assumptions),
     list(title = "R syntax to mathematics", obj = x$bridge),
     list(title = "What each coefficient means", obj = x$interpretation),
+    if (!is.null(x$variance_components) && nrow(x$variance_components) > 0L)
+      list(title = "How the variation splits", obj = x$variance_components),
     list(title = "Index vs matrix notation", obj = x$notation_bridge)
   )
+  sections <- Filter(Negate(is.null), sections)
   parts <- c(
     sprintf("## Explaining your `%s` model", sym$model$class),
     "",

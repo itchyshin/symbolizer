@@ -264,7 +264,7 @@ symbolize.drmTMB <- function(fit, symbols = NULL, units = NULL,
   }
   fixed_eff    <- drm_build_fixed_effects(terms_tbl, fit, ci_method = ci_method)
   re_tbl       <- drm_build_random_effects(re_per_entry)
-  vc_tbl       <- drm_build_variance_components(re_per_entry)
+  vc_tbl       <- drm_build_variance_components(re_per_entry, fit$sdpars)
   cov_tbl      <- drm_build_covariance_components(re_tbl)
   components   <- drm_build_components(submodels, terms_tbl, re_tbl,
                                        response_symbol, response_symbol_matrix,
@@ -1226,7 +1226,7 @@ drm_build_random_effects <- function(re_per_entry) {
   out
 }
 
-drm_build_variance_components <- function(re_per_entry) {
+drm_build_variance_components <- function(re_per_entry, sdpars = NULL) {
   re <- drm_build_random_effects(re_per_entry)
   if (is.null(re)) return(NULL)
   desc <- vapply(seq_len(nrow(re)), function(i) {
@@ -1238,6 +1238,24 @@ drm_build_variance_components <- function(re_per_entry) {
               re$group_var[[i]], re$component[[i]], re$submodel[[i]])
     }
   }, character(1L))
+  # v0.22.x: pull the numeric between-group SD from the fitted object's
+  # `sdpars` (a list keyed by submodel; each element a named vector of RE
+  # SDs, e.g. fit$sdpars$mu = c("(1 | group)" = 0.613)). This is the
+  # keystone that lets variance_partition() / icc() / the variation panel
+  # read real numbers for drmTMB (lme4 / glmmTMB already carry them).
+  # Match a row to its SD by the group variable appearing inside the
+  # RE-term name "( ... | <group> )". Unmatched rows get NA (graceful).
+  sd_for <- function(submodel, group_var) {
+    v <- if (!is.null(sdpars)) sdpars[[submodel]] else NULL
+    if (is.null(v) || length(v) == 0L) return(NA_real_)
+    hit <- v[grepl(sprintf("\\|\\s*%s\\s*\\)$",
+                           gsub("([.\\\\^$|(){}+*?\\[\\]])", "\\\\\\1", group_var)),
+                   names(v))]
+    if (length(hit) >= 1L) as.numeric(hit[[1L]]) else as.numeric(v[[1L]])
+  }
+  sd_est <- vapply(seq_len(nrow(re)),
+                   function(i) sd_for(re$submodel[[i]], re$group_var[[i]]),
+                   numeric(1L))
   tibble::tibble(
     submodel    = re$submodel,
     group_var   = re$group_var,
@@ -1247,6 +1265,8 @@ drm_build_variance_components <- function(re_per_entry) {
                                  re$component)),
     symbol      = re$sigma_symbol,
     n_levels    = re$n_levels,
+    sd_estimate = sd_est,
+    var_estimate = sd_est^2,
     description = desc
   )
 }

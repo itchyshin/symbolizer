@@ -23,7 +23,8 @@ units, e.g. \code{c(body_mass = "g", temperature = "C")}.}
 \value{
 A \code{symbolized_explanation} object with elements \code{model} (the
 underlying \code{symbolized_model}), \code{equations}, \code{symbols}, \code{assumptions},
-\code{bridge}, \code{interpretation}, \code{notation_bridge}.
+\code{bridge}, \code{interpretation}, \code{variance_components} (NULL when the model
+has no random effects), \code{notation_bridge}.
 }
 \description{
 \code{explain()} is the recommended entry point for first-time users. It runs
@@ -36,6 +37,8 @@ with the six reader-facing pieces already rendered:
 \item \code{assumptions}      -- the \code{\link[=assumption_table]{assumption_table()}} result
 \item \code{bridge}           -- the \code{\link[=formula_bridge]{formula_bridge()}} result
 \item \code{interpretation}   -- the \code{\link[=parameter_interpretation]{parameter_interpretation()}} result
+\item \code{variance_components} -- where the variation lives (NULL when the model
+has no random effects)
 \item \code{notation_bridge}  -- the \code{\link[=notation_bridge]{notation_bridge()}} result
 }
 

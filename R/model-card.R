@@ -33,7 +33,8 @@
 #'
 #' @return A `symbolizer_model_card` (a list) with elements:
 #'   `meta`, `equation`, `symbols`, `assumptions`, `bridge`,
-#'   `formula_bridge`, `interpretation`, `extraction_calls`,
+#'   `formula_bridge`, `interpretation`, `variance_components` (NULL when
+#'   the model has no random effects), `warnings`, `extraction_calls`,
 #'   `recommended_plots`, `marginal_means` (NULL when the model has no
 #'   factors), `marginal_slopes` (NULL when no continuous-by-* interaction
 #'   is present).
@@ -68,6 +69,7 @@ model_card.symbolized_model <- function(x, ...) {
     bridge            = notation_bridge(x),
     formula_bridge    = formula_bridge(x, notation = "both"),
     interpretation    = parameter_interpretation(x, scale = "all"),
+    variance_components = x$variance_components,
     warnings          = warning_table(x),
     extraction_calls  = model_card_extraction_calls(x),
     recommended_plots = model_card_recommended_plots(x),
