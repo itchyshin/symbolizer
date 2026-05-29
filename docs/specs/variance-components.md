@@ -80,6 +80,39 @@ Approved by the maintainer via the v2 pilot. Decisions on record:
   component bars.
 - **S4 — shrinkage caption.** Prose-only caption on the worked-row BLUP. Test:
   rendered worked row carries the partial-pooling caption when `has_re`.
+- **S5 — GLMM repeatability demo (accessor-centric).** Give the bar + ICC a
+  visible home on the live site, in the rptR / repeatability tradition the
+  maintainer named (lme4 + glmmTMB GLMMs, *not* the drmTMB location-scale
+  sections). Two units:
+  1. **`knit_print` methods** for `symbolizer_variance_partition` and
+     `symbolizer_icc` (`R/knit-print.R`, mirroring `group_means`/`group_slopes`).
+     They emit `knitr::asis_output` HTML by **reusing the S3 helpers**
+     (`vc_bar_stacked()` / `vc_bar_per_component()` / `vc_component_list()` for
+     the partition; `vc_icc_line()` for the ICC) plus a compact numbers table
+     built as inline HTML (so the whole emission is one `asis` HTML block
+     alongside the bar — not a kable, which would not combine with raw HTML).
+     This frees the bar from the drmTMB-only three-views widget: it now travels
+     wherever the accessor is shown. No extractor changes; the lme4/glmmTMB
+     Tab-3 widget gap is explicitly out of scope (not queued).
+  2. **New vignette** `vignettes/symbolizer-variance-components.Rmd` ("Where the
+     variation lives: ICC and repeatability"). Reuses the approved pilot
+     examples (no new dependency; `rnorm`/`rbinom`): boldness measured
+     repeatedly per individual and survival per nest. §1 Gaussian repeatability
+     via `lmer` → `variance_partition()` (bar + table) + `icc()` (data-scale =
+     repeatability). §2 binomial via `glmer` → `icc()` latent-scale + the "not
+     observed-outcome variance" caption (the rptR `link`-scale approach). §3
+     **same reading, different engine** via `glmmTMB` → `icc()` matches lme4
+     (engine-agnostic). §4 brief honesty note (Poisson / >1 RE → `NA` + reason;
+     point estimates only). Frames **ICC = repeatability**, nods to rptR
+     (Nakagawa & Schielzeth). Registered in `_pkgdown.yml` ("Deep dives" group;
+     placement adjustable).
+
+  Tests (`test-variance-knit-print.R`): `knit_print(variance_partition(lmer))`
+  is `asis` HTML with the bar markers + a numbers table; `knit_print(icc(glmer
+  binomial))` contains "ICC" + "latent" + "observed outcome"; Poisson → "not
+  available". Verification: vignette built locally + a visual check that the
+  Gaussian repeatability bar renders live (the showcase the location-scale
+  widgets could not provide).
 
 ## Verification
 
