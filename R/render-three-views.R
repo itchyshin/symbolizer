@@ -513,6 +513,59 @@ pdf_three_views_matrix_block_latex <- function(x, head = 5L, tail = 2L,
   out
 }
 
+# Single source of truth for the family-dependent SHAPE of a Tab 3 worked
+# row, shared by the HTML emitter (three_views_worked_row) and the PDF
+# emitter (pdf_three_views_worked_row) so the two cannot drift apart
+# (PDF/HTML parity, Pattern J). Returns:
+#   shape         -- "additive_gaussian" | "additive_log" | "generalized"
+#   link_label    -- LaTeX for the inverse-link operator (\exp, logistic, ...)
+#   family_label  -- LaTeX name of the distribution for the likelihood line
+worked_row_family_spec <- function(family) {
+  fam <- tolower(as.character(family))
+  list(
+    shape = switch(fam,
+      gaussian  = "additive_gaussian",
+      student   = "additive_gaussian",
+      lognormal = "additive_log",
+      "generalized"),
+    link_label = switch(fam,
+      poisson  = "\\exp",
+      binomial = "\\mathrm{logistic}",
+      beta     = "\\mathrm{logistic}",
+      gamma    = "\\exp",
+      nbinom1  = "\\exp",
+      nbinom2  = "\\exp",
+      "\\mathrm{link}^{-1}"),
+    family_label = switch(fam,
+      poisson  = "\\mathrm{Poisson}",
+      binomial = "\\mathrm{Binomial}",
+      beta     = "\\mathrm{Beta}",
+      gamma    = "\\mathrm{Gamma}",
+      nbinom1  = "\\mathrm{NegBinom}_1",
+      nbinom2  = "\\mathrm{NegBinom}_2",
+      paste0("\\mathrm{", family, "}"))
+  )
+}
+
+# Family-aware likelihood argument list, mirroring each family's Tab 1
+# parameterization, built from caller-supplied mean and dispersion
+# symbols (so HTML can pass `\hat\mu_{1}` / `\hat\sigma_{1}` and PDF can
+# pass `\hat\mu_1` / `\hat\sigma_1` in their own local styles). Drives
+# both the spurious-ellipsis fix (#3) and the precision-hiding fix (#4),
+# and now keeps HTML + PDF in lockstep.
+worked_row_lik_args <- function(family, mu_sym, sigma_sym) {
+  switch(tolower(as.character(family)),
+    poisson  = sprintf("(%s)", mu_sym),
+    binomial = sprintf("(%s)", mu_sym),
+    beta     = sprintf("(%s%s,\\, (1 - %s)%s)", mu_sym, sigma_sym, mu_sym, sigma_sym),
+    gamma    = sprintf("(\\mathrm{shape} = 1/%s^2,\\, \\mathrm{scale} = %s%s^2)",
+                       sigma_sym, mu_sym, sigma_sym),
+    nbinom1  = sprintf("(%s,\\, \\mathrm{size} = \\exp(%s))", mu_sym, sigma_sym),
+    nbinom2  = sprintf("(%s,\\, \\mathrm{size} = \\exp(%s))", mu_sym, sigma_sym),
+    sprintf("(%s, \\ldots)", mu_sym)
+  )
+}
+
 # Build the LaTeX content for the "worked observation" section. Pure-LaTeX
 # strings (math + prose). Returns one $$...$$ block per submodel that has
 # data populated in $expanded.
@@ -540,44 +593,79 @@ pdf_three_views_worked_row <- function(x) {
   # v0.21.2 dat.moura2021 metafor + MCMCglmm fits.
   has_re <- !is.null(ex$Z_g) && !is.null(ex$u)
   re_contrib_num <- if (has_re) sum(ex$Z_g[i, ] * ex$u) else 0
+  # v0.22.4 #1 (BLOCKER): the PDF worked row must branch on family/link
+  # exactly as the HTML emitter does, via the shared family-spec helpers.
+  # The old code hardcoded the Gaussian-additive `y = Xb + eps = y` form
+  # for every family -- wrong scale, arithmetically false, and at odds
+  # with the PDF's own link-scale stacked block.
+  fam_spec <- worked_row_family_spec(x$model$family)
+  shape    <- fam_spec$shape
+  eta_i    <- if (!is.null(ex$eta_hat)) ex$eta_hat[[i]] else mu_i
+  resp1    <- sprintf("\\mathrm{%s}_1", resp_sym)
   if (!is.null(X_i) && !is.null(beta) && length(X_i) == length(beta)) {
-    terms_tex <- vapply(seq_along(beta), function(k) {
-      bk <- fmt(beta[[k]])
-      xk <- fmt(X_i[[k]])
-      if (k == 1L) bk else sprintf("%s \\cdot %s", bk, xk)
-    }, character(1L))
-    # Use paste(..., collapse) instead of an explicit for-loop -- the loop
-    # `for (k in seq.int(2L, length(terms_tex)))` breaks when
-    # length(terms_tex) == 1L (intercept-only model) because seq.int(2L, 1L)
-    # returns c(2L, 1L) and tries to index a nonexistent element. Florence
-    # caught this on the v0.21.2 dat.moura2021 intercept-only metafor fit.
-    rhs_signed <- paste(terms_tex, collapse = " + ")
+    # Build the displayed linear-predictor terms + the reader-facing
+    # numeric value of each (for closing additive equations at display
+    # precision -- same approach as the HTML worked row).
+    terms_tex <- character(length(beta))
+    num_vals  <- numeric(length(beta))
+    for (k in seq_along(beta)) {
+      if (k == 1L) {
+        terms_tex[k] <- fmt(beta[[k]])
+        num_vals[k]  <- as.numeric(fmt(beta[[k]]))
+      } else {
+        terms_tex[k] <- sprintf("%s \\cdot %s", fmt(beta[[k]]), fmt(X_i[[k]]))
+        num_vals[k]  <- as.numeric(fmt(beta[[k]])) * as.numeric(fmt(X_i[[k]]))
+      }
+    }
     if (has_re) {
-      # Append the RE-contribution term so the arithmetic closes.
-      re_str <- if (re_contrib_num < 0)
-                  sprintf("- %s", fmt(abs(re_contrib_num)))
-                else
-                  sprintf("+ %s", fmt(re_contrib_num))
-      rhs_signed <- sprintf("%s \\;%s", rhs_signed, re_str)
+      terms_tex <- c(terms_tex, sprintf("(%s)", fmt(re_contrib_num)))
+      num_vals  <- c(num_vals, as.numeric(fmt(re_contrib_num)))
     }
-    rhs_full <- if (!is.na(eps_i)) {
-      eps_str <- if (eps_i < 0) sprintf("- %s", fmt(abs(eps_i)))
-                 else sprintf("+ %s", fmt(eps_i))
-      sprintf("%s \\;%s = %s", rhs_signed, eps_str, fmt(y_i))
+    rhs_lp  <- join_signed_terms(terms_tex)  # folds '+ -' -> '-' (#7)
+    lp_disp <- sum(num_vals)
+
+    if (shape == "additive_gaussian") {
+      eps_disp <- as.numeric(fmt(y_i)) - lp_disp
+      eps_str  <- if (eps_disp < 0) sprintf("- %s", fmt(abs(eps_disp)))
+                  else sprintf("+ %s", fmt(eps_disp))
+      parts <- c(parts, "$$",
+        sprintf("\\underbrace{%s}_{\\text{observed}=%s} \\;=\\; %s \\;%s",
+                resp1, fmt(y_i), rhs_lp, eps_str),
+        "$$", "",
+        sprintf(paste0("_Predicted $\\hat\\mu_1 = %s$ (response scale); ",
+                       "residual $\\hat\\varepsilon_1 = %s$._"),
+                fmt(mu_i), fmt(eps_disp)))
+    } else if (shape == "additive_log") {
+      log_y    <- log(y_i)
+      eps_disp <- as.numeric(fmt(log_y)) - lp_disp
+      eps_str  <- if (eps_disp < 0) sprintf("- %s", fmt(abs(eps_disp)))
+                  else sprintf("+ %s", fmt(eps_disp))
+      parts <- c(parts, "$$",
+        sprintf("\\underbrace{\\log %s}_{\\log\\,\\text{observed}=%s} \\;=\\; %s \\;%s",
+                resp1, fmt(log_y), rhs_lp, eps_str),
+        "$$", "",
+        sprintf(paste0("_Predicted log-scale mean $\\hat\\mu_1 = %s$; ",
+                       "log-scale residual $\\hat\\varepsilon_1^{(\\log)} = %s$. ",
+                       "Back-transform to the response-scale mean with ",
+                       "$\\mathbb{E}[%s] = \\exp(\\hat\\mu_1 + \\hat\\sigma_1^2/2)$._"),
+                fmt(mu_i), fmt(eps_disp), resp1))
     } else {
-      rhs_signed
+      # generalized: link-scale linear predictor, response-scale mean via
+      # the inverse link, then the likelihood. No additive error term.
+      link <- fam_spec$link_label
+      lik  <- worked_row_lik_args(x$model$family, "\\hat\\mu_1", "\\hat\\sigma_1")
+      parts <- c(parts, "$$", "\\begin{aligned}",
+        sprintf("\\hat\\eta_1 &\\;=\\; %s \\;\\approx\\; %s \\\\", rhs_lp, fmt(eta_i)),
+        sprintf("\\hat\\mu_1 &\\;=\\; %s(\\hat\\eta_1) \\;=\\; %s(%s) \\;\\approx\\; %s \\\\",
+                link, link, fmt(eta_i), fmt(mu_i)),
+        sprintf("%s &\\;\\sim\\; %s%s", resp1, fam_spec$family_label, lik),
+        "\\end{aligned}", "$$", "",
+        sprintf(paste0("_Linear predictor $\\hat\\eta_1 = %s$ on the link scale; ",
+                       "predicted mean $\\hat\\mu_1 = %s(\\hat\\eta_1) \\approx %s$ on the ",
+                       "response scale. No additive error term enters the linear ",
+                       "predictor -- the spread is set by the likelihood above._"),
+                fmt(eta_i), link, fmt(mu_i)))
     }
-    parts <- c(parts,
-      "$$",
-      sprintf("\\underbrace{%s}_{\\text{observed}=%s} \\;=\\; %s",
-              sprintf("\\mathrm{%s}_1", resp_sym), fmt(y_i), rhs_full),
-      "$$",
-      "",
-      if (!is.na(mu_i) && !is.na(eps_i)) {
-        sprintf("_Predicted $\\hat\\mu_1 = %s$; residual $\\hat\\varepsilon_1 = %s$._",
-                fmt(mu_i), fmt(eps_i))
-      } else ""
-    )
   }
   if (!is.null(ex$X_sigma) && !is.null(ex$gamma) &&
       !is.null(ex$sigma_hat) && length(ex$sigma_hat) >= 1L) {
@@ -624,6 +712,28 @@ pdf_three_views_worked_row <- function(x) {
 # Underscore-escape a response name for use inside \mathrm{...} in LaTeX.
 escape_underscores_for_latex <- function(s) {
   gsub("_", "\\_", s, fixed = TRUE)
+}
+
+# Join a vector of LaTeX numeric term strings into a sum, folding a
+# leading minus sign on any term into the binary operator so the result
+# reads `a - b` rather than the glued `a + -b` (punch-list #7). The first
+# term keeps its own sign. Terms whose displayed value is already
+# parenthesised (e.g. a random-effect or residual term `(-0.45)`) start
+# with `(` not `-`, so they keep the `+ (...)` style -- the page's own
+# convention for those, intentionally left intact.
+join_signed_terms <- function(terms) {
+  terms <- terms[nzchar(terms)]
+  if (length(terms) == 0L) return("")
+  out <- terms[[1L]]
+  for (j in seq_along(terms)[-1L]) {
+    t <- terms[[j]]
+    if (grepl("^-", t)) {
+      out <- paste0(out, " - ", sub("^-\\s*", "", t))
+    } else {
+      out <- paste0(out, " + ", t)
+    }
+  }
+  out
 }
 
 # Wrap a three-views fragment with a full standalone HTML document that
@@ -1398,6 +1508,10 @@ three_views_worked_row <- function(ex, resp_sym = "\\mathbf{y}",
   } else NULL
   re_terms_sym <- character(0L)
   re_terms_num <- character(0L)
+  # Reader-facing numeric value of each displayed RE term (parallel to
+  # re_terms_num) so the "with your numbers" equation can be closed at
+  # display precision -- see lp_disp below.
+  re_terms_val <- numeric(0L)
   if (!is.null(per_tier_Z_wr)) {
     for (gv in names(per_tier_Z_wr)) {
       Z_gv <- per_tier_Z_wr[[gv]]
@@ -1428,6 +1542,7 @@ three_views_worked_row <- function(ex, resp_sym = "\\mathbf{y}",
       }
       re_terms_sym <- c(re_terms_sym, group_label)
       re_terms_num <- c(re_terms_num, sprintf("(%s)", fmt(contrib)))
+      re_terms_val <- c(re_terms_val, as.numeric(fmt(contrib)))
     }
   }
 
@@ -1474,20 +1589,36 @@ three_views_worked_row <- function(ex, resp_sym = "\\mathbf{y}",
   # (sanitized for LaTeX) with subscript i = 1.
   predictor_label <- function(k) {
     nm <- names(X1)[k]
-    if (is.null(nm) || !nzchar(nm)) nm <- paste0("x_{", k, "}")
-    nm <- gsub("_", "\\_", nm, fixed = TRUE)
-    sprintf("\\mathrm{%s}_{1}", nm)
+    if (is.null(nm) || !nzchar(nm)) return(sprintf("x_{%d}", k))
+    # Punch-list #9: a single-letter predictor is italic math (matching
+    # Tab 1, the symbol glossary, and the dimension labels). Multi-letter
+    # or transformed names stay upright \mathrm{} so they read as one
+    # named object rather than a product of italic letters.
+    if (grepl("^[A-Za-z]$", nm)) {
+      sprintf("%s_{1}", nm)
+    } else {
+      sprintf("\\mathrm{%s}_{1}", gsub("_", "\\_", nm, fixed = TRUE))
+    }
   }
 
   sym_terms <- character(length(X1))
   num_terms <- character(length(X1))
+  # num_vals[k] = the value a reader gets by combining the DISPLAYED
+  # (rounded) numbers in num_terms[k]: intercept -> round(beta0);
+  # slope -> round(beta) * round(x). Used to close the printed equation
+  # at display precision (punch-list #5) -- you cannot round a, b and
+  # a+b independently and have them add up, so the residual is computed
+  # against this reader-facing sum.
+  num_vals  <- numeric(length(X1))
   for (k in seq_along(X1)) {
     if (is_intercept[k]) {
       sym_terms[k] <- beta_k(k)
       num_terms[k] <- fmt(ex$beta[k])
+      num_vals[k]  <- as.numeric(fmt(ex$beta[k]))
     } else {
       sym_terms[k] <- paste0(beta_k(k), "\\,", predictor_label(k))
       num_terms[k] <- paste0(fmt(ex$beta[k]), " \\times ", fmt(X1[k]))
+      num_vals[k]  <- as.numeric(fmt(ex$beta[k])) * as.numeric(fmt(X1[k]))
     }
   }
   # Append every tier's RE term to both lists so the symbolic and
@@ -1497,9 +1628,13 @@ three_views_worked_row <- function(ex, resp_sym = "\\mathbf{y}",
   if (length(re_terms_sym) > 0L) {
     sym_terms <- c(sym_terms, re_terms_sym)
     num_terms <- c(num_terms, re_terms_num)
+    num_vals  <- c(num_vals, re_terms_val)
   }
   sym_rhs <- paste(sym_terms, collapse = " + ")
-  num_rhs <- paste(num_terms, collapse = " + ")
+  num_rhs <- join_signed_terms(num_terms)
+  # Reader-facing linear predictor at display precision (sum of the
+  # rounded terms exactly as the reader would add them up).
+  lp_disp <- sum(num_vals)
 
   # v0.22.2.1: family-aware worked-row shape. Three patterns:
   #   "additive_gaussian"  -- y = X*beta + eps (Gaussian identity link)
@@ -1511,71 +1646,60 @@ three_views_worked_row <- function(ex, resp_sym = "\\mathbf{y}",
   # that every family fell through to "additive_gaussian" -- mixing
   # link-scale and response-scale quantities additively and emitting a
   # meaningless ε for Poisson / Beta.
-  shape <- switch(
-    tolower(as.character(family)),
-    gaussian      = "additive_gaussian",
-    student       = "additive_gaussian",
-    lognormal     = "additive_log",
-    "generalized"
-  )
+  fam_spec_wr <- worked_row_family_spec(family)
+  shape <- fam_spec_wr$shape
 
   if (shape == "additive_gaussian") {
+    # Residual displayed as the balancing figure so the PRINTED numbers
+    # reconcile at display precision (punch-list #5): observed minus the
+    # reader-facing linear predictor lp_disp.
+    eps_disp <- as.numeric(fmt(W1)) - lp_disp
     paste0(
       "<div class=\"sym-eq\">$$\n\\begin{aligned}\n",
       scalar_response_sym, " &= ", sym_rhs, " + \\hat\\varepsilon_{1} ",
       "&\\quad(\\text{response equation, one row of the model}) \\\\\n",
-      fmt(W1), " &= ", num_rhs, " + (", fmt(eps1), ") ",
+      fmt(W1), " &= ", num_rhs, " + (", fmt(eps_disp), ") ",
       "&\\quad(\\text{with your numbers}) \\\\\n",
       "&= \\underbrace{", fmt(mu1),
       "}_{\\textstyle\\,\\hat\\mu_{1}\\,\\text{(predicted)}\\,} \\;+\\; ",
-      "\\underbrace{(", fmt(eps1),
-      ")}_{\\textstyle\\,\\hat\\varepsilon_{1}\\,\\text{(residual)}\\,}",
+      "\\underbrace{(", fmt(eps_disp),
+      ")}_{\\textstyle\\,\\hat\\varepsilon_{1}\\,\\text{(residual)}\\,} ",
+      "&\\quad(\\text{predicted mean} + \\text{residual})",
       "\n\\end{aligned}\n$$</div>\n"
     )
   } else if (shape == "additive_log") {
     # Lognormal: drmTMB parameterises log(Y) ~ Normal(mu, sigma^2). The
     # additive noise is on the LOG scale; the linear-predictor equals
     # the mean of log(y). Show the log-scale residual explicitly so the
-    # arithmetic closes without scale-mixing.
+    # arithmetic closes without scale-mixing. The residual is the
+    # balancing figure against lp_disp so the printed equation closes
+    # at display precision (punch-list #5).
     log_W1   <- log(W1)
-    eps_log1 <- log_W1 - mu1
+    eps_disp <- as.numeric(fmt(log_W1)) - lp_disp
     paste0(
       "<div class=\"sym-eq\">$$\n\\begin{aligned}\n",
       "\\log(", scalar_response_sym, ") &= ", sym_rhs,
       " + \\hat\\varepsilon_{1}^{(\\log)} ",
       "&\\quad(\\text{response equation, log scale}) \\\\\n",
-      fmt(log_W1), " &= ", num_rhs, " + (", fmt(eps_log1), ") ",
+      fmt(log_W1), " &= ", num_rhs, " + (", fmt(eps_disp), ") ",
       "&\\quad(\\text{with your numbers, on } \\log y) \\\\\n",
       "&= \\underbrace{", fmt(mu1),
       "}_{\\textstyle\\,\\hat\\mu_{1}\\,\\text{(log-scale mean)}\\,}",
-      " \\;+\\; \\underbrace{(", fmt(eps_log1),
-      ")}_{\\textstyle\\,\\hat\\varepsilon_{1}^{(\\log)}\\,\\text{(log-scale residual)}\\,}",
+      " \\;+\\; \\underbrace{(", fmt(eps_disp),
+      ")}_{\\textstyle\\,\\hat\\varepsilon_{1}^{(\\log)}\\,\\text{(log-scale residual)}\\,} ",
+      "&\\quad(\\text{log-scale mean} + \\text{residual})",
       "\n\\end{aligned}\n$$</div>\n"
     )
   } else {
     # Generalized: no additive noise on the linear predictor. Show
     # eta_hat (linear predictor), mu_hat (response scale via link
-    # inverse), and the distributional declaration.
-    link_str <- switch(
-      tolower(as.character(family)),
-      poisson    = "\\exp",
-      binomial   = "\\mathrm{logistic}",
-      beta       = "\\mathrm{logistic}",
-      gamma      = "\\exp",
-      nbinom1    = "\\exp",
-      nbinom2    = "\\exp",
-      "\\mathrm{link}^{-1}"
-    )
-    family_label <- switch(
-      tolower(as.character(family)),
-      poisson    = "\\mathrm{Poisson}",
-      binomial   = "\\mathrm{Binomial}",
-      beta       = "\\mathrm{Beta}",
-      gamma      = "\\mathrm{Gamma}",
-      nbinom1    = "\\mathrm{NegBinom}_1",
-      nbinom2    = "\\mathrm{NegBinom}_2",
-      paste0("\\mathrm{", family, "}")
-    )
+    # inverse), and the distributional declaration. The family-dependent
+    # link operator, distribution label, and likelihood argument list all
+    # come from the shared family-spec helpers so the HTML and PDF
+    # emitters cannot drift (#1/#3/#4, PDF/HTML parity).
+    link_str     <- fam_spec_wr$link_label
+    family_label <- fam_spec_wr$family_label
+    lik_args     <- worked_row_lik_args(family, "\\hat\\mu_{1}", "\\hat\\sigma_{1}")
     paste0(
       "<div class=\"sym-eq\">$$\n\\begin{aligned}\n",
       "\\hat\\eta_{1} &= ", sym_rhs,
@@ -1585,7 +1709,7 @@ three_views_worked_row <- function(ex, resp_sym = "\\mathbf{y}",
       "\\hat\\mu_{1} &= ", link_str, "(\\hat\\eta_{1}) = ",
       link_str, "(", fmt(eta1), ") \\approx ", fmt(mu1),
       "&\\quad(\\text{response scale, predicted}) \\\\\n",
-      scalar_response_sym, " &\\sim ", family_label, "(\\hat\\mu_{1}, \\ldots)",
+      scalar_response_sym, " &\\sim ", family_label, lik_args,
       "&\\quad(\\text{likelihood; no additive }\\varepsilon\\text{ here})",
       "\n\\end{aligned}\n$$</div>\n"
     )
@@ -1635,7 +1759,7 @@ three_views_worked_row_sigma <- function(ex, family = "gaussian") {
     }
   }
   sym_rhs <- paste(sym_terms, collapse = " + ")
-  num_rhs <- paste(num_terms, collapse = " + ")
+  num_rhs <- join_signed_terms(num_terms)  # fold '+ -' -> '-' (punch-list #7)
 
   # v0.22.2.1: per-family label for what the sigma submodel actually
   # parameterises. Gaussian/Student-t: residual SD. Lognormal: log-scale

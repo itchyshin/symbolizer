@@ -112,6 +112,111 @@ test_that("Beta sigma caption uses plain prose for the precision parameter", {
   expect_equal(bad, character(0L))
 })
 
+test_that("worked-row predictor renders italic x, not upright mathrm{x}", {
+  # Punch-list #9. The worked-row LHS used \mathrm{x}_{1} (upright,
+  # conventionally for multi-letter operators) while Tab 1, the gloss,
+  # and the dimension labels all use italic math x. A single-letter
+  # predictor should be italic so it reads as the same object.
+  skip_if_not_installed("drmTMB")
+  source(test_path("helper-drmtmb-fits.R"), local = TRUE)
+  fit <- suppressWarnings(fit_drm_poisson())
+  sym <- symbolize(fit)
+  html <- as_html_three_views(sym, id = "test-pred-italic")
+  expect_false(grepl("\\\\mathrm\\{x\\}", html),
+               info = "single-letter predictor should be italic x_{1}, not \\mathrm{x}_{1}")
+})
+
+test_that("worked rows fold negative coefficients into the operator (no '+ -')", {
+  # Punch-list #7. Negative coefficients rendered as a binary plus glued
+  # to a negative literal: '0.955 + -0.0438 \\times 0.45'. Fold the sign
+  # into the operator: '0.955 - 0.0438 \\times 0.45'. The parenthesized
+  # residual / random-effect style '+ (-0.448)' is the page's own
+  # convention and is left intact (only bare '+ -<digit>' is the bug).
+  skip_if_not_installed("drmTMB")
+  source(test_path("helper-drmtmb-fits.R"), local = TRUE)
+
+  for (h in c("fit_drm_poisson", "fit_drm_beta", "fit_drm_lognormal")) {
+    fit <- suppressWarnings(get(h)())
+    sym <- symbolize(fit)
+    html <- as_html_three_views(sym, id = paste0("test-sign-", h))
+    expect_false(
+      grepl("\\+ -[0-9.]", html),
+      info = paste(h, "worked row still glues '+ -' before a negative coefficient")
+    )
+  }
+})
+
+# --- helpers for the lognormal additive_log worked-row checks -------------
+.extract_additive_log_block <- function(html) {
+  blocks <- regmatches(
+    html,
+    gregexpr("\\\\begin\\{aligned\\}.*?\\\\end\\{aligned\\}", html))[[1L]]
+  hit <- blocks[grepl("varepsilon_\\{1\\}\\^\\{\\(\\\\log\\)\\}", blocks) &
+                  grepl("times", blocks)]
+  if (length(hit) == 0L) "" else hit[[1L]]
+}
+
+test_that("Lognormal worked-row 'with your numbers' equation closes at display precision", {
+  # Punch-list #5. The row printed `1.55 = 1.96 + 0.131 x -0.167 + (-0.383)`
+  # but the rounded RHS re-summed to 1.56, not the printed LHS 1.55 -- an
+  # arithmetically FALSE '='. You cannot round a, b and a+b independently
+  # and have them add up; the residual must be the balancing figure so the
+  # printed numbers reconcile (families-audit option b).
+  skip_if_not_installed("drmTMB")
+  source(test_path("helper-drmtmb-fits.R"), local = TRUE)
+  fit <- suppressWarnings(fit_drm_lognormal())
+  sym <- symbolize(fit)
+  html <- as_html_three_views(sym, id = "test-ln-close")
+
+  block <- .extract_additive_log_block(html)
+  expect_true(nzchar(block), info = "additive_log worked-row block not found")
+
+  # Pull the "with your numbers" row: starts with a decimal, has &=, \times.
+  rows <- strsplit(block, "\\\\\\\\")[[1L]]
+  num_row <- rows[grepl("&=", rows) & grepl("times", rows)]
+  expect_length(num_row, 1L)
+
+  # LHS = the number before &= ; RHS = between &= and the &\quad caption.
+  lhs <- sub("^[^0-9.-]*(-?[0-9.]+)\\s*&=.*$", "\\1", num_row)
+  rhs <- sub("^.*&=\\s*(.*?)\\s*&\\\\quad.*$", "\\1", num_row)
+  # Turn the displayed RHS into an evaluable arithmetic expression.
+  expr <- gsub("\\\\times", "*", rhs, fixed = FALSE)
+  expr <- gsub("\\\\,", "", expr, fixed = FALSE)
+  expr <- gsub("[^0-9.+*()\\-]", "", expr)
+  rhs_val <- eval(parse(text = expr), envir = new.env())
+
+  # The reader-summed RHS, formatted as the renderer formats numbers,
+  # must equal the printed LHS string.
+  expect_equal(formatC(rhs_val, digits = 3, format = "g"), lhs,
+               info = paste0("Lognormal worked row does not close: LHS=", lhs,
+                             " but RHS re-sums to ", rhs_val))
+})
+
+test_that("Lognormal worked-row aligned block has uniform alignment-cell counts", {
+  # Punch-list #8. The underbrace decomposition row carried 1 '&' where
+  # the two rows above carry 2, so amsmath ragged the column and the
+  # caption cell did not line up.
+  skip_if_not_installed("drmTMB")
+  source(test_path("helper-drmtmb-fits.R"), local = TRUE)
+  fit <- suppressWarnings(fit_drm_lognormal())
+  sym <- symbolize(fit)
+  html <- as_html_three_views(sym, id = "test-ln-grid")
+
+  block <- .extract_additive_log_block(html)
+  expect_true(nzchar(block), info = "additive_log worked-row block not found")
+  # Strip the \begin/\end wrappers, split into rows, count & per row.
+  body <- sub("^.*\\\\begin\\{aligned\\}", "", block)
+  body <- sub("\\\\end\\{aligned\\}.*$", "", body)
+  rows <- trimws(strsplit(body, "\\\\\\\\")[[1L]])
+  rows <- rows[nzchar(rows)]
+  amp_counts <- vapply(rows,
+                       function(r) lengths(regmatches(r, gregexpr("&", r))),
+                       integer(1L))
+  expect_equal(length(unique(amp_counts)), 1L,
+               info = paste("Ragged alignment: & counts per row =",
+                            paste(amp_counts, collapse = ", ")))
+})
+
 test_that("Gaussian-identity worked row keeps the historic y = Xb + eps shape", {
   # Back-compat: Gaussian-identity is the ONLY family that legitimately
   # has y = X*beta + eps on the linear-predictor scale. Don't break it.
@@ -124,6 +229,48 @@ test_that("Gaussian-identity worked row keeps the historic y = Xb + eps shape", 
   # Historic shape: the worked row DOES include the additive epsilon
   # on the response equation. Don't regress.
   expect_true(grepl("\\\\hat\\\\varepsilon_\\{1\\}", html))
+})
+
+test_that("Poisson worked-row likelihood drops the spurious ellipsis (one-parameter family)", {
+  # Punch-list #3. Poisson is strictly one-parameter; the worked-row
+  # likelihood line emitted `Poisson(\hat\mu_1, \ldots)`, implying a
+  # hidden second parameter that does not exist and contradicting this
+  # widget's own Tab 1 (Poisson(mu)) and matrix-tail caption.
+  skip_if_not_installed("drmTMB")
+  source(test_path("helper-drmtmb-fits.R"), local = TRUE)
+  fit <- suppressWarnings(fit_drm_poisson())
+  sym <- symbolize(fit)
+  html <- as_html_three_views(sym, id = "test-pois-lik")
+
+  expect_false(
+    grepl("\\\\mathrm\\{Poisson\\}\\(\\\\hat\\\\mu_\\{1\\}, \\\\ldots\\)", html),
+    info = "Poisson likelihood must not carry a trailing ellipsis"
+  )
+  expect_true(
+    grepl("\\\\mathrm\\{Poisson\\}\\(\\\\hat\\\\mu_\\{1\\}\\)", html),
+    info = "Poisson likelihood should read Poisson(mu_hat_1) with no second argument"
+  )
+})
+
+test_that("Beta worked-row likelihood shows mean-precision shapes, not Beta(mu, ...)", {
+  # Punch-list #4. Tab 1 of the Beta widget writes the full
+  # mean-precision form Beta(mu_i sigma_i, (1-mu_i) sigma_i); the Tab 3
+  # worked-row likelihood collapsed it to Beta(\hat\mu_1, \ldots),
+  # hiding the precision the widget derives one line below.
+  skip_if_not_installed("drmTMB")
+  source(test_path("helper-drmtmb-fits.R"), local = TRUE)
+  fit <- suppressWarnings(fit_drm_beta())
+  sym <- symbolize(fit)
+  html <- as_html_three_views(sym, id = "test-beta-lik")
+
+  expect_false(
+    grepl("\\\\mathrm\\{Beta\\}\\(\\\\hat\\\\mu_\\{1\\}, \\\\ldots\\)", html),
+    info = "Beta likelihood must not collapse to Beta(mu_hat_1, ...)"
+  )
+  expect_true(
+    grepl("\\(1 - \\\\hat\\\\mu_\\{1\\}\\)\\s*\\\\hat\\\\sigma_\\{1\\}", html, perl = TRUE),
+    info = "Beta likelihood should show the (1 - mu_hat_1) sigma_hat_1 precision shape"
+  )
 })
 
 test_that("sigma worked row does not emit duplicated `= -X = -X` for intercept-only sigma", {
