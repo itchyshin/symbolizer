@@ -207,6 +207,15 @@ vc_residual_variance <- function(x) {
   fit <- x$metadata$fit
   # Gaussian-identity: a single residual SD (when homoscedastic).
   if (fam %in% c("gaussian", "normal")) {
+    # Prefer an explicit residual row already carried by the extractor
+    # (lme4 / glmmTMB / MCMCglmm all carry one; for these `stats::sigma()`
+    # would only reproduce the same number, and for MCMCglmm it warns "no
+    # 'nobs' method is available"). Only drmTMB lacks a residual row -- there
+    # we fall back to sigma(), which exposes the location-scale case.
+    rv_tbl <- vc_residual_from_table(x$variance_components)
+    if (is.finite(rv_tbl)) {
+      return(list(value = rv_tbl, scale = "data", reason = NA_character_))
+    }
     rv <- vc_gaussian_residual_var(fit)
     return(list(value = rv$value, scale = "data", reason = rv$reason))
   }
@@ -230,16 +239,31 @@ vc_residual_variance <- function(x) {
                                  family = if (is.na(fam)) "this" else fam))
 }
 
-# Residual variance for a Gaussian fit. `stats::sigma()` returns a scalar for
-# lme4 / glmmTMB and a per-observation vector for a drmTMB location-scale fit;
-# the latter only defines a single within-group variance when it is constant
-# (sigma ~ 1).
+# The residual variance from an explicit "residual" row carried in the
+# variance_components table (lme4 / glmmTMB / MCMCglmm). NA when no such row
+# exists (drmTMB keeps the residual in its sigma submodel, not the table).
+vc_residual_from_table <- function(vc) {
+  if (is.null(vc) || nrow(vc) == 0L || !"var_estimate" %in% names(vc)) {
+    return(NA_real_)
+  }
+  is_res <- vc_is_residual_row(vc)
+  if (!any(is_res)) return(NA_real_)
+  as.numeric(vc$var_estimate[which(is_res)[1L]])
+}
+
+# Residual variance for a Gaussian fit with no explicit residual row (drmTMB).
+# `stats::sigma()` returns a scalar for lme4 / glmmTMB and a per-observation
+# vector for a drmTMB location-scale fit; the latter only defines a single
+# within-group variance when it is constant (sigma ~ 1). The call is wrapped
+# in suppressWarnings because some fit classes (e.g. MCMCglmm) emit an
+# uninformative "no 'nobs' method" warning; we handle a non-finite result
+# below regardless.
 vc_gaussian_residual_var <- function(fit) {
   if (is.null(fit)) {
     return(list(value = NA_real_,
                 reason = "the original fit is not retained on this symbolized model."))
   }
-  s <- tryCatch(stats::sigma(fit), error = function(e) NULL)
+  s <- suppressWarnings(tryCatch(stats::sigma(fit), error = function(e) NULL))
   if (is.null(s) || length(s) == 0L || !all(is.finite(s))) {
     return(list(value = NA_real_,
                 reason = "could not retrieve a residual SD from the fit."))

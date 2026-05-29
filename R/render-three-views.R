@@ -122,6 +122,9 @@ as_html_three_views.symbolized_model <- function(x, head = 5L, tail = 2L,
   } else ""
   # v0.22.4 #11: per-family numeric diagnostic (e.g. Beta U-shape).
   family_diagnostic <- three_views_family_diagnostic(x)
+  # Variance-components surface (S3): "where does the variation live?" panel,
+  # placed beneath the random-effects glossary. "" for fits without RE.
+  variance_panel <- three_views_variance_panel(x)
   idx_panel <- paste0(
     "<div class=\"sym-panel sym-active\" role=\"tabpanel\" id=\"", pan_idx,
     "\" aria-labelledby=\"", tab_idx, "\" data-panel=\"idx\" tabindex=\"0\">\n",
@@ -133,6 +136,7 @@ as_html_three_views.symbolized_model <- function(x, head = 5L, tail = 2L,
     paste0(vapply(idx_lines, align_at, character(1L)), collapse = " \\\\\n"),
     "\n\\end{aligned}$$</div>\n",
     gloss_index,
+    variance_panel,
     "</div>\n"
   )
   eq_panel <- paste0(
@@ -1972,6 +1976,124 @@ three_views_family_diagnostic <- function(x) {
   tmpl <- gsub("{alpha}", fmt(a), tmpl, fixed = TRUE)
   tmpl <- gsub("{beta}",  fmt(b), tmpl, fixed = TRUE)
   paste0("  <p class=\"sym-biology\">", tmpl, "</p>\n")
+}
+
+# Variance-components surface (docs/specs/variance-components.md, S3): the
+# "where does the variation live?" panel for the Index tab, sitting beneath
+# the random-effects glossary. Reuses the variance_partition() / icc()
+# accessors and renders a plain-CSS-div bar (no JS, survives PDF): a single
+# stacked between/within bar for exactly two variance components, per-component
+# bars for three or more. Below the bar sit one sentence and the ICC line --
+# with the latent-scale caption for binomial, or the "not available on this
+# scale yet" line when the ICC is undefined (Poisson, location-scale, >1 RE).
+# All prose is templated from inst/extdata/variance-readings.csv. Returns ""
+# when the fit has no random effects (nothing to partition).
+three_views_variance_panel <- function(x) {
+  re <- tryCatch(vc_re_rows(x$variance_components), error = function(e) NULL)
+  if (is.null(re) || nrow(re) == 0L) return("")
+  vp <- tryCatch(variance_partition(x), error = function(e) NULL)
+  ic <- tryCatch(icc(x), error = function(e) NULL)
+  if (is.null(vp) || is.null(ic) || nrow(vp) == 0L) return("")
+
+  has_pct <- all(is.finite(vp$pct))
+  body <- if (has_pct) {
+    if (nrow(vp) == 2L) vc_bar_stacked(vp) else vc_bar_per_component(vp)
+  } else {
+    vc_component_list(vp)
+  }
+  intro <- variance_reading("partition_intro")
+
+  paste0(
+    "<div class=\"sym-vc-panel\" style=\"margin-top:1rem;border-top:1px solid #eee;padding-top:0.7rem\">\n",
+    "  <p class=\"sym-caption\"><strong>Where does the variation live?</strong> ",
+    intro, "</p>\n",
+    body,
+    vc_icc_line(ic),
+    "  <p class=\"sym-caption\" style=\"font-size:0.8em;color:#9ca3af;margin-top:0.3rem\">Point estimates only; uncertainty not shown.</p>\n",
+    "</div>\n"
+  )
+}
+
+# Option A: a single horizontal bar split into between / within segments
+# (exactly two variance components). Colours: between = teal, residual = grey.
+vc_bar_stacked <- function(vp) {
+  cols <- c("#2c7fb8", "#d9d9d9")
+  segs <- vapply(seq_len(nrow(vp)), function(i) {
+    w   <- formatC(100 * vp$pct[[i]], digits = 1L, format = "f")
+    col <- cols[[min(i, length(cols))]]
+    txt <- if (i == 1L) "#fff" else "#333"
+    sprintf(
+      "<div style=\"width:%s%%;background:%s;color:%s;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis\" title=\"%s\">%s %s%%</div>",
+      w, col, txt, vp$component[[i]], vp$component[[i]], w)
+  }, character(1L))
+  paste0(
+    "  <div class=\"sym-vc-bar sym-vc-stacked\" role=\"img\" aria-label=\"variance partition\" style=\"display:flex;width:100%;height:1.8rem;border-radius:4px;overflow:hidden;font-size:0.78rem;line-height:1.8rem;margin:0.4rem 0\">\n    ",
+    paste(segs, collapse = "\n    "),
+    "\n  </div>\n"
+  )
+}
+
+# Option B: one labelled track per component (three or more components).
+vc_bar_per_component <- function(vp) {
+  pal <- c("#2c7fb8", "#7fcdbb", "#fec44f", "#d95f0e", "#756bb1")
+  rows <- vapply(seq_len(nrow(vp)), function(i) {
+    w   <- formatC(100 * vp$pct[[i]], digits = 1L, format = "f")
+    res <- grepl("^Residual", vp$component[[i]])
+    col <- if (res) "#d9d9d9" else pal[[((i - 1L) %% length(pal)) + 1L]]
+    sprintf(paste0(
+      "    <div class=\"sym-vc-row\" style=\"display:flex;align-items:center;margin:0.25rem 0;font-size:0.8rem\">\n",
+      "      <span style=\"flex:0 0 38%%;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis\">%s</span>\n",
+      "      <span style=\"flex:1;background:#f3f4f6;border-radius:3px;overflow:hidden\"><span style=\"display:block;width:%s%%;background:%s;color:#fff;padding:0.1rem 0.35rem;white-space:nowrap;box-sizing:border-box\">%s%%</span></span>\n",
+      "    </div>"),
+      vp$component[[i]], w, col, w)
+  }, character(1L))
+  paste0(
+    "  <div class=\"sym-vc-bar sym-vc-bars\" role=\"img\" aria-label=\"variance partition\" style=\"margin:0.4rem 0\">\n",
+    paste(rows, collapse = "\n"),
+    "\n  </div>\n"
+  )
+}
+
+# Text fallback when shares are undefined (no residual on a single scale):
+# the contract is "show the table" without a misleading bar.
+vc_component_list <- function(vp) {
+  items <- vapply(seq_len(nrow(vp)), function(i) {
+    sprintf("<li>%s: variance = %s</li>", vp$component[[i]],
+            formatC(vp$variance[[i]], digits = 3L, format = "fg", flag = "#"))
+  }, character(1L))
+  paste0(
+    "  <ul class=\"sym-vc-list\" style=\"font-size:0.82rem;color:#374151;margin:0.3rem 0;padding-left:1.1rem\">\n    ",
+    paste(items, collapse = "\n    "),
+    "\n  </ul>\n"
+  )
+}
+
+# The ICC line: scale-labelled value + caption, or the "not available" line
+# with its reason. Prose from variance-readings.csv.
+vc_icc_line <- function(ic) {
+  v <- as.numeric(unclass(ic))
+  if (!is.finite(v)) {
+    msg    <- variance_reading("icc_unavailable")
+    reason <- attr(ic, "reason")
+    why <- if (!is.null(reason) && !is.na(reason) && nzchar(reason)) {
+      sprintf(" <span style=\"color:#9ca3af\">(%s)</span>", reason)
+    } else {
+      ""
+    }
+    return(sprintf(
+      "  <p class=\"sym-vc-icc\" style=\"margin:0.4rem 0\"><strong>ICC:</strong> %s%s</p>\n",
+      msg, why))
+  }
+  sc  <- attr(ic, "scale")
+  cap <- attr(ic, "caption")
+  cap_html <- if (!is.null(cap) && !is.na(cap) && nzchar(cap)) {
+    sprintf(" <span style=\"color:#6b7280;font-style:italic\">%s</span>", cap)
+  } else {
+    ""
+  }
+  sprintf(
+    "  <p class=\"sym-vc-icc\" style=\"margin:0.4rem 0\"><strong>ICC (%s scale):</strong> %s.%s</p>\n",
+    sc, formatC(v, digits = 3L, format = "f"), cap_html)
 }
 
 three_views_biology_gloss <- function(x) {
