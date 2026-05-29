@@ -1659,11 +1659,27 @@ three_views_worked_row_sigma <- function(ex, family = "gaussian") {
     nbinom2   = "predicted dispersion (size parameter k) for observation 1",
     "predicted dispersion parameter for observation 1"
   )
+  # v0.22.4 Slice 1d: for intercept-only sigma submodels (sigma ~ 1),
+  # `num_rhs` is the single number `fmt(gamma_0)` which numerically
+  # equals `fmt(log_sig1)`. Emitting `&= num_rhs = fmt(log_sig1)` then
+  # renders as `= -0.764 = -0.764` -- a visible redundancy in every
+  # Lognormal / Beta / Gamma fit with the default `sigma ~ 1`. Drop
+  # the trailing `= fmt(log_sig1)` when it would duplicate `num_rhs`.
+  # Florence spotted this post-Slice-1 on the families article.
+  # NOTE: use unname() because `ex$sigma_hat` is a named numeric vector
+  # in drmTMB output, so `fmt(log_sig1)` carries a `names` attribute
+  # that breaks `identical()` even when the string values match.
+  log_sig1_str <- unname(fmt(log_sig1))
+  num_rhs_value <- if (identical(unname(num_rhs), log_sig1_str)) {
+    num_rhs
+  } else {
+    paste0(num_rhs, " = ", log_sig1_str)
+  }
   paste0(
     "<div class=\"sym-eq\">$$\n\\begin{aligned}\n",
     "\\log\\hat\\sigma_{1} &= ", sym_rhs, " ",
     "&\\quad(\\text{sigma submodel for observation 1, log link}) \\\\\n",
-    "\\log\\hat\\sigma_{1} &= ", num_rhs, " = ", fmt(log_sig1), " ",
+    "\\log\\hat\\sigma_{1} &= ", num_rhs_value, " ",
     "&\\quad(\\text{with your numbers}) \\\\\n",
     "\\hat\\sigma_{1} &= \\exp(", fmt(log_sig1), ") \\approx ", fmt(sigma1), " ",
     "&\\quad(\\text{", sigma_meaning, "})",
