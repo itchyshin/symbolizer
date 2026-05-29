@@ -120,12 +120,15 @@ as_html_three_views.symbolized_model <- function(x, head = 5L, tail = 2L,
     paste0("  <p class=\"sym-biology\"><strong>Coefficient reading.</strong> ",
            coef_reading_txt, "</p>\n")
   } else ""
+  # v0.22.4 #11: per-family numeric diagnostic (e.g. Beta U-shape).
+  family_diagnostic <- three_views_family_diagnostic(x)
   idx_panel <- paste0(
     "<div class=\"sym-panel sym-active\" role=\"tabpanel\" id=\"", pan_idx,
     "\" aria-labelledby=\"", tab_idx, "\" data-panel=\"idx\" tabindex=\"0\">\n",
     "  <p class=\"sym-caption\">What happens for each observation <em>i</em> -- the per-individual reading.</p>\n",
     bio_gloss,
     coef_gloss,
+    family_diagnostic,
     "  <div class=\"sym-eq\">$$\\begin{aligned}\n",
     paste0(vapply(idx_lines, align_at, character(1L)), collapse = " \\\\\n"),
     "\n\\end{aligned}$$</div>\n",
@@ -1933,6 +1936,36 @@ three_views_coef_reading <- function(family) {
   hit <- tbl[tbl$family == family, , drop = FALSE]
   if (nrow(hit) == 0L) return("")
   hit$coef_reading[[1L]]
+}
+
+# v0.22.4 #11: per-family numeric diagnostic surfaced inside the widget.
+# Currently: a Beta fit whose implied shape parameters at observation 1
+# (alpha = mu*phi, beta = (1-mu)*phi) are BOTH below 1 is U-shaped (mass
+# piled near 0 and 1), which a "precision" label alone hides. The
+# condition is checked in R from the already-available mu_hat / sigma_hat;
+# the prose is templated from inst/extdata/family-diagnostics.csv (no
+# string-spliced prose in R). Returns "" when the condition does not hold
+# or for non-Beta families.
+three_views_family_diagnostic <- function(x) {
+  family <- tryCatch(x$model$family, error = function(e) NULL)
+  if (is.null(family) || !identical(tolower(family), "beta")) return("")
+  ex <- x$expanded
+  if (is.null(ex) || is.null(ex$mu_hat) || is.null(ex$sigma_hat)) return("")
+  mu1  <- ex$mu_hat[[1L]]
+  phi1 <- ex$sigma_hat[[1L]]
+  if (!is.finite(mu1) || !is.finite(phi1)) return("")
+  a <- mu1 * phi1
+  b <- (1 - mu1) * phi1
+  if (!(is.finite(a) && is.finite(b) && a < 1 && b < 1)) return("")
+  tbl <- tryCatch(load_template("family-diagnostics"), error = function(e) NULL)
+  if (is.null(tbl) || !"family" %in% names(tbl)) return("")
+  hit <- tbl[tbl$family == "beta", , drop = FALSE]
+  if (nrow(hit) == 0L) return("")
+  fmt <- function(v) formatC(v, digits = 2, format = "g")
+  tmpl <- hit$template[[1L]]
+  tmpl <- gsub("{alpha}", fmt(a), tmpl, fixed = TRUE)
+  tmpl <- gsub("{beta}",  fmt(b), tmpl, fixed = TRUE)
+  paste0("  <p class=\"sym-biology\">", tmpl, "</p>\n")
 }
 
 three_views_biology_gloss <- function(x) {
