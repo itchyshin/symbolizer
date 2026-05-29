@@ -465,8 +465,38 @@ pdf_three_views_matrix_block_latex <- function(x, head = 5L, tail = 2L,
   # If a sigma submodel was emitted, it is the next matrix block.
   idx <- 2L
   if (has_sigma && length(matrix_eqs) >= idx) {
+    # v0.22.4 Slice 1, F3 (PDF parity): match the HTML side's per-shape
+    # sigma caption. Without this, the PDF still claims sigma describes
+    # "spread of epsilon-hat" for Beta / Gamma / NegBinom, where sigma
+    # is actually a precision / shape / size parameter.
+    resp_sym_pdf <- escape_underscores_for_latex(x$model$response)
+    family_str_pdf <-
+      if (!is.null(x$model$family)) as.character(x$model$family[[1L]])
+      else "gaussian"
+    block_shape_pdf <- switch(
+      tolower(family_str_pdf),
+      gaussian  = "additive_gaussian",
+      student   = "additive_gaussian",
+      lognormal = "additive_log",
+      "generalized"
+    )
+    sigma_role_pdf <- switch(
+      block_shape_pdf,
+      additive_gaussian = "$\\sigma$'s job is to describe the spread of $\\hat{\\boldsymbol{\\varepsilon}}$",
+      additive_log = paste0(
+        "$\\sigma$'s job is to describe the spread of the log-scale ",
+        "residual $\\hat{\\boldsymbol{\\varepsilon}}^{(\\log)}$, ",
+        "i.e. the SD of $\\log ", resp_sym_pdf, "$"
+      ),
+      generalized = paste0(
+        "$\\sigma$ here is the family's spread parameter ",
+        "and is not a residual SD; see Tab 1 for its specific role ",
+        "in this distribution"
+      )
+    )
     out <- c(out,
-      "_And the $\\sigma$ submodel (no observed counterpart -- $\\sigma$'s job is to describe the spread of $\\hat{\\boldsymbol{\\varepsilon}}$):_",
+      paste0("_And the $\\sigma$ submodel (no observed counterpart -- ",
+             sigma_role_pdf, "):_"),
       "",
       matrix_eqs[idx],
       "")
@@ -904,29 +934,78 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L,
   # already R-string-encoded as a single backslash, so it can drop into
   # the cat'd HTML as-is.
 
-  # --- Block 1: response equation `w = X beta_hat (+ Z_g u_hat) + eps_hat`
-  # Pedagogically this is the matrix-form RESPONSE equation, not the
-  # conditional-mean equation. Tab 2 (the abstraction tab) shows
-  # `\boldsymbol{\mu} = \mathbf{X}\boldsymbol{\beta}` -- the conditional
-  # mean, no error term. Tab 3 (this one) drops down a level of honesty:
-  # it shows the observed vector `w`, the prediction `X\hat\beta`
-  # (= `\hat\mu`), AND the residual vector `\hat\varepsilon = w - \hat\mu`.
-  # Every row of THIS equation is exactly one of the per-observation
-  # response equations the worked-row block right above shows in scalar
-  # arithmetic. The matrix block IS the worked row, stacked n times.
-  eps_hat  <- ex$y - ex$mu_hat
-  y_vec    <- latex_vec(ex$y,     rows)
+  # --- Block 1: response equation, family-aware ---
+  # Pedagogically this is the matrix-form RESPONSE equation. Tab 2
+  # (abstraction) shows the conditional mean only. Tab 3 (here) drops
+  # down a level of honesty: it shows the observed vector, the
+  # prediction, and -- when the family is Gaussian-additive on some
+  # scale -- the residual vector.
+  #
+  # v0.22.4 Slice 1: three shapes per family (mirrors the worked-row
+  # architecture from v0.22.3, ensuring within-tab consistency):
+  #
+  #   additive_gaussian  -- y = X β̂ + ε̂ on response scale
+  #                         (Gaussian, Student-t)
+  #   additive_log       -- log(y) = X β̂ + ε̂^{(log)} on log scale
+  #                         (Lognormal, drmTMB identity-on-mu-of-log-y)
+  #   generalized        -- η̂ = X β̂ on link scale; μ̂ = link⁻¹(η̂);
+  #                         y ~ Family(μ̂)
+  #                         (Poisson, Beta, Binomial, Gamma, NegBinom)
+  #
+  # The pre-v0.22.4 build emitted `y = X β̂ + ε̂` for every family.
+  # For non-Gaussian families that mixed response-scale y with
+  # link-scale X β̂ in one additive equation -- arithmetically false,
+  # cross-confirmed BLOCKER by all four V-agents in the families
+  # team review (docs/dev-log/figure-audits/v0.22.3-families-team-review/).
+  family_str_block <-
+    if (!is.null(x$model$family)) as.character(x$model$family[[1L]])
+    else "gaussian"
+  block_shape <- switch(
+    tolower(family_str_block),
+    gaussian  = "additive_gaussian",
+    student   = "additive_gaussian",
+    lognormal = "additive_log",
+    "generalized"
+  )
+  emit_eps <- block_shape %in% c("additive_gaussian", "additive_log")
+  if (block_shape == "additive_log") {
+    lhs_values <- log(ex$y)
+    lhs_sym    <- sprintf("\\log(%s)", resp_sym)
+    lhs_role   <- "observed, log scale"
+    eps_vals   <- log(ex$y) - ex$mu_hat
+    eps_sym    <- "\\hat{\\boldsymbol{\\varepsilon}}^{(\\log)}"
+    eps_role   <- "log-scale residual"
+  } else if (block_shape == "generalized") {
+    lhs_values <- ex$eta_hat
+    lhs_sym    <- "\\hat{\\boldsymbol{\\eta}}"
+    lhs_role   <- "linear predictor, link scale"
+    eps_vals   <- NULL
+    eps_sym    <- NULL
+    eps_role   <- NULL
+  } else {
+    # additive_gaussian (historic; back-compat path)
+    lhs_values <- ex$y
+    lhs_sym    <- resp_sym
+    lhs_role   <- "observed"
+    eps_vals   <- ex$y - ex$mu_hat
+    eps_sym    <- "\\hat{\\boldsymbol{\\varepsilon}}"
+    eps_role   <- "residual"
+  }
+
+  y_vec    <- latex_vec(lhs_values, rows)
   X_mat    <- latex_mat(ex$X,     rows,
                          col_head = head_cols, col_tail = tail_cols)
   beta_vec <- latex_vec(ex$beta)
-  eps_vec  <- latex_vec(eps_hat,  rows)
-  y_lab    <- sprintf("%s_{\\,%d \\times 1}\\;\\text{(observed)}",
-                      resp_sym, n)
+  eps_vec  <- if (emit_eps) latex_vec(eps_vals, rows) else NULL
+  y_lab    <- sprintf("%s_{\\,%d \\times 1}\\;\\text{(%s)}",
+                      lhs_sym, n, lhs_role)
   X_lab    <- sprintf("\\mathbf{X}_{\\,%d \\times %d}", n, ncol(ex$X))
   beta_lab <- sprintf("\\hat{\\boldsymbol{\\beta}}_{\\,%d \\times 1}\\;\\text{(estimated)}",
                       length(ex$beta))
-  eps_lab  <- sprintf("\\hat{\\boldsymbol{\\varepsilon}}_{\\,%d \\times 1}\\;\\text{(residual)}",
-                      n)
+  eps_lab  <- if (emit_eps) {
+    sprintf("%s_{\\,%d \\times 1}\\;\\text{(%s)}",
+            eps_sym, n, eps_role)
+  } else NULL
 
   eq_mu <- paste0(
     underbrace(y_vec,    y_lab),    " \\;=\\; ",
@@ -1032,11 +1111,17 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L,
     nrow(ex$Z_g) >= 1L &&
     all(rowSums(ex$Z_g != 0) == 1L) &&
     all(colSums(ex$Z_g != 0) <= 1L)
-  # Close the response equation with the residual vector.
-  eq_mu <- paste0(
-    eq_mu, " \\;+\\; ",
-    underbrace(eps_vec, eps_lab)
-  )
+  # Close the response equation with the residual vector -- only for
+  # families with additive Gaussian noise on some scale. For
+  # generalized families (Poisson, Beta, etc.) the linear predictor
+  # has no additive residual on link scale; emitting +eps would be a
+  # math error of the same class as the v0.22.3 worked-row template.
+  if (emit_eps) {
+    eq_mu <- paste0(
+      eq_mu, " \\;+\\; ",
+      underbrace(eps_vec, eps_lab)
+    )
+  }
 
   # --- Block 2: sigma submodel (only when distributional) ----------------
   eq_sigma <- if (has_sigma) {
@@ -1152,21 +1237,105 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L,
       )
     },
     paste0("<div class=\"sym-eq\">$$\n", eq_mu, "\n$$</div>\n"),
-    paste0("<p class=\"sym-caption\" style=\"font-size:0.85em;color:#6b7280;margin-top:0.4rem\"><strong>Left</strong>: observed vector $", resp_sym, "$. <strong>Middle</strong>: the prediction $\\mathbf{X}\\hat{\\boldsymbol{\\beta}}",
-           if (has_re) {
-             # When Z is the identity on the observed levels (one obs per
-             # level) the renderer drops Z from the visible block, so the
-             # caption should also drop the Z factor; otherwise show Zu.
-             if (isTRUE(z_is_one_to_one_flag)) {
-               " + \\hat{\\mathbf{u}}"
-             } else {
-               " + \\mathbf{Z}\\hat{\\mathbf{u}}"
-             }
-           } else "",
-           " = \\hat{\\boldsymbol{\\mu}}$. <strong>Right</strong>: the residual vector $\\hat{\\boldsymbol{\\varepsilon}} = ", resp_sym, " - \\hat{\\boldsymbol{\\mu}}$. Every row of this matrix equation is one of the response-equation rows from the worked row above.</p>\n"),
+    # v0.22.4 Slice 1, F2: family-aware caption. The universal
+    # `Xβ̂ = μ̂` claim assumed identity-link Gaussian. For
+    # additive_log (Lognormal) μ̂ is on log scale; for generalized
+    # (Poisson, Beta, ...) Xβ̂ is the link-scale linear predictor η̂
+    # and the back-transform μ̂ = link⁻¹(η̂) is what feeds the
+    # likelihood, with no additive residual on link scale.
+    {
+      z_term_tex <- if (has_re) {
+        # When Z is the identity on the observed levels (one obs per
+        # level) the renderer drops Z from the visible block, so the
+        # caption should also drop the Z factor; otherwise show Zu.
+        if (isTRUE(z_is_one_to_one_flag)) " + \\hat{\\mathbf{u}}"
+        else " + \\mathbf{Z}\\hat{\\mathbf{u}}"
+      } else ""
+      cap_open  <- "<p class=\"sym-caption\" style=\"font-size:0.85em;color:#6b7280;margin-top:0.4rem\">"
+      cap_close <- "</p>\n"
+      switch(
+        block_shape,
+        additive_gaussian = paste0(
+          cap_open,
+          "<strong>Left</strong>: observed vector $", resp_sym, "$. ",
+          "<strong>Middle</strong>: the prediction ",
+          "$\\mathbf{X}\\hat{\\boldsymbol{\\beta}}", z_term_tex,
+          " = \\hat{\\boldsymbol{\\mu}}$. ",
+          "<strong>Right</strong>: the residual vector ",
+          "$\\hat{\\boldsymbol{\\varepsilon}} = ", resp_sym,
+          " - \\hat{\\boldsymbol{\\mu}}$. ",
+          "Every row of this matrix equation is one of the ",
+          "response-equation rows from the worked row above.",
+          cap_close
+        ),
+        additive_log = paste0(
+          cap_open,
+          "<strong>Left</strong>: log-scale observed vector ",
+          "$\\log(", resp_sym, ")$. ",
+          "<strong>Middle</strong>: the log-scale linear predictor ",
+          "$\\mathbf{X}\\hat{\\boldsymbol{\\beta}}", z_term_tex, "$ ",
+          "&mdash; this is $\\hat{\\boldsymbol{\\mu}}$, the mean of ",
+          "$\\log ", resp_sym, "$ (as Tab 1 states). ",
+          "<strong>Right</strong>: the log-scale residual vector ",
+          "$\\hat{\\boldsymbol{\\varepsilon}}^{(\\log)} = ",
+          "\\log(", resp_sym, ") - \\hat{\\boldsymbol{\\mu}}$. ",
+          "Each row matches the log-scale worked row above; ",
+          "back-transform via $E[", resp_sym,
+          "] = \\exp(\\hat{\\mu} + \\hat{\\sigma}^2 / 2)$ to recover ",
+          "the response-scale mean.",
+          cap_close
+        ),
+        # generalized: Poisson, Beta, Binomial, Gamma, NegBinom, ...
+        generalized = paste0(
+          cap_open,
+          "<strong>Left</strong>: linear predictor ",
+          "$\\hat{\\boldsymbol{\\eta}}$ on the link scale. ",
+          "<strong>Right</strong>: ",
+          "$\\mathbf{X}\\hat{\\boldsymbol{\\beta}}", z_term_tex, "$ ",
+          "&mdash; the same linear predictor in matrix form. ",
+          "There is no additive residual on the link scale: each ",
+          "$", resp_sym, "_i$ has its own likelihood row above, ",
+          "$", resp_sym, "_i \\sim \\mathrm{Family}(\\hat{\\mu}_i)$, ",
+          "with the response-scale mean recovered as ",
+          "$\\hat{\\boldsymbol{\\mu}} = ",
+          "g^{-1}(\\hat{\\boldsymbol{\\eta}})$ ",
+          "(the inverse-link back-transform shown in the worked row).",
+          cap_close
+        )
+      )
+    },
     if (!is.null(eq_sigma)) {
+      # v0.22.4 Slice 1, F3: per-shape sigma-submodel caption. The
+      # "spread of ε̂" prose presumed additive residuals and pulled the
+      # ε̂ symbol into the panel-mat for families (Beta, Gamma, ...)
+      # whose sigma is a precision / shape parameter, not a residual SD.
+      sigma_role_html <- switch(
+        block_shape,
+        additive_gaussian = paste0(
+          "$\\sigma$'s job is to describe the spread of ",
+          "$\\hat{\\boldsymbol{\\varepsilon}}$"
+        ),
+        additive_log = paste0(
+          "$\\sigma$'s job is to describe the spread of the log-scale ",
+          "residual $\\hat{\\boldsymbol{\\varepsilon}}^{(\\log)}$, ",
+          "i.e. the SD of $\\log ", resp_sym, "$"
+        ),
+        # generalized: per-family meaning -- Beta precision, Gamma shape,
+        # NegBinom size, etc. Defer the specific role to Tab 1 / the
+        # per-family worked-row, which already labels it correctly.
+        generalized = paste0(
+          "$\\sigma$ here is the family's spread parameter ",
+          "and is not a residual SD; see Tab 1 for its specific role ",
+          "in this distribution"
+        )
+      )
       c(
-        "<p class=\"sym-caption\" style=\"font-size:0.95em;color:#374151;margin-top:1.2rem\">And the $\\sigma$ submodel (no observed counterpart -- $\\sigma$'s job is to describe the spread of $\\hat{\\boldsymbol{\\varepsilon}}$). For the same observation <em>i</em> = 1:</p>\n",
+        paste0(
+          "<p class=\"sym-caption\" style=\"font-size:0.95em;",
+          "color:#374151;margin-top:1.2rem\">And the $\\sigma$ submodel ",
+          "(no observed counterpart -- ", sigma_role_html, "). ",
+          "For the same observation <em>i</em> = 1:</p>\n"
+        ),
         if (!is.null(worked_sigma)) worked_sigma else character(0),
         "<p class=\"sym-caption\" style=\"font-size:0.95em;color:#374151\">Stacking the same log-link equation for all <em>n</em> = ", n, " observations:</p>\n",
         paste0("<div class=\"sym-eq\">$$\n", eq_sigma, "\n$$</div>\n")
