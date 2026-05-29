@@ -1,3 +1,459 @@
+# symbolizer (development version)
+
+## Variance-components surface -- "where does the variation live?"
+
+A mixed model's payoff for a biologist is *where the variation lives* and
+*how repeatable a trait is*. symbolizer computed the variance components and
+then dropped them. This surface closes that gap, Gaussian-first, with a hard
+honesty contract. Spec: `docs/specs/variance-components.md`. Built in four
+TDD slices.
+
+* **Numbers, not just symbols (S1).** Every mixed-model extractor's
+  `variance_components` tibble now carries numeric `sd_estimate` /
+  `var_estimate`; the drmTMB builder, which previously carried only symbols,
+  was fixed to populate them from `fit$sdpars`. `explain()` and
+  `model_card()` now surface a "How the variation splits" section whenever
+  the fit has random effects.
+* **New accessor `variance_partition()` (S2).** One row per variance source
+  (`component`, `variance`, `sd`, `pct`), with a residual row and `pct`
+  shares that sum to 1 when the residual variance is defined; otherwise the
+  variances are shown and `pct` is `NA` with a reason.
+* **New accessor `icc()` (S2).** The intraclass correlation / repeatability,
+  carrying an explicit `scale` attribute. Gaussian-identity single random
+  intercept gives a **data-scale** ICC (a true proportion of variance);
+  binomial gives a **latent-scale** ICC (logit residual \eqn{\pi^2/3},
+  probit residual 1) with a mandatory "not a proportion of variance in the
+  observed outcome" caption. Any other family, a location-scale Gaussian
+  whose residual SD varies, or more than one random-effect term returns `NA`
+  with a human-readable reason rather than a misleading number.
+* **Widget panel (S3).** The three-views Index tab now shows a "where does
+  the variation live?" panel beneath the random-effects glossary: a plain-CSS
+  bar (a stacked between/within bar for two components, per-component bars
+  for three or more), one sentence, and the ICC line. No bar -- only the
+  table and the "ICC not available on this scale yet" line -- when the ICC is
+  undefined.
+* **Partial-pooling caption (S4).** The Tab 3 worked-row BLUP block carries a
+  prose-only caption explaining that the random-effect estimates are shrunk
+  toward zero (partial pooling); no numbers.
+* **GLMM repeatability demo + `knit_print` (S5).** New `knit_print` methods for
+  `variance_partition()` / `icc()` render the bar + numbers table + the
+  scale-labelled ICC reading as HTML in a knitted document, so the bar travels
+  outside the three-views widget. New vignette
+  `vignette("symbolizer-variance-components")` ("Where the variation lives: ICC
+  and repeatability") walks a Gaussian `lme4::lmer`, a binomial `lme4::glmer`
+  (latent-scale ICC), and a `glmmTMB` refit (same reading, different engine),
+  framed as repeatability in the rptR tradition, with an explicit account of
+  when the ICC is `NA` and why.
+
+All reader-facing prose is templated from
+`inst/extdata/variance-readings.csv` (no string-spliced prose in R). Point
+estimates only; no confidence intervals. The panel and caption ship in the
+HTML widget; PDF/HTML parity for the variance surface is deferred to the
+Pattern J payload rebuild (see the spec's scope-boundary note).
+
+# symbolizer 0.22.3
+
+## v0.22.3 -- family-aware Tab 3 worked row for non-Gaussian families
+
+Closes the BLOCKER on `symbolizer-families.html` surfaced by the v0.22.2
+Fisher pass
+(`docs/dev-log/figure-audits/v0.22.2-audit-pass/families-fisher.md`).
+
+Before this release the Tab 3 worked-row helper hardcoded the Gaussian
+template
+
+$$y_1 = \beta_0 + \beta_1 x_1 + \hat{\varepsilon}_1$$
+
+for every family. For non-identity-link families the displayed
+$\hat{\mu}_1$ was the **linear predictor** $\hat{\eta}_1$ not the
+**response-scale predicted mean**, the additive $\hat{\varepsilon}_1$
+was meaningless (Poisson has no residual in its likelihood at all), and
+the rendered values were either off by orders of magnitude or
+mathematically impossible. The Beta widget displayed
+$\hat{\mu}_1 = -0.95$ -- impossible for a Beta mean which must be in
+$(0,1)$; the correct response-scale value is
+$\mathrm{logistic}(-0.95) = 0.279$.
+
+### Three slices (TDD)
+
+**Slice 1 -- `R/symbolize-drmtmb.R`:** `drm_build_expanded()` now stores
+the linear predictor in a new `$expanded$eta_hat` slot and applies the
+mu-submodel link inverse to obtain `$expanded$mu_hat` on the response
+scale. Helper `drm_apply_link_inverse(eta_hat, link)` covers
+identity, log, logit, probit, cloglog, and inverse. For
+Gaussian-identity and the drmTMB Lognormal-on-mu-of-log-Y convention,
+`mu_hat == eta_hat` and the historic behaviour is preserved.
+
+**Slice 2 -- `R/render-three-views.R`:** the Tab 3 worked-row helper
+becomes family-aware and emits one of three shapes:
+
+- **Additive Gaussian** (Gaussian, Student-t):
+  $y_1 = \beta_0 + \beta_1 x_1 + \hat{\varepsilon}_1$ -- the historic
+  form, kept for back-compat.
+- **Additive log** (Lognormal):
+  $\log(y_1) = \beta_0 + \beta_1 x_1 + \hat{\varepsilon}_1^{(\log)}$
+  -- the residual is on the log scale where the Gaussian noise lives.
+- **Generalized** (Poisson, Beta, Binomial, Gamma, NegBinom):
+  $\hat{\eta}_1 = \beta_0 + \beta_1 x_1$, then
+  $\hat{\mu}_1 = \mathrm{link}^{-1}(\hat{\eta}_1)$, then
+  $y_1 \sim \mathrm{Family}(\hat{\mu}_1, \ldots)$ -- no spurious
+  additive $\hat{\varepsilon}_1$.
+
+**Slice 3 -- `R/render-three-views.R` (sigma submodel):**
+`three_views_worked_row_sigma()` takes the family argument and labels
+the $\hat{\sigma}_1$ submodel correctly per family:
+
+- gaussian / student: predicted residual SD (unchanged)
+- lognormal: log-scale residual SD (SD of $\log y$)
+- beta: predicted **precision $\hat{\phi}_1$** (NOT an SD)
+- gamma: predicted dispersion
+- nbinom1 / nbinom2: predicted dispersion (size parameter $k$)
+
+### Tests
+
+- `tests/testthat/test-symbolize-drmtmb-link-scale.R` (9 expectations):
+  Poisson $\hat{\mu}_1 = \exp(\hat{\eta}_1)$; Beta $\hat{\mu}_1 \in (0,1)$;
+  Lognormal $\hat{\mu}_1 = \hat{\eta}_1$ (drmTMB identity-on-mu);
+  Gaussian back-compat.
+- `tests/testthat/test-three-views-worked-row-families.R` (5
+  expectations): Poisson drops spurious $\varepsilon$; Poisson shows
+  $\exp$ back-transform; Beta shows response-scale $\hat{\mu}_1$
+  matching $\sym$expanded$mu_hat[[1]]$; Beta $\sigma$ row labelled as
+  precision $\phi$; Gaussian-identity keeps the historic shape.
+- `tests/testthat/test-expand.R`: slot list updated to include
+  `eta_hat`.
+
+Full suite: `FAIL 0 | SKIP 0 | PASS 1908` (+13 from new tests beyond
+the 1893 in v0.22.2-mu_hat-with-Zu).
+
+### Rendered HTML verification
+
+Spot-checks on `docs/articles/symbolizer-families.html`:
+
+```
+Poisson \hat{\eta}_{1} line:              4 matches
+Poisson \exp() back-transform:            7 matches
+Poisson y ~ Poisson(...) declaration:    11 matches
+Beta logistic link in worked row:         2 matches
+Beta "precision \phi" label:              2 matches
+Lognormal \log scale references:         19 matches
+Lognormal "log-scale residual SD" label:  3 matches
+Beta misleading "predicted residual SD":  0 matches  ← was the bug
+```
+
+### Out of scope (deferred to a separate slice)
+
+- The other extractors (gllvmTMB, glmmTMB, lme4, brms, MCMCglmm,
+  metafor, phylolm, mgcv, sdmTMB) have not been audited under the
+  Fisher protocol yet. The two-tier and structural-dependence widgets
+  may have analogous bugs; both Codex audits started during v0.22.2
+  were killed by the maintainer mid-run.
+- CRAN submission is paused per maintainer direction
+  (2026-05-28 21:55): focus on families correctness first.
+
+# symbolizer 0.22.2
+
+## v0.22.2 -- multi-tier random-effects in Tab 3 (Slice A1 + A2 + worked-row polish)
+
+Closes the second of the two bugs the maintainer's Fisher pass
+surfaced on 2026-05-28: the phylogenetic random-effect tier was
+silently invisible in Tab 3 of the meta-multilevel widget, because
+`drm_build_expanded()` extracted only the first random-effect tier
+via `re_per_entry[[which(has_re)[1L]]]`. For phylo + study fits, the
+35-species phylogenetic tier (the article's central thesis) was
+hidden behind a single bare `Z` aggregate that actually held only
+the iid study tier.
+
+This release replaces the single-tier extraction path with a
+per-tier one. Every random-effect tier present in `re_per_entry`
+is now surfaced into the `$expanded$Z_per_tier` and
+`$expanded$u_per_tier` slots, with kinds tagged in
+`$expanded$tier_kind` (`"iid"` or `"structured"`). The Tab 3
+stacked matrix block iterates these slots so every tier shows up
+in the equation; the worked-row at observation 1 likewise
+expands to include each tier's BLUP. Single-tier fits keep the
+historic shape (no `_g` subscripts, no per-tier subscript on
+`\hat{u}`) for back-compat.
+
+### Numerical contract
+
+Per the Fisher protocol from `docs/specs/import-from-sisters.md`:
+
+$$\mathbf{X}\hat{\boldsymbol{\beta}} + \sum_g \mathbf{Z}_g \hat{\mathbf{u}}_g = \hat{\boldsymbol{\mu}}$$
+
+verified to 2.5e-14 on the Pottier thermal subset (35 species
+× 39 studies × 164 effects), well under the protocol tolerance
+of 1e-9. Closure holds for both the iid tier (study) and the
+structured tier (phylogeny, where BLUPs are extracted from
+`fit$obj$report()$u_phylo[1:n_tips]` in factor-level order).
+
+### Renderer changes
+
+- `as_html_three_views()` Tab 3 stacked block iterates
+  `$expanded$Z_per_tier` and emits one `\mathbf{Z}_g
+  \hat{\mathbf{u}}_g` block per tier with `\text{...}`-wrapped
+  subscripts so multi-character group names like `study_ID`
+  render legibly.
+- The worked-row helper (`three_views_worked_row()`) iterates the
+  same per-tier slots and emits one `\hat{u}_{g,\,\text{level}(1)}`
+  term per tier. On the Pottier widget, observation 1 now shows
+  `+ \hat{u}_{\text{study\_ID},\,3}
+   + \hat{u}_{\text{phylogeny},\,\text{Myzus\_persicae}}`,
+  carrying the BLUP for each tier so the scalar arithmetic closes.
+- Pattern O smart-column-truncation now promotes informative MIDDLE
+  columns into the visible head/tail when neither structural head
+  nor tail contains any 1s within the visible row band. The phylo
+  Z column on the Pottier fit (visible species: Myzus_persicae
+  at col 18, Oreochromis_niloticus at col 20 of 35) now displays
+  the 1s rather than all zeros.
+
+### Extractor changes
+
+- `drm_build_expanded()` now accepts a
+  `structured_matrix_for_group` argument and threads it through
+  to flag structured tiers (where BLUPs come from
+  `fit$obj$report()$u_phylo` rather than
+  `fit$random_effects$mu$terms`).
+- The factor-coercion-before-`model.matrix` discipline from
+  v0.22.1.3 applies per-tier; numeric grouping variables for
+  ANY tier are correctly turned into one-hot incidence matrices.
+
+### Tests
+
+- New `tests/testthat/test-symbolize-drmtmb-per-tier-Z.R` (30
+  expectations): two-tier iid fit surfaces both Z, Pottier
+  meta-multilevel surfaces study + phylogeny with full Fisher
+  closure at 1e-9, single-RE back-compat $Z_g/$u alias semantics.
+- `tests/testthat/test-expand.R` updated to list the new slot
+  names on `$expanded`.
+- Full suite: `FAIL 0 | SKIP 0 | PASS 1891` (+30 from new tests
+  beyond 1861).
+
+### Audit trail
+
+- `docs/dev-log/figure-audits/v0.22.1-meta-phylo/claude-fisher-audit.md`
+  is the numerical Fisher pass that surfaced both bugs.
+- `docs/specs/import-from-sisters.md` is the synthesis of three
+  sister-repo scouts (drmTMB / glmmTMB / gllvmTMB) into a
+  discipline-import spec. This release implements Priority 1
+  (Z-matrix bug class) and part of Priority 2 (Fisher closure
+  baked into a regression test).
+
+### Known residuals
+
+- Codex CLI Fisher-pass demo is still pending a CLI upgrade
+  (`codex-cli 0.120.0` does not yet support the backend's `gpt-5.5`
+  routing). The Claude-authored Fisher pass substitutes; live
+  Codex demo deferred.
+- The remaining Priority 3-6 imports (V-agent registry expansion,
+  after-task `_TEMPLATE.md`, `tools/` enforcement scripts,
+  `.codex/agents/` stubs) are deferred to v0.22.3-discipline.
+
+# symbolizer 0.22.1.3
+
+## v0.22.1.3 -- drmTMB Z_g extractor fix (numeric group_var)
+
+**Bug fix.** `drm_build_expanded()$Z_g` was being constructed via
+`stats::model.matrix(~ 0 + g_var, data = fit$data)` without coercing
+`g_var` to factor. When `g_var` is a NUMERIC variable in `fit$data`
+(very common -- `study_ID`, `site_id`, `animal_id` codes are
+typically integer-coded), `model.matrix` does NOT build a one-hot
+incidence matrix. It returns a single-column matrix carrying the
+literal integer values. The widget Tab 3 then displayed a
+`164 x 1` Z column of raw study integers `[3, 3, 3, ..., 147, 147]`
+next to a `39`-vector of BLUPs, and the displayed
+$\mathbf{Z}\hat{\mathbf{u}}$ arithmetic in the worked row was
+meaningless (`3.29e-18` instead of the true BLUP value `9.74e-11`
+for study_ID = 3).
+
+Surfaced by the maintainer's Fisher-pass on the v0.22.1.2 rendered
+widget -- the V1 Florence and V3 Noether audits had both
+rubber-stamped Tab 3 without checking that Z was actually a
+one-hot matrix. The bug had been latent in `drm_build_expanded()`
+since v0.1 and affects every drmTMB fit where the grouping
+variable is stored as numeric in `fit$data`.
+
+**Fix.** One-line change in `R/symbolize-drmtmb.R`: convert
+`g_var` to factor before `model.matrix` so the one-hot matrix is
+emitted correctly. The companion `u` vector is then re-ordered by
+factor levels so `Z_g %*% u` gives the correct per-observation
+random-effect contribution.
+
+**Regression coverage** added in
+`tests/testthat/test-symbolize-drmtmb-Zg-numeric-group.R`:
+- `Z_g` is `n x k` with row-sums all 1 and values in {0, 1} for
+  numeric group_var
+- `Z_g %*% u` equals the per-row BLUP indexed by the row's group
+- factor input path (previously already correct) still works
+
+Full suite: `FAIL 0 | SKIP 0 | PASS 1861` (+16 from new tests).
+
+# symbolizer 0.22.1.2
+
+## v0.22.1.2 -- Tab 3 marginal-covariance decomposition
+
+Closes V2 Pat-lens flow break #2 on
+`symbolizer-meta-analysis.Rmd` §4: Tab 3 of the widget now
+*shows* the marginal-covariance decomposition rather than just
+announcing it in prose.
+
+### What changed
+
+New helper `latex_marginal_cov_block(x)` in
+`R/render-three-views.R` emits a LaTeX `Cov(y) = ...` block
+of the form
+
+$$\underbrace{\mathrm{Cov}(\mathbf{y})}_{n \times n} = \underbrace{\sigma_g^2\, \mathbf{A}}_{\text{phylogeny tier}} + \underbrace{\sigma_g^2\, \mathbf{Z}_g\,\mathbf{Z}_g^{\!\top}}_{\text{study tier}} + \underbrace{\mathrm{diag}(\mathbf{v})}_{\text{known sampling}}$$
+
+with one underbrace-labeled term per random-effect tier (structured
+tiers carry $\mathbf{A}$; unstructured tiers use $\mathbf{Z}_g\mathbf{Z}_g^\top$)
+plus a `diag(v)` term when `meta_V()` is detected. The helper
+returns `NULL` for trivial cases (single iid RE without `meta_V`)
+so simple fits aren't cluttered.
+
+Wired into `as_html_three_views.symbolized_model` Tab 3. Mutually
+exclusive with the existing gllvm $\boldsymbol{\Sigma}_B$ /
+$\boldsymbol{\Sigma}_W$ stacked block — gllvm fits never carry
+`meta_analysis` in `detected_signals` and never expose
+`metadata$structured_matrix_for_group`, so the new block fires
+only on meta-analysis / multilevel widgets.
+
+`symbolize.drmTMB()` now also exposes
+`metadata$structured_matrix_for_group` (a named list mapping
+each detected structured group to its LaTeX matrix symbol, e.g.
+`list(phylogeny = "\\mathbf{A}")`) so the renderer can match
+structured tiers to their group_vars.
+
+### Tests
+
+Two new tests in `test-symbolize-drmtmb-meta-multilevel.R`:
+one assertion on a meta-multilevel fit (block contains the three
+tier symbols + the `Cov(y)` LHS), and one assertion that
+single-RE non-meta fits return `NULL`. Suite at
+`FAIL 0 | SKIP 0 | PASS 1847`.
+
+# symbolizer 0.22.1.1
+
+## v0.22.1.1 -- phylo tier propagated into widget equations
+
+Closes the V2 Pat-lens blocker on `symbolizer-meta-analysis.Rmd`
+§4: the article's central thesis equation -- the phylogenetic
+random effect $\mathbf{u}_p \sim \mathcal{N}(\mathbf{0},\,
+\sigma_p^2\,\mathbf{A})$ -- now appears in the rendered widget
+across all three tabs.
+
+### What changed
+
+`symbolize.drmTMB()` now synthesises a random-effect row for each
+`phylo()` / `animal()` marker in the formula so the equation
+renderer, `variance_components`, symbol dictionary, and assumption
+gate all see the structured tier. Previously the tier was detected
+in `metadata$phylo_representation` and `metadata$structured_matrices`
+but never reached `$random_effects` (because drmTMB consumes
+`phylo()` into its internal sparse-precision pipeline rather than
+`fit$random_effects`).
+
+`drm_build_components()` now receives `structured_matrix_for_group`
+and emits $\mathbf{u}_g \sim \mathcal{N}(\mathbf{0},\, \sigma_g^2\,
+\mathbf{A}_{k \times k})$ (matrix form) and $\mathbf{u}_g \sim
+\mathcal{N}(\mathbf{0},\, \sigma_g^2\, \mathbf{A})$ (index form)
+for any structured tier, instead of falling through to
+$\mathbf{I}_n$.
+
+The linear-predictor matrix form disambiguates multiple
+intercept-only RE groups: single-RE fits keep the historic bare
+$\mathbf{u}$, multi-RE fits emit $\mathbf{u}_{g_1} + \mathbf{u}_{g_2}$
+so the multilevel structure is visible.
+
+`sym$metadata$structured_matrices` is now populated when drmTMB
+detects `phylo()` / `animal()` / `spatial()`, exposing the matrix
+symbol, role tag, and dimensions for downstream consumers.
+
+### Tests
+
+`test-symbolize-drmtmb-meta-multilevel.R` gains two un-skipped
+tests covering the variance_components phylo tier and the matrix-
+form equation row $\mathbf{u}_{\text{phylogeny}} \sim
+\mathcal{N}(\mathbf{0},\, \sigma_{\text{phylogeny}}^2\,
+\mathbf{A}_{35 \times 35})$, plus a new test for
+`metadata$structured_matrices`. Suite at FAIL 0 | SKIP 0 | PASS 1845.
+
+### Vignette
+
+`vignettes/symbolizer-meta-analysis.Rmd` §4.3 drops the
+"Known limitation (v0.22.1)" caveat (the cause is fixed) and
+documents the synthesis path.
+
+# symbolizer 0.22.1
+
+## v0.22.1 -- meta-analysis Widget 2 (phylogenetic multilevel)
+
+Second slice of the v0.22 meta-analysis article (design anchored on
+Nakagawa et al. 2025 *Global Change Biology* e70204 "Bonus 2"). Adds
+§4 of `vignettes/symbolizer-meta-analysis.Rmd` -- phylogenetic
+multilevel meta-analysis with three Faces:
+
+- **Face 1 (deep)**: `drmTMB::drmTMB(drm_formula(es ~ x + meta_V(V = vi) + phylo(1 | species, tree = ...) + (1 | study), sigma ~ 1))` -- the GCB-aligned native idiom that replaces brms `se(sqrt(vi))` and `gr(., cov = A)`.
+- **Face 2 (light)**: `brms::brm(bf(es | se(sqrt(vi)) ~ ... + (1 | gr(species, cov = mat))))` -- the GCB paper's reference syntax.
+- **Face 3 (light)**: `metafor::rma.mv(yi, V = vi, random = list(~1|phylogeny, ~1|study), R = list(phylogeny = A))`.
+
+Widget 2 (id = `sym-phylomultilevel-...`) renders the per-tier
+$\boldsymbol{\Sigma}$ decomposition in Tab 3, mirroring the
+v0.21.6-redo gllvm Σ-block layout. The article switches data from
+the §3 BCG fixture to a 35-species / 164-effect subset of the
+Pottier et al. (2022) thermal acclimation data shipped at
+`inst/extdata/thermal_subset.csv`.
+
+### Extractor additions
+
+- `symbolize.drmTMB()` detects `meta_V()` inside the formula and
+  tags `metadata$context = "meta_analysis"`. Two production-code
+  fixes (`drm_strip_re_terms` + `drm_entry_rhs_formula`) ensure
+  drm-formula parsing handles `meta_V()` and `phylo()` markers
+  cleanly.
+- `symbolize.brms()` detects `se(...)` on the response and tags
+  `metadata$context = "meta_analysis"`.
+
+### Data
+
+- `inst/extdata/thermal_subset.csv` (164 effects, 35 species, 39
+  studies; seed = `20260528L`).
+- `inst/extdata/thermal_subset_tree.tre` (ultrametric phylogeny
+  matching the subset).
+- `data-raw/make-thermal-subset.R` (reproducible build script).
+
+### Tests
+
+- `tests/testthat/test-symbolize-drmtmb-meta-multilevel.R` (5
+  passing + 1 documented skip).
+- `tests/testthat/test-symbolize-brms-meta.R` (3 passing).
+- `tests/testthat/helper-meta-fits.R` adds three fixtures:
+  `fit_drmtmb_phylo_multilevel()`, `fit_brms_phylo_meta()`,
+  `fit_metafor_phylo_meta()`.
+
+### Capabilities + assumptions
+
+- 4 new rows in `inst/extdata/capabilities.csv`: drmTMB / brms /
+  metafor × meta-analytic + phylo-multilevel.
+- 7 new rows in `inst/extdata/assumption-templates.csv` for
+  `family = gaussian` with `requires = meta_analysis`: the
+  meta-analytic likelihood ($y_k \mid \theta_k \sim
+  \mathrm{Normal}(\theta_k,\, v_k)$), the known-sampling-variance
+  caveat ($v_k$ is an input, not a parameter), the moderator
+  + random-effect linear predictor for $\theta_k$, conditional
+  independence, and three reader-responsibilities (no publication
+  bias, correct effect metric, no missing-at-random). Rows fire
+  only when `symbolize.drmTMB()` or `symbolize.brms()` reports
+  `detected_signals` including `"meta_analysis"`.
+
+### Out of scope (deferred)
+
+- §5 location-scale Widget 3 (v0.22.2).
+- PDF widgets via `as_pdf_three_views()` (v0.22.3).
+- Updating §2/§3 to use the thermal dataset (currently still BCG;
+  the §4 transition paragraph documents the switch).
+- MCMCglmm `mev = vi` bridge (lands later if scope allows).
+
 # symbolizer 0.21.6-redo
 
 ## v0.21.6-redo -- gllvm two-tier widget: syndromes + integrated plasticity

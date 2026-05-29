@@ -27,7 +27,7 @@
       index: `\sigma_i`
       matrix: `\boldsymbol{\sigma}`
       dimension: `\mathbb{R}^n` (= `\mathbb{R}^{80}`)
-      conditional sigma of body_mass
+      residual standard deviation
       (coefficient)
       index: `\beta_{0}, \beta_{1}`
       matrix: `\boldsymbol{\beta}`
@@ -58,7 +58,7 @@
       -- Assumptions --
       
       conditional_distribution
-      expression: `W_i \mid \mu_i\, \sigma_i \sim \mathrm{Normal}(\mu_i\,
+      expression: `W_i \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\,
       \sigma_i^2)`
       meaning: body_mass varies normally around its expected value
       status: ["explicit"]

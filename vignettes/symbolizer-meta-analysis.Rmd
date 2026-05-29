@@ -246,22 +246,182 @@ cleanest interface; glmmTMB and drmTMB reproduce the math via
 `weights = 1/vi`; brms and MCMCglmm use their own meta-analytic
 bridges (`se(sqrt(vi))`, `mev = vi`).
 
-## 4. Phylogenetic meta-analysis
+## 4. Phylogenetic multilevel meta-analysis
 
-*(Scaffold; full coverage lands in v0.22.1.)*
+**Dataset switch.** The 13-trial BCG dataset of §3 was great for
+showing traditional pooling, but it has only one study per row — so
+no species-level or phylogenetic structure to model. For §4 and §5
+we move to a richer dataset: a 35-species, 164-effect subset of the
+Pottier et al. (2022) thermal acclimation meta-dataset, with `dARR`
+as the effect size and `habitat` (aquatic vs terrestrial) as the
+moderator. The subset is shipped with the package so the vignette
+is fully reproducible.
 
-When studies are on related species, the between-study variance
-splits into a phylogenetic piece (constrained by $\mathbf{A}$) and a
-non-phylogenetic piece. The deep Face is
-`metafor::rma.mv(yi, V = vi, random = ~ 1 | species,
-                 R = list(species = A))`.
+When studies are on related species, the between-study tier splits
+into a phylogenetic piece (constrained by the phylogeny via
+$\mathbf{A}$) and a non-phylogenetic study tier.
 
-Cross-link: the v0.21.4-redo article
-[`symbolizer-structural-dependence.html`](symbolizer-structural-dependence.html)
-covers the **structural dependence** view of the same model (without
-the sampling-tier $v_k$). This article's §4 will combine the two: known
-$v_k$ at the bottom tier + phylogenetic correlation at the species
-tier.
+### 4.1 The model in symbols
+
+For each effect $kt$ in study $k$ on species $s(k)$:
+
+$$
+y_{kt} = \beta_0 + \beta_1\, x_{kt} + u_{p,\,s(k)} + u_{\text{study},\,k} + \epsilon_{kt}
+$$
+
+with
+
+$$
+u_{p,\,s} \sim \mathcal{N}(\mathbf{0},\, \sigma_p^2\, \mathbf{A}),
+\quad
+u_{\text{study},\,k} \sim \mathcal{N}(0,\, \sigma_{\text{study}}^2),
+\quad
+\epsilon_{kt} \sim \mathcal{N}(0,\, v_{kt}).
+$$
+
+The known sampling variance $v_{kt}$ is fixed per effect (computed from
+the original study's sample size). The marginal variance of one effect
+is
+
+$$
+\mathrm{Var}(y_{kt}) = v_{kt} + \sigma_{\text{study}}^2 + \sigma_p^2\, \mathbf{A}_{s(k),\,s(k)}.
+$$
+
+This is the Nakagawa-paper-style "phylogenetic multilevel meta-analysis"
+form, with the location-scale extension deferred to §5.
+
+### 4.2 Data
+
+A 35-species, 164-effect subset of the Pottier et al. (2022) thermal
+acclimation dataset (effect-size = `dARR`; moderator = `habitat`,
+aquatic vs terrestrial). Subsample is shipped with the package so the
+vignette is fully reproducible without network access.
+
+```{r meta-phylo-data}
+library(symbolizer)
+library(ape)
+dat <- read.csv(system.file("extdata", "thermal_subset.csv",
+                            package = "symbolizer"),
+                stringsAsFactors = FALSE)
+tree <- ape::read.tree(system.file("extdata", "thermal_subset_tree.tre",
+                                   package = "symbolizer"))
+cat(sprintf("%d effects across %d species across %d studies; habitats: %s\n",
+            nrow(dat),
+            length(unique(dat$phylogeny)),
+            length(unique(dat$study_ID)),
+            paste(sort(unique(dat$habitat)), collapse = ", ")))
+```
+
+### 4.3 Face 1 — `drmTMB` (deep dive)
+
+The model adds the §3 study-tier random effect to a phylogenetic
+random effect with covariance $\sigma_p^2\,\mathbf{A}$, on top of
+the known per-effect sampling variance $v_k$. In drmTMB's idiom
+that is one formula with two markers: `meta_V()` *inside* the
+formula (replacing brms's response-side `se(sqrt(vi))`) and
+`phylo()` *inside* the formula too (replacing brms's
+`gr(., cov = A)`). One gotcha: drmTMB's formula parser does NOT
+accept namespace-qualified names inside the formula, so we bind
+the helpers to local names first.
+
+```{r drmtmb-fit-phylo, message = FALSE, warning = FALSE}
+library(drmTMB)
+
+# drmTMB requires unqualified names INSIDE the formula -- bind locally.
+bf      <- drmTMB::drm_formula
+meta_V  <- drmTMB::meta_V
+phylo   <- drmTMB::phylo
+
+fit_drm_phylo <- drmTMB::drmTMB(
+  bf(
+    dARR ~ 1 + habitat +
+            meta_V(V = Var_dARR) +
+            phylo(1 | phylogeny, tree = tree) +
+            (1 | study_ID),
+    sigma ~ 1),
+  family = stats::gaussian(),
+  data   = dat
+)
+sym_drm_phylo <- symbolize(
+  fit_drm_phylo,
+  context = "phylogenetic multilevel meta-analysis"
+)
+```
+
+#### Three views — phylogenetic multilevel
+
+```{r widget-phylo, results = 'asis', echo = FALSE, message = FALSE}
+as_html_three_views(sym_drm_phylo, id = "phylo-multilevel")
+```
+
+The widget's **Tab 3** decomposes the marginal variance into the known
+sampling tier $v_{kt}$ and the two estimated tiers
+($\sigma_{\text{study}}^2$, $\sigma_p^2\,\mathbf{A}_{kk}$). Tabs 1
+and 2 carry the matching index- and matrix-form equations, including
+the phylogenetic line $\mathbf{u}_p \sim \mathcal{N}(\mathbf{0},\,
+\sigma_p^2\,\mathbf{A})$ — drmTMB consumes `phylo()` into its
+internal sparse-precision pipeline rather than `fit$random_effects`,
+and `symbolize.drmTMB()` synthesises the structured tier so the
+widget renders the full two-tier model (v0.22.1.1).
+
+### 4.4 Face 2 — `brms` (light, with `se(sqrt(vi))` + `gr(., cov = A)`)
+
+The same math in brms's idiom. Note that `se()` is parsed by brms
+internally — you write it *unqualified* inside `bf()`, not as
+`brms::se()`.
+
+```{r brms-fit-phylo, eval = FALSE}
+library(brms)
+A_phylo <- ape::vcv.phylo(tree, corr = TRUE)
+fit_brms_phylo <- brm(
+  bf(dARR | se(sqrt(Var_dARR)) ~ 1 + habitat
+       + (1 | study_ID)
+       + (1 | gr(phylogeny, cov = mat))),
+  data   = dat,
+  data2  = list(mat = A_phylo),
+  family = gaussian(),
+  chains = 2, iter = 1000, warmup = 500,
+  file = "cache/brms-phylo-multilevel"   # cache to disk
+)
+```
+
+The cross-package bridge (cf. §7): brms `se(sqrt(vi))` ↔ drmTMB
+`meta_V(V = vi)`; brms `gr(g, cov = A)` ↔ drmTMB
+`phylo(1 | g, tree = ...)`.
+
+### 4.5 Face 3 — `metafor::rma.mv` (light)
+
+`metafor` was built for meta-analysis; `rma.mv()` accepts `V = vi` for
+the known sampling variances and `R = list(... = A)` for the
+phylogenetic correlation:
+
+```{r metafor-fit-phylo}
+library(metafor)
+A_phylo <- ape::vcv.phylo(tree, corr = TRUE)
+fit_metafor_phylo <- rma.mv(
+  yi     = dARR,
+  V      = Var_dARR,
+  mods   = ~ 1 + habitat,
+  random = list(~ 1 | phylogeny, ~ 1 | study_ID),
+  R      = list(phylogeny = A_phylo),
+  data   = dat
+)
+fit_metafor_phylo$sigma2
+```
+
+The two `$sigma2` rows correspond, in the listed order, to the
+phylogenetic tier $\sigma_p^2$ (first row) and the study tier
+$\sigma_{\text{study}}^2$ (second row). On the Pottier thermal
+subset, the study-level variance dominates the phylogenetic
+variance by an order of magnitude — most heterogeneity in dARR
+sits between studies rather than along the phylogeny. (Heritability
+reading: $H^2 = \sigma_p^2 / (\sigma_p^2 + \sigma_{\text{study}}^2)$.)
+
+**Takeaway.** Three packages, one math. drmTMB leads with the
+cleanest meta-analytic idiom (`meta_V` + `phylo` inside the formula);
+brms and metafor offer equivalent fits via package-specific syntax.
+The next step (§5) adds the location-scale extension — modelling
+$\tau^2$ itself as a function of the moderator.
 
 ## 5. Location-scale meta-analysis
 

@@ -110,15 +110,33 @@ as_html_three_views.symbolized_model <- function(x, head = 5L, tail = 2L,
   # results to biological phenomena" and the matrix algebra teaching needs
   # one sentence anchoring it to the model's whole-system story.
   bio_gloss <- three_views_biology_gloss(x)
+  # v0.22.4 #6: the response-scale coefficient reading, INSIDE the widget
+  # (Tab 1, where coefficients are introduced) so it travels with PDF
+  # export and a Methods-section paste instead of being orphaned in the
+  # surrounding article prose.
+  coef_reading_txt <- three_views_coef_reading(tryCatch(x$model$family,
+                                                        error = function(e) NULL))
+  coef_gloss <- if (nzchar(coef_reading_txt)) {
+    paste0("  <p class=\"sym-biology\"><strong>Coefficient reading.</strong> ",
+           coef_reading_txt, "</p>\n")
+  } else ""
+  # v0.22.4 #11: per-family numeric diagnostic (e.g. Beta U-shape).
+  family_diagnostic <- three_views_family_diagnostic(x)
+  # Variance-components surface (S3): "where does the variation live?" panel,
+  # placed beneath the random-effects glossary. "" for fits without RE.
+  variance_panel <- three_views_variance_panel(x)
   idx_panel <- paste0(
     "<div class=\"sym-panel sym-active\" role=\"tabpanel\" id=\"", pan_idx,
     "\" aria-labelledby=\"", tab_idx, "\" data-panel=\"idx\" tabindex=\"0\">\n",
     "  <p class=\"sym-caption\">What happens for each observation <em>i</em> -- the per-individual reading.</p>\n",
     bio_gloss,
+    coef_gloss,
+    family_diagnostic,
     "  <div class=\"sym-eq\">$$\\begin{aligned}\n",
     paste0(vapply(idx_lines, align_at, character(1L)), collapse = " \\\\\n"),
     "\n\\end{aligned}$$</div>\n",
     gloss_index,
+    variance_panel,
     "</div>\n"
   )
   eq_panel <- paste0(
@@ -148,6 +166,31 @@ as_html_three_views.symbolized_model <- function(x, head = 5L, tail = 2L,
     Sigma = ex$Sigma_W, Lambda = ex$Lambda_W, Psi = ex$Psi_W
   )
   implied_cov_html <- ""
+  # v0.22.1.2: marginal-covariance decomposition for meta-analytic and
+  # multilevel fits. Mutually exclusive with the gllvm Sigma_B / Sigma_W
+  # path -- gllvm fits never carry `meta_analysis` in detected_signals
+  # and never expose `metadata$structured_matrix_for_group`, so this
+  # block fires only on the meta-analysis / multilevel widget path.
+  marginal_block <- latex_marginal_cov_block(x)
+  if (!is.null(marginal_block)) {
+    has_meta <- !is.null(x$metadata$detected_signals) &&
+                "meta_analysis" %in% x$metadata$detected_signals
+    caption <- if (has_meta) {
+      paste0(
+        "Marginal covariance of the response decomposes into the ",
+        "(known) sampling tier plus one term per random-effect group. ",
+        "Structured tiers carry their correlation matrix; ",
+        "unstructured tiers use the identity via $\\mathbf{Z}_g\\mathbf{Z}_g^{\\!\\top}$:")
+    } else {
+      paste0(
+        "Marginal covariance of the response is the sum of one term ",
+        "per random-effect group:")
+    }
+    implied_cov_html <- paste0(implied_cov_html,
+      "<p class=\"sym-caption\" style=\"font-size:0.95em;color:#374151\">",
+      caption,
+      "</p>\n<div class=\"sym-eq\">", marginal_block, "</div>\n")
+  }
   if (!is.null(sigma_B_block)) {
     implied_cov_html <- paste0(implied_cov_html,
       "<p class=\"sym-caption\" style=\"font-size:0.95em;color:#374151\">",
@@ -329,12 +372,43 @@ as_pdf_three_views.symbolized_model <- function(x, file, title = NULL,
     title <- sprintf("Three views of a %s model (response: %s)",
                      x$model$class, x$model$response)
   }
+  rmd_path <- tempfile(fileext = ".Rmd")
+  rmd_body <- pdf_three_views_rmd_body(x, head = head, tail = tail,
+                                       head_cols = head_cols,
+                                       tail_cols = tail_cols,
+                                       title = title, keep_tex = keep_tex)
+  writeLines(rmd_body, rmd_path)
+  out <- rmarkdown::render(
+    rmd_path,
+    output_file = file,
+    quiet = TRUE,
+    ...
+  )
+  invisible(out)
+}
+
+# Build the PDF Rmd body as a character vector. Extracted from
+# as_pdf_three_views() so the PDF content is testable without a LaTeX
+# toolchain and so the coefficient-reading callout (#6) can be verified
+# to travel into the PDF (PDF/HTML parity).
+pdf_three_views_rmd_body <- function(x, head = 5L, tail = 2L,
+                                     head_cols = 5L, tail_cols = 2L,
+                                     title = NULL, keep_tex = FALSE) {
+  if (is.null(title) || !nzchar(title)) {
+    title <- sprintf("Three views of a %s model (response: %s)",
+                     x$model$class, x$model$response)
+  }
   latex_index  <- as_latex(x, notation = "index")
   latex_matrix <- as_latex(x, notation = "matrix")
   worked <- pdf_three_views_worked_row(x)
-
-  rmd_path <- tempfile(fileext = ".Rmd")
-  rmd_body <- c(
+  # v0.22.4 #6: response-scale coefficient reading, carried into the PDF
+  # so it survives export (it used to live only in the article prose).
+  coef_txt <- three_views_coef_reading(
+    tryCatch(x$model$family, error = function(e) NULL))
+  coef_line <- if (nzchar(coef_txt)) {
+    c(sprintf("_**Coefficient reading.** %s_", coef_txt), "")
+  } else character(0L)
+  c(
     "---",
     sprintf("title: \"%s\"", gsub("\"", "'", title, fixed = TRUE)),
     "geometry: margin=2cm",
@@ -358,6 +432,7 @@ as_pdf_three_views.symbolized_model <- function(x, file, title = NULL,
     latex_index,
     "$$",
     "",
+    coef_line,
     "# 2. Matrix form",
     "",
     "_The same model in matrix notation. The structural contract every textbook past chapter 4 switches to._",
@@ -380,14 +455,6 @@ as_pdf_three_views.symbolized_model <- function(x, file, title = NULL,
                                         tail_cols = tail_cols),
     ""
   )
-  writeLines(rmd_body, rmd_path)
-  out <- rmarkdown::render(
-    rmd_path,
-    output_file = file,
-    quiet = TRUE,
-    ...
-  )
-  invisible(out)
 }
 
 # Pattern J seed: extract the matrix-form LaTeX equations from the HTML
@@ -440,8 +507,38 @@ pdf_three_views_matrix_block_latex <- function(x, head = 5L, tail = 2L,
   # If a sigma submodel was emitted, it is the next matrix block.
   idx <- 2L
   if (has_sigma && length(matrix_eqs) >= idx) {
+    # v0.22.4 Slice 1, F3 (PDF parity): match the HTML side's per-shape
+    # sigma caption. Without this, the PDF still claims sigma describes
+    # "spread of epsilon-hat" for Beta / Gamma / NegBinom, where sigma
+    # is actually a precision / shape / size parameter.
+    resp_sym_pdf <- escape_underscores_for_latex(x$model$response)
+    family_str_pdf <-
+      if (!is.null(x$model$family)) as.character(x$model$family[[1L]])
+      else "gaussian"
+    block_shape_pdf <- switch(
+      tolower(family_str_pdf),
+      gaussian  = "additive_gaussian",
+      student   = "additive_gaussian",
+      lognormal = "additive_log",
+      "generalized"
+    )
+    sigma_role_pdf <- switch(
+      block_shape_pdf,
+      additive_gaussian = "$\\sigma$'s job is to describe the spread of $\\hat{\\boldsymbol{\\varepsilon}}$",
+      additive_log = paste0(
+        "$\\sigma$'s job is to describe the spread of the log-scale ",
+        "residual $\\hat{\\boldsymbol{\\varepsilon}}^{(\\log)}$, ",
+        "i.e. the SD of $\\log ", resp_sym_pdf, "$"
+      ),
+      generalized = paste0(
+        "$\\sigma$ here is the family's spread parameter ",
+        "and is not a residual SD; see Tab 1 for its specific role ",
+        "in this distribution"
+      )
+    )
     out <- c(out,
-      "_And the $\\sigma$ submodel (no observed counterpart -- $\\sigma$'s job is to describe the spread of $\\hat{\\boldsymbol{\\varepsilon}}$):_",
+      paste0("_And the $\\sigma$ submodel (no observed counterpart -- ",
+             sigma_role_pdf, "):_"),
       "",
       matrix_eqs[idx],
       "")
@@ -456,6 +553,59 @@ pdf_three_views_matrix_block_latex <- function(x, head = 5L, tail = 2L,
       "")
   }
   out
+}
+
+# Single source of truth for the family-dependent SHAPE of a Tab 3 worked
+# row, shared by the HTML emitter (three_views_worked_row) and the PDF
+# emitter (pdf_three_views_worked_row) so the two cannot drift apart
+# (PDF/HTML parity, Pattern J). Returns:
+#   shape         -- "additive_gaussian" | "additive_log" | "generalized"
+#   link_label    -- LaTeX for the inverse-link operator (\exp, logistic, ...)
+#   family_label  -- LaTeX name of the distribution for the likelihood line
+worked_row_family_spec <- function(family) {
+  fam <- tolower(as.character(family))
+  list(
+    shape = switch(fam,
+      gaussian  = "additive_gaussian",
+      student   = "additive_gaussian",
+      lognormal = "additive_log",
+      "generalized"),
+    link_label = switch(fam,
+      poisson  = "\\exp",
+      binomial = "\\mathrm{logistic}",
+      beta     = "\\mathrm{logistic}",
+      gamma    = "\\exp",
+      nbinom1  = "\\exp",
+      nbinom2  = "\\exp",
+      "\\mathrm{link}^{-1}"),
+    family_label = switch(fam,
+      poisson  = "\\mathrm{Poisson}",
+      binomial = "\\mathrm{Binomial}",
+      beta     = "\\mathrm{Beta}",
+      gamma    = "\\mathrm{Gamma}",
+      nbinom1  = "\\mathrm{NegBinom}_1",
+      nbinom2  = "\\mathrm{NegBinom}_2",
+      paste0("\\mathrm{", family, "}"))
+  )
+}
+
+# Family-aware likelihood argument list, mirroring each family's Tab 1
+# parameterization, built from caller-supplied mean and dispersion
+# symbols (so HTML can pass `\hat\mu_{1}` / `\hat\sigma_{1}` and PDF can
+# pass `\hat\mu_1` / `\hat\sigma_1` in their own local styles). Drives
+# both the spurious-ellipsis fix (#3) and the precision-hiding fix (#4),
+# and now keeps HTML + PDF in lockstep.
+worked_row_lik_args <- function(family, mu_sym, sigma_sym) {
+  switch(tolower(as.character(family)),
+    poisson  = sprintf("(%s)", mu_sym),
+    binomial = sprintf("(%s)", mu_sym),
+    beta     = sprintf("(%s%s,\\, (1 - %s)%s)", mu_sym, sigma_sym, mu_sym, sigma_sym),
+    gamma    = sprintf("(\\mathrm{shape} = 1/%s^2,\\, \\mathrm{scale} = %s%s^2)",
+                       sigma_sym, mu_sym, sigma_sym),
+    nbinom1  = sprintf("(%s,\\, \\mathrm{size} = \\exp(%s))", mu_sym, sigma_sym),
+    nbinom2  = sprintf("(%s,\\, \\mathrm{size} = \\exp(%s))", mu_sym, sigma_sym),
+    sprintf("(%s, \\ldots)", mu_sym)
+  )
 }
 
 # Build the LaTeX content for the "worked observation" section. Pure-LaTeX
@@ -485,44 +635,78 @@ pdf_three_views_worked_row <- function(x) {
   # v0.21.2 dat.moura2021 metafor + MCMCglmm fits.
   has_re <- !is.null(ex$Z_g) && !is.null(ex$u)
   re_contrib_num <- if (has_re) sum(ex$Z_g[i, ] * ex$u) else 0
+  # v0.22.4 #1 (BLOCKER): the PDF worked row must branch on family/link
+  # exactly as the HTML emitter does, via the shared family-spec helpers.
+  # The old code hardcoded the Gaussian-additive `y = Xb + eps = y` form
+  # for every family -- wrong scale, arithmetically false, and at odds
+  # with the PDF's own link-scale stacked block.
+  fam_spec <- worked_row_family_spec(x$model$family)
+  shape    <- fam_spec$shape
+  eta_i    <- if (!is.null(ex$eta_hat)) ex$eta_hat[[i]] else mu_i
+  resp1    <- sprintf("\\mathrm{%s}_1", resp_sym)
   if (!is.null(X_i) && !is.null(beta) && length(X_i) == length(beta)) {
-    terms_tex <- vapply(seq_along(beta), function(k) {
-      bk <- fmt(beta[[k]])
-      xk <- fmt(X_i[[k]])
-      if (k == 1L) bk else sprintf("%s \\cdot %s", bk, xk)
-    }, character(1L))
-    # Use paste(..., collapse) instead of an explicit for-loop -- the loop
-    # `for (k in seq.int(2L, length(terms_tex)))` breaks when
-    # length(terms_tex) == 1L (intercept-only model) because seq.int(2L, 1L)
-    # returns c(2L, 1L) and tries to index a nonexistent element. Florence
-    # caught this on the v0.21.2 dat.moura2021 intercept-only metafor fit.
-    rhs_signed <- paste(terms_tex, collapse = " + ")
+    # Build the displayed linear-predictor terms + the reader-facing
+    # numeric value of each (for closing additive equations at display
+    # precision -- same approach as the HTML worked row).
+    terms_tex <- character(length(beta))
+    num_vals  <- numeric(length(beta))
+    for (k in seq_along(beta)) {
+      if (k == 1L) {
+        terms_tex[k] <- fmt(beta[[k]])
+        num_vals[k]  <- as.numeric(fmt(beta[[k]]))
+      } else {
+        terms_tex[k] <- sprintf("%s \\cdot %s", fmt(beta[[k]]), fmt(X_i[[k]]))
+        num_vals[k]  <- as.numeric(fmt(beta[[k]])) * as.numeric(fmt(X_i[[k]]))
+      }
+    }
     if (has_re) {
-      # Append the RE-contribution term so the arithmetic closes.
-      re_str <- if (re_contrib_num < 0)
-                  sprintf("- %s", fmt(abs(re_contrib_num)))
-                else
-                  sprintf("+ %s", fmt(re_contrib_num))
-      rhs_signed <- sprintf("%s \\;%s", rhs_signed, re_str)
+      terms_tex <- c(terms_tex, sprintf("(%s)", fmt(re_contrib_num)))
+      num_vals  <- c(num_vals, as.numeric(fmt(re_contrib_num)))
     }
-    rhs_full <- if (!is.na(eps_i)) {
-      eps_str <- if (eps_i < 0) sprintf("- %s", fmt(abs(eps_i)))
-                 else sprintf("+ %s", fmt(eps_i))
-      sprintf("%s \\;%s = %s", rhs_signed, eps_str, fmt(y_i))
+    rhs_lp  <- join_signed_terms(terms_tex)  # folds '+ -' -> '-' (#7)
+    lp_disp <- sum(num_vals)
+
+    if (shape == "additive_gaussian") {
+      # #155: LP build with \approx, then the TRUE residual y - mu_hat
+      # (matches the stacked matrix block, no balancing fudge).
+      eps_true <- y_i - mu_i
+      parts <- c(parts, "$$",
+        sprintf("\\hat\\mu_1 \\;=\\; %s \\;\\approx\\; %s", rhs_lp, fmt(mu_i)),
+        "$$", "",
+        sprintf(paste0("_Observed $%s = %s$; predicted mean $\\hat\\mu_1 = %s$ ",
+                       "(response scale); residual $\\hat\\varepsilon_1 = %s$ ",
+                       "(observed = mean + residual)._"),
+                resp1, fmt(y_i), fmt(mu_i), fmt(eps_true)))
+    } else if (shape == "additive_log") {
+      log_y    <- log(y_i)
+      eps_true <- log_y - mu_i
+      parts <- c(parts, "$$",
+        sprintf("\\hat\\mu_1 \\;=\\; %s \\;\\approx\\; %s", rhs_lp, fmt(mu_i)),
+        "$$", "",
+        sprintf(paste0("_Observed $\\log %s = %s$ (log scale); predicted log-scale ",
+                       "mean $\\hat\\mu_1 = %s$; log-scale residual ",
+                       "$\\hat\\varepsilon_1^{(\\log)} = %s$ ",
+                       "(observed = mean + residual). Back-transform to the ",
+                       "response-scale mean with ",
+                       "$\\mathbb{E}[%s] = \\exp(\\hat\\mu_1 + \\hat\\sigma_1^2/2)$._"),
+                resp1, fmt(log_y), fmt(mu_i), fmt(eps_true), resp1))
     } else {
-      rhs_signed
+      # generalized: link-scale linear predictor, response-scale mean via
+      # the inverse link, then the likelihood. No additive error term.
+      link <- fam_spec$link_label
+      lik  <- worked_row_lik_args(x$model$family, "\\hat\\mu_1", "\\hat\\sigma_1")
+      parts <- c(parts, "$$", "\\begin{aligned}",
+        sprintf("\\hat\\eta_1 &\\;=\\; %s \\;\\approx\\; %s \\\\", rhs_lp, fmt(eta_i)),
+        sprintf("\\hat\\mu_1 &\\;=\\; %s(\\hat\\eta_1) \\;=\\; %s(%s) \\;\\approx\\; %s \\\\",
+                link, link, fmt(eta_i), fmt(mu_i)),
+        sprintf("%s &\\;\\sim\\; %s%s", resp1, fam_spec$family_label, lik),
+        "\\end{aligned}", "$$", "",
+        sprintf(paste0("_Linear predictor $\\hat\\eta_1 = %s$ on the link scale; ",
+                       "predicted mean $\\hat\\mu_1 = %s(\\hat\\eta_1) \\approx %s$ on the ",
+                       "response scale. No additive error term enters the linear ",
+                       "predictor -- the spread is set by the likelihood above._"),
+                fmt(eta_i), link, fmt(mu_i)))
     }
-    parts <- c(parts,
-      "$$",
-      sprintf("\\underbrace{%s}_{\\text{observed}=%s} \\;=\\; %s",
-              sprintf("\\mathrm{%s}_1", resp_sym), fmt(y_i), rhs_full),
-      "$$",
-      "",
-      if (!is.na(mu_i) && !is.na(eps_i)) {
-        sprintf("_Predicted $\\hat\\mu_1 = %s$; residual $\\hat\\varepsilon_1 = %s$._",
-                fmt(mu_i), fmt(eps_i))
-      } else ""
-    )
   }
   if (!is.null(ex$X_sigma) && !is.null(ex$gamma) &&
       !is.null(ex$sigma_hat) && length(ex$sigma_hat) >= 1L) {
@@ -569,6 +753,28 @@ pdf_three_views_worked_row <- function(x) {
 # Underscore-escape a response name for use inside \mathrm{...} in LaTeX.
 escape_underscores_for_latex <- function(s) {
   gsub("_", "\\_", s, fixed = TRUE)
+}
+
+# Join a vector of LaTeX numeric term strings into a sum, folding a
+# leading minus sign on any term into the binary operator so the result
+# reads `a - b` rather than the glued `a + -b` (punch-list #7). The first
+# term keeps its own sign. Terms whose displayed value is already
+# parenthesised (e.g. a random-effect or residual term `(-0.45)`) start
+# with `(` not `-`, so they keep the `+ (...)` style -- the page's own
+# convention for those, intentionally left intact.
+join_signed_terms <- function(terms) {
+  terms <- terms[nzchar(terms)]
+  if (length(terms) == 0L) return("")
+  out <- terms[[1L]]
+  for (j in seq_along(terms)[-1L]) {
+    t <- terms[[j]]
+    if (grepl("^-", t)) {
+      out <- paste0(out, " - ", sub("^-\\s*", "", t))
+    } else {
+      out <- paste0(out, " + ", t)
+    }
+  }
+  out
 }
 
 # Wrap a three-views fragment with a full standalone HTML document that
@@ -656,6 +862,73 @@ underbrace <- function(content, label)
 # Λ Λ^T + diag(Ψ²) decomposition. Returns a character string suitable
 # for inclusion inside a `$$ ... $$` MathJax block, or NULL when any
 # matrix is missing.
+# Emit the symbolic marginal-covariance decomposition for a multilevel
+# / meta-analytic fit. Returns a LaTeX `$$...$$` block of the shape
+#
+#   Cov(y) = sigma_p^2 A         (phylo tier, structured)
+#          + sigma_study^2 Z Z^T (study tier, unstructured)
+#          + diag(v)              (sampling variance, when meta_V present)
+#
+# with `\underbrace{...}_{label}` annotations naming each tier. Returns
+# NULL when there's no meta-analytic context, no random effects, and no
+# structured matrix -- i.e. when the decomposition is trivially
+# `sigma^2 I` and would carry no pedagogy.
+#
+# Lives inside Tab 3 of the three-views widget. The widget already shows
+# per-tier distribution rows on Tabs 1 + 2; this block makes the
+# *implied* marginal covariance explicit, mirroring what V2 Pat's audit
+# of the meta-analysis Widget 2 asked for: "Tab 3 should *show* the
+# decomposition, not just announce it."
+latex_marginal_cov_block <- function(x) {
+  has_meta <- !is.null(x$metadata$detected_signals) &&
+              "meta_analysis" %in% x$metadata$detected_signals
+  re_tbl   <- x$random_effects
+  has_re   <- !is.null(re_tbl) && nrow(re_tbl) > 0L
+  # No work to do when the model has neither known sampling variance
+  # nor a random-effect structure beyond residual.
+  if (!has_meta && !has_re) return(NULL)
+  # When there's a single iid RE and no meta_V, the decomposition
+  # collapses to `sigma^2 Z Z^T + sigma_eps^2 I`, which is the standard
+  # textbook form already shown in §1 of every regression chapter. Skip
+  # to avoid cluttering simple fits.
+  if (!has_meta && has_re && nrow(re_tbl) == 1L) return(NULL)
+
+  smfg <- x$metadata$structured_matrix_for_group
+  is_structured <- function(gv) {
+    !is.null(smfg) && !is.null(smfg[[gv]])
+  }
+
+  # One term per random-effect group (mu submodel only -- variance-
+  # submodel terms enter via the link function, not the marginal
+  # covariance of y).
+  re_mu <- re_tbl[re_tbl$submodel == "mu", , drop = FALSE]
+  groups <- unique(re_mu$group_var)
+  re_terms <- vapply(groups, function(gv) {
+    sel    <- which(re_mu$group_var == gv)[[1L]]
+    sigma  <- re_mu$sigma_symbol[[sel]]
+    if (is_structured(gv)) {
+      struct_sym <- smfg[[gv]]
+      body  <- sprintf("%s^2\\, %s", sigma, struct_sym)
+      label <- sprintf("\\text{%s tier}", gv)
+    } else {
+      body  <- sprintf("%s^2\\, \\mathbf{Z}_{%s}\\mathbf{Z}_{%s}^{\\!\\top}",
+                       sigma, gv, gv)
+      label <- sprintf("\\text{%s tier}", gv)
+    }
+    underbrace(body, label)
+  }, character(1L))
+
+  meta_term <- if (has_meta) {
+    underbrace("\\mathrm{diag}(\\mathbf{v})",
+               "\\text{known sampling}")
+  } else NULL
+
+  rhs <- paste(c(re_terms, meta_term), collapse = " \\;+\\; ")
+  lhs <- underbrace("\\mathrm{Cov}(\\mathbf{y})",
+                    sprintf("n \\times n,\\; n = %d", x$model$n_obs))
+  paste0("$$\n", lhs, " \\;=\\; ", rhs, "\n$$\n")
+}
+
 latex_implied_cov_block <- function(tier = c("B", "W"), Sigma, Lambda, Psi) {
   tier <- match.arg(tier)
   if (is.null(Sigma) || is.null(Lambda) || is.null(Psi)) return(NULL)
@@ -726,6 +999,24 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L,
     } else integer(0L)
     nz_head <- intersect(seq_len(min(head, p)), informative)
     nz_tail <- intersect(seq.int(max(1L, p - tail + 1L), p), informative)
+    # v0.22.2-discipline Slice A2 polish: when the informative columns
+    # sit in the MIDDLE of a wide matrix (e.g. Z_phylo for a species
+    # that's alphabetically mid-list), nz_head and nz_tail are both
+    # empty and the old code fell to the structural head/tail (all
+    # zeros for sparse one-hot). Surface middle informative cols by
+    # promoting them into the head/tail sets so the visible window
+    # contains the 1s the reader needs to see.
+    nz_middle <- setdiff(informative, c(nz_head, nz_tail))
+    if (length(nz_head) == 0L && length(nz_middle) > 0L) {
+      take <- min(length(nz_middle), head)
+      nz_head   <- nz_middle[seq_len(take)]
+      nz_middle <- nz_middle[-seq_len(take)]
+    }
+    if (length(nz_tail) == 0L && length(nz_middle) > 0L) {
+      take <- min(length(nz_middle), tail)
+      nz_tail <- nz_middle[seq.int(length(nz_middle) - take + 1L,
+                                    length(nz_middle))]
+    }
     if (length(nz_head) > 0L || length(nz_tail) > 0L) {
       head_set <- unique(c(nz_head, head(setdiff(seq_len(p), nz_head),
                                           head - length(nz_head))))
@@ -794,29 +1085,78 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L,
   # already R-string-encoded as a single backslash, so it can drop into
   # the cat'd HTML as-is.
 
-  # --- Block 1: response equation `w = X beta_hat (+ Z_g u_hat) + eps_hat`
-  # Pedagogically this is the matrix-form RESPONSE equation, not the
-  # conditional-mean equation. Tab 2 (the abstraction tab) shows
-  # `\boldsymbol{\mu} = \mathbf{X}\boldsymbol{\beta}` -- the conditional
-  # mean, no error term. Tab 3 (this one) drops down a level of honesty:
-  # it shows the observed vector `w`, the prediction `X\hat\beta`
-  # (= `\hat\mu`), AND the residual vector `\hat\varepsilon = w - \hat\mu`.
-  # Every row of THIS equation is exactly one of the per-observation
-  # response equations the worked-row block right above shows in scalar
-  # arithmetic. The matrix block IS the worked row, stacked n times.
-  eps_hat  <- ex$y - ex$mu_hat
-  y_vec    <- latex_vec(ex$y,     rows)
+  # --- Block 1: response equation, family-aware ---
+  # Pedagogically this is the matrix-form RESPONSE equation. Tab 2
+  # (abstraction) shows the conditional mean only. Tab 3 (here) drops
+  # down a level of honesty: it shows the observed vector, the
+  # prediction, and -- when the family is Gaussian-additive on some
+  # scale -- the residual vector.
+  #
+  # v0.22.4 Slice 1: three shapes per family (mirrors the worked-row
+  # architecture from v0.22.3, ensuring within-tab consistency):
+  #
+  #   additive_gaussian  -- y = X β̂ + ε̂ on response scale
+  #                         (Gaussian, Student-t)
+  #   additive_log       -- log(y) = X β̂ + ε̂^{(log)} on log scale
+  #                         (Lognormal, drmTMB identity-on-mu-of-log-y)
+  #   generalized        -- η̂ = X β̂ on link scale; μ̂ = link⁻¹(η̂);
+  #                         y ~ Family(μ̂)
+  #                         (Poisson, Beta, Binomial, Gamma, NegBinom)
+  #
+  # The pre-v0.22.4 build emitted `y = X β̂ + ε̂` for every family.
+  # For non-Gaussian families that mixed response-scale y with
+  # link-scale X β̂ in one additive equation -- arithmetically false,
+  # cross-confirmed BLOCKER by all four V-agents in the families
+  # team review (docs/dev-log/figure-audits/v0.22.3-families-team-review/).
+  family_str_block <-
+    if (!is.null(x$model$family)) as.character(x$model$family[[1L]])
+    else "gaussian"
+  block_shape <- switch(
+    tolower(family_str_block),
+    gaussian  = "additive_gaussian",
+    student   = "additive_gaussian",
+    lognormal = "additive_log",
+    "generalized"
+  )
+  emit_eps <- block_shape %in% c("additive_gaussian", "additive_log")
+  if (block_shape == "additive_log") {
+    lhs_values <- log(ex$y)
+    lhs_sym    <- sprintf("\\log(%s)", resp_sym)
+    lhs_role   <- "observed, log scale"
+    eps_vals   <- log(ex$y) - ex$mu_hat
+    eps_sym    <- "\\hat{\\boldsymbol{\\varepsilon}}^{(\\log)}"
+    eps_role   <- "log-scale residual"
+  } else if (block_shape == "generalized") {
+    lhs_values <- ex$eta_hat
+    lhs_sym    <- "\\hat{\\boldsymbol{\\eta}}"
+    lhs_role   <- "linear predictor, link scale"
+    eps_vals   <- NULL
+    eps_sym    <- NULL
+    eps_role   <- NULL
+  } else {
+    # additive_gaussian (historic; back-compat path)
+    lhs_values <- ex$y
+    lhs_sym    <- resp_sym
+    lhs_role   <- "observed"
+    eps_vals   <- ex$y - ex$mu_hat
+    eps_sym    <- "\\hat{\\boldsymbol{\\varepsilon}}"
+    eps_role   <- "residual"
+  }
+
+  y_vec    <- latex_vec(lhs_values, rows)
   X_mat    <- latex_mat(ex$X,     rows,
                          col_head = head_cols, col_tail = tail_cols)
   beta_vec <- latex_vec(ex$beta)
-  eps_vec  <- latex_vec(eps_hat,  rows)
-  y_lab    <- sprintf("%s_{\\,%d \\times 1}\\;\\text{(observed)}",
-                      resp_sym, n)
+  eps_vec  <- if (emit_eps) latex_vec(eps_vals, rows) else NULL
+  y_lab    <- sprintf("%s_{\\,%d \\times 1}\\;\\text{(%s)}",
+                      lhs_sym, n, lhs_role)
   X_lab    <- sprintf("\\mathbf{X}_{\\,%d \\times %d}", n, ncol(ex$X))
   beta_lab <- sprintf("\\hat{\\boldsymbol{\\beta}}_{\\,%d \\times 1}\\;\\text{(estimated)}",
                       length(ex$beta))
-  eps_lab  <- sprintf("\\hat{\\boldsymbol{\\varepsilon}}_{\\,%d \\times 1}\\;\\text{(residual)}",
-                      n)
+  eps_lab  <- if (emit_eps) {
+    sprintf("%s_{\\,%d \\times 1}\\;\\text{(%s)}",
+            eps_sym, n, eps_role)
+  } else NULL
 
   eq_mu <- paste0(
     underbrace(y_vec,    y_lab),    " \\;=\\; ",
@@ -838,48 +1178,101 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L,
   # when the data have multiple observations per level (so Z carries
   # genuine mapping content). The flag is computed once here so the
   # caption prose below can drop the "Z" factor too.
+  # v0.22.2-discipline Slice A2: per-tier Tab 3 rendering. When the
+  # extractor surfaced more than one random-effect tier (e.g. phylo +
+  # study), emit one Z * u group PER tier so the article's multilevel
+  # structure is visible in the matrix block, not hidden behind a
+  # single bare `Z` aggregate. Single-tier fits fall through to the
+  # historic shape (no `_g` subscripts on Z / u) for back-compat.
+  per_tier_Z <- if (!is.null(ex$Z_per_tier) && length(ex$Z_per_tier) > 0L) {
+    ex$Z_per_tier
+  } else if (has_re) {
+    stats::setNames(list(ex$Z_g), "")  # single-tier fallback, no subscript
+  } else NULL
+  per_tier_u <- if (!is.null(ex$u_per_tier) && length(ex$u_per_tier) > 0L) {
+    ex$u_per_tier
+  } else if (has_re) {
+    stats::setNames(list(ex$u), "")
+  } else NULL
+  if (!is.null(per_tier_Z)) {
+    # Sanitize a group_var name into a LaTeX-safe subscript. The
+    # subscript is rendered in `\text{...}` so multi-character labels
+    # like `study_ID` come through legibly; underscores are escaped so
+    # they don't trigger subscript-of-subscript.
+    latex_subscript <- function(gv) {
+      if (!nzchar(gv)) return("")
+      paste0("\\text{", gsub("_", "\\\\_", gv, fixed = FALSE), "}")
+    }
+    for (gv in names(per_tier_Z)) {
+      Z_gv <- per_tier_Z[[gv]]
+      u_gv <- per_tier_u[[gv]]
+      if (is.null(Z_gv) || is.null(u_gv)) next
+      sub_tex <- latex_subscript(gv)
+      sub_with_comma <- if (nzchar(sub_tex)) paste0(sub_tex, ",\\,") else ""
+      z_one_to_one <-
+        nrow(Z_gv) >= 1L &&
+        all(rowSums(Z_gv != 0) == 1L) &&
+        all(colSums(Z_gv != 0) <= 1L)
+      if (z_one_to_one) {
+        u_per_obs <- as.numeric(Z_gv %*% u_gv)
+        u_obs_vec <- latex_vec(u_per_obs, rows)
+        u_obs_lab <- if (nzchar(sub_tex)) {
+          sprintf(
+            "\\hat{\\mathbf{u}}_{%s,\\,%d \\times 1}\\;\\text{(per-obs %s effect)}",
+            sub_tex, n, gv
+          )
+        } else {
+          sprintf(
+            "\\hat{\\mathbf{u}}_{\\,%d \\times 1}\\;\\text{(per-obs random effect)}",
+            n
+          )
+        }
+        eq_mu <- paste0(
+          eq_mu, " \\;+\\; ",
+          underbrace(u_obs_vec, u_obs_lab)
+        )
+      } else {
+        z_col_idx <- trunc_col_idx(Z_gv, rows,
+                                   head = head_cols, tail = tail_cols)
+        Zg_mat  <- latex_mat(Z_gv, rows,
+                             col_head = head_cols, col_tail = tail_cols)
+        u_vec   <- latex_vec(u_gv, z_col_idx)
+        Zg_lab  <- sprintf("\\mathbf{Z}_{%s\\,%d \\times %d}",
+                           sub_with_comma, n, ncol(Z_gv))
+        u_lab   <- if (nzchar(sub_tex)) {
+          sprintf("\\hat{\\mathbf{u}}_{%s,\\,%d \\times 1}\\;\\text{(BLUP)}",
+                  sub_tex, length(u_gv))
+        } else {
+          sprintf("\\hat{\\mathbf{u}}_{\\,%d \\times 1}\\;\\text{(BLUP)}",
+                  length(u_gv))
+        }
+        eq_mu <- paste0(
+          eq_mu, " \\;+\\; ",
+          underbrace(Zg_mat, Zg_lab), "\\, ",
+          underbrace(u_vec,  u_lab)
+        )
+      }
+    }
+  }
+  # Preserve the old single-tier "Z is identity-on-obs" flag for the
+  # caption prose below (the caption decides whether to mention Z by
+  # name based on whether ANY tier actually emitted a Z block).
   z_is_one_to_one_flag <- has_re &&
+    !is.null(ex$Z_g) &&
     nrow(ex$Z_g) >= 1L &&
     all(rowSums(ex$Z_g != 0) == 1L) &&
     all(colSums(ex$Z_g != 0) <= 1L)
-  if (has_re) {
-    if (z_is_one_to_one_flag) {
-      u_per_obs <- as.numeric(ex$Z_g %*% ex$u)
-      u_obs_vec <- latex_vec(u_per_obs, rows)
-      u_obs_lab <- sprintf(
-        "\\hat{\\mathbf{u}}_{\\,%d \\times 1}\\;\\text{(per-obs random effect)}",
-        n
-      )
-      eq_mu <- paste0(
-        eq_mu, " \\;+\\; ",
-        underbrace(u_obs_vec, u_obs_lab)
-      )
-    } else {
-      # Multi-obs-per-level case: Z carries genuine mapping content.
-      # Pattern O: Z's columns and u's rows share the level dimension;
-      # truncate them with matching indices so the matrix multiplication
-      # Z u remains aligned visually.
-      z_col_idx <- trunc_col_idx(ex$Z_g, rows,
-                                 head = head_cols, tail = tail_cols)
-      Zg_mat  <- latex_mat(ex$Z_g, rows,
-                           col_head = head_cols, col_tail = tail_cols)
-      u_vec   <- latex_vec(ex$u, z_col_idx)
-      Zg_lab  <- sprintf("\\mathbf{Z}_{\\,%d \\times %d}",
-                         n, ncol(ex$Z_g))
-      u_lab   <- sprintf("\\hat{\\mathbf{u}}_{\\,%d \\times 1}\\;\\text{(BLUP)}",
-                         length(ex$u))
-      eq_mu <- paste0(
-        eq_mu, " \\;+\\; ",
-        underbrace(Zg_mat, Zg_lab), "\\, ",
-        underbrace(u_vec,  u_lab)
-      )
-    }
+  # Close the response equation with the residual vector -- only for
+  # families with additive Gaussian noise on some scale. For
+  # generalized families (Poisson, Beta, etc.) the linear predictor
+  # has no additive residual on link scale; emitting +eps would be a
+  # math error of the same class as the v0.22.3 worked-row template.
+  if (emit_eps) {
+    eq_mu <- paste0(
+      eq_mu, " \\;+\\; ",
+      underbrace(eps_vec, eps_lab)
+    )
   }
-  # Close the response equation with the residual vector.
-  eq_mu <- paste0(
-    eq_mu, " \\;+\\; ",
-    underbrace(eps_vec, eps_lab)
-  )
 
   # --- Block 2: sigma submodel (only when distributional) ----------------
   eq_sigma <- if (has_sigma) {
@@ -909,8 +1302,9 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L,
   # with numbers, then back-transformed to sigma_1 in original units.
   # Both anchor the matrix algebra immediately below: each matrix equation
   # is the corresponding worked row stacked n times.
-  worked_mu    <- three_views_worked_row(ex, resp_sym)
-  worked_sigma <- three_views_worked_row_sigma(ex)
+  family_str <- if (!is.null(x$model$family)) as.character(x$model$family[[1L]]) else "gaussian"
+  worked_mu    <- three_views_worked_row(ex, resp_sym, family = family_str)
+  worked_sigma <- three_views_worked_row_sigma(ex, family = family_str)
 
   # --- Block 3: structured covariance matrix (phylo / spatial / temporal) -
   # When the model carries a structured random effect, render
@@ -994,21 +1388,107 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L,
       )
     },
     paste0("<div class=\"sym-eq\">$$\n", eq_mu, "\n$$</div>\n"),
-    paste0("<p class=\"sym-caption\" style=\"font-size:0.85em;color:#6b7280;margin-top:0.4rem\"><strong>Left</strong>: observed vector $", resp_sym, "$. <strong>Middle</strong>: the prediction $\\mathbf{X}\\hat{\\boldsymbol{\\beta}}",
-           if (has_re) {
-             # When Z is the identity on the observed levels (one obs per
-             # level) the renderer drops Z from the visible block, so the
-             # caption should also drop the Z factor; otherwise show Zu.
-             if (isTRUE(z_is_one_to_one_flag)) {
-               " + \\hat{\\mathbf{u}}"
-             } else {
-               " + \\mathbf{Z}\\hat{\\mathbf{u}}"
-             }
-           } else "",
-           " = \\hat{\\boldsymbol{\\mu}}$. <strong>Right</strong>: the residual vector $\\hat{\\boldsymbol{\\varepsilon}} = ", resp_sym, " - \\hat{\\boldsymbol{\\mu}}$. Every row of this matrix equation is one of the response-equation rows from the worked row above.</p>\n"),
+    # v0.22.4 Slice 1, F2: family-aware caption. The universal
+    # `Xβ̂ = μ̂` claim assumed identity-link Gaussian. For
+    # additive_log (Lognormal) μ̂ is on log scale; for generalized
+    # (Poisson, Beta, ...) Xβ̂ is the link-scale linear predictor η̂
+    # and the back-transform μ̂ = link⁻¹(η̂) is what feeds the
+    # likelihood, with no additive residual on link scale.
+    {
+      z_term_tex <- if (has_re) {
+        # When Z is the identity on the observed levels (one obs per
+        # level) the renderer drops Z from the visible block, so the
+        # caption should also drop the Z factor; otherwise show Zu.
+        if (isTRUE(z_is_one_to_one_flag)) " + \\hat{\\mathbf{u}}"
+        else " + \\mathbf{Z}\\hat{\\mathbf{u}}"
+      } else ""
+      cap_open  <- "<p class=\"sym-caption\" style=\"font-size:0.85em;color:#6b7280;margin-top:0.4rem\">"
+      cap_close <- "</p>\n"
+      switch(
+        block_shape,
+        additive_gaussian = paste0(
+          cap_open,
+          "<strong>Left</strong>: observed vector $", resp_sym, "$. ",
+          "<strong>Middle</strong>: the prediction ",
+          "$\\mathbf{X}\\hat{\\boldsymbol{\\beta}}", z_term_tex,
+          " = \\hat{\\boldsymbol{\\mu}}$. ",
+          "<strong>Right</strong>: the residual vector ",
+          "$\\hat{\\boldsymbol{\\varepsilon}} = ", resp_sym,
+          " - \\hat{\\boldsymbol{\\mu}}$. ",
+          "Every row of this matrix equation is one of the ",
+          "response-equation rows from the worked row above.",
+          cap_close
+        ),
+        additive_log = paste0(
+          cap_open,
+          "<strong>Left</strong>: log-scale observed vector ",
+          "$\\log(", resp_sym, ")$. ",
+          "<strong>Middle</strong>: the log-scale linear predictor ",
+          "$\\mathbf{X}\\hat{\\boldsymbol{\\beta}}", z_term_tex, "$ ",
+          "&mdash; this is $\\hat{\\boldsymbol{\\mu}}$, the mean of ",
+          "$\\log ", resp_sym, "$ (as Tab 1 states). ",
+          "<strong>Right</strong>: the log-scale residual vector ",
+          "$\\hat{\\boldsymbol{\\varepsilon}}^{(\\log)} = ",
+          "\\log(", resp_sym, ") - \\hat{\\boldsymbol{\\mu}}$. ",
+          "Each row matches the log-scale worked row above; ",
+          "back-transform via $E[", resp_sym,
+          "] = \\exp(\\hat{\\mu} + \\hat{\\sigma}^2 / 2)$ to recover ",
+          "the response-scale mean.",
+          cap_close
+        ),
+        # generalized: Poisson, Beta, Binomial, Gamma, NegBinom, ...
+        generalized = paste0(
+          cap_open,
+          "<strong>Left</strong>: linear predictor ",
+          "$\\hat{\\boldsymbol{\\eta}}$ on the link scale. ",
+          "<strong>Right</strong>: ",
+          "$\\mathbf{X}\\hat{\\boldsymbol{\\beta}}", z_term_tex, "$ ",
+          "&mdash; the same linear predictor in matrix form. ",
+          "There is no additive residual on the link scale: each ",
+          "$", resp_sym, "_i$ has its own likelihood row above, ",
+          "$", resp_sym, "_i \\sim \\mathrm{Family}(\\hat{\\mu}_i)$, ",
+          "with the response-scale mean recovered as ",
+          "$\\hat{\\boldsymbol{\\mu}} = ",
+          "g^{-1}(\\hat{\\boldsymbol{\\eta}})$ ",
+          "(the inverse-link back-transform shown in the worked row).",
+          cap_close
+        )
+      )
+    },
+    # S4: partial-pooling caption beside the BLUP block (RE fits only).
+    three_views_shrinkage_caption(has_re),
     if (!is.null(eq_sigma)) {
+      # v0.22.4 Slice 1, F3: per-shape sigma-submodel caption. The
+      # "spread of ε̂" prose presumed additive residuals and pulled the
+      # ε̂ symbol into the panel-mat for families (Beta, Gamma, ...)
+      # whose sigma is a precision / shape parameter, not a residual SD.
+      sigma_role_html <- switch(
+        block_shape,
+        additive_gaussian = paste0(
+          "$\\sigma$'s job is to describe the spread of ",
+          "$\\hat{\\boldsymbol{\\varepsilon}}$"
+        ),
+        additive_log = paste0(
+          "$\\sigma$'s job is to describe the spread of the log-scale ",
+          "residual $\\hat{\\boldsymbol{\\varepsilon}}^{(\\log)}$, ",
+          "i.e. the SD of $\\log ", resp_sym, "$"
+        ),
+        # generalized: per-family meaning -- Beta precision, Gamma shape,
+        # NegBinom size, etc. Defer the specific role to Tab 1 / the
+        # per-family worked-row, which already labels it correctly.
+        generalized = paste0(
+          "$\\sigma$ here is the family's spread parameter ",
+          "and is not a residual SD; see Tab 1 for its specific role ",
+          "in this distribution"
+        )
+      )
       c(
-        "<p class=\"sym-caption\" style=\"font-size:0.95em;color:#374151;margin-top:1.2rem\">And the $\\sigma$ submodel (no observed counterpart -- $\\sigma$'s job is to describe the spread of $\\hat{\\boldsymbol{\\varepsilon}}$). For the same observation <em>i</em> = 1:</p>\n",
+        paste0(
+          "<p class=\"sym-caption\" style=\"font-size:0.95em;",
+          "color:#374151;margin-top:1.2rem\">And the $\\sigma$ submodel ",
+          "(no observed counterpart -- ", sigma_role_html, "). ",
+          "For the same observation <em>i</em> = 1:</p>\n"
+        ),
         if (!is.null(worked_sigma)) worked_sigma else character(0),
         "<p class=\"sym-caption\" style=\"font-size:0.95em;color:#374151\">Stacking the same log-link equation for all <em>n</em> = ", n, " observations:</p>\n",
         paste0("<div class=\"sym-eq\">$$\n", eq_sigma, "\n$$</div>\n")
@@ -1029,7 +1509,8 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L,
 # `W_1 = beta_0 + beta_1 T_1 + ... + eps_1` once symbolically and once
 # with the actual numbers. Returns a `$$ ... $$` MathJax block, or NULL
 # if the model doesn't have enough structure to write a meaningful row.
-three_views_worked_row <- function(ex, resp_sym = "\\mathbf{y}") {
+three_views_worked_row <- function(ex, resp_sym = "\\mathbf{y}",
+                                    family = "gaussian") {
   if (is.null(ex$y) || is.null(ex$X) || is.null(ex$beta) || is.null(ex$mu_hat))
     return(NULL)
   if (length(ex$y) < 1L || nrow(ex$X) < 1L) return(NULL)
@@ -1038,33 +1519,73 @@ three_views_worked_row <- function(ex, resp_sym = "\\mathbf{y}") {
   i  <- 1L
   X1 <- ex$X[i, ]
   W1 <- ex$y[i]
-  mu1 <- ex$mu_hat[i]
+  # v0.22.2.1: mu_hat is now on response scale (link-inverted); eta_hat
+  # is on linear-predictor scale. For Gaussian-additive families
+  # (identity link, additive Gaussian noise) the two are equal. For
+  # generalized families they differ and the worked row must show both.
+  eta1 <- if (!is.null(ex$eta_hat)) ex$eta_hat[i] else ex$mu_hat[i]
+  mu1  <- ex$mu_hat[i]
   eps1 <- W1 - mu1
 
-  # If the model has a random effect, the conditional mean for
-  # observation i = 1 is `X[1,] beta + Z_g[1,] u`. The worked-row
-  # symbolic + numeric line must include the RE contribution explicitly,
-  # otherwise the arithmetic doesn't close (Pat's audit caught this:
-  # readers who try to mentally check the row see `X*beta + eps` != W).
+  # If the model has random effects, the conditional mean for
+  # observation i = 1 is `X[1,] beta + sum_g Z_g[1,] u_g`. The worked-row
+  # symbolic + numeric line must include EVERY tier's RE contribution
+  # explicitly, otherwise the arithmetic doesn't close (Pat's audit
+  # caught this: readers who try to mentally check the row see
+  # `X*beta + eps` != W).
+  #
+  # v0.22.2-discipline Slice A2: iterate ex$Z_per_tier so multi-tier
+  # fits (phylo + study, animal + litter, ...) emit ONE re_group_label
+  # and ONE re_contrib_num per tier. Single-tier fits fall back to the
+  # historic single-term shape.
   has_re <- !is.null(ex$Z_g) && !is.null(ex$u)
-  re_contrib_num <- if (has_re) sum(ex$Z_g[i, ] * ex$u) else 0
-  # Find which level of which RE group observation i = 1 belongs to (we
-  # use it to build a symbolic label `\hat{u}_{group(1)}`). For simple
-  # `(1|group)` models, Z_g is a one-hot indicator and the active column
-  # is the group label.
-  re_group_label <- NULL
-  if (has_re) {
-    active_col <- which(ex$Z_g[i, ] != 0)
-    if (length(active_col) == 1L) {
-      lvl <- colnames(ex$Z_g)[active_col]
-      if (!is.null(lvl) && nzchar(lvl)) {
-        lvl_esc <- gsub("_", "\\_", lvl, fixed = TRUE)
-        re_group_label <- sprintf("\\hat{u}_{\\mathrm{%s}}", lvl_esc)
+  per_tier_Z_wr <- if (!is.null(ex$Z_per_tier) && length(ex$Z_per_tier) > 0L) {
+    ex$Z_per_tier
+  } else if (has_re) {
+    stats::setNames(list(ex$Z_g), "")
+  } else NULL
+  per_tier_u_wr <- if (!is.null(ex$u_per_tier) && length(ex$u_per_tier) > 0L) {
+    ex$u_per_tier
+  } else if (has_re) {
+    stats::setNames(list(ex$u), "")
+  } else NULL
+  re_terms_sym <- character(0L)
+  re_terms_num <- character(0L)
+  # Reader-facing numeric value of each displayed RE term (parallel to
+  # re_terms_num) so the "with your numbers" equation can be closed at
+  # display precision -- see lp_disp below.
+  re_terms_val <- numeric(0L)
+  if (!is.null(per_tier_Z_wr)) {
+    for (gv in names(per_tier_Z_wr)) {
+      Z_gv <- per_tier_Z_wr[[gv]]
+      u_gv <- per_tier_u_wr[[gv]]
+      if (is.null(Z_gv) || is.null(u_gv)) next
+      contrib <- sum(Z_gv[i, ] * u_gv)
+      active_col <- which(Z_gv[i, ] != 0)
+      lvl <- if (length(active_col) == 1L) colnames(Z_gv)[active_col] else NULL
+      lvl_esc <- if (!is.null(lvl) && nzchar(lvl)) {
+        gsub("_", "\\_", lvl, fixed = TRUE)
+      } else NULL
+      group_label <- if (nzchar(gv)) {
+        # Multi-tier: subscript both the tier name and the level
+        # (e.g. \hat{u}_{study_ID,\,3} or \hat{u}_{phylogeny,\,Myzus\_persicae})
+        gv_esc <- gsub("_", "\\_", gv, fixed = TRUE)
+        if (!is.null(lvl_esc)) {
+          sprintf("\\hat{u}_{\\mathrm{%s},\\,\\mathrm{%s}}", gv_esc, lvl_esc)
+        } else {
+          sprintf("\\hat{u}_{\\mathrm{%s},\\,\\mathrm{group}(1)}", gv_esc)
+        }
       } else {
-        re_group_label <- "\\hat{u}_{\\,\\mathrm{group}(1)}"
+        # Single-tier back-compat: historic shape (no tier subscript)
+        if (!is.null(lvl_esc)) {
+          sprintf("\\hat{u}_{\\mathrm{%s}}", lvl_esc)
+        } else {
+          "\\hat{u}_{\\,\\mathrm{group}(1)}"
+        }
       }
-    } else {
-      re_group_label <- "\\hat{u}_{\\,\\mathrm{group}(1)}"
+      re_terms_sym <- c(re_terms_sym, group_label)
+      re_terms_num <- c(re_terms_num, sprintf("(%s)", fmt(contrib)))
+      re_terms_val <- c(re_terms_val, as.numeric(fmt(contrib)))
     }
   }
 
@@ -1111,43 +1632,138 @@ three_views_worked_row <- function(ex, resp_sym = "\\mathbf{y}") {
   # (sanitized for LaTeX) with subscript i = 1.
   predictor_label <- function(k) {
     nm <- names(X1)[k]
-    if (is.null(nm) || !nzchar(nm)) nm <- paste0("x_{", k, "}")
-    nm <- gsub("_", "\\_", nm, fixed = TRUE)
-    sprintf("\\mathrm{%s}_{1}", nm)
+    if (is.null(nm) || !nzchar(nm)) return(sprintf("x_{%d}", k))
+    # Punch-list #9: a single-letter predictor is italic math (matching
+    # Tab 1, the symbol glossary, and the dimension labels). Multi-letter
+    # or transformed names stay upright \mathrm{} so they read as one
+    # named object rather than a product of italic letters.
+    if (grepl("^[A-Za-z]$", nm)) {
+      sprintf("%s_{1}", nm)
+    } else {
+      sprintf("\\mathrm{%s}_{1}", gsub("_", "\\_", nm, fixed = TRUE))
+    }
   }
 
   sym_terms <- character(length(X1))
   num_terms <- character(length(X1))
+  # num_vals[k] = the value a reader gets by combining the DISPLAYED
+  # (rounded) numbers in num_terms[k]: intercept -> round(beta0);
+  # slope -> round(beta) * round(x). Used to close the printed equation
+  # at display precision (punch-list #5) -- you cannot round a, b and
+  # a+b independently and have them add up, so the residual is computed
+  # against this reader-facing sum.
+  num_vals  <- numeric(length(X1))
   for (k in seq_along(X1)) {
     if (is_intercept[k]) {
       sym_terms[k] <- beta_k(k)
       num_terms[k] <- fmt(ex$beta[k])
+      num_vals[k]  <- as.numeric(fmt(ex$beta[k]))
     } else {
       sym_terms[k] <- paste0(beta_k(k), "\\,", predictor_label(k))
       num_terms[k] <- paste0(fmt(ex$beta[k]), " \\times ", fmt(X1[k]))
+      num_vals[k]  <- as.numeric(fmt(ex$beta[k])) * as.numeric(fmt(X1[k]))
     }
   }
-  # Append the RE term to both lists when present so the symbolic and
-  # numeric rows close arithmetically.
-  if (has_re) {
-    sym_terms <- c(sym_terms, re_group_label)
-    num_terms <- c(num_terms, sprintf("(%s)", fmt(re_contrib_num)))
+  # Append every tier's RE term to both lists so the symbolic and
+  # numeric rows close arithmetically. Multi-tier fits emit multiple
+  # \hat{u}_{...} terms in series; single-tier emits exactly one as
+  # in the v0.22.1 shape.
+  if (length(re_terms_sym) > 0L) {
+    sym_terms <- c(sym_terms, re_terms_sym)
+    num_terms <- c(num_terms, re_terms_num)
+    num_vals  <- c(num_vals, re_terms_val)
   }
   sym_rhs <- paste(sym_terms, collapse = " + ")
-  num_rhs <- paste(num_terms, collapse = " + ")
+  num_rhs <- join_signed_terms(num_terms)
+  # Reader-facing linear predictor at display precision (sum of the
+  # rounded terms exactly as the reader would add them up).
+  lp_disp <- sum(num_vals)
 
-  paste0(
-    "<div class=\"sym-eq\">$$\n\\begin{aligned}\n",
-    scalar_response_sym, " &= ", sym_rhs, " + \\hat\\varepsilon_{1} ",
-    "&\\quad(\\text{response equation, one row of the model}) \\\\\n",
-    fmt(W1), " &= ", num_rhs, " + (", fmt(eps1), ") ",
-    "&\\quad(\\text{with your numbers}) \\\\\n",
-    "&= \\underbrace{", fmt(mu1),
-    "}_{\\textstyle\\,\\hat\\mu_{1}\\,\\text{(predicted)}\\,} \\;+\\; ",
-    "\\underbrace{(", fmt(eps1),
-    ")}_{\\textstyle\\,\\hat\\varepsilon_{1}\\,\\text{(residual)}\\,}",
-    "\n\\end{aligned}\n$$</div>\n"
-  )
+  # v0.22.2.1: family-aware worked-row shape. Three patterns:
+  #   "additive_gaussian"  -- y = X*beta + eps (Gaussian identity link)
+  #   "additive_log"       -- log(y) = X*beta + eps_log (Lognormal,
+  #                            additive Gaussian noise on log scale)
+  #   "generalized"        -- eta = X*beta; mu = link_inv(eta);
+  #                            y ~ Family(mu, ...); no additive eps
+  # The bug surfaced by the Fisher pass on symbolizer-families.html was
+  # that every family fell through to "additive_gaussian" -- mixing
+  # link-scale and response-scale quantities additively and emitting a
+  # meaningless ε for Poisson / Beta.
+  fam_spec_wr <- worked_row_family_spec(family)
+  shape <- fam_spec_wr$shape
+
+  if (shape == "additive_gaussian") {
+    # v0.22.4 #155: separate the linear-predictor build (row 2, shown with
+    # \approx because the rounded terms only approximate mu_hat) from the
+    # decomposition (row 3). The residual displayed is the TRUE residual
+    # y - mu_hat -- identical to what the stacked matrix block shows -- so
+    # the worked row and the matrix block agree on observation 1. (The old
+    # #5 fix used a balancing figure that closed the explicit equation but
+    # diverged from the matrix block's true residual; you cannot round a,
+    # b and a+b independently and have all of {expanded row closes, true
+    # residual shown, matrix block matches} hold, so we drop the
+    # falsifiable numeric closure and keep the true, consistent residual.)
+    eps_true <- W1 - mu1
+    paste0(
+      "<div class=\"sym-eq\">$$\n\\begin{aligned}\n",
+      scalar_response_sym, " &= ", sym_rhs, " + \\hat\\varepsilon_{1} ",
+      "&\\quad(\\text{response equation, one row of the model}) \\\\\n",
+      "\\hat\\mu_{1} &= ", num_rhs, " \\approx ", fmt(mu1), " ",
+      "&\\quad(\\text{predicted mean} = \\text{linear predictor}) \\\\\n",
+      scalar_response_sym, " &= \\underbrace{", fmt(mu1),
+      "}_{\\textstyle\\,\\hat\\mu_{1}\\,\\text{(predicted)}\\,} \\;+\\; ",
+      "\\underbrace{(", fmt(eps_true),
+      ")}_{\\textstyle\\,\\hat\\varepsilon_{1}\\,\\text{(residual)}\\,} ",
+      "&\\quad(\\text{observed} = \\text{predicted mean} + \\text{residual})",
+      "\n\\end{aligned}\n$$</div>\n"
+    )
+  } else if (shape == "additive_log") {
+    # Lognormal: drmTMB parameterises log(Y) ~ Normal(mu, sigma^2). The
+    # additive noise is on the LOG scale; the linear predictor equals the
+    # mean of log(y). Same structure as additive_gaussian (#155): an
+    # \approx linear-predictor build, then a decomposition that shows the
+    # TRUE log-scale residual log(y) - mu_hat -- identical to the stacked
+    # matrix block, so the two agree on observation 1.
+    log_W1   <- log(W1)
+    eps_true <- log_W1 - mu1
+    paste0(
+      "<div class=\"sym-eq\">$$\n\\begin{aligned}\n",
+      "\\log(", scalar_response_sym, ") &= ", sym_rhs,
+      " + \\hat\\varepsilon_{1}^{(\\log)} ",
+      "&\\quad(\\text{response equation, log scale}) \\\\\n",
+      "\\hat\\mu_{1} &= ", num_rhs, " \\approx ", fmt(mu1), " ",
+      "&\\quad(\\text{log-scale mean} = \\text{linear predictor}) \\\\\n",
+      "\\log(", scalar_response_sym, ") &= \\underbrace{", fmt(mu1),
+      "}_{\\textstyle\\,\\hat\\mu_{1}\\,\\text{(log-scale mean)}\\,}",
+      " \\;+\\; \\underbrace{(", fmt(eps_true),
+      ")}_{\\textstyle\\,\\hat\\varepsilon_{1}^{(\\log)}\\,\\text{(log-scale residual)}\\,} ",
+      "&\\quad(\\text{observed} = \\text{mean} + \\text{residual})",
+      "\n\\end{aligned}\n$$</div>\n"
+    )
+  } else {
+    # Generalized: no additive noise on the linear predictor. Show
+    # eta_hat (linear predictor), mu_hat (response scale via link
+    # inverse), and the distributional declaration. The family-dependent
+    # link operator, distribution label, and likelihood argument list all
+    # come from the shared family-spec helpers so the HTML and PDF
+    # emitters cannot drift (#1/#3/#4, PDF/HTML parity).
+    link_str     <- fam_spec_wr$link_label
+    family_label <- fam_spec_wr$family_label
+    lik_args     <- worked_row_lik_args(family, "\\hat\\mu_{1}", "\\hat\\sigma_{1}")
+    paste0(
+      "<div class=\"sym-eq\">$$\n\\begin{aligned}\n",
+      "\\hat\\eta_{1} &= ", sym_rhs,
+      "&\\quad(\\text{linear predictor, link scale}) \\\\\n",
+      fmt(eta1), " &= ", num_rhs,
+      "&\\quad(\\text{with your numbers}) \\\\\n",
+      "\\hat\\mu_{1} &= ", link_str, "(\\hat\\eta_{1}) = ",
+      link_str, "(", fmt(eta1), ") \\approx ", fmt(mu1),
+      "&\\quad(\\text{response scale, predicted}) \\\\\n",
+      scalar_response_sym, " &\\sim ", family_label, lik_args,
+      "&\\quad(\\text{likelihood; no additive }\\varepsilon\\text{ here})",
+      "\n\\end{aligned}\n$$</div>\n"
+    )
+  }
 }
 
 # Worked-row for the sigma submodel, parallel to three_views_worked_row().
@@ -1156,7 +1772,7 @@ three_views_worked_row <- function(ex, resp_sym = "\\mathbf{y}") {
 # in symbolic form, with numbers, and the back-transformed sigma_hat_1.
 # Returns NULL if the model has no sigma submodel; matrix-block stitcher
 # then skips this section.
-three_views_worked_row_sigma <- function(ex) {
+three_views_worked_row_sigma <- function(ex, family = "gaussian") {
   if (is.null(ex$X_sigma) || is.null(ex$gamma) || is.null(ex$sigma_hat))
     return(NULL)
   if (length(ex$sigma_hat) < 1L || nrow(ex$X_sigma) < 1L) return(NULL)
@@ -1193,16 +1809,54 @@ three_views_worked_row_sigma <- function(ex) {
     }
   }
   sym_rhs <- paste(sym_terms, collapse = " + ")
-  num_rhs <- paste(num_terms, collapse = " + ")
+  num_rhs <- join_signed_terms(num_terms)  # fold '+ -' -> '-' (punch-list #7)
 
+  # v0.22.2.1: per-family label for what the sigma submodel actually
+  # parameterises. Gaussian/Student-t: residual SD. Lognormal: log-scale
+  # residual SD (the SD of log y). Beta: precision phi (positive shape
+  # parameter, NOT an SD). Gamma: dispersion. NegBinom: size parameter k.
+  # Fisher pass on symbolizer-families.html flagged the Beta and
+  # Lognormal mislabels as Pattern D.
+  # NOTE: keep backslash commands OUT of these captions -- they sit
+  # inside `\\text{...}` and any inline LaTeX (`\\log y`, `\\hat\\phi_{1}`,
+  # etc.) breaks pandoc's math-block parser and the whole $$ aligned $$
+  # block renders as raw source. Maintainer caught this on v0.22.3 with
+  # the Lognormal + Beta widgets. Plain prose only.
+  sigma_meaning <- switch(
+    tolower(as.character(family)),
+    gaussian  = "predicted residual SD for observation 1",
+    student   = "predicted residual SD for observation 1",
+    lognormal = "predicted log-scale residual SD for observation 1 (SD of log y)",
+    beta      = "predicted precision parameter for observation 1 (positive shape, not an SD)",
+    gamma     = "predicted dispersion for observation 1",
+    nbinom1   = "predicted dispersion (size parameter k) for observation 1",
+    nbinom2   = "predicted dispersion (size parameter k) for observation 1",
+    "predicted dispersion parameter for observation 1"
+  )
+  # v0.22.4 Slice 1d: for intercept-only sigma submodels (sigma ~ 1),
+  # `num_rhs` is the single number `fmt(gamma_0)` which numerically
+  # equals `fmt(log_sig1)`. Emitting `&= num_rhs = fmt(log_sig1)` then
+  # renders as `= -0.764 = -0.764` -- a visible redundancy in every
+  # Lognormal / Beta / Gamma fit with the default `sigma ~ 1`. Drop
+  # the trailing `= fmt(log_sig1)` when it would duplicate `num_rhs`.
+  # Florence spotted this post-Slice-1 on the families article.
+  # NOTE: use unname() because `ex$sigma_hat` is a named numeric vector
+  # in drmTMB output, so `fmt(log_sig1)` carries a `names` attribute
+  # that breaks `identical()` even when the string values match.
+  log_sig1_str <- unname(fmt(log_sig1))
+  num_rhs_value <- if (identical(unname(num_rhs), log_sig1_str)) {
+    num_rhs
+  } else {
+    paste0(num_rhs, " = ", log_sig1_str)
+  }
   paste0(
     "<div class=\"sym-eq\">$$\n\\begin{aligned}\n",
     "\\log\\hat\\sigma_{1} &= ", sym_rhs, " ",
     "&\\quad(\\text{sigma submodel for observation 1, log link}) \\\\\n",
-    "\\log\\hat\\sigma_{1} &= ", num_rhs, " = ", fmt(log_sig1), " ",
+    "\\log\\hat\\sigma_{1} &= ", num_rhs_value, " ",
     "&\\quad(\\text{with your numbers}) \\\\\n",
     "\\hat\\sigma_{1} &= \\exp(", fmt(log_sig1), ") \\approx ", fmt(sigma1), " ",
-    "&\\quad(\\text{predicted residual SD for observation 1})",
+    "&\\quad(\\text{", sigma_meaning, "})",
     "\n\\end{aligned}\n$$</div>\n"
   )
 }
@@ -1281,6 +1935,184 @@ three_views_symbol_gloss <- function(x, notation = c("matrix", "index")) {
 # ("rises with", "is multiplied by"); never causal ("effect of",
 # "due to"). For v0.20 these templates move into a CSV so the prose
 # can be edited without code changes.
+# v0.22.4 #6: per-family "coefficient reading on the response scale" --
+# the single most useful sentence for a biologist (rate ratio / odds
+# ratio / geometric-mean multiplier). Prose lives in
+# inst/extdata/coef-readings.csv (architectural rule: no string-spliced
+# prose in R). Returns "" for families without a clean single-slope
+# reading (latent-variable / ordinal), so the caller emits nothing.
+three_views_coef_reading <- function(family) {
+  if (is.null(family) || !nzchar(family)) return("")
+  tbl <- tryCatch(load_template("coef-readings"), error = function(e) NULL)
+  if (is.null(tbl) || !"family" %in% names(tbl)) return("")
+  hit <- tbl[tbl$family == family, , drop = FALSE]
+  if (nrow(hit) == 0L) return("")
+  hit$coef_reading[[1L]]
+}
+
+# v0.22.4 #11: per-family numeric diagnostic surfaced inside the widget.
+# Currently: a Beta fit whose implied shape parameters at observation 1
+# (alpha = mu*phi, beta = (1-mu)*phi) are BOTH below 1 is U-shaped (mass
+# piled near 0 and 1), which a "precision" label alone hides. The
+# condition is checked in R from the already-available mu_hat / sigma_hat;
+# the prose is templated from inst/extdata/family-diagnostics.csv (no
+# string-spliced prose in R). Returns "" when the condition does not hold
+# or for non-Beta families.
+three_views_family_diagnostic <- function(x) {
+  family <- tryCatch(x$model$family, error = function(e) NULL)
+  if (is.null(family) || !identical(tolower(family), "beta")) return("")
+  ex <- x$expanded
+  if (is.null(ex) || is.null(ex$mu_hat) || is.null(ex$sigma_hat)) return("")
+  mu1  <- ex$mu_hat[[1L]]
+  phi1 <- ex$sigma_hat[[1L]]
+  if (!is.finite(mu1) || !is.finite(phi1)) return("")
+  a <- mu1 * phi1
+  b <- (1 - mu1) * phi1
+  if (!(is.finite(a) && is.finite(b) && a < 1 && b < 1)) return("")
+  tbl <- tryCatch(load_template("family-diagnostics"), error = function(e) NULL)
+  if (is.null(tbl) || !"family" %in% names(tbl)) return("")
+  hit <- tbl[tbl$family == "beta", , drop = FALSE]
+  if (nrow(hit) == 0L) return("")
+  fmt <- function(v) formatC(v, digits = 2, format = "g")
+  tmpl <- hit$template[[1L]]
+  tmpl <- gsub("{alpha}", fmt(a), tmpl, fixed = TRUE)
+  tmpl <- gsub("{beta}",  fmt(b), tmpl, fixed = TRUE)
+  paste0("  <p class=\"sym-biology\">", tmpl, "</p>\n")
+}
+
+# Variance-components surface (docs/specs/variance-components.md, S3): the
+# "where does the variation live?" panel for the Index tab, sitting beneath
+# the random-effects glossary. Reuses the variance_partition() / icc()
+# accessors and renders a plain-CSS-div bar (no JS, survives PDF): a single
+# stacked between/within bar for exactly two variance components, per-component
+# bars for three or more. Below the bar sit one sentence and the ICC line --
+# with the latent-scale caption for binomial, or the "not available on this
+# scale yet" line when the ICC is undefined (Poisson, location-scale, >1 RE).
+# All prose is templated from inst/extdata/variance-readings.csv. Returns ""
+# when the fit has no random effects (nothing to partition).
+three_views_variance_panel <- function(x) {
+  re <- tryCatch(vc_re_rows(x$variance_components), error = function(e) NULL)
+  if (is.null(re) || nrow(re) == 0L) return("")
+  vp <- tryCatch(variance_partition(x), error = function(e) NULL)
+  ic <- tryCatch(icc(x), error = function(e) NULL)
+  if (is.null(vp) || is.null(ic) || nrow(vp) == 0L) return("")
+
+  has_pct <- all(is.finite(vp$pct))
+  body <- if (has_pct) {
+    if (nrow(vp) == 2L) vc_bar_stacked(vp) else vc_bar_per_component(vp)
+  } else {
+    vc_component_list(vp)
+  }
+  intro <- variance_reading("partition_intro")
+
+  paste0(
+    "<div class=\"sym-vc-panel\" style=\"margin-top:1rem;border-top:1px solid #eee;padding-top:0.7rem\">\n",
+    "  <p class=\"sym-caption\"><strong>Where does the variation live?</strong> ",
+    intro, "</p>\n",
+    body,
+    vc_icc_line(ic),
+    "  <p class=\"sym-caption\" style=\"font-size:0.8em;color:#9ca3af;margin-top:0.3rem\">Point estimates only; uncertainty not shown.</p>\n",
+    "</div>\n"
+  )
+}
+
+# Variance-components surface (S4, contract clause 6): a prose-only
+# partial-pooling caption that sits beside the worked-row BLUP block,
+# explaining that the random-effect estimates are shrunk toward zero. Emitted
+# only when the fit has random effects. No numbers (numeric shrinkage
+# deferred). Prose from inst/extdata/variance-readings.csv.
+three_views_shrinkage_caption <- function(has_re) {
+  if (!isTRUE(has_re)) return("")
+  txt <- variance_reading("shrinkage_caption")
+  if (!nzchar(txt)) return("")
+  paste0(
+    "<p class=\"sym-caption\" style=\"font-size:0.85em;color:#6b7280;margin-top:0.3rem\">",
+    "<strong>Partial pooling.</strong> ", txt, "</p>\n"
+  )
+}
+
+# Option A: a single horizontal bar split into between / within segments
+# (exactly two variance components). Colours: between = teal, residual = grey.
+vc_bar_stacked <- function(vp) {
+  cols <- c("#2c7fb8", "#d9d9d9")
+  segs <- vapply(seq_len(nrow(vp)), function(i) {
+    w   <- formatC(100 * vp$pct[[i]], digits = 1L, format = "f")
+    col <- cols[[min(i, length(cols))]]
+    txt <- if (i == 1L) "#fff" else "#333"
+    sprintf(
+      "<div style=\"width:%s%%;background:%s;color:%s;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis\" title=\"%s\">%s %s%%</div>",
+      w, col, txt, vp$component[[i]], vp$component[[i]], w)
+  }, character(1L))
+  paste0(
+    "  <div class=\"sym-vc-bar sym-vc-stacked\" role=\"img\" aria-label=\"variance partition\" style=\"display:flex;width:100%;height:1.8rem;border-radius:4px;overflow:hidden;font-size:0.78rem;line-height:1.8rem;margin:0.4rem 0\">\n    ",
+    paste(segs, collapse = "\n    "),
+    "\n  </div>\n"
+  )
+}
+
+# Option B: one labelled track per component (three or more components).
+vc_bar_per_component <- function(vp) {
+  pal <- c("#2c7fb8", "#7fcdbb", "#fec44f", "#d95f0e", "#756bb1")
+  rows <- vapply(seq_len(nrow(vp)), function(i) {
+    w   <- formatC(100 * vp$pct[[i]], digits = 1L, format = "f")
+    res <- grepl("^Residual", vp$component[[i]])
+    col <- if (res) "#d9d9d9" else pal[[((i - 1L) %% length(pal)) + 1L]]
+    sprintf(paste0(
+      "    <div class=\"sym-vc-row\" style=\"display:flex;align-items:center;margin:0.25rem 0;font-size:0.8rem\">\n",
+      "      <span style=\"flex:0 0 38%%;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis\">%s</span>\n",
+      "      <span style=\"flex:1;background:#f3f4f6;border-radius:3px;overflow:hidden\"><span style=\"display:block;width:%s%%;background:%s;color:#fff;padding:0.1rem 0.35rem;white-space:nowrap;box-sizing:border-box\">%s%%</span></span>\n",
+      "    </div>"),
+      vp$component[[i]], w, col, w)
+  }, character(1L))
+  paste0(
+    "  <div class=\"sym-vc-bar sym-vc-bars\" role=\"img\" aria-label=\"variance partition\" style=\"margin:0.4rem 0\">\n",
+    paste(rows, collapse = "\n"),
+    "\n  </div>\n"
+  )
+}
+
+# Text fallback when shares are undefined (no residual on a single scale):
+# the contract is "show the table" without a misleading bar.
+vc_component_list <- function(vp) {
+  items <- vapply(seq_len(nrow(vp)), function(i) {
+    sprintf("<li>%s: variance = %s</li>", vp$component[[i]],
+            formatC(vp$variance[[i]], digits = 3L, format = "fg", flag = "#"))
+  }, character(1L))
+  paste0(
+    "  <ul class=\"sym-vc-list\" style=\"font-size:0.82rem;color:#374151;margin:0.3rem 0;padding-left:1.1rem\">\n    ",
+    paste(items, collapse = "\n    "),
+    "\n  </ul>\n"
+  )
+}
+
+# The ICC line: scale-labelled value + caption, or the "not available" line
+# with its reason. Prose from variance-readings.csv.
+vc_icc_line <- function(ic) {
+  v <- as.numeric(unclass(ic))
+  if (!is.finite(v)) {
+    msg    <- variance_reading("icc_unavailable")
+    reason <- attr(ic, "reason")
+    why <- if (!is.null(reason) && !is.na(reason) && nzchar(reason)) {
+      sprintf(" <span style=\"color:#9ca3af\">(%s)</span>", reason)
+    } else {
+      ""
+    }
+    return(sprintf(
+      "  <p class=\"sym-vc-icc\" style=\"margin:0.4rem 0\"><strong>ICC:</strong> %s%s</p>\n",
+      msg, why))
+  }
+  sc  <- attr(ic, "scale")
+  cap <- attr(ic, "caption")
+  cap_html <- if (!is.null(cap) && !is.na(cap) && nzchar(cap)) {
+    sprintf(" <span style=\"color:#6b7280;font-style:italic\">%s</span>", cap)
+  } else {
+    ""
+  }
+  sprintf(
+    "  <p class=\"sym-vc-icc\" style=\"margin:0.4rem 0\"><strong>ICC (%s scale):</strong> %s.%s</p>\n",
+    sc, formatC(v, digits = 3L, format = "f"), cap_html)
+}
+
 three_views_biology_gloss <- function(x) {
   family <- tryCatch(x$model$family, error = function(e) NULL)
   if (is.null(family) || !nzchar(family)) return("")

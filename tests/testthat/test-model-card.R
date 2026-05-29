@@ -12,8 +12,8 @@ test_that("model_card returns the full bundle for drmTMB", {
   expect_setequal(
     names(card),
     c("meta", "equation", "symbols", "assumptions", "bridge",
-      "formula_bridge", "interpretation", "warnings",
-      "extraction_calls", "recommended_plots",
+      "formula_bridge", "interpretation", "variance_components",
+      "warnings", "extraction_calls", "recommended_plots",
       "marginal_means", "marginal_slopes")
   )
   expect_true(any(grepl("drmTMB::fixef", card$extraction_calls, fixed = TRUE)))

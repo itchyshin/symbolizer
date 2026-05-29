@@ -112,6 +112,98 @@ symbolize.drmTMB <- function(fit, symbols = NULL, units = NULL,
     }
   }
 
+  # v0.22.1.1: detect drmTMB structured-dependence markers (phylo, animal,
+  # spatial, meta_V) and synthesise random-effect rows for structured tiers
+  # that drmTMB absorbs into its internal sparse-precision pipeline rather
+  # than fit$random_effects. Without this, phylo(1 | species, tree = ...)
+  # detected via metadata$phylo_representation never reaches the equation
+  # renderer, so the central thesis equation (u_p ~ N(0, sigma_p^2 A)) is
+  # silently missing from the rendered widget (V2 Pat-lens blocker on
+  # symbolizer-meta-analysis.Rmd Sec 4).
+  detected_signals <- character(0L)
+  has_drmtmb_phylo <- FALSE
+  has_drmtmb_spatial <- FALSE
+  has_drmtmb_meta_v <- FALSE
+  phylo_groups_per_dpar <- list()   # named list: dpar -> character vector of group_vars
+  for (e in entries) {
+    if (is.null(e$rhs)) next
+    rhs_text <- paste(deparse(e$rhs), collapse = " ")
+    if (grepl("(^|[^A-Za-z._])(phylo|animal)\\s*\\(", rhs_text)) {
+      has_drmtmb_phylo <- TRUE
+      # Parse `phylo(<lhs> | group, ...)` / `animal(<lhs> | group, ...)`
+      # marker(s) and pull the group-var. There can be more than one
+      # phylo() block on the same submodel (rare but legal).
+      hits <- gregexpr(
+        "(?:phylo|animal)\\s*\\(\\s*[^|]+\\|\\s*([A-Za-z._][A-Za-z0-9._]*)",
+        rhs_text, perl = TRUE)[[1L]]
+      if (hits[[1L]] > 0L) {
+        starts <- as.integer(hits)
+        lens   <- attr(hits, "match.length")
+        for (h in seq_along(starts)) {
+          m <- substr(rhs_text, starts[[h]], starts[[h]] + lens[[h]] - 1L)
+          gv <- sub(".*\\|\\s*", "", m)
+          phylo_groups_per_dpar[[e$dpar]] <-
+            c(phylo_groups_per_dpar[[e$dpar]] %||% character(0L), gv)
+        }
+      }
+    }
+    if (grepl("(^|[^A-Za-z._])spatial\\s*\\(", rhs_text)) {
+      has_drmtmb_spatial <- TRUE
+    }
+    # v0.22.1: detect meta_V() sampling-variance marker (meta-analysis).
+    if (grepl("(^|[^A-Za-z._])meta_V\\s*\\(", rhs_text)) {
+      has_drmtmb_meta_v <- TRUE
+    }
+  }
+  if (has_drmtmb_phylo)   detected_signals <- c(detected_signals, "phylo")
+  if (has_drmtmb_spatial) detected_signals <- c(detected_signals, "spatial")
+  if (has_drmtmb_meta_v)  detected_signals <- c(detected_signals, "meta_analysis")
+
+  # Inject synthetic phylo random-effect rows into re_per_entry so the
+  # equation renderer, variance_components, symbol table, and assumption
+  # gate all see them. From symbolizer's standpoint, phylo(1 | species)
+  # IS a random effect on the submodel even though drmTMB stores it via
+  # the structured-precision pipeline (fit$random_effects holds only
+  # unstructured tiers).
+  structured_matrix_for_group <- list()
+  if (has_drmtmb_phylo) {
+    for (i in seq_along(entries)) {
+      dpar <- entries[[i]]$dpar
+      gvs  <- phylo_groups_per_dpar[[dpar]]
+      if (is.null(gvs) || length(gvs) == 0L) next
+      for (gv in unique(gvs)) {
+        # Skip when an unstructured (1 | gv) tier already exists for this
+        # dpar -- the user-facing structured information lives in the
+        # structured-matrix decoration, not in a duplicate row.
+        existing <- re_per_entry[[i]]
+        already  <- !is.null(existing) &&
+                    any(existing$group_var == gv & existing$submodel == dpar)
+        if (already) {
+          structured_matrix_for_group[[gv]] <- "\\mathbf{A}"
+          next
+        }
+        n_levels <- if (gv %in% names(data)) {
+          length(unique(data[[gv]]))
+        } else NA_integer_
+        synth <- tibble::tibble(
+          submodel   = dpar,
+          term_label = sprintf("(1 | %s)", gv),
+          lhs_expr   = "1",
+          group_var  = gv,
+          component  = "(Intercept)",
+          n_levels   = as.integer(n_levels)
+        )
+        re_per_entry[[i]] <- if (is.null(existing)) synth else rbind(existing, synth)
+        structured_matrix_for_group[[gv]] <- "\\mathbf{A}"
+      }
+    }
+    has_re <- vapply(re_per_entry, function(x) !is.null(x) && nrow(x) > 0L,
+                     logical(1L))
+  }
+  if (length(structured_matrix_for_group) == 0L) {
+    structured_matrix_for_group <- NULL
+  }
+
   param <- get_parameterization(family)
   index <- list(observation = "i", individual = "j",
                 group = "g", trait = "k", time = "t")
@@ -172,34 +264,18 @@ symbolize.drmTMB <- function(fit, symbols = NULL, units = NULL,
   }
   fixed_eff    <- drm_build_fixed_effects(terms_tbl, fit, ci_method = ci_method)
   re_tbl       <- drm_build_random_effects(re_per_entry)
-  vc_tbl       <- drm_build_variance_components(re_per_entry)
+  vc_tbl       <- drm_build_variance_components(re_per_entry, fit$sdpars)
   cov_tbl      <- drm_build_covariance_components(re_tbl)
   components   <- drm_build_components(submodels, terms_tbl, re_tbl,
                                        response_symbol, response_symbol_matrix,
                                        family = family,
                                        response_symbol_1 = response_symbol_1,
-                                       response_symbol_2 = response_symbol_2)
-  # v0.21+ structured-dependence detection. drmTMB exposes phylo(),
-  # animal(), and spatial() as formula markers. The phylo() and animal()
-  # paths use the Hadfield-Nakagawa A-inverse sparse-precision
-  # representation (all-nodes); spatial() uses coords / mesh.
-  detected_signals <- character(0L)
-  has_drmtmb_phylo <- FALSE
-  has_drmtmb_spatial <- FALSE
-  for (e in entries) {
-    if (is.null(e$rhs)) next
-    rhs_text <- paste(deparse(e$rhs), collapse = " ")
-    # \\b alone is greedy on word-character boundaries; use a more
-    # targeted look-ahead for the marker followed by an open paren.
-    if (grepl("(^|[^A-Za-z._])(phylo|animal)\\s*\\(", rhs_text)) {
-      has_drmtmb_phylo <- TRUE
-    }
-    if (grepl("(^|[^A-Za-z._])spatial\\s*\\(", rhs_text)) {
-      has_drmtmb_spatial <- TRUE
-    }
-  }
-  if (has_drmtmb_phylo)   detected_signals <- c(detected_signals, "phylo")
-  if (has_drmtmb_spatial) detected_signals <- c(detected_signals, "spatial")
+                                       response_symbol_2 = response_symbol_2,
+                                       structured_matrix_for_group =
+                                         structured_matrix_for_group)
+  # v0.21+ structured-dependence symbol-dictionary scaffolding. detected_*
+  # booleans and detected_signals are set early so re_per_entry can be
+  # augmented before re_tbl / components / variance_components build.
   structured_matrices <- c(
     if (has_drmtmb_phylo) list(list(
       symbol             = "\\mathbf{A}",
@@ -243,11 +319,23 @@ symbolize.drmTMB <- function(fit, symbols = NULL, units = NULL,
   bridge       <- drm_build_formula_bridge(entries, components, response,
                                            response_1 = response_1,
                                            response_2 = response_2)
-  expanded     <- drm_build_expanded(fit, re_per_entry, has_re)
+  expanded     <- drm_build_expanded(fit, re_per_entry, has_re,
+                                     structured_matrix_for_group =
+                                       structured_matrix_for_group)
+
+  # v0.22.1: meta_V() detection overrides the caller-supplied context so
+  # that the meta-analytic context is always tagged when the marker is
+  # present. The caller's explicit context (if any) is preserved in the
+  # fallback so non-meta fits are unaffected.
+  resolved_context <- if (isTRUE(has_drmtmb_meta_v)) {
+    "meta_analysis"
+  } else {
+    context %||% ""
+  }
 
   metadata <- list(
     call = fit$call,
-    context = context %||% "",
+    context = resolved_context,
     ci_method = ci_method,
     # The fit is retained by reference so downstream accessors that need to
     # re-query the original object (e.g. group_means / group_slopes via
@@ -260,6 +348,8 @@ symbolize.drmTMB <- function(fit, symbols = NULL, units = NULL,
     ),
     phylo_representation = if (has_drmtmb_phylo) "all_nodes" else NULL,
     spatial_representation = if (has_drmtmb_spatial) "package_managed" else NULL,
+    structured_matrices = structured_matrices,
+    structured_matrix_for_group = structured_matrix_for_group,
     detected_signals = detected_signals,
     created_by = "symbolize.drmTMB"
   )
@@ -400,15 +490,17 @@ drm_assert_supported_re <- function(re_tbl, dpar) {
 }
 
 drm_strip_re_terms <- function(rhs_expr) {
-  # Walk the parse tree to remove `(... | ...)` random-effect bars,
-  # leaving only fixed-effect terms. The previous regex-based
-  # implementation explicitly rejected inner parens, so brms's
+  # Walk the parse tree to remove `(... | ...)` random-effect bars AND
+  # drmTMB special-call markers (`meta_V(...)`, etc.) that stats::terms()
+  # cannot evaluate, leaving only fixed-effect terms. The previous regex-
+  # based implementation explicitly rejected inner parens, so brms's
   # `(1 | gr(species, cov = A))` survived the strip and crashed
   # `stats::model.frame()` with "could not find function 'gr'".
   # The tree walker handles arbitrary nesting inside the grouping
   # expression.
   terms <- .drm_decompose_plus(rhs_expr)
-  keep <- !vapply(terms, .drm_is_re_bar, logical(1L))
+  keep <- !vapply(terms, .drm_is_re_bar, logical(1L)) &
+          !vapply(terms, .drm_is_meta_v_term, logical(1L))
   kept <- terms[keep]
   if (length(kept) == 0L) return(quote(1))
   Reduce(function(a, b) call("+", a, b), kept)
@@ -434,6 +526,17 @@ drm_strip_re_terms <- function(rhs_expr) {
   if (!identical(expr[[1L]], as.name("("))) return(FALSE)
   inner <- expr[[2L]]
   is.call(inner) && identical(inner[[1L]], as.name("|"))
+}
+
+.drm_is_meta_v_term <- function(expr) {
+  # v0.22.1: meta_V(V = ...) is a drmTMB sampling-variance marker.
+  # stats::terms() / stats::model.frame() cannot evaluate it (the function
+  # lives in drmTMB, not in base R), so strip it from the fixed-effect rhs
+  # before passing to extract_terms(). The marker presence is detected
+  # separately (via deparsed formula grep) and recorded in metadata$context.
+  if (!is.call(expr)) return(FALSE)
+  fn_name <- as.character(expr[[1L]])[1L]
+  fn_name %in% c("meta_V", "drmTMB::meta_V")
 }
 
 drm_coef_family_for <- function(dpar) {
@@ -638,7 +741,12 @@ drm_entry_rhs_formula <- function(entry) {
   # so lme4-style RE notation `(g | group)` is preserved) before handing
   # to `stats::terms()`. The marker presence is detected separately
   # (`has_drmtmb_phylo` etc.) and surfaced via `metadata$phylo_representation`.
+  #
+  # v0.22.1: after drm_strip_markers() converts e.g. `phylo(1 | phylogeny)`
+  # → `(1 | phylogeny)`, those newly exposed RE bars must be stripped too so
+  # stats::model.frame() doesn't try to evaluate `1 | phylogeny`.
   rhs <- drm_strip_markers(entry$rhs)
+  rhs <- drm_strip_re_terms(rhs)
   rhs_txt <- paste(deparse(rhs), collapse = " ")
   stats::as.formula(paste("~", rhs_txt))
 }
@@ -895,7 +1003,29 @@ drm_build_fixed_effects <- function(terms_tbl, fit, ci_method = "wald") {
   )
 }
 
-drm_build_expanded <- function(fit, re_per_entry, has_re) {
+# v0.22.2.1: link inverse mapping for drmTMB families. Returns the
+# response-scale predicted value given the linear predictor eta_hat.
+# drmTMB family$link is a vector; the mu-submodel link is element [[1L]].
+# For Lognormal the mu link is "identity" (drmTMB's mu parameterises
+# E[log Y]); callers needing the response-scale E[Y] = exp(mu + sigma^2/2)
+# compute it from mu_hat + sigma_hat downstream.
+drm_apply_link_inverse <- function(eta_hat, link) {
+  switch(
+    link,
+    identity = eta_hat,
+    log      = exp(eta_hat),
+    logit    = stats::plogis(eta_hat),
+    probit   = stats::pnorm(eta_hat),
+    cloglog  = -expm1(-exp(eta_hat)),
+    inverse  = 1 / eta_hat,
+    # Fallback: assume identity. Matches the pre-v0.22.2.1 behaviour
+    # for any link name we haven't catalogued yet.
+    eta_hat
+  )
+}
+
+drm_build_expanded <- function(fit, re_per_entry, has_re,
+                                structured_matrix_for_group = NULL) {
   # Univariate Gaussian path: `fit$model$y`, `fit$model$X$mu`, etc. all exist
   # and are non-NULL. For biv_gaussian the design is per-dpar (X$mu1, X$mu2,
   # ...), and these names are NULL, so the multiplications below quietly
@@ -906,41 +1036,144 @@ drm_build_expanded <- function(fit, re_per_entry, has_re) {
   X_sigma <- fit$model$X$sigma
   beta    <- fit$coefficients$mu
   gamma   <- fit$coefficients$sigma
-  mu_hat <- if (!is.null(X) && !is.null(beta)) drop(X %*% beta) else NULL
+  # v0.22.2.1: store the LINEAR PREDICTOR (eta_hat) here; mu_hat
+  # (response-scale predicted mean) is derived later after Z*u is added
+  # and the link inverse is applied. For identity-link families
+  # (Gaussian, drmTMB Lognormal-on-log-Y) mu_hat == eta_hat.
+  eta_hat <- if (!is.null(X) && !is.null(beta)) drop(X %*% beta) else NULL
   sigma_hat <- if (!is.null(X_sigma) && !is.null(gamma)) {
     exp(drop(X_sigma %*% gamma))
   } else NULL
   e <- tryCatch(as.numeric(stats::residuals(fit)), error = function(...) NULL)
-  Z_g <- NULL; u <- NULL
+
+  # v0.22.2-discipline Slice A1: per-tier Z surfacing.
+  # The pre-v0.22.2 build extracted only `re_per_entry[[which(has_re)[1]]]`
+  # -- silently dropping every random-effect tier beyond the first. For
+  # phylo + study fits, that hid the phylogenetic tier (the article
+  # thesis) from Tab 3's numeric expansion. The maintainer's
+  # Fisher-pass surfaced this bug on 2026-05-28.
+  #
+  # The fix iterates EVERY tier across EVERY submodel that has random
+  # effects, builds per-tier Z via factor-coerced model.matrix (see
+  # v0.22.1.3 fix for why factor coercion matters), and stores per-tier
+  # BLUPs in `u_per_tier`. iid tiers' BLUPs come from
+  # `fit$random_effects$mu$terms`; structured tiers' BLUPs come from
+  # `fit$obj$report()$u_phylo` (all-nodes encoding; the first n_tips
+  # entries are the tip BLUPs in factor-level order).
+  #
+  # Back-compat: `Z_g` and `u` keep their existing semantics (= first
+  # tier) so existing renderer code that reads them keeps working.
+  Z_per_tier <- list()
+  u_per_tier <- list()
+  tier_kind  <- character(0L)
   if (any(has_re)) {
-    re_info <- re_per_entry[[which(has_re)[1L]]]
-    if (!is.null(re_info) && nrow(re_info) > 0L) {
-      g_var <- re_info$group_var[[1L]]
-      term_label <- re_info$term_label[[1L]]
-      if (g_var %in% names(fit$data)) {
-        levels_g <- levels(factor(fit$data[[g_var]]))
-        Z_g <- stats::model.matrix(stats::reformulate(paste0("0+", g_var)),
-                                   data = fit$data)
-        # rename columns from `<g_var><level>` to bare level if possible
-        cn <- colnames(Z_g)
-        bare <- sub(paste0("^", g_var), "", cn)
-        if (length(bare) == length(levels_g)) colnames(Z_g) <- bare
+    for (i in which(has_re)) {
+      re_info <- re_per_entry[[i]]
+      if (is.null(re_info) || nrow(re_info) == 0L) next
+      for (gv in unique(re_info$group_var)) {
+        if (!(gv %in% names(fit$data))) next
+        # Factor-coerce before model.matrix (v0.22.1.3 discipline).
+        data_local <- fit$data
+        data_local[[gv]] <- factor(data_local[[gv]])
+        levels_g <- levels(data_local[[gv]])
+        Zg <- stats::model.matrix(
+          stats::reformulate(paste0("0+", gv)),
+          data = data_local
+        )
+        cn <- colnames(Zg)
+        bare <- sub(paste0("^", gv), "", cn)
+        if (length(bare) == length(levels_g)) colnames(Zg) <- bare
+        Z_per_tier[[gv]] <- Zg
+
+        is_structured <- !is.null(structured_matrix_for_group) &&
+                         !is.null(structured_matrix_for_group[[gv]])
+        tier_kind[[gv]] <- if (is_structured) "structured" else "iid"
+
+        u_g <- NULL
+        if (is_structured) {
+          # Structured tier (phylo): drmTMB stores BLUPs in
+          # fit$obj$report()$u_phylo under the all-nodes encoding:
+          # length = n_tips + n_internal_nodes. The first n_tips
+          # entries are the tip-level BLUPs, ordered by the factor's
+          # levels (which matches `levels_g` above when phylogeny is
+          # stored alphabetically in the tree).
+          rep_obj <- tryCatch(fit$obj$report(),
+                              error = function(...) NULL)
+          if (!is.null(rep_obj) && !is.null(rep_obj$u_phylo)) {
+            u_phylo_all <- as.numeric(rep_obj$u_phylo)
+            n_tips      <- length(levels_g)
+            if (length(u_phylo_all) >= n_tips) {
+              u_g <- u_phylo_all[seq_len(n_tips)]
+            }
+          }
+        } else {
+          # iid tier: drmTMB stores BLUPs by level name in
+          # fit$random_effects$mu$terms[[term_label]].
+          term_label <- sprintf("(1 | %s)", gv)
+          blups <- fit$random_effects$mu$terms[[term_label]]
+          if (!is.null(blups)) {
+            if (!is.null(names(blups)) &&
+                all(colnames(Zg) %in% names(blups))) {
+              blups <- blups[colnames(Zg)]
+            }
+            u_g <- as.numeric(blups)
+          }
+        }
+        u_per_tier[[gv]] <- u_g
       }
-      blups <- fit$random_effects$mu$terms[[term_label]]
-      if (!is.null(blups)) u <- as.numeric(blups)
     }
   }
+
+  # Back-compat aliases: first tier becomes Z_g / u.
+  Z_g <- if (length(Z_per_tier) > 0L) Z_per_tier[[1L]] else NULL
+  u   <- if (length(u_per_tier) > 0L) u_per_tier[[1L]] else NULL
+
+  # v0.22.2.1: include EVERY random-effect tier's contribution in eta_hat
+  # so the linear-predictor is complete. Pre-2026-05-28 behaviour
+  # computed mu_hat = X*beta only; the residual e came from
+  # stats::residuals(fit) which IS y - (X*beta + sum_g Z_g*u_g). That
+  # mismatch broke Tab 3's worked row. Add Zu to eta_hat per tier.
+  if (!is.null(eta_hat) && length(Z_per_tier) > 0L) {
+    for (gv in names(Z_per_tier)) {
+      Z_gv <- Z_per_tier[[gv]]
+      u_gv <- u_per_tier[[gv]]
+      if (!is.null(Z_gv) && !is.null(u_gv)) {
+        eta_hat <- eta_hat + drop(Z_gv %*% u_gv)
+      }
+    }
+  }
+
+  # v0.22.2.1 part 2: apply the link inverse so mu_hat carries the
+  # RESPONSE-scale predicted value (not the linear predictor). Surfaced
+  # by the Fisher pass on symbolizer-families.html: Beta widget displayed
+  # mu_hat = -0.95, an impossible value for a Beta mean. After this fix
+  # mu_hat = plogis(eta_hat) = 0.279 ∈ (0,1) as required.
+  #
+  # Family / link mapping. drmTMB stores link as a length-vector with
+  # the mu-submodel link in position [[1L]]. For Lognormal drmTMB's
+  # mu parameterises E[log Y] (identity link on mu), so identity is
+  # correct -- the response-scale E[Y] = exp(mu + sigma^2/2) is a
+  # separate derived quantity that callers compute downstream.
+  mu_hat <- if (is.null(eta_hat)) NULL else {
+    link <- if (!is.null(fit$family$link)) as.character(fit$family$link[[1L]]) else "identity"
+    drm_apply_link_inverse(eta_hat, link)
+  }
+
   list(
-    y         = y,
-    X         = X,
-    beta      = if (is.null(beta)) NULL else as.numeric(beta),
-    X_sigma   = X_sigma,
-    gamma     = if (is.null(gamma)) NULL else as.numeric(gamma),
-    Z_g       = Z_g,
-    u         = u,
-    e         = e,
-    mu_hat    = mu_hat,
-    sigma_hat = sigma_hat
+    y          = y,
+    X          = X,
+    beta       = if (is.null(beta))  NULL else as.numeric(beta),
+    X_sigma    = X_sigma,
+    gamma      = if (is.null(gamma)) NULL else as.numeric(gamma),
+    Z_g        = Z_g,
+    u          = u,
+    Z_per_tier = Z_per_tier,
+    u_per_tier = u_per_tier,
+    tier_kind  = tier_kind,
+    e          = e,
+    eta_hat    = eta_hat,
+    mu_hat     = mu_hat,
+    sigma_hat  = sigma_hat
   )
 }
 
@@ -993,7 +1226,7 @@ drm_build_random_effects <- function(re_per_entry) {
   out
 }
 
-drm_build_variance_components <- function(re_per_entry) {
+drm_build_variance_components <- function(re_per_entry, sdpars = NULL) {
   re <- drm_build_random_effects(re_per_entry)
   if (is.null(re)) return(NULL)
   desc <- vapply(seq_len(nrow(re)), function(i) {
@@ -1005,6 +1238,24 @@ drm_build_variance_components <- function(re_per_entry) {
               re$group_var[[i]], re$component[[i]], re$submodel[[i]])
     }
   }, character(1L))
+  # v0.22.x: pull the numeric between-group SD from the fitted object's
+  # `sdpars` (a list keyed by submodel; each element a named vector of RE
+  # SDs, e.g. fit$sdpars$mu = c("(1 | group)" = 0.613)). This is the
+  # keystone that lets variance_partition() / icc() / the variation panel
+  # read real numbers for drmTMB (lme4 / glmmTMB already carry them).
+  # Match a row to its SD by the group variable appearing inside the
+  # RE-term name "( ... | <group> )". Unmatched rows get NA (graceful).
+  sd_for <- function(submodel, group_var) {
+    v <- if (!is.null(sdpars)) sdpars[[submodel]] else NULL
+    if (is.null(v) || length(v) == 0L) return(NA_real_)
+    hit <- v[grepl(sprintf("\\|\\s*%s\\s*\\)$",
+                           gsub("([.\\\\^$|(){}+*?\\[\\]])", "\\\\\\1", group_var)),
+                   names(v))]
+    if (length(hit) >= 1L) as.numeric(hit[[1L]]) else as.numeric(v[[1L]])
+  }
+  sd_est <- vapply(seq_len(nrow(re)),
+                   function(i) sd_for(re$submodel[[i]], re$group_var[[i]]),
+                   numeric(1L))
   tibble::tibble(
     submodel    = re$submodel,
     group_var   = re$group_var,
@@ -1014,6 +1265,8 @@ drm_build_variance_components <- function(re_per_entry) {
                                  re$component)),
     symbol      = re$sigma_symbol,
     n_levels    = re$n_levels,
+    sd_estimate = sd_est,
+    var_estimate = sd_est^2,
     description = desc
   )
 }
@@ -1147,13 +1400,22 @@ drm_build_components <- function(submodels, terms_tbl, re_tbl, response_symbol,
       rhs <- if (nzchar(rhs)) paste(rhs, "+", re_idx) else re_idx
       # Matrix form: for intercept-only groups, render the bare \mathbf{u};
       # for multi-component groups, use \mathbf{Z}_g \mathbf{u}_g per group.
+      # When there's more than one random-effect group, disambiguate the
+      # intercept-only term with \mathbf{u}_g so the multilevel structure
+      # is visible (otherwise the linear predictor collapses to repeated
+      # bare \mathbf{u} terms, which is unreadable).
       groups <- unique(re_for_dpar$group_var)
       mat_terms <- vapply(groups, function(gv) {
         sel <- which(re_for_dpar$group_var == gv)
         if (length(sel) == 1L &&
             is.na(re_for_dpar$predictor_factor[[sel[[1L]]]])) {
-          # Intercept-only group: bare \mathbf{u} (historic notation).
-          re_for_dpar$u_symbol_matrix[[sel[[1L]]]]
+          # Intercept-only group: bare \mathbf{u} when there's only one
+          # group (historic notation); group-subscripted otherwise.
+          if (length(groups) == 1L) {
+            re_for_dpar$u_symbol_matrix[[sel[[1L]]]]
+          } else {
+            sprintf("\\mathbf{u}_{%s}", gv)
+          }
         } else {
           # Multi-component (random intercept + slopes): \mathbf{Z}_g \mathbf{u}_g.
           sprintf("\\mathbf{Z}_{%s}\\, \\mathbf{u}_{%s}", gv, gv)
@@ -1502,9 +1764,30 @@ drm_build_symbol_dictionary <- function(terms_tbl, response, response_symbol,
     if (dpar %in% c("mu2", "sigma2")) return(response_2 %||% response)
     paste(response_1 %||% "", response_2 %||% "", sep = ", ")
   }
+  # v0.22.4 #10: the dispersion parameter's gloss must be family-aware.
+  # "conditional sigma of y" is misleading for Beta (sigma is a PRECISION:
+  # larger => tighter, the opposite of an SD), Gamma (dispersion), NegBin
+  # (overdispersion), etc. Source the meaning from the per-family
+  # scale_meaning column of family-parameterizations.csv.
+  sigma_meaning_lookup <- function(fam) {
+    tbl <- tryCatch(load_template("family-parameterizations"),
+                    error = function(e) NULL)
+    if (is.null(tbl) || !"family" %in% names(tbl) ||
+        !"scale_meaning" %in% names(tbl)) return("")
+    hit <- tbl[tbl$family == fam, , drop = FALSE]
+    if (nrow(hit) == 0L) return("")
+    sm <- hit$scale_meaning[[1L]]
+    if (is.na(sm) || !nzchar(sm)) "" else sm
+  }
   for (i in seq_len(nrow(submodels))) {
     dpar <- submodels$parameter[[i]]
     greek <- drm_param_greek(dpar)
+    desc_i <- if (identical(dpar, "sigma")) {
+      sm <- sigma_meaning_lookup(family)
+      if (nzchar(sm)) sm else sprintf("conditional %s of %s", dpar, param_owner(dpar))
+    } else {
+      sprintf("conditional %s of %s", dpar, param_owner(dpar))
+    }
     rows[[length(rows) + 1L]] <- tibble::tibble(
       symbol = drm_param_index_form(dpar, greek),
       symbol_matrix = drm_param_greek_bold(dpar),
@@ -1513,7 +1796,7 @@ drm_build_symbol_dictionary <- function(terms_tbl, response, response_symbol,
       role = "parameter",
       dimension = "\\mathbb{R}^n",
       dimension_concrete = sprintf("\\mathbb{R}^{%d}", n_obs),
-      description = sprintf("conditional %s of %s", dpar, param_owner(dpar))
+      description = desc_i
     )
   }
   # v0.21.1+ residual-SD row.

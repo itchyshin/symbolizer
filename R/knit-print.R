@@ -408,3 +408,88 @@ knit_print.symbolizer_variance_components <- function(x, ...) {
   kab <- sym_kable(out)
   knitr::asis_output(paste(c("", kab, ""), collapse = "\n"))
 }
+
+# ---------------------------------------------------------------------------
+# Variance-components surface (S5): knit_print for the variance_partition() /
+# icc() accessors. These emit asis HTML so the bar + ICC reading render in a
+# knitted vignette, reusing the S3 widget helpers (vc_bar_*, vc_icc_line,
+# variance_reading) -- the bar now travels outside the drmTMB-only widget.
+# ---------------------------------------------------------------------------
+
+#' @exportS3Method knitr::knit_print
+knit_print.symbolizer_variance_partition <- function(x, ...) {
+  intro   <- variance_reading("partition_intro")
+  has_pct <- nrow(x) > 0L && all(is.finite(x$pct))
+  bar <- if (has_pct) {
+    if (nrow(x) == 2L) vc_bar_stacked(x) else vc_bar_per_component(x)
+  } else {
+    vc_component_list(x)
+  }
+  reason <- attr(x, "reason")
+  reason_html <- if (!is.null(reason) && !is.na(reason) && nzchar(reason)) {
+    sprintf(paste0(
+      "<p class=\"sym-caption\" style=\"font-size:0.8rem;color:#9ca3af\">",
+      "Shares (%%) not shown: %s</p>"), reason)
+  } else {
+    ""
+  }
+  html <- paste0(
+    "<div class=\"sym-vc-panel\">",
+    if (nzchar(intro)) {
+      sprintf("<p class=\"sym-caption\"><strong>Where does the variation live?</strong> %s</p>", intro)
+    } else {
+      ""
+    },
+    bar,
+    vc_numbers_table(x),
+    reason_html,
+    "</div>"
+  )
+  knitr::asis_output(vc_html_oneline(html))
+}
+
+#' @exportS3Method knitr::knit_print
+knit_print.symbolizer_icc <- function(x, ...) {
+  knitr::asis_output(vc_html_oneline(paste0(
+    "<div class=\"sym-vc-panel\">", vc_icc_line(x), "</div>")))
+}
+
+# Collapse newlines + inter-tag indentation so the emitted HTML is a single
+# line. The bar helpers indent their <div> rows; pandoc's markdown reader
+# (used by html_vignette / pkgdown) treats 4+ leading spaces as a CODE BLOCK
+# and would escape the bar's HTML as literal text. One line side-steps that
+# entirely while leaving text content (which never sits around a newline)
+# untouched.
+#' @keywords internal
+vc_html_oneline <- function(html) {
+  gsub("\\s*\\n\\s*", "", html)
+}
+
+# Inline-HTML numbers table for the variance partition (source / variance / SD
+# / % of total), so the figures travel alongside the bar in one asis block.
+#' @keywords internal
+vc_numbers_table <- function(vp) {
+  fmt <- function(v) formatC(v, digits = 3L, format = "fg", flag = "#")
+  rows <- vapply(seq_len(nrow(vp)), function(i) {
+    pct <- vp$pct[[i]]
+    pct_s <- if (is.finite(pct)) {
+      sprintf("%s%%", formatC(100 * pct, digits = 1L, format = "f"))
+    } else {
+      "&mdash;"
+    }
+    sprintf(paste0(
+      "<tr><td>%s</td><td style=\"text-align:right\">%s</td>",
+      "<td style=\"text-align:right\">%s</td>",
+      "<td style=\"text-align:right\">%s</td></tr>"),
+      vp$component[[i]], fmt(vp$variance[[i]]), fmt(vp$sd[[i]]), pct_s)
+  }, character(1L))
+  paste0(
+    "<table class=\"sym-vc-table\" style=\"border-collapse:collapse;",
+    "font-size:0.85rem;margin:0.4rem 0\">",
+    "<thead><tr><th style=\"text-align:left\">source</th>",
+    "<th style=\"padding-left:1rem\">variance</th>",
+    "<th style=\"padding-left:1rem\">SD</th>",
+    "<th style=\"padding-left:1rem\">% of total</th></tr></thead>",
+    "<tbody>", paste(rows, collapse = ""), "</tbody></table>"
+  )
+}

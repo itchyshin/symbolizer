@@ -1,0 +1,10 @@
+key,text
+partition_intro,"Where the variation lives -- each row is one source of variance, shown as a share of the total."
+icc_caption_data,"Data-scale ICC: the share of total variance that lies between groups -- a genuine proportion of variance."
+icc_caption_latent,"Latent-scale ICC: not a proportion of variance in the observed outcome -- it is the repeatability on the link (latent) scale."
+icc_unavailable,ICC not available on this scale yet.
+reason_no_re,"this model has no random effects, so there is nothing to partition."
+reason_multiple_re,"more than one random-effect term, so a single-number ICC is not defined -- read the full variance partition instead."
+reason_location_scale,"the residual SD varies across observations (a location-scale model), so there is no single within-group variance to form the ICC."
+reason_no_residual_constant,"no known residual-variance constant for the {family} family on the data scale, so the ICC is not defined here."
+shrinkage_caption,"The random-effect estimates shown here (the BLUPs) are partially pooled: each group's estimate is shrunk toward zero by an amount that grows when the group has little data and shrinks when the between-group variance is large. Groups with the least data are pulled hardest toward the overall mean."

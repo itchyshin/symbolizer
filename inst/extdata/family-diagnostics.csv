@@ -1,0 +1,2 @@
+family,condition,template
+beta,both_shapes_below_one,"Heads-up -- both implied shape parameters are below 1 here ($\hat\alpha = \hat\mu\hat\sigma \approx {alpha}$ and $\hat\beta = (1-\hat\mu)\hat\sigma \approx {beta}$), so the fitted Beta is <strong>U-shaped</strong>: its density piles up near 0 and 1 rather than peaking at the mean. A precision $\hat\sigma < 1$ does that. Worth checking whether a U-shape matches your data."
