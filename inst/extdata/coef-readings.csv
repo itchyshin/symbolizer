@@ -1,0 +1,11 @@
+family,coef_reading
+gaussian,"On the response scale, $\hat\beta$ is the additive change in the mean of the response for a one-unit increase in the predictor (identity link -- no back-transformation needed)."
+student,"On the response scale, $\hat\beta$ is the additive change in the mean of the response for a one-unit increase in the predictor (identity link); the degrees of freedom $\nu$ only set the tail weight."
+lognormal,"On the response scale, $\exp(\hat\beta)$ is the multiplicative effect on the geometric mean (the median) of the response: a one-unit increase multiplies the median by $\exp(\hat\beta)$."
+Gamma,"On the response scale, $\exp(\hat\beta)$ multiplies the mean of the response for a one-unit increase in the predictor (log link)."
+beta,"On the response scale, $\exp(\hat\beta)$ is the odds ratio for the mean proportion: a one-unit increase multiplies the odds $\mu/(1-\mu)$ by $\exp(\hat\beta)$ (logit link)."
+poisson,"On the response scale, $\exp(\hat\beta)$ is the rate ratio: a one-unit increase in the predictor multiplies the expected count by $\exp(\hat\beta)$ (log link)."
+nbinom2,"On the response scale, $\exp(\hat\beta)$ is the rate ratio: a one-unit increase multiplies the expected count by $\exp(\hat\beta)$ (log link); the dispersion only widens the spread, it does not change the rate."
+beta_binomial,"On the response scale, $\exp(\hat\beta)$ is the odds ratio for the mean success probability: a one-unit increase multiplies the odds by $\exp(\hat\beta)$ (logit link)."
+truncated_nbinom2,"On the response scale, $\exp(\hat\beta)$ is the rate ratio for the underlying (untruncated) count: a one-unit increase multiplies it by $\exp(\hat\beta)$ (log link)."
+binomial,"On the response scale, $\exp(\hat\beta)$ is the odds ratio for the success probability: a one-unit increase multiplies the odds by $\exp(\hat\beta)$ (logit link)."

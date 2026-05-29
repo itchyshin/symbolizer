@@ -110,11 +110,22 @@ as_html_three_views.symbolized_model <- function(x, head = 5L, tail = 2L,
   # results to biological phenomena" and the matrix algebra teaching needs
   # one sentence anchoring it to the model's whole-system story.
   bio_gloss <- three_views_biology_gloss(x)
+  # v0.22.4 #6: the response-scale coefficient reading, INSIDE the widget
+  # (Tab 1, where coefficients are introduced) so it travels with PDF
+  # export and a Methods-section paste instead of being orphaned in the
+  # surrounding article prose.
+  coef_reading_txt <- three_views_coef_reading(tryCatch(x$model$family,
+                                                        error = function(e) NULL))
+  coef_gloss <- if (nzchar(coef_reading_txt)) {
+    paste0("  <p class=\"sym-biology\"><strong>Coefficient reading.</strong> ",
+           coef_reading_txt, "</p>\n")
+  } else ""
   idx_panel <- paste0(
     "<div class=\"sym-panel sym-active\" role=\"tabpanel\" id=\"", pan_idx,
     "\" aria-labelledby=\"", tab_idx, "\" data-panel=\"idx\" tabindex=\"0\">\n",
     "  <p class=\"sym-caption\">What happens for each observation <em>i</em> -- the per-individual reading.</p>\n",
     bio_gloss,
+    coef_gloss,
     "  <div class=\"sym-eq\">$$\\begin{aligned}\n",
     paste0(vapply(idx_lines, align_at, character(1L)), collapse = " \\\\\n"),
     "\n\\end{aligned}$$</div>\n",
@@ -354,12 +365,43 @@ as_pdf_three_views.symbolized_model <- function(x, file, title = NULL,
     title <- sprintf("Three views of a %s model (response: %s)",
                      x$model$class, x$model$response)
   }
+  rmd_path <- tempfile(fileext = ".Rmd")
+  rmd_body <- pdf_three_views_rmd_body(x, head = head, tail = tail,
+                                       head_cols = head_cols,
+                                       tail_cols = tail_cols,
+                                       title = title, keep_tex = keep_tex)
+  writeLines(rmd_body, rmd_path)
+  out <- rmarkdown::render(
+    rmd_path,
+    output_file = file,
+    quiet = TRUE,
+    ...
+  )
+  invisible(out)
+}
+
+# Build the PDF Rmd body as a character vector. Extracted from
+# as_pdf_three_views() so the PDF content is testable without a LaTeX
+# toolchain and so the coefficient-reading callout (#6) can be verified
+# to travel into the PDF (PDF/HTML parity).
+pdf_three_views_rmd_body <- function(x, head = 5L, tail = 2L,
+                                     head_cols = 5L, tail_cols = 2L,
+                                     title = NULL, keep_tex = FALSE) {
+  if (is.null(title) || !nzchar(title)) {
+    title <- sprintf("Three views of a %s model (response: %s)",
+                     x$model$class, x$model$response)
+  }
   latex_index  <- as_latex(x, notation = "index")
   latex_matrix <- as_latex(x, notation = "matrix")
   worked <- pdf_three_views_worked_row(x)
-
-  rmd_path <- tempfile(fileext = ".Rmd")
-  rmd_body <- c(
+  # v0.22.4 #6: response-scale coefficient reading, carried into the PDF
+  # so it survives export (it used to live only in the article prose).
+  coef_txt <- three_views_coef_reading(
+    tryCatch(x$model$family, error = function(e) NULL))
+  coef_line <- if (nzchar(coef_txt)) {
+    c(sprintf("_**Coefficient reading.** %s_", coef_txt), "")
+  } else character(0L)
+  c(
     "---",
     sprintf("title: \"%s\"", gsub("\"", "'", title, fixed = TRUE)),
     "geometry: margin=2cm",
@@ -383,6 +425,7 @@ as_pdf_three_views.symbolized_model <- function(x, file, title = NULL,
     latex_index,
     "$$",
     "",
+    coef_line,
     "# 2. Matrix form",
     "",
     "_The same model in matrix notation. The structural contract every textbook past chapter 4 switches to._",
@@ -405,14 +448,6 @@ as_pdf_three_views.symbolized_model <- function(x, file, title = NULL,
                                         tail_cols = tail_cols),
     ""
   )
-  writeLines(rmd_body, rmd_path)
-  out <- rmarkdown::render(
-    rmd_path,
-    output_file = file,
-    quiet = TRUE,
-    ...
-  )
-  invisible(out)
 }
 
 # Pattern J seed: extract the matrix-form LaTeX equations from the HTML
@@ -1885,6 +1920,21 @@ three_views_symbol_gloss <- function(x, notation = c("matrix", "index")) {
 # ("rises with", "is multiplied by"); never causal ("effect of",
 # "due to"). For v0.20 these templates move into a CSV so the prose
 # can be edited without code changes.
+# v0.22.4 #6: per-family "coefficient reading on the response scale" --
+# the single most useful sentence for a biologist (rate ratio / odds
+# ratio / geometric-mean multiplier). Prose lives in
+# inst/extdata/coef-readings.csv (architectural rule: no string-spliced
+# prose in R). Returns "" for families without a clean single-slope
+# reading (latent-variable / ordinal), so the caller emits nothing.
+three_views_coef_reading <- function(family) {
+  if (is.null(family) || !nzchar(family)) return("")
+  tbl <- tryCatch(load_template("coef-readings"), error = function(e) NULL)
+  if (is.null(tbl) || !"family" %in% names(tbl)) return("")
+  hit <- tbl[tbl$family == family, , drop = FALSE]
+  if (nrow(hit) == 0L) return("")
+  hit$coef_reading[[1L]]
+}
+
 three_views_biology_gloss <- function(x) {
   family <- tryCatch(x$model$family, error = function(e) NULL)
   if (is.null(family) || !nzchar(family)) return("")

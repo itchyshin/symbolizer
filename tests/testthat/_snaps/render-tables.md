@@ -27,7 +27,7 @@
       index: `\sigma_i`
       matrix: `\boldsymbol{\sigma}`
       dimension: `\mathbb{R}^n` (= `\mathbb{R}^{80}`)
-      conditional sigma of body_mass
+      residual standard deviation
       (coefficient)
       index: `\beta_{0}, \beta_{1}`
       matrix: `\boldsymbol{\beta}`

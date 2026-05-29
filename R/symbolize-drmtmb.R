@@ -1744,9 +1744,30 @@ drm_build_symbol_dictionary <- function(terms_tbl, response, response_symbol,
     if (dpar %in% c("mu2", "sigma2")) return(response_2 %||% response)
     paste(response_1 %||% "", response_2 %||% "", sep = ", ")
   }
+  # v0.22.4 #10: the dispersion parameter's gloss must be family-aware.
+  # "conditional sigma of y" is misleading for Beta (sigma is a PRECISION:
+  # larger => tighter, the opposite of an SD), Gamma (dispersion), NegBin
+  # (overdispersion), etc. Source the meaning from the per-family
+  # scale_meaning column of family-parameterizations.csv.
+  sigma_meaning_lookup <- function(fam) {
+    tbl <- tryCatch(load_template("family-parameterizations"),
+                    error = function(e) NULL)
+    if (is.null(tbl) || !"family" %in% names(tbl) ||
+        !"scale_meaning" %in% names(tbl)) return("")
+    hit <- tbl[tbl$family == fam, , drop = FALSE]
+    if (nrow(hit) == 0L) return("")
+    sm <- hit$scale_meaning[[1L]]
+    if (is.na(sm) || !nzchar(sm)) "" else sm
+  }
   for (i in seq_len(nrow(submodels))) {
     dpar <- submodels$parameter[[i]]
     greek <- drm_param_greek(dpar)
+    desc_i <- if (identical(dpar, "sigma")) {
+      sm <- sigma_meaning_lookup(family)
+      if (nzchar(sm)) sm else sprintf("conditional %s of %s", dpar, param_owner(dpar))
+    } else {
+      sprintf("conditional %s of %s", dpar, param_owner(dpar))
+    }
     rows[[length(rows) + 1L]] <- tibble::tibble(
       symbol = drm_param_index_form(dpar, greek),
       symbol_matrix = drm_param_greek_bold(dpar),
@@ -1755,7 +1776,7 @@ drm_build_symbol_dictionary <- function(terms_tbl, response, response_symbol,
       role = "parameter",
       dimension = "\\mathbb{R}^n",
       dimension_concrete = sprintf("\\mathbb{R}^{%d}", n_obs),
-      description = sprintf("conditional %s of %s", dpar, param_owner(dpar))
+      description = desc_i
     )
   }
   # v0.21.1+ residual-SD row.
