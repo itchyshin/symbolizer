@@ -1455,6 +1455,8 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L,
         )
       )
     },
+    # S4: partial-pooling caption beside the BLUP block (RE fits only).
+    three_views_shrinkage_caption(has_re),
     if (!is.null(eq_sigma)) {
       # v0.22.4 Slice 1, F3: per-shape sigma-submodel caption. The
       # "spread of ε̂" prose presumed additive residuals and pulled the
@@ -2011,6 +2013,21 @@ three_views_variance_panel <- function(x) {
     vc_icc_line(ic),
     "  <p class=\"sym-caption\" style=\"font-size:0.8em;color:#9ca3af;margin-top:0.3rem\">Point estimates only; uncertainty not shown.</p>\n",
     "</div>\n"
+  )
+}
+
+# Variance-components surface (S4, contract clause 6): a prose-only
+# partial-pooling caption that sits beside the worked-row BLUP block,
+# explaining that the random-effect estimates are shrunk toward zero. Emitted
+# only when the fit has random effects. No numbers (numeric shrinkage
+# deferred). Prose from inst/extdata/variance-readings.csv.
+three_views_shrinkage_caption <- function(has_re) {
+  if (!isTRUE(has_re)) return("")
+  txt <- variance_reading("shrinkage_caption")
+  if (!nzchar(txt)) return("")
+  paste0(
+    "<p class=\"sym-caption\" style=\"font-size:0.85em;color:#6b7280;margin-top:0.3rem\">",
+    "<strong>Partial pooling.</strong> ", txt, "</p>\n"
   )
 }
 

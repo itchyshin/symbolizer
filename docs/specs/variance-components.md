@@ -87,3 +87,16 @@ Approved by the maintainer via the v2 pilot. Decisions on record:
 - Visual: rebuild one Gaussian + one binomial widget; confirm the panel renders
   and the binomial latent caption is present (preview / pilot-style check).
 - Audited by the Pat (reader) + Noether (honesty) lenses on the rendered widget.
+
+## Scope boundary: HTML-first; PDF parity deferred
+
+S3 (the Index-tab panel) and S4 (the shrinkage caption) ship in the **HTML
+widget only**. The PDF emitter currently drops the entire stacked-matrix BLUP
+block and its captions (catalog B57–B64), so there is no block beside which to
+place the panel or caption. Adding either to a PDF that omits the block would
+itself be an inconsistency. PDF/HTML parity for the whole variance surface is
+therefore one deferred follow-up, tied to the Pattern J rebuild (the single
+`three_views_payload` formatter, v0.21.8 in the redo plan) that restores the
+PDF stacked block. Until then the HTML widget is the source of truth for the
+variance surface; the accessors (`variance_partition()` / `icc()`) are
+package-public and scale-honest regardless of render target.
