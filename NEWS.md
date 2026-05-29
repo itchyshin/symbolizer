@@ -1,3 +1,47 @@
+# symbolizer (development version)
+
+## Variance-components surface -- "where does the variation live?"
+
+A mixed model's payoff for a biologist is *where the variation lives* and
+*how repeatable a trait is*. symbolizer computed the variance components and
+then dropped them. This surface closes that gap, Gaussian-first, with a hard
+honesty contract. Spec: `docs/specs/variance-components.md`. Built in four
+TDD slices.
+
+* **Numbers, not just symbols (S1).** Every mixed-model extractor's
+  `variance_components` tibble now carries numeric `sd_estimate` /
+  `var_estimate`; the drmTMB builder, which previously carried only symbols,
+  was fixed to populate them from `fit$sdpars`. `explain()` and
+  `model_card()` now surface a "How the variation splits" section whenever
+  the fit has random effects.
+* **New accessor `variance_partition()` (S2).** One row per variance source
+  (`component`, `variance`, `sd`, `pct`), with a residual row and `pct`
+  shares that sum to 1 when the residual variance is defined; otherwise the
+  variances are shown and `pct` is `NA` with a reason.
+* **New accessor `icc()` (S2).** The intraclass correlation / repeatability,
+  carrying an explicit `scale` attribute. Gaussian-identity single random
+  intercept gives a **data-scale** ICC (a true proportion of variance);
+  binomial gives a **latent-scale** ICC (logit residual \eqn{\pi^2/3},
+  probit residual 1) with a mandatory "not a proportion of variance in the
+  observed outcome" caption. Any other family, a location-scale Gaussian
+  whose residual SD varies, or more than one random-effect term returns `NA`
+  with a human-readable reason rather than a misleading number.
+* **Widget panel (S3).** The three-views Index tab now shows a "where does
+  the variation live?" panel beneath the random-effects glossary: a plain-CSS
+  bar (a stacked between/within bar for two components, per-component bars
+  for three or more), one sentence, and the ICC line. No bar -- only the
+  table and the "ICC not available on this scale yet" line -- when the ICC is
+  undefined.
+* **Partial-pooling caption (S4).** The Tab 3 worked-row BLUP block carries a
+  prose-only caption explaining that the random-effect estimates are shrunk
+  toward zero (partial pooling); no numbers.
+
+All reader-facing prose is templated from
+`inst/extdata/variance-readings.csv` (no string-spliced prose in R). Point
+estimates only; no confidence intervals. The panel and caption ship in the
+HTML widget; PDF/HTML parity for the variance surface is deferred to the
+Pattern J payload rebuild (see the spec's scope-boundary note).
+
 # symbolizer 0.22.3
 
 ## v0.22.3 -- family-aware Tab 3 worked row for non-Gaussian families
