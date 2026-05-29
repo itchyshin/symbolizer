@@ -1918,10 +1918,33 @@ drm_build_symbol_dictionary <- function(terms_tbl, response, response_symbol,
   do.call(rbind, rows)
 }
 
+# Honest link-aware prose for a given link, from inst/extdata/link-readings.csv.
+# Returns the matching row, the generic "*" fallback, or NULL.
+drm_link_reading <- function(link) {
+  tbl <- tryCatch(load_template("link-readings"), error = function(e) NULL)
+  if (is.null(tbl) || !"link" %in% names(tbl)) return(NULL)
+  hit <- tbl[tbl$link == link, , drop = FALSE]
+  if (nrow(hit) == 0L) hit <- tbl[tbl$link == "*", , drop = FALSE]
+  if (nrow(hit) == 0L) return(NULL)
+  hit[1L, , drop = FALSE]
+}
+
+# TRUE when an explicit fit link differs from the family's default link
+# (family-parameterizations.csv link_mu). When they match, the family-keyed
+# prose is already correct, so no override is needed (NULL link_mu => FALSE,
+# preserving behaviour for every caller that does not pass a link).
+drm_link_overrides_default <- function(family, link_mu) {
+  if (is.null(link_mu) || is.na(link_mu) || !nzchar(link_mu)) return(FALSE)
+  default <- tryCatch(get_parameterization(family)$link_mu,
+                      error = function(e) NA_character_)
+  !is.na(default) && nzchar(default) && !identical(link_mu, default)
+}
+
 drm_build_assumptions <- function(family, response, response_symbol,
                                   re_tbl = NULL,
                                   response_1 = NULL, response_2 = NULL,
-                                  detected_signals = character(0L)) {
+                                  detected_signals = character(0L),
+                                  link_mu = NULL) {
   tbl <- load_template("assumption-templates")
   rows <- tbl[tbl$family == family, , drop = FALSE]
   if (nrow(rows) == 0L) {
@@ -1954,7 +1977,7 @@ drm_build_assumptions <- function(family, response, response_symbol,
                  character(1L), mapping = mapping, USE.NAMES = FALSE)
   meaning <- vapply(rows$biological_meaning, drm_substitute,
                     character(1L), mapping = mapping, USE.NAMES = FALSE)
-  tibble::tibble(
+  out <- tibble::tibble(
     family = rows$family,
     submodel = rows$submodel,
     assumption = rows$assumption,
@@ -1962,6 +1985,21 @@ drm_build_assumptions <- function(family, response, response_symbol,
     biological_meaning = meaning,
     status = rows$status
   )
+  # Link-honesty: when the fit uses a non-default link (e.g. mgcv Gamma's
+  # inverse), the family-keyed linear_predictor template names the wrong link.
+  # Replace its left-hand side + meaning with the actual link's prose.
+  if (drm_link_overrides_default(family, link_mu)) {
+    lr <- drm_link_reading(link_mu)
+    if (!is.null(lr)) {
+      lp <- which(out$assumption == "linear_predictor")
+      if (length(lp) >= 1L) {
+        out$expression_latex[lp] <- paste0(lr$lp_lhs[[1L]],
+          " = \\beta_0 + \\sum_k \\beta_k X_{ki}")
+        out$biological_meaning[lp] <- lr$link_meaning[[1L]]
+      }
+    }
+  }
+  out
 }
 
 ref_for_var <- function(var, data) {
@@ -2048,7 +2086,8 @@ drm_interaction_subs <- function(row, data) {
 
 drm_build_interpretation <- function(fixed_eff, family, response, data,
                                      response_1 = NULL, response_2 = NULL,
-                                     detected_signals = character(0L)) {
+                                     detected_signals = character(0L),
+                                     link_mu = NULL) {
   empty <- tibble::tibble(
     submodel = character(0),
     term_label = character(0),
@@ -2094,6 +2133,15 @@ drm_build_interpretation <- function(fixed_eff, family, response, data,
     )
     names(has_int)[!has_int]
   }
+  # Link-honesty: when the fit uses a non-default link, the family-keyed
+  # readings name the wrong link scale (e.g. "Log mean ... exp(beta)" for an
+  # inverse-link Gamma). Override the mean-submodel link/natural readings with
+  # the actual link's honest prose. NULL link_mu => no override.
+  lr_override <- if (drm_link_overrides_default(family, link_mu)) {
+    drm_link_reading(link_mu)
+  } else {
+    NULL
+  }
   rows <- list()
   for (i in seq_len(nrow(fixed_eff))) {
     r <- fixed_eff[i, , drop = FALSE]
@@ -2110,6 +2158,10 @@ drm_build_interpretation <- function(fixed_eff, family, response, data,
       , drop = FALSE
     ]
     if (nrow(template) == 0L) next
+    if (!is.null(lr_override) && r$submodel %in% c("mu", "mu1", "mu2")) {
+      template$link_scale_reading[[1L]]    <- lr_override$link_scale_reading[[1L]]
+      template$natural_scale_reading[[1L]] <- lr_override$natural_scale_reading[[1L]]
+    }
     variable <- if (is.na(r$variable)) "" else r$variable
     level <- if (is.na(r$contrast_level)) "" else r$contrast_level
     transform <- if (is.na(r$transform)) "" else r$transform

@@ -161,11 +161,13 @@ symbolize.gam <- function(fit, symbols = NULL, units = NULL,
   )
   assumptions <- drm_build_assumptions(
     family, response, response_symbol, re_tbl,
-    response_1 = response, response_2 = NA_character_
+    response_1 = response, response_2 = NA_character_,
+    link_mu = link
   )
   interp <- drm_build_interpretation(
     fixed_eff, family, response, data,
-    response_1 = response, response_2 = NA_character_
+    response_1 = response, response_2 = NA_character_,
+    link_mu = link
   )
   bridge <- drm_build_formula_bridge(
     entries, components, response,
