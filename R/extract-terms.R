@@ -152,8 +152,12 @@ extract_terms <- function(formula, data, submodel,
                           symbol, coef_symbol) {
     if (role == "intercept") return(coef_symbol)
     if (role == "factor_contrast") {
+      # variable + level are raw R names; escape underscores so a snake_case
+      # factor (body_size) does not render `body` subscript `size` (B81 family).
       return(sprintf("%s \\, [%s = \\mathrm{%s}]",
-                     coef_symbol, variable, contrast_level))
+                     coef_symbol,
+                     escape_underscores_for_latex(variable),
+                     escape_underscores_for_latex(contrast_level)))
     }
     if (role == "interaction") {
       vars <- strsplit(variable, ":", fixed = TRUE)[[1L]]
