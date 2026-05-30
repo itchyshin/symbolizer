@@ -956,18 +956,30 @@ latex_implied_cov_block <- function(tier = c("B", "W"), Sigma, Lambda, Psi) {
   else
     "within-individual implied covariance"
   T_n <- nrow(Sigma); d <- ncol(Lambda)
-  sigma_mat <- latex_mat(Sigma, rows = seq_len(min(T_n, 7L)))
-  lam_mat   <- latex_mat(Lambda, rows = seq_len(min(T_n, 7L)))
-  psi_mat   <- latex_mat(diag(Psi^2), rows = seq_len(min(T_n, 7L)))
+  rows <- seq_len(min(T_n, 7L))
+  # Full chain Lambda -> Lambda Lambda^T + Psi^2 = Sigma. The block previously
+  # rendered the raw T x d loading matrix under the "Lambda Lambda^T" label,
+  # so the displayed equation did not close dimensionally (T x T = T x d +
+  # T x T). Show the loadings as their own factor, then the T x T OUTER
+  # PRODUCT under the Lambda Lambda^T label (E1).
+  load_mat  <- latex_mat(Lambda, rows = rows)                  # T x d loadings
+  llt_mat   <- latex_mat(Lambda %*% t(Lambda), rows = rows)    # T x T outer product
+  sigma_mat <- latex_mat(Sigma, rows = rows)                   # T x T implied covariance
+  psi_mat   <- latex_mat(diag(Psi^2), rows = rows)             # T x T diagonal uniquenesses
+  # `\times` stays in math mode (outside \text) -- inside \text{} KaTeX would
+  # render it literally (old B8). "loadings" is the only text token.
+  load_lab  <- sprintf("\\boldsymbol{\\Lambda}_%s\\;(%d \\times %d\\text{ loadings})",
+                       tier, T_n, d)
   sigma_lab <- sprintf("\\boldsymbol{\\Sigma}_%s\\;\\text{(%s)}",
                        tier, caption)
   lam_lab   <- sprintf("\\boldsymbol{\\Lambda}_%s\\,\\boldsymbol{\\Lambda}_%s^{\\!\\top}",
                        tier, tier)
   psi_lab   <- sprintf("\\boldsymbol{\\Psi}_%s^{\\,2}", tier)
   paste0(
+    "$$\n", underbrace(load_mat, load_lab), "\n$$\n",
     "$$\n",
     underbrace(sigma_mat, sigma_lab),
-    " \\;=\\; ", underbrace(lam_mat, lam_lab),
+    " \\;=\\; ", underbrace(llt_mat, lam_lab),
     " \\;+\\; ", underbrace(psi_mat, psi_lab),
     "\n$$\n"
   )
