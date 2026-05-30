@@ -105,7 +105,18 @@ demote the non-converging drmTMB `meta_V()+phylo()` combo to a caveated idiom
 (#417); §5.4 "same coefficients" replaced with honest magnitudes (drmTMB γ −1.16
 vs glmmTMB −0.84); plus 2 newly-found §3.5 pipe leaks. Verified by full re-render.
 
-**Still deferred to maintainer** (core-renderer with wide snapshot churn):
-P5 worked-row RE-fold; P6b underscore-escaping; P7 factor-template-under-interaction;
-gllvm Λ outer-product; broader phantom-σ sweep (lm/lmer/glmmTMB/…); P1 feature-half
-(family-aware `$expanded` for lm/glm). See `.memory/reports/2026-05-30-page-audit-fixes.md`.
+**P6b underscore-escaping — now FIXED** (commits `fix(render)` P6b-1 + P6b-2):
+a shared `default_response_symbol()` escapes `_` + wraps multi-letter names
+upright in `\mathrm{}_i`; all 8 response resolvers + the predictor
+`lookup_symbol()` delegate to it (Pattern G). Verified: ladder rungs 1–3 +
+factors render `\mathrm{body\_mass}_i` / `\mathrm{body\_size}_i`, zero raw
+underscore-in-math; suite green; only extract-terms snapshots churned
+(escaping-only, accepted).
+
+**Still deferred to maintainer** (core-renderer with wide churn / feature):
+P6b-3 (symbol_table `\mathbf{}` wrap + `poly()` deparse + factor_contrast
+`[var = level]` raw variable — no flagged snake_case-factor case today);
+broader phantom-σ sweep (lm/lmer/glmmTMB/mcmcglmm/sdmtmb); P5 worked-row
+RE-fold; P7 factor-template-under-interaction; gllvm Λ outer-product; P1
+feature-half (family-aware `$expanded` for lm/glm). See
+`.memory/reports/2026-05-30-page-audit-fixes.md`.
