@@ -45,7 +45,7 @@
       mu submodel design matrix
       (design_matrix)
       index: `(no index form)`
-      matrix: `\mathbf{Z}`
+      matrix: `\mathbf{X}_{\sigma}`
       dimension: `\mathbb{R}^{n \times p_\sigma}` (= `\mathbb{R}^{80 \times 2}`)
       sigma submodel design matrix
 
@@ -104,5 +104,5 @@
       meaning: Log residual SD of body_mass is a linear function of the scale-model
       predictors
       math: `\log(\sigma_i) = \gamma_{0} + \gamma_{1} \, T_i`
-      matrix: `\log(\boldsymbol{\sigma}) = \mathbf{Z} \boldsymbol{\gamma}`
+      matrix: `\log(\boldsymbol{\sigma}) = \mathbf{X}_{\sigma} \boldsymbol{\gamma}`
 
