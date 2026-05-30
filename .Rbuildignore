@@ -24,3 +24,21 @@
 ^README\.html$
 ^doc$
 ^Meta$
+# CRAN tarball trim (items 2+3): ship only the light base-R quickstart vignette
+# (symbolizer.Rmd). The model-fitting articles stay on the pkgdown site -- pkgdown
+# reads vignettes/ from source, so .Rbuildignore here only drops them from the
+# CRAN tarball, where they would otherwise refit drmTMB/gllvm/brms/MCMCglmm at
+# check time. The fig-*.pdf demos and the 3.5 MB brms cache are pkgdown assets,
+# not shipped.
+^vignettes/fig-.*\.pdf$
+^vignettes/fig-.*\.rds$
+^vignettes/symbolizer-compare\.Rmd$
+^vignettes/symbolizer-drmtmb\.Rmd$
+^vignettes/symbolizer-factors\.Rmd$
+^vignettes/symbolizer-families\.Rmd$
+^vignettes/symbolizer-gllvm\.Rmd$
+^vignettes/symbolizer-ladder\.Rmd$
+^vignettes/symbolizer-meta-analysis\.Rmd$
+^vignettes/symbolizer-roadmap\.Rmd$
+^vignettes/symbolizer-structural-dependence\.Rmd$
+^vignettes/symbolizer-variance-components\.Rmd$

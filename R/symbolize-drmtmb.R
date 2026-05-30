@@ -64,6 +64,12 @@
 #' @export
 symbolize.drmTMB <- function(fit, symbols = NULL, units = NULL,
                              context = NULL, ci_method = "wald", ...) {
+  if (!requireNamespace("drmTMB", quietly = TRUE)) {
+    cli::cli_abort(c(
+      "{.pkg drmTMB} is needed to symbolize this fit.",
+      i = "Install it with {.code remotes::install_github(\"itchyshin/drmTMB\")}."
+    ))
+  }
   entries <- fit$formula$entries
   if (!is.list(entries) || length(entries) == 0L) {
     cli::cli_abort("{.arg fit} has no submodel entries in {.code fit$formula$entries}.")
