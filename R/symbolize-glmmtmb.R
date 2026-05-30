@@ -190,7 +190,8 @@ symbolize.glmmTMB <- function(fit, symbols = NULL, units = NULL,
 
   distribution <- drm_build_distribution(
     family, response_symbol, response_symbol_matrix,
-    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_
+    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_,
+    constant_scale = !has_sigma_sub  # keep sigma_i only for a real dispformula
   )
   submodels  <- glmm_build_submodels(entries, fit, param, link)
   terms_tbl  <- drm_build_terms(entries_fe, data, symbols)
@@ -202,7 +203,8 @@ symbolize.glmmTMB <- function(fit, symbols = NULL, units = NULL,
     submodels, terms_tbl, re_tbl,
     response_symbol, response_symbol_matrix,
     family = family,
-    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_
+    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_,
+    constant_scale = !has_sigma_sub  # keep sigma_i only for a real dispformula
   )
   # v0.21+ structured-dependence signals. glmmTMB's propto block attaches
   # Sigma = sigma_p^2 * V on a random-effect group (the phylogenetic /

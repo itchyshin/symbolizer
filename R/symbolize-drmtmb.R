@@ -775,13 +775,15 @@ drm_strip_markers <- function(expr) {
 drm_build_distribution <- function(family, response_symbol,
                                    response_symbol_matrix,
                                    response_symbol_1 = NULL,
-                                   response_symbol_2 = NULL) {
+                                   response_symbol_2 = NULL,
+                                   constant_scale = FALSE) {
   tex <- drm_distribution_template(
     family,
     response_symbol = response_symbol,
     response_symbol_matrix = response_symbol_matrix,
     response_symbol_1 = response_symbol_1,
-    response_symbol_2 = response_symbol_2
+    response_symbol_2 = response_symbol_2,
+    constant_scale = constant_scale
   )
   tibble::tibble(
     family = family,
@@ -801,7 +803,8 @@ drm_build_distribution <- function(family, response_symbol,
 drm_distribution_template <- function(family, response_symbol,
                                       response_symbol_matrix,
                                       response_symbol_1 = NULL,
-                                      response_symbol_2 = NULL) {
+                                      response_symbol_2 = NULL,
+                                      constant_scale = FALSE) {
   tbl <- load_template("family-distributions")
   hit <- tbl[tbl$family == family, , drop = FALSE]
   if (nrow(hit) == 0L) {
@@ -820,8 +823,19 @@ drm_distribution_template <- function(family, response_symbol,
     response_symbol_1      = response_symbol_1 %||% "",
     response_symbol_2      = response_symbol_2 %||% ""
   )
+  index_latex <- drm_substitute(hit$index_latex[[1L]], mapping)
+  # When the residual SD / dispersion is constant across observations (no
+  # scale submodel -- lm, lmer, an intercept-only dispformula, ...), the
+  # per-observation index on sigma is over-specified: write \sigma, not
+  # \sigma_i (audit M4 -- the indexed form wrongly implied heteroscedasticity
+  # from Rung 1 of the ladder). Targeted fixed-string swap: it leaves \mu_i,
+  # \sigma_{1i} (bivariate), and \sigma_p (phylogenetic) untouched. The matrix
+  # form already uses \boldsymbol{\sigma} with no per-observation index.
+  if (isTRUE(constant_scale)) {
+    index_latex <- gsub("\\sigma_i", "\\sigma", index_latex, fixed = TRUE)
+  }
   list(
-    index_latex  = drm_substitute(hit$index_latex[[1L]],  mapping),
+    index_latex  = index_latex,
     matrix_latex = drm_substitute(hit$matrix_latex[[1L]], mapping)
   )
 }
@@ -1338,7 +1352,8 @@ drm_build_components <- function(submodels, terms_tbl, re_tbl, response_symbol,
                                   family = "gaussian",
                                   response_symbol_1 = NULL,
                                   response_symbol_2 = NULL,
-                                  structured_matrix_for_group = NULL) {
+                                  structured_matrix_for_group = NULL,
+                                  constant_scale = FALSE) {
   # v0.21.1+ `structured_matrix_for_group`: optional named list mapping
   # random-effect group name to a LaTeX matrix symbol (e.g.,
   # list(species = "\\mathbf{A}") for a phylogenetic random effect, or
@@ -1355,7 +1370,8 @@ drm_build_components <- function(submodels, terms_tbl, re_tbl, response_symbol,
     response_symbol        = response_symbol,
     response_symbol_matrix = response_symbol_matrix,
     response_symbol_1      = response_symbol_1,
-    response_symbol_2      = response_symbol_2
+    response_symbol_2      = response_symbol_2,
+    constant_scale         = constant_scale
   )
   rows <- list()
   rows[[1L]] <- tibble::tibble(

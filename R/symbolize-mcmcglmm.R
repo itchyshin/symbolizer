@@ -143,7 +143,8 @@ symbolize.MCMCglmm <- function(fit, symbols = NULL, units = NULL,
 
   distribution <- drm_build_distribution(
     family, response_symbol, response_symbol_matrix,
-    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_
+    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_,
+    constant_scale = TRUE  # residual SD is constant; structure lives in the RE, not the scale
   )
   submodels  <- mcmcglmm_build_submodels(entries, fit, param, link)
   terms_tbl  <- drm_build_terms(entries_fe, data, symbols)
@@ -185,7 +186,8 @@ symbolize.MCMCglmm <- function(fit, symbols = NULL, units = NULL,
     response_symbol, response_symbol_matrix,
     family = family,
     response_symbol_1 = response_symbol, response_symbol_2 = NA_character_,
-    structured_matrix_for_group = structured_matrix_for_group
+    structured_matrix_for_group = structured_matrix_for_group,
+    constant_scale = TRUE  # residual SD constant; structure lives in the RE
   )
   # v0.21+ structured-dependence signals. MCMCglmm's ginverse path is the
   # Hadfield-Nakagawa all-nodes representation of a phylogenetic correlation

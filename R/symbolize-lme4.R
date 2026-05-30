@@ -142,7 +142,8 @@ lme4_symbolize_impl <- function(fit, family, link, class_name,
 
   distribution <- drm_build_distribution(
     family, response_symbol, response_symbol_matrix,
-    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_
+    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_,
+    constant_scale = TRUE  # lmer / glmer: a single residual SD, not a scale submodel
   )
   submodels  <- lme4_build_submodels(entries, fit, param, link)
   terms_tbl  <- drm_build_terms(entries_fe, data, symbols)
@@ -154,7 +155,8 @@ lme4_symbolize_impl <- function(fit, family, link, class_name,
     submodels, terms_tbl, re_tbl,
     response_symbol, response_symbol_matrix,
     family = family,
-    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_
+    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_,
+    constant_scale = TRUE  # lmer / glmer: a single residual SD
   )
   symbol_dict <- drm_build_symbol_dictionary(
     terms_tbl, response, response_symbol, response_symbol_matrix,

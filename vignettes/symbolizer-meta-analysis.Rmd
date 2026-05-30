@@ -375,6 +375,13 @@ Tab 2 carries the matrix form. (The "with your numbers" tab falls back to
 a note for `rma.mv` — `symbolize()` does not yet expand metafor's design
 matrix into per-row arrays — so the structure lives on Tabs 1–2.)
 
+**Reading the widget's notation.** `symbolizer` names each random tier by
+its *data column*, so the widget writes $\sigma_{\text{phylogeny}}$ for the
+phylogenetic SD that §4.1 called $\sigma_p$, and $\sigma_{\text{study\_ID}}$
+for $\sigma_{\text{study}}$, and it indexes every quantity by the
+effect-size row $i$ rather than by the $(k, s(k))$ effect-within-species
+pairing used in §4.1. The two notations describe the same two tiers.
+
 ### 4.4 Face 2 — `brms` (light, with `se(sqrt(vi))` + `gr(., cov = A)`)
 
 The same math in brms's idiom. Note that `se()` is parsed by brms

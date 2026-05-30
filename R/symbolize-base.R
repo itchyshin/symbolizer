@@ -134,7 +134,8 @@ base_symbolize_impl <- function(fit, family, link, class_name, package_name,
 
   distribution <- drm_build_distribution(
     family, response_symbol, response_symbol_matrix,
-    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_
+    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_,
+    constant_scale = TRUE  # lm / glm: single residual SD / fixed dispersion
   )
   submodels  <- base_build_submodels(entries, fit, param, link)
   terms_tbl  <- drm_build_terms(entries, data, symbols)
@@ -146,7 +147,8 @@ base_symbolize_impl <- function(fit, family, link, class_name, package_name,
     submodels, terms_tbl, re_tbl,
     response_symbol, response_symbol_matrix,
     family = family,
-    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_
+    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_,
+    constant_scale = TRUE  # lm / glm: sigma is constant -> write \sigma, not \sigma_i
   )
   symbol_dict <- drm_build_symbol_dictionary(
     terms_tbl, response, response_symbol, response_symbol_matrix,
