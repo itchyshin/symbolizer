@@ -28,8 +28,12 @@ jobs:
           # Vignettes are NOT built/checked on CI: they fit heavy MCMC models
           # (brms / MCMCglmm) and emit PDF figures via as_pdf_three_views(),
           # which needs a TeX distribution the runner does not install. They are
-          # built and checked locally (devtools::check / pkgdown) per the
-          # repo's "local checks over CI" policy. CI keeps the fast, portable
-          # R-code / docs / examples / tests checks.
-          args: 'c("--no-manual", "--no-vignettes", "--as-cran")'
+          # built and checked locally (devtools::check / pkgdown) per the repo's
+          # "local checks over CI" policy. --ignore-vignettes drops the vignette
+          # checks entirely (--no-build-vignettes alone leaves inst/doc empty and
+          # R CMD check WARNs "files in vignettes but no inst/doc"). error-on
+          # "error" keeps CI failing on real ERRORs + test failures, not on that
+          # benign no-inst/doc vignette WARNING.
+          args: 'c("--no-manual", "--ignore-vignettes", "--as-cran")'
           build_args: 'c("--no-manual", "--no-build-vignettes")'
+          error-on: '"error"'
