@@ -11,7 +11,8 @@
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
 <link rel="icon" sizes="any" href="../favicon.ico">
 <link rel="manifest" href="../site.webmanifest">
-<script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<!-- katex math --><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" integrity="sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script><script src="../katex-auto.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
@@ -77,29 +78,26 @@ teaches the <em>dependence-structure</em> axis of GLMM grammar through
 one <strong>deep-dive</strong> Face and two <strong>light</strong> Faces
 across three R packages: <code>MCMCglmm</code>, <code>brms</code>, and
 <code>phylolm</code>. The scope is the <strong>phylogenetic LMM</strong>
-with
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>σ</mi><mi>e</mi><mn>2</mn></msubsup><annotation encoding="application/x-tex">\sigma_e^2</annotation></semantics></math>
-estimated; the <em>meta-analytic</em> form (with
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>v</mi><mi>i</mi></msub><annotation encoding="application/x-tex">v_i</annotation></semantics></math>
+with <span class="math inline">\sigma_e^2</span> estimated; the
+<em>meta-analytic</em> form (with <span class="math inline">v_i</span>
 known sampling variances) is its own surface in the v0.22 article.</p>
 <div class="section level2">
 <h2 id="the-shared-grammar">The shared grammar<a class="anchor" aria-label="anchor" href="#the-shared-grammar"></a>
 </h2>
 <p>A generalised linear mixed model writes</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mi>i</mi></msub><mo>∣</mo><mi>𝐛</mi><mspace width="0.278em"></mspace><mo>∼</mo><mspace width="0.278em"></mspace><mi>𝒟</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>μ</mi><mi>i</mi></msub><mo>,</mo><mi>ϕ</mi><mo stretchy="false" form="postfix">)</mo><mo>,</mo><mspace width="2.0em"></mspace><mi>g</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>μ</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mspace width="0.278em"></mspace><mo>=</mo><mspace width="0.278em"></mspace><msubsup><mi>𝐱</mi><mi>i</mi><mi>⊤</mi></msubsup><mi>𝛃</mi><mo>+</mo><msubsup><mi>𝐳</mi><mi>i</mi><mi>⊤</mi></msubsup><mi>𝐛</mi><mo>,</mo></mrow><annotation encoding="application/x-tex">
+<p><span class="math display">
 y_i \mid \mathbf b \;\sim\; \mathcal D(\mu_i, \phi),\qquad
-g(\mu_i) \;=\; \mathbf x_i^\top \boldsymbol\beta + \mathbf z_i^\top \mathbf b,
-</annotation></semantics></math></p>
+g(\mu_i) \;=\; \mathbf x_i^\top \boldsymbol\beta + \mathbf z_i^\top
+\mathbf b,
+</span></p>
 <p>with random effects</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐛</mi><mspace width="0.278em"></mspace><mo>∼</mo><mspace width="0.278em"></mspace><mi>𝒩</mi><mo stretchy="false" form="prefix">(</mo><mn>𝟎</mn><mo>,</mo><mspace width="0.278em"></mspace><msup><mi>σ</mi><mn>2</mn></msup><mspace width="0.167em"></mspace><mi>𝐌</mi><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
+<p><span class="math display">
 \mathbf b \;\sim\; \mathcal N(\mathbf 0,\; \sigma^2\,\mathbf M).
-</annotation></semantics></math></p>
-<p>The standard textbook GLMM takes
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐌</mi><mo>=</mo><mi>𝐈</mi></mrow><annotation encoding="application/x-tex">\mathbf M = \mathbf I</annotation></semantics></math>
-— the random effects are independent draws. Structural dependence is
-what you get when
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐌</mi><mo>≠</mo><mi>𝐈</mi></mrow><annotation encoding="application/x-tex">\mathbf M \ne \mathbf I</annotation></semantics></math>.
-Three named instantiations recur:</p>
+</span></p>
+<p>The standard textbook GLMM takes <span class="math inline">\mathbf M
+= \mathbf I</span> — the random effects are independent draws.
+Structural dependence is what you get when <span class="math inline">\mathbf M \ne \mathbf I</span>. Three named
+instantiations recur:</p>
 <table class="table">
 <colgroup>
 <col width="33%">
@@ -109,64 +107,49 @@ Three named instantiations recur:</p>
 <thead><tr class="header">
 <th>Context</th>
 <th>Symbol</th>
-<th>What
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐌</mi><annotation encoding="application/x-tex">\mathbf M</annotation></semantics></math>
-encodes</th>
+<th>What <span class="math inline">\mathbf M</span> encodes</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
 <td>Phylogenetic</td>
-<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐀</mi><annotation encoding="application/x-tex">\mathbf A</annotation></semantics></math></td>
+<td><span class="math inline">\mathbf A</span></td>
 <td>Shared evolutionary history (tree → correlation)</td>
 </tr>
 <tr class="even">
 <td>Pedigree (animal model)</td>
-<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐀</mi><annotation encoding="application/x-tex">\mathbf A</annotation></semantics></math></td>
+<td><span class="math inline">\mathbf A</span></td>
 <td>Genetic relatedness (pedigree → correlation)</td>
 </tr>
 <tr class="odd">
 <td>Spatial</td>
-<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛀</mi><annotation encoding="application/x-tex">\boldsymbol\Omega</annotation></semantics></math></td>
+<td><span class="math inline">\boldsymbol\Omega</span></td>
 <td>Geographic proximity (distance + kernel)</td>
 </tr>
 </tbody>
 </table>
 <p>In abstract / cross-package teaching contexts (this article’s prose),
-we write
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐌</mi><annotation encoding="application/x-tex">\mathbf M</annotation></semantics></math>
-for the generic role. In a fitted model with a known context
+we write <span class="math inline">\mathbf M</span> for the generic
+role. In a fitted model with a known context
 (e.g. <code><a href="https://itchyshin.github.io/drmTMB/reference/phylo.html" class="external-link">drmTMB::phylo()</a></code> calls), <code>symbolizer</code>
-chooses the domain-specific letter —
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐀</mi><annotation encoding="application/x-tex">\mathbf A</annotation></semantics></math>
-for phylogenetic / animal-model,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛀</mi><annotation encoding="application/x-tex">\boldsymbol\Omega</annotation></semantics></math>
-for spatial. The symbol-dictionary description for
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛀</mi><annotation encoding="application/x-tex">\boldsymbol\Omega</annotation></semantics></math>
-explicitly disambiguates it from (a) Wishart precision matrices and (b)
-CAR / SAR spatial weights matrices.</p>
+chooses the domain-specific letter — <span class="math inline">\mathbf
+A</span> for phylogenetic / animal-model, <span class="math inline">\boldsymbol\Omega</span> for spatial. The
+symbol-dictionary description for <span class="math inline">\boldsymbol\Omega</span> explicitly disambiguates it
+from (a) Wishart precision matrices and (b) CAR / SAR spatial weights
+matrices.</p>
 </div>
 <div class="section level2">
 <h2 id="where-the-matrix-comes-from">Where the matrix comes from<a class="anchor" aria-label="anchor" href="#where-the-matrix-comes-from"></a>
 </h2>
 <p>For phylogenetic dependence under a Brownian-motion model of trait
-evolution,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐀</mi><annotation encoding="application/x-tex">\mathbf A</annotation></semantics></math>
-is the <strong>phylogenetic correlation matrix</strong>:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>A</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mspace width="0.278em"></mspace><mo>=</mo><mspace width="0.278em"></mspace><mfrac><msub><mi>T</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mi>T</mi></mfrac><mo>,</mo></mrow><annotation encoding="application/x-tex">
+evolution, <span class="math inline">\mathbf A</span> is the
+<strong>phylogenetic correlation matrix</strong>:</p>
+<p><span class="math display">
 A_{ij} \;=\; \frac{T_{ij}}{T},
-</annotation></semantics></math></p>
-<p>where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>T</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">T_{ij}</annotation></semantics></math>
-is the shared branch length between species
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>
-measured from the root, and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math>
-is the tree height. For an ultrametric tree all tips are equidistant
-from the root and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>A</mi><mrow><mi>i</mi><mi>i</mi></mrow></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">A_{ii} = 1</annotation></semantics></math>
-by construction. The matrix is symmetric positive-definite.</p>
+</span></p>
+<p>where <span class="math inline">T_{ij}</span> is the shared branch
+length between species <span class="math inline">i</span> and <span class="math inline">j</span> measured from the root, and <span class="math inline">T</span> is the tree height. For an ultrametric tree
+all tips are equidistant from the root and <span class="math inline">A_{ii} = 1</span> by construction. The matrix is
+symmetric positive-definite.</p>
 <p>Two operational representations exist:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressPackageStartupMessages</a></span><span class="op">(</span><span class="op">{</span></span>
@@ -246,7 +229,7 @@ by construction. The matrix is symmetric positive-definite.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"A off-diagonal quantiles (25/50/75/99%): "</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">A_tips</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/lower.tri.html" class="external-link">upper.tri</a></span><span class="op">(</span><span class="va">A_tips</span><span class="op">)</span><span class="op">]</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.25</span>,<span class="fl">.5</span>,<span class="fl">.75</span>,<span class="fl">.99</span><span class="op">)</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>,</span>
 <span>          collapse <span class="op">=</span> <span class="st">" / "</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; A off-diagonal quantiles (25/50/75/99%):  0 / 0.095 / 0.228 / 0.866</span></span></code></pre></div>
+<span><span class="co">#&gt; A off-diagonal quantiles (25/50/75/99%):  0 / 0.091 / 0.227 / 0.865</span></span></code></pre></div>
 <p>The two representations encode the <strong>same</strong>
 Brownian-motion prior. The tips-only version is the operational default
 for <code>metafor</code>, <code>glmmTMB::propto</code>, and
@@ -258,19 +241,19 @@ cites Hadfield &amp; Nakagawa 2010 explicitly in its <code><a href="https://rdrr
 help page). The all-nodes form is <em>richer</em>: it gives access to
 ancestral-state BLUPs at internal nodes; the tips-only form marginalises
 those out. In a balanced setup the two agree on the variance estimate
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mover><mi>σ</mi><mo accent="true">̂</mo></mover><mi>p</mi><mn>2</mn></msubsup><annotation encoding="application/x-tex">\hat\sigma_p^2</annotation></semantics></math>
-— a result we’ll return to in § “Tips vs all-nodes”.</p>
+<span class="math inline">\hat\sigma_p^2</span> — a result we’ll return
+to in § “Tips-only vs all-nodes”.</p>
 </div>
 <div class="section level2">
 <h2 id="three-packages-one-phylogenetic-lmm">Three packages, one phylogenetic LMM<a class="anchor" aria-label="anchor" href="#three-packages-one-phylogenetic-lmm"></a>
 </h2>
 <p>We fit the same model three different ways on the 60-species
 Moura-derived dataset. The model is</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow><mi mathvariant="normal">Z</mi><mi mathvariant="normal">r</mi></mrow><mi>i</mi></msub><mspace width="0.278em"></mspace><mo>=</mo><mspace width="0.278em"></mspace><msub><mi>β</mi><mn>0</mn></msub><mo>+</mo><msub><mi>u</mi><msub><mi>p</mi><mrow><mi>k</mi><mo stretchy="false" form="prefix">[</mo><mi>i</mi><mo stretchy="false" form="postfix">]</mo></mrow></msub></msub><mo>+</mo><msub><mi>e</mi><mi>i</mi></msub><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>u</mi><mi>p</mi></msub><mo>∼</mo><mi>𝒩</mi><mo stretchy="false" form="prefix">(</mo><mn>𝟎</mn><mo>,</mo><mspace width="0.278em"></mspace><msubsup><mi>σ</mi><mi>p</mi><mn>2</mn></msubsup><mspace width="0.167em"></mspace><mi>𝐀</mi><mo stretchy="false" form="postfix">)</mo><mo>,</mo><mspace width="1.0em"></mspace><msub><mi>e</mi><mi>i</mi></msub><mo>∼</mo><mi>𝒩</mi><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mspace width="0.278em"></mspace><msubsup><mi>σ</mi><mi>e</mi><mn>2</mn></msubsup><mo stretchy="false" form="postfix">)</mo><mo>,</mo></mrow><annotation encoding="application/x-tex">
+<p><span class="math display">
 \mathrm{Zr}_i \;=\; \beta_0 + u_{p_{k[i]}} + e_i,\qquad
 u_p \sim \mathcal N(\mathbf 0,\; \sigma_p^2\,\mathbf A),\quad
 e_i \sim \mathcal N(0,\; \sigma_e^2),
-</annotation></semantics></math></p>
+</span></p>
 <p>where:</p>
 <table class="table">
 <colgroup>
@@ -285,84 +268,66 @@ e_i \sim \mathcal N(0,\; \sigma_e^2),
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math></td>
-<td>observation index,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mo>=</mo><mn>1</mn><mo>,</mo><mi>…</mi><mo>,</mo><mi>n</mi></mrow><annotation encoding="application/x-tex">i = 1, \dots, n</annotation></semantics></math>
-— in this dataset there is one observation per species, so
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
-runs over species</td>
+<td><span class="math inline">i</span></td>
+<td>observation index, <span class="math inline">i = 1, \dots, n</span>
+— in this dataset there is one observation per species, so <span class="math inline">i</span> runs over species</td>
 <td>index</td>
 </tr>
 <tr class="even">
-<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math></td>
-<td>species index — total number of species in the phylogeny,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>=</mo><mn>60</mn></mrow><annotation encoding="application/x-tex">k = 60</annotation></semantics></math>
-here</td>
+<td><span class="math inline">k</span></td>
+<td>species index — total number of species in the phylogeny, <span class="math inline">k = 60</span> here</td>
 <td>index</td>
 </tr>
 <tr class="odd">
-<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo stretchy="false" form="prefix">[</mo><mi>i</mi><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">k[i]</annotation></semantics></math></td>
-<td>the species that observation
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
-belongs to (here
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo stretchy="false" form="prefix">[</mo><mi>i</mi><mo stretchy="false" form="postfix">]</mo><mo>=</mo><mi>i</mi></mrow><annotation encoding="application/x-tex">k[i] = i</annotation></semantics></math>
-because one observation per species)</td>
+<td><span class="math inline">k[i]</span></td>
+<td>the species that observation <span class="math inline">i</span>
+belongs to (here <span class="math inline">k[i] = i</span> because one
+observation per species)</td>
 <td>index</td>
 </tr>
 <tr class="even">
-<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mrow><mi mathvariant="normal">Z</mi><mi mathvariant="normal">r</mi></mrow><mi>i</mi></msub><annotation encoding="application/x-tex">\mathrm{Zr}_i</annotation></semantics></math></td>
-<td>Fisher-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>z</mi><annotation encoding="application/x-tex">z</annotation></semantics></math>
-transformed correlation for species
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
-— here treated as an ordinary continuous trait</td>
+<td><span class="math inline">\mathrm{Zr}_i</span></td>
+<td>Fisher-<span class="math inline">z</span> transformed correlation
+for species <span class="math inline">i</span> — here treated as an
+ordinary continuous trait</td>
 <td>observed</td>
 </tr>
 <tr class="odd">
-<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\beta_0</annotation></semantics></math></td>
-<td>global mean of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">Z</mi><mi mathvariant="normal">r</mi></mrow><annotation encoding="application/x-tex">\mathrm{Zr}</annotation></semantics></math>
-across species</td>
+<td><span class="math inline">\beta_0</span></td>
+<td>global mean of <span class="math inline">\mathrm{Zr}</span> across
+species</td>
 <td><strong>estimated</strong></td>
 </tr>
 <tr class="even">
-<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>u</mi><msub><mi>p</mi><mrow><mi>k</mi><mo stretchy="false" form="prefix">[</mo><mi>i</mi><mo stretchy="false" form="postfix">]</mo></mrow></msub></msub><annotation encoding="application/x-tex">u_{p_{k[i]}}</annotation></semantics></math></td>
-<td>phylogenetic random effect, indexed by species
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo stretchy="false" form="prefix">[</mo><mi>i</mi><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">k[i]</annotation></semantics></math>
-for observation
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
+<td><span class="math inline">u_{p_{k[i]}}</span></td>
+<td>phylogenetic random effect, indexed by species <span class="math inline">k[i]</span> for observation <span class="math inline">i</span>
 </td>
 <td>
 <strong>estimated</strong> (latent)</td>
 </tr>
 <tr class="odd">
-<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>σ</mi><mi>p</mi><mn>2</mn></msubsup><annotation encoding="application/x-tex">\sigma_p^2</annotation></semantics></math></td>
-<td>phylogenetic variance — the scale of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝐮</mi><mi>p</mi></msub><annotation encoding="application/x-tex">\mathbf u_p</annotation></semantics></math>
+<td><span class="math inline">\sigma_p^2</span></td>
+<td>phylogenetic variance — the scale of <span class="math inline">\mathbf u_p</span>
 </td>
 <td><strong>estimated</strong></td>
 </tr>
 <tr class="even">
-<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐀</mi><annotation encoding="application/x-tex">\mathbf A</annotation></semantics></math></td>
+<td><span class="math inline">\mathbf A</span></td>
 <td>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>×</mo><mi>k</mi></mrow><annotation encoding="application/x-tex">k \times k</annotation></semantics></math>
-tips-only phylogenetic correlation matrix derived from the tree under
-Brownian motion (or its all-nodes augmentation; see § “Tips-only vs
-all-nodes”)</td>
+<span class="math inline">k \times k</span> tips-only phylogenetic
+correlation matrix derived from the tree under Brownian motion (or its
+all-nodes augmentation; see § “Tips-only vs all-nodes”)</td>
 <td>constructed from tree</td>
 </tr>
 <tr class="odd">
-<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>e</mi><mi>i</mi></msub><annotation encoding="application/x-tex">e_i</annotation></semantics></math></td>
+<td><span class="math inline">e_i</span></td>
 <td>residual on the response scale</td>
 <td><strong>estimated</strong></td>
 </tr>
 <tr class="even">
-<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>σ</mi><mi>e</mi><mn>2</mn></msubsup><annotation encoding="application/x-tex">\sigma_e^2</annotation></semantics></math></td>
-<td>residual variance — what each package would call
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>σ</mi><mtext mathvariant="normal">units</mtext><mn>2</mn></msubsup><annotation encoding="application/x-tex">\sigma^2_{\text{units}}</annotation></semantics></math>,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>σ</mi><mtext mathvariant="normal">res</mtext><mn>2</mn></msubsup><annotation encoding="application/x-tex">\sigma^2_{\text{res}}</annotation></semantics></math>,
-or the marginal
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>σ</mi><mn>2</mn></msup><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>λ</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\sigma^2 (1 - \lambda)</annotation></semantics></math>
-depending on the parameterisation</td>
+<td><span class="math inline">\sigma_e^2</span></td>
+<td>residual variance — what each package would call <span class="math inline">\sigma^2_{\text{units}}</span>, <span class="math inline">\sigma^2_{\text{res}}</span>, or the marginal <span class="math inline">\sigma^2 (1 - \lambda)</span> depending on the
+parameterisation</td>
 <td><strong>estimated</strong></td>
 </tr>
 </tbody>
@@ -370,50 +335,34 @@ depending on the parameterisation</td>
 <p>Three notes that often trip up first readers:</p>
 <ol style="list-style-type: decimal">
 <li>
-<strong><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>σ</mi><mi>e</mi><mn>2</mn></msubsup><annotation encoding="application/x-tex">\sigma_e^2</annotation></semantics></math>
-is estimated, not the per-effect sampling variance
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>v</mi><mi>i</mi></msub><annotation encoding="application/x-tex">v_i</annotation></semantics></math>.</strong>
-In meta-analysis we’d also feed in
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>v</mi><mi>i</mi></msub><annotation encoding="application/x-tex">v_i</annotation></semantics></math>
-(a <em>known</em> sampling variance per study) via
-<code>metafor::rma.mv(V = vi, ...)</code>. That’s the model class in the
-v0.22 article — same
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>σ</mi><mi>p</mi><mn>2</mn></msubsup><mi>𝐀</mi></mrow><annotation encoding="application/x-tex">\sigma_p^2 \mathbf A</annotation></semantics></math>
-phylogenetic term, but with
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐕</mi><mo>=</mo><mrow><mi mathvariant="normal">diag</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>v</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\mathbf V = \operatorname{diag}(v_i)</annotation></semantics></math>
-added on top of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>σ</mi><mi>e</mi><mn>2</mn></msubsup><mi>𝐈</mi></mrow><annotation encoding="application/x-tex">\sigma_e^2 \mathbf I</annotation></semantics></math>
-(Cinar et al. 2022, Eq. 1–10).</li>
+<strong><span class="math inline">\sigma_e^2</span> is estimated,
+not the per-effect sampling variance <span class="math inline">v_i</span>.</strong> In meta-analysis we’d also feed
+in <span class="math inline">v_i</span> (a <em>known</em> sampling
+variance per study) via <code>metafor::rma.mv(V = vi, ...)</code>.
+That’s the model class in the v0.22 article — same <span class="math inline">\sigma_p^2 \mathbf A</span> phylogenetic term, but
+with <span class="math inline">\mathbf V =
+\operatorname{diag}(v_i)</span> added on top of <span class="math inline">\sigma_e^2 \mathbf I</span> (Cinar et al. 2022, Eq.
+1–10).</li>
 <li>The Moura data was <em>built</em> as a meta-analytic dataset (one
-Fisher-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>z</mi><annotation encoding="application/x-tex">z</annotation></semantics></math>
-per species, aggregated from many effect-size estimates). We use only
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">Z</mi><mi mathvariant="normal">r</mi></mrow><annotation encoding="application/x-tex">\mathrm{Zr}</annotation></semantics></math>
-here; the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>v</mi><mi>i</mi></msub><annotation encoding="application/x-tex">v_i</annotation></semantics></math>
-column is set aside. That’s a pedagogical choice — a clean phylo-LMM is
-easier to read than a meta-analytic phylo-LMM, and it keeps this article
-focused on the structural-dependence axis.</li>
+Fisher-<span class="math inline">z</span> per species, aggregated from
+many effect-size estimates). We use only <span class="math inline">\mathrm{Zr}</span> here; the <span class="math inline">v_i</span> column is set aside. That’s a pedagogical
+choice — a clean phylo-LMM is easier to read than a meta-analytic
+phylo-LMM, and it keeps this article focused on the
+structural-dependence axis.</li>
 <li>
 <code>phylolm</code> fits a <strong>marginalised</strong> version of
-this same model: it absorbs
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>u</mi><mi>p</mi></msub><annotation encoding="application/x-tex">u_p</annotation></semantics></math>
-into the residual to give
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">Z</mi><mi mathvariant="normal">r</mi></mrow><mo>∼</mo><mi>𝒩</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>β</mi><mn>0</mn></msub><mn>𝟏</mn><mo>,</mo><msup><mi>σ</mi><mn>2</mn></msup><mi>𝐂</mi><mo stretchy="false" form="prefix">(</mo><mi>α</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\mathrm{Zr} \sim \mathcal N(\beta_0 \mathbf 1, \sigma^2 \mathbf C(\alpha))</annotation></semantics></math>
-where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>σ</mi><mn>2</mn></msup><mi>𝐂</mi><mo stretchy="false" form="prefix">(</mo><mi>α</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msubsup><mi>σ</mi><mi>p</mi><mn>2</mn></msubsup><mi>𝐀</mi><mo>+</mo><msubsup><mi>σ</mi><mi>e</mi><mn>2</mn></msubsup><mi>𝐈</mi></mrow><annotation encoding="application/x-tex">\sigma^2 \mathbf C(\alpha) = \sigma_p^2 \mathbf A + \sigma_e^2 \mathbf I</annotation></semantics></math>
-in the
-Pagel-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math>
-parametrisation. The § “Face 3” Face below makes the bridge
-explicit.</li>
+this same model: it absorbs <span class="math inline">u_p</span> into
+the residual to give <span class="math inline">\mathrm{Zr} \sim \mathcal
+N(\beta_0 \mathbf 1, \sigma^2 \mathbf C(\alpha))</span> where <span class="math inline">\sigma^2 \mathbf C(\alpha) = \sigma_p^2 \mathbf A +
+\sigma_e^2 \mathbf I</span> in the Pagel-<span class="math inline">\lambda</span> parametrisation. The § “Face 3” Face
+below makes the bridge explicit.</li>
 </ol>
-<p>The phylogenetic correlation matrix
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐀</mi><annotation encoding="application/x-tex">\mathbf A</annotation></semantics></math>
-carries realistic biology — most species pairs are distantly related
-(median off-diagonal
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>≈</mo><mn>0.03</mn></mrow><annotation encoding="application/x-tex">\approx 0.03</annotation></semantics></math>)
-while a handful are close (top 1 % above 0.85). Compare with the
-degenerate <code>rcoal(15)</code> simulation used in earlier drafts
-where 75 % of pairs were above 0.91.</p>
+<p>The phylogenetic correlation matrix <span class="math inline">\mathbf
+A</span> carries realistic biology — most species pairs are distantly
+related (median off-diagonal <span class="math inline">\approx
+0.09</span>) while a handful are close (top 1 % above 0.85). Compare
+with the degenerate <code>rcoal(15)</code> simulation used in earlier
+drafts where 75 % of pairs were above 0.91.</p>
 <div class="section level3">
 <h3 id="face-1-deep-dive-mcmcglmm-with-ginverse-listspecies-ainv">Face 1 (deep dive): <code>MCMCglmm</code> with
 <code>ginverse = list(species = Ainv)</code><a class="anchor" aria-label="anchor" href="#face-1-deep-dive-mcmcglmm-with-ginverse-listspecies-ainv"></a>
@@ -421,43 +370,23 @@ where 75 % of pairs were above 0.91.</p>
 <p><code>MCMCglmm</code> uses the <strong>all-nodes</strong>
 representation natively (Hadfield 2010 §8.2.1). Internally the
 random-effect vector spans both tip species AND internal phylogenetic
-nodes, so when the widget below shows the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐀</mi><annotation encoding="application/x-tex">\mathbf{A}</annotation></semantics></math>
-matrix you will see a
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>116</mn><mo>×</mo><mn>116</mn></mrow><annotation encoding="application/x-tex">116 \times 116</annotation></semantics></math>
-block, not the nominal
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>×</mo><mi>k</mi><mo>=</mo><mn>60</mn><mo>×</mo><mn>60</mn></mrow><annotation encoding="application/x-tex">k \times k = 60 \times 60</annotation></semantics></math>
-tips-only form — the same prior, just an augmented coordinate system.
-(For a
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>-tip
-tree the augmentation is at most
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn><mi>k</mi><mo>−</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">2k-2</annotation></semantics></math>
-rows; in this dataset two polytomies after ultrametricisation drop the
-count from 118 to 116.) The Moura dataset has one observation per
-species, so the random-effect incidence matrix
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐙</mi><annotation encoding="application/x-tex">\mathbf{Z}</annotation></semantics></math>
-is the identity on the observed species and the widget elides it from
-Tab 3’s stacked block — each row shows the predicted per-observation
-random effect
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>u</mi><mo accent="true">̂</mo></mover><mrow><mtext mathvariant="normal">species</mtext><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo></mrow></msub><annotation encoding="application/x-tex">\hat u_{\text{species}(i)}</annotation></semantics></math>
-directly.
-(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐙</mi><annotation encoding="application/x-tex">\mathbf{Z}</annotation></semantics></math>
-is reintroduced in articles where multiple observations share a species
-or study.)</p>
+nodes, so when the widget below shows the <span class="math inline">\mathbf{A}</span> matrix you will see a <span class="math inline">116 \times 116</span> block, not the nominal <span class="math inline">k \times k = 60 \times 60</span> tips-only form —
+the same prior, just an augmented coordinate system. (For a <span class="math inline">k</span>-tip tree the augmentation is at most <span class="math inline">2k-2</span> rows; in this dataset two polytomies
+after ultrametricisation drop the count from 118 to 116.) The Moura
+dataset has one observation per species, so the random-effect incidence
+matrix <span class="math inline">\mathbf{Z}</span> is the identity on
+the observed species and the widget elides it from Tab 3’s stacked block
+— each row shows the predicted per-observation random effect <span class="math inline">\hat u_{\text{species}(i)}</span> directly. (<span class="math inline">\mathbf{Z}</span> is reintroduced in articles where
+multiple observations share a species or study.)</p>
 <p>A note on <strong>scalar vs vector notation</strong> before the
 widget: the <strong>Index</strong> tab writes one row of the model for a
-single observation
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>,
-so the scalar form
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mrow><mi mathvariant="normal">Z</mi><mi mathvariant="normal">r</mi></mrow><mi>i</mi></msub><annotation encoding="application/x-tex">\mathrm{Zr}_i</annotation></semantics></math>
-(italic capital, with subscript) is used. The <strong>Matrix</strong>
-and <strong>Equations with data</strong> tabs collect all
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
-observations into the column vector
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi>𝐳</mi><mi>𝐫</mi></mrow><mo>=</mo><mo stretchy="false" form="prefix">(</mo><msub><mrow><mi mathvariant="normal">Z</mi><mi mathvariant="normal">r</mi></mrow><mn>1</mn></msub><mo>,</mo><mi>…</mi><mo>,</mo><msub><mrow><mi mathvariant="normal">Z</mi><mi mathvariant="normal">r</mi></mrow><mi>n</mi></msub><msup><mo stretchy="false" form="postfix">)</mo><mi>⊤</mi></msup></mrow><annotation encoding="application/x-tex">\mathbf{zr} = (\mathrm{Zr}_1, \dots, \mathrm{Zr}_n)^\top</annotation></semantics></math>
-(bold lowercase, no subscript). Same quantity, two notations — the index
-form is for reading one row, the vector form is for the matrix
-algebra.</p>
+single observation <span class="math inline">i</span>, so the scalar
+form <span class="math inline">\mathrm{Zr}_i</span> (italic capital,
+with subscript) is used. The <strong>Matrix</strong> and
+<strong>Equations with data</strong> tabs collect all <span class="math inline">n</span> observations into the column vector <span class="math inline">\mathbf{zr} = (\mathrm{Zr}_1, \dots,
+\mathrm{Zr}_n)^\top</span> (bold lowercase, no subscript). Same
+quantity, two notations — the index form is for reading one row, the
+vector form is for the matrix algebra.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_mcmc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/MCMCglmm/man/MCMCglmm.html" class="external-link">MCMCglmm</a></span><span class="op">(</span></span>
 <span>  <span class="va">Zr</span> <span class="op">~</span> <span class="fl">1</span>,</span>
@@ -488,7 +417,7 @@ algebra.</p>
 <td align="left">mu</td>
 <td align="left">species</td>
 <td align="left">(Intercept)</td>
-<td align="left">0.325</td>
+<td align="left">0.324</td>
 <td align="left">0.105</td>
 </tr>
 <tr class="even">
@@ -496,7 +425,7 @@ algebra.</p>
 <td align="left">residual</td>
 <td align="left">Residual</td>
 <td align="left">0.215</td>
-<td align="left">0.0460</td>
+<td align="left">0.0461</td>
 </tr>
 </tbody>
 </table>
@@ -505,7 +434,7 @@ algebra.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 5</span></span></span>
 <span><span class="co">#&gt;   group   variance_A variance_E heritability reading                            </span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                              </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> species      0.105     0.046<span style="text-decoration: underline;">0</span>        0.696 Heritability h^2 = sigma^2_p / (si…</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> species      0.105     0.046<span style="text-decoration: underline;">1</span>        0.694 Heritability h^2 = sigma^2_p / (si…</span></span></code></pre></div>
 <div class="section level4">
 <h4 id="three-views-widget-for-the-mcmcglmm-fit">Three-views widget for the MCMCglmm fit<a class="anchor" aria-label="anchor" href="#three-views-widget-for-the-mcmcglmm-fit"></a>
 </h4>
@@ -533,21 +462,21 @@ algebra.</p>
 .sym-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .sym-skip { position: absolute; top: -100px; left: 0; padding: 0.4rem 0.7rem; background: #8a1f22; color: #fff; text-decoration: none; font-size: 0.85rem; z-index: 5; }
 .sym-skip:focus { top: 0; }</style>
-<div id="sym-mcmc-1780075488" class="sym-tabs">
-<a class="sym-skip" href="#sym-mcmc-1780075488-end">Skip three-views
+<div id="sym-mcmc-1780180818" class="sym-tabs">
+<a class="sym-skip" href="#sym-mcmc-1780180818-end">Skip three-views
 widget</a>
 <div class="sym-tablist" role="tablist" aria-label="Three views of the model">
-<button type="button" class="sym-tab sym-active" role="tab" id="sym-mcmc-1780075488-tab-idx" aria-controls="sym-mcmc-1780075488-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
+<button type="button" class="sym-tab sym-active" role="tab" id="sym-mcmc-1780180818-tab-idx" aria-controls="sym-mcmc-1780180818-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>1. Index
 </button>
-<button type="button" class="sym-tab" role="tab" id="sym-mcmc-1780075488-tab-eq" aria-controls="sym-mcmc-1780075488-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
+<button type="button" class="sym-tab" role="tab" id="sym-mcmc-1780180818-tab-eq" aria-controls="sym-mcmc-1780180818-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>2. Matrix
 </button>
-<button type="button" class="sym-tab" role="tab" id="sym-mcmc-1780075488-tab-mat" aria-controls="sym-mcmc-1780075488-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
+<button type="button" class="sym-tab" role="tab" id="sym-mcmc-1780180818-tab-mat" aria-controls="sym-mcmc-1780180818-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>3. Equations with data
 </button>
 </div>
-<div id="sym-mcmc-1780075488-panel-idx" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-mcmc-1780075488-tab-idx" data-panel="idx" tabindex="0">
+<div id="sym-mcmc-1780180818-panel-idx" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-mcmc-1780180818-tab-idx" data-panel="idx" tabindex="0">
 <p class="sym-caption">
 What happens for each observation <em>i</em> – the per-individual
 reading.
@@ -555,80 +484,74 @@ reading.
 <p class="sym-biology">
 Species are not independent observations. Closely related species tend
 to have similar trait values because of shared evolutionary history; the
-phylogenetic correlation matrix
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐀</mi><annotation encoding="application/x-tex">\mathbf{A}</annotation></semantics></math>
-encodes those expected similarities (cell
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>A</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">A_{ij}</annotation></semantics></math>
-= fraction of shared branch length between species
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>).
-The phylogenetic SD
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>p</mi></msub><annotation encoding="application/x-tex">\sigma_p</annotation></semantics></math>
-measures how much across-species variation remains after fixed-effect
-predictors are accounted for.
+phylogenetic correlation matrix <span class="math inline">\mathbf{A}</span> encodes those expected
+similarities (cell <span class="math inline">A_{ij}</span> = fraction of
+shared branch length between species <span class="math inline">i</span>
+and <span class="math inline">j</span>). The phylogenetic SD <span class="math inline">\sigma_p</span> measures how much across-species
+variation remains after fixed-effect predictors are accounted for.
 </p>
 <p class="sym-biology">
-<strong>Coefficient reading.</strong> On the response scale,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>β</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat\beta</annotation></semantics></math>
-is the additive change in the mean of the response for a one-unit
-increase in the predictor (identity link – no back-transformation
-needed).
+<strong>Coefficient reading.</strong> On the response scale, <span class="math inline">\hat\beta</span> is the additive change in the mean
+of the response for a one-unit increase in the predictor (identity link
+– no back-transformation needed).
 </p>
 <div class="sym-eq">
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mrow><mi mathvariant="normal">Z</mi><mi mathvariant="normal">r</mi></mrow><mi>i</mi></msub><mo>∣</mo><msub><mi>μ</mi><mi>i</mi></msub><mo>,</mo><mspace width="0.167em"></mspace><msub><mi>σ</mi><mi>i</mi></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>∼</mo><mrow><mi mathvariant="normal">N</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>μ</mi><mi>i</mi></msub><mo>,</mo><mspace width="0.167em"></mspace><msubsup><mi>σ</mi><mi>i</mi><mn>2</mn></msubsup><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>μ</mi><mi>i</mi></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><msub><mi>β</mi><mn>0</mn></msub><mo>+</mo><msub><mi>u</mi><mrow><mi>s</mi><mi>p</mi><mi>e</mi><mi>c</mi><mi>i</mi><mi>e</mi><mi>s</mi><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo></mrow></msub></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>𝐮</mi><mrow><mi>s</mi><mi>p</mi><mi>e</mi><mi>c</mi><mi>i</mi><mi>e</mi><mi>s</mi></mrow></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>∼</mo><mi>𝒩</mi><mo stretchy="false" form="prefix">(</mo><mn>𝟎</mn><mo>,</mo><mspace width="0.167em"></mspace><msubsup><mi>σ</mi><mrow><mi>s</mi><mi>p</mi><mi>e</mi><mi>c</mi><mi>i</mi><mi>e</mi><mi>s</mi></mrow><mn>2</mn></msubsup><mi>𝐀</mi><mo stretchy="false" form="postfix">)</mo></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
-\mathrm{Zr}_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
+<span class="math display">\begin{aligned}
+\mathrm{Zr}_i \mid \mu_i,\, \sigma &amp; \sim \mathrm{Normal}(\mu_i,\,
+\sigma^2) \\
 \mu_i &amp; = \beta_{0} + u_{species(i)} \\
-\mathbf{u}_{species} &amp; \sim \mathcal{N}(\mathbf{0},\, \sigma_{species}^2 \mathbf{A})
-\end{aligned}</annotation></semantics></math>
+\mathbf{u}_{species} &amp; \sim \mathcal{N}(\mathbf{0},\,
+\sigma_{species}^2 \mathbf{A})
+\end{aligned}</span>
 </div>
 <details class="sym-gloss" open><summary>
 where:
 </summary><ul class="sym-gloss-list">
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mrow><mi mathvariant="normal">Z</mi><mi mathvariant="normal">r</mi></mrow><mi>i</mi></msub><annotation encoding="application/x-tex">\mathrm{Zr}_i</annotation></semantics></math>
-— response variable  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>60</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{60}</annotation></semantics></math></span>
+<span class="math inline">\mathrm{Zr}_i</span> — response variable
+ <span class="sym-dim"><span class="math inline">\mathbb{R}^{60}</span></span>
 </li>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>μ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\mu_i</annotation></semantics></math>
-— conditional mu of Zr  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>60</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{60}</annotation></semantics></math></span>
+<span class="math inline">\mu_i</span> — conditional mu of Zr  <span class="sym-dim"><span class="math inline">\mathbb{R}^{60}</span></span>
 </li>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\sigma_i</annotation></semantics></math>
-— residual standard deviation of Zr  <span class="sym-dim">scalar</span>
+<span class="math inline">\sigma</span> — residual standard deviation of
+Zr  <span class="sym-dim">scalar</span>
 </li>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\beta_{0}</annotation></semantics></math>
-— mu submodel coefficients  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>1</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{1}</annotation></semantics></math></span>
+<span class="math inline">\beta_{0}</span> — mu submodel coefficients
+ <span class="sym-dim"><span class="math inline">\mathbb{R}^{1}</span></span>
 </li>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>u</mi><mrow><mi>s</mi><mi>p</mi><mi>e</mi><mi>c</mi><mi>i</mi><mi>e</mi><mi>s</mi><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo></mrow></msub><annotation encoding="application/x-tex">u_{species(i)}</annotation></semantics></math>
-— random intercept by species  <span class="sym-dim">scalar;
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>116</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{116}</annotation></semantics></math>
-in matrix form</span>
+<span class="math inline">u_{species(i)}</span> — random intercept by
+species  <span class="sym-dim">scalar; <span class="math inline">\mathbb{R}^{116}</span> in matrix form</span>
 </li>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mrow><mi>s</mi><mi>p</mi><mi>e</mi><mi>c</mi><mi>i</mi><mi>e</mi><mi>s</mi></mrow></msub><annotation encoding="application/x-tex">\sigma_{species}</annotation></semantics></math>
-— between-species standard deviation  <span class="sym-dim">scalar</span>
+<span class="math inline">\sigma_{species}</span> — between-species
+standard deviation  <span class="sym-dim">scalar</span>
 </li>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐀</mi><annotation encoding="application/x-tex">\mathbf{A}</annotation></semantics></math>
-— phylogenetic / pedigree correlation matrix on species
-(Hadfield-Nakagawa all-nodes sparse-precision representation, supplied
-via ginverse)  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><msub><mi>k</mi><mrow><mi>s</mi><mi>p</mi><mi>e</mi><mi>c</mi><mi>i</mi><mi>e</mi><mi>s</mi></mrow></msub><mo>×</mo><msub><mi>k</mi><mrow><mi>s</mi><mi>p</mi><mi>e</mi><mi>c</mi><mi>i</mi><mi>e</mi><mi>s</mi></mrow></msub></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{k_{species} \times k_{species}}</annotation></semantics></math></span>
+<span class="math inline">\mathbf{A}</span> — phylogenetic / pedigree
+correlation matrix on species (Hadfield-Nakagawa all-nodes
+sparse-precision representation, supplied via ginverse)  <span class="sym-dim"><span class="math inline">\mathbb{R}^{k_{species} \times
+k_{species}}</span></span>
 </li>
 </ul></details><div class="sym-vc-panel" style="margin-top:1rem;border-top:1px solid #eee;padding-top:0.7rem">
 <p class="sym-caption">
 <strong>Where does the variation live?</strong> Where the variation
-lives – each row is one source of variance, shown as a share of the
-total.
+lives – each row is one variance component (shown as a share of the
+total when a single total variance is defined).
 </p>
 <div class="sym-vc-bar sym-vc-stacked" role="img" aria-label="variance partition" style="display:flex;width:100%;height:1.8rem;border-radius:4px;overflow:hidden;font-size:0.78rem;line-height:1.8rem;margin:0.4rem 0">
-<pre><code>&lt;div style="width:69.6%;background:#2c7fb8;color:#fff;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="species"&gt;species 69.6%&lt;/div&gt;
-&lt;div style="width:30.4%;background:#d9d9d9;color:#333;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="Residual (within-group)"&gt;Residual (within-group) 30.4%&lt;/div&gt;</code></pre>
+<div style="width:69.4%;background:#2c7fb8;color:#fff;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="species">
+species 69.4%
+</div>
+<div style="width:30.6%;background:#d9d9d9;color:#333;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="Residual (within-group)">
+Residual (within-group) 30.6%
+</div>
 </div>
 <p class="sym-vc-icc" style="margin:0.4rem 0">
-<strong>ICC (data scale):</strong> 0.696. <span style="color:#6b7280;font-style:italic">Data-scale ICC: the share of
+<strong>ICC (data scale):</strong> 0.694. <span style="color:#6b7280;font-style:italic">Data-scale ICC: the share of
 total variance that lies between groups – a genuine proportion of
 variance.</span>
 </p>
@@ -637,7 +560,7 @@ Point estimates only; uncertainty not shown.
 </p>
 </div>
 </div>
-<div id="sym-mcmc-1780075488-panel-eq" class="sym-panel" role="tabpanel" aria-labelledby="sym-mcmc-1780075488-tab-eq" data-panel="eq" hidden="" tabindex="0">
+<div id="sym-mcmc-1780180818-panel-eq" class="sym-panel" role="tabpanel" aria-labelledby="sym-mcmc-1780180818-tab-eq" data-panel="eq" hidden="" tabindex="0">
 <p class="sym-caption">
 The same model in matrix form – the structural contract every textbook
 past chapter 4 switches to.
@@ -645,68 +568,61 @@ past chapter 4 switches to.
 <p class="sym-biology">
 Species are not independent observations. Closely related species tend
 to have similar trait values because of shared evolutionary history; the
-phylogenetic correlation matrix
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐀</mi><annotation encoding="application/x-tex">\mathbf{A}</annotation></semantics></math>
-encodes those expected similarities (cell
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>A</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">A_{ij}</annotation></semantics></math>
-= fraction of shared branch length between species
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>).
-The phylogenetic SD
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>p</mi></msub><annotation encoding="application/x-tex">\sigma_p</annotation></semantics></math>
-measures how much across-species variation remains after fixed-effect
-predictors are accounted for.
+phylogenetic correlation matrix <span class="math inline">\mathbf{A}</span> encodes those expected
+similarities (cell <span class="math inline">A_{ij}</span> = fraction of
+shared branch length between species <span class="math inline">i</span>
+and <span class="math inline">j</span>). The phylogenetic SD <span class="math inline">\sigma_p</span> measures how much across-species
+variation remains after fixed-effect predictors are accounted for.
 </p>
 <div class="sym-eq">
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mrow><mi>𝐳</mi><mi>𝐫</mi></mrow><mo>∣</mo><mi>𝛍</mi><mo>,</mo><mspace width="0.167em"></mspace><mi>𝛔</mi></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>∼</mo><mi>𝒩</mi><mo stretchy="false" form="prefix">(</mo><mi>𝛍</mi><mo>,</mo><mspace width="0.167em"></mspace><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">g</mi></mrow><mo stretchy="false" form="prefix">(</mo><msup><mi>𝛔</mi><mn>2</mn></msup><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mi>𝛍</mi></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>𝐗</mi><mi>𝛃</mi><mo>+</mo><mi>𝐮</mi></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>𝐮</mi><mrow><mi>s</mi><mi>p</mi><mi>e</mi><mi>c</mi><mi>i</mi><mi>e</mi><mi>s</mi></mrow></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>∼</mo><mi>𝒩</mi><mo stretchy="false" form="prefix">(</mo><mn>𝟎</mn><mo>,</mo><mspace width="0.167em"></mspace><msubsup><mi>σ</mi><mrow><mi>s</mi><mi>p</mi><mi>e</mi><mi>c</mi><mi>i</mi><mi>e</mi><mi>s</mi></mrow><mn>2</mn></msubsup><msub><mi>𝐀</mi><mrow><mn>116</mn><mo>×</mo><mn>116</mn></mrow></msub><mo stretchy="false" form="postfix">)</mo></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
-\mathbf{zr} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} &amp; \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2)) \\
+<span class="math display">\begin{aligned}
+\mathbf{zr} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} &amp; \sim
+\mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2)) \\
 \boldsymbol{\mu} &amp; = \mathbf{X} \boldsymbol{\beta} + \mathbf{u} \\
-\mathbf{u}_{species} &amp; \sim \mathcal{N}(\mathbf{0},\, \sigma_{species}^2 \mathbf{A}_{116 \times 116})
-\end{aligned}</annotation></semantics></math>
+\mathbf{u}_{species} &amp; \sim \mathcal{N}(\mathbf{0},\,
+\sigma_{species}^2 \mathbf{A}_{116 \times 116})
+\end{aligned}</span>
 </div>
 <details class="sym-gloss" open><summary>
 where:
 </summary><ul class="sym-gloss-list">
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐳</mi><mi>𝐫</mi></mrow><annotation encoding="application/x-tex">\mathbf{zr}</annotation></semantics></math>
-— response variable  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>60</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{60}</annotation></semantics></math></span>
+<span class="math inline">\mathbf{zr}</span> — response variable  <span class="sym-dim"><span class="math inline">\mathbb{R}^{60}</span></span>
 </li>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛍</mi><annotation encoding="application/x-tex">\boldsymbol{\mu}</annotation></semantics></math>
-— conditional mu of Zr  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>60</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{60}</annotation></semantics></math></span>
+<span class="math inline">\boldsymbol{\mu}</span> — conditional mu of Zr
+ <span class="sym-dim"><span class="math inline">\mathbb{R}^{60}</span></span>
 </li>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛔</mi><annotation encoding="application/x-tex">\boldsymbol{\sigma}</annotation></semantics></math>
-— residual standard deviation of Zr  <span class="sym-dim">scalar</span>
+<span class="math inline">\boldsymbol{\sigma}</span> — residual standard
+deviation of Zr  <span class="sym-dim">scalar</span>
 </li>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛃</mi><annotation encoding="application/x-tex">\boldsymbol{\beta}</annotation></semantics></math>
-— mu submodel coefficients  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>1</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{1}</annotation></semantics></math></span>
+<span class="math inline">\boldsymbol{\beta}</span> — mu submodel
+coefficients  <span class="sym-dim"><span class="math inline">\mathbb{R}^{1}</span></span>
 </li>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐗</mi><annotation encoding="application/x-tex">\mathbf{X}</annotation></semantics></math>
-— mu submodel design matrix  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mn>60</mn><mo>×</mo><mn>1</mn></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{60 \times 1}</annotation></semantics></math></span>
+<span class="math inline">\mathbf{X}</span> — mu submodel design matrix
+ <span class="sym-dim"><span class="math inline">\mathbb{R}^{60 \times
+1}</span></span>
 </li>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝐮</mi><mrow><mi>s</mi><mi>p</mi><mi>e</mi><mi>c</mi><mi>i</mi><mi>e</mi><mi>s</mi></mrow></msub><annotation encoding="application/x-tex">\mathbf{u}_{species}</annotation></semantics></math>
-— random intercept by species  <span class="sym-dim">scalar;
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>116</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{116}</annotation></semantics></math>
-in matrix form</span>
+<span class="math inline">\mathbf{u}_{species}</span> — random intercept
+by species  <span class="sym-dim">scalar; <span class="math inline">\mathbb{R}^{116}</span> in matrix form</span>
 </li>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mrow><mi>s</mi><mi>p</mi><mi>e</mi><mi>c</mi><mi>i</mi><mi>e</mi><mi>s</mi></mrow></msub><annotation encoding="application/x-tex">\sigma_{species}</annotation></semantics></math>
-— between-species standard deviation  <span class="sym-dim">scalar</span>
+<span class="math inline">\sigma_{species}</span> — between-species
+standard deviation  <span class="sym-dim">scalar</span>
 </li>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐀</mi><annotation encoding="application/x-tex">\mathbf{A}</annotation></semantics></math>
-— phylogenetic / pedigree correlation matrix on species
-(Hadfield-Nakagawa all-nodes sparse-precision representation, supplied
-via ginverse)  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><msub><mi>k</mi><mrow><mi>s</mi><mi>p</mi><mi>e</mi><mi>c</mi><mi>i</mi><mi>e</mi><mi>s</mi></mrow></msub><mo>×</mo><msub><mi>k</mi><mrow><mi>s</mi><mi>p</mi><mi>e</mi><mi>c</mi><mi>i</mi><mi>e</mi><mi>s</mi></mrow></msub></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{k_{species} \times k_{species}}</annotation></semantics></math></span>
+<span class="math inline">\mathbf{A}</span> — phylogenetic / pedigree
+correlation matrix on species (Hadfield-Nakagawa all-nodes
+sparse-precision representation, supplied via ginverse)  <span class="sym-dim"><span class="math inline">\mathbb{R}^{k_{species} \times
+k_{species}}</span></span>
 </li>
 </ul></details>
 </div>
-<div id="sym-mcmc-1780075488-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-mcmc-1780075488-tab-mat" data-panel="mat" hidden="" tabindex="0">
+<div id="sym-mcmc-1780180818-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-mcmc-1780180818-tab-mat" data-panel="mat" hidden="" tabindex="0">
 <p class="sym-caption">
 The same matrix equation, with your actual numbers stacked inside the
 brackets – what the computer multiplies. Showing first 5 and last 2 rows
@@ -715,18 +631,11 @@ of n = 60.
 <p class="sym-biology">
 Species are not independent observations. Closely related species tend
 to have similar trait values because of shared evolutionary history; the
-phylogenetic correlation matrix
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐀</mi><annotation encoding="application/x-tex">\mathbf{A}</annotation></semantics></math>
-encodes those expected similarities (cell
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>A</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">A_{ij}</annotation></semantics></math>
-= fraction of shared branch length between species
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>).
-The phylogenetic SD
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>p</mi></msub><annotation encoding="application/x-tex">\sigma_p</annotation></semantics></math>
-measures how much across-species variation remains after fixed-effect
-predictors are accounted for.
+phylogenetic correlation matrix <span class="math inline">\mathbf{A}</span> encodes those expected
+similarities (cell <span class="math inline">A_{ij}</span> = fraction of
+shared branch length between species <span class="math inline">i</span>
+and <span class="math inline">j</span>). The phylogenetic SD <span class="math inline">\sigma_p</span> measures how much across-species
+variation remains after fixed-effect predictors are accounted for.
 </p>
 <span class="sym-sr-only">Matrix-form expansion of the model. Each row
 shows the response y_i and the corresponding row of the design matrix X
@@ -737,32 +646,45 @@ contribution to each observation is also shown.</span>
 For observation <em>i</em> = 1 of your data:
 </p>
 <div class="sym-eq">
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><mi>z</mi><msub><mi>r</mi><mn>1</mn></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><msub><mover><mi>β</mi><mo accent="true">̂</mo></mover><mn>0</mn></msub><mo>+</mo><msub><mover><mi>ε</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub></mtd><mtd columnalign="right" style="text-align: right"><mspace width="1.0em"></mspace><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">response equation, one row of the model</mtext><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><msub><mover><mi>μ</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mn>0.366</mn><mo>≈</mo><mn>0.215</mn></mtd><mtd columnalign="right" style="text-align: right"><mspace width="1.0em"></mspace><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">predicted mean</mtext><mo>=</mo><mtext mathvariant="normal">linear predictor</mtext><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>z</mi><msub><mi>r</mi><mn>1</mn></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><munder><munder><mn>0.215</mn><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mover><mi>μ</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mspace width="0.167em"></mspace><mtext mathvariant="normal">(predicted)</mtext><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.278em"></mspace><mo>+</mo><mspace width="0.278em"></mspace><munder><munder><mrow><mo stretchy="false" form="prefix">(</mo><mi>−</mi><mn>0.0485</mn><mo stretchy="false" form="postfix">)</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mover><mi>ε</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mspace width="0.167em"></mspace><mtext mathvariant="normal">(residual)</mtext><mspace width="0.167em"></mspace></mrow></munder></mtd><mtd columnalign="right" style="text-align: right"><mspace width="1.0em"></mspace><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">observed</mtext><mo>=</mo><mtext mathvariant="normal">predicted mean</mtext><mo>+</mo><mtext mathvariant="normal">residual</mtext><mo stretchy="false" form="postfix">)</mo></mtd></mtr></mtable><annotation encoding="application/x-tex">
+<span class="math display">
 \begin{aligned}
-zr_{1} &amp;= \hat\beta_{0} + \hat\varepsilon_{1} &amp;\quad(\text{response equation, one row of the model}) \\
-\hat\mu_{1} &amp;= 0.366 \approx 0.215 &amp;\quad(\text{predicted mean} = \text{linear predictor}) \\
-zr_{1} &amp;= \underbrace{0.215}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-0.0485)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,} &amp;\quad(\text{observed} = \text{predicted mean} + \text{residual})
+zr_{1} &amp;= \hat\beta_{0} + \hat{u}_{1} + \hat\varepsilon_{1}
+&amp;\quad(\text{response equation, one row of the model}) \\
+\hat\mu_{1} &amp;= 0.366 + (-0.151) \approx 0.215
+&amp;\quad(\text{predicted mean} = \text{linear predictor}) \\
+zr_{1} &amp;=
+\underbrace{0.215}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\;
+\underbrace{(-0.0485)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
+&amp;\quad(\text{observed} = \text{predicted mean} + \text{residual})
 \end{aligned}
-</annotation></semantics></math>
+</span>
 </div>
 <p class="sym-caption" style="font-size:0.95em;color:#374151">
 Stacking the same response equation for all <em>n</em> = 60
 observations:
 </p>
 <div class="sym-eq">
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mn>0.166</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1.12</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.66</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1.05</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.676</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.172</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.0853</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mrow><mi>𝐳</mi><mi>𝐫</mi></mrow><mrow><mspace width="0.167em"></mspace><mn>60</mn><mo>×</mo><mn>1</mn></mrow></msub><mspace width="0.278em"></mspace><mtext mathvariant="normal">(observed)</mtext><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.278em"></mspace><mo>=</mo><mspace width="0.278em"></mspace><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mi>𝐗</mi><mrow><mspace width="0.167em"></mspace><mn>60</mn><mo>×</mo><mn>1</mn></mrow></msub><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.167em"></mspace><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mn>0.366</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mover><mi>𝛃</mi><mo accent="true">̂</mo></mover><mrow><mspace width="0.167em"></mspace><mn>1</mn><mo>×</mo><mn>1</mn></mrow></msub><mspace width="0.278em"></mspace><mtext mathvariant="normal">(estimated)</mtext><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.278em"></mspace><mo>+</mo><mspace width="0.278em"></mspace><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>0.0485</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.351</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.057</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.289</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.285</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>0.178</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>0.0958</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mover><mi>𝛆</mi><mo accent="true">̂</mo></mover><mrow><mspace width="0.167em"></mspace><mn>60</mn><mo>×</mo><mn>1</mn></mrow></msub><mspace width="0.278em"></mspace><mtext mathvariant="normal">(residual)</mtext><mspace width="0.167em"></mspace></mrow></munder></mrow><annotation encoding="application/x-tex">
-\underbrace{\begin{bmatrix} 0.166 \\ 1.12 \\ 0.66 \\ 1.05 \\ 0.676 \\ \vdots \\ 0.172 \\ 0.0853 \end{bmatrix}}_{\textstyle\,\mathbf{zr}_{\,60 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 \\    1 \\    1 \\    1 \\    1 \\ \vdots \\    1 \\    1 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,60 \times 1}\,}\, \underbrace{\begin{bmatrix} 0.366 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,1 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} -0.0485 \\ 0.351 \\ 0.057 \\ 0.289 \\ 0.285 \\ \vdots \\ -0.178 \\ -0.0958 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,60 \times 1}\;\text{(residual)}\,}
-</annotation></semantics></math>
+<span class="math display">
+\underbrace{\begin{bmatrix} 0.166 \\ 1.12 \\ 0.66 \\ 1.05 \\ 0.676 \\
+\vdots \\ 0.172 \\ 0.0853 \end{bmatrix}}_{\textstyle\,\mathbf{zr}_{\,60
+\times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1
+\\    1 \\    1 \\    1 \\    1 \\ \vdots \\    1 \\    1
+\end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,60 \times 1}\,}\,
+\underbrace{\begin{bmatrix} 0.366
+\end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,1 \times
+1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} -0.0485 \\
+0.351 \\ 0.0572 \\ 0.29 \\ 0.285 \\ \vdots \\ -0.178 \\ -0.0961
+\end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,60 \times
+1}\;\text{(residual)}\,}
+</span>
 </div>
 <p class="sym-caption" style="font-size:0.85em;color:#6b7280;margin-top:0.4rem">
-<strong>Left</strong>: observed vector
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐳</mi><mi>𝐫</mi></mrow><annotation encoding="application/x-tex">\mathbf{zr}</annotation></semantics></math>.
-<strong>Middle</strong>: the prediction
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐗</mi><mover><mi>𝛃</mi><mo accent="true">̂</mo></mover><mo>+</mo><mover><mi>𝐮</mi><mo accent="true">̂</mo></mover><mo>=</mo><mover><mi>𝛍</mi><mo accent="true">̂</mo></mover></mrow><annotation encoding="application/x-tex">\mathbf{X}\hat{\boldsymbol{\beta}} + \hat{\mathbf{u}} = \hat{\boldsymbol{\mu}}</annotation></semantics></math>.
-<strong>Right</strong>: the residual vector
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>𝛆</mi><mo accent="true">̂</mo></mover><mo>=</mo><mrow><mi>𝐳</mi><mi>𝐫</mi></mrow><mo>−</mo><mover><mi>𝛍</mi><mo accent="true">̂</mo></mover></mrow><annotation encoding="application/x-tex">\hat{\boldsymbol{\varepsilon}} = \mathbf{zr} - \hat{\boldsymbol{\mu}}</annotation></semantics></math>.
-Every row of this matrix equation is one of the response-equation rows
-from the worked row above.
+<strong>Left</strong>: observed vector <span class="math inline">\mathbf{zr}</span>. <strong>Middle</strong>: the
+prediction <span class="math inline">\mathbf{X}\hat{\boldsymbol{\beta}}
++ \hat{\mathbf{u}} = \hat{\boldsymbol{\mu}}</span>.
+<strong>Right</strong>: the residual vector <span class="math inline">\hat{\boldsymbol{\varepsilon}} = \mathbf{zr} -
+\hat{\boldsymbol{\mu}}</span>. Every row of this matrix equation is one
+of the response-equation rows from the worked row above.
 </p>
 <p class="sym-caption" style="font-size:0.85em;color:#6b7280;margin-top:0.3rem">
 <strong>Partial pooling.</strong> The random-effect estimates shown here
@@ -777,25 +699,38 @@ The random effect that gives this model its structural-dependence
 character:
 </p>
 <div class="sym-eq">
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">C</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">v</mi></mrow><mo stretchy="false" form="prefix">(</mo><mover><mi>𝐮</mi><mo accent="true">̂</mo></mover><mo stretchy="false" form="postfix">)</mo><mspace width="0.278em"></mspace><mo>=</mo><mspace width="0.278em"></mspace><msubsup><mi>σ</mi><mi>p</mi><mn>2</mn></msubsup><mo>⋅</mo><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mn>0.161</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0.161</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0.161</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0.161</mn></mtd><mtd columnalign="center" style="text-align: center"><mi>⋯</mi></mtd><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0.0946</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd><mtd columnalign="center" style="text-align: center"><mi>⋯</mi></mtd><mtd columnalign="center" style="text-align: center"><mn>0.0946</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0.0946</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.161</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0.228</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0.228</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0.228</mn></mtd><mtd columnalign="center" style="text-align: center"><mi>⋯</mi></mtd><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.161</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0.228</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0.298</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0.298</mn></mtd><mtd columnalign="center" style="text-align: center"><mi>⋯</mi></mtd><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.161</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0.228</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0.298</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0.565</mn></mtd><mtd columnalign="center" style="text-align: center"><mi>⋯</mi></mtd><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0.0946</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd><mtd columnalign="center" style="text-align: center"><mi>⋯</mi></mtd><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0.867</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0.0946</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd><mtd columnalign="center" style="text-align: center"><mi>⋯</mi></mtd><mtd columnalign="center" style="text-align: center"><mn>0.867</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mi>𝐀</mi><mrow><mspace width="0.167em"></mspace><mn>116</mn><mo>×</mo><mn>116</mn></mrow></msub><mspace width="0.167em"></mspace></mrow></munder></mrow><annotation encoding="application/x-tex">
-\mathrm{Cov}(\hat{\mathbf{u}}) \;=\; \sigma_p^2 \cdot \underbrace{\begin{bmatrix} 0.161 &amp;    0 &amp; 0.161 &amp; 0.161 &amp; 0.161 &amp; \cdots &amp;    0 &amp;    0 \\    0 &amp; 0.0946 &amp;    0 &amp;    0 &amp;    0 &amp; \cdots &amp; 0.0946 &amp; 0.0946 \\ 0.161 &amp;    0 &amp; 0.228 &amp; 0.228 &amp; 0.228 &amp; \cdots &amp;    0 &amp;    0 \\ 0.161 &amp;    0 &amp; 0.228 &amp; 0.298 &amp; 0.298 &amp; \cdots &amp;    0 &amp;    0 \\ 0.161 &amp;    0 &amp; 0.228 &amp; 0.298 &amp; 0.565 &amp; \cdots &amp;    0 &amp;    0 \\ \vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots \\    0 &amp; 0.0946 &amp;    0 &amp;    0 &amp;    0 &amp; \cdots &amp;    1 &amp; 0.867 \\    0 &amp; 0.0946 &amp;    0 &amp;    0 &amp;    0 &amp; \cdots &amp; 0.867 &amp;    1 \end{bmatrix}}_{\textstyle\,\mathbf{A}_{\,116 \times 116}\,}
-</annotation></semantics></math>
+<span class="math display">
+\mathrm{Cov}(\hat{\mathbf{u}}) \;=\; \sigma_p^2 \cdot
+\underbrace{\begin{bmatrix} 0.161 &amp;    0 &amp; 0.161 &amp; 0.161
+&amp; 0.161 &amp; \cdots &amp;    0 &amp;    0 \\    0 &amp; 0.0913
+&amp;    0 &amp;    0 &amp;    0 &amp; \cdots &amp; 0.0913 &amp; 0.0913
+\\ 0.161 &amp;    0 &amp; 0.227 &amp; 0.227 &amp; 0.227 &amp; \cdots
+&amp;    0 &amp;    0 \\ 0.161 &amp;    0 &amp; 0.227 &amp; 0.297 &amp;
+0.297 &amp; \cdots &amp;    0 &amp;    0 \\ 0.161 &amp;    0 &amp; 0.227
+&amp; 0.297 &amp; 0.564 &amp; \cdots &amp;    0 &amp;    0 \\ \vdots
+&amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp;
+\vdots &amp; \vdots \\    0 &amp; 0.0913 &amp;    0 &amp;    0
+&amp;    0 &amp; \cdots &amp;    1 &amp; 0.866 \\    0 &amp; 0.0913
+&amp;    0 &amp;    0 &amp;    0 &amp; \cdots &amp; 0.866 &amp;    1
+\end{bmatrix}}_{\textstyle\,\mathbf{A}_{\,116 \times 116}\,}
+</span>
 </div>
 <p class="sym-caption" style="font-size:0.85em;color:#6b7280;margin-top:0.4rem">
-The phylo random effect
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
-has covariance
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>σ</mi><mi>p</mi><mn>2</mn></msubsup><mo>⋅</mo><mi>𝐀</mi></mrow><annotation encoding="application/x-tex">\sigma_p^2 \cdot \mathbf{A}</annotation></semantics></math>,
-where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐀</mi><annotation encoding="application/x-tex">\mathbf{A}</annotation></semantics></math>
-is the 116 × 116 phylogenetic correlation matrix. Showing the head +
-tail rows / columns; full matrix is 116 × 116.
+The phylo random effect <span class="math inline">u</span> has
+covariance <span class="math inline">\sigma_p^2 \cdot \mathbf{A}</span>,
+where <span class="math inline">\mathbf{A}</span> is the 116 × 116
+augmented phylogenetic <strong>covariance</strong> matrix (tips and
+internal nodes, the Hadfield–Nakagawa all-nodes representation). Its
+diagonal is <em>not</em> all 1: the leading rows shown here are internal
+nodes, whose self-covariance is &lt; 1 under all-nodes scaling; only the
+tip rows have unit diagonal. Showing the head + tail rows / columns;
+full matrix is 116 × 116.
 </p>
 </div>
 </div>
-<span id="sym-mcmc-1780075488-end" tabindex="-1"></span>
+<span id="sym-mcmc-1780180818-end" tabindex="-1"></span>
 <script>(function() {
-  var root = document.getElementById("sym-mcmc-1780075488");
+  var root = document.getElementById("sym-mcmc-1780180818");
   if (!root) return;
   var tabs   = Array.prototype.slice.call(root.querySelectorAll("[role=\"tab\"]"));
   var panels = Array.prototype.slice.call(root.querySelectorAll("[role=\"tabpanel\"]"));
@@ -811,7 +746,13 @@ tail rows / columns; full matrix is 116 × 116.
       p.classList.toggle("sym-active", on);
       if (on) { p.removeAttribute("hidden"); } else { p.setAttribute("hidden", ""); }
     });
-    if (typeof window.MathJax !== "undefined" && window.MathJax.typesetPromise) {
+    // Re-render math in the newly shown panel. KaTeX (the pkgdown site
+    // renderer) exposes renderMathInElement and already typesets hidden
+    // panels at load, so this is belt-and-braces; fall back to MathJax for
+    // standalone exports that still bootstrap MathJax from a CDN.
+    if (typeof window.renderMathInElement === "function") {
+      try { window.renderMathInElement(panels[idx], {throwOnError: false}); } catch (e) {}
+    } else if (typeof window.MathJax !== "undefined" && window.MathJax.typesetPromise) {
       try { window.MathJax.typesetPromise([panels[idx]]); } catch (e) {}
     }
   }
@@ -844,7 +785,7 @@ tail rows / columns; full matrix is 116 × 116.
 model via the <code><a href="https://paulbuerkner.com/brms/reference/gr.html" class="external-link">gr()</a></code> group factor inside an lme4-style RE
 bar. The fit takes ~30 s of Stan compile-and-sample (cached after the
 first build).</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/paul-buerkner/brms" class="external-link">brms</a></span><span class="op">)</span></span>
 <span><span class="va">data2_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>A <span class="op">=</span> <span class="va">A_tips</span><span class="op">)</span></span>
 <span><span class="va">fit_brms</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://paulbuerkner.com/brms/reference/brm.html" class="external-link">brm</a></span><span class="op">(</span></span>
@@ -858,7 +799,7 @@ first build).</p>
 <span>  file_refit <span class="op">=</span> <span class="st">"on_change"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">sym_brms</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/symbolize.html">symbolize</a></span><span class="op">(</span><span class="va">fit_brms</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sym_brms</span><span class="op">$</span><span class="va">metadata</span><span class="op">$</span><span class="va">phylo_representation</span>   <span class="co"># "tips_only"</span></span>
 <span><span class="co">#&gt; [1] "tips_only"</span></span>
 <span><span class="va">sym_brms</span><span class="op">$</span><span class="va">metadata</span><span class="op">$</span><span class="va">detected_signals</span>       <span class="co"># "phylo"</span></span>
@@ -877,38 +818,38 @@ first build).</p>
 <td align="left">mu</td>
 <td align="left">species</td>
 <td align="left">(Intercept)</td>
-<td align="left">0.364</td>
-<td align="left">0.132</td>
+<td align="left">0.341</td>
+<td align="left">0.117</td>
 </tr>
 <tr class="even">
 <td align="left">residual</td>
 <td align="left">residual</td>
 <td align="left">Residual</td>
-<td align="left">0.170</td>
-<td align="left">0.0289</td>
+<td align="left">0.184</td>
+<td align="left">0.0337</td>
 </tr>
 </tbody>
 </table>
 <p><code>symbolizer</code> reports
 <code>phylo_representation = "tips_only"</code> because
-<code>brms</code> works directly with the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>×</mo><mi>k</mi></mrow><annotation encoding="application/x-tex">k \times k</annotation></semantics></math>
-tips-only
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐀</mi><annotation encoding="application/x-tex">\mathbf A</annotation></semantics></math>
-— no internal-node augmentation. Compare with the MCMCglmm Face above
+<code>brms</code> works directly with the <span class="math inline">k
+\times k</span> tips-only <span class="math inline">\mathbf A</span> —
+no internal-node augmentation. Compare with the MCMCglmm Face above
 where <code>phylo_representation = "all_nodes"</code>; the variance
-estimate
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mover><mi>σ</mi><mo accent="true">̂</mo></mover><mi>p</mi><mn>2</mn></msubsup><annotation encoding="application/x-tex">\hat\sigma_p^2</annotation></semantics></math>
-is the same in expectation.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+estimate <span class="math inline">\hat\sigma_p^2</span> is the same in
+expectation — the roughly 28 % Monte-Carlo gap between the two fits here
+(and the matching gap in <span class="math inline">\hat H^2</span>)
+reflects short chains and differing default priors, not a difference in
+the underlying model.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/assumption_table.html">assumption_table</a></span><span class="op">(</span><span class="va">sym_brms</span><span class="op">)</span></span></code></pre></div>
 <div class="table-responsive" style="overflow-x:auto;">
-<table class="table">
+<table style="width:100%;" class="table">
 <colgroup>
 <col width="12%">
 <col width="29%">
-<col width="48%">
-<col width="9%">
+<col width="49%">
+<col width="8%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">assumption</th>
@@ -919,37 +860,26 @@ is the same in expectation.</p>
 <tbody>
 <tr class="odd">
 <td align="left">conditional_distribution</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow><mi mathvariant="normal">Z</mi><mi mathvariant="normal">r</mi></mrow><mi>i</mi></msub><mo>∣</mo><msub><mi>μ</mi><mi>i</mi></msub><mo>,</mo><mspace width="0.167em"></mspace><msub><mi>σ</mi><mi>i</mi></msub><mo>∼</mo><mrow><mi mathvariant="normal">N</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>μ</mi><mi>i</mi></msub><mo>,</mo><mspace width="0.167em"></mspace><msubsup><mi>σ</mi><mi>i</mi><mn>2</mn></msubsup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\mathrm{Zr}_i \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2)</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathrm{Zr}_i \mid \mu_i,\,
+\sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2)</span></td>
 <td align="left">Zr varies normally around its expected value</td>
 <td align="left">explicit</td>
 </tr>
 <tr class="even">
 <td align="left">linear_predictor</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>μ</mi><mi>i</mi></msub><mo>=</mo><msub><mi>β</mi><mn>0</mn></msub><mo>+</mo><msub><mo>∑</mo><mi>k</mi></msub><msub><mi>β</mi><mi>k</mi></msub><msub><mi>X</mi><mrow><mi>k</mi><mi>i</mi></mrow></msub></mrow><annotation encoding="application/x-tex">\mu_i = \beta_0 + \sum_k \beta_k X_{ki}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mu_i = \beta_0 + \sum_k
+\beta_k X_{ki}</span></td>
 <td align="left">Expected Zr is a linear combination of the mean-model
 predictors</td>
 <td align="left">explicit</td>
 </tr>
 <tr class="odd">
-<td align="left">linear_predictor</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>σ</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>γ</mi><mn>0</mn></msub><mo>+</mo><msub><mo>∑</mo><mi>k</mi></msub><msub><mi>γ</mi><mi>k</mi></msub><msub><mi>Z</mi><mrow><mi>k</mi><mi>i</mi></mrow></msub></mrow><annotation encoding="application/x-tex">\log(\sigma_i) = \gamma_0 + \sum_k \gamma_k Z_{ki}</annotation></semantics></math></td>
-<td align="left">Log residual SD of Zr is a linear combination of the
-scale-model predictors</td>
-<td align="left">explicit</td>
-</tr>
-<tr class="even">
 <td align="left">independence_given_random_effects</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow><mi mathvariant="normal">Z</mi><mi mathvariant="normal">r</mi></mrow><mi>i</mi></msub><mo>⟂</mo><msub><mrow><mi mathvariant="normal">Z</mi><mi mathvariant="normal">r</mi></mrow><mi>j</mi></msub><mo>∣</mo><mi>X</mi><mspace width="0.167em"></mspace><mi>𝐮</mi><mrow><mspace width="0.333em"></mspace><mtext mathvariant="normal"> for </mtext><mspace width="0.333em"></mspace></mrow><mi>i</mi><mo>≠</mo><mi>j</mi></mrow><annotation encoding="application/x-tex">\mathrm{Zr}_i \perp \mathrm{Zr}_j \mid X\, \mathbf{u} \text{ for } i \ne j</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathrm{Zr}_i \perp
+\mathrm{Zr}_j \mid X\, \mathbf{u} \text{ for } i \ne j</span></td>
 <td align="left">Observations are conditionally independent given the
 predictors and the random effects</td>
 <td align="left">explicit</td>
-</tr>
-<tr class="odd">
-<td align="left">positivity</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>σ</mi><mi>i</mi></msub><mo>&gt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\sigma_i &gt; 0</annotation></semantics></math></td>
-<td align="left">Residual SD is constrained positive via the log
-link</td>
-<td align="left">follows from the formula</td>
 </tr>
 <tr class="even">
 <td align="left">no_missing_at_random</td>
@@ -960,29 +890,33 @@ depends on the unobserved response</td>
 </tr>
 <tr class="odd">
 <td align="left">phylo_random_effect</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>𝐮</mi><mi>p</mi></msub><mo>∼</mo><mi>𝒩</mi><mo stretchy="false" form="prefix">(</mo><mn>𝟎</mn><mo>,</mo><msubsup><mi>σ</mi><mi>p</mi><mn>2</mn></msubsup><mi>𝐀</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\mathbf{u}_p \sim \mathcal{N}(\mathbf{0}, \sigma_p^2 \mathbf{A})</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbf{u}_p \sim
+\mathcal{N}(\mathbf{0}, \sigma_p^2 \mathbf{A})</span></td>
 <td align="left">Species-level random effect with covariance
 proportional to the phylogenetic correlation matrix A</td>
 <td align="left">explicit</td>
 </tr>
 <tr class="even">
 <td align="left">phylo_A_positive_definite</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐀</mi><mo>≻</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\mathbf{A} \succ 0</annotation></semantics></math></td>
-<td align="left">A is positive-definite k x k phylogenetic correlation
-matrix derived from a rooted tree under Brownian motion</td>
+<td align="left"><span class="math inline">\mathbf{A} \succ
+0</span></td>
+<td align="left">A is positive-definite <span class="math inline">k
+\times k</span> phylogenetic correlation matrix derived from a rooted
+tree under Brownian motion</td>
 <td align="left">follows from the formula</td>
 </tr>
 <tr class="odd">
 <td align="left">phylo_tips_only_representation</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>A</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><msub><mi>T</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mi>/</mi><mi>T</mi></mrow><annotation encoding="application/x-tex">A_{ij} = T_{ij}/T</annotation></semantics></math></td>
-<td align="left">Tips-only k x k representation: A_{ij} is shared branch
-length between species i and j divided by total tree height (Hadfield
-2010)</td>
+<td align="left"><span class="math inline">A_{ij} = T_{ij}/T</span></td>
+<td align="left">Tips-only <span class="math inline">k \times k</span>
+representation: A_{ij} is shared branch length between species i and j
+divided by total tree height (Hadfield 2010)</td>
 <td align="left">follows from the formula</td>
 </tr>
 <tr class="even">
 <td align="left">phylo_brownian_motion</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">V</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>u</mi><mi>p</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>∝</mo><mrow><mi mathvariant="normal">t</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">e</mi></mrow></mrow><annotation encoding="application/x-tex">\mathrm{Var}(u_p) \propto \mathrm{time}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathrm{Var}(u_p) \propto
+\mathrm{time}</span></td>
 <td align="left">Brownian motion prior: phylogenetic variance
 accumulates linearly with branch length</td>
 <td align="left">your responsibility</td>
@@ -1004,50 +938,43 @@ interpretation</td>
 form<a class="anchor" aria-label="anchor" href="#face-3-light-phylolmphylolm-the-marginal-pgls-form"></a>
 </h3>
 <p><code>phylolm</code> (Ho &amp; Ané 2014) fits the same conceptual
-model in a <em>marginalised</em> form: instead of writing
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi><mo>=</mo><msub><mi>β</mi><mn>0</mn></msub><mo>+</mo><msub><mi>u</mi><mi>p</mi></msub><mo>+</mo><mi>e</mi></mrow><annotation encoding="application/x-tex">y = \beta_0 + u_p + e</annotation></semantics></math>
-with two separate variance components, <code>phylolm</code> absorbs
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>u</mi><mi>p</mi></msub><annotation encoding="application/x-tex">u_p</annotation></semantics></math>
-into the residual to give</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow><mi mathvariant="normal">Z</mi><mi mathvariant="normal">r</mi></mrow><mi>i</mi></msub><mspace width="0.278em"></mspace><mo>=</mo><mspace width="0.278em"></mspace><msub><mi>β</mi><mn>0</mn></msub><mo>+</mo><msubsup><mi>e</mi><mi>i</mi><mo>′</mo></msubsup><mo>,</mo><mspace width="1.0em"></mspace><msup><mi>𝐞</mi><mo>′</mo></msup><mo>∼</mo><mi>𝒩</mi><mo stretchy="false" form="prefix">(</mo><mn>𝟎</mn><mo>,</mo><mspace width="0.278em"></mspace><msup><mi>σ</mi><mn>2</mn></msup><mspace width="0.167em"></mspace><mi>𝐂</mi><mo stretchy="false" form="prefix">(</mo><mi>α</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">
+model in a <em>marginalised</em> form: instead of writing <span class="math inline">y = \beta_0 + u_p + e</span> with two separate
+variance components, <code>phylolm</code> absorbs <span class="math inline">u_p</span> into the residual to give</p>
+<p><span class="math display">
 \mathrm{Zr}_i \;=\; \beta_0 + e'_i,\quad
 \mathbf e' \sim \mathcal N(\mathbf 0,\; \sigma^2\,\mathbf C(\alpha))
-</annotation></semantics></math></p>
-<p>where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐂</mi><mo stretchy="false" form="prefix">(</mo><mi>α</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\mathbf C(\alpha)</annotation></semantics></math>
-is a tree-derived correlation matrix. For Pagel’s
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math>
-model the connection to the RE form is precise:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐂</mi><mo stretchy="false" form="prefix">(</mo><mi>λ</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>λ</mi><mspace width="0.167em"></mspace><mi>𝐀</mi><mo>+</mo><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>λ</mi><mo stretchy="false" form="postfix">)</mo><mspace width="0.167em"></mspace><mi>𝐈</mi><mo>,</mo><mspace width="2.0em"></mspace><msubsup><mi>σ</mi><mi>p</mi><mn>2</mn></msubsup><mo>=</mo><mi>λ</mi><mspace width="0.167em"></mspace><msup><mi>σ</mi><mn>2</mn></msup><mo>,</mo><mspace width="2.0em"></mspace><msubsup><mi>σ</mi><mi>e</mi><mn>2</mn></msubsup><mo>=</mo><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>λ</mi><mo stretchy="false" form="postfix">)</mo><mspace width="0.167em"></mspace><msup><mi>σ</mi><mn>2</mn></msup><mi>.</mi></mrow><annotation encoding="application/x-tex">
+</span></p>
+<p>where <span class="math inline">\mathbf C(\alpha)</span> is a
+tree-derived correlation matrix. For Pagel’s <span class="math inline">\lambda</span> model the connection to the RE form
+is precise:</p>
+<p><span class="math display">
 \mathbf C(\lambda) = \lambda\,\mathbf A + (1 - \lambda)\,\mathbf I,
 \qquad
 \sigma_p^2 = \lambda\,\sigma^2,
 \qquad
 \sigma_e^2 = (1 - \lambda)\,\sigma^2.
-</annotation></semantics></math></p>
-<p>So
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>λ</mi><mo>=</mo><msubsup><mi>σ</mi><mi>p</mi><mn>2</mn></msubsup><mi>/</mi><mo stretchy="false" form="prefix">(</mo><msubsup><mi>σ</mi><mi>p</mi><mn>2</mn></msubsup><mo>+</mo><msubsup><mi>σ</mi><mi>e</mi><mn>2</mn></msubsup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\lambda = \sigma_p^2 / (\sigma_p^2 + \sigma_e^2)</annotation></semantics></math>
-— the <strong>phylogenetic heritability</strong>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>H</mi><mn>2</mn></msup><annotation encoding="application/x-tex">H^2</annotation></semantics></math>
-from § “Animal-model unification” — and the two parameterisations agree
-on every prediction. <code>phylolm</code>’s advantage is speed: a
-closed-form ML fit in a fraction of a second instead of Stan’s compile +
-sample.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+</span></p>
+<p>So <span class="math inline">\lambda = \sigma_p^2 / (\sigma_p^2 +
+\sigma_e^2)</span> — the <strong>phylogenetic heritability</strong>
+<span class="math inline">H^2</span> from § “Animal-model unification” —
+and the two parameterisations agree on every prediction.
+<code>phylolm</code>’s advantage is speed: a closed-form ML fit in a
+fraction of a second instead of Stan’s compile + sample.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/lamho86/phylolm" class="external-link">phylolm</a></span><span class="op">)</span></span>
 <span><span class="va">dat_pl</span> <span class="op">&lt;-</span> <span class="va">dat</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">dat_pl</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">dat_pl</span><span class="op">$</span><span class="va">species</span></span>
 <span><span class="va">fit_pl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/phylolm/man/phylolm.html" class="external-link">phylolm</a></span><span class="op">(</span><span class="va">Zr</span> <span class="op">~</span> <span class="fl">1</span>, data <span class="op">=</span> <span class="va">dat_pl</span>, phy <span class="op">=</span> <span class="va">tree</span>, model <span class="op">=</span> <span class="st">"lambda"</span><span class="op">)</span></span>
 <span><span class="va">sym_pl</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/symbolize.html">symbolize</a></span><span class="op">(</span><span class="va">fit_pl</span>, data <span class="op">=</span> <span class="va">dat_pl</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sym_pl</span><span class="op">$</span><span class="va">metadata</span><span class="op">$</span><span class="va">phylo_representation</span>   <span class="co"># "pgls_marginal"</span></span>
 <span><span class="co">#&gt; [1] "pgls_marginal"</span></span>
 <span><span class="va">sym_pl</span><span class="op">$</span><span class="va">metadata</span><span class="op">$</span><span class="va">phylo_model</span>            <span class="co"># "lambda"</span></span>
 <span><span class="co">#&gt; [1] "lambda"</span></span>
 <span><span class="va">sym_pl</span><span class="op">$</span><span class="va">metadata</span><span class="op">$</span><span class="va">phylo_param</span>            <span class="co"># estimated lambda</span></span>
-<span><span class="co">#&gt; [1] 0.7631645</span></span>
-<span><span class="va">sym_pl</span><span class="op">$</span><span class="va">metadata</span><span class="op">$</span><span class="va">detected_signals</span>       <span class="co"># "phylo"</span></span>
-<span><span class="co">#&gt; [1] "phylo"</span></span>
+<span><span class="co">#&gt; [1] 0.7617321</span></span>
+<span><span class="va">sym_pl</span><span class="op">$</span><span class="va">metadata</span><span class="op">$</span><span class="va">detected_signals</span>       <span class="co"># "phylo_marginal"</span></span>
+<span><span class="co">#&gt; [1] "phylo_marginal"</span></span>
 <span><span class="va">sym_pl</span><span class="op">$</span><span class="va">variance_components</span>             <span class="co"># single sigma^2 row</span></span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
@@ -1061,66 +988,57 @@ sample.</p>
 <td align="left">residual</td>
 <td align="left">phylo</td>
 <td align="left">sigma^2 (phylogenetic)</td>
-<td align="left">0.376</td>
+<td align="left">0.375</td>
 <td align="left">0.141</td>
 </tr></tbody>
 </table>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit_pl</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Call:</span></span>
 <span><span class="co">#&gt; phylolm(formula = Zr ~ 1, data = dat_pl, phy = tree, model = "lambda")</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;    AIC logLik </span></span>
-<span><span class="co">#&gt;  27.13 -10.57 </span></span>
+<span><span class="co">#&gt;  27.12 -10.56 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Raw residuals:</span></span>
 <span><span class="co">#&gt;      Min       1Q   Median       3Q      Max </span></span>
-<span><span class="co">#&gt; -0.51914 -0.23479 -0.12683  0.05359  1.20643 </span></span>
+<span><span class="co">#&gt; -0.51918 -0.23483 -0.12687  0.05356  1.20640 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Mean tip height: 1</span></span>
 <span><span class="co">#&gt; Parameter estimate(s) using ML:</span></span>
-<span><span class="co">#&gt; lambda : 0.7631645</span></span>
-<span><span class="co">#&gt; sigma2: 0.141141 </span></span>
+<span><span class="co">#&gt; lambda : 0.7617321</span></span>
+<span><span class="co">#&gt; sigma2: 0.1405798 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Coefficients:</span></span>
-<span><span class="co">#&gt;             Estimate  StdErr t.value  p.value   </span></span>
-<span><span class="co">#&gt; (Intercept)  0.38077 0.13955  2.7285 0.008369 **</span></span>
+<span><span class="co">#&gt;             Estimate  StdErr t.value p.value   </span></span>
+<span><span class="co">#&gt; (Intercept)  0.38081 0.13881  2.7434 0.00804 **</span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; R-squared:     0 Adjusted R-squared:     0 </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Note: p-values and R-squared are conditional on lambda=0.7631645.</span></span></code></pre></div>
-<p>The bridge with the RE form: take the estimated
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mover><mi>σ</mi><mo accent="true">̂</mo></mover><mn>2</mn></msup><annotation encoding="application/x-tex">\hat\sigma^2</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>λ</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat\lambda</annotation></semantics></math>
-from the summary above, then
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mover><mi>σ</mi><mo accent="true">̂</mo></mover><mi>p</mi><mn>2</mn></msubsup><mo>=</mo><mover><mi>λ</mi><mo accent="true">̂</mo></mover><mspace width="0.167em"></mspace><msup><mover><mi>σ</mi><mo accent="true">̂</mo></mover><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">\hat\sigma_p^2 = \hat\lambda\,\hat\sigma^2</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mover><mi>σ</mi><mo accent="true">̂</mo></mover><mi>e</mi><mn>2</mn></msubsup><mo>=</mo><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><mover><mi>λ</mi><mo accent="true">̂</mo></mover><mo stretchy="false" form="postfix">)</mo><mspace width="0.167em"></mspace><msup><mover><mi>σ</mi><mo accent="true">̂</mo></mover><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">\hat\sigma_e^2 = (1-\hat\lambda)\,\hat\sigma^2</annotation></semantics></math>.
-With this dataset, those reconciled values agree with the MCMCglmm
-estimates on the phylogenetic variance to within a couple of percent,
-but the residual variance
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>σ</mi><mi>e</mi><mn>2</mn></msubsup><annotation encoding="application/x-tex">\sigma_e^2</annotation></semantics></math>
-can differ by 20–30 % across the three packages — the variance
-<em>split</em> is weakly identified when there is one observation per
-species (see § “When unification breaks: identifiability” below). The
-total
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mover><mi>σ</mi><mo accent="true">̂</mo></mover><mi>p</mi><mn>2</mn></msubsup><mo>+</mo><msubsup><mover><mi>σ</mi><mo accent="true">̂</mo></mover><mi>e</mi><mn>2</mn></msubsup></mrow><annotation encoding="application/x-tex">\hat\sigma_p^2 + \hat\sigma_e^2</annotation></semantics></math>
-and the heritability
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mover><mi>H</mi><mo accent="true">̂</mo></mover><mn>2</mn></msup><mo>=</mo><mover><mi>λ</mi><mo accent="true">̂</mo></mover></mrow><annotation encoding="application/x-tex">\hat H^2 = \hat\lambda</annotation></semantics></math>
-are more stable than either component on its own.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<span><span class="co">#&gt; Note: p-values and R-squared are conditional on lambda=0.7617321.</span></span></code></pre></div>
+<p>The bridge with the RE form: take the estimated <span class="math inline">\hat\sigma^2</span> and <span class="math inline">\hat\lambda</span> from the summary above, then
+<span class="math inline">\hat\sigma_p^2 =
+\hat\lambda\,\hat\sigma^2</span> and <span class="math inline">\hat\sigma_e^2 =
+(1-\hat\lambda)\,\hat\sigma^2</span>. With this dataset, those
+reconciled values agree with the MCMCglmm estimates on the phylogenetic
+variance to within a couple of percent, but the residual variance <span class="math inline">\sigma_e^2</span> can differ by 20–30 % across the
+three packages — the variance <em>split</em> is weakly identified when
+there is one observation per species (see § “When unification breaks:
+identifiability” below). The total <span class="math inline">\hat\sigma_p^2 + \hat\sigma_e^2</span> and the
+heritability <span class="math inline">\hat H^2 = \hat\lambda</span> are
+more stable than either component on its own.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/assumption_table.html">assumption_table</a></span><span class="op">(</span><span class="va">sym_pl</span><span class="op">)</span></span></code></pre></div>
 <div class="table-responsive" style="overflow-x:auto;">
 <table class="table">
 <colgroup>
-<col width="11%">
-<col width="30%">
-<col width="49%">
-<col width="9%">
+<col width="5%">
+<col width="20%">
+<col width="70%">
+<col width="3%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">assumption</th>
@@ -1131,80 +1049,80 @@ are more stable than either component on its own.</p>
 <tbody>
 <tr class="odd">
 <td align="left">conditional_distribution</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow><mi mathvariant="normal">Z</mi><mi mathvariant="normal">r</mi></mrow><mi>i</mi></msub><mo>∣</mo><msub><mi>μ</mi><mi>i</mi></msub><mo>,</mo><mspace width="0.167em"></mspace><msub><mi>σ</mi><mi>i</mi></msub><mo>∼</mo><mrow><mi mathvariant="normal">N</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>μ</mi><mi>i</mi></msub><mo>,</mo><mspace width="0.167em"></mspace><msubsup><mi>σ</mi><mi>i</mi><mn>2</mn></msubsup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\mathrm{Zr}_i \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2)</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathrm{Zr}_i \mid \mu_i,\,
+\sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2)</span></td>
 <td align="left">Zr varies normally around its expected value</td>
 <td align="left">explicit</td>
 </tr>
 <tr class="even">
 <td align="left">linear_predictor</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>μ</mi><mi>i</mi></msub><mo>=</mo><msub><mi>β</mi><mn>0</mn></msub><mo>+</mo><msub><mo>∑</mo><mi>k</mi></msub><msub><mi>β</mi><mi>k</mi></msub><msub><mi>X</mi><mrow><mi>k</mi><mi>i</mi></mrow></msub></mrow><annotation encoding="application/x-tex">\mu_i = \beta_0 + \sum_k \beta_k X_{ki}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mu_i = \beta_0 + \sum_k
+\beta_k X_{ki}</span></td>
 <td align="left">Expected Zr is a linear combination of the mean-model
 predictors</td>
 <td align="left">explicit</td>
 </tr>
 <tr class="odd">
-<td align="left">linear_predictor</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>σ</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>γ</mi><mn>0</mn></msub><mo>+</mo><msub><mo>∑</mo><mi>k</mi></msub><msub><mi>γ</mi><mi>k</mi></msub><msub><mi>Z</mi><mrow><mi>k</mi><mi>i</mi></mrow></msub></mrow><annotation encoding="application/x-tex">\log(\sigma_i) = \gamma_0 + \sum_k \gamma_k Z_{ki}</annotation></semantics></math></td>
-<td align="left">Log residual SD of Zr is a linear combination of the
-scale-model predictors</td>
-<td align="left">explicit</td>
-</tr>
-<tr class="even">
-<td align="left">independence</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow><mi mathvariant="normal">Z</mi><mi mathvariant="normal">r</mi></mrow><mi>i</mi></msub><mo>⟂</mo><msub><mrow><mi mathvariant="normal">Z</mi><mi mathvariant="normal">r</mi></mrow><mi>j</mi></msub><mo>∣</mo><mi>X</mi><mrow><mspace width="0.333em"></mspace><mtext mathvariant="normal"> for </mtext><mspace width="0.333em"></mspace></mrow><mi>i</mi><mo>≠</mo><mi>j</mi></mrow><annotation encoding="application/x-tex">\mathrm{Zr}_i \perp \mathrm{Zr}_j \mid X \text{ for } i \ne j</annotation></semantics></math></td>
-<td align="left">Observations are conditionally independent given the
-predictors</td>
-<td align="left">follows from the formula</td>
-</tr>
-<tr class="odd">
-<td align="left">positivity</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>σ</mi><mi>i</mi></msub><mo>&gt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\sigma_i &gt; 0</annotation></semantics></math></td>
-<td align="left">Residual SD is constrained positive via the log
-link</td>
-<td align="left">follows from the formula</td>
-</tr>
-<tr class="even">
 <td align="left">no_missing_at_random</td>
 <td align="left">—</td>
 <td align="left">Observations are assumed not missing in a way that
 depends on the unobserved response</td>
 <td align="left">your responsibility</td>
 </tr>
+<tr class="even">
+<td align="left">pgls_marginal_distribution</td>
+<td align="left"><span class="math inline">\mathbf{y} \mid
+\boldsymbol{\beta},\, \sigma_p^2 \sim \mathcal{N}(\mathbf{X}
+\boldsymbol{\beta},\, \sigma_p^2 \mathbf{A})</span></td>
+<td align="left">Zr follows a multivariate normal with mean <span class="math inline">\mathbf{X}\boldsymbol{\beta}</span> and a DENSE
+phylogenetic residual covariance (PGLS marginal form). Under Brownian
+motion that covariance is <span class="math inline">\sigma_p^2\mathbf{A}</span>; under Pagel’s <span class="math inline">\lambda</span> it is <span class="math inline">\sigma_p^2[\lambda\mathbf{A} +
+(1-\lambda)\mathbf{I}]</span> – <span class="math inline">\lambda</span>
+scales the phylogenetic off-diagonals while leaving the diagonal at
+<span class="math inline">\sigma_p^2</span>. Either way the residuals
+are not independent across species.</td>
+<td align="left">explicit</td>
+</tr>
 <tr class="odd">
-<td align="left">phylo_random_effect</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>𝐮</mi><mi>p</mi></msub><mo>∼</mo><mi>𝒩</mi><mo stretchy="false" form="prefix">(</mo><mn>𝟎</mn><mo>,</mo><msubsup><mi>σ</mi><mi>p</mi><mn>2</mn></msubsup><mi>𝐀</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\mathbf{u}_p \sim \mathcal{N}(\mathbf{0}, \sigma_p^2 \mathbf{A})</annotation></semantics></math></td>
-<td align="left">Species-level random effect with covariance
-proportional to the phylogenetic correlation matrix A</td>
+<td align="left">phylo_residual_covariance</td>
+<td align="left"><span class="math inline">\mathbf{e} \sim
+\mathcal{N}(\mathbf{0},\, \sigma_p^2 \mathbf{A}),\quad \mathbf{y} =
+\mathbf{X} \boldsymbol{\beta} + \mathbf{e}</span></td>
+<td align="left">The phylogenetic signal lives entirely in the residual
+covariance: phylolm marginalises the species effect into <span class="math inline">\mathbf{e}</span>, so <span class="math inline">\mathrm{Cov}(\mathbf{e}) =
+\sigma_p^2\mathbf{A}</span> (under BM) or <span class="math inline">\sigma_p^2[\lambda\mathbf{A} +
+(1-\lambda)\mathbf{I}]</span> (under Pagel’s <span class="math inline">\lambda</span>) rather than a separate <span class="math inline">u_p</span> random-effect tier.</td>
 <td align="left">explicit</td>
 </tr>
 <tr class="even">
-<td align="left">phylo_A_positive_definite</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐀</mi><mo>≻</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\mathbf{A} \succ 0</annotation></semantics></math></td>
-<td align="left">A is positive-definite k x k phylogenetic correlation
-matrix derived from a rooted tree under Brownian motion</td>
+<td align="left">phylo_marginal_A_positive_definite</td>
+<td align="left"><span class="math inline">\mathbf{A} \succ
+0</span></td>
+<td align="left">
+<span class="math inline">\mathbf{A}</span> is the
+positive-definite <span class="math inline">k \times k</span>
+phylogenetic correlation matrix derived from the rooted tree. Under BM
+the residual covariance is <span class="math inline">\sigma_p^2\mathbf{A}</span>; under Pagel’s <span class="math inline">\lambda</span> it is <span class="math inline">\sigma_p^2[\lambda\mathbf{A} +
+(1-\lambda)\mathbf{I}]</span>.</td>
 <td align="left">follows from the formula</td>
 </tr>
 <tr class="odd">
-<td align="left">phylo_tips_only_representation</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>A</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><msub><mi>T</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mi>/</mi><mi>T</mi></mrow><annotation encoding="application/x-tex">A_{ij} = T_{ij}/T</annotation></semantics></math></td>
-<td align="left">Tips-only k x k representation: A_{ij} is shared branch
-length between species i and j divided by total tree height (Hadfield
-2010)</td>
-<td align="left">follows from the formula</td>
-</tr>
-<tr class="even">
-<td align="left">phylo_brownian_motion</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">V</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>u</mi><mi>p</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>∝</mo><mrow><mi mathvariant="normal">t</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">e</mi></mrow></mrow><annotation encoding="application/x-tex">\mathrm{Var}(u_p) \propto \mathrm{time}</annotation></semantics></math></td>
-<td align="left">Brownian motion prior: phylogenetic variance
-accumulates linearly with branch length</td>
+<td align="left">phylo_marginal_brownian_motion</td>
+<td align="left"><span class="math inline">\mathrm{Cov}(e_i\, e_j) =
+\sigma_p^2 A_{ij} \propto \text{shared branch length}</span></td>
+<td align="left">Brownian motion: residual covariance between two
+species is proportional to their shared evolutionary history (branch
+length). If OU / EB / kappa / delta is intended, refit with that
+correlation structure – the marginalization-bridge prose is calibrated
+to BM and Pagel’s lambda</td>
 <td align="left">your responsibility</td>
 </tr>
-<tr class="odd">
-<td align="left">phylo_ultrametric_tree</td>
+<tr class="even">
+<td align="left">phylo_marginal_ultrametric_tree</td>
 <td align="left">—</td>
-<td align="left">Tree is ultrametric – non-ultrametric trees still
-produce a valid A but break the strict Brownian-motion variance
-interpretation</td>
+<td align="left">Tree is ultrametric (all tips equidistant from the
+root); non-ultrametric trees still give a valid A but break the strict
+Brownian-motion variance interpretation</td>
 <td align="left">your responsibility</td>
 </tr>
 </tbody>
@@ -1212,15 +1130,18 @@ interpretation</td>
 </div>
 <p>The cross-package agreement story is the point: every fit above
 attaches the same conceptual object — a phylogenetic correlation matrix
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐀</mi><annotation encoding="application/x-tex">\mathbf A</annotation></semantics></math>
-— even though the syntactic surface differs (RE bar in
-<code>MCMCglmm</code> and <code>brms</code>, marginalised residual
-covariance in <code>phylolm</code>). <code>symbolizer</code> produces
-the same <code>metadata$detected_signals = "phylo"</code>, the same
-symbol-dictionary row for
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐀</mi><annotation encoding="application/x-tex">\mathbf A</annotation></semantics></math>,
-the same gated phylogenetic assumption rows, no matter which
-parameterisation fitted the model.</p>
+<span class="math inline">\mathbf A</span> — even though the syntactic
+surface differs (RE bar in <code>MCMCglmm</code> and <code>brms</code>,
+marginalised residual covariance in <code>phylolm</code>). The RE-form
+fits (<code>MCMCglmm</code>, <code>brms</code>) report
+<code>metadata$detected_signals = "phylo"</code>; <code>phylolm</code>
+reports <code>"phylo_marginal"</code>, the marginal-form variant of the
+same phylogenetic signal (it absorbs <span class="math inline">u_p</span> into the residual, so there is no
+separate <span class="math inline">u_p</span> tier to label). Either way
+<code>symbolizer</code> attaches the same symbol-dictionary row for
+<span class="math inline">\mathbf A</span> and gates the matching
+phylogenetic assumption rows, no matter which parameterisation fitted
+the model.</p>
 </div>
 </div>
 <div class="section level2">
@@ -1228,31 +1149,20 @@ parameterisation fitted the model.</p>
 </h2>
 <p>The phylogenetic random effect is the <strong>same mathematical
 object</strong> as the additive-genetic random effect in a
-quantitative-genetics animal model. The matrix
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐀</mi><annotation encoding="application/x-tex">\mathbf A</annotation></semantics></math>
-comes from a different source (a pedigree of dam-sire-offspring rather
-than a phylogenetic tree), but its meaning in the model is
-identical:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>𝐮</mi><mi>p</mi></msub><mspace width="0.278em"></mspace><mo>∼</mo><mspace width="0.278em"></mspace><mi>𝒩</mi><mo stretchy="false" form="prefix">(</mo><mn>𝟎</mn><mo>,</mo><msubsup><mi>σ</mi><mi>p</mi><mn>2</mn></msubsup><mspace width="0.167em"></mspace><mi>𝐀</mi><mo stretchy="false" form="postfix">)</mo><mo>,</mo><mspace width="2.0em"></mspace><msup><mi>h</mi><mn>2</mn></msup><mspace width="0.278em"></mspace><mo>=</mo><mspace width="0.278em"></mspace><mfrac><msubsup><mi>σ</mi><mi>p</mi><mn>2</mn></msubsup><mrow><msubsup><mi>σ</mi><mi>p</mi><mn>2</mn></msubsup><mo>+</mo><msubsup><mi>σ</mi><mi>e</mi><mn>2</mn></msubsup></mrow></mfrac><mi>.</mi></mrow><annotation encoding="application/x-tex">
+quantitative-genetics animal model. The matrix <span class="math inline">\mathbf A</span> comes from a different source (a
+pedigree of dam-sire-offspring rather than a phylogenetic tree), but its
+meaning in the model is identical:</p>
+<p><span class="math display">
 \mathbf u_p \;\sim\; \mathcal N(\mathbf 0, \sigma_p^2\,\mathbf A),\qquad
 h^2 \;=\; \frac{\sigma_p^2}{\sigma_p^2 + \sigma_e^2}.
-</annotation></semantics></math></p>
+</span></p>
 <p>(The quantitative-genetics literature often writes the same
-quantities as
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝐮</mi><mi>a</mi></msub><annotation encoding="application/x-tex">\mathbf u_a</annotation></semantics></math>,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>σ</mi><mi>A</mi><mn>2</mn></msubsup><annotation encoding="application/x-tex">\sigma_A^2</annotation></semantics></math>,
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>σ</mi><mi>E</mi><mn>2</mn></msubsup><annotation encoding="application/x-tex">\sigma_E^2</annotation></semantics></math>
-— the “A” / “E” letters stand for <em>additive</em> and
-<em>environmental</em>. This article uses
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math>
-/
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>e</mi><annotation encoding="application/x-tex">e</annotation></semantics></math>
+quantities as <span class="math inline">\mathbf u_a</span>, <span class="math inline">\sigma_A^2</span>, and <span class="math inline">\sigma_E^2</span> — the “A” / “E” letters stand for
+<em>additive</em> and <em>environmental</em>. This article uses <span class="math inline">p</span> / <span class="math inline">e</span>
 throughout for consistency; the conversion is purely cosmetic.) The
-interpretation of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>σ</mi><mi>p</mi><mn>2</mn></msubsup><annotation encoding="application/x-tex">\sigma_p^2</annotation></semantics></math>
-differs by domain: it’s <em>phylogenetic</em> variance among species in
-a phylogenetic comparative method, <em>additive genetic</em> variance
+interpretation of <span class="math inline">\sigma_p^2</span> differs by
+domain: it’s <em>phylogenetic</em> variance among species in a
+phylogenetic comparative method, <em>additive genetic</em> variance
 among individuals in a quantitative-genetics animal model.
 <code>symbolizer</code>’s <code><a href="../reference/symbolize.MCMCglmm.html">symbolize.MCMCglmm()</a></code> handles both
 via the same <code>ginverse</code> detection branch, and
@@ -1277,28 +1187,23 @@ inferring ancestral character states.</li>
 <li>
 <strong>Numerical efficiency on large trees</strong>. The all-nodes
 A-inverse is <em>sparse</em> (each internal node connects to its parent
-and children only). Inverting the tips-only
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>×</mo><mi>k</mi></mrow><annotation encoding="application/x-tex">k \times k</annotation></semantics></math>
-matrix is
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝒪</mi><mo stretchy="false" form="prefix">(</mo><msup><mi>k</mi><mn>3</mn></msup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\mathcal O(k^3)</annotation></semantics></math>;
-the sparse A-inverse path is much faster for
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>&gt;</mo><mo>∼</mo><mn>200</mn></mrow><annotation encoding="application/x-tex">k &gt; \sim 200</annotation></semantics></math>.</li>
+and children only). Inverting the tips-only <span class="math inline">k
+\times k</span> matrix is <span class="math inline">\mathcal
+O(k^3)</span>; the sparse A-inverse path is much faster for <span class="math inline">k &gt; \sim 200</span>.</li>
 <li>
 <strong>Partial observations</strong>. If some species have measured
 traits and others are unobserved (but on the tree), the all-nodes form
 handles this naturally.</li>
 </ol>
 <p>On a balanced setup with all species observed, both representations
-give the same
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mover><mi>σ</mi><mo accent="true">̂</mo></mover><mi>p</mi><mn>2</mn></msubsup><annotation encoding="application/x-tex">\hat\sigma_p^2</annotation></semantics></math>
-to machine precision — the Hadfield-Nakagawa equivalence.</p>
+give the same <span class="math inline">\hat\sigma_p^2</span> to machine
+precision — the Hadfield-Nakagawa equivalence.</p>
 </div>
 <div class="section level2">
 <h2 id="spatial-same-grammar-different-matrix">Spatial: same grammar, different matrix<a class="anchor" aria-label="anchor" href="#spatial-same-grammar-different-matrix"></a>
 </h2>
-<p>For spatial dependence,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐌</mi><annotation encoding="application/x-tex">\mathbf M</annotation></semantics></math>
-is built from pairwise geographic distances and a kernel. The standard
+<p>For spatial dependence, <span class="math inline">\mathbf M</span> is
+built from pairwise geographic distances and a kernel. The standard
 choices are:</p>
 <table class="table">
 <thead><tr class="header">
@@ -1309,28 +1214,26 @@ choices are:</p>
 <tbody>
 <tr class="odd">
 <td>Exponential</td>
-<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><mo stretchy="false" form="prefix">(</mo><mi>d</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>−</mi><mi>d</mi><mi>/</mi><mi>ρ</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">C(d) = \exp(-d/\rho)</annotation></semantics></math></td>
+<td><span class="math inline">C(d) = \exp(-d/\rho)</span></td>
 <td>Power</td>
 </tr>
 <tr class="even">
 <td>Squared-exponential (Gaussian)</td>
-<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><mo stretchy="false" form="prefix">(</mo><mi>d</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>−</mi><msup><mi>d</mi><mn>2</mn></msup><mi>/</mi><msup><mi>ρ</mi><mn>2</mn></msup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">C(d) = \exp(-d^2/\rho^2)</annotation></semantics></math></td>
+<td><span class="math inline">C(d) = \exp(-d^2/\rho^2)</span></td>
 <td>Sharp</td>
 </tr>
 <tr class="odd">
 <td>Matérn</td>
-<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><mo stretchy="false" form="prefix">(</mo><mi>d</mi><mo>;</mo><mi>κ</mi><mo>,</mo><mi>ν</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">C(d; \kappa, \nu)</annotation></semantics></math></td>
+<td><span class="math inline">C(d; \kappa, \nu)</span></td>
 <td>Tunable smoothness</td>
 </tr>
 </tbody>
 </table>
 <p>Two fits <em>illustrate</em> the structurally identical grammar with
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛀</mi><annotation encoding="application/x-tex">\boldsymbol\Omega</annotation></semantics></math>
-in place of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐀</mi><annotation encoding="application/x-tex">\mathbf A</annotation></semantics></math>
-— these are <strong>pseudocode</strong> (the spatial demo data + mesh
-would be set up in a separate spatial article, not here):</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<span class="math inline">\boldsymbol\Omega</span> in place of <span class="math inline">\mathbf A</span> — these are
+<strong>pseudocode</strong> (the spatial demo data + mesh would be set
+up in a separate spatial article, not here):</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://sdmTMB.github.io/sdmTMB/" class="external-link">sdmTMB</a></span><span class="op">)</span></span>
 <span><span class="va">fit_sp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://sdmTMB.github.io/sdmTMB/reference/sdmTMB.html" class="external-link">sdmTMB</a></span><span class="op">(</span></span>
 <span>  <span class="va">y</span> <span class="op">~</span> <span class="fl">1</span>,</span>
@@ -1357,20 +1260,18 @@ story.</p>
 <p>The unification works mathematically, but practical inference depends
 on the data. When you stack a phylogenetic tier and a non-phylogenetic
 species-level tier on the same grouping column,</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mi>i</mi></msub><mo>=</mo><msub><mi>β</mi><mn>0</mn></msub><mo>+</mo><msub><mi>u</mi><msub><mi>p</mi><mrow><mi>k</mi><mo stretchy="false" form="prefix">[</mo><mi>i</mi><mo stretchy="false" form="postfix">]</mo></mrow></msub></msub><mo>+</mo><msub><mi>u</mi><msub><mi>s</mi><mrow><mi>k</mi><mo stretchy="false" form="prefix">[</mo><mi>i</mi><mo stretchy="false" form="postfix">]</mo></mrow></msub></msub><mo>+</mo><msub><mi>e</mi><mi>i</mi></msub><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>u</mi><mi>p</mi></msub><mo>∼</mo><mi>𝒩</mi><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><msubsup><mi>σ</mi><mi>p</mi><mn>2</mn></msubsup><mi>𝐀</mi><mo stretchy="false" form="postfix">)</mo><mo>,</mo><mspace width="1.0em"></mspace><msub><mi>u</mi><mi>s</mi></msub><mo>∼</mo><mi>𝒩</mi><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><msubsup><mi>σ</mi><mi>s</mi><mn>2</mn></msubsup><mi>𝐈</mi><mo stretchy="false" form="postfix">)</mo><mo>,</mo></mrow><annotation encoding="application/x-tex">
+<p><span class="math display">
 y_i = \beta_0 + u_{p_{k[i]}} + u_{s_{k[i]}} + e_i,\qquad
 u_p \sim \mathcal N(0, \sigma_p^2 \mathbf A),\quad
 u_s \sim \mathcal N(0, \sigma_s^2 \mathbf I),
-</annotation></semantics></math></p>
-<p>the variance components
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>σ</mi><mi>p</mi><mn>2</mn></msubsup><annotation encoding="application/x-tex">\sigma_p^2</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>σ</mi><mi>s</mi><mn>2</mn></msubsup><annotation encoding="application/x-tex">\sigma_s^2</annotation></semantics></math>
-are <em>weakly identified</em>: their sum is precisely estimable but the
-split between them is not (Hadfield &amp; Nakagawa 2010 §3.2; Mizuno et
-al. 2026 §4). With strong phylogenetic signal (Pagel’s λ near 1) the
-split is informative; with weak signal (λ near 0) the data have almost
-no leverage to separate the two. <code>symbolizer</code> emits a
+</span></p>
+<p>the variance components <span class="math inline">\sigma_p^2</span>
+and <span class="math inline">\sigma_s^2</span> are <em>weakly
+identified</em>: their sum is precisely estimable but the split between
+them is not (Hadfield &amp; Nakagawa 2010 §3.2; Mizuno et al. 2026 §4).
+With strong phylogenetic signal (Pagel’s λ near 1) the split is
+informative; with weak signal (λ near 0) the data have almost no
+leverage to separate the two. <code>symbolizer</code> emits a
 <code>phylo_nonphylo_unidentifiable</code> row in
 <code><a href="../reference/warning_table.html">warning_table()</a></code> when this configuration is detected.
 Profile on λ or fix one tier to resolve.</p>
@@ -1381,23 +1282,18 @@ Profile on λ or fix one tier to resolve.</p>
 <ul>
 <li>
 <strong>v0.22 — Phylogenetic meta-analysis (Mizuno et
-al. 2026)</strong>. This article fits the general phylo-GLMM with
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>σ</mi><mi>e</mi><mn>2</mn></msubsup><annotation encoding="application/x-tex">\sigma_e^2</annotation></semantics></math><em>estimated</em>. The meta-analytic case where the sampling variance
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>v</mi><mi>i</mi></msub><annotation encoding="application/x-tex">v_i</annotation></semantics></math>
-is <strong>known</strong> per study is its own surface —
-<code>metafor::rma.mv(V = V, ...)</code> is the canonical interface,
-with <code>glmmTMB::equalto</code> (reserved) and
+al. 2026)</strong>. This article fits the general phylo-GLMM with <span class="math inline">\sigma_e^2</span> <em>estimated</em>. The
+meta-analytic case where the sampling variance <span class="math inline">v_i</span> is <strong>known</strong> per study is
+its own surface — <code>metafor::rma.mv(V = V, ...)</code> is the
+canonical interface, with <code>glmmTMB::equalto</code> (reserved) and
 <code>brms::se(sqrt(vi))</code> as bridges.</li>
 <li>
-<strong>v0.24 — Location-scale on
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐌</mi><annotation encoding="application/x-tex">\mathbf M</annotation></semantics></math>
-(Nakagawa et al. 2025 <em>MEE</em>)</strong>. The dependence parameter
-itself can have a submodel:
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>σ</mi><mi>p</mi></msub><mo>∼</mo><mi>z</mi></mrow><annotation encoding="application/x-tex">\sigma_p \sim z</annotation></semantics></math>
-across clades,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ρ</mi><mo>∼</mo><mi>z</mi></mrow><annotation encoding="application/x-tex">\rho \sim z</annotation></semantics></math>
-across environments. Symbolizer’s drmTMB extractor is the right home for
-the phylogenetic location-scale model.</li>
+<strong>v0.24 — Location-scale on <span class="math inline">\mathbf
+M</span> (Nakagawa et al. 2025 <em>MEE</em>)</strong>. The dependence
+parameter itself can have a submodel: <span class="math inline">\sigma_p
+\sim z</span> across clades, <span class="math inline">\rho \sim
+z</span> across environments. Symbolizer’s drmTMB extractor is the right
+home for the phylogenetic location-scale model.</li>
 <li>
 <strong>drmTMB deep dives</strong>:
 <code><a href="https://itchyshin.github.io/drmTMB/articles/phylogenetic-models.html" class="external-link">vignette("phylogenetic-models", package = "drmTMB")</a></code>,

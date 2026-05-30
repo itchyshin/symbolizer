@@ -2,19 +2,19 @@
 
 ### Get started
 
-Start here. The ladder builds up from lm() to location-scale on one
-shared dataset.
+Start here: a five-minute quickstart, then the ladder that builds up
+from lm() to location-scale on one shared dataset.
 
-- [Building up: from \`lm\` to
+- [Get started with
+  symbolizer](https://itchyshin.github.io/symbolizer/articles/symbolizer.md):
+
+- [Building up: from lm to
   location-scale](https://itchyshin.github.io/symbolizer/articles/symbolizer-ladder.md):
 
   One synthetic dataset, four models of increasing complexity, the same
   [`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
   call. Watch the symbolic equation grow one row at a time as you add a
   factor, then a random effect, then a heterogeneity submodel.
-
-- [Get started with
-  symbolizer](https://itchyshin.github.io/symbolizer/articles/symbolizer.md):
 
 ### Deep dives
 
@@ -35,16 +35,8 @@ shared dataset.
 
 - [Structural dependence: phylogenetic, animal-model, and spatial random
   effects](https://itchyshin.github.io/symbolizer/articles/symbolizer-structural-dependence.md):
-
 - [Three flavors of meta-analysis: a cross-package
   tour](https://itchyshin.github.io/symbolizer/articles/symbolizer-meta-analysis.md):
-
-- [Three faces of meta-analysis: metafor, glmmTMB,
-  drmTMB](https://itchyshin.github.io/symbolizer/articles/symbolizer-meta.md):
-
-  The same two-tier meta-analytic model, fit three ways. Symbolizer
-  reads each one and reveals the shared structure underneath the
-  package-specific syntax.
 
 ### Where we’re going
 

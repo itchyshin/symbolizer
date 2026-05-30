@@ -102,43 +102,30 @@ equations(sym, notation = "both")
 
 **Index form:**
 
-``` math
-\begin{aligned}
-W_i \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
-\mu_i = \beta_{0} + \beta_{1} \, T_i \\
-\log(\sigma_i) = \gamma_{0} + \gamma_{1} \, T_i
-\end{aligned}
-```
+\begin{aligned} W_i \mid \mu_i,\\ \sigma_i \sim \mathrm{Normal}(\mu_i,\\
+\sigma_i^2) \\ \mu_i = \beta\_{0} + \beta\_{1} \\ T_i \\ \log(\sigma_i)
+= \gamma\_{0} + \gamma\_{1} \\ T_i \end{aligned}
 
 **Matrix form:**
 
-``` math
-\begin{aligned}
-\mathbf{w} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2)) \\
-\boldsymbol{\mu} = \mathbf{X} \boldsymbol{\beta} \\
-\log(\boldsymbol{\sigma}) = \mathbf{Z} \boldsymbol{\gamma}
-\end{aligned}
-```
+\begin{aligned} \mathbf{w} \mid \boldsymbol{\mu},\\ \boldsymbol{\sigma}
+\sim \mathcal{N}(\boldsymbol{\mu},\\
+\mathrm{diag}(\boldsymbol{\sigma}^2)) \\ \boldsymbol{\mu} = \mathbf{X}
+\boldsymbol{\beta} \\ \log(\boldsymbol{\sigma}) = \mathbf{X}\_{\sigma}
+\boldsymbol{\gamma} \end{aligned}
 
 In math, the index form is
 
-``` math
-W_i \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2),
-```
-``` math
-\mu_i = \beta_0 + \beta_1\, T_i, \qquad \log(\sigma_i) = \gamma_0 + \gamma_1\, T_i,
-```
+W_i \mid \mu_i,\\ \sigma_i \sim \mathrm{Normal}(\mu_i,\\ \sigma_i^2),
+\mu_i = \beta_0 + \beta_1\\ T_i, \qquad \log(\sigma_i) = \gamma_0 +
+\gamma_1\\ T_i,
 
 and the matrix form is
 
-``` math
-\mathbf{w} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma}
-  \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2)),
-```
-``` math
-\boldsymbol{\mu} = \mathbf{X}\,\boldsymbol{\beta}, \qquad
-  \log(\boldsymbol{\sigma}) = \mathbf{Z}\,\boldsymbol{\gamma}.
-```
+\mathbf{w} \mid \boldsymbol{\mu},\\ \boldsymbol{\sigma} \sim
+\mathcal{N}(\boldsymbol{\mu},\\ \mathrm{diag}(\boldsymbol{\sigma}^2)),
+\boldsymbol{\mu} = \mathbf{X}\\\boldsymbol{\beta}, \qquad
+\log(\boldsymbol{\sigma}) = \mathbf{Z}\\\boldsymbol{\gamma}.
 
 Each piece of the R call produced one piece of math. The left half of
 [`drm_formula()`](https://itchyshin.github.io/drmTMB/reference/drm_formula.html)
@@ -162,20 +149,18 @@ linear predictor on the log scale.
 That choice is not cosmetic. It changes the units of every coefficient
 in the sigma submodel. `drmTMB` locks in the log link on sigma, so
 
-``` math
 \log(\sigma_i) = \gamma_0 + \gamma_1 T_i \quad\Longleftrightarrow\quad
-  \sigma_i = \exp(\gamma_0)\,\exp(\gamma_1 T_i).
-```
+\sigma_i = \exp(\gamma_0)\\\exp(\gamma_1 T_i).
 
 Two readings follow.
 
-- $`\gamma_0`$ is $`\log(\sigma)`$ at the reference (here, $`T_i = 0`$).
-  $`\exp(\gamma_0)`$ is the residual SD itself at that reference value.
-- $`\gamma_1`$ is the change in $`\log(\sigma)`$ per one-unit change in
+- \gamma_0 is \log(\sigma) at the reference (here, T_i = 0).
+  \exp(\gamma_0) is the residual SD itself at that reference value.
+- \gamma_1 is the change in \log(\sigma) per one-unit change in
   temperature. The biological reading is multiplicative: a one-unit
-  change in temperature multiplies the residual SD by
-  $`\exp(\gamma_1)`$. If $`\gamma_1 > 0`$, hotter sites are more
-  variable; if $`\gamma_1 < 0`$, they are less variable.
+  change in temperature multiplies the residual SD by \exp(\gamma_1). If
+  \gamma_1 \> 0, hotter sites are more variable; if \gamma_1 \< 0, they
+  are less variable.
 
 [`parameter_interpretation()`](https://itchyshin.github.io/symbolizer/reference/parameter_interpretation.md)
 reads each coefficient on every relevant scale at once:
@@ -197,7 +182,7 @@ method: `wald`).*
 
 The `variance_scale_reading` column is the one that does the work for
 sigma coefficients: it states the multiplicative effect on the residual
-SD itself, with the fitted value of $`\exp(\hat{\gamma}_1)`$ already
+SD itself, with the fitted value of \exp(\hat{\gamma}\_1) already
 substituted in.
 
 **Takeaway.** Each observation has its own predicted sigma. The sigma
@@ -220,27 +205,27 @@ assumption_table(sym)
 
 | assumption | expression | biological meaning | status |
 |:---|:---|:---|:---|
-| conditional_distribution | $`W_i \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2)`$ | body_mass varies normally around its expected value | explicit |
-| linear_predictor | $`\mu_i = \beta_0 + \sum_k \beta_k X_{ki}`$ | Expected body_mass is a linear combination of the mean-model predictors | explicit |
-| linear_predictor | $`\log(\sigma_i) = \gamma_0 + \sum_k \gamma_k Z_{ki}`$ | Log residual SD of body_mass is a linear combination of the scale-model predictors | explicit |
-| independence | $`W_i \perp W_j \mid X \text{ for } i \ne j`$ | Observations are conditionally independent given the predictors | follows from the formula |
-| positivity | $`\sigma_i > 0`$ | Residual SD is constrained positive via the log link | follows from the formula |
+| conditional_distribution | W_i \mid \mu_i,\\ \sigma_i \sim \mathrm{Normal}(\mu_i,\\ \sigma_i^2) | body_mass varies normally around its expected value | explicit |
+| linear_predictor | \mu_i = \beta_0 + \sum_k \beta_k X\_{ki} | Expected body_mass is a linear combination of the mean-model predictors | explicit |
+| linear_predictor | \log(\sigma_i) = \gamma_0 + \sum_k \gamma_k Z\_{ki} | Log residual SD of body_mass is a linear combination of the scale-model predictors | explicit |
+| independence | W_i \perp W_j \mid X \text{ for } i \ne j | Observations are conditionally independent given the predictors | follows from the formula |
+| positivity | \sigma_i \> 0 | Residual SD is constrained positive via the log link | follows from the formula |
 | no_missing_at_random | — | Observations are assumed not missing in a way that depends on the unobserved response | your responsibility |
 
 The three statuses map onto three honest questions.
 
 - **`stated`** — the formula declares this. The Gaussian distribution on
-  $`W_i`$, the identity link on mu, the log link on sigma, and the
+  W_i, the identity link on mu, the log link on sigma, and the
   linear-predictor structure of each submodel are all *stated*: they are
   what
   [`drm_formula()`](https://itchyshin.github.io/drmTMB/reference/drm_formula.html)
   and `family = gaussian()` mean. There is nothing for the user to
   verify; this is what the model *is*.
 - **`implied`** — these follow from the parameterisation, not from data.
-  The log link on sigma forces $`\sigma_i > 0`$ automatically;
-  conditional independence given the predictors is the default of any
-  fixed-effects regression. The package surfaces these so they are not
-  invisible, but they are not separate empirical claims.
+  The log link on sigma forces \sigma_i \> 0 automatically; conditional
+  independence given the predictors is the default of any fixed-effects
+  regression. The package surfaces these so they are not invisible, but
+  they are not separate empirical claims.
 - **`not_checked`** — these are the user’s responsibility. Missing-at-
   random, for example, cannot be inferred from the fit; `symbolizer`
   states it as an assumption the analyst still owns.
@@ -298,7 +283,7 @@ sym_re <- symbolize(
 )
 ```
 
-The mu equation picks up a $`+ u_{\mathrm{site}(i)}`$ term, and a new
+The mu equation picks up a + u\_{\mathrm{site}(i)} term, and a new
 random-effect distribution row appears in the equation block:
 
 ``` r
@@ -308,25 +293,20 @@ equations(sym_re, notation = "both")
 
 **Index form:**
 
-``` math
-\begin{aligned}
-W_i \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
-\mu_i = \beta_{0} + \beta_{1} \, T_i + u_{site(i)} \\
-\log(\sigma_i) = \gamma_{0} + \gamma_{1} \, T_i \\
-u_{site} \sim \mathcal{N}(0,\, \sigma_{site}^2)
-\end{aligned}
-```
+\begin{aligned} W_i \mid \mu_i,\\ \sigma_i \sim \mathrm{Normal}(\mu_i,\\
+\sigma_i^2) \\ \mu_i = \beta\_{0} + \beta\_{1} \\ T_i + u\_{site(i)} \\
+\log(\sigma_i) = \gamma\_{0} + \gamma\_{1} \\ T_i \\ u\_{site} \sim
+\mathcal{N}(0,\\ \sigma\_{site}^2) \end{aligned}
 
 **Matrix form:**
 
-``` math
-\begin{aligned}
-\mathbf{w} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2)) \\
-\boldsymbol{\mu} = \mathbf{X} \boldsymbol{\beta} + \mathbf{u} \\
-\log(\boldsymbol{\sigma}) = \mathbf{Z} \boldsymbol{\gamma} \\
-\mathbf{u}_{site} \sim \mathcal{N}(\mathbf{0},\, \sigma_{site}^2 \mathbf{I}_{6})
+\begin{aligned} \mathbf{w} \mid \boldsymbol{\mu},\\ \boldsymbol{\sigma}
+\sim \mathcal{N}(\boldsymbol{\mu},\\
+\mathrm{diag}(\boldsymbol{\sigma}^2)) \\ \boldsymbol{\mu} = \mathbf{X}
+\boldsymbol{\beta} + \mathbf{u} \\ \log(\boldsymbol{\sigma}) =
+\mathbf{X}\_{\sigma} \boldsymbol{\gamma} \\ \mathbf{u}\_{site} \sim
+\mathcal{N}(\mathbf{0},\\ \sigma\_{site}^2 \mathbf{I}\_{6})
 \end{aligned}
-```
 
 The assumption table swaps the independence row. Side by side:
 
@@ -339,7 +319,7 @@ assumption_table(sym)[assumption_table(sym)$assumption %in%
 
 | assumption | expression | biological meaning | status |
 |:---|:---|:---|:---|
-| independence | $`W_i \perp W_j \mid X \text{ for } i \ne j`$ | Observations are conditionally independent given the predictors | follows from the formula |
+| independence | W_i \perp W_j \mid X \text{ for } i \ne j | Observations are conditionally independent given the predictors | follows from the formula |
 
 ``` r
 
@@ -350,7 +330,7 @@ assumption_table(sym_re)[assumption_table(sym_re)$assumption %in%
 
 | assumption | expression | biological meaning | status |
 |:---|:---|:---|:---|
-| independence_given_random_effects | $`W_i \perp W_j \mid X\, \mathbf{u} \text{ for } i \ne j`$ | Observations are conditionally independent given the predictors and the random effects | explicit |
+| independence_given_random_effects | W_i \perp W_j \mid X\\ \mathbf{u} \text{ for } i \ne j | Observations are conditionally independent given the predictors and the random effects | explicit |
 
 The structured object also exposes the random-effect structure as tidy
 tibbles, ready for downstream renderers:
@@ -360,9 +340,9 @@ tibbles, ready for downstream renderers:
 sym_re$random_effects
 ```
 
-| submodel | term               | group | levels | random effect   | between-group SD  |
-|:---------|:-------------------|:------|-------:|:----------------|:------------------|
-| mu       | `(1 \&#124; site)` | site  |      6 | $`u_{site(i)}`$ | $`\sigma_{site}`$ |
+| submodel | term         | group | levels | random effect | between-group SD |
+|:---------|:-------------|:------|-------:|:--------------|:-----------------|
+| mu       | `(1 | site)` | site  |      6 | u\_{site(i)}  | \sigma\_{site}   |
 
 ``` r
 
@@ -374,7 +354,7 @@ sym_re$variance_components
 | sigma_site_0 | 1.05        | 1.10         |
 
 `sd(site)` is the between-site standard deviation; the symbol table
-reports it as $`\sigma_{\mathrm{site}}`$.
+reports it as \sigma\_{\mathrm{site}}.
 
 **Takeaway.** Adding `(1 | group)` automatically reworks the
 independence assumption from unconditional to conditional. The audit
@@ -387,20 +367,19 @@ The same
 widget that anchors the [ladder
 article](https://itchyshin.github.io/symbolizer/articles/symbolizer-ladder.md)
 works on every `symbolized_model`. Calling it on `sym_re` lets a reader
-walk from the per-observation form
-$`y_i = \beta_0 + \beta_1 T_i + u_{\mathrm{site}(i)} + \varepsilon_i`$
-through the matrix abstraction
-$`\boldsymbol{\mu} = \mathbf{X}\boldsymbol{\beta} + \mathbf{Z}\mathbf{u}`$
+walk from the per-observation form y_i = \beta_0 + \beta_1 T_i +
+u\_{\mathrm{site}(i)} + \varepsilon_i through the matrix abstraction
+\boldsymbol{\mu} = \mathbf{X}\boldsymbol{\beta} + \mathbf{Z}\mathbf{u}
 to the actual numeric arrays — with both the
-$`\mathbf{X}\boldsymbol{\beta}`$ fixed-effect block and the
-$`\mathbf{Z}\mathbf{u}`$ random-effect block populated from the data:
+\mathbf{X}\boldsymbol{\beta} fixed-effect block and the
+\mathbf{Z}\mathbf{u} random-effect block populated from the data:
 
 ``` r
 
 as_html_three_views(sym_re)
 ```
 
-[Skip three-views widget](#sym-sym-1780075439-end)
+[Skip three-views widget](#sym-sym-1780180780-end)
 
 ▸1. Index
 
@@ -415,35 +394,31 @@ with the fixed-effect predictors and a group offset, with a residual SD
 that may also shift with its own predictors – both location and spread
 are modeled.
 
-**Coefficient reading.** On the response scale, $`\hat\beta`$ is the
+**Coefficient reading.** On the response scale, \hat\beta is the
 additive change in the mean of the response for a one-unit increase in
 the predictor (identity link – no back-transformation needed).
 
-``` math
-\begin{aligned}
-W_i \mid \mu_i,\, \sigma_i & \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
-\mu_i & = \beta_{0} + \beta_{1} \, T_i + u_{site(i)} \\
-\log(\sigma_i) & = \gamma_{0} + \gamma_{1} \, T_i \\
-u_{site} & \sim \mathcal{N}(0,\, \sigma_{site}^2)
-\end{aligned}
-```
+\begin{aligned} W_i \mid \mu_i,\\ \sigma_i & \sim
+\mathrm{Normal}(\mu_i,\\ \sigma_i^2) \\ \mu_i & = \beta\_{0} +
+\beta\_{1} \\ T_i + u\_{site(i)} \\ \log(\sigma_i) & = \gamma\_{0} +
+\gamma\_{1} \\ T_i \\ u\_{site} & \sim \mathcal{N}(0,\\
+\sigma\_{site}^2) \end{aligned}
 
 where:
 
-- $`W_i`$ — response variable  $`\mathbb{R}^{120}`$
-- $`T_i`$ — continuous predictor  column of X (length 120)
-- $`\mu_i`$ — conditional mu of body_mass  $`\mathbb{R}^{120}`$
-- $`\sigma_i`$ — residual standard deviation  $`\mathbb{R}^{120}`$
-- $`\beta_{0}, \beta_{1}`$ — mu submodel coefficients
-   $`\mathbb{R}^{2}`$
-- $`\gamma_{0}, \gamma_{1}`$ — sigma submodel coefficients
-   $`\mathbb{R}^{2}`$
-- $`u_{site(i)}`$ — random intercept by site  scalar; $`\mathbb{R}^{6}`$
-  in matrix form
-- $`\sigma_{site}`$ — between-site standard deviation  scalar
+- W_i — response variable  \mathbb{R}^{120}
+- T_i — continuous predictor  column of X (length 120)
+- \mu_i — conditional mu of body_mass  \mathbb{R}^{120}
+- \sigma_i — residual standard deviation  \mathbb{R}^{120}
+- \beta\_{0}, \beta\_{1} — mu submodel coefficients  \mathbb{R}^{2}
+- \gamma\_{0}, \gamma\_{1} — sigma submodel coefficients  \mathbb{R}^{2}
+- u\_{site(i)} — random intercept by site  scalar; \mathbb{R}^{6} in
+  matrix form
+- \sigma\_{site} — between-site standard deviation  scalar
 
 **Where does the variation live?** Where the variation lives – each row
-is one source of variance, shown as a share of the total.
+is one variance component (shown as a share of the total when a single
+total variance is defined).
 
 - site: variance = 1.10
 
@@ -461,32 +436,27 @@ with the fixed-effect predictors and a group offset, with a residual SD
 that may also shift with its own predictors – both location and spread
 are modeled.
 
-``` math
-\begin{aligned}
-\mathbf{w} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} & \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2)) \\
-\boldsymbol{\mu} & = \mathbf{X} \boldsymbol{\beta} + \mathbf{u} \\
-\log(\boldsymbol{\sigma}) & = \mathbf{Z} \boldsymbol{\gamma} \\
-\mathbf{u}_{site} & \sim \mathcal{N}(\mathbf{0},\, \sigma_{site}^2 \mathbf{I}_{6})
+\begin{aligned} \mathbf{w} \mid \boldsymbol{\mu},\\ \boldsymbol{\sigma}
+& \sim \mathcal{N}(\boldsymbol{\mu},\\
+\mathrm{diag}(\boldsymbol{\sigma}^2)) \\ \boldsymbol{\mu} & = \mathbf{X}
+\boldsymbol{\beta} + \mathbf{u} \\ \log(\boldsymbol{\sigma}) & =
+\mathbf{X}\_{\sigma} \boldsymbol{\gamma} \\ \mathbf{u}\_{site} & \sim
+\mathcal{N}(\mathbf{0},\\ \sigma\_{site}^2 \mathbf{I}\_{6})
 \end{aligned}
-```
 
 where:
 
-- $`\mathbf{w}`$ — response variable  $`\mathbb{R}^{120}`$
-- $`\boldsymbol{\mu}`$ — conditional mu of body_mass
-   $`\mathbb{R}^{120}`$
-- $`\boldsymbol{\sigma}`$ — residual standard deviation
-   $`\mathbb{R}^{120}`$
-- $`\boldsymbol{\beta}`$ — mu submodel coefficients  $`\mathbb{R}^{2}`$
-- $`\boldsymbol{\gamma}`$ — sigma submodel coefficients
-   $`\mathbb{R}^{2}`$
-- $`\mathbf{X}`$ — mu submodel design matrix
-   $`\mathbb{R}^{120 \times 2}`$
-- $`\mathbf{Z}`$ — sigma submodel design matrix
-   $`\mathbb{R}^{120 \times 2}`$
-- $`\mathbf{u}_{site}`$ — random intercept by site  scalar;
-  $`\mathbb{R}^{6}`$ in matrix form
-- $`\sigma_{site}`$ — between-site standard deviation  scalar
+- \mathbf{w} — response variable  \mathbb{R}^{120}
+- \boldsymbol{\mu} — conditional mu of body_mass  \mathbb{R}^{120}
+- \boldsymbol{\sigma} — residual standard deviation  \mathbb{R}^{120}
+- \boldsymbol{\beta} — mu submodel coefficients  \mathbb{R}^{2}
+- \boldsymbol{\gamma} — sigma submodel coefficients  \mathbb{R}^{2}
+- \mathbf{X} — mu submodel design matrix  \mathbb{R}^{120 \times 2}
+- \mathbf{X}\_{\sigma} — sigma submodel design matrix  \mathbb{R}^{120
+  \times 2}
+- \mathbf{u}\_{site} — random intercept by site  scalar; \mathbb{R}^{6}
+  in matrix form
+- \sigma\_{site} — between-site standard deviation  scalar
 
 The same matrix equation, with your actual numbers stacked inside the
 brackets – what the computer multiplies. Showing first 5 and last 2 rows
@@ -505,24 +475,44 @@ also shown.
 
 For observation *i* = 1 of your data:
 
-``` math
-\begin{aligned}
-w_{1} &= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{temperature}_{1} + \hat{u}_{\mathrm{site},\,\mathrm{a}} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
-\hat\mu_{1} &=   29 + 0.458 \times 24.7 + (0.482) \approx 40.7 &\quad(\text{predicted mean} = \text{linear predictor}) \\
-w_{1} &= \underbrace{40.7}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-0.526)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,} &\quad(\text{observed} = \text{predicted mean} + \text{residual})
+\begin{aligned} w\_{1} &= \hat\beta\_{0} +
+\hat\beta\_{1}\\\mathrm{temperature}\_{1} +
+\hat{u}\_{\mathrm{site},\\\mathrm{a}} + \hat\varepsilon\_{1}
+&\quad(\text{response equation, one row of the model}) \\ \hat\mu\_{1}
+&= 29 + 0.458 \times 24.7 + (0.482) \approx 40.7 &\quad(\text{predicted
+mean} = \text{linear predictor}) \\ w\_{1} &=
+\underbrace{40.7}\_{\textstyle\\\hat\mu\_{1}\\\text{(predicted)}\\}
+\\+\\
+\underbrace{(-0.526)}\_{\textstyle\\\hat\varepsilon\_{1}\\\text{(residual)}\\}
+&\quad(\text{observed} = \text{predicted mean} + \text{residual})
 \end{aligned}
-```
 
 Stacking the same response equation for all *n* = 120 observations:
 
-``` math
-\underbrace{\begin{bmatrix} 40.2 \\ 41.4 \\ 44.2 \\ 33.8 \\   38 \\ \vdots \\ 34.8 \\ 36.2 \end{bmatrix}}_{\textstyle\,\mathbf{w}_{\,120 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 & 24.7 \\    1 & 18.9 \\    1 & 20.6 \\    1 & 16.3 \\    1 & 21.1 \\ \vdots & \vdots \\    1 & 11.9 \\    1 & 18.9 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,120 \times 2}\,}\, \underbrace{\begin{bmatrix}   29 \\ 0.458 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,2 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix}    1 &    0 &    0 &    0 &    0 &    0 \\    0 &    1 &    0 &    0 &    0 &    0 \\    0 &    0 &    1 &    0 &    0 &    0 \\    0 &    0 &    0 &    1 &    0 &    0 \\    0 &    0 &    0 &    0 &    1 &    0 \\ \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\    0 &    0 &    0 &    0 &    1 &    0 \\    0 &    0 &    0 &    0 &    0 &    1 \end{bmatrix}}_{\textstyle\,\mathbf{Z}_{\text{site},\,\,120 \times 6}\,}\, \underbrace{\begin{bmatrix} 0.482 \\ 1.47 \\ -0.889 \\ -0.823 \\ -0.45 \\ 0.207 \end{bmatrix}}_{\textstyle\,\hat{\mathbf{u}}_{\text{site},\,6 \times 1}\;\text{(BLUP)}\,} \;+\; \underbrace{\begin{bmatrix} -0.526 \\ 2.37 \\ 6.67 \\ -1.77 \\ -0.109 \\ \vdots \\ 0.81 \\ -1.6 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,120 \times 1}\;\text{(residual)}\,}
-```
+\underbrace{\begin{bmatrix} 40.2 \\ 41.4 \\ 44.2 \\ 33.8 \\ 38 \\ \vdots
+\\ 34.8 \\ 36.2 \end{bmatrix}}\_{\textstyle\\\mathbf{w}\_{\\120 \times
+1}\\\text{(observed)}\\} \\=\\ \underbrace{\begin{bmatrix} 1 & 24.7 \\ 1
+& 18.9 \\ 1 & 20.6 \\ 1 & 16.3 \\ 1 & 21.1 \\ \vdots & \vdots \\ 1 &
+11.9 \\ 1 & 18.9 \end{bmatrix}}\_{\textstyle\\\mathbf{X}\_{\\120 \times
+2}\\}\\ \underbrace{\begin{bmatrix} 29 \\ 0.458
+\end{bmatrix}}\_{\textstyle\\\hat{\boldsymbol{\beta}}\_{\\2 \times
+1}\\\text{(estimated)}\\} \\+\\ \underbrace{\begin{bmatrix} 1 & 0 & 0 &
+0 & 0 & 0 \\ 0 & 1 & 0 & 0 & 0 & 0 \\ 0 & 0 & 1 & 0 & 0 & 0 \\ 0 & 0 & 0
+& 1 & 0 & 0 \\ 0 & 0 & 0 & 0 & 1 & 0 \\ \vdots & \vdots & \vdots &
+\vdots & \vdots & \vdots \\ 0 & 0 & 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 0 & 0 &
+1 \end{bmatrix}}\_{\textstyle\\\mathbf{Z}\_{\text{site},\\\\120 \times
+6}\\}\\ \underbrace{\begin{bmatrix} 0.482 \\ 1.47 \\ -0.889 \\ -0.823 \\
+-0.45 \\ 0.207
+\end{bmatrix}}\_{\textstyle\\\hat{\mathbf{u}}\_{\text{site},\\6 \times
+1}\\\text{(BLUP)}\\} \\+\\ \underbrace{\begin{bmatrix} -0.526 \\ 2.37 \\
+6.67 \\ -1.77 \\ -0.109 \\ \vdots \\ 0.81 \\ -1.6
+\end{bmatrix}}\_{\textstyle\\\hat{\boldsymbol{\varepsilon}}\_{\\120
+\times 1}\\\text{(residual)}\\}
 
-**Left**: observed vector $`\mathbf{w}`$. **Middle**: the prediction
-$`\mathbf{X}\hat{\boldsymbol{\beta}} + \mathbf{Z}\hat{\mathbf{u}} = \hat{\boldsymbol{\mu}}`$.
-**Right**: the residual vector
-$`\hat{\boldsymbol{\varepsilon}} = \mathbf{w} - \hat{\boldsymbol{\mu}}`$.
+**Left**: observed vector \mathbf{w}. **Middle**: the prediction
+\mathbf{X}\hat{\boldsymbol{\beta}} + \mathbf{Z}\hat{\mathbf{u}} =
+\hat{\boldsymbol{\mu}}. **Right**: the residual vector
+\hat{\boldsymbol{\varepsilon}} = \mathbf{w} - \hat{\boldsymbol{\mu}}.
 Every row of this matrix equation is one of the response-equation rows
 from the worked row above.
 
@@ -532,23 +522,27 @@ amount that grows when the group has little data and shrinks when the
 between-group variance is large. Groups with the least data are pulled
 hardest toward the overall mean.
 
-And the $`\sigma`$ submodel (no observed counterpart – $`\sigma`$’s job
-is to describe the spread of $`\hat{\boldsymbol{\varepsilon}}`$). For
-the same observation *i* = 1:
+And the \sigma submodel (no observed counterpart – \sigma’s job is to
+describe the spread of \hat{\boldsymbol{\varepsilon}}). For the same
+observation *i* = 1:
 
-``` math
-\begin{aligned}
-\log\hat\sigma_{1} &= \hat\gamma_{0} + \hat\gamma_{1}\,\mathrm{temperature}_{1} &\quad(\text{sigma submodel for observation 1, log link}) \\
-\log\hat\sigma_{1} &= 0.578 + 0.0422 \times 24.7 = 1.62 &\quad(\text{with your numbers}) \\
-\hat\sigma_{1} &= \exp(1.62) \approx 5.05 &\quad(\text{predicted residual SD for observation 1})
-\end{aligned}
-```
+\begin{aligned} \log\hat\sigma\_{1} &= \hat\gamma\_{0} +
+\hat\gamma\_{1}\\\mathrm{temperature}\_{1} &\quad(\text{sigma submodel
+for observation 1, log link}) \\ \log\hat\sigma\_{1} &= 0.578 + 0.0422
+\times 24.7 = 1.62 &\quad(\text{with your numbers}) \\ \hat\sigma\_{1}
+&= \exp(1.62) \approx 5.05 &\quad(\text{predicted residual SD for
+observation 1}) \end{aligned}
 
 Stacking the same log-link equation for all *n* = 120 observations:
 
-``` math
-\log\!\underbrace{\begin{bmatrix} 5.05 \\ 3.95 \\ 4.25 \\ 3.55 \\ 4.34 \\ \vdots \\ 2.95 \\ 3.95 \end{bmatrix}}_{\textstyle\,\boldsymbol{\sigma}_{\,120 \times 1}\,} \;=\; \underbrace{\begin{bmatrix}    1 & 24.7 \\    1 & 18.9 \\    1 & 20.6 \\    1 & 16.3 \\    1 & 21.1 \\ \vdots & \vdots \\    1 & 11.9 \\    1 & 18.9 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\sigma,\,120 \times 2}\,}\, \underbrace{\begin{bmatrix} 0.578 \\ 0.0422 \end{bmatrix}}_{\textstyle\,\boldsymbol{\gamma}_{\,2 \times 1}\,}
-```
+\log\\\underbrace{\begin{bmatrix} 5.05 \\ 3.95 \\ 4.25 \\ 3.55 \\ 4.34
+\\ \vdots \\ 2.95 \\ 3.95
+\end{bmatrix}}\_{\textstyle\\\boldsymbol{\sigma}\_{\\120 \times 1}\\}
+\\=\\ \underbrace{\begin{bmatrix} 1 & 24.7 \\ 1 & 18.9 \\ 1 & 20.6 \\ 1
+& 16.3 \\ 1 & 21.1 \\ \vdots & \vdots \\ 1 & 11.9 \\ 1 & 18.9
+\end{bmatrix}}\_{\textstyle\\\mathbf{X}\_{\sigma,\\120 \times 2}\\}\\
+\underbrace{\begin{bmatrix} 0.578 \\ 0.0422
+\end{bmatrix}}\_{\textstyle\\\boldsymbol{\gamma}\_{\\2 \times 1}\\}
 
 ## 6. A richer worked example: four predictor roles in one fit
 
@@ -607,17 +601,17 @@ formula_bridge(sym_rich)
 
 | submodel | R syntax | meaning | math (index) | math (matrix) |
 |:---|:---|:---|:---|:---|
-| mu | `body_mass ~ temperature + log(food) + sex + (1 \&#124; site)` | Expected body_mass is a linear function of the mean-model predictors | $`\mu_i = \beta_{0} + \beta_{1} \, T_i + \beta_{2} \, \mathrm{log}(F_i) + \beta_{3} \, [sex = \mathrm{male}] + u_{site(i)}`$ | $`\boldsymbol{\mu} = \mathbf{X} \boldsymbol{\beta} + \mathbf{u}`$ |
-| sigma | `sigma ~ temperature + sex` | Log residual SD of body_mass is a linear function of the scale-model predictors | $`\log(\sigma_i) = \gamma_{0} + \gamma_{1} \, T_i + \gamma_{2} \, [sex = \mathrm{male}]`$ | $`\log(\boldsymbol{\sigma}) = \mathbf{Z} \boldsymbol{\gamma}`$ |
+| mu | `body_mass ~ temperature + log(food) + sex + (1 | site)` | Expected body_mass is a linear function of the mean-model predictors | \mu_i = \beta\_{0} + \beta\_{1} \\ T_i + \beta\_{2} \\ \mathrm{log}(F_i) + \beta\_{3} \\ \[sex = \mathrm{male}\] + u\_{site(i)} | \boldsymbol{\mu} = \mathbf{X} \boldsymbol{\beta} + \mathbf{u} |
+| sigma | `sigma ~ temperature + sex` | Log residual SD of body_mass is a linear function of the scale-model predictors | \log(\sigma_i) = \gamma\_{0} + \gamma\_{1} \\ T_i + \gamma\_{2} \\ \[sex = \mathrm{male}\] | \log(\boldsymbol{\sigma}) = \mathbf{X}\_{\sigma} \boldsymbol{\gamma} |
 
 For the mu submodel, the R syntax
 `body_mass ~ temperature + log(food) + sex + (1 | site)` maps to the
-indexed equation in the `mathematics` column and to
-$`\boldsymbol{\mu} = \mathbf{X} \boldsymbol{\beta} + \mathbf{u}`$ in the
-`mathematics_matrix` column. The random-intercept piece appears as
-$`+ \mathbf{u}`$ in the matrix form and as $`+ u_{\mathrm{site}(i)}`$ in
-the indexed form. A reader can compare the two columns and learn the
-translation without doing it by hand.
+indexed equation in the `mathematics` column and to \boldsymbol{\mu} =
+\mathbf{X} \boldsymbol{\beta} + \mathbf{u} in the `mathematics_matrix`
+column. The random-intercept piece appears as + \mathbf{u} in the matrix
+form and as + u\_{\mathrm{site}(i)} in the indexed form. A reader can
+compare the two columns and learn the translation without doing it by
+hand.
 
 [`notation_bridge()`](https://itchyshin.github.io/symbolizer/reference/notation_bridge.md)
 is the deeper teaching surface: every symbol *and* every equation pairs
@@ -630,26 +624,26 @@ notation_bridge(sym_rich)
 
 | concept | index | matrix | shape | concrete |
 |:---|:---|:---|:---|:---|
-| conditional_distribution | $`W_i \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2)`$ | $`\mathbf{w} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2))`$ | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ |
-| mu_linear_predictor | $`\mu_i = \beta_{0} + \beta_{1} \, T_i + \beta_{2} \, \mathrm{log}(F_i) + \beta_{3} \, [sex = \mathrm{male}] + u_{site(i)}`$ | $`\boldsymbol{\mu} = \mathbf{X} \boldsymbol{\beta} + \mathbf{u}`$ | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ |
-| sigma_linear_predictor | $`\log(\sigma_i) = \gamma_{0} + \gamma_{1} \, T_i + \gamma_{2} \, [sex = \mathrm{male}]`$ | $`\log(\boldsymbol{\sigma}) = \mathbf{Z} \boldsymbol{\gamma}`$ | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ |
-| body_mass | $`W_i`$ | $`\mathbf{w}`$ | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ |
-| parameter | $`\mu_i`$ | $`\boldsymbol{\mu}`$ | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ |
-| parameter | $`\sigma_i`$ | $`\boldsymbol{\sigma}`$ | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ |
-| coefficient | $`\beta_{0}, \beta_{1}, \beta_{2}, \beta_{3}`$ | $`\boldsymbol{\beta}`$ | $`\mathbb{R}^{p_\mu}`$ | $`\mathbb{R}^{4}`$ |
-| coefficient | $`\gamma_{0}, \gamma_{1}, \gamma_{2}`$ | $`\boldsymbol{\gamma}`$ | $`\mathbb{R}^{p_\sigma}`$ | $`\mathbb{R}^{3}`$ |
-| design_matrix | — | $`\mathbf{X}`$ | $`\mathbb{R}^{n \times p_\mu}`$ | $`\mathbb{R}^{200 \times 4}`$ |
-| design_matrix | — | $`\mathbf{Z}`$ | $`\mathbb{R}^{n \times p_\sigma}`$ | $`\mathbb{R}^{200 \times 3}`$ |
-| site | $`u_{site(i)}`$ | $`\mathbf{u}_{site}`$ | \$scalar; $`\mathbb{R}^{G_{site}}`$ in matrix form\$ | \$scalar; $`\mathbb{R}^{8}`$ in matrix form\$ |
-| variance_component | $`\sigma_{site}`$ | $`\sigma_{site}`$ | scalar | scalar |
+| conditional_distribution | W_i \mid \mu_i,\\ \sigma_i \sim \mathrm{Normal}(\mu_i,\\ \sigma_i^2) | \mathbf{w} \mid \boldsymbol{\mu},\\ \boldsymbol{\sigma} \sim \mathcal{N}(\boldsymbol{\mu},\\ \mathrm{diag}(\boldsymbol{\sigma}^2)) | \mathbb{R}^n | \mathbb{R}^{200} |
+| mu_linear_predictor | \mu_i = \beta\_{0} + \beta\_{1} \\ T_i + \beta\_{2} \\ \mathrm{log}(F_i) + \beta\_{3} \\ \[sex = \mathrm{male}\] + u\_{site(i)} | \boldsymbol{\mu} = \mathbf{X} \boldsymbol{\beta} + \mathbf{u} | \mathbb{R}^n | \mathbb{R}^{200} |
+| sigma_linear_predictor | \log(\sigma_i) = \gamma\_{0} + \gamma\_{1} \\ T_i + \gamma\_{2} \\ \[sex = \mathrm{male}\] | \log(\boldsymbol{\sigma}) = \mathbf{X}\_{\sigma} \boldsymbol{\gamma} | \mathbb{R}^n | \mathbb{R}^{200} |
+| body_mass | W_i | \mathbf{w} | \mathbb{R}^n | \mathbb{R}^{200} |
+| parameter | \mu_i | \boldsymbol{\mu} | \mathbb{R}^n | \mathbb{R}^{200} |
+| parameter | \sigma_i | \boldsymbol{\sigma} | \mathbb{R}^n | \mathbb{R}^{200} |
+| coefficient | \beta\_{0}, \beta\_{1}, \beta\_{2}, \beta\_{3} | \boldsymbol{\beta} | \mathbb{R}^{p\_\mu} | \mathbb{R}^{4} |
+| coefficient | \gamma\_{0}, \gamma\_{1}, \gamma\_{2} | \boldsymbol{\gamma} | \mathbb{R}^{p\_\sigma} | \mathbb{R}^{3} |
+| design_matrix | — | \mathbf{X} | \mathbb{R}^{n \times p\_\mu} | \mathbb{R}^{200 \times 4} |
+| design_matrix | — | \mathbf{X}\_{\sigma} | \mathbb{R}^{n \times p\_\sigma} | \mathbb{R}^{200 \times 3} |
+| site | u\_{site(i)} | \mathbf{u}\_{site} | \$scalar; \mathbb{R}^{G\_{site}} in matrix form\$ | \$scalar; \mathbb{R}^{8} in matrix form\$ |
+| variance_component | \sigma\_{site} | \sigma\_{site} | scalar | scalar |
 
-The `dimension` column carries the shape rule (e.g. $`\mathbb{R}^n`$,
-$`\mathbb{R}^{n \times p_\mu}`$). The `dimension_concrete` column plugs
-in the actual numbers from this fit (e.g. $`\mathbb{R}^{200}`$,
-$`\mathbb{R}^{200 \times 4}`$). A reader learning matrix notation can
-stare at this table and see, in one place, that the $`\boldsymbol{\mu}`$
-vector has 200 entries, the $`\boldsymbol{\beta}`$ vector has four, and
-$`\mathbf{X}`$ is the $`200 \times 4`$ matrix that connects them.
+The `dimension` column carries the shape rule (e.g. \mathbb{R}^n,
+\mathbb{R}^{n \times p\_\mu}). The `dimension_concrete` column plugs in
+the actual numbers from this fit (e.g. \mathbb{R}^{200}, \mathbb{R}^{200
+\times 4}). A reader learning matrix notation can stare at this table
+and see, in one place, that the \boldsymbol{\mu} vector has 200 entries,
+the \boldsymbol{\beta} vector has four, and \mathbf{X} is the 200 \times
+4 matrix that connects them.
 
 **Takeaway.** The same renderers (`equations`, `formula_bridge`,
 `notation_bridge`) scale from a two-predictor toy fit to a four-role
@@ -664,7 +658,7 @@ correlate — a univariate fit fits each response in isolation and ignores
 the residual correlation between them. `drmTMB`’s
 [`biv_gaussian()`](https://itchyshin.github.io/drmTMB/reference/biv_gaussian.html)
 family models both responses jointly, with a residual correlation
-$`\rho_{12}`$ that itself can depend on covariates.
+\rho\_{12} that itself can depend on covariates.
 
 ``` r
 
@@ -710,17 +704,16 @@ formula_bridge(sym_biv)
 
 | submodel | R syntax | meaning | math (index) | math (matrix) |
 |:---|:---|:---|:---|:---|
-| mu1 | `growth ~ x1` | Expected growth is a linear function of the first mean-model predictors | $`\mu_{1i} = \beta_{1,0} + \beta_{1,1} \, x1_i`$ | $`\boldsymbol{\mu}_{1} = \mathbf{X}_{1} \boldsymbol{\beta}_{1}`$ |
-| mu2 | `repro ~ x2` | Expected repro is a linear function of the second mean-model predictors | $`\mu_{2i} = \beta_{2,0} + \beta_{2,1} \, x2_i`$ | $`\boldsymbol{\mu}_{2} = \mathbf{X}_{2} \boldsymbol{\beta}_{2}`$ |
-| sigma1 | `~1` | Log residual SD of growth is a linear function of the first scale-model predictors | $`\log(\sigma_{1i}) = \gamma_{1,0}`$ | $`\log(\boldsymbol{\sigma}_{1}) = \mathbf{Z}_{1} \boldsymbol{\gamma}_{1}`$ |
-| sigma2 | `~1` | Log residual SD of repro is a linear function of the second scale-model predictors | $`\log(\sigma_{2i}) = \gamma_{2,0}`$ | $`\log(\boldsymbol{\sigma}_{2}) = \mathbf{Z}_{2} \boldsymbol{\gamma}_{2}`$ |
-| rho12 | `~1` | Fisher-z residual correlation between growth and repro is a linear function of the correlation-model predictors | $`\mathrm{tanh}^{-1}(\rho_{12,i}) = \rho_{0}`$ | $`\mathrm{tanh}^{-1}(\boldsymbol{\rho}_{12}) = \mathbf{W} \boldsymbol{\rho}`$ |
+| mu1 | `growth ~ x1` | Expected growth is a linear function of the first mean-model predictors | \mu\_{1i} = \beta\_{1,0} + \beta\_{1,1} \\ \mathrm{x1}\_i | \boldsymbol{\mu}\_{1} = \mathbf{X}\_{1} \boldsymbol{\beta}\_{1} |
+| mu2 | `repro ~ x2` | Expected repro is a linear function of the second mean-model predictors | \mu\_{2i} = \beta\_{2,0} + \beta\_{2,1} \\ \mathrm{x2}\_i | \boldsymbol{\mu}\_{2} = \mathbf{X}\_{2} \boldsymbol{\beta}\_{2} |
+| sigma1 | `~1` | Log residual SD of growth is a linear function of the first scale-model predictors | \log(\sigma\_{1i}) = \gamma\_{1,0} | \log(\boldsymbol{\sigma}\_{1}) = \mathbf{X}\_{\sigma\_{1}} \boldsymbol{\gamma}\_{1} |
+| sigma2 | `~1` | Log residual SD of repro is a linear function of the second scale-model predictors | \log(\sigma\_{2i}) = \gamma\_{2,0} | \log(\boldsymbol{\sigma}\_{2}) = \mathbf{X}\_{\sigma\_{2}} \boldsymbol{\gamma}\_{2} |
+| rho12 | `~1` | Fisher-z residual correlation between growth and repro is a linear function of the correlation-model predictors | \mathrm{tanh}^{-1}(\rho\_{12,i}) = \rho\_{0} | \mathrm{tanh}^{-1}(\boldsymbol{\rho}\_{12}) = \mathbf{W} \boldsymbol{\rho} |
 
 `mu1`, `mu2` are the two mean predictors; `sigma1`, `sigma2` are the two
 log-SD predictors (one residual SD per response); `rho12` is the
 residual correlation on the Fisher-z scale (so the linear predictor can
-range over all of $`\mathbb{R}`$ while the correlation stays in
-$`(-1, 1)`$).
+range over all of \mathbb{R} while the correlation stays in (-1, 1)).
 
 The joint conditional distribution is rendered in both index and matrix
 forms:
@@ -732,37 +725,36 @@ equations(sym_biv, notation = "both")
 
 **Index form:**
 
-``` math
-\begin{aligned}
-(Y_{1i}, Y_{2i}) \mid \mu_{1i},\, \mu_{2i},\, \sigma_{1i},\, \sigma_{2i},\, \rho_{12,i} \sim \mathcal{N}_2\!\left((\mu_{1i}, \mu_{2i}),\, \Sigma_i\right) \\
-\mu_{1i} = \beta_{1,0} + \beta_{1,1} \, x1_i \\
-\mu_{2i} = \beta_{2,0} + \beta_{2,1} \, x2_i \\
-\log(\sigma_{1i}) = \gamma_{1,0} \\
-\log(\sigma_{2i}) = \gamma_{2,0} \\
-\mathrm{tanh}^{-1}(\rho_{12,i}) = \rho_{0} \\
-\Sigma_i = \begin{pmatrix}\sigma_{1i}^2 & \rho_{12,i}\sigma_{1i}\sigma_{2i} \\ \rho_{12,i}\sigma_{1i}\sigma_{2i} & \sigma_{2i}^2\end{pmatrix}
+\begin{aligned} (Y\_{1i}, Y\_{2i}) \mid \mu\_{1i},\\ \mu\_{2i},\\
+\sigma\_{1i},\\ \sigma\_{2i},\\ \rho\_{12,i} \sim
+\mathcal{N}\_2\\\left((\mu\_{1i}, \mu\_{2i}),\\ \Sigma_i\right) \\
+\mu\_{1i} = \beta\_{1,0} + \beta\_{1,1} \\ \mathrm{x1}\_i \\ \mu\_{2i} =
+\beta\_{2,0} + \beta\_{2,1} \\ \mathrm{x2}\_i \\ \log(\sigma\_{1i}) =
+\gamma\_{1,0} \\ \log(\sigma\_{2i}) = \gamma\_{2,0} \\
+\mathrm{tanh}^{-1}(\rho\_{12,i}) = \rho\_{0} \\ \Sigma_i =
+\begin{pmatrix}\sigma\_{1i}^2 & \rho\_{12,i}\sigma\_{1i}\sigma\_{2i} \\
+\rho\_{12,i}\sigma\_{1i}\sigma\_{2i} & \sigma\_{2i}^2\end{pmatrix}
 \end{aligned}
-```
 
 **Matrix form:**
 
-``` math
-\begin{aligned}
-\mathbf{Y} \mid \mathbf{M},\, \mathbf{S},\, \boldsymbol{\rho}_{12} \sim \mathcal{N}_2(\mathbf{M},\, \boldsymbol{\Sigma}) \\
-\boldsymbol{\mu}_{1} = \mathbf{X}_{1} \boldsymbol{\beta}_{1} \\
-\boldsymbol{\mu}_{2} = \mathbf{X}_{2} \boldsymbol{\beta}_{2} \\
-\log(\boldsymbol{\sigma}_{1}) = \mathbf{Z}_{1} \boldsymbol{\gamma}_{1} \\
-\log(\boldsymbol{\sigma}_{2}) = \mathbf{Z}_{2} \boldsymbol{\gamma}_{2} \\
-\mathrm{tanh}^{-1}(\boldsymbol{\rho}_{12}) = \mathbf{W} \boldsymbol{\rho} \\
-\boldsymbol{\Sigma} = \mathrm{diag}(\boldsymbol{\sigma}_{1}) \mathbf{R}(\boldsymbol{\rho}_{12}) \mathrm{diag}(\boldsymbol{\sigma}_{2})
-\end{aligned}
-```
+\begin{aligned} \mathbf{Y} \mid \mathbf{M},\\ \mathbf{S},\\
+\boldsymbol{\rho}\_{12} \sim \mathcal{N}\_2(\mathbf{M},\\
+\boldsymbol{\Sigma}) \\ \boldsymbol{\mu}\_{1} = \mathbf{X}\_{1}
+\boldsymbol{\beta}\_{1} \\ \boldsymbol{\mu}\_{2} = \mathbf{X}\_{2}
+\boldsymbol{\beta}\_{2} \\ \log(\boldsymbol{\sigma}\_{1}) =
+\mathbf{X}\_{\sigma\_{1}} \boldsymbol{\gamma}\_{1} \\
+\log(\boldsymbol{\sigma}\_{2}) = \mathbf{X}\_{\sigma\_{2}}
+\boldsymbol{\gamma}\_{2} \\ \mathrm{tanh}^{-1}(\boldsymbol{\rho}\_{12})
+= \mathbf{W} \boldsymbol{\rho} \\ \boldsymbol{\Sigma} =
+\mathrm{diag}(\boldsymbol{\sigma}\_{1})
+\mathbf{R}(\boldsymbol{\rho}\_{12})
+\mathrm{diag}(\boldsymbol{\sigma}\_{2}) \end{aligned}
 
-The matrix form is the cleaner reading: $`\mathbf{Y}`$ is the
-$`n \times 2`$ response matrix, $`\mathbf{M}`$ stacks the
-per-observation mean vectors, and $`\boldsymbol{\Sigma}`$ is the
-per-observation $`2 \times 2`$ covariance matrix with
-$`\sigma_{1,i}\,\sigma_{2,i}\,\rho_{12,i}`$ on the off-diagonal.
+The matrix form is the cleaner reading: \mathbf{Y} is the n \times 2
+response matrix, \mathbf{M} stacks the per-observation mean vectors, and
+\boldsymbol{\Sigma} is the per-observation 2 \times 2 covariance matrix
+with \sigma\_{1,i}\\\sigma\_{2,i}\\\rho\_{12,i} on the off-diagonal.
 
 The rho12 coefficient gets the same multi-scale treatment as every other
 coefficient. The reading row points the reader at the Fisher-z scale
@@ -786,9 +778,9 @@ method: `wald`).*
 
 **Takeaway.** The same `symbolized_model` interface scales from two
 submodels to five. `formula_bridge` shows the new submodels, the joint
-distribution exposes $`\boldsymbol{\Sigma}`$, and
-`parameter_interpretation` gives the rho12 row the same multi-scale
-reading as every other coefficient.
+distribution exposes \boldsymbol{\Sigma}, and `parameter_interpretation`
+gives the rho12 row the same multi-scale reading as every other
+coefficient.
 
 ## 8. What to inspect next
 
@@ -997,7 +989,10 @@ The relevant rows are:
   `(1 | group)`)
 - `drmTMB / biv_gaussian / mu1`, `mu2`, `sigma1`, `sigma2`, `rho12` —
   **First slice** (see Section 6)
-- All non-Gaussian families — **Planned or reserved**
+- Student-t, lognormal, Gamma, beta, beta_binomial, Poisson, nbinom2,
+  truncated_nbinom2, cumulative_logit (with their zero-inflation and
+  hurdle submodels) — **First slice** (the `caps` table above is the
+  authoritative list)
 
 If you call
 [`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)

@@ -86,14 +86,14 @@ symbol_table(sym1)
 
 | index | matrix | variable | units | role | shape | concrete | description |
 |:---|:---|:---|:---|:---|:---|:---|:---|
-| $`W_i`$ | $`\mathbf{w}`$ | body_mass | g | response | $`\mathbb{R}^n`$ | $`\mathbb{R}^{120}`$ | response variable |
-| sex_i | — | sex | NA | factor | column of design matrix | column of X (length 120) | factor (female \[reference\], male) |
-| $`\mu_i`$ | $`\boldsymbol{\mu}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{120}`$ | conditional mu of body_mass |
-| $`\sigma_i`$ | $`\boldsymbol{\sigma}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{120}`$ | residual standard deviation |
-| $`\beta_{0}, \beta_{1}`$ | $`\boldsymbol{\beta}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\mu}`$ | $`\mathbb{R}^{2}`$ | mu submodel coefficients |
-| $`\gamma_{0}`$ | $`\boldsymbol{\gamma}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\sigma}`$ | $`\mathbb{R}^{1}`$ | sigma submodel coefficients |
-| — | $`\mathbf{X}`$ | NA | NA | design_matrix | $`\mathbb{R}^{n \times p_\mu}`$ | $`\mathbb{R}^{120 \times 2}`$ | mu submodel design matrix |
-| — | $`\mathbf{Z}`$ | NA | NA | design_matrix | $`\mathbb{R}^{n \times p_\sigma}`$ | $`\mathbb{R}^{120 \times 1}`$ | sigma submodel design matrix |
+| W_i | \mathbf{w} | body_mass | g | response | \mathbb{R}^n | \mathbb{R}^{120} | response variable |
+| \mathrm{sex}\_i | — | sex | NA | factor | column of design matrix | column of X (length 120) | factor (female \[reference\], male) |
+| \mu_i | \boldsymbol{\mu} | NA | NA | parameter | \mathbb{R}^n | \mathbb{R}^{120} | conditional mu of body_mass |
+| \sigma_i | \boldsymbol{\sigma} | NA | NA | parameter | \mathbb{R}^n | \mathbb{R}^{120} | residual standard deviation |
+| \beta\_{0}, \beta\_{1} | \boldsymbol{\beta} | NA | NA | coefficient | \mathbb{R}^{p\_\mu} | \mathbb{R}^{2} | mu submodel coefficients |
+| \gamma\_{0} | \boldsymbol{\gamma} | NA | NA | coefficient | \mathbb{R}^{p\_\sigma} | \mathbb{R}^{1} | sigma submodel coefficients |
+| — | \mathbf{X} | NA | NA | design_matrix | \mathbb{R}^{n \times p\_\mu} | \mathbb{R}^{120 \times 2} | mu submodel design matrix |
+| — | \mathbf{X}\_{\sigma} | NA | NA | design_matrix | \mathbb{R}^{n \times p\_\sigma} | \mathbb{R}^{120 \times 1} | sigma submodel design matrix |
 
 Look at the `sex [factor]` row’s description:
 `factor (female [reference], male)`. That `[reference]` marker is the
@@ -124,8 +124,8 @@ Two coefficients on the mu submodel:
   differ from the female mean.
 - The **`sexmale` contrast** estimate (4.99) is the **difference**
   between male and female means. It is *not* the male mean. To get the
-  male mean you add:
-  `intercept + sexmale = r round(sum(sym1$fixed_effects$estimate[1:2]), 2)`.
+  male mean you add the intercept and the contrast:
+  `intercept + sexmale` = 34.8.
 
 The biological reading in the table — *“Average body_mass differs
 between male and the reference”* — is the same statement in templated
@@ -192,14 +192,14 @@ symbol_table(sym2)
 
 | index | matrix | variable | units | role | shape | concrete | description |
 |:---|:---|:---|:---|:---|:---|:---|:---|
-| $`W_i`$ | $`\mathbf{w}`$ | body_mass | g | response | $`\mathbb{R}^n`$ | $`\mathbb{R}^{120}`$ | response variable |
-| site_i | — | site | NA | factor | column of design matrix | column of X (length 120) | factor (A \[reference\], B, C, D) |
-| $`\mu_i`$ | $`\boldsymbol{\mu}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{120}`$ | conditional mu of body_mass |
-| $`\sigma_i`$ | $`\boldsymbol{\sigma}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{120}`$ | residual standard deviation |
-| $`\beta_{0}, \beta_{1}, \beta_{2}, \beta_{3}`$ | $`\boldsymbol{\beta}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\mu}`$ | $`\mathbb{R}^{4}`$ | mu submodel coefficients |
-| $`\gamma_{0}`$ | $`\boldsymbol{\gamma}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\sigma}`$ | $`\mathbb{R}^{1}`$ | sigma submodel coefficients |
-| — | $`\mathbf{X}`$ | NA | NA | design_matrix | $`\mathbb{R}^{n \times p_\mu}`$ | $`\mathbb{R}^{120 \times 4}`$ | mu submodel design matrix |
-| — | $`\mathbf{Z}`$ | NA | NA | design_matrix | $`\mathbb{R}^{n \times p_\sigma}`$ | $`\mathbb{R}^{120 \times 1}`$ | sigma submodel design matrix |
+| W_i | \mathbf{w} | body_mass | g | response | \mathbb{R}^n | \mathbb{R}^{120} | response variable |
+| \mathrm{site}\_i | — | site | NA | factor | column of design matrix | column of X (length 120) | factor (A \[reference\], B, C, D) |
+| \mu_i | \boldsymbol{\mu} | NA | NA | parameter | \mathbb{R}^n | \mathbb{R}^{120} | conditional mu of body_mass |
+| \sigma_i | \boldsymbol{\sigma} | NA | NA | parameter | \mathbb{R}^n | \mathbb{R}^{120} | residual standard deviation |
+| \beta\_{0}, \beta\_{1}, \beta\_{2}, \beta\_{3} | \boldsymbol{\beta} | NA | NA | coefficient | \mathbb{R}^{p\_\mu} | \mathbb{R}^{4} | mu submodel coefficients |
+| \gamma\_{0} | \boldsymbol{\gamma} | NA | NA | coefficient | \mathbb{R}^{p\_\sigma} | \mathbb{R}^{1} | sigma submodel coefficients |
+| — | \mathbf{X} | NA | NA | design_matrix | \mathbb{R}^{n \times p\_\mu} | \mathbb{R}^{120 \times 4} | mu submodel design matrix |
+| — | \mathbf{X}\_{\sigma} | NA | NA | design_matrix | \mathbb{R}^{n \times p\_\sigma} | \mathbb{R}^{120 \times 1} | sigma submodel design matrix |
 
 The `site [factor]` row reads `factor (A [reference], B, C, D)`. And the
 coefficients are:
@@ -293,15 +293,15 @@ symbol_table(sym3)
 
 | index | matrix | variable | units | role | shape | concrete | description |
 |:---|:---|:---|:---|:---|:---|:---|:---|
-| $`W_i`$ | $`\mathbf{w}`$ | body_mass | g | response | $`\mathbb{R}^n`$ | $`\mathbb{R}^{120}`$ | response variable |
-| sex_i | — | sex | NA | factor | column of design matrix | column of X (length 120) | factor (female \[reference\], male) |
-| $`L_i`$ | — | body_size | mm | predictor | column of design matrix | column of X (length 120) | continuous predictor |
-| $`\mu_i`$ | $`\boldsymbol{\mu}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{120}`$ | conditional mu of body_mass |
-| $`\sigma_i`$ | $`\boldsymbol{\sigma}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{120}`$ | residual standard deviation |
-| $`\beta_{0}, \beta_{1}, \beta_{2}`$ | $`\boldsymbol{\beta}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\mu}`$ | $`\mathbb{R}^{3}`$ | mu submodel coefficients |
-| $`\gamma_{0}`$ | $`\boldsymbol{\gamma}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\sigma}`$ | $`\mathbb{R}^{1}`$ | sigma submodel coefficients |
-| — | $`\mathbf{X}`$ | NA | NA | design_matrix | $`\mathbb{R}^{n \times p_\mu}`$ | $`\mathbb{R}^{120 \times 3}`$ | mu submodel design matrix |
-| — | $`\mathbf{Z}`$ | NA | NA | design_matrix | $`\mathbb{R}^{n \times p_\sigma}`$ | $`\mathbb{R}^{120 \times 1}`$ | sigma submodel design matrix |
+| W_i | \mathbf{w} | body_mass | g | response | \mathbb{R}^n | \mathbb{R}^{120} | response variable |
+| \mathrm{sex}\_i | — | sex | NA | factor | column of design matrix | column of X (length 120) | factor (female \[reference\], male) |
+| L_i | — | body_size | mm | predictor | column of design matrix | column of X (length 120) | continuous predictor |
+| \mu_i | \boldsymbol{\mu} | NA | NA | parameter | \mathbb{R}^n | \mathbb{R}^{120} | conditional mu of body_mass |
+| \sigma_i | \boldsymbol{\sigma} | NA | NA | parameter | \mathbb{R}^n | \mathbb{R}^{120} | residual standard deviation |
+| \beta\_{0}, \beta\_{1}, \beta\_{2} | \boldsymbol{\beta} | NA | NA | coefficient | \mathbb{R}^{p\_\mu} | \mathbb{R}^{3} | mu submodel coefficients |
+| \gamma\_{0} | \boldsymbol{\gamma} | NA | NA | coefficient | \mathbb{R}^{p\_\sigma} | \mathbb{R}^{1} | sigma submodel coefficients |
+| — | \mathbf{X} | NA | NA | design_matrix | \mathbb{R}^{n \times p\_\mu} | \mathbb{R}^{120 \times 3} | mu submodel design matrix |
+| — | \mathbf{X}\_{\sigma} | NA | NA | design_matrix | \mathbb{R}^{n \times p\_\sigma} | \mathbb{R}^{120 \times 1} | sigma submodel design matrix |
 
 Look for the `(design_matrix)` row at the bottom:
 `dimension: R^{n × p_mu} (= R^{120 × 3})`. Three coefficients, three
@@ -353,16 +353,15 @@ For a `sex + body_size` fit the design matrix has **three columns** —
 intercept, `sexmale` (0 for female, 1 for male), and `body_size` — and
 the three-views widget shows exactly that on the matrix-with-data tab:
 the `0`s and `1`s of the dummy column sit next to the continuous
-`body_size` column, with the coefficient vector
-$`\boldsymbol{\beta} = (\beta_0,\,\beta_1,\,\beta_2)^\top`$ multiplying
-through:
+`body_size` column, with the coefficient vector \boldsymbol{\beta} =
+(\beta_0,\\\beta_1,\\\beta_2)^\top multiplying through:
 
 ``` r
 
 as_html_three_views(sym3)
 ```
 
-[Skip three-views widget](#sym-sym-1780075446-end)
+[Skip three-views widget](#sym-sym-1780180785-end)
 
 ▸1. Index
 
@@ -375,29 +374,26 @@ What happens for each observation *i* – the per-individual reading.
 Each observation is normally distributed around a mean that may shift
 with the predictors; the residual SD is constant across observations.
 
-**Coefficient reading.** On the response scale, $`\hat\beta`$ is the
+**Coefficient reading.** On the response scale, \hat\beta is the
 additive change in the mean of the response for a one-unit increase in
 the predictor (identity link – no back-transformation needed).
 
-``` math
-\begin{aligned}
-W_i \mid \mu_i,\, \sigma_i & \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
-\mu_i & = \beta_{0} + \beta_{1} \, [sex = \mathrm{male}] + \beta_{2} \, L_i \\
-\log(\sigma_i) & = \gamma_{0}
-\end{aligned}
-```
+\begin{aligned} W_i \mid \mu_i,\\ \sigma_i & \sim
+\mathrm{Normal}(\mu_i,\\ \sigma_i^2) \\ \mu_i & = \beta\_{0} +
+\beta\_{1} \\ \[sex = \mathrm{male}\] + \beta\_{2} \\ L_i \\
+\log(\sigma_i) & = \gamma\_{0} \end{aligned}
 
 where:
 
-- $`W_i`$ — response variable  $`\mathbb{R}^{120}`$
-- $`sex_i`$ — factor (female \[reference\], male)  column of X (length
-  120)
-- $`L_i`$ — continuous predictor  column of X (length 120)
-- $`\mu_i`$ — conditional mu of body_mass  $`\mathbb{R}^{120}`$
-- $`\sigma_i`$ — residual standard deviation  $`\mathbb{R}^{120}`$
-- $`\beta_{0}, \beta_{1}, \beta_{2}`$ — mu submodel coefficients
-   $`\mathbb{R}^{3}`$
-- $`\gamma_{0}`$ — sigma submodel coefficients  $`\mathbb{R}^{1}`$
+- W_i — response variable  \mathbb{R}^{120}
+- \mathrm{sex}\_i — factor (female \[reference\], male)  column of X
+  (length 120)
+- L_i — continuous predictor  column of X (length 120)
+- \mu_i — conditional mu of body_mass  \mathbb{R}^{120}
+- \sigma_i — residual standard deviation  \mathbb{R}^{120}
+- \beta\_{0}, \beta\_{1}, \beta\_{2} — mu submodel coefficients
+   \mathbb{R}^{3}
+- \gamma\_{0} — sigma submodel coefficients  \mathbb{R}^{1}
 
 The same model in matrix form – the structural contract every textbook
 past chapter 4 switches to.
@@ -405,28 +401,22 @@ past chapter 4 switches to.
 Each observation is normally distributed around a mean that may shift
 with the predictors; the residual SD is constant across observations.
 
-``` math
-\begin{aligned}
-\mathbf{w} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} & \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2)) \\
-\boldsymbol{\mu} & = \mathbf{X} \boldsymbol{\beta} \\
-\log(\boldsymbol{\sigma}) & = \mathbf{Z} \boldsymbol{\gamma}
-\end{aligned}
-```
+\begin{aligned} \mathbf{w} \mid \boldsymbol{\mu},\\ \boldsymbol{\sigma}
+& \sim \mathcal{N}(\boldsymbol{\mu},\\
+\mathrm{diag}(\boldsymbol{\sigma}^2)) \\ \boldsymbol{\mu} & = \mathbf{X}
+\boldsymbol{\beta} \\ \log(\boldsymbol{\sigma}) & = \mathbf{X}\_{\sigma}
+\boldsymbol{\gamma} \end{aligned}
 
 where:
 
-- $`\mathbf{w}`$ — response variable  $`\mathbb{R}^{120}`$
-- $`\boldsymbol{\mu}`$ — conditional mu of body_mass
-   $`\mathbb{R}^{120}`$
-- $`\boldsymbol{\sigma}`$ — residual standard deviation
-   $`\mathbb{R}^{120}`$
-- $`\boldsymbol{\beta}`$ — mu submodel coefficients  $`\mathbb{R}^{3}`$
-- $`\boldsymbol{\gamma}`$ — sigma submodel coefficients
-   $`\mathbb{R}^{1}`$
-- $`\mathbf{X}`$ — mu submodel design matrix
-   $`\mathbb{R}^{120 \times 3}`$
-- $`\mathbf{Z}`$ — sigma submodel design matrix
-   $`\mathbb{R}^{120 \times 1}`$
+- \mathbf{w} — response variable  \mathbb{R}^{120}
+- \boldsymbol{\mu} — conditional mu of body_mass  \mathbb{R}^{120}
+- \boldsymbol{\sigma} — residual standard deviation  \mathbb{R}^{120}
+- \boldsymbol{\beta} — mu submodel coefficients  \mathbb{R}^{3}
+- \boldsymbol{\gamma} — sigma submodel coefficients  \mathbb{R}^{1}
+- \mathbf{X} — mu submodel design matrix  \mathbb{R}^{120 \times 3}
+- \mathbf{X}\_{\sigma} — sigma submodel design matrix  \mathbb{R}^{120
+  \times 1}
 
 The same matrix equation, with your actual numbers stacked inside the
 brackets – what the computer multiplies. Showing first 5 and last 2 rows
@@ -442,44 +432,58 @@ below.
 
 For observation *i* = 1 of your data:
 
-``` math
-\begin{aligned}
-w_{1} &= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{sexmale}_{1} + \hat\beta_{2}\,\mathrm{body\_size}_{1} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
-\hat\mu_{1} &= 29.9 + 5.26 \times    0 + 0.197 \times 60.5 \approx 41.8 &\quad(\text{predicted mean} = \text{linear predictor}) \\
-w_{1} &= \underbrace{41.8}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-2.36)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,} &\quad(\text{observed} = \text{predicted mean} + \text{residual})
+\begin{aligned} w\_{1} &= \hat\beta\_{0} +
+\hat\beta\_{1}\\\mathrm{sexmale}\_{1} +
+\hat\beta\_{2}\\\mathrm{body\\size}\_{1} + \hat\varepsilon\_{1}
+&\quad(\text{response equation, one row of the model}) \\ \hat\mu\_{1}
+&= 29.9 + 5.26 \times 0 + 0.197 \times 60.5 \approx 41.8
+&\quad(\text{predicted mean} = \text{linear predictor}) \\ w\_{1} &=
+\underbrace{41.8}\_{\textstyle\\\hat\mu\_{1}\\\text{(predicted)}\\}
+\\+\\
+\underbrace{(-2.36)}\_{\textstyle\\\hat\varepsilon\_{1}\\\text{(residual)}\\}
+&\quad(\text{observed} = \text{predicted mean} + \text{residual})
 \end{aligned}
-```
 
 Stacking the same response equation for all *n* = 120 observations:
 
-``` math
-\underbrace{\begin{bmatrix} 39.5 \\ 55.1 \\ 50.4 \\ 46.7 \\ 55.4 \\ \vdots \\ 49.4 \\ 48.7 \end{bmatrix}}_{\textstyle\,\mathbf{w}_{\,120 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 &    0 & 60.5 \\    1 &    0 &  129 \\    1 &    0 & 70.5 \\    1 &    0 & 77.9 \\    1 &    1 &  111 \\ \vdots & \vdots & \vdots \\    1 &    0 &   77 \\    1 &    1 &  103 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,120 \times 3}\,}\, \underbrace{\begin{bmatrix} 29.9 \\ 5.26 \\ 0.197 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,3 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} -2.36 \\ -0.159 \\ 6.62 \\ 1.51 \\ -1.49 \\ \vdots \\ 4.37 \\ -6.76 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,120 \times 1}\;\text{(residual)}\,}
-```
+\underbrace{\begin{bmatrix} 39.5 \\ 55.1 \\ 50.4 \\ 46.7 \\ 55.4 \\
+\vdots \\ 49.4 \\ 48.7 \end{bmatrix}}\_{\textstyle\\\mathbf{w}\_{\\120
+\times 1}\\\text{(observed)}\\} \\=\\ \underbrace{\begin{bmatrix} 1 & 0
+& 60.5 \\ 1 & 0 & 129 \\ 1 & 0 & 70.5 \\ 1 & 0 & 77.9 \\ 1 & 1 & 111 \\
+\vdots & \vdots & \vdots \\ 1 & 0 & 77 \\ 1 & 1 & 103
+\end{bmatrix}}\_{\textstyle\\\mathbf{X}\_{\\120 \times 3}\\}\\
+\underbrace{\begin{bmatrix} 29.9 \\ 5.26 \\ 0.197
+\end{bmatrix}}\_{\textstyle\\\hat{\boldsymbol{\beta}}\_{\\3 \times
+1}\\\text{(estimated)}\\} \\+\\ \underbrace{\begin{bmatrix} -2.36 \\
+-0.159 \\ 6.62 \\ 1.51 \\ -1.49 \\ \vdots \\ 4.37 \\ -6.76
+\end{bmatrix}}\_{\textstyle\\\hat{\boldsymbol{\varepsilon}}\_{\\120
+\times 1}\\\text{(residual)}\\}
 
-**Left**: observed vector $`\mathbf{w}`$. **Middle**: the prediction
-$`\mathbf{X}\hat{\boldsymbol{\beta}} = \hat{\boldsymbol{\mu}}`$.
-**Right**: the residual vector
-$`\hat{\boldsymbol{\varepsilon}} = \mathbf{w} - \hat{\boldsymbol{\mu}}`$.
-Every row of this matrix equation is one of the response-equation rows
-from the worked row above.
+**Left**: observed vector \mathbf{w}. **Middle**: the prediction
+\mathbf{X}\hat{\boldsymbol{\beta}} = \hat{\boldsymbol{\mu}}. **Right**:
+the residual vector \hat{\boldsymbol{\varepsilon}} = \mathbf{w} -
+\hat{\boldsymbol{\mu}}. Every row of this matrix equation is one of the
+response-equation rows from the worked row above.
 
-And the $`\sigma`$ submodel (no observed counterpart – $`\sigma`$’s job
-is to describe the spread of $`\hat{\boldsymbol{\varepsilon}}`$). For
-the same observation *i* = 1:
+And the \sigma submodel (no observed counterpart – \sigma’s job is to
+describe the spread of \hat{\boldsymbol{\varepsilon}}). For the same
+observation *i* = 1:
 
-``` math
-\begin{aligned}
-\log\hat\sigma_{1} &= \hat\gamma_{0} &\quad(\text{sigma submodel for observation 1, log link}) \\
-\log\hat\sigma_{1} &= 1.17 &\quad(\text{with your numbers}) \\
-\hat\sigma_{1} &= \exp(1.17) \approx 3.21 &\quad(\text{predicted residual SD for observation 1})
-\end{aligned}
-```
+\begin{aligned} \log\hat\sigma\_{1} &= \hat\gamma\_{0}
+&\quad(\text{sigma submodel for observation 1, log link}) \\
+\log\hat\sigma\_{1} &= 1.17 &\quad(\text{with your numbers}) \\
+\hat\sigma\_{1} &= \exp(1.17) \approx 3.21 &\quad(\text{predicted
+residual SD for observation 1}) \end{aligned}
 
 Stacking the same log-link equation for all *n* = 120 observations:
 
-``` math
-\log\!\underbrace{\begin{bmatrix} 3.21 \\ 3.21 \\ 3.21 \\ 3.21 \\ 3.21 \\ \vdots \\ 3.21 \\ 3.21 \end{bmatrix}}_{\textstyle\,\boldsymbol{\sigma}_{\,120 \times 1}\,} \;=\; \underbrace{\begin{bmatrix}    1 \\    1 \\    1 \\    1 \\    1 \\ \vdots \\    1 \\    1 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\sigma,\,120 \times 1}\,}\, \underbrace{\begin{bmatrix} 1.17 \end{bmatrix}}_{\textstyle\,\boldsymbol{\gamma}_{\,1 \times 1}\,}
-```
+\log\\\underbrace{\begin{bmatrix} 3.21 \\ 3.21 \\ 3.21 \\ 3.21 \\ 3.21
+\\ \vdots \\ 3.21 \\ 3.21
+\end{bmatrix}}\_{\textstyle\\\boldsymbol{\sigma}\_{\\120 \times 1}\\}
+\\=\\ \underbrace{\begin{bmatrix} 1 \\ 1 \\ 1 \\ 1 \\ 1 \\ \vdots \\ 1
+\\ 1 \end{bmatrix}}\_{\textstyle\\\mathbf{X}\_{\sigma,\\120 \times
+1}\\}\\ \underbrace{\begin{bmatrix} 1.17
+\end{bmatrix}}\_{\textstyle\\\boldsymbol{\gamma}\_{\\1 \times 1}\\}
 
 ## Step 4: Continuous-by-factor interaction (`body_mass ~ sex * body_size`)
 
@@ -548,33 +552,31 @@ sym4$fixed_effects[, c("term_label", "role", "contrast_level", "estimate")]
 #> 5 (Intercept)   intercept       NA               1.11
 ```
 
-Four coefficients to read. Let us call them $`\beta_0`$ (intercept),
-$`\beta_1`$ (`sexmale`), $`\beta_2`$ (`body_size`), $`\beta_3`$
-(`sexmale:body_size`). The model is
+Four coefficients to read. Let us call them \beta_0 (intercept), \beta_1
+(`sexmale`), \beta_2 (`body_size`), \beta_3 (`sexmale:body_size`). The
+model is
 
-``` math
-\mathrm{E}(W_i) = \beta_0 + \beta_1 \cdot \mathrm{male}_i + \beta_2 \cdot L_i + \beta_3 \cdot \mathrm{male}_i \cdot L_i.
-```
+\mathrm{E}(W_i) = \beta_0 + \beta_1 \cdot \mathrm{male}\_i + \beta_2
+\cdot L_i + \beta_3 \cdot \mathrm{male}\_i \cdot L_i.
 
 Split it into the two regression lines by setting the `sexmale` dummy to
 0 or 1:
 
-- **Females** (`sexmale = 0`):
-  $`\mathrm{E}(W_i) = \beta_0 + \beta_2 L_i`$. Intercept $`\beta_0`$,
-  slope $`\beta_2`$.
-- **Males** (`sexmale = 1`): $`\mathrm{E}(W_i) = (\beta_0 + \beta_1) +
-  (\beta_2 + \beta_3) L_i`$. Intercept $`\beta_0 + \beta_1`$, slope
-  $`\beta_2 + \beta_3`$.
+- **Females** (`sexmale = 0`): \mathrm{E}(W_i) = \beta_0 + \beta_2 L_i.
+  Intercept \beta_0, slope \beta_2.
+- **Males** (`sexmale = 1`): \mathrm{E}(W_i) = (\beta_0 + \beta_1) +
+  (\beta_2 + \beta_3) L_i. Intercept \beta_0 + \beta_1, slope \beta_2 +
+  \beta_3.
 
 So:
 
-- $`\beta_2`$ is the **female slope on `body_size`**.
-- $`\beta_2 + \beta_3`$ is the **male slope**.
-- $`\beta_3`$ — the interaction coefficient — is the **difference
-  between the two slopes**, not the male slope itself.
-- $`\beta_1`$ — the `sexmale` contrast — is the **difference in
-  intercepts** at `body_size = 0`. It is no longer “the average male
-  mass” *or* “the male-female mass difference at average body size”.
+- \beta_2 is the **female slope on `body_size`**.
+- \beta_2 + \beta_3 is the **male slope**.
+- \beta_3 — the interaction coefficient — is the **difference between
+  the two slopes**, not the male slope itself.
+- \beta_1 — the `sexmale` contrast — is the **difference in intercepts**
+  at `body_size = 0`. It is no longer “the average male mass” *or* “the
+  male-female mass difference at average body size”.
 
 [`parameter_interpretation()`](https://itchyshin.github.io/symbolizer/reference/parameter_interpretation.md)
 reads all four templated rows, including the dedicated
@@ -588,7 +590,7 @@ parameter_interpretation(sym4, scale = "biological")
 | submodel | term_label | coefficient_role | estimate | 95% CI | biological_reading |
 |:---|:---|:---|:---|:---|:---|
 | mu | (Intercept) | intercept | 30.9 | 28.3, 33.5 \* | Baseline body_mass in the reference condition |
-| mu | sex | factor_contrast | 3.04 | -0.801, 6.87 | Average body_mass differs between male and female by 3.04 |
+| mu | sex | factor_contrast_interaction | 3.04 | -0.801, 6.87 | Because sex interacts with another predictor, the male-vs-female difference in body_mass is not a single number: 3.04 is the difference when the interacting predictor = 0; see group_means() / group_slopes() for the marginal effect. |
 | mu | body_size | slope | 0.198 | 0.173, 0.223 \* | A unit change in body_size shifts the expected body_mass by 0.198 |
 | mu | sex:body_size | interaction_cont_factor | 0.0669 | 0.0303, 0.104 \* | The effect of body_size on body_mass differs by 0.0669 between male and female. Call `group_slopes(sym, continuous = "body_size")` to see each group’s slope on the response scale, with confidence intervals. |
 | sigma | (Intercept) | intercept | 1.11 | 0.979, 1.23 \* | Baseline level of unexplained individual variation in body_mass |
@@ -596,7 +598,7 @@ parameter_interpretation(sym4, scale = "biological")
 *Rows marked `*` have a 95% confidence interval that excludes zero (CI
 method: `wald`).*
 
-Read the prose above in place of a templated row. The interaction is
+The interaction row carries its own templated reading. It is
 ecologically the most interesting coefficient in the fit — the slope of
 `body_mass` on `body_size` *depends on* `sex`, which is exactly what
 “interaction” means.
@@ -665,30 +667,26 @@ The four columns are `(Intercept)`, `temperature`, `body_size`, and
 `temperature:body_size`. The interaction column is literally the product
 of the other two predictor columns.
 
-Call the four coefficients $`\beta_0, \beta_1, \beta_2, \beta_3`$ in
-column order. The model is
+Call the four coefficients \beta_0, \beta_1, \beta_2, \beta_3 in column
+order. The model is
 
-``` math
 \mathrm{E}(W_i) = \beta_0 + \beta_1 T_i + \beta_2 L_i + \beta_3 T_i L_i.
-```
 
 Re-arrange to isolate the slope of `temperature`:
 
-``` math
 \mathrm{E}(W_i) = \beta_0 + (\beta_1 + \beta_3 L_i) T_i + \beta_2 L_i.
-```
 
-The slope of `temperature` is $`\beta_1 + \beta_3 L_i`$ — it depends on
+The slope of `temperature` is \beta_1 + \beta_3 L_i — it depends on
 `body_size`. Reading the four coefficients in those terms:
 
-- **$`\beta_0`$ (intercept)** = expected `body_mass` when
-  `temperature = 0` and `body_size = 0`.
-- **$`\beta_1`$ (`temperature`)** = the `temperature` slope *at*
+- **\beta_0 (intercept)** = expected `body_mass` when `temperature = 0`
+  and `body_size = 0`.
+- **\beta_1 (`temperature`)** = the `temperature` slope *at*
   `body_size = 0`. Not “the temperature slope”. The slope at one
   specific value of `body_size`.
-- **$`\beta_2`$ (`body_size`)** = the `body_size` slope *at*
+- **\beta_2 (`body_size`)** = the `body_size` slope *at*
   `temperature = 0`. Same reasoning.
-- **$`\beta_3`$ (`temperature:body_size`)** = how much the `temperature`
+- **\beta_3 (`temperature:body_size`)** = how much the `temperature`
   slope changes per one-unit increase in `body_size`. Equivalently, how
   much the `body_size` slope changes per one-unit increase in
   `temperature`. The two readings are symmetric.
@@ -720,8 +718,8 @@ method: `wald`).*
 
 Three rows, each the `temperature` slope at a different `body_size`,
 with confidence intervals. The slope rises as `body_size` rises — the
-sign of $`\beta_3`$ tells you whether the interaction amplifies or
-dampens the `temperature` effect.
+sign of \beta_3 tells you whether the interaction amplifies or dampens
+the `temperature` effect.
 
 **Takeaway.** A continuous-by-continuous interaction means *the slope of
 one continuous predictor changes with the level of another*. Use
@@ -810,20 +808,18 @@ sym5$fixed_effects[, c("term_label", "role", "contrast_level", "estimate")]
 #> 9 (Intercept) intercept       NA                1.03
 ```
 
-Reading the eight coefficients in cell terms (write $`\bar W_{s,x}`$ for
+Reading the eight coefficients in cell terms (write \bar W\_{s,x} for
 the population mean at site `s`, sex `x`):
 
-- **Intercept** = $`\bar W_{A,\mathrm{female}}`$ — site `A`, female.
+- **Intercept** = \bar W\_{A,\mathrm{female}} — site `A`, female.
 - **`siteB`**, **`siteC`**, **`siteD`** = site mean minus site `A` mean,
-  *for females*:
-  $`\bar W_{B,\mathrm{female}} - \bar W_{A,\mathrm{female}}`$, and so
-  on.
-- **`sexmale`** = male minus female *at site `A`*:
-  $`\bar W_{A,\mathrm{male}} -
-  \bar W_{A,\mathrm{female}}`$.
-- **`siteB:sexmale`** is the part that needs the most care. It is
-  $`(\bar W_{B,\mathrm{male}} - \bar W_{B,\mathrm{female}}) -
-   (\bar W_{A,\mathrm{male}} - \bar W_{A,\mathrm{female}})`$.
+  *for females*: \bar W\_{B,\mathrm{female}} - \bar
+  W\_{A,\mathrm{female}}, and so on.
+- **`sexmale`** = male minus female *at site `A`*: \bar
+  W\_{A,\mathrm{male}} - \bar W\_{A,\mathrm{female}}.
+- **`siteB:sexmale`** is the part that needs the most care. It is (\bar
+  W\_{B,\mathrm{male}} - \bar W\_{B,\mathrm{female}}) - (\bar
+  W\_{A,\mathrm{male}} - \bar W\_{A,\mathrm{female}}).
 
 That last line is the *difference of two differences*. The male-female
 gap at site `B`, minus the male-female gap at site `A`. If
@@ -852,10 +848,10 @@ parameter_interpretation(sym5, scale = "biological")
 | submodel | term_label | coefficient_role | estimate | 95% CI | biological_reading |
 |:---|:---|:---|:---|:---|:---|
 | mu | (Intercept) | intercept | 29.7 | 28.4, 31.1 \* | Baseline body_mass in the reference condition |
-| mu | site | factor_contrast | 3.66 | 1.16, 6.15 \* | Average body_mass differs between B and A by 3.66 |
-| mu | site | factor_contrast | 4.44 | 2.55, 6.33 \* | Average body_mass differs between C and A by 4.44 |
-| mu | site | factor_contrast | -2.62 | -4.51, -0.730 \* | Average body_mass differs between D and A by -2.62 |
-| mu | sex | factor_contrast | 4.94 | 2.92, 6.95 \* | Average body_mass differs between male and female by 4.94 |
+| mu | site | factor_contrast_interaction | 3.66 | 1.16, 6.15 \* | Because site interacts with another predictor, the B-vs-A difference in body_mass is not a single number: 3.66 is the difference when the interacting predictor = 0; see group_means() / group_slopes() for the marginal effect. |
+| mu | site | factor_contrast_interaction | 4.44 | 2.55, 6.33 \* | Because site interacts with another predictor, the C-vs-A difference in body_mass is not a single number: 4.44 is the difference when the interacting predictor = 0; see group_means() / group_slopes() for the marginal effect. |
+| mu | site | factor_contrast_interaction | -2.62 | -4.51, -0.730 \* | Because site interacts with another predictor, the D-vs-A difference in body_mass is not a single number: -2.62 is the difference when the interacting predictor = 0; see group_means() / group_slopes() for the marginal effect. |
+| mu | sex | factor_contrast_interaction | 4.94 | 2.92, 6.95 \* | Because sex interacts with another predictor, the male-vs-female difference in body_mass is not a single number: 4.94 is the difference when the interacting predictor = 0; see group_means() / group_slopes() for the marginal effect. |
 | mu | site:sex | interaction_factor_factor | 0.276 | -3.10, 3.65 | The site effect on body_mass differs by 0.276 between sex = male and sex = female. Call `group_means(sym, by = c("site", "sex"))` to see each cell’s expected response with confidence intervals. |
 | mu | site:sex | interaction_factor_factor | -2.13 | -4.80, 0.534 | The site effect on body_mass differs by -2.13 between sex = male and sex = female. Call `group_means(sym, by = c("site", "sex"))` to see each cell’s expected response with confidence intervals. |
 | mu | site:sex | interaction_factor_factor | 3.16 | 0.380, 5.95 \* | The site effect on body_mass differs by 3.16 between sex = male and sex = female. Call `group_means(sym, by = c("site", "sex"))` to see each cell’s expected response with confidence intervals. |
@@ -864,8 +860,10 @@ parameter_interpretation(sym5, scale = "biological")
 *Rows marked `*` have a 95% confidence interval that excludes zero (CI
 method: `wald`).*
 
-Three interaction rows are again silent. Read the cell-mean translations
-above in their place.
+Each of the three interaction rows carries its own templated
+*difference-of-differences* reading;
+[`group_means()`](https://itchyshin.github.io/symbolizer/reference/group_means.md)
+gives the cell-mean translation on demand.
 
 **Takeaway.** A factor-by-factor interaction coefficient is a
 *difference of differences*: how much the gap between two non-reference
@@ -919,15 +917,15 @@ symbol_table(sym_p1)
 
 | index | matrix | variable | units | role | shape | concrete | description |
 |:---|:---|:---|:---|:---|:---|:---|:---|
-| $`\mathrm{body\_mass}_i`$ | $`\mathbf{body\_mass}`$ | body_mass | NA | response | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | response variable |
-| sex_i | — | sex | NA | factor | column of design matrix | column of X (length 80) | factor (female \[reference\], male) |
-| body_size_i | — | body_size | NA | predictor | column of design matrix | column of X (length 80) | continuous predictor |
-| $`\mu_i`$ | $`\boldsymbol{\mu}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | conditional mu of body_mass |
-| $`\sigma_i`$ | $`\boldsymbol{\sigma}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | residual standard deviation |
-| $`\beta_{0}, \beta_{1}, \beta_{2}`$ | $`\boldsymbol{\beta}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\mu}`$ | $`\mathbb{R}^{3}`$ | mu submodel coefficients |
-| $`\gamma_{0}`$ | $`\boldsymbol{\gamma}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\sigma}`$ | $`\mathbb{R}^{1}`$ | sigma submodel coefficients |
-| — | $`\mathbf{X}`$ | NA | NA | design_matrix | $`\mathbb{R}^{n \times p_\mu}`$ | $`\mathbb{R}^{80 \times 3}`$ | mu submodel design matrix |
-| — | $`\mathbf{Z}`$ | NA | NA | design_matrix | $`\mathbb{R}^{n \times p_\sigma}`$ | $`\mathbb{R}^{80 \times 1}`$ | sigma submodel design matrix |
+| \mathrm{body\\mass}\_i | \mathbf{body\\mass} | body_mass | NA | response | \mathbb{R}^n | \mathbb{R}^{80} | response variable |
+| \mathrm{sex}\_i | — | sex | NA | factor | column of design matrix | column of X (length 80) | factor (female \[reference\], male) |
+| \mathrm{body\\size}\_i | — | body_size | NA | predictor | column of design matrix | column of X (length 80) | continuous predictor |
+| \mu_i | \boldsymbol{\mu} | NA | NA | parameter | \mathbb{R}^n | \mathbb{R}^{80} | conditional mu of body_mass |
+| \sigma_i | \boldsymbol{\sigma} | NA | NA | parameter | \mathbb{R}^n | \mathbb{R}^{80} | residual standard deviation |
+| \beta\_{0}, \beta\_{1}, \beta\_{2} | \boldsymbol{\beta} | NA | NA | coefficient | \mathbb{R}^{p\_\mu} | \mathbb{R}^{3} | mu submodel coefficients |
+| \gamma\_{0} | \boldsymbol{\gamma} | NA | NA | coefficient | \mathbb{R}^{p\_\sigma} | \mathbb{R}^{1} | sigma submodel coefficients |
+| — | \mathbf{X} | NA | NA | design_matrix | \mathbb{R}^{n \times p\_\mu} | \mathbb{R}^{80 \times 3} | mu submodel design matrix |
+| — | \mathbf{X}\_{\sigma} | NA | NA | design_matrix | \mathbb{R}^{n \times p\_\sigma} | \mathbb{R}^{80 \times 1} | sigma submodel design matrix |
 
 **Rule of thumb.** *Read the intercept as the expected response at the
 reference factor level and zero on every continuous predictor.*
@@ -1134,13 +1132,12 @@ expected linear slope, so it looks fine — but the column is the *first
 orthogonal polynomial of `body_size`*, not the raw linear term.
 
 **Diagnosis.** `poly(x, 2)` produces two ORTHOGONAL columns: a
-combination of $`x`$ and $`x^2`$ scaled so the two columns are
-uncorrelated. The first column is *not* “the slope of $`x`$”. By
-contrast `I(x^2)` puts the literal $`x^2`$ column into the design matrix
-alongside a separate linear $`x`$ term, and now the linear coefficient
-*is* the slope at $`x = 0`$. The two parameterisations carry the same
-information but their coefficient *interpretations* differ. Use
-whichever fits your story.
+combination of x and x^2 scaled so the two columns are uncorrelated. The
+first column is *not* “the slope of x”. By contrast `I(x^2)` puts the
+literal x^2 column into the design matrix alongside a separate linear x
+term, and now the linear coefficient *is* the slope at x = 0. The two
+parameterisations carry the same information but their coefficient
+*interpretations* differ. Use whichever fits your story.
 
 ``` r
 
@@ -1170,14 +1167,14 @@ symbol_table(sym_p6_poly)
 
 | index | matrix | variable | units | role | shape | concrete | description |
 |:---|:---|:---|:---|:---|:---|:---|:---|
-| $`\mathrm{body\_mass}_i`$ | $`\mathbf{body\_mass}`$ | body_mass | NA | response | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | response variable |
-| body_size, 2_i | — | body_size, 2 | NA | transformation | column of design matrix | column of X (length 80) | predictor (poly-transformed) |
-| $`\mu_i`$ | $`\boldsymbol{\mu}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | conditional mu of body_mass |
-| $`\sigma_i`$ | $`\boldsymbol{\sigma}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | residual standard deviation |
-| $`\beta_{0}, \beta_{1}, \beta_{2}`$ | $`\boldsymbol{\beta}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\mu}`$ | $`\mathbb{R}^{3}`$ | mu submodel coefficients |
-| $`\gamma_{0}`$ | $`\boldsymbol{\gamma}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\sigma}`$ | $`\mathbb{R}^{1}`$ | sigma submodel coefficients |
-| — | $`\mathbf{X}`$ | NA | NA | design_matrix | $`\mathbb{R}^{n \times p_\mu}`$ | $`\mathbb{R}^{80 \times 3}`$ | mu submodel design matrix |
-| — | $`\mathbf{Z}`$ | NA | NA | design_matrix | $`\mathbb{R}^{n \times p_\sigma}`$ | $`\mathbb{R}^{80 \times 1}`$ | sigma submodel design matrix |
+| \mathrm{body\\mass}\_i | \mathbf{body\\mass} | body_mass | NA | response | \mathbb{R}^n | \mathbb{R}^{80} | response variable |
+| \mathrm{body\\size}\_i | — | body_size | NA | transformation | column of design matrix | column of X (length 80) | predictor (poly-transformed) |
+| \mu_i | \boldsymbol{\mu} | NA | NA | parameter | \mathbb{R}^n | \mathbb{R}^{80} | conditional mu of body_mass |
+| \sigma_i | \boldsymbol{\sigma} | NA | NA | parameter | \mathbb{R}^n | \mathbb{R}^{80} | residual standard deviation |
+| \beta\_{0}, \beta\_{1}, \beta\_{2} | \boldsymbol{\beta} | NA | NA | coefficient | \mathbb{R}^{p\_\mu} | \mathbb{R}^{3} | mu submodel coefficients |
+| \gamma\_{0} | \boldsymbol{\gamma} | NA | NA | coefficient | \mathbb{R}^{p\_\sigma} | \mathbb{R}^{1} | sigma submodel coefficients |
+| — | \mathbf{X} | NA | NA | design_matrix | \mathbb{R}^{n \times p\_\mu} | \mathbb{R}^{80 \times 3} | mu submodel design matrix |
+| — | \mathbf{X}\_{\sigma} | NA | NA | design_matrix | \mathbb{R}^{n \times p\_\sigma} | \mathbb{R}^{80 \times 1} | sigma submodel design matrix |
 
 ``` r
 
@@ -1186,15 +1183,15 @@ symbol_table(sym_p6_raw)
 
 | index | matrix | variable | units | role | shape | concrete | description |
 |:---|:---|:---|:---|:---|:---|:---|:---|
-| $`\mathrm{body\_mass}_i`$ | $`\mathbf{body\_mass}`$ | body_mass | NA | response | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | response variable |
-| body_size_i | — | body_size | NA | predictor | column of design matrix | column of X (length 80) | continuous predictor |
-| body_size^2_i | — | body_size^2 | NA | transformation | column of design matrix | column of X (length 80) | predictor (I-transformed) |
-| $`\mu_i`$ | $`\boldsymbol{\mu}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | conditional mu of body_mass |
-| $`\sigma_i`$ | $`\boldsymbol{\sigma}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{80}`$ | residual standard deviation |
-| $`\beta_{0}, \beta_{1}, \beta_{2}`$ | $`\boldsymbol{\beta}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\mu}`$ | $`\mathbb{R}^{3}`$ | mu submodel coefficients |
-| $`\gamma_{0}`$ | $`\boldsymbol{\gamma}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\sigma}`$ | $`\mathbb{R}^{1}`$ | sigma submodel coefficients |
-| — | $`\mathbf{X}`$ | NA | NA | design_matrix | $`\mathbb{R}^{n \times p_\mu}`$ | $`\mathbb{R}^{80 \times 3}`$ | mu submodel design matrix |
-| — | $`\mathbf{Z}`$ | NA | NA | design_matrix | $`\mathbb{R}^{n \times p_\sigma}`$ | $`\mathbb{R}^{80 \times 1}`$ | sigma submodel design matrix |
+| \mathrm{body\\mass}\_i | \mathbf{body\\mass} | body_mass | NA | response | \mathbb{R}^n | \mathbb{R}^{80} | response variable |
+| \mathrm{body\\size}\_i | — | body_size | NA | predictor | column of design matrix | column of X (length 80) | continuous predictor |
+| \mathrm{body\\size^2}\_i | — | body_size^2 | NA | transformation | column of design matrix | column of X (length 80) | predictor (I-transformed) |
+| \mu_i | \boldsymbol{\mu} | NA | NA | parameter | \mathbb{R}^n | \mathbb{R}^{80} | conditional mu of body_mass |
+| \sigma_i | \boldsymbol{\sigma} | NA | NA | parameter | \mathbb{R}^n | \mathbb{R}^{80} | residual standard deviation |
+| \beta\_{0}, \beta\_{1}, \beta\_{2} | \boldsymbol{\beta} | NA | NA | coefficient | \mathbb{R}^{p\_\mu} | \mathbb{R}^{3} | mu submodel coefficients |
+| \gamma\_{0} | \boldsymbol{\gamma} | NA | NA | coefficient | \mathbb{R}^{p\_\sigma} | \mathbb{R}^{1} | sigma submodel coefficients |
+| — | \mathbf{X} | NA | NA | design_matrix | \mathbb{R}^{n \times p\_\mu} | \mathbb{R}^{80 \times 3} | mu submodel design matrix |
+| — | \mathbf{X}\_{\sigma} | NA | NA | design_matrix | \mathbb{R}^{n \times p\_\sigma} | \mathbb{R}^{80 \times 1} | sigma submodel design matrix |
 
 **Rule of thumb.** *Use `poly(x, 2)` when you want orthogonal columns
 (uncorrelated polynomial terms); use `I(x^2)` when you want a literal
@@ -1237,6 +1234,9 @@ The point of
 is to make every layer of this translation visible: the design matrix
 shows the dummies, the symbol table marks the references, and
 [`parameter_interpretation()`](https://itchyshin.github.io/symbolizer/reference/parameter_interpretation.md)
-reads each templated coefficient on the biological scale. The
-interaction layer is on the template roadmap; until it lands, the
-cell-mean translation in this vignette is the manual fallback.
+reads each templated coefficient on the biological scale — including the
+continuous-by-factor and factor-by-factor interaction rows.
+[`group_means()`](https://itchyshin.github.io/symbolizer/reference/group_means.md)
+/
+[`group_slopes()`](https://itchyshin.github.io/symbolizer/reference/group_slopes.md)
+give the cell-mean and per-level-slope translations on demand.

@@ -11,7 +11,8 @@
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
 <link rel="icon" sizes="any" href="../favicon.ico">
 <link rel="manifest" href="../site.webmanifest">
-<script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<!-- katex math --><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" integrity="sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script><script src="../katex-auto.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
@@ -73,12 +74,11 @@
     
     
 <p><code>symbolizer</code> is built first for two TMB sister packages —
-<code>drmTMB</code> and <code>gllvmTMB</code> — with planned extensions
-across the GLMM ecosystem used in ecology and evolution:
-<code>glmmTMB</code>, <code>brms</code>, <code>MCMCglmm</code>,
-<code>sdmTMB</code>, <code>lme4</code>, <code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">stats::lm</a></code> /
-<code><a href="https://rdrr.io/r/stats/glm.html" class="external-link">stats::glm</a></code>, <code>metafor</code>, and
-<code>mgcv</code>.</p>
+<code>drmTMB</code> and <code>gllvmTMB</code> — and now reads across the
+GLMM ecosystem used in ecology and evolution: <code>glmmTMB</code>,
+<code>brms</code>, <code>MCMCglmm</code>, <code>sdmTMB</code>,
+<code>lme4</code>, <code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">stats::lm</a></code> / <code><a href="https://rdrr.io/r/stats/glm.html" class="external-link">stats::glm</a></code>,
+<code>metafor</code>, <code>mgcv</code>, and <code>phylolm</code>.</p>
 <p>The <strong>capability registry</strong>
 (<code><a href="../reference/symbolizer_capabilities.html">symbolizer_capabilities()</a></code>) is the source of truth: any
 class / family / component not marked Stable or First slice there will
@@ -124,7 +124,7 @@ model.</td>
 </table>
 </div>
 <div class="section level2">
-<h2 id="whats-covered-today-v0-1-v0-18-x">What’s covered today (v0.1 – v0.18.x)<a class="anchor" aria-label="anchor" href="#whats-covered-today-v0-1-v0-18-x"></a>
+<h2 id="whats-covered-today-v0-1-v0-22-x">What’s covered today (v0.1 – v0.22.x)<a class="anchor" aria-label="anchor" href="#whats-covered-today-v0-1-v0-22-x"></a>
 </h2>
 <div class="section level3">
 <h3 id="model-classes">Model classes<a class="anchor" aria-label="anchor" href="#model-classes"></a>
@@ -210,11 +210,22 @@ via <code>R = list(...)</code>
 <code>s(x, by =)</code> + <code>te(x, z)</code>; <code>gamm</code> /
 <code>gamm4</code> covered via the <code>$gam</code> slot</td>
 </tr>
+<tr class="odd">
+<td><strong>phylolm</strong></td>
+<td><code>phylolm</code></td>
+<td>Phylogenetic Gaussian regression (PGLS); Brownian-motion / OU
+residual correlation via the <code>phylo</code> marker</td>
+</tr>
 </tbody>
 </table>
-<p>That’s 10 package families, 14 fitted-class methods, ~30 family-class
+<p>That’s 11 package families, 14 fitted-class methods, ~30 family-class
 combinations with their own assumption / interpretation / methods-text
-prose coverage.</p>
+prose coverage. <strong>Phylogenetic (<code>phylo</code> /
+structured-covariance) support landed (First slice, v0.21)</strong>
+across <code>drmTMB</code>, <code>metafor</code>, <code>brms</code>,
+<code>MCMCglmm</code>, <code>glmmTMB</code>, and <code>gllvmTMB</code>,
+plus the standalone <code>phylolm</code> PGLS extractor — see
+<code><a href="../articles/symbolizer-structural-dependence.html">vignette("symbolizer-structural-dependence")</a></code>.</p>
 </div>
 <div class="section level3">
 <h3 id="cross-cutting-surfaces">Cross-cutting surfaces<a class="anchor" aria-label="anchor" href="#cross-cutting-surfaces"></a>
@@ -296,6 +307,31 @@ code for the fitted model</td>
 Matrix-with-data widget</td>
 <td>First slice</td>
 </tr>
+<tr class="even">
+<td>
+<code><a href="../reference/as_pdf_three_views.html">as_pdf_three_views()</a></code> standalone PDF of the three-views
+widget</td>
+<td>First slice</td>
+</tr>
+<tr class="odd">
+<td>
+<code><a href="../reference/explain.html">explain()</a></code> first-call plain-English summary of a
+<code>symbolized_model</code>
+</td>
+<td>First slice</td>
+</tr>
+<tr class="even">
+<td>
+<code><a href="../reference/notation_bridge.html">notation_bridge()</a></code> index ↔︎ matrix notation
+cross-reference</td>
+<td>First slice</td>
+</tr>
+<tr class="odd">
+<td>
+<code><a href="../reference/variance_partition.html">variance_partition()</a></code> / <code><a href="../reference/icc.html">icc()</a></code> variance
+decomposition + repeatability (ICC)</td>
+<td>First slice</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -314,7 +350,7 @@ Matrix-with-data widget</td>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td>v0.19+</td>
+<td>Near-term</td>
 <td>brms negative-binomial + other distributional dpars
 (<code>nu ~ z</code>, <code>phi ~ z</code>); glmmTMB hurdle
 (<code>truncated_nbinom2 + ziformula</code>); MCMCglmm flexible
@@ -324,18 +360,20 @@ deeper publication-bias and I² / CV partitioning for
 </tr>
 <tr class="even">
 <td>Considered</td>
-<td>Phylogenetic flagship (<code>phylolm</code>, <code>phyloglm</code>,
-<code>phyr::pglmm</code>, <code>sommer</code>); <code><a href="https://rdrr.io/pkg/nlme/man/lme.html" class="external-link">nlme::lme</a></code>
-standalone; <code>survival</code>; <code>ordinal::clm</code>;
-<code>geepack</code>; <code>marginaleffects</code> /
-<code>ggeffects</code> companion layer; <code>DHARMa</code> /
-<code>performance</code> / <code>gratia</code> integration as
-<code><a href="../reference/warning_table.html">warning_table()</a></code> sources.</td>
+<td>Remaining phylogenetic classes (<code>phyloglm</code>,
+<code>phyr::pglmm</code>, <code>sommer</code>) — the
+<code>phylolm</code> PGLS flagship and structured-covariance phylo
+bridges across the six classes above have <strong>shipped</strong>;
+<code><a href="https://rdrr.io/pkg/nlme/man/lme.html" class="external-link">nlme::lme</a></code> standalone; <code>survival</code>;
+<code>ordinal::clm</code>; <code>geepack</code>;
+<code>marginaleffects</code> / <code>ggeffects</code> companion layer;
+<code>DHARMa</code> / <code>performance</code> / <code>gratia</code>
+integration as <code><a href="../reference/warning_table.html">warning_table()</a></code> sources.</td>
 </tr>
 </tbody>
 </table>
 <p>Items previously listed here that have <strong>shipped</strong> in
-the v0.13 – v0.18 window are now in the Release history table below. The
+the v0.13 – v0.22 window are now in the Release history table below. The
 kept-public function surface stays tight: new model-class support
 arrives as S3 methods (invisible in
 <code>ls("package:symbolizer")</code>), not as new exported helpers.</p>
@@ -395,8 +433,7 @@ refactor</td>
 </tr>
 <tr class="odd">
 <td>v0.7</td>
-<td>glmmTMB Gaussian + <code>(1 \| g)</code> +
-<code>dispformula</code>
+<td>glmmTMB Gaussian + (1 | g) + <code>dispformula</code>
 </td>
 </tr>
 <tr class="even">
@@ -442,7 +479,7 @@ pattern, not meta-analysis); “three faces of meta-analysis” article</td>
 <tr class="even">
 <td>v0.17</td>
 <td>“Building up” ladder vignette (<code>lm</code> →
-<code>lm + sex</code> → <code>lmer + (1 \| site)</code> →
+<code>lm + sex</code> → <code>lmer</code> + (1 | site) →
 <code>drmTMB</code> location-scale on one shared dataset); homepage
 three-views widget screenshot</td>
 </tr>
@@ -468,11 +505,35 @@ vignettes</td>
 </tr>
 <tr class="even">
 <td>v0.18.3</td>
-<td>Pipe-encoding fix in
-<code>knit_print.symbolizer_formula_bridge</code>
-(<code>(1 \| group)</code> no longer renders as literal
-<code>&amp;amp;#124;</code>); roadmap article rewritten to match shipped
-reality</td>
+<td>First pipe-encoding fix in <code>formula_bridge</code> rendering;
+roadmap article rewritten to match shipped reality</td>
+</tr>
+<tr class="odd">
+<td>v0.19 – v0.20</td>
+<td>Audit passes (Fisher / Emmy / Pat / Rose lenses);
+<code>propto</code> reframed as the phylogenetic / structured-covariance
+pattern (not a meta-analysis bridge); phylogenetic capability scaffold;
+R-output vs LaTeX parity fixes across articles</td>
+</tr>
+<tr class="even">
+<td>v0.21</td>
+<td>
+<strong>Phylogenetic flagship</strong>:
+<code><a href="../articles/symbolizer-structural-dependence.html">vignette("symbolizer-structural-dependence")</a></code>;
+<code>phylo</code> structured-covariance bridges across
+<code>drmTMB</code> / <code>metafor</code> / <code>brms</code> /
+<code>MCMCglmm</code> / <code>glmmTMB</code> / <code>gllvmTMB</code>;
+<code>phylolm</code> PGLS extractor; three-views widget rollout;
+standalone HTML + PDF export + Copy-LaTeX buttons</td>
+</tr>
+<tr class="odd">
+<td>v0.22</td>
+<td>Meta-analysis bridges (<code>meta_known_vi</code>,
+<code>meta_phylo_multilevel</code>) + consolidated
+<code><a href="../articles/symbolizer-meta-analysis.html">vignette("symbolizer-meta-analysis")</a></code>;
+<code><a href="../reference/variance_partition.html">variance_partition()</a></code> / <code><a href="../reference/icc.html">icc()</a></code> repeatability;
+mgcv poisson / binomial / Gamma smooths; family-aware Tab-3 worked
+rows</td>
 </tr>
 </tbody>
 </table>
@@ -490,14 +551,17 @@ list because methods are invisible in
 helpers is rejected by default; instead, we extend existing functions
 with new arguments and use articles to organise and explain.</p>
 <p>Core public functions (the things users actually call):
-<code><a href="../reference/symbolize.html">symbolize()</a></code>, <code><a href="../reference/as_latex.html">as_latex()</a></code>,
-<code><a href="../reference/equations.html">equations()</a></code>, <code><a href="../reference/symbol_table.html">symbol_table()</a></code>,
-<code><a href="../reference/assumption_table.html">assumption_table()</a></code>, <code><a href="../reference/formula_bridge.html">formula_bridge()</a></code>,
-<code><a href="../reference/parameter_interpretation.html">parameter_interpretation()</a></code>, <code><a href="../reference/model_card.html">model_card()</a></code>,
-<code><a href="../reference/as_dag.html">as_dag()</a></code>, <code><a href="../reference/compare_symbolic.html">compare_symbolic()</a></code>,
-<code><a href="../reference/methods_text.html">methods_text()</a></code>, <code><a href="../reference/warning_table.html">warning_table()</a></code>,
-<code><a href="../reference/group_means.html">group_means()</a></code>, <code><a href="../reference/group_slopes.html">group_slopes()</a></code>,
-<code><a href="../reference/expand.html">expand()</a></code>, <code><a href="../reference/as_html_three_views.html">as_html_three_views()</a></code>,
+<code><a href="../reference/symbolize.html">symbolize()</a></code>, <code><a href="../reference/explain.html">explain()</a></code>,
+<code><a href="../reference/as_latex.html">as_latex()</a></code>, <code><a href="../reference/equations.html">equations()</a></code>,
+<code><a href="../reference/symbol_table.html">symbol_table()</a></code>, <code><a href="../reference/assumption_table.html">assumption_table()</a></code>,
+<code><a href="../reference/formula_bridge.html">formula_bridge()</a></code>, <code><a href="../reference/notation_bridge.html">notation_bridge()</a></code>,
+<code><a href="../reference/parameter_interpretation.html">parameter_interpretation()</a></code>,
+<code><a href="../reference/variance_partition.html">variance_partition()</a></code>, <code><a href="../reference/icc.html">icc()</a></code>,
+<code><a href="../reference/model_card.html">model_card()</a></code>, <code><a href="../reference/as_dag.html">as_dag()</a></code>,
+<code><a href="../reference/compare_symbolic.html">compare_symbolic()</a></code>, <code><a href="../reference/methods_text.html">methods_text()</a></code>,
+<code><a href="../reference/warning_table.html">warning_table()</a></code>, <code><a href="../reference/group_means.html">group_means()</a></code>,
+<code><a href="../reference/group_slopes.html">group_slopes()</a></code>, <code><a href="../reference/expand.html">expand()</a></code>,
+<code><a href="../reference/as_html_three_views.html">as_html_three_views()</a></code>, <code><a href="../reference/as_pdf_three_views.html">as_pdf_three_views()</a></code>,
 <code><a href="../reference/simulate_recipe.html">simulate_recipe()</a></code>,
 <code><a href="../reference/symbolizer_capabilities.html">symbolizer_capabilities()</a></code>.</p>
 </div>

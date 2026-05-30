@@ -1,6 +1,12 @@
-# Building up: from \`lm\` to location-scale
+# Building up: from lm to location-scale
 
 ## The idea
+
+> **New to symbolizer?** Skim
+> [`vignette("symbolizer")`](https://itchyshin.github.io/symbolizer/articles/symbolizer.md)
+> first — a five-minute quickstart on a single model. This article is
+> the next step up: it climbs from `lm` to a location-scale model so you
+> can watch the symbolic story grow.
 
 `symbolizer` turns any fitted model into a structured symbolic
 specification. To see *what* that buys you, the easiest path is to fit a
@@ -14,8 +20,8 @@ across temperature, sex, and site — and climb four rungs:
 |----|----|----|
 | 1 | `lm(body_mass ~ temperature)` | distribution + linear predictor |
 | 2 | `lm(body_mass ~ temperature + sex)` | a factor: dummy-encoded contrast |
-| 3 | `lmer(body_mass ~ temperature + sex + (1\|site))` | a random intercept + variance components |
-| 4 | `drmTMB(body_mass ~ temperature + sex + (1\|site), sigma ~ temperature)` | heteroscedasticity: variance depends on temperature |
+| 3 | lmer(body_mass ~ temperature + sex + (1 \| site)) | a random intercept + variance components |
+| 4 | drmTMB(body_mass ~ temperature + sex + (1 \| site), sigma ~ temperature) | heteroscedasticity: variance depends on temperature |
 
 The reader-facing surface stays exactly the same: at every rung you call
 `symbolize(fit)`, then
@@ -86,12 +92,9 @@ The equation:
 equations(sym1, notation = "index")
 ```
 
-``` math
-\begin{aligned}
-body_mass \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
-\mu_i = \beta_{0} + \beta_{1} \, temperature_i
-\end{aligned}
-```
+\begin{aligned} \mathrm{body\\mass}\_i \mid \mu_i,\\ \sigma \sim
+\mathrm{Normal}(\mu_i,\\ \sigma^2) \\ \mu_i = \beta\_{0} + \beta\_{1} \\
+\mathrm{temperature}\_i \end{aligned}
 
 The symbol dictionary, listing every variable the model uses:
 
@@ -102,12 +105,12 @@ symbol_table(sym1)
 
 | index | matrix | variable | units | role | shape | concrete | description |
 |:---|:---|:---|:---|:---|:---|:---|:---|
-| body_mass | $`\mathbf{body\_mass}`$ | body_mass | NA | response | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ | response variable |
-| temperature_i | — | temperature | NA | predictor | column of design matrix | column of X (length 200) | continuous predictor |
-| $`\mu_i`$ | $`\boldsymbol{\mu}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ | conditional mu of body_mass |
-| $`\sigma_i`$ | $`\boldsymbol{\sigma}`$ | NA | NA | residual_sd | scalar (constant across observations) | scalar | residual standard deviation of body_mass |
-| $`\beta_{0}, \beta_{1}`$ | $`\boldsymbol{\beta}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\mu}`$ | $`\mathbb{R}^{2}`$ | mu submodel coefficients |
-| — | $`\mathbf{X}`$ | NA | NA | design_matrix | $`\mathbb{R}^{n \times p_\mu}`$ | $`\mathbb{R}^{200 \times 2}`$ | mu submodel design matrix |
+| \mathrm{body\\mass}\_i | \mathbf{body\\mass} | body_mass | NA | response | \mathbb{R}^n | \mathbb{R}^{200} | response variable |
+| \mathrm{temperature}\_i | — | temperature | NA | predictor | column of design matrix | column of X (length 200) | continuous predictor |
+| \mu_i | \boldsymbol{\mu} | NA | NA | parameter | \mathbb{R}^n | \mathbb{R}^{200} | conditional mu of body_mass |
+| \sigma | \boldsymbol{\sigma} | NA | NA | residual_sd | scalar (constant across observations) | scalar | residual standard deviation of body_mass |
+| \beta\_{0}, \beta\_{1} | \boldsymbol{\beta} | NA | NA | coefficient | \mathbb{R}^{p\_\mu} | \mathbb{R}^{2} | mu submodel coefficients |
+| — | \mathbf{X} | NA | NA | design_matrix | \mathbb{R}^{n \times p\_\mu} | \mathbb{R}^{200 \times 2} | mu submodel design matrix |
 
 What each coefficient means, on each scale `symbolizer` knows about:
 
@@ -125,10 +128,9 @@ parameter_interpretation(sym1, scale = "biological")
 method: `wald`).*
 
 **What we have so far.** A distribution line for the response, a linear
-predictor for $`\mu_i`$, and one slope to interpret. No variance
-modelling beyond a single residual SD. No grouping. The biological
-reading is “a unit change in temperature shifts the expected body_mass
-by 0.303.”
+predictor for \mu_i, and one slope to interpret. No variance modelling
+beyond a single residual SD. No grouping. The biological reading is “a
+unit change in temperature shifts the expected body_mass by 0.303.”
 
 ## Rung 2 — Adding a factor
 
@@ -146,12 +148,10 @@ sym2 <- symbolize(fit2)
 equations(sym2, notation = "index")
 ```
 
-``` math
-\begin{aligned}
-body_mass \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
-\mu_i = \beta_{0} + \beta_{1} \, temperature_i + \beta_{2} \, [sex = \mathrm{M}]
+\begin{aligned} \mathrm{body\\mass}\_i \mid \mu_i,\\ \sigma \sim
+\mathrm{Normal}(\mu_i,\\ \sigma^2) \\ \mu_i = \beta\_{0} + \beta\_{1} \\
+\mathrm{temperature}\_i + \beta\_{2} \\ \[sex = \mathrm{M}\]
 \end{aligned}
-```
 
 The equation now carries a contrast term. The symbol dictionary adds a
 row for the dummy-encoded contrast:
@@ -163,17 +163,17 @@ symbol_table(sym2)
 
 | index | matrix | variable | units | role | shape | concrete | description |
 |:---|:---|:---|:---|:---|:---|:---|:---|
-| body_mass | $`\mathbf{body\_mass}`$ | body_mass | NA | response | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ | response variable |
-| temperature_i | — | temperature | NA | predictor | column of design matrix | column of X (length 200) | continuous predictor |
-| sex_i | — | sex | NA | factor | column of design matrix | column of X (length 200) | factor (F \[reference\], M) |
-| $`\mu_i`$ | $`\boldsymbol{\mu}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ | conditional mu of body_mass |
-| $`\sigma_i`$ | $`\boldsymbol{\sigma}`$ | NA | NA | residual_sd | scalar (constant across observations) | scalar | residual standard deviation of body_mass |
-| $`\beta_{0}, \beta_{1}, \beta_{2}`$ | $`\boldsymbol{\beta}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\mu}`$ | $`\mathbb{R}^{3}`$ | mu submodel coefficients |
-| — | $`\mathbf{X}`$ | NA | NA | design_matrix | $`\mathbb{R}^{n \times p_\mu}`$ | $`\mathbb{R}^{200 \times 3}`$ | mu submodel design matrix |
+| \mathrm{body\\mass}\_i | \mathbf{body\\mass} | body_mass | NA | response | \mathbb{R}^n | \mathbb{R}^{200} | response variable |
+| \mathrm{temperature}\_i | — | temperature | NA | predictor | column of design matrix | column of X (length 200) | continuous predictor |
+| \mathrm{sex}\_i | — | sex | NA | factor | column of design matrix | column of X (length 200) | factor (F \[reference\], M) |
+| \mu_i | \boldsymbol{\mu} | NA | NA | parameter | \mathbb{R}^n | \mathbb{R}^{200} | conditional mu of body_mass |
+| \sigma | \boldsymbol{\sigma} | NA | NA | residual_sd | scalar (constant across observations) | scalar | residual standard deviation of body_mass |
+| \beta\_{0}, \beta\_{1}, \beta\_{2} | \boldsymbol{\beta} | NA | NA | coefficient | \mathbb{R}^{p\_\mu} | \mathbb{R}^{3} | mu submodel coefficients |
+| — | \mathbf{X} | NA | NA | design_matrix | \mathbb{R}^{n \times p\_\mu} | \mathbb{R}^{200 \times 3} | mu submodel design matrix |
 
 `sex` is a factor with reference level `F` (alphabetical). The single
 dummy column `[sex = M]` enters the linear predictor with its own slope
-$`\beta_2`$. The interpretation reads the contrast explicitly:
+\beta_2. The interpretation reads the contrast explicitly:
 
 ``` r
 
@@ -214,17 +214,15 @@ sym3 <- symbolize(fit3)
 equations(sym3, notation = "index")
 ```
 
-``` math
-\begin{aligned}
-body_mass \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
-\mu_i = \beta_{0} + \beta_{1} \, temperature_i + \beta_{2} \, [sex = \mathrm{M}] + u_{site(i)} \\
-u_{site} \sim \mathcal{N}(0,\, \sigma_{site}^2)
+\begin{aligned} \mathrm{body\\mass}\_i \mid \mu_i,\\ \sigma \sim
+\mathrm{Normal}(\mu_i,\\ \sigma^2) \\ \mu_i = \beta\_{0} + \beta\_{1} \\
+\mathrm{temperature}\_i + \beta\_{2} \\ \[sex = \mathrm{M}\] +
+u\_{site(i)} \\ u\_{site} \sim \mathcal{N}(0,\\ \sigma\_{site}^2)
 \end{aligned}
-```
 
 Two new rows in the equation block:
 
-1.  `u_{site(i)}` is added to the linear predictor for $`\mu_i`$.
+1.  `u_{site(i)}` is added to the linear predictor for \mu_i.
 2.  A second distributional line: `u_{site} ~ N(0, σ²_site)`.
 
 Variance components are now first-class:
@@ -266,13 +264,13 @@ abline(h = 0, col = "#666666")
 spread](symbolizer-ladder_files/figure-html/rung4-resid-1.png)
 
 The variance is changing with temperature. A standard mixed model forces
-residual variance to be constant, so the inference on $`\beta_1`$
-ignores that. This is called a **location-scale model** (also known as
+residual variance to be constant, so the inference on \beta_1 ignores
+that. This is called a **location-scale model** (also known as
 **distributional regression** or, when the variance component is what
 changes, *heteroscedastic regression*): instead of treating the residual
 SD as a single fixed number, we let it depend on its own predictors with
-its own coefficients. Climb the last rung: fit
-$`\log(\sigma_i) = \gamma_0 + \gamma_1\, T_i`$.
+its own coefficients. Climb the last rung: fit \log(\sigma_i) =
+\gamma_0 + \gamma_1\\ T_i.
 
 ``` r
 
@@ -299,18 +297,16 @@ sym4 <- symbolize(fit4)
 equations(sym4, notation = "index")
 ```
 
-``` math
-\begin{aligned}
-\mathrm{body\_mass}_i \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
-\mu_i = \beta_{0} + \beta_{1} \, temperature_i + \beta_{2} \, [sex = \mathrm{M}] + u_{site(i)} \\
-\log(\sigma_i) = \gamma_{0} + \gamma_{1} \, temperature_i \\
-u_{site} \sim \mathcal{N}(0,\, \sigma_{site}^2)
-\end{aligned}
-```
+\begin{aligned} \mathrm{body\\mass}\_i \mid \mu_i,\\ \sigma_i \sim
+\mathrm{Normal}(\mu_i,\\ \sigma_i^2) \\ \mu_i = \beta\_{0} + \beta\_{1}
+\\ \mathrm{temperature}\_i + \beta\_{2} \\ \[sex = \mathrm{M}\] +
+u\_{site(i)} \\ \log(\sigma_i) = \gamma\_{0} + \gamma\_{1} \\
+\mathrm{temperature}\_i \\ u\_{site} \sim \mathcal{N}(0,\\
+\sigma\_{site}^2) \end{aligned}
 
-The equation block grew by **one new line** — the
-$`\log(\sigma_i) = \gamma_0 + \gamma_1\, T_i`$ row. That single
-additional line is the heteroscedasticity story.
+The equation block grew by **one new line** — the \log(\sigma_i) =
+\gamma_0 + \gamma_1\\ T_i row. That single additional line is the
+heteroscedasticity story.
 
 Reading on the variability scale:
 
@@ -325,9 +321,9 @@ pi4[pi4$submodel == "sigma", c("term_label", "estimate", "biological_reading")]
 | (Intercept) | 0.465 | Baseline level of unexplained individual variation in body_mass |
 | temperature | 0.0399 | A unit change in temperature multiplies the unexplained variability of body_mass by exp(0.0399) |
 
-The slope $`\gamma_1`$ reads as “residual SD multiplies by `exp(γ_1)`
-per °C”. For our simulated data the truth was `exp(0.05) ≈ 1.05`, so
-each additional °C inflates the residual SD by about 5 %.
+The slope \gamma_1 reads as “residual SD multiplies by `exp(γ_1)` per
+°C”. For our simulated data the truth was `exp(0.05) ≈ 1.05`, so each
+additional °C inflates the residual SD by about 5 %.
 
 ## Three views of the same fit
 
@@ -340,7 +336,7 @@ three-view widget:
 as_html_three_views(sym4)
 ```
 
-[Skip three-views widget](#sym-sym-1780075467-end)
+[Skip three-views widget](#sym-sym-1780180805-end)
 
 ▸1. Index
 
@@ -355,36 +351,36 @@ with the fixed-effect predictors and a group offset, with a residual SD
 that may also shift with its own predictors – both location and spread
 are modeled.
 
-**Coefficient reading.** On the response scale, $`\hat\beta`$ is the
+**Coefficient reading.** On the response scale, \hat\beta is the
 additive change in the mean of the response for a one-unit increase in
 the predictor (identity link – no back-transformation needed).
 
-``` math
-\begin{aligned}
-\mathrm{body\_mass}_i \mid \mu_i,\, \sigma_i & \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
-\mu_i & = \beta_{0} + \beta_{1} \, temperature_i + \beta_{2} \, [sex = \mathrm{M}] + u_{site(i)} \\
-\log(\sigma_i) & = \gamma_{0} + \gamma_{1} \, temperature_i \\
-u_{site} & \sim \mathcal{N}(0,\, \sigma_{site}^2)
-\end{aligned}
-```
+\begin{aligned} \mathrm{body\\mass}\_i \mid \mu_i,\\ \sigma_i & \sim
+\mathrm{Normal}(\mu_i,\\ \sigma_i^2) \\ \mu_i & = \beta\_{0} +
+\beta\_{1} \\ \mathrm{temperature}\_i + \beta\_{2} \\ \[sex =
+\mathrm{M}\] + u\_{site(i)} \\ \log(\sigma_i) & = \gamma\_{0} +
+\gamma\_{1} \\ \mathrm{temperature}\_i \\ u\_{site} & \sim
+\mathcal{N}(0,\\ \sigma\_{site}^2) \end{aligned}
 
 where:
 
-- $`\mathrm{body\_mass}_i`$ — response variable  $`\mathbb{R}^{200}`$
-- $`temperature_i`$ — continuous predictor  column of X (length 200)
-- $`sex_i`$ — factor (F \[reference\], M)  column of X (length 200)
-- $`\mu_i`$ — conditional mu of body_mass  $`\mathbb{R}^{200}`$
-- $`\sigma_i`$ — residual standard deviation  $`\mathbb{R}^{200}`$
-- $`\beta_{0}, \beta_{1}, \beta_{2}`$ — mu submodel coefficients
-   $`\mathbb{R}^{3}`$
-- $`\gamma_{0}, \gamma_{1}`$ — sigma submodel coefficients
-   $`\mathbb{R}^{2}`$
-- $`u_{site(i)}`$ — random intercept by site  scalar;
-  $`\mathbb{R}^{12}`$ in matrix form
-- $`\sigma_{site}`$ — between-site standard deviation  scalar
+- \mathrm{body\\mass}\_i — response variable  \mathbb{R}^{200}
+- \mathrm{temperature}\_i — continuous predictor  column of X (length
+  200)
+- \mathrm{sex}\_i — factor (F \[reference\], M)  column of X (length
+  200)
+- \mu_i — conditional mu of body_mass  \mathbb{R}^{200}
+- \sigma_i — residual standard deviation  \mathbb{R}^{200}
+- \beta\_{0}, \beta\_{1}, \beta\_{2} — mu submodel coefficients
+   \mathbb{R}^{3}
+- \gamma\_{0}, \gamma\_{1} — sigma submodel coefficients  \mathbb{R}^{2}
+- u\_{site(i)} — random intercept by site  scalar; \mathbb{R}^{12} in
+  matrix form
+- \sigma\_{site} — between-site standard deviation  scalar
 
 **Where does the variation live?** Where the variation lives – each row
-is one source of variance, shown as a share of the total.
+is one variance component (shown as a share of the total when a single
+total variance is defined).
 
 - site: variance = 1.28
 
@@ -402,32 +398,27 @@ with the fixed-effect predictors and a group offset, with a residual SD
 that may also shift with its own predictors – both location and spread
 are modeled.
 
-``` math
-\begin{aligned}
-\mathbf{body\_mass} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} & \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2)) \\
-\boldsymbol{\mu} & = \mathbf{X} \boldsymbol{\beta} + \mathbf{u} \\
-\log(\boldsymbol{\sigma}) & = \mathbf{Z} \boldsymbol{\gamma} \\
-\mathbf{u}_{site} & \sim \mathcal{N}(\mathbf{0},\, \sigma_{site}^2 \mathbf{I}_{12})
+\begin{aligned} \mathbf{body\\mass} \mid \boldsymbol{\mu},\\
+\boldsymbol{\sigma} & \sim \mathcal{N}(\boldsymbol{\mu},\\
+\mathrm{diag}(\boldsymbol{\sigma}^2)) \\ \boldsymbol{\mu} & = \mathbf{X}
+\boldsymbol{\beta} + \mathbf{u} \\ \log(\boldsymbol{\sigma}) & =
+\mathbf{X}\_{\sigma} \boldsymbol{\gamma} \\ \mathbf{u}\_{site} & \sim
+\mathcal{N}(\mathbf{0},\\ \sigma\_{site}^2 \mathbf{I}\_{12})
 \end{aligned}
-```
 
 where:
 
-- $`\mathbf{body\_mass}`$ — response variable  $`\mathbb{R}^{200}`$
-- $`\boldsymbol{\mu}`$ — conditional mu of body_mass
-   $`\mathbb{R}^{200}`$
-- $`\boldsymbol{\sigma}`$ — residual standard deviation
-   $`\mathbb{R}^{200}`$
-- $`\boldsymbol{\beta}`$ — mu submodel coefficients  $`\mathbb{R}^{3}`$
-- $`\boldsymbol{\gamma}`$ — sigma submodel coefficients
-   $`\mathbb{R}^{2}`$
-- $`\mathbf{X}`$ — mu submodel design matrix
-   $`\mathbb{R}^{200 \times 3}`$
-- $`\mathbf{Z}`$ — sigma submodel design matrix
-   $`\mathbb{R}^{200 \times 2}`$
-- $`\mathbf{u}_{site}`$ — random intercept by site  scalar;
-  $`\mathbb{R}^{12}`$ in matrix form
-- $`\sigma_{site}`$ — between-site standard deviation  scalar
+- \mathbf{body\\mass} — response variable  \mathbb{R}^{200}
+- \boldsymbol{\mu} — conditional mu of body_mass  \mathbb{R}^{200}
+- \boldsymbol{\sigma} — residual standard deviation  \mathbb{R}^{200}
+- \boldsymbol{\beta} — mu submodel coefficients  \mathbb{R}^{3}
+- \boldsymbol{\gamma} — sigma submodel coefficients  \mathbb{R}^{2}
+- \mathbf{X} — mu submodel design matrix  \mathbb{R}^{200 \times 3}
+- \mathbf{X}\_{\sigma} — sigma submodel design matrix  \mathbb{R}^{200
+  \times 2}
+- \mathbf{u}\_{site} — random intercept by site  scalar; \mathbb{R}^{12}
+  in matrix form
+- \sigma\_{site} — between-site standard deviation  scalar
 
 The same matrix equation, with your actual numbers stacked inside the
 brackets – what the computer multiplies. Showing first 5 and last 2 rows
@@ -446,27 +437,52 @@ also shown.
 
 For observation *i* = 1 of your data:
 
-``` math
-\begin{aligned}
-\mathrm{body\_mass}_{1} &= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{temperature}_{1} + \hat\beta_{2}\,\mathrm{sexM}_{1} + \hat{u}_{\mathrm{site},\,\mathrm{S01}} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
-\hat\mu_{1} &= 32.1 +  0.3 \times 23.9 + 0.757 \times    0 + (-1.33) \approx 37.9 &\quad(\text{predicted mean} = \text{linear predictor}) \\
-\mathrm{body\_mass}_{1} &= \underbrace{37.9}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-1.06)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,} &\quad(\text{observed} = \text{predicted mean} + \text{residual})
+\begin{aligned} \mathrm{body\\mass}\_{1} &= \hat\beta\_{0} +
+\hat\beta\_{1}\\\mathrm{temperature}\_{1} +
+\hat\beta\_{2}\\\mathrm{sexM}\_{1} +
+\hat{u}\_{\mathrm{site},\\\mathrm{S01}} + \hat\varepsilon\_{1}
+&\quad(\text{response equation, one row of the model}) \\ \hat\mu\_{1}
+&= 32.1 + 0.3 \times 23.9 + 0.757 \times 0 + (-1.33) \approx 37.9
+&\quad(\text{predicted mean} = \text{linear predictor}) \\
+\mathrm{body\\mass}\_{1} &=
+\underbrace{37.9}\_{\textstyle\\\hat\mu\_{1}\\\text{(predicted)}\\}
+\\+\\
+\underbrace{(-1.06)}\_{\textstyle\\\hat\varepsilon\_{1}\\\text{(residual)}\\}
+&\quad(\text{observed} = \text{predicted mean} + \text{residual})
 \end{aligned}
-```
 
 Stacking the same response equation for all *n* = 200 observations:
 
-``` math
-\underbrace{\begin{bmatrix} 36.8 \\ 32.9 \\ 37.7 \\ 40.2 \\ 36.1 \\ \vdots \\   38 \\ 38.3 \end{bmatrix}}_{\textstyle\,\mathbf{body\_mass}_{\,200 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 & 23.9 &    0 \\    1 & 17.7 &    0 \\    1 & 13.9 &    1 \\    1 & 10.7 &    0 \\    1 & 16.3 &    0 \\ \vdots & \vdots & \vdots \\    1 & 19.9 &    1 \\    1 & 12.1 &    1 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,200 \times 3}\,}\, \underbrace{\begin{bmatrix} 32.1 \\  0.3 \\ 0.757 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,3 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix}    1 &    0 &    0 &    0 &    0 & \cdots &    0 &    0 \\    0 &    1 &    0 &    0 &    0 & \cdots &    0 &    0 \\    0 &    0 &    1 &    0 &    0 & \cdots &    0 &    0 \\    0 &    0 &    0 &    1 &    0 & \cdots &    0 &    0 \\    0 &    0 &    0 &    0 &    1 & \cdots &    0 &    0 \\ \vdots & \vdots & \vdots & \vdots & \vdots & \ddots & \vdots & \vdots \\    0 &    0 &    0 &    0 &    0 & \cdots &    1 &    0 \\    0 &    0 &    0 &    0 &    0 & \cdots &    0 &    1 \end{bmatrix}}_{\textstyle\,\mathbf{Z}_{\text{site},\,\,200 \times 12}\,}\, \underbrace{\begin{bmatrix} -1.33 \\ 0.266 \\ -1.38 \\ 1.48 \\ 0.519 \\ \vdots \\ -0.247 \\ 0.281 \end{bmatrix}}_{\textstyle\,\hat{\mathbf{u}}_{\text{site},\,12 \times 1}\;\text{(BLUP)}\,} \;+\; \underbrace{\begin{bmatrix} -1.06 \\ -4.76 \\ 2.06 \\ 3.42 \\ -1.4 \\ \vdots \\ -0.568 \\ 1.54 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,200 \times 1}\;\text{(residual)}\,}
-```
+\underbrace{\begin{bmatrix} 36.8 \\ 32.9 \\ 37.7 \\ 40.2 \\ 36.1 \\
+\vdots \\ 38 \\ 38.3
+\end{bmatrix}}\_{\textstyle\\\mathbf{body\\mass}\_{\\200 \times
+1}\\\text{(observed)}\\} \\=\\ \underbrace{\begin{bmatrix} 1 & 23.9 & 0
+\\ 1 & 17.7 & 0 \\ 1 & 13.9 & 1 \\ 1 & 10.7 & 0 \\ 1 & 16.3 & 0 \\
+\vdots & \vdots & \vdots \\ 1 & 19.9 & 1 \\ 1 & 12.1 & 1
+\end{bmatrix}}\_{\textstyle\\\mathbf{X}\_{\\200 \times 3}\\}\\
+\underbrace{\begin{bmatrix} 32.1 \\ 0.3 \\ 0.757
+\end{bmatrix}}\_{\textstyle\\\hat{\boldsymbol{\beta}}\_{\\3 \times
+1}\\\text{(estimated)}\\} \\+\\ \underbrace{\begin{bmatrix} 1 & 0 & 0 &
+0 & 0 & \cdots & 0 & 0 \\ 0 & 1 & 0 & 0 & 0 & \cdots & 0 & 0 \\ 0 & 0 &
+1 & 0 & 0 & \cdots & 0 & 0 \\ 0 & 0 & 0 & 1 & 0 & \cdots & 0 & 0 \\ 0 &
+0 & 0 & 0 & 1 & \cdots & 0 & 0 \\ \vdots & \vdots & \vdots & \vdots &
+\vdots & \ddots & \vdots & \vdots \\ 0 & 0 & 0 & 0 & 0 & \cdots & 1 & 0
+\\ 0 & 0 & 0 & 0 & 0 & \cdots & 0 & 1
+\end{bmatrix}}\_{\textstyle\\\mathbf{Z}\_{\text{site},\\\\200 \times
+12}\\}\\ \underbrace{\begin{bmatrix} -1.33 \\ 0.266 \\ -1.38 \\ 1.48 \\
+0.519 \\ \vdots \\ -0.247 \\ 0.281
+\end{bmatrix}}\_{\textstyle\\\hat{\mathbf{u}}\_{\text{site},\\12 \times
+1}\\\text{(BLUP)}\\} \\+\\ \underbrace{\begin{bmatrix} -1.06 \\ -4.76 \\
+2.06 \\ 3.42 \\ -1.4 \\ \vdots \\ -0.568 \\ 1.54
+\end{bmatrix}}\_{\textstyle\\\hat{\boldsymbol{\varepsilon}}\_{\\200
+\times 1}\\\text{(residual)}\\}
 
-**Left**: observed vector $`\mathbf{body\_mass}`$. **Middle**: the
-prediction
-$`\mathbf{X}\hat{\boldsymbol{\beta}} + \mathbf{Z}\hat{\mathbf{u}} = \hat{\boldsymbol{\mu}}`$.
-**Right**: the residual vector
-$`\hat{\boldsymbol{\varepsilon}} = \mathbf{body\_mass} - \hat{\boldsymbol{\mu}}`$.
-Every row of this matrix equation is one of the response-equation rows
-from the worked row above.
+**Left**: observed vector \mathbf{body\\mass}. **Middle**: the
+prediction \mathbf{X}\hat{\boldsymbol{\beta}} +
+\mathbf{Z}\hat{\mathbf{u}} = \hat{\boldsymbol{\mu}}. **Right**: the
+residual vector \hat{\boldsymbol{\varepsilon}} = \mathbf{body\\mass} -
+\hat{\boldsymbol{\mu}}. Every row of this matrix equation is one of the
+response-equation rows from the worked row above.
 
 **Partial pooling.** The random-effect estimates shown here (the BLUPs)
 are partially pooled: each group’s estimate is shrunk toward zero by an
@@ -474,23 +490,27 @@ amount that grows when the group has little data and shrinks when the
 between-group variance is large. Groups with the least data are pulled
 hardest toward the overall mean.
 
-And the $`\sigma`$ submodel (no observed counterpart – $`\sigma`$’s job
-is to describe the spread of $`\hat{\boldsymbol{\varepsilon}}`$). For
-the same observation *i* = 1:
+And the \sigma submodel (no observed counterpart – \sigma’s job is to
+describe the spread of \hat{\boldsymbol{\varepsilon}}). For the same
+observation *i* = 1:
 
-``` math
-\begin{aligned}
-\log\hat\sigma_{1} &= \hat\gamma_{0} + \hat\gamma_{1}\,\mathrm{temperature}_{1} &\quad(\text{sigma submodel for observation 1, log link}) \\
-\log\hat\sigma_{1} &= 0.465 + 0.0399 \times 23.9 = 1.42 &\quad(\text{with your numbers}) \\
-\hat\sigma_{1} &= \exp(1.42) \approx 4.12 &\quad(\text{predicted residual SD for observation 1})
-\end{aligned}
-```
+\begin{aligned} \log\hat\sigma\_{1} &= \hat\gamma\_{0} +
+\hat\gamma\_{1}\\\mathrm{temperature}\_{1} &\quad(\text{sigma submodel
+for observation 1, log link}) \\ \log\hat\sigma\_{1} &= 0.465 + 0.0399
+\times 23.9 = 1.42 &\quad(\text{with your numbers}) \\ \hat\sigma\_{1}
+&= \exp(1.42) \approx 4.12 &\quad(\text{predicted residual SD for
+observation 1}) \end{aligned}
 
 Stacking the same log-link equation for all *n* = 200 observations:
 
-``` math
-\log\!\underbrace{\begin{bmatrix} 4.12 \\ 3.22 \\ 2.77 \\ 2.44 \\ 3.04 \\ \vdots \\ 3.53 \\ 2.58 \end{bmatrix}}_{\textstyle\,\boldsymbol{\sigma}_{\,200 \times 1}\,} \;=\; \underbrace{\begin{bmatrix}    1 & 23.9 \\    1 & 17.7 \\    1 & 13.9 \\    1 & 10.7 \\    1 & 16.3 \\ \vdots & \vdots \\    1 & 19.9 \\    1 & 12.1 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\sigma,\,200 \times 2}\,}\, \underbrace{\begin{bmatrix} 0.465 \\ 0.0399 \end{bmatrix}}_{\textstyle\,\boldsymbol{\gamma}_{\,2 \times 1}\,}
-```
+\log\\\underbrace{\begin{bmatrix} 4.12 \\ 3.22 \\ 2.77 \\ 2.44 \\ 3.04
+\\ \vdots \\ 3.53 \\ 2.58
+\end{bmatrix}}\_{\textstyle\\\boldsymbol{\sigma}\_{\\200 \times 1}\\}
+\\=\\ \underbrace{\begin{bmatrix} 1 & 23.9 \\ 1 & 17.7 \\ 1 & 13.9 \\ 1
+& 10.7 \\ 1 & 16.3 \\ \vdots & \vdots \\ 1 & 19.9 \\ 1 & 12.1
+\end{bmatrix}}\_{\textstyle\\\mathbf{X}\_{\sigma,\\200 \times 2}\\}\\
+\underbrace{\begin{bmatrix} 0.465 \\ 0.0399
+\end{bmatrix}}\_{\textstyle\\\boldsymbol{\gamma}\_{\\2 \times 1}\\}
 
 (The widget renders live in this page. In an R session,
 `cat(as_html_three_views(sym))` inside a `results = "asis"` chunk will
@@ -527,6 +547,6 @@ educator-facing surface stays one verb deep.
 - For meta-analysis with `metafor` and `drmTMB` location-scale (plus
   `glmmTMB`’s `propto()` as the related phylogenetic /
   structured-covariance pattern, not strict meta-analysis), see
-  [`vignette("symbolizer-meta")`](https://itchyshin.github.io/symbolizer/articles/symbolizer-meta.md).
+  [`vignette("symbolizer-meta-analysis")`](https://itchyshin.github.io/symbolizer/articles/symbolizer-meta-analysis.md).
 - For the full capability matrix and what’s planned next, see
   [`vignette("symbolizer-roadmap")`](https://itchyshin.github.io/symbolizer/articles/symbolizer-roadmap.md).

@@ -11,7 +11,8 @@
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
 <link rel="icon" sizes="any" href="../favicon.ico">
 <link rel="manifest" href="../site.webmanifest">
-<script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<!-- katex math --><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" integrity="sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script><script src="../katex-auto.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
@@ -158,17 +159,17 @@ intercept.</p>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>W</mi><mi>i</mi></msub><annotation encoding="application/x-tex">W_i</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐰</mi><annotation encoding="application/x-tex">\mathbf{w}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">W_i</span></td>
+<td align="left"><span class="math inline">\mathbf{w}</span></td>
 <td align="left">body_mass</td>
 <td align="left">g</td>
 <td align="left">response</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mi>n</mi></msup><annotation encoding="application/x-tex">\mathbb{R}^n</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>120</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{120}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^n</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{120}</span></td>
 <td align="left">response variable</td>
 </tr>
 <tr class="even">
-<td align="left">sex_i</td>
+<td align="left"><span class="math inline">\mathrm{sex}_i</span></td>
 <td align="left">—</td>
 <td align="left">sex</td>
 <td align="left">NA</td>
@@ -178,63 +179,68 @@ intercept.</p>
 <td align="left">factor (female [reference], male)</td>
 </tr>
 <tr class="odd">
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>μ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\mu_i</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛍</mi><annotation encoding="application/x-tex">\boldsymbol{\mu}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mu_i</span></td>
+<td align="left"><span class="math inline">\boldsymbol{\mu}</span></td>
 <td align="left">NA</td>
 <td align="left">NA</td>
 <td align="left">parameter</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mi>n</mi></msup><annotation encoding="application/x-tex">\mathbb{R}^n</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>120</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{120}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^n</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{120}</span></td>
 <td align="left">conditional mu of body_mass</td>
 </tr>
 <tr class="even">
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\sigma_i</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛔</mi><annotation encoding="application/x-tex">\boldsymbol{\sigma}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\sigma_i</span></td>
+<td align="left"><span class="math inline">\boldsymbol{\sigma}</span></td>
 <td align="left">NA</td>
 <td align="left">NA</td>
 <td align="left">parameter</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mi>n</mi></msup><annotation encoding="application/x-tex">\mathbb{R}^n</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>120</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{120}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^n</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{120}</span></td>
 <td align="left">residual standard deviation</td>
 </tr>
 <tr class="odd">
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mn>0</mn></msub><mo>,</mo><msub><mi>β</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">\beta_{0}, \beta_{1}</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛃</mi><annotation encoding="application/x-tex">\boldsymbol{\beta}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\beta_{0},
+\beta_{1}</span></td>
+<td align="left"><span class="math inline">\boldsymbol{\beta}</span></td>
 <td align="left">NA</td>
 <td align="left">NA</td>
 <td align="left">coefficient</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><msub><mi>p</mi><mi>μ</mi></msub></msup><annotation encoding="application/x-tex">\mathbb{R}^{p_\mu}</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>2</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{2}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^{p_\mu}</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{2}</span></td>
 <td align="left">mu submodel coefficients</td>
 </tr>
 <tr class="even">
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>γ</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\gamma_{0}</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛄</mi><annotation encoding="application/x-tex">\boldsymbol{\gamma}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\gamma_{0}</span></td>
+<td align="left"><span class="math inline">\boldsymbol{\gamma}</span></td>
 <td align="left">NA</td>
 <td align="left">NA</td>
 <td align="left">coefficient</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><msub><mi>p</mi><mi>σ</mi></msub></msup><annotation encoding="application/x-tex">\mathbb{R}^{p_\sigma}</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>1</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{1}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^{p_\sigma}</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{1}</span></td>
 <td align="left">sigma submodel coefficients</td>
 </tr>
 <tr class="odd">
 <td align="left">—</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐗</mi><annotation encoding="application/x-tex">\mathbf{X}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbf{X}</span></td>
 <td align="left">NA</td>
 <td align="left">NA</td>
 <td align="left">design_matrix</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mi>n</mi><mo>×</mo><msub><mi>p</mi><mi>μ</mi></msub></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{n \times p_\mu}</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mn>120</mn><mo>×</mo><mn>2</mn></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{120 \times 2}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^{n \times
+p_\mu}</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{120 \times
+2}</span></td>
 <td align="left">mu submodel design matrix</td>
 </tr>
 <tr class="even">
 <td align="left">—</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐙</mi><annotation encoding="application/x-tex">\mathbf{Z}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbf{X}_{\sigma}</span></td>
 <td align="left">NA</td>
 <td align="left">NA</td>
 <td align="left">design_matrix</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mi>n</mi><mo>×</mo><msub><mi>p</mi><mi>σ</mi></msub></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{n \times p_\sigma}</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mn>120</mn><mo>×</mo><mn>1</mn></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{120 \times 1}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^{n \times
+p_\sigma}</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{120 \times
+1}</span></td>
 <td align="left">sigma submodel design matrix</td>
 </tr>
 </tbody>
@@ -303,8 +309,8 @@ i.e. females. It is <em>not</em> the overall mean of
 would differ from the female mean.</li>
 <li>The <strong><code>sexmale</code> contrast</strong> estimate (4.99)
 is the <strong>difference</strong> between male and female means. It is
-<em>not</em> the male mean. To get the male mean you add:
-<code>intercept + sexmale = r round(sum(sym1$fixed_effects$estimate[1:2]), 2)</code>.</li>
+<em>not</em> the male mean. To get the male mean you add the intercept
+and the contrast: <code>intercept + sexmale</code> = 34.8.</li>
 </ul>
 <p>The biological reading in the table — <em>“Average body_mass differs
 between male and the reference”</em> — is the same statement in
@@ -382,17 +388,17 @@ reference.</p>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>W</mi><mi>i</mi></msub><annotation encoding="application/x-tex">W_i</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐰</mi><annotation encoding="application/x-tex">\mathbf{w}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">W_i</span></td>
+<td align="left"><span class="math inline">\mathbf{w}</span></td>
 <td align="left">body_mass</td>
 <td align="left">g</td>
 <td align="left">response</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mi>n</mi></msup><annotation encoding="application/x-tex">\mathbb{R}^n</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>120</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{120}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^n</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{120}</span></td>
 <td align="left">response variable</td>
 </tr>
 <tr class="even">
-<td align="left">site_i</td>
+<td align="left"><span class="math inline">\mathrm{site}_i</span></td>
 <td align="left">—</td>
 <td align="left">site</td>
 <td align="left">NA</td>
@@ -402,63 +408,68 @@ reference.</p>
 <td align="left">factor (A [reference], B, C, D)</td>
 </tr>
 <tr class="odd">
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>μ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\mu_i</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛍</mi><annotation encoding="application/x-tex">\boldsymbol{\mu}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mu_i</span></td>
+<td align="left"><span class="math inline">\boldsymbol{\mu}</span></td>
 <td align="left">NA</td>
 <td align="left">NA</td>
 <td align="left">parameter</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mi>n</mi></msup><annotation encoding="application/x-tex">\mathbb{R}^n</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>120</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{120}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^n</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{120}</span></td>
 <td align="left">conditional mu of body_mass</td>
 </tr>
 <tr class="even">
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\sigma_i</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛔</mi><annotation encoding="application/x-tex">\boldsymbol{\sigma}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\sigma_i</span></td>
+<td align="left"><span class="math inline">\boldsymbol{\sigma}</span></td>
 <td align="left">NA</td>
 <td align="left">NA</td>
 <td align="left">parameter</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mi>n</mi></msup><annotation encoding="application/x-tex">\mathbb{R}^n</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>120</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{120}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^n</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{120}</span></td>
 <td align="left">residual standard deviation</td>
 </tr>
 <tr class="odd">
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mn>0</mn></msub><mo>,</mo><msub><mi>β</mi><mn>1</mn></msub><mo>,</mo><msub><mi>β</mi><mn>2</mn></msub><mo>,</mo><msub><mi>β</mi><mn>3</mn></msub></mrow><annotation encoding="application/x-tex">\beta_{0}, \beta_{1}, \beta_{2}, \beta_{3}</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛃</mi><annotation encoding="application/x-tex">\boldsymbol{\beta}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\beta_{0}, \beta_{1},
+\beta_{2}, \beta_{3}</span></td>
+<td align="left"><span class="math inline">\boldsymbol{\beta}</span></td>
 <td align="left">NA</td>
 <td align="left">NA</td>
 <td align="left">coefficient</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><msub><mi>p</mi><mi>μ</mi></msub></msup><annotation encoding="application/x-tex">\mathbb{R}^{p_\mu}</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>4</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{4}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^{p_\mu}</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{4}</span></td>
 <td align="left">mu submodel coefficients</td>
 </tr>
 <tr class="even">
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>γ</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\gamma_{0}</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛄</mi><annotation encoding="application/x-tex">\boldsymbol{\gamma}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\gamma_{0}</span></td>
+<td align="left"><span class="math inline">\boldsymbol{\gamma}</span></td>
 <td align="left">NA</td>
 <td align="left">NA</td>
 <td align="left">coefficient</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><msub><mi>p</mi><mi>σ</mi></msub></msup><annotation encoding="application/x-tex">\mathbb{R}^{p_\sigma}</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>1</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{1}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^{p_\sigma}</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{1}</span></td>
 <td align="left">sigma submodel coefficients</td>
 </tr>
 <tr class="odd">
 <td align="left">—</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐗</mi><annotation encoding="application/x-tex">\mathbf{X}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbf{X}</span></td>
 <td align="left">NA</td>
 <td align="left">NA</td>
 <td align="left">design_matrix</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mi>n</mi><mo>×</mo><msub><mi>p</mi><mi>μ</mi></msub></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{n \times p_\mu}</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mn>120</mn><mo>×</mo><mn>4</mn></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{120 \times 4}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^{n \times
+p_\mu}</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{120 \times
+4}</span></td>
 <td align="left">mu submodel design matrix</td>
 </tr>
 <tr class="even">
 <td align="left">—</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐙</mi><annotation encoding="application/x-tex">\mathbf{Z}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbf{X}_{\sigma}</span></td>
 <td align="left">NA</td>
 <td align="left">NA</td>
 <td align="left">design_matrix</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mi>n</mi><mo>×</mo><msub><mi>p</mi><mi>σ</mi></msub></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{n \times p_\sigma}</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mn>120</mn><mo>×</mo><mn>1</mn></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{120 \times 1}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^{n \times
+p_\sigma}</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{120 \times
+1}</span></td>
 <td align="left">sigma submodel design matrix</td>
 </tr>
 </tbody>
@@ -623,17 +634,17 @@ that concrete in its design-matrix row:</p>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>W</mi><mi>i</mi></msub><annotation encoding="application/x-tex">W_i</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐰</mi><annotation encoding="application/x-tex">\mathbf{w}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">W_i</span></td>
+<td align="left"><span class="math inline">\mathbf{w}</span></td>
 <td align="left">body_mass</td>
 <td align="left">g</td>
 <td align="left">response</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mi>n</mi></msup><annotation encoding="application/x-tex">\mathbb{R}^n</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>120</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{120}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^n</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{120}</span></td>
 <td align="left">response variable</td>
 </tr>
 <tr class="even">
-<td align="left">sex_i</td>
+<td align="left"><span class="math inline">\mathrm{sex}_i</span></td>
 <td align="left">—</td>
 <td align="left">sex</td>
 <td align="left">NA</td>
@@ -643,7 +654,7 @@ that concrete in its design-matrix row:</p>
 <td align="left">factor (female [reference], male)</td>
 </tr>
 <tr class="odd">
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>L</mi><mi>i</mi></msub><annotation encoding="application/x-tex">L_i</annotation></semantics></math></td>
+<td align="left"><span class="math inline">L_i</span></td>
 <td align="left">—</td>
 <td align="left">body_size</td>
 <td align="left">mm</td>
@@ -653,63 +664,68 @@ that concrete in its design-matrix row:</p>
 <td align="left">continuous predictor</td>
 </tr>
 <tr class="even">
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>μ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\mu_i</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛍</mi><annotation encoding="application/x-tex">\boldsymbol{\mu}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mu_i</span></td>
+<td align="left"><span class="math inline">\boldsymbol{\mu}</span></td>
 <td align="left">NA</td>
 <td align="left">NA</td>
 <td align="left">parameter</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mi>n</mi></msup><annotation encoding="application/x-tex">\mathbb{R}^n</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>120</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{120}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^n</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{120}</span></td>
 <td align="left">conditional mu of body_mass</td>
 </tr>
 <tr class="odd">
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\sigma_i</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛔</mi><annotation encoding="application/x-tex">\boldsymbol{\sigma}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\sigma_i</span></td>
+<td align="left"><span class="math inline">\boldsymbol{\sigma}</span></td>
 <td align="left">NA</td>
 <td align="left">NA</td>
 <td align="left">parameter</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mi>n</mi></msup><annotation encoding="application/x-tex">\mathbb{R}^n</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>120</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{120}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^n</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{120}</span></td>
 <td align="left">residual standard deviation</td>
 </tr>
 <tr class="even">
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mn>0</mn></msub><mo>,</mo><msub><mi>β</mi><mn>1</mn></msub><mo>,</mo><msub><mi>β</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">\beta_{0}, \beta_{1}, \beta_{2}</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛃</mi><annotation encoding="application/x-tex">\boldsymbol{\beta}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\beta_{0}, \beta_{1},
+\beta_{2}</span></td>
+<td align="left"><span class="math inline">\boldsymbol{\beta}</span></td>
 <td align="left">NA</td>
 <td align="left">NA</td>
 <td align="left">coefficient</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><msub><mi>p</mi><mi>μ</mi></msub></msup><annotation encoding="application/x-tex">\mathbb{R}^{p_\mu}</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>3</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{3}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^{p_\mu}</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{3}</span></td>
 <td align="left">mu submodel coefficients</td>
 </tr>
 <tr class="odd">
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>γ</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\gamma_{0}</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛄</mi><annotation encoding="application/x-tex">\boldsymbol{\gamma}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\gamma_{0}</span></td>
+<td align="left"><span class="math inline">\boldsymbol{\gamma}</span></td>
 <td align="left">NA</td>
 <td align="left">NA</td>
 <td align="left">coefficient</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><msub><mi>p</mi><mi>σ</mi></msub></msup><annotation encoding="application/x-tex">\mathbb{R}^{p_\sigma}</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>1</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{1}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^{p_\sigma}</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{1}</span></td>
 <td align="left">sigma submodel coefficients</td>
 </tr>
 <tr class="even">
 <td align="left">—</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐗</mi><annotation encoding="application/x-tex">\mathbf{X}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbf{X}</span></td>
 <td align="left">NA</td>
 <td align="left">NA</td>
 <td align="left">design_matrix</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mi>n</mi><mo>×</mo><msub><mi>p</mi><mi>μ</mi></msub></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{n \times p_\mu}</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mn>120</mn><mo>×</mo><mn>3</mn></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{120 \times 3}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^{n \times
+p_\mu}</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{120 \times
+3}</span></td>
 <td align="left">mu submodel design matrix</td>
 </tr>
 <tr class="odd">
 <td align="left">—</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐙</mi><annotation encoding="application/x-tex">\mathbf{Z}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbf{X}_{\sigma}</span></td>
 <td align="left">NA</td>
 <td align="left">NA</td>
 <td align="left">design_matrix</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mi>n</mi><mo>×</mo><msub><mi>p</mi><mi>σ</mi></msub></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{n \times p_\sigma}</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mn>120</mn><mo>×</mo><mn>1</mn></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{120 \times 1}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^{n \times
+p_\sigma}</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{120 \times
+1}</span></td>
 <td align="left">sigma submodel design matrix</td>
 </tr>
 </tbody>
@@ -807,8 +823,8 @@ female, 1 for male), and <code>body_size</code> — and the three-views
 widget shows exactly that on the matrix-with-data tab: the
 <code>0</code>s and <code>1</code>s of the dummy column sit next to the
 continuous <code>body_size</code> column, with the coefficient vector
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝛃</mi><mo>=</mo><mo stretchy="false" form="prefix">(</mo><msub><mi>β</mi><mn>0</mn></msub><mo>,</mo><mspace width="0.167em"></mspace><msub><mi>β</mi><mn>1</mn></msub><mo>,</mo><mspace width="0.167em"></mspace><msub><mi>β</mi><mn>2</mn></msub><msup><mo stretchy="false" form="postfix">)</mo><mi>⊤</mi></msup></mrow><annotation encoding="application/x-tex">\boldsymbol{\beta} = (\beta_0,\,\beta_1,\,\beta_2)^\top</annotation></semantics></math>
-multiplying through:</p>
+<span class="math inline">\boldsymbol{\beta} =
+(\beta_0,\,\beta_1,\,\beta_2)^\top</span> multiplying through:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/as_html_three_views.html">as_html_three_views</a></span><span class="op">(</span><span class="va">sym3</span><span class="op">)</span></span></code></pre></div>
 <style>.sym-tabs { position: relative; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; margin: 1em 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
@@ -835,21 +851,21 @@ multiplying through:</p>
 .sym-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .sym-skip { position: absolute; top: -100px; left: 0; padding: 0.4rem 0.7rem; background: #8a1f22; color: #fff; text-decoration: none; font-size: 0.85rem; z-index: 5; }
 .sym-skip:focus { top: 0; }</style>
-<div id="sym-sym-1780075446" class="sym-tabs">
-<a class="sym-skip" href="#sym-sym-1780075446-end">Skip three-views
+<div id="sym-sym-1780180785" class="sym-tabs">
+<a class="sym-skip" href="#sym-sym-1780180785-end">Skip three-views
 widget</a>
 <div class="sym-tablist" role="tablist" aria-label="Three views of the model">
-<button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1780075446-tab-idx" aria-controls="sym-sym-1780075446-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
+<button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1780180785-tab-idx" aria-controls="sym-sym-1780180785-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>1. Index
 </button>
-<button type="button" class="sym-tab" role="tab" id="sym-sym-1780075446-tab-eq" aria-controls="sym-sym-1780075446-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
+<button type="button" class="sym-tab" role="tab" id="sym-sym-1780180785-tab-eq" aria-controls="sym-sym-1780180785-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>2. Matrix
 </button>
-<button type="button" class="sym-tab" role="tab" id="sym-sym-1780075446-tab-mat" aria-controls="sym-sym-1780075446-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
+<button type="button" class="sym-tab" role="tab" id="sym-sym-1780180785-tab-mat" aria-controls="sym-sym-1780180785-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>3. Equations with data
 </button>
 </div>
-<div id="sym-sym-1780075446-panel-idx" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-sym-1780075446-tab-idx" data-panel="idx" tabindex="0">
+<div id="sym-sym-1780180785-panel-idx" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-sym-1780180785-tab-idx" data-panel="idx" tabindex="0">
 <p class="sym-caption">
 What happens for each observation <em>i</em> – the per-individual
 reading.
@@ -859,55 +875,52 @@ Each observation is normally distributed around a mean that may shift
 with the predictors; the residual SD is constant across observations.
 </p>
 <p class="sym-biology">
-<strong>Coefficient reading.</strong> On the response scale,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>β</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat\beta</annotation></semantics></math>
-is the additive change in the mean of the response for a one-unit
-increase in the predictor (identity link – no back-transformation
-needed).
+<strong>Coefficient reading.</strong> On the response scale, <span class="math inline">\hat\beta</span> is the additive change in the mean
+of the response for a one-unit increase in the predictor (identity link
+– no back-transformation needed).
 </p>
 <div class="sym-eq">
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>W</mi><mi>i</mi></msub><mo>∣</mo><msub><mi>μ</mi><mi>i</mi></msub><mo>,</mo><mspace width="0.167em"></mspace><msub><mi>σ</mi><mi>i</mi></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>∼</mo><mrow><mi mathvariant="normal">N</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>μ</mi><mi>i</mi></msub><mo>,</mo><mspace width="0.167em"></mspace><msubsup><mi>σ</mi><mi>i</mi><mn>2</mn></msubsup><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>μ</mi><mi>i</mi></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><msub><mi>β</mi><mn>0</mn></msub><mo>+</mo><msub><mi>β</mi><mn>1</mn></msub><mspace width="0.167em"></mspace><mo stretchy="false" form="prefix">[</mo><mi>s</mi><mi>e</mi><mi>x</mi><mo>=</mo><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow><mo stretchy="false" form="postfix">]</mo><mo>+</mo><msub><mi>β</mi><mn>2</mn></msub><mspace width="0.167em"></mspace><msub><mi>L</mi><mi>i</mi></msub></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>σ</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><msub><mi>γ</mi><mn>0</mn></msub></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
-W_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
-\mu_i &amp; = \beta_{0} + \beta_{1} \, [sex = \mathrm{male}] + \beta_{2} \, L_i \\
+<span class="math display">\begin{aligned}
+W_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\,
+\sigma_i^2) \\
+\mu_i &amp; = \beta_{0} + \beta_{1} \, [sex = \mathrm{male}] + \beta_{2}
+\, L_i \\
 \log(\sigma_i) &amp; = \gamma_{0}
-\end{aligned}</annotation></semantics></math>
+\end{aligned}</span>
 </div>
 <details class="sym-gloss" open><summary>
 where:
 </summary><ul class="sym-gloss-list">
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>W</mi><mi>i</mi></msub><annotation encoding="application/x-tex">W_i</annotation></semantics></math>
-— response variable  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>120</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{120}</annotation></semantics></math></span>
+<span class="math inline">W_i</span> — response variable  <span class="sym-dim"><span class="math inline">\mathbb{R}^{120}</span></span>
 </li>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>e</mi><msub><mi>x</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">sex_i</annotation></semantics></math>
-— factor (female [reference], male)  <span class="sym-dim">column of X
-(length 120)</span>
-</li>
-<li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>L</mi><mi>i</mi></msub><annotation encoding="application/x-tex">L_i</annotation></semantics></math>
-— continuous predictor  <span class="sym-dim">column of X (length
+<span class="math inline">\mathrm{sex}_i</span> — factor (female
+[reference], male)  <span class="sym-dim">column of X (length
 120)</span>
 </li>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>μ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\mu_i</annotation></semantics></math>
-— conditional mu of body_mass  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>120</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{120}</annotation></semantics></math></span>
+<span class="math inline">L_i</span> — continuous predictor  <span class="sym-dim">column of X (length 120)</span>
 </li>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\sigma_i</annotation></semantics></math>
-— residual standard deviation  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>120</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{120}</annotation></semantics></math></span>
+<span class="math inline">\mu_i</span> — conditional mu of body_mass
+ <span class="sym-dim"><span class="math inline">\mathbb{R}^{120}</span></span>
 </li>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mn>0</mn></msub><mo>,</mo><msub><mi>β</mi><mn>1</mn></msub><mo>,</mo><msub><mi>β</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">\beta_{0}, \beta_{1}, \beta_{2}</annotation></semantics></math>
-— mu submodel coefficients  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>3</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{3}</annotation></semantics></math></span>
+<span class="math inline">\sigma_i</span> — residual standard deviation
+ <span class="sym-dim"><span class="math inline">\mathbb{R}^{120}</span></span>
 </li>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>γ</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\gamma_{0}</annotation></semantics></math>
-— sigma submodel coefficients  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>1</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{1}</annotation></semantics></math></span>
+<span class="math inline">\beta_{0}, \beta_{1}, \beta_{2}</span> — mu
+submodel coefficients  <span class="sym-dim"><span class="math inline">\mathbb{R}^{3}</span></span>
+</li>
+<li>
+<span class="math inline">\gamma_{0}</span> — sigma submodel
+coefficients  <span class="sym-dim"><span class="math inline">\mathbb{R}^{1}</span></span>
 </li>
 </ul></details>
 </div>
-<div id="sym-sym-1780075446-panel-eq" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1780075446-tab-eq" data-panel="eq" hidden="" tabindex="0">
+<div id="sym-sym-1780180785-panel-eq" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1780180785-tab-eq" data-panel="eq" hidden="" tabindex="0">
 <p class="sym-caption">
 The same model in matrix form – the structural contract every textbook
 past chapter 4 switches to.
@@ -917,46 +930,48 @@ Each observation is normally distributed around a mean that may shift
 with the predictors; the residual SD is constant across observations.
 </p>
 <div class="sym-eq">
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mi>𝐰</mi><mo>∣</mo><mi>𝛍</mi><mo>,</mo><mspace width="0.167em"></mspace><mi>𝛔</mi></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>∼</mo><mi>𝒩</mi><mo stretchy="false" form="prefix">(</mo><mi>𝛍</mi><mo>,</mo><mspace width="0.167em"></mspace><mrow><mi mathvariant="normal">d</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">g</mi></mrow><mo stretchy="false" form="prefix">(</mo><msup><mi>𝛔</mi><mn>2</mn></msup><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mi>𝛍</mi></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>𝐗</mi><mi>𝛃</mi></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>𝛔</mi><mo stretchy="false" form="postfix">)</mo></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><mi>𝐙</mi><mi>𝛄</mi></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
-\mathbf{w} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} &amp; \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2)) \\
+<span class="math display">\begin{aligned}
+\mathbf{w} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} &amp; \sim
+\mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2)) \\
 \boldsymbol{\mu} &amp; = \mathbf{X} \boldsymbol{\beta} \\
-\log(\boldsymbol{\sigma}) &amp; = \mathbf{Z} \boldsymbol{\gamma}
-\end{aligned}</annotation></semantics></math>
+\log(\boldsymbol{\sigma}) &amp; = \mathbf{X}_{\sigma}
+\boldsymbol{\gamma}
+\end{aligned}</span>
 </div>
 <details class="sym-gloss" open><summary>
 where:
 </summary><ul class="sym-gloss-list">
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐰</mi><annotation encoding="application/x-tex">\mathbf{w}</annotation></semantics></math>
-— response variable  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>120</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{120}</annotation></semantics></math></span>
+<span class="math inline">\mathbf{w}</span> — response variable  <span class="sym-dim"><span class="math inline">\mathbb{R}^{120}</span></span>
 </li>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛍</mi><annotation encoding="application/x-tex">\boldsymbol{\mu}</annotation></semantics></math>
-— conditional mu of body_mass  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>120</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{120}</annotation></semantics></math></span>
+<span class="math inline">\boldsymbol{\mu}</span> — conditional mu of
+body_mass  <span class="sym-dim"><span class="math inline">\mathbb{R}^{120}</span></span>
 </li>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛔</mi><annotation encoding="application/x-tex">\boldsymbol{\sigma}</annotation></semantics></math>
-— residual standard deviation  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>120</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{120}</annotation></semantics></math></span>
+<span class="math inline">\boldsymbol{\sigma}</span> — residual standard
+deviation  <span class="sym-dim"><span class="math inline">\mathbb{R}^{120}</span></span>
 </li>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛃</mi><annotation encoding="application/x-tex">\boldsymbol{\beta}</annotation></semantics></math>
-— mu submodel coefficients  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>3</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{3}</annotation></semantics></math></span>
+<span class="math inline">\boldsymbol{\beta}</span> — mu submodel
+coefficients  <span class="sym-dim"><span class="math inline">\mathbb{R}^{3}</span></span>
 </li>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛄</mi><annotation encoding="application/x-tex">\boldsymbol{\gamma}</annotation></semantics></math>
-— sigma submodel coefficients  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>1</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{1}</annotation></semantics></math></span>
+<span class="math inline">\boldsymbol{\gamma}</span> — sigma submodel
+coefficients  <span class="sym-dim"><span class="math inline">\mathbb{R}^{1}</span></span>
 </li>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐗</mi><annotation encoding="application/x-tex">\mathbf{X}</annotation></semantics></math>
-— mu submodel design matrix  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mn>120</mn><mo>×</mo><mn>3</mn></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{120 \times 3}</annotation></semantics></math></span>
+<span class="math inline">\mathbf{X}</span> — mu submodel design matrix
+ <span class="sym-dim"><span class="math inline">\mathbb{R}^{120 \times
+3}</span></span>
 </li>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐙</mi><annotation encoding="application/x-tex">\mathbf{Z}</annotation></semantics></math>
-— sigma submodel design matrix  <span class="sym-dim"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mn>120</mn><mo>×</mo><mn>1</mn></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{120 \times 1}</annotation></semantics></math></span>
+<span class="math inline">\mathbf{X}_{\sigma}</span> — sigma submodel
+design matrix  <span class="sym-dim"><span class="math inline">\mathbb{R}^{120 \times 1}</span></span>
 </li>
 </ul></details>
 </div>
-<div id="sym-sym-1780075446-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1780075446-tab-mat" data-panel="mat" hidden="" tabindex="0">
+<div id="sym-sym-1780180785-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1780180785-tab-mat" data-panel="mat" hidden="" tabindex="0">
 <p class="sym-caption">
 The same matrix equation, with your actual numbers stacked inside the
 brackets – what the computer multiplies. Showing first 5 and last 2 rows
@@ -974,65 +989,88 @@ coefficient vector beta listed below.</span>
 For observation <em>i</em> = 1 of your data:
 </p>
 <div class="sym-eq">
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>w</mi><mn>1</mn></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><msub><mover><mi>β</mi><mo accent="true">̂</mo></mover><mn>0</mn></msub><mo>+</mo><msub><mover><mi>β</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mspace width="0.167em"></mspace><msub><mrow><mi mathvariant="normal">s</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">x</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow><mn>1</mn></msub><mo>+</mo><msub><mover><mi>β</mi><mo accent="true">̂</mo></mover><mn>2</mn></msub><mspace width="0.167em"></mspace><msub><mrow><mi mathvariant="normal">b</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">d</mi><mi mathvariant="normal">y</mi><mi mathvariant="normal">_</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">z</mi><mi mathvariant="normal">e</mi></mrow><mn>1</mn></msub><mo>+</mo><msub><mover><mi>ε</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub></mtd><mtd columnalign="right" style="text-align: right"><mspace width="1.0em"></mspace><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">response equation, one row of the model</mtext><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><msub><mover><mi>μ</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mn>29.9</mn><mo>+</mo><mn>5.26</mn><mo>×</mo><mn>0</mn><mo>+</mo><mn>0.197</mn><mo>×</mo><mn>60.5</mn><mo>≈</mo><mn>41.8</mn></mtd><mtd columnalign="right" style="text-align: right"><mspace width="1.0em"></mspace><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">predicted mean</mtext><mo>=</mo><mtext mathvariant="normal">linear predictor</mtext><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>w</mi><mn>1</mn></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><munder><munder><mn>41.8</mn><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mover><mi>μ</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mspace width="0.167em"></mspace><mtext mathvariant="normal">(predicted)</mtext><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.278em"></mspace><mo>+</mo><mspace width="0.278em"></mspace><munder><munder><mrow><mo stretchy="false" form="prefix">(</mo><mi>−</mi><mn>2.36</mn><mo stretchy="false" form="postfix">)</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mover><mi>ε</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mspace width="0.167em"></mspace><mtext mathvariant="normal">(residual)</mtext><mspace width="0.167em"></mspace></mrow></munder></mtd><mtd columnalign="right" style="text-align: right"><mspace width="1.0em"></mspace><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">observed</mtext><mo>=</mo><mtext mathvariant="normal">predicted mean</mtext><mo>+</mo><mtext mathvariant="normal">residual</mtext><mo stretchy="false" form="postfix">)</mo></mtd></mtr></mtable><annotation encoding="application/x-tex">
+<span class="math display">
 \begin{aligned}
-w_{1} &amp;= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{sexmale}_{1} + \hat\beta_{2}\,\mathrm{body\_size}_{1} + \hat\varepsilon_{1} &amp;\quad(\text{response equation, one row of the model}) \\
-\hat\mu_{1} &amp;= 29.9 + 5.26 \times    0 + 0.197 \times 60.5 \approx 41.8 &amp;\quad(\text{predicted mean} = \text{linear predictor}) \\
-w_{1} &amp;= \underbrace{41.8}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-2.36)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,} &amp;\quad(\text{observed} = \text{predicted mean} + \text{residual})
+w_{1} &amp;= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{sexmale}_{1} +
+\hat\beta_{2}\,\mathrm{body\_size}_{1} + \hat\varepsilon_{1}
+&amp;\quad(\text{response equation, one row of the model}) \\
+\hat\mu_{1} &amp;= 29.9 + 5.26 \times    0 + 0.197 \times 60.5 \approx
+41.8 &amp;\quad(\text{predicted mean} = \text{linear predictor}) \\
+w_{1} &amp;=
+\underbrace{41.8}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\;
+\underbrace{(-2.36)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
+&amp;\quad(\text{observed} = \text{predicted mean} + \text{residual})
 \end{aligned}
-</annotation></semantics></math>
+</span>
 </div>
 <p class="sym-caption" style="font-size:0.95em;color:#374151">
 Stacking the same response equation for all <em>n</em> = 120
 observations:
 </p>
 <div class="sym-eq">
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mn>39.5</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>55.1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>50.4</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>46.7</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>55.4</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>49.4</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>48.7</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mi>𝐰</mi><mrow><mspace width="0.167em"></mspace><mn>120</mn><mo>×</mo><mn>1</mn></mrow></msub><mspace width="0.278em"></mspace><mtext mathvariant="normal">(observed)</mtext><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.278em"></mspace><mo>=</mo><mspace width="0.278em"></mspace><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>60.5</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>129</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>70.5</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>77.9</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>111</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>77</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd><mtd columnalign="center" style="text-align: center"><mn>103</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mi>𝐗</mi><mrow><mspace width="0.167em"></mspace><mn>120</mn><mo>×</mo><mn>3</mn></mrow></msub><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.167em"></mspace><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mn>29.9</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>5.26</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0.197</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mover><mi>𝛃</mi><mo accent="true">̂</mo></mover><mrow><mspace width="0.167em"></mspace><mn>3</mn><mo>×</mo><mn>1</mn></mrow></msub><mspace width="0.278em"></mspace><mtext mathvariant="normal">(estimated)</mtext><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.278em"></mspace><mo>+</mo><mspace width="0.278em"></mspace><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>2.36</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>0.159</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>6.62</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1.51</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>1.49</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>4.37</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>−</mi><mn>6.76</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mover><mi>𝛆</mi><mo accent="true">̂</mo></mover><mrow><mspace width="0.167em"></mspace><mn>120</mn><mo>×</mo><mn>1</mn></mrow></msub><mspace width="0.278em"></mspace><mtext mathvariant="normal">(residual)</mtext><mspace width="0.167em"></mspace></mrow></munder></mrow><annotation encoding="application/x-tex">
-\underbrace{\begin{bmatrix} 39.5 \\ 55.1 \\ 50.4 \\ 46.7 \\ 55.4 \\ \vdots \\ 49.4 \\ 48.7 \end{bmatrix}}_{\textstyle\,\mathbf{w}_{\,120 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 &amp;    0 &amp; 60.5 \\    1 &amp;    0 &amp;  129 \\    1 &amp;    0 &amp; 70.5 \\    1 &amp;    0 &amp; 77.9 \\    1 &amp;    1 &amp;  111 \\ \vdots &amp; \vdots &amp; \vdots \\    1 &amp;    0 &amp;   77 \\    1 &amp;    1 &amp;  103 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,120 \times 3}\,}\, \underbrace{\begin{bmatrix} 29.9 \\ 5.26 \\ 0.197 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,3 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} -2.36 \\ -0.159 \\ 6.62 \\ 1.51 \\ -1.49 \\ \vdots \\ 4.37 \\ -6.76 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,120 \times 1}\;\text{(residual)}\,}
-</annotation></semantics></math>
+<span class="math display">
+\underbrace{\begin{bmatrix} 39.5 \\ 55.1 \\ 50.4 \\ 46.7 \\ 55.4 \\
+\vdots \\ 49.4 \\ 48.7 \end{bmatrix}}_{\textstyle\,\mathbf{w}_{\,120
+\times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1
+&amp;    0 &amp; 60.5 \\    1 &amp;    0 &amp;  129 \\    1 &amp;    0
+&amp; 70.5 \\    1 &amp;    0 &amp; 77.9 \\    1 &amp;    1 &amp;  111
+\\ \vdots &amp; \vdots &amp; \vdots \\    1 &amp;    0 &amp;   77
+\\    1 &amp;    1 &amp;  103
+\end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,120 \times 3}\,}\,
+\underbrace{\begin{bmatrix} 29.9 \\ 5.26 \\ 0.197
+\end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,3 \times
+1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} -2.36 \\
+-0.159 \\ 6.62 \\ 1.51 \\ -1.49 \\ \vdots \\ 4.37 \\ -6.76
+\end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,120 \times
+1}\;\text{(residual)}\,}
+</span>
 </div>
 <p class="sym-caption" style="font-size:0.85em;color:#6b7280;margin-top:0.4rem">
-<strong>Left</strong>: observed vector
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐰</mi><annotation encoding="application/x-tex">\mathbf{w}</annotation></semantics></math>.
-<strong>Middle</strong>: the prediction
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐗</mi><mover><mi>𝛃</mi><mo accent="true">̂</mo></mover><mo>=</mo><mover><mi>𝛍</mi><mo accent="true">̂</mo></mover></mrow><annotation encoding="application/x-tex">\mathbf{X}\hat{\boldsymbol{\beta}} = \hat{\boldsymbol{\mu}}</annotation></semantics></math>.
-<strong>Right</strong>: the residual vector
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>𝛆</mi><mo accent="true">̂</mo></mover><mo>=</mo><mi>𝐰</mi><mo>−</mo><mover><mi>𝛍</mi><mo accent="true">̂</mo></mover></mrow><annotation encoding="application/x-tex">\hat{\boldsymbol{\varepsilon}} = \mathbf{w} - \hat{\boldsymbol{\mu}}</annotation></semantics></math>.
-Every row of this matrix equation is one of the response-equation rows
-from the worked row above.
+<strong>Left</strong>: observed vector <span class="math inline">\mathbf{w}</span>. <strong>Middle</strong>: the
+prediction <span class="math inline">\mathbf{X}\hat{\boldsymbol{\beta}}
+= \hat{\boldsymbol{\mu}}</span>. <strong>Right</strong>: the residual
+vector <span class="math inline">\hat{\boldsymbol{\varepsilon}} =
+\mathbf{w} - \hat{\boldsymbol{\mu}}</span>. Every row of this matrix
+equation is one of the response-equation rows from the worked row above.
 </p>
 <p class="sym-caption" style="font-size:0.95em;color:#374151;margin-top:1.2rem">
-And the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>
-submodel (no observed counterpart –
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>’s
-job is to describe the spread of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>𝛆</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat{\boldsymbol{\varepsilon}}</annotation></semantics></math>).
-For the same observation <em>i</em> = 1:
+And the <span class="math inline">\sigma</span> submodel (no observed
+counterpart – <span class="math inline">\sigma</span>’s job is to
+describe the spread of <span class="math inline">\hat{\boldsymbol{\varepsilon}}</span>). For the same
+observation <em>i</em> = 1:
 </p>
 <div class="sym-eq">
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><msub><mover><mi>σ</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><msub><mover><mi>γ</mi><mo accent="true">̂</mo></mover><mn>0</mn></msub></mtd><mtd columnalign="right" style="text-align: right"><mspace width="1.0em"></mspace><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">sigma submodel for observation 1, log link</mtext><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><msub><mover><mi>σ</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mn>1.17</mn></mtd><mtd columnalign="right" style="text-align: right"><mspace width="1.0em"></mspace><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">with your numbers</mtext><mo stretchy="false" form="postfix">)</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><msub><mover><mi>σ</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mn>1.17</mn><mo stretchy="false" form="postfix">)</mo><mo>≈</mo><mn>3.21</mn></mtd><mtd columnalign="right" style="text-align: right"><mspace width="1.0em"></mspace><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">predicted residual SD for observation 1</mtext><mo stretchy="false" form="postfix">)</mo></mtd></mtr></mtable><annotation encoding="application/x-tex">
+<span class="math display">
 \begin{aligned}
-\log\hat\sigma_{1} &amp;= \hat\gamma_{0} &amp;\quad(\text{sigma submodel for observation 1, log link}) \\
+\log\hat\sigma_{1} &amp;= \hat\gamma_{0} &amp;\quad(\text{sigma submodel
+for observation 1, log link}) \\
 \log\hat\sigma_{1} &amp;= 1.17 &amp;\quad(\text{with your numbers}) \\
-\hat\sigma_{1} &amp;= \exp(1.17) \approx 3.21 &amp;\quad(\text{predicted residual SD for observation 1})
+\hat\sigma_{1} &amp;= \exp(1.17) \approx 3.21 &amp;\quad(\text{predicted
+residual SD for observation 1})
 \end{aligned}
-</annotation></semantics></math>
+</span>
 </div>
 <p class="sym-caption" style="font-size:0.95em;color:#374151">
 Stacking the same log-link equation for all <em>n</em> = 120
 observations:
 </p>
 <div class="sym-eq">
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mspace width="-0.167em"></mspace><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mn>3.21</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>3.21</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>3.21</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>3.21</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>3.21</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>3.21</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>3.21</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mi>𝛔</mi><mrow><mspace width="0.167em"></mspace><mn>120</mn><mo>×</mo><mn>1</mn></mrow></msub><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.278em"></mspace><mo>=</mo><mspace width="0.278em"></mspace><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>⋮</mi></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>1</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mi>𝐗</mi><mrow><mi>σ</mi><mo>,</mo><mspace width="0.167em"></mspace><mn>120</mn><mo>×</mo><mn>1</mn></mrow></msub><mspace width="0.167em"></mspace></mrow></munder><mspace width="0.167em"></mspace><munder><munder><mrow><mo stretchy="true" form="prefix">[</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mn>1.17</mn></mtd></mtr></mtable><mo stretchy="true" form="postfix">]</mo></mrow><mo accent="true">⏟</mo></munder><mrow><mspace width="0.167em"></mspace><msub><mi>𝛄</mi><mrow><mspace width="0.167em"></mspace><mn>1</mn><mo>×</mo><mn>1</mn></mrow></msub><mspace width="0.167em"></mspace></mrow></munder></mrow><annotation encoding="application/x-tex">
-\log\!\underbrace{\begin{bmatrix} 3.21 \\ 3.21 \\ 3.21 \\ 3.21 \\ 3.21 \\ \vdots \\ 3.21 \\ 3.21 \end{bmatrix}}_{\textstyle\,\boldsymbol{\sigma}_{\,120 \times 1}\,} \;=\; \underbrace{\begin{bmatrix}    1 \\    1 \\    1 \\    1 \\    1 \\ \vdots \\    1 \\    1 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\sigma,\,120 \times 1}\,}\, \underbrace{\begin{bmatrix} 1.17 \end{bmatrix}}_{\textstyle\,\boldsymbol{\gamma}_{\,1 \times 1}\,}
-</annotation></semantics></math>
+<span class="math display">
+\log\!\underbrace{\begin{bmatrix} 3.21 \\ 3.21 \\ 3.21 \\ 3.21 \\ 3.21
+\\ \vdots \\ 3.21 \\ 3.21
+\end{bmatrix}}_{\textstyle\,\boldsymbol{\sigma}_{\,120 \times 1}\,}
+\;=\; \underbrace{\begin{bmatrix}    1 \\    1 \\    1 \\    1 \\    1
+\\ \vdots \\    1 \\    1
+\end{bmatrix}}_{\textstyle\,\mathbf{X}_{\sigma,\,120 \times 1}\,}\,
+\underbrace{\begin{bmatrix} 1.17
+\end{bmatrix}}_{\textstyle\,\boldsymbol{\gamma}_{\,1 \times 1}\,}
+</span>
 </div>
 </div>
 </div>
-<span id="sym-sym-1780075446-end" tabindex="-1"></span>
+<span id="sym-sym-1780180785-end" tabindex="-1"></span>
 <script>(function() {
-  var root = document.getElementById("sym-sym-1780075446");
+  var root = document.getElementById("sym-sym-1780180785");
   if (!root) return;
   var tabs   = Array.prototype.slice.call(root.querySelectorAll("[role=\"tab\"]"));
   var panels = Array.prototype.slice.call(root.querySelectorAll("[role=\"tabpanel\"]"));
@@ -1048,7 +1086,13 @@ observations:
       p.classList.toggle("sym-active", on);
       if (on) { p.removeAttribute("hidden"); } else { p.setAttribute("hidden", ""); }
     });
-    if (typeof window.MathJax !== "undefined" && window.MathJax.typesetPromise) {
+    // Re-render math in the newly shown panel. KaTeX (the pkgdown site
+    // renderer) exposes renderMathInElement and already typesets hidden
+    // panels at load, so this is belt-and-braces; fall back to MathJax for
+    // standalone exports that still bootstrap MathJax from a CDN.
+    if (typeof window.renderMathInElement === "function") {
+      try { window.renderMathInElement(panels[idx], {throwOnError: false}); } catch (e) {}
+    } else if (typeof window.MathJax !== "undefined" && window.MathJax.typesetPromise) {
       try { window.MathJax.typesetPromise([panels[idx]]); } catch (e) {}
     }
   }
@@ -1127,52 +1171,38 @@ and the continuous <code>body_size</code> — it is zero for every female
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> body_size     predictor       <span style="color: #BB0000;">NA</span>               0.198 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> sex:body_size interaction     male:-           0.066<span style="text-decoration: underline;">9</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> (Intercept)   intercept       <span style="color: #BB0000;">NA</span>               1.11</span></span></code></pre></div>
-<p>Four coefficients to read. Let us call them
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\beta_0</annotation></semantics></math>
-(intercept),
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mn>1</mn></msub><annotation encoding="application/x-tex">\beta_1</annotation></semantics></math>
-(<code>sexmale</code>),
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mn>2</mn></msub><annotation encoding="application/x-tex">\beta_2</annotation></semantics></math>
-(<code>body_size</code>),
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mn>3</mn></msub><annotation encoding="application/x-tex">\beta_3</annotation></semantics></math>
-(<code>sexmale:body_size</code>). The model is</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">E</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>W</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>β</mi><mn>0</mn></msub><mo>+</mo><msub><mi>β</mi><mn>1</mn></msub><mo>⋅</mo><msub><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow><mi>i</mi></msub><mo>+</mo><msub><mi>β</mi><mn>2</mn></msub><mo>⋅</mo><msub><mi>L</mi><mi>i</mi></msub><mo>+</mo><msub><mi>β</mi><mn>3</mn></msub><mo>⋅</mo><msub><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow><mi>i</mi></msub><mo>⋅</mo><msub><mi>L</mi><mi>i</mi></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">\mathrm{E}(W_i) = \beta_0 + \beta_1 \cdot \mathrm{male}_i + \beta_2 \cdot L_i + \beta_3 \cdot \mathrm{male}_i \cdot L_i.</annotation></semantics></math></p>
+<p>Four coefficients to read. Let us call them <span class="math inline">\beta_0</span> (intercept), <span class="math inline">\beta_1</span> (<code>sexmale</code>), <span class="math inline">\beta_2</span> (<code>body_size</code>), <span class="math inline">\beta_3</span> (<code>sexmale:body_size</code>). The
+model is</p>
+<p><span class="math display">\mathrm{E}(W_i) = \beta_0 + \beta_1 \cdot
+\mathrm{male}_i + \beta_2 \cdot L_i + \beta_3 \cdot \mathrm{male}_i
+\cdot L_i.</span></p>
 <p>Split it into the two regression lines by setting the
 <code>sexmale</code> dummy to 0 or 1:</p>
 <ul>
 <li>
-<strong>Females</strong> (<code>sexmale = 0</code>):
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">E</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>W</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>β</mi><mn>0</mn></msub><mo>+</mo><msub><mi>β</mi><mn>2</mn></msub><msub><mi>L</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">\mathrm{E}(W_i) = \beta_0 + \beta_2 L_i</annotation></semantics></math>.
-Intercept
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\beta_0</annotation></semantics></math>,
-slope
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mn>2</mn></msub><annotation encoding="application/x-tex">\beta_2</annotation></semantics></math>.</li>
+<strong>Females</strong> (<code>sexmale = 0</code>): <span class="math inline">\mathrm{E}(W_i) = \beta_0 + \beta_2 L_i</span>.
+Intercept <span class="math inline">\beta_0</span>, slope <span class="math inline">\beta_2</span>.</li>
 <li>
-<strong>Males</strong> (<code>sexmale = 1</code>):
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">E</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>W</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mo stretchy="false" form="prefix">(</mo><msub><mi>β</mi><mn>0</mn></msub><mo>+</mo><msub><mi>β</mi><mn>1</mn></msub><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mo stretchy="false" form="prefix">(</mo><msub><mi>β</mi><mn>2</mn></msub><mo>+</mo><msub><mi>β</mi><mn>3</mn></msub><mo stretchy="false" form="postfix">)</mo><msub><mi>L</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">\mathrm{E}(W_i) = (\beta_0 + \beta_1) +
-(\beta_2 + \beta_3) L_i</annotation></semantics></math>. Intercept
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mn>0</mn></msub><mo>+</mo><msub><mi>β</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">\beta_0 + \beta_1</annotation></semantics></math>,
-slope
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mn>2</mn></msub><mo>+</mo><msub><mi>β</mi><mn>3</mn></msub></mrow><annotation encoding="application/x-tex">\beta_2 + \beta_3</annotation></semantics></math>.</li>
+<strong>Males</strong> (<code>sexmale = 1</code>): <span class="math inline">\mathrm{E}(W_i) = (\beta_0 + \beta_1) +
+(\beta_2 + \beta_3) L_i</span>. Intercept <span class="math inline">\beta_0 + \beta_1</span>, slope <span class="math inline">\beta_2 + \beta_3</span>.</li>
 </ul>
 <p>So:</p>
 <ul>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mn>2</mn></msub><annotation encoding="application/x-tex">\beta_2</annotation></semantics></math>
-is the <strong>female slope on <code>body_size</code></strong>.</li>
+<span class="math inline">\beta_2</span> is the <strong>female slope
+on <code>body_size</code></strong>.</li>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mn>2</mn></msub><mo>+</mo><msub><mi>β</mi><mn>3</mn></msub></mrow><annotation encoding="application/x-tex">\beta_2 + \beta_3</annotation></semantics></math>
-is the <strong>male slope</strong>.</li>
+<span class="math inline">\beta_2 + \beta_3</span> is the
+<strong>male slope</strong>.</li>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mn>3</mn></msub><annotation encoding="application/x-tex">\beta_3</annotation></semantics></math>
-— the interaction coefficient — is the <strong>difference between the
-two slopes</strong>, not the male slope itself.</li>
+<span class="math inline">\beta_3</span> — the interaction
+coefficient — is the <strong>difference between the two slopes</strong>,
+not the male slope itself.</li>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mn>1</mn></msub><annotation encoding="application/x-tex">\beta_1</annotation></semantics></math>
-— the <code>sexmale</code> contrast — is the <strong>difference in
-intercepts</strong> at <code>body_size = 0</code>. It is no longer “the
-average male mass” <em>or</em> “the male-female mass difference at
-average body size”.</li>
+<span class="math inline">\beta_1</span> — the <code>sexmale</code>
+contrast — is the <strong>difference in intercepts</strong> at
+<code>body_size = 0</code>. It is no longer “the average male mass”
+<em>or</em> “the male-female mass difference at average body size”.</li>
 </ul>
 <p><code><a href="../reference/parameter_interpretation.html">parameter_interpretation()</a></code> reads all four templated
 rows, including the dedicated continuous-by-factor interaction
@@ -1181,12 +1211,12 @@ reading:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/parameter_interpretation.html">parameter_interpretation</a></span><span class="op">(</span><span class="va">sym4</span>, scale <span class="op">=</span> <span class="st">"biological"</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <colgroup>
-<col width="3%">
+<col width="2%">
+<col width="4%">
+<col width="9%">
+<col width="2%">
 <col width="5%">
-<col width="8%">
-<col width="3%">
-<col width="5%">
-<col width="74%">
+<col width="75%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">submodel</th>
@@ -1208,11 +1238,13 @@ reading:</p>
 <tr class="even">
 <td align="left">mu</td>
 <td align="left">sex</td>
-<td align="left">factor_contrast</td>
+<td align="left">factor_contrast_interaction</td>
 <td align="left">3.04</td>
 <td align="left">-0.801, 6.87</td>
-<td align="left">Average body_mass differs between male and female by
-3.04</td>
+<td align="left">Because sex interacts with another predictor, the
+male-vs-female difference in body_mass is not a single number: 3.04 is
+the difference when the interacting predictor = 0; see group_means() /
+group_slopes() for the marginal effect.</td>
 </tr>
 <tr class="odd">
 <td align="left">mu</td>
@@ -1247,7 +1279,7 @@ body_mass</td>
 </table>
 <p><em>Rows marked <code>*</code> have a 95% confidence interval that
 excludes zero (CI method: <code>wald</code>).</em></p>
-<p>Read the prose above in place of a templated row. The interaction is
+<p>The interaction row carries its own templated reading. It is
 ecologically the most interesting coefficient in the fit — the slope of
 <code>body_mass</code> on <code>body_size</code> <em>depends on</em>
 <code>sex</code>, which is exactly what “interaction” means.</p>
@@ -1309,32 +1341,32 @@ two real numbers and their product:</p>
 <code>temperature</code>, <code>body_size</code>, and
 <code>temperature:body_size</code>. The interaction column is literally
 the product of the other two predictor columns.</p>
-<p>Call the four coefficients
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mn>0</mn></msub><mo>,</mo><msub><mi>β</mi><mn>1</mn></msub><mo>,</mo><msub><mi>β</mi><mn>2</mn></msub><mo>,</mo><msub><mi>β</mi><mn>3</mn></msub></mrow><annotation encoding="application/x-tex">\beta_0, \beta_1, \beta_2, \beta_3</annotation></semantics></math>
-in column order. The model is</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">E</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>W</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>β</mi><mn>0</mn></msub><mo>+</mo><msub><mi>β</mi><mn>1</mn></msub><msub><mi>T</mi><mi>i</mi></msub><mo>+</mo><msub><mi>β</mi><mn>2</mn></msub><msub><mi>L</mi><mi>i</mi></msub><mo>+</mo><msub><mi>β</mi><mn>3</mn></msub><msub><mi>T</mi><mi>i</mi></msub><msub><mi>L</mi><mi>i</mi></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">\mathrm{E}(W_i) = \beta_0 + \beta_1 T_i + \beta_2 L_i + \beta_3 T_i L_i.</annotation></semantics></math></p>
+<p>Call the four coefficients <span class="math inline">\beta_0,
+\beta_1, \beta_2, \beta_3</span> in column order. The model is</p>
+<p><span class="math display">\mathrm{E}(W_i) = \beta_0 + \beta_1 T_i +
+\beta_2 L_i + \beta_3 T_i L_i.</span></p>
 <p>Re-arrange to isolate the slope of <code>temperature</code>:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">E</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>W</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>β</mi><mn>0</mn></msub><mo>+</mo><mo stretchy="false" form="prefix">(</mo><msub><mi>β</mi><mn>1</mn></msub><mo>+</mo><msub><mi>β</mi><mn>3</mn></msub><msub><mi>L</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><msub><mi>T</mi><mi>i</mi></msub><mo>+</mo><msub><mi>β</mi><mn>2</mn></msub><msub><mi>L</mi><mi>i</mi></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">\mathrm{E}(W_i) = \beta_0 + (\beta_1 + \beta_3 L_i) T_i + \beta_2 L_i.</annotation></semantics></math></p>
-<p>The slope of <code>temperature</code> is
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mn>1</mn></msub><mo>+</mo><msub><mi>β</mi><mn>3</mn></msub><msub><mi>L</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">\beta_1 + \beta_3 L_i</annotation></semantics></math>
-— it depends on <code>body_size</code>. Reading the four coefficients in
-those terms:</p>
+<p><span class="math display">\mathrm{E}(W_i) = \beta_0 + (\beta_1 +
+\beta_3 L_i) T_i + \beta_2 L_i.</span></p>
+<p>The slope of <code>temperature</code> is <span class="math inline">\beta_1 + \beta_3 L_i</span> — it depends on
+<code>body_size</code>. Reading the four coefficients in those
+terms:</p>
 <ul>
 <li>
-<strong><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\beta_0</annotation></semantics></math>
+<strong><span class="math inline">\beta_0</span>
 (intercept)</strong> = expected <code>body_mass</code> when
 <code>temperature = 0</code> and <code>body_size = 0</code>.</li>
 <li>
-<strong><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mn>1</mn></msub><annotation encoding="application/x-tex">\beta_1</annotation></semantics></math>
+<strong><span class="math inline">\beta_1</span>
 (<code>temperature</code>)</strong> = the <code>temperature</code> slope
 <em>at</em> <code>body_size = 0</code>. Not “the temperature slope”. The
 slope at one specific value of <code>body_size</code>.</li>
 <li>
-<strong><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mn>2</mn></msub><annotation encoding="application/x-tex">\beta_2</annotation></semantics></math>
+<strong><span class="math inline">\beta_2</span>
 (<code>body_size</code>)</strong> = the <code>body_size</code> slope
 <em>at</em> <code>temperature = 0</code>. Same reasoning.</li>
 <li>
-<strong><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mn>3</mn></msub><annotation encoding="application/x-tex">\beta_3</annotation></semantics></math>
+<strong><span class="math inline">\beta_3</span>
 (<code>temperature:body_size</code>)</strong> = how much the
 <code>temperature</code> slope changes per one-unit increase in
 <code>body_size</code>. Equivalently, how much the
@@ -1401,10 +1433,8 @@ slope of <code>temperature</code> at <em>specific values</em> of
 excludes zero (CI method: <code>wald</code>).</em></p>
 <p>Three rows, each the <code>temperature</code> slope at a different
 <code>body_size</code>, with confidence intervals. The slope rises as
-<code>body_size</code> rises — the sign of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>β</mi><mn>3</mn></msub><annotation encoding="application/x-tex">\beta_3</annotation></semantics></math>
-tells you whether the interaction amplifies or dampens the
-<code>temperature</code> effect.</p>
+<code>body_size</code> rises — the sign of <span class="math inline">\beta_3</span> tells you whether the interaction
+amplifies or dampens the <code>temperature</code> effect.</p>
 <p><strong>Takeaway.</strong> A continuous-by-continuous interaction
 means <em>the slope of one continuous predictor changes with the level
 of another</em>. Use
@@ -1485,30 +1515,27 @@ interaction columns are products of the site dummy and the
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> site:sex    interaction     C:male           -<span style="color: #BB0000;">2.13</span> </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">8</span> site:sex    interaction     D:male            3.16 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">9</span> (Intercept) intercept       <span style="color: #BB0000;">NA</span>                1.03</span></span></code></pre></div>
-<p>Reading the eight coefficients in cell terms (write
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>W</mi><mo accent="true">‾</mo></mover><mrow><mi>s</mi><mo>,</mo><mi>x</mi></mrow></msub><annotation encoding="application/x-tex">\bar W_{s,x}</annotation></semantics></math>
-for the population mean at site <code>s</code>, sex <code>x</code>):</p>
+<p>Reading the eight coefficients in cell terms (write <span class="math inline">\bar W_{s,x}</span> for the population mean at site
+<code>s</code>, sex <code>x</code>):</p>
 <ul>
 <li>
-<strong>Intercept</strong> =
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>W</mi><mo accent="true">‾</mo></mover><mrow><mi>A</mi><mo>,</mo><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><annotation encoding="application/x-tex">\bar W_{A,\mathrm{female}}</annotation></semantics></math>
-— site <code>A</code>, female.</li>
+<strong>Intercept</strong> = <span class="math inline">\bar
+W_{A,\mathrm{female}}</span> — site <code>A</code>, female.</li>
 <li>
 <strong><code>siteB</code></strong>,
 <strong><code>siteC</code></strong>, <strong><code>siteD</code></strong>
-= site mean minus site <code>A</code> mean, <em>for females</em>:
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>W</mi><mo accent="true">‾</mo></mover><mrow><mi>B</mi><mo>,</mo><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><mo>−</mo><msub><mover><mi>W</mi><mo accent="true">‾</mo></mover><mrow><mi>A</mi><mo>,</mo><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub></mrow><annotation encoding="application/x-tex">\bar W_{B,\mathrm{female}} - \bar W_{A,\mathrm{female}}</annotation></semantics></math>,
-and so on.</li>
+= site mean minus site <code>A</code> mean, <em>for females</em>: <span class="math inline">\bar W_{B,\mathrm{female}} - \bar
+W_{A,\mathrm{female}}</span>, and so on.</li>
 <li>
 <strong><code>sexmale</code></strong> = male minus female <em>at
-site <code>A</code></em>:
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>W</mi><mo accent="true">‾</mo></mover><mrow><mi>A</mi><mo>,</mo><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><mo>−</mo><msub><mover><mi>W</mi><mo accent="true">‾</mo></mover><mrow><mi>A</mi><mo>,</mo><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub></mrow><annotation encoding="application/x-tex">\bar W_{A,\mathrm{male}} -
-\bar W_{A,\mathrm{female}}</annotation></semantics></math>.</li>
+site <code>A</code></em>: <span class="math inline">\bar
+W_{A,\mathrm{male}} -
+\bar W_{A,\mathrm{female}}</span>.</li>
 <li>
 <strong><code>siteB:sexmale</code></strong> is the part that needs
-the most care. It is
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>W</mi><mo accent="true">‾</mo></mover><mrow><mi>B</mi><mo>,</mo><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><mo>−</mo><msub><mover><mi>W</mi><mo accent="true">‾</mo></mover><mrow><mi>B</mi><mo>,</mo><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><mo stretchy="false" form="postfix">)</mo><mo>−</mo><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>W</mi><mo accent="true">‾</mo></mover><mrow><mi>A</mi><mo>,</mo><mrow><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><mo>−</mo><msub><mover><mi>W</mi><mo accent="true">‾</mo></mover><mrow><mi>A</mi><mo>,</mo><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi></mrow></mrow></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(\bar W_{B,\mathrm{male}} - \bar W_{B,\mathrm{female}}) -
- (\bar W_{A,\mathrm{male}} - \bar W_{A,\mathrm{female}})</annotation></semantics></math>.</li>
+the most care. It is <span class="math inline">(\bar W_{B,\mathrm{male}}
+- \bar W_{B,\mathrm{female}}) -
+(\bar W_{A,\mathrm{male}} - \bar W_{A,\mathrm{female}})</span>.</li>
 </ul>
 <p>That last line is the <em>difference of two differences</em>. The
 male-female gap at site <code>B</code>, minus the male-female gap at
@@ -1529,12 +1556,12 @@ cell-mean translation on demand:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/parameter_interpretation.html">parameter_interpretation</a></span><span class="op">(</span><span class="va">sym5</span>, scale <span class="op">=</span> <span class="st">"biological"</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <colgroup>
+<col width="2%">
 <col width="3%">
-<col width="4%">
 <col width="9%">
-<col width="3%">
-<col width="6%">
-<col width="72%">
+<col width="2%">
+<col width="5%">
+<col width="75%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">submodel</th>
@@ -1556,35 +1583,46 @@ cell-mean translation on demand:</p>
 <tr class="even">
 <td align="left">mu</td>
 <td align="left">site</td>
-<td align="left">factor_contrast</td>
+<td align="left">factor_contrast_interaction</td>
 <td align="left">3.66</td>
 <td align="left">1.16, 6.15 *</td>
-<td align="left">Average body_mass differs between B and A by 3.66</td>
+<td align="left">Because site interacts with another predictor, the
+B-vs-A difference in body_mass is not a single number: 3.66 is the
+difference when the interacting predictor = 0; see group_means() /
+group_slopes() for the marginal effect.</td>
 </tr>
 <tr class="odd">
 <td align="left">mu</td>
 <td align="left">site</td>
-<td align="left">factor_contrast</td>
+<td align="left">factor_contrast_interaction</td>
 <td align="left">4.44</td>
 <td align="left">2.55, 6.33 *</td>
-<td align="left">Average body_mass differs between C and A by 4.44</td>
+<td align="left">Because site interacts with another predictor, the
+C-vs-A difference in body_mass is not a single number: 4.44 is the
+difference when the interacting predictor = 0; see group_means() /
+group_slopes() for the marginal effect.</td>
 </tr>
 <tr class="even">
 <td align="left">mu</td>
 <td align="left">site</td>
-<td align="left">factor_contrast</td>
+<td align="left">factor_contrast_interaction</td>
 <td align="left">-2.62</td>
 <td align="left">-4.51, -0.730 *</td>
-<td align="left">Average body_mass differs between D and A by -2.62</td>
+<td align="left">Because site interacts with another predictor, the
+D-vs-A difference in body_mass is not a single number: -2.62 is the
+difference when the interacting predictor = 0; see group_means() /
+group_slopes() for the marginal effect.</td>
 </tr>
 <tr class="odd">
 <td align="left">mu</td>
 <td align="left">sex</td>
-<td align="left">factor_contrast</td>
+<td align="left">factor_contrast_interaction</td>
 <td align="left">4.94</td>
 <td align="left">2.92, 6.95 *</td>
-<td align="left">Average body_mass differs between male and female by
-4.94</td>
+<td align="left">Because sex interacts with another predictor, the
+male-vs-female difference in body_mass is not a single number: 4.94 is
+the difference when the interacting predictor = 0; see group_means() /
+group_slopes() for the marginal effect.</td>
 </tr>
 <tr class="even">
 <td align="left">mu</td>
@@ -1632,8 +1670,9 @@ body_mass</td>
 </table>
 <p><em>Rows marked <code>*</code> have a 95% confidence interval that
 excludes zero (CI method: <code>wald</code>).</em></p>
-<p>Three interaction rows are again silent. Read the cell-mean
-translations above in their place.</p>
+<p>Each of the three interaction rows carries its own templated
+<em>difference-of-differences</em> reading; <code><a href="../reference/group_means.html">group_means()</a></code>
+gives the cell-mean translation on demand.</p>
 <p><strong>Takeaway.</strong> A factor-by-factor interaction coefficient
 is a <em>difference of differences</em>: how much the gap between two
 non-reference cells differs from the corresponding gap in the reference
@@ -1708,17 +1747,17 @@ is not the overall mean unless the sexes are balanced and
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mrow><mi mathvariant="normal">b</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">d</mi><mi mathvariant="normal">y</mi><mi mathvariant="normal">_</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">s</mi></mrow><mi>i</mi></msub><annotation encoding="application/x-tex">\mathrm{body\_mass}_i</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐛</mi><mi>𝐨</mi><mi>𝐝</mi><mi>𝐲</mi><mi mathvariant="bold">_</mi><mi>𝐦</mi><mi>𝐚</mi><mi>𝐬</mi><mi>𝐬</mi></mrow><annotation encoding="application/x-tex">\mathbf{body\_mass}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathrm{body\_mass}_i</span></td>
+<td align="left"><span class="math inline">\mathbf{body\_mass}</span></td>
 <td align="left">body_mass</td>
 <td align="left">NA</td>
 <td align="left">response</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mi>n</mi></msup><annotation encoding="application/x-tex">\mathbb{R}^n</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>80</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{80}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^n</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{80}</span></td>
 <td align="left">response variable</td>
 </tr>
 <tr class="even">
-<td align="left">sex_i</td>
+<td align="left"><span class="math inline">\mathrm{sex}_i</span></td>
 <td align="left">—</td>
 <td align="left">sex</td>
 <td align="left">NA</td>
@@ -1728,7 +1767,7 @@ is not the overall mean unless the sexes are balanced and
 <td align="left">factor (female [reference], male)</td>
 </tr>
 <tr class="odd">
-<td align="left">body_size_i</td>
+<td align="left"><span class="math inline">\mathrm{body\_size}_i</span></td>
 <td align="left">—</td>
 <td align="left">body_size</td>
 <td align="left">NA</td>
@@ -1738,63 +1777,68 @@ is not the overall mean unless the sexes are balanced and
 <td align="left">continuous predictor</td>
 </tr>
 <tr class="even">
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>μ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\mu_i</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛍</mi><annotation encoding="application/x-tex">\boldsymbol{\mu}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mu_i</span></td>
+<td align="left"><span class="math inline">\boldsymbol{\mu}</span></td>
 <td align="left">NA</td>
 <td align="left">NA</td>
 <td align="left">parameter</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mi>n</mi></msup><annotation encoding="application/x-tex">\mathbb{R}^n</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>80</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{80}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^n</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{80}</span></td>
 <td align="left">conditional mu of body_mass</td>
 </tr>
 <tr class="odd">
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\sigma_i</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛔</mi><annotation encoding="application/x-tex">\boldsymbol{\sigma}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\sigma_i</span></td>
+<td align="left"><span class="math inline">\boldsymbol{\sigma}</span></td>
 <td align="left">NA</td>
 <td align="left">NA</td>
 <td align="left">parameter</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mi>n</mi></msup><annotation encoding="application/x-tex">\mathbb{R}^n</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>80</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{80}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^n</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{80}</span></td>
 <td align="left">residual standard deviation</td>
 </tr>
 <tr class="even">
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mn>0</mn></msub><mo>,</mo><msub><mi>β</mi><mn>1</mn></msub><mo>,</mo><msub><mi>β</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">\beta_{0}, \beta_{1}, \beta_{2}</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛃</mi><annotation encoding="application/x-tex">\boldsymbol{\beta}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\beta_{0}, \beta_{1},
+\beta_{2}</span></td>
+<td align="left"><span class="math inline">\boldsymbol{\beta}</span></td>
 <td align="left">NA</td>
 <td align="left">NA</td>
 <td align="left">coefficient</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><msub><mi>p</mi><mi>μ</mi></msub></msup><annotation encoding="application/x-tex">\mathbb{R}^{p_\mu}</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>3</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{3}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^{p_\mu}</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{3}</span></td>
 <td align="left">mu submodel coefficients</td>
 </tr>
 <tr class="odd">
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>γ</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\gamma_{0}</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛄</mi><annotation encoding="application/x-tex">\boldsymbol{\gamma}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\gamma_{0}</span></td>
+<td align="left"><span class="math inline">\boldsymbol{\gamma}</span></td>
 <td align="left">NA</td>
 <td align="left">NA</td>
 <td align="left">coefficient</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><msub><mi>p</mi><mi>σ</mi></msub></msup><annotation encoding="application/x-tex">\mathbb{R}^{p_\sigma}</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>1</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{1}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^{p_\sigma}</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{1}</span></td>
 <td align="left">sigma submodel coefficients</td>
 </tr>
 <tr class="even">
 <td align="left">—</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐗</mi><annotation encoding="application/x-tex">\mathbf{X}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbf{X}</span></td>
 <td align="left">NA</td>
 <td align="left">NA</td>
 <td align="left">design_matrix</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mi>n</mi><mo>×</mo><msub><mi>p</mi><mi>μ</mi></msub></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{n \times p_\mu}</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mn>80</mn><mo>×</mo><mn>3</mn></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{80 \times 3}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^{n \times
+p_\mu}</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{80 \times
+3}</span></td>
 <td align="left">mu submodel design matrix</td>
 </tr>
 <tr class="odd">
 <td align="left">—</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐙</mi><annotation encoding="application/x-tex">\mathbf{Z}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbf{X}_{\sigma}</span></td>
 <td align="left">NA</td>
 <td align="left">NA</td>
 <td align="left">design_matrix</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mi>n</mi><mo>×</mo><msub><mi>p</mi><mi>σ</mi></msub></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{n \times p_\sigma}</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mn>80</mn><mo>×</mo><mn>1</mn></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{80 \times 1}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^{n \times
+p_\sigma}</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{80 \times
+1}</span></td>
 <td align="left">sigma submodel design matrix</td>
 </tr>
 </tbody>
@@ -2089,22 +2133,14 @@ happens to match an expected linear slope, so it looks fine — but the
 column is the <em>first orthogonal polynomial of
 <code>body_size</code></em>, not the raw linear term.</p>
 <p><strong>Diagnosis.</strong> <code>poly(x, 2)</code> produces two
-ORTHOGONAL columns: a combination of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>x</mi><mn>2</mn></msup><annotation encoding="application/x-tex">x^2</annotation></semantics></math>
-scaled so the two columns are uncorrelated. The first column is
-<em>not</em> “the slope of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>”.
-By contrast <code>I(x^2)</code> puts the literal
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>x</mi><mn>2</mn></msup><annotation encoding="application/x-tex">x^2</annotation></semantics></math>
-column into the design matrix alongside a separate linear
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>
-term, and now the linear coefficient <em>is</em> the slope at
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">x = 0</annotation></semantics></math>.
-The two parameterisations carry the same information but their
-coefficient <em>interpretations</em> differ. Use whichever fits your
-story.</p>
+ORTHOGONAL columns: a combination of <span class="math inline">x</span>
+and <span class="math inline">x^2</span> scaled so the two columns are
+uncorrelated. The first column is <em>not</em> “the slope of <span class="math inline">x</span>”. By contrast <code>I(x^2)</code> puts the
+literal <span class="math inline">x^2</span> column into the design
+matrix alongside a separate linear <span class="math inline">x</span>
+term, and now the linear coefficient <em>is</em> the slope at <span class="math inline">x = 0</span>. The two parameterisations carry the
+same information but their coefficient <em>interpretations</em> differ.
+Use whichever fits your story.</p>
 <div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">n_p6</span> <span class="op">&lt;-</span> <span class="fl">80</span></span>
 <span><span class="va">bs_p6</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="va">n_p6</span>, <span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span></span>
@@ -2130,9 +2166,9 @@ story.</p>
 <span><span class="fu"><a href="../reference/symbol_table.html">symbol_table</a></span><span class="op">(</span><span class="va">sym_p6_poly</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <colgroup>
-<col width="18%">
+<col width="19%">
 <col width="12%">
-<col width="7%">
+<col width="5%">
 <col width="3%">
 <col width="8%">
 <col width="18%">
@@ -2151,19 +2187,19 @@ story.</p>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mrow><mi mathvariant="normal">b</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">d</mi><mi mathvariant="normal">y</mi><mi mathvariant="normal">_</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">s</mi></mrow><mi>i</mi></msub><annotation encoding="application/x-tex">\mathrm{body\_mass}_i</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐛</mi><mi>𝐨</mi><mi>𝐝</mi><mi>𝐲</mi><mi mathvariant="bold">_</mi><mi>𝐦</mi><mi>𝐚</mi><mi>𝐬</mi><mi>𝐬</mi></mrow><annotation encoding="application/x-tex">\mathbf{body\_mass}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathrm{body\_mass}_i</span></td>
+<td align="left"><span class="math inline">\mathbf{body\_mass}</span></td>
 <td align="left">body_mass</td>
 <td align="left">NA</td>
 <td align="left">response</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mi>n</mi></msup><annotation encoding="application/x-tex">\mathbb{R}^n</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>80</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{80}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^n</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{80}</span></td>
 <td align="left">response variable</td>
 </tr>
 <tr class="even">
-<td align="left">body_size, 2_i</td>
+<td align="left"><span class="math inline">\mathrm{body\_size}_i</span></td>
 <td align="left">—</td>
-<td align="left">body_size, 2</td>
+<td align="left">body_size</td>
 <td align="left">NA</td>
 <td align="left">transformation</td>
 <td align="left">column of design matrix</td>
@@ -2171,63 +2207,68 @@ story.</p>
 <td align="left">predictor (poly-transformed)</td>
 </tr>
 <tr class="odd">
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>μ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\mu_i</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛍</mi><annotation encoding="application/x-tex">\boldsymbol{\mu}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mu_i</span></td>
+<td align="left"><span class="math inline">\boldsymbol{\mu}</span></td>
 <td align="left">NA</td>
 <td align="left">NA</td>
 <td align="left">parameter</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mi>n</mi></msup><annotation encoding="application/x-tex">\mathbb{R}^n</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>80</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{80}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^n</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{80}</span></td>
 <td align="left">conditional mu of body_mass</td>
 </tr>
 <tr class="even">
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\sigma_i</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛔</mi><annotation encoding="application/x-tex">\boldsymbol{\sigma}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\sigma_i</span></td>
+<td align="left"><span class="math inline">\boldsymbol{\sigma}</span></td>
 <td align="left">NA</td>
 <td align="left">NA</td>
 <td align="left">parameter</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mi>n</mi></msup><annotation encoding="application/x-tex">\mathbb{R}^n</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>80</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{80}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^n</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{80}</span></td>
 <td align="left">residual standard deviation</td>
 </tr>
 <tr class="odd">
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mn>0</mn></msub><mo>,</mo><msub><mi>β</mi><mn>1</mn></msub><mo>,</mo><msub><mi>β</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">\beta_{0}, \beta_{1}, \beta_{2}</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛃</mi><annotation encoding="application/x-tex">\boldsymbol{\beta}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\beta_{0}, \beta_{1},
+\beta_{2}</span></td>
+<td align="left"><span class="math inline">\boldsymbol{\beta}</span></td>
 <td align="left">NA</td>
 <td align="left">NA</td>
 <td align="left">coefficient</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><msub><mi>p</mi><mi>μ</mi></msub></msup><annotation encoding="application/x-tex">\mathbb{R}^{p_\mu}</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>3</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{3}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^{p_\mu}</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{3}</span></td>
 <td align="left">mu submodel coefficients</td>
 </tr>
 <tr class="even">
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>γ</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\gamma_{0}</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛄</mi><annotation encoding="application/x-tex">\boldsymbol{\gamma}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\gamma_{0}</span></td>
+<td align="left"><span class="math inline">\boldsymbol{\gamma}</span></td>
 <td align="left">NA</td>
 <td align="left">NA</td>
 <td align="left">coefficient</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><msub><mi>p</mi><mi>σ</mi></msub></msup><annotation encoding="application/x-tex">\mathbb{R}^{p_\sigma}</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>1</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{1}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^{p_\sigma}</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{1}</span></td>
 <td align="left">sigma submodel coefficients</td>
 </tr>
 <tr class="odd">
 <td align="left">—</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐗</mi><annotation encoding="application/x-tex">\mathbf{X}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbf{X}</span></td>
 <td align="left">NA</td>
 <td align="left">NA</td>
 <td align="left">design_matrix</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mi>n</mi><mo>×</mo><msub><mi>p</mi><mi>μ</mi></msub></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{n \times p_\mu}</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mn>80</mn><mo>×</mo><mn>3</mn></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{80 \times 3}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^{n \times
+p_\mu}</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{80 \times
+3}</span></td>
 <td align="left">mu submodel design matrix</td>
 </tr>
 <tr class="even">
 <td align="left">—</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐙</mi><annotation encoding="application/x-tex">\mathbf{Z}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbf{X}_{\sigma}</span></td>
 <td align="left">NA</td>
 <td align="left">NA</td>
 <td align="left">design_matrix</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mi>n</mi><mo>×</mo><msub><mi>p</mi><mi>σ</mi></msub></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{n \times p_\sigma}</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mn>80</mn><mo>×</mo><mn>1</mn></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{80 \times 1}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^{n \times
+p_\sigma}</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{80 \times
+1}</span></td>
 <td align="left">sigma submodel design matrix</td>
 </tr>
 </tbody>
@@ -2257,17 +2298,17 @@ story.</p>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mrow><mi mathvariant="normal">b</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">d</mi><mi mathvariant="normal">y</mi><mi mathvariant="normal">_</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">s</mi><mi mathvariant="normal">s</mi></mrow><mi>i</mi></msub><annotation encoding="application/x-tex">\mathrm{body\_mass}_i</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐛</mi><mi>𝐨</mi><mi>𝐝</mi><mi>𝐲</mi><mi mathvariant="bold">_</mi><mi>𝐦</mi><mi>𝐚</mi><mi>𝐬</mi><mi>𝐬</mi></mrow><annotation encoding="application/x-tex">\mathbf{body\_mass}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathrm{body\_mass}_i</span></td>
+<td align="left"><span class="math inline">\mathbf{body\_mass}</span></td>
 <td align="left">body_mass</td>
 <td align="left">NA</td>
 <td align="left">response</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mi>n</mi></msup><annotation encoding="application/x-tex">\mathbb{R}^n</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>80</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{80}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^n</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{80}</span></td>
 <td align="left">response variable</td>
 </tr>
 <tr class="even">
-<td align="left">body_size_i</td>
+<td align="left"><span class="math inline">\mathrm{body\_size}_i</span></td>
 <td align="left">—</td>
 <td align="left">body_size</td>
 <td align="left">NA</td>
@@ -2277,7 +2318,7 @@ story.</p>
 <td align="left">continuous predictor</td>
 </tr>
 <tr class="odd">
-<td align="left">body_size^2_i</td>
+<td align="left"><span class="math inline">\mathrm{body\_size^2}_i</span></td>
 <td align="left">—</td>
 <td align="left">body_size^2</td>
 <td align="left">NA</td>
@@ -2287,63 +2328,68 @@ story.</p>
 <td align="left">predictor (I-transformed)</td>
 </tr>
 <tr class="even">
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>μ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\mu_i</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛍</mi><annotation encoding="application/x-tex">\boldsymbol{\mu}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mu_i</span></td>
+<td align="left"><span class="math inline">\boldsymbol{\mu}</span></td>
 <td align="left">NA</td>
 <td align="left">NA</td>
 <td align="left">parameter</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mi>n</mi></msup><annotation encoding="application/x-tex">\mathbb{R}^n</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>80</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{80}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^n</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{80}</span></td>
 <td align="left">conditional mu of body_mass</td>
 </tr>
 <tr class="odd">
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>σ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\sigma_i</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛔</mi><annotation encoding="application/x-tex">\boldsymbol{\sigma}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\sigma_i</span></td>
+<td align="left"><span class="math inline">\boldsymbol{\sigma}</span></td>
 <td align="left">NA</td>
 <td align="left">NA</td>
 <td align="left">parameter</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mi>n</mi></msup><annotation encoding="application/x-tex">\mathbb{R}^n</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>80</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{80}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^n</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{80}</span></td>
 <td align="left">residual standard deviation</td>
 </tr>
 <tr class="even">
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mn>0</mn></msub><mo>,</mo><msub><mi>β</mi><mn>1</mn></msub><mo>,</mo><msub><mi>β</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">\beta_{0}, \beta_{1}, \beta_{2}</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛃</mi><annotation encoding="application/x-tex">\boldsymbol{\beta}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\beta_{0}, \beta_{1},
+\beta_{2}</span></td>
+<td align="left"><span class="math inline">\boldsymbol{\beta}</span></td>
 <td align="left">NA</td>
 <td align="left">NA</td>
 <td align="left">coefficient</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><msub><mi>p</mi><mi>μ</mi></msub></msup><annotation encoding="application/x-tex">\mathbb{R}^{p_\mu}</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>3</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{3}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^{p_\mu}</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{3}</span></td>
 <td align="left">mu submodel coefficients</td>
 </tr>
 <tr class="odd">
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>γ</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\gamma_{0}</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛄</mi><annotation encoding="application/x-tex">\boldsymbol{\gamma}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\gamma_{0}</span></td>
+<td align="left"><span class="math inline">\boldsymbol{\gamma}</span></td>
 <td align="left">NA</td>
 <td align="left">NA</td>
 <td align="left">coefficient</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><msub><mi>p</mi><mi>σ</mi></msub></msup><annotation encoding="application/x-tex">\mathbb{R}^{p_\sigma}</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mn>1</mn></msup><annotation encoding="application/x-tex">\mathbb{R}^{1}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^{p_\sigma}</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{1}</span></td>
 <td align="left">sigma submodel coefficients</td>
 </tr>
 <tr class="even">
 <td align="left">—</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐗</mi><annotation encoding="application/x-tex">\mathbf{X}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbf{X}</span></td>
 <td align="left">NA</td>
 <td align="left">NA</td>
 <td align="left">design_matrix</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mi>n</mi><mo>×</mo><msub><mi>p</mi><mi>μ</mi></msub></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{n \times p_\mu}</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mn>80</mn><mo>×</mo><mn>3</mn></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{80 \times 3}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^{n \times
+p_\mu}</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{80 \times
+3}</span></td>
 <td align="left">mu submodel design matrix</td>
 </tr>
 <tr class="odd">
 <td align="left">—</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐙</mi><annotation encoding="application/x-tex">\mathbf{Z}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbf{X}_{\sigma}</span></td>
 <td align="left">NA</td>
 <td align="left">NA</td>
 <td align="left">design_matrix</td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mi>n</mi><mo>×</mo><msub><mi>p</mi><mi>σ</mi></msub></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{n \times p_\sigma}</annotation></semantics></math></td>
-<td align="left"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>ℝ</mi><mrow><mn>80</mn><mo>×</mo><mn>1</mn></mrow></msup><annotation encoding="application/x-tex">\mathbb{R}^{80 \times 1}</annotation></semantics></math></td>
+<td align="left"><span class="math inline">\mathbb{R}^{n \times
+p_\sigma}</span></td>
+<td align="left"><span class="math inline">\mathbb{R}^{80 \times
+1}</span></td>
 <td align="left">sigma submodel design matrix</td>
 </tr>
 </tbody>
@@ -2392,9 +2438,10 @@ intercept-plus-contrast(s) by hand.</p>
 <p>The point of <code><a href="../reference/symbolize.html">symbolize()</a></code> is to make every layer of this
 translation visible: the design matrix shows the dummies, the symbol
 table marks the references, and <code><a href="../reference/parameter_interpretation.html">parameter_interpretation()</a></code>
-reads each templated coefficient on the biological scale. The
-interaction layer is on the template roadmap; until it lands, the
-cell-mean translation in this vignette is the manual fallback.</p>
+reads each templated coefficient on the biological scale — including the
+continuous-by-factor and factor-by-factor interaction rows.
+<code><a href="../reference/group_means.html">group_means()</a></code> / <code><a href="../reference/group_slopes.html">group_slopes()</a></code> give the
+cell-mean and per-level-slope translations on demand.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

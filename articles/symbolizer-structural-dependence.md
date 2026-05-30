@@ -8,58 +8,51 @@ matrix that encodes the dependence changes. This article is the first in
 *dependence-structure* axis of GLMM grammar through one **deep-dive**
 Face and two **light** Faces across three R packages: `MCMCglmm`,
 `brms`, and `phylolm`. The scope is the **phylogenetic LMM** with
-$`\sigma_e^2`$ estimated; the *meta-analytic* form (with $`v_i`$ known
-sampling variances) is its own surface in the v0.22 article.
+\sigma_e^2 estimated; the *meta-analytic* form (with v_i known sampling
+variances) is its own surface in the v0.22 article.
 
 ## The shared grammar
 
 A generalised linear mixed model writes
 
-``` math
-y_i \mid \mathbf b \;\sim\; \mathcal D(\mu_i, \phi),\qquad
-g(\mu_i) \;=\; \mathbf x_i^\top \boldsymbol\beta + \mathbf z_i^\top \mathbf b,
-```
+y_i \mid \mathbf b \\\sim\\ \mathcal D(\mu_i, \phi),\qquad g(\mu_i)
+\\=\\ \mathbf x_i^\top \boldsymbol\beta + \mathbf z_i^\top \mathbf b,
 
 with random effects
 
-``` math
-\mathbf b \;\sim\; \mathcal N(\mathbf 0,\; \sigma^2\,\mathbf M).
-```
+\mathbf b \\\sim\\ \mathcal N(\mathbf 0,\\ \sigma^2\\\mathbf M).
 
-The standard textbook GLMM takes $`\mathbf M = \mathbf I`$ — the random
+The standard textbook GLMM takes \mathbf M = \mathbf I — the random
 effects are independent draws. Structural dependence is what you get
-when $`\mathbf M \ne \mathbf I`$. Three named instantiations recur:
+when \mathbf M \ne \mathbf I. Three named instantiations recur:
 
-| Context | Symbol | What $`\mathbf M`$ encodes |
+| Context | Symbol | What \mathbf M encodes |
 |----|----|----|
-| Phylogenetic | $`\mathbf A`$ | Shared evolutionary history (tree → correlation) |
-| Pedigree (animal model) | $`\mathbf A`$ | Genetic relatedness (pedigree → correlation) |
-| Spatial | $`\boldsymbol\Omega`$ | Geographic proximity (distance + kernel) |
+| Phylogenetic | \mathbf A | Shared evolutionary history (tree → correlation) |
+| Pedigree (animal model) | \mathbf A | Genetic relatedness (pedigree → correlation) |
+| Spatial | \boldsymbol\Omega | Geographic proximity (distance + kernel) |
 
 In abstract / cross-package teaching contexts (this article’s prose), we
-write $`\mathbf M`$ for the generic role. In a fitted model with a known
+write \mathbf M for the generic role. In a fitted model with a known
 context
 (e.g. [`drmTMB::phylo()`](https://itchyshin.github.io/drmTMB/reference/phylo.html)
-calls), `symbolizer` chooses the domain-specific letter — $`\mathbf A`$
-for phylogenetic / animal-model, $`\boldsymbol\Omega`$ for spatial. The
-symbol-dictionary description for $`\boldsymbol\Omega`$ explicitly
+calls), `symbolizer` chooses the domain-specific letter — \mathbf A for
+phylogenetic / animal-model, \boldsymbol\Omega for spatial. The
+symbol-dictionary description for \boldsymbol\Omega explicitly
 disambiguates it from (a) Wishart precision matrices and (b) CAR / SAR
 spatial weights matrices.
 
 ## Where the matrix comes from
 
 For phylogenetic dependence under a Brownian-motion model of trait
-evolution, $`\mathbf A`$ is the **phylogenetic correlation matrix**:
+evolution, \mathbf A is the **phylogenetic correlation matrix**:
 
-``` math
-A_{ij} \;=\; \frac{T_{ij}}{T},
-```
+A\_{ij} \\=\\ \frac{T\_{ij}}{T},
 
-where $`T_{ij}`$ is the shared branch length between species $`i`$ and
-$`j`$ measured from the root, and $`T`$ is the tree height. For an
-ultrametric tree all tips are equidistant from the root and
-$`A_{ii} = 1`$ by construction. The matrix is symmetric
-positive-definite.
+where T\_{ij} is the shared branch length between species i and j
+measured from the root, and T is the tree height. For an ultrametric
+tree all tips are equidistant from the root and A\_{ii} = 1 by
+construction. The matrix is symmetric positive-definite.
 
 Two operational representations exist:
 
@@ -142,7 +135,7 @@ cat("species k =", nrow(dat),
 cat("A off-diagonal quantiles (25/50/75/99%): ",
     paste(round(quantile(A_tips[upper.tri(A_tips)], c(.25,.5,.75,.99)), 3),
           collapse = " / "), "\n")
-#> A off-diagonal quantiles (25/50/75/99%):  0 / 0.095 / 0.228 / 0.866
+#> A off-diagonal quantiles (25/50/75/99%):  0 / 0.091 / 0.227 / 0.865
 ```
 
 The two representations encode the **same** Brownian-motion prior. The
@@ -156,88 +149,83 @@ explicitly in its [`?phylo`](https://rdrr.io/pkg/ape/man/read.tree.html)
 help page). The all-nodes form is *richer*: it gives access to
 ancestral-state BLUPs at internal nodes; the tips-only form marginalises
 those out. In a balanced setup the two agree on the variance estimate
-$`\hat\sigma_p^2`$ — a result we’ll return to in § “Tips vs all-nodes”.
+\hat\sigma_p^2 — a result we’ll return to in § “Tips-only vs all-nodes”.
 
 ## Three packages, one phylogenetic LMM
 
 We fit the same model three different ways on the 60-species
 Moura-derived dataset. The model is
 
-``` math
-\mathrm{Zr}_i \;=\; \beta_0 + u_{p_{k[i]}} + e_i,\qquad
-u_p \sim \mathcal N(\mathbf 0,\; \sigma_p^2\,\mathbf A),\quad
-e_i \sim \mathcal N(0,\; \sigma_e^2),
-```
+\mathrm{Zr}\_i \\=\\ \beta_0 + u\_{p\_{k\[i\]}} + e_i,\qquad u_p \sim
+\mathcal N(\mathbf 0,\\ \sigma_p^2\\\mathbf A),\quad e_i \sim \mathcal
+N(0,\\ \sigma_e^2),
 
 where:
 
 | Symbol | Meaning | Status |
 |----|----|----|
-| $`i`$ | observation index, $`i = 1, \dots, n`$ — in this dataset there is one observation per species, so $`i`$ runs over species | index |
-| $`k`$ | species index — total number of species in the phylogeny, $`k = 60`$ here | index |
-| $`k[i]`$ | the species that observation $`i`$ belongs to (here $`k[i] = i`$ because one observation per species) | index |
-| $`\mathrm{Zr}_i`$ | Fisher-$`z`$ transformed correlation for species $`i`$ — here treated as an ordinary continuous trait | observed |
-| $`\beta_0`$ | global mean of $`\mathrm{Zr}`$ across species | **estimated** |
-| $`u_{p_{k[i]}}`$ | phylogenetic random effect, indexed by species $`k[i]`$ for observation $`i`$ | **estimated** (latent) |
-| $`\sigma_p^2`$ | phylogenetic variance — the scale of $`\mathbf u_p`$ | **estimated** |
-| $`\mathbf A`$ | $`k \times k`$ tips-only phylogenetic correlation matrix derived from the tree under Brownian motion (or its all-nodes augmentation; see § “Tips-only vs all-nodes”) | constructed from tree |
-| $`e_i`$ | residual on the response scale | **estimated** |
-| $`\sigma_e^2`$ | residual variance — what each package would call $`\sigma^2_{\text{units}}`$, $`\sigma^2_{\text{res}}`$, or the marginal $`\sigma^2 (1 - \lambda)`$ depending on the parameterisation | **estimated** |
+| i | observation index, i = 1, \dots, n — in this dataset there is one observation per species, so i runs over species | index |
+| k | species index — total number of species in the phylogeny, k = 60 here | index |
+| k\[i\] | the species that observation i belongs to (here k\[i\] = i because one observation per species) | index |
+| \mathrm{Zr}\_i | Fisher-z transformed correlation for species i — here treated as an ordinary continuous trait | observed |
+| \beta_0 | global mean of \mathrm{Zr} across species | **estimated** |
+| u\_{p\_{k\[i\]}} | phylogenetic random effect, indexed by species k\[i\] for observation i | **estimated** (latent) |
+| \sigma_p^2 | phylogenetic variance — the scale of \mathbf u_p | **estimated** |
+| \mathbf A | k \times k tips-only phylogenetic correlation matrix derived from the tree under Brownian motion (or its all-nodes augmentation; see § “Tips-only vs all-nodes”) | constructed from tree |
+| e_i | residual on the response scale | **estimated** |
+| \sigma_e^2 | residual variance — what each package would call \sigma^2\_{\text{units}}, \sigma^2\_{\text{res}}, or the marginal \sigma^2 (1 - \lambda) depending on the parameterisation | **estimated** |
 
 Three notes that often trip up first readers:
 
-1.  **$`\sigma_e^2`$ is estimated, not the per-effect sampling variance
-    $`v_i`$.** In meta-analysis we’d also feed in $`v_i`$ (a *known*
-    sampling variance per study) via `metafor::rma.mv(V = vi, ...)`.
-    That’s the model class in the v0.22 article — same
-    $`\sigma_p^2 \mathbf A`$ phylogenetic term, but with
-    $`\mathbf V = \operatorname{diag}(v_i)`$ added on top of
-    $`\sigma_e^2 \mathbf I`$ (Cinar et al. 2022, Eq. 1–10).
-2.  The Moura data was *built* as a meta-analytic dataset (one
-    Fisher-$`z`$ per species, aggregated from many effect-size
-    estimates). We use only $`\mathrm{Zr}`$ here; the $`v_i`$ column is
-    set aside. That’s a pedagogical choice — a clean phylo-LMM is easier
-    to read than a meta-analytic phylo-LMM, and it keeps this article
-    focused on the structural-dependence axis.
+1.  **\sigma_e^2 is estimated, not the per-effect sampling variance
+    v_i.** In meta-analysis we’d also feed in v_i (a *known* sampling
+    variance per study) via `metafor::rma.mv(V = vi, ...)`. That’s the
+    model class in the v0.22 article — same \sigma_p^2 \mathbf A
+    phylogenetic term, but with \mathbf V = \operatorname{diag}(v_i)
+    added on top of \sigma_e^2 \mathbf I (Cinar et al. 2022, Eq. 1–10).
+2.  The Moura data was *built* as a meta-analytic dataset (one Fisher-z
+    per species, aggregated from many effect-size estimates). We use
+    only \mathrm{Zr} here; the v_i column is set aside. That’s a
+    pedagogical choice — a clean phylo-LMM is easier to read than a
+    meta-analytic phylo-LMM, and it keeps this article focused on the
+    structural-dependence axis.
 3.  `phylolm` fits a **marginalised** version of this same model: it
-    absorbs $`u_p`$ into the residual to give
-    $`\mathrm{Zr} \sim \mathcal N(\beta_0 \mathbf 1, \sigma^2 \mathbf C(\alpha))`$
-    where
-    $`\sigma^2 \mathbf C(\alpha) = \sigma_p^2 \mathbf A + \sigma_e^2 \mathbf I`$
-    in the Pagel-$`\lambda`$ parametrisation. The § “Face 3” Face below
-    makes the bridge explicit.
+    absorbs u_p into the residual to give \mathrm{Zr} \sim \mathcal
+    N(\beta_0 \mathbf 1, \sigma^2 \mathbf C(\alpha)) where \sigma^2
+    \mathbf C(\alpha) = \sigma_p^2 \mathbf A + \sigma_e^2 \mathbf I in
+    the Pagel-\lambda parametrisation. The § “Face 3” Face below makes
+    the bridge explicit.
 
-The phylogenetic correlation matrix $`\mathbf A`$ carries realistic
-biology — most species pairs are distantly related (median off-diagonal
-$`\approx 0.03`$) while a handful are close (top 1 % above 0.85).
-Compare with the degenerate `rcoal(15)` simulation used in earlier
-drafts where 75 % of pairs were above 0.91.
+The phylogenetic correlation matrix \mathbf A carries realistic biology
+— most species pairs are distantly related (median off-diagonal \approx
+0.09) while a handful are close (top 1 % above 0.85). Compare with the
+degenerate `rcoal(15)` simulation used in earlier drafts where 75 % of
+pairs were above 0.91.
 
 ### Face 1 (deep dive): `MCMCglmm` with `ginverse = list(species = Ainv)`
 
 `MCMCglmm` uses the **all-nodes** representation natively (Hadfield 2010
 §8.2.1). Internally the random-effect vector spans both tip species AND
 internal phylogenetic nodes, so when the widget below shows the
-$`\mathbf{A}`$ matrix you will see a $`116 \times 116`$ block, not the
-nominal $`k \times k = 60 \times 60`$ tips-only form — the same prior,
-just an augmented coordinate system. (For a $`k`$-tip tree the
-augmentation is at most $`2k-2`$ rows; in this dataset two polytomies
-after ultrametricisation drop the count from 118 to 116.) The Moura
-dataset has one observation per species, so the random-effect incidence
-matrix $`\mathbf{Z}`$ is the identity on the observed species and the
-widget elides it from Tab 3’s stacked block — each row shows the
-predicted per-observation random effect $`\hat u_{\text{species}(i)}`$
-directly. ($`\mathbf{Z}`$ is reintroduced in articles where multiple
-observations share a species or study.)
+\mathbf{A} matrix you will see a 116 \times 116 block, not the nominal k
+\times k = 60 \times 60 tips-only form — the same prior, just an
+augmented coordinate system. (For a k-tip tree the augmentation is at
+most 2k-2 rows; in this dataset two polytomies after ultrametricisation
+drop the count from 118 to 116.) The Moura dataset has one observation
+per species, so the random-effect incidence matrix \mathbf{Z} is the
+identity on the observed species and the widget elides it from Tab 3’s
+stacked block — each row shows the predicted per-observation random
+effect \hat u\_{\text{species}(i)} directly. (\mathbf{Z} is reintroduced
+in articles where multiple observations share a species or study.)
 
 A note on **scalar vs vector notation** before the widget: the **Index**
-tab writes one row of the model for a single observation $`i`$, so the
-scalar form $`\mathrm{Zr}_i`$ (italic capital, with subscript) is used.
-The **Matrix** and **Equations with data** tabs collect all $`n`$
-observations into the column vector
-$`\mathbf{zr} = (\mathrm{Zr}_1, \dots, \mathrm{Zr}_n)^\top`$ (bold
-lowercase, no subscript). Same quantity, two notations — the index form
-is for reading one row, the vector form is for the matrix algebra.
+tab writes one row of the model for a single observation i, so the
+scalar form \mathrm{Zr}\_i (italic capital, with subscript) is used. The
+**Matrix** and **Equations with data** tabs collect all n observations
+into the column vector \mathbf{zr} = (\mathrm{Zr}\_1, \dots,
+\mathrm{Zr}\_n)^\top (bold lowercase, no subscript). Same quantity, two
+notations — the index form is for reading one row, the vector form is
+for the matrix algebra.
 
 ``` r
 
@@ -264,8 +252,8 @@ sym_mcmc$variance_components             # phylo + residual
 
 | parameter | group    | term        | sd_estimate | var_estimate |
 |:----------|:---------|:------------|:------------|:-------------|
-| mu        | species  | (Intercept) | 0.325       | 0.105        |
-| residual  | residual | Residual    | 0.215       | 0.0460       |
+| mu        | species  | (Intercept) | 0.324       | 0.105        |
+| residual  | residual | Residual    | 0.215       | 0.0461       |
 
 ``` r
 
@@ -273,12 +261,12 @@ sym_mcmc$metadata$heritability           # h^2 derived automatically
 #> # A tibble: 1 × 5
 #>   group   variance_A variance_E heritability reading                            
 #>   <chr>        <dbl>      <dbl>        <dbl> <chr>                              
-#> 1 species      0.105     0.0460        0.696 Heritability h^2 = sigma^2_p / (si…
+#> 1 species      0.105     0.0461        0.694 Heritability h^2 = sigma^2_p / (si…
 ```
 
 #### Three-views widget for the MCMCglmm fit
 
-[Skip three-views widget](#sym-mcmc-1780075488-end)
+[Skip three-views widget](#sym-mcmc-1780180818-end)
 
 ▸1. Index
 
@@ -290,44 +278,43 @@ What happens for each observation *i* – the per-individual reading.
 
 Species are not independent observations. Closely related species tend
 to have similar trait values because of shared evolutionary history; the
-phylogenetic correlation matrix $`\mathbf{A}`$ encodes those expected
-similarities (cell $`A_{ij}`$ = fraction of shared branch length between
-species $`i`$ and $`j`$). The phylogenetic SD $`\sigma_p`$ measures how
-much across-species variation remains after fixed-effect predictors are
+phylogenetic correlation matrix \mathbf{A} encodes those expected
+similarities (cell A\_{ij} = fraction of shared branch length between
+species i and j). The phylogenetic SD \sigma_p measures how much
+across-species variation remains after fixed-effect predictors are
 accounted for.
 
-**Coefficient reading.** On the response scale, $`\hat\beta`$ is the
+**Coefficient reading.** On the response scale, \hat\beta is the
 additive change in the mean of the response for a one-unit increase in
 the predictor (identity link – no back-transformation needed).
 
-``` math
-\begin{aligned}
-\mathrm{Zr}_i \mid \mu_i,\, \sigma_i & \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
-\mu_i & = \beta_{0} + u_{species(i)} \\
-\mathbf{u}_{species} & \sim \mathcal{N}(\mathbf{0},\, \sigma_{species}^2 \mathbf{A})
-\end{aligned}
-```
+\begin{aligned} \mathrm{Zr}\_i \mid \mu_i,\\ \sigma & \sim
+\mathrm{Normal}(\mu_i,\\ \sigma^2) \\ \mu_i & = \beta\_{0} +
+u\_{species(i)} \\ \mathbf{u}\_{species} & \sim
+\mathcal{N}(\mathbf{0},\\ \sigma\_{species}^2 \mathbf{A}) \end{aligned}
 
 where:
 
-- $`\mathrm{Zr}_i`$ — response variable  $`\mathbb{R}^{60}`$
-- $`\mu_i`$ — conditional mu of Zr  $`\mathbb{R}^{60}`$
-- $`\sigma_i`$ — residual standard deviation of Zr  scalar
-- $`\beta_{0}`$ — mu submodel coefficients  $`\mathbb{R}^{1}`$
-- $`u_{species(i)}`$ — random intercept by species  scalar;
-  $`\mathbb{R}^{116}`$ in matrix form
-- $`\sigma_{species}`$ — between-species standard deviation  scalar
-- $`\mathbf{A}`$ — phylogenetic / pedigree correlation matrix on species
+- \mathrm{Zr}\_i — response variable  \mathbb{R}^{60}
+- \mu_i — conditional mu of Zr  \mathbb{R}^{60}
+- \sigma — residual standard deviation of Zr  scalar
+- \beta\_{0} — mu submodel coefficients  \mathbb{R}^{1}
+- u\_{species(i)} — random intercept by species  scalar;
+  \mathbb{R}^{116} in matrix form
+- \sigma\_{species} — between-species standard deviation  scalar
+- \mathbf{A} — phylogenetic / pedigree correlation matrix on species
   (Hadfield-Nakagawa all-nodes sparse-precision representation, supplied
-  via ginverse)  $`\mathbb{R}^{k_{species} \times k_{species}}`$
+  via ginverse)  \mathbb{R}^{k\_{species} \times k\_{species}}
 
 **Where does the variation live?** Where the variation lives – each row
-is one source of variance, shown as a share of the total.
+is one variance component (shown as a share of the total when a single
+total variance is defined).
 
-    <div style="width:69.6%;background:#2c7fb8;color:#fff;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="species">species 69.6%</div>
-    <div style="width:30.4%;background:#d9d9d9;color:#333;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="Residual (within-group)">Residual (within-group) 30.4%</div>
+species 69.4%
 
-**ICC (data scale):** 0.696. Data-scale ICC: the share of total variance
+Residual (within-group) 30.6%
+
+**ICC (data scale):** 0.694. Data-scale ICC: the share of total variance
 that lies between groups – a genuine proportion of variance.
 
 Point estimates only; uncertainty not shown.
@@ -337,34 +324,32 @@ past chapter 4 switches to.
 
 Species are not independent observations. Closely related species tend
 to have similar trait values because of shared evolutionary history; the
-phylogenetic correlation matrix $`\mathbf{A}`$ encodes those expected
-similarities (cell $`A_{ij}`$ = fraction of shared branch length between
-species $`i`$ and $`j`$). The phylogenetic SD $`\sigma_p`$ measures how
-much across-species variation remains after fixed-effect predictors are
+phylogenetic correlation matrix \mathbf{A} encodes those expected
+similarities (cell A\_{ij} = fraction of shared branch length between
+species i and j). The phylogenetic SD \sigma_p measures how much
+across-species variation remains after fixed-effect predictors are
 accounted for.
 
-``` math
-\begin{aligned}
-\mathbf{zr} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} & \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2)) \\
-\boldsymbol{\mu} & = \mathbf{X} \boldsymbol{\beta} + \mathbf{u} \\
-\mathbf{u}_{species} & \sim \mathcal{N}(\mathbf{0},\, \sigma_{species}^2 \mathbf{A}_{116 \times 116})
-\end{aligned}
-```
+\begin{aligned} \mathbf{zr} \mid \boldsymbol{\mu},\\ \boldsymbol{\sigma}
+& \sim \mathcal{N}(\boldsymbol{\mu},\\
+\mathrm{diag}(\boldsymbol{\sigma}^2)) \\ \boldsymbol{\mu} & = \mathbf{X}
+\boldsymbol{\beta} + \mathbf{u} \\ \mathbf{u}\_{species} & \sim
+\mathcal{N}(\mathbf{0},\\ \sigma\_{species}^2 \mathbf{A}\_{116 \times
+116}) \end{aligned}
 
 where:
 
-- $`\mathbf{zr}`$ — response variable  $`\mathbb{R}^{60}`$
-- $`\boldsymbol{\mu}`$ — conditional mu of Zr  $`\mathbb{R}^{60}`$
-- $`\boldsymbol{\sigma}`$ — residual standard deviation of Zr  scalar
-- $`\boldsymbol{\beta}`$ — mu submodel coefficients  $`\mathbb{R}^{1}`$
-- $`\mathbf{X}`$ — mu submodel design matrix
-   $`\mathbb{R}^{60 \times 1}`$
-- $`\mathbf{u}_{species}`$ — random intercept by species  scalar;
-  $`\mathbb{R}^{116}`$ in matrix form
-- $`\sigma_{species}`$ — between-species standard deviation  scalar
-- $`\mathbf{A}`$ — phylogenetic / pedigree correlation matrix on species
+- \mathbf{zr} — response variable  \mathbb{R}^{60}
+- \boldsymbol{\mu} — conditional mu of Zr  \mathbb{R}^{60}
+- \boldsymbol{\sigma} — residual standard deviation of Zr  scalar
+- \boldsymbol{\beta} — mu submodel coefficients  \mathbb{R}^{1}
+- \mathbf{X} — mu submodel design matrix  \mathbb{R}^{60 \times 1}
+- \mathbf{u}\_{species} — random intercept by species  scalar;
+  \mathbb{R}^{116} in matrix form
+- \sigma\_{species} — between-species standard deviation  scalar
+- \mathbf{A} — phylogenetic / pedigree correlation matrix on species
   (Hadfield-Nakagawa all-nodes sparse-precision representation, supplied
-  via ginverse)  $`\mathbb{R}^{k_{species} \times k_{species}}`$
+  via ginverse)  \mathbb{R}^{k\_{species} \times k\_{species}}
 
 The same matrix equation, with your actual numbers stacked inside the
 brackets – what the computer multiplies. Showing first 5 and last 2 rows
@@ -372,10 +357,10 @@ of n = 60.
 
 Species are not independent observations. Closely related species tend
 to have similar trait values because of shared evolutionary history; the
-phylogenetic correlation matrix $`\mathbf{A}`$ encodes those expected
-similarities (cell $`A_{ij}`$ = fraction of shared branch length between
-species $`i`$ and $`j`$). The phylogenetic SD $`\sigma_p`$ measures how
-much across-species variation remains after fixed-effect predictors are
+phylogenetic correlation matrix \mathbf{A} encodes those expected
+similarities (cell A\_{ij} = fraction of shared branch length between
+species i and j). The phylogenetic SD \sigma_p measures how much
+across-species variation remains after fixed-effect predictors are
 accounted for.
 
 Matrix-form expansion of the model. Each row shows the response y_i and
@@ -386,24 +371,35 @@ also shown.
 
 For observation *i* = 1 of your data:
 
-``` math
-\begin{aligned}
-zr_{1} &= \hat\beta_{0} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
-\hat\mu_{1} &= 0.366 \approx 0.215 &\quad(\text{predicted mean} = \text{linear predictor}) \\
-zr_{1} &= \underbrace{0.215}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-0.0485)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,} &\quad(\text{observed} = \text{predicted mean} + \text{residual})
+\begin{aligned} zr\_{1} &= \hat\beta\_{0} + \hat{u}\_{1} +
+\hat\varepsilon\_{1} &\quad(\text{response equation, one row of the
+model}) \\ \hat\mu\_{1} &= 0.366 + (-0.151) \approx 0.215
+&\quad(\text{predicted mean} = \text{linear predictor}) \\ zr\_{1} &=
+\underbrace{0.215}\_{\textstyle\\\hat\mu\_{1}\\\text{(predicted)}\\}
+\\+\\
+\underbrace{(-0.0485)}\_{\textstyle\\\hat\varepsilon\_{1}\\\text{(residual)}\\}
+&\quad(\text{observed} = \text{predicted mean} + \text{residual})
 \end{aligned}
-```
 
 Stacking the same response equation for all *n* = 60 observations:
 
-``` math
-\underbrace{\begin{bmatrix} 0.166 \\ 1.12 \\ 0.66 \\ 1.05 \\ 0.676 \\ \vdots \\ 0.172 \\ 0.0853 \end{bmatrix}}_{\textstyle\,\mathbf{zr}_{\,60 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 \\    1 \\    1 \\    1 \\    1 \\ \vdots \\    1 \\    1 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,60 \times 1}\,}\, \underbrace{\begin{bmatrix} 0.366 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,1 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} -0.0485 \\ 0.351 \\ 0.057 \\ 0.289 \\ 0.285 \\ \vdots \\ -0.178 \\ -0.0958 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,60 \times 1}\;\text{(residual)}\,}
-```
+\underbrace{\begin{bmatrix} 0.166 \\ 1.12 \\ 0.66 \\ 1.05 \\ 0.676 \\
+\vdots \\ 0.172 \\ 0.0853
+\end{bmatrix}}\_{\textstyle\\\mathbf{zr}\_{\\60 \times
+1}\\\text{(observed)}\\} \\=\\ \underbrace{\begin{bmatrix} 1 \\ 1 \\ 1
+\\ 1 \\ 1 \\ \vdots \\ 1 \\ 1
+\end{bmatrix}}\_{\textstyle\\\mathbf{X}\_{\\60 \times 1}\\}\\
+\underbrace{\begin{bmatrix} 0.366
+\end{bmatrix}}\_{\textstyle\\\hat{\boldsymbol{\beta}}\_{\\1 \times
+1}\\\text{(estimated)}\\} \\+\\ \underbrace{\begin{bmatrix} -0.0485 \\
+0.351 \\ 0.0572 \\ 0.29 \\ 0.285 \\ \vdots \\ -0.178 \\ -0.0961
+\end{bmatrix}}\_{\textstyle\\\hat{\boldsymbol{\varepsilon}}\_{\\60
+\times 1}\\\text{(residual)}\\}
 
-**Left**: observed vector $`\mathbf{zr}`$. **Middle**: the prediction
-$`\mathbf{X}\hat{\boldsymbol{\beta}} + \hat{\mathbf{u}} = \hat{\boldsymbol{\mu}}`$.
-**Right**: the residual vector
-$`\hat{\boldsymbol{\varepsilon}} = \mathbf{zr} - \hat{\boldsymbol{\mu}}`$.
+**Left**: observed vector \mathbf{zr}. **Middle**: the prediction
+\mathbf{X}\hat{\boldsymbol{\beta}} + \hat{\mathbf{u}} =
+\hat{\boldsymbol{\mu}}. **Right**: the residual vector
+\hat{\boldsymbol{\varepsilon}} = \mathbf{zr} - \hat{\boldsymbol{\mu}}.
 Every row of this matrix equation is one of the response-equation rows
 from the worked row above.
 
@@ -416,14 +412,23 @@ hardest toward the overall mean.
 **And the structured-covariance prior on `u`**. The random effect that
 gives this model its structural-dependence character:
 
-``` math
-\mathrm{Cov}(\hat{\mathbf{u}}) \;=\; \sigma_p^2 \cdot \underbrace{\begin{bmatrix} 0.161 &    0 & 0.161 & 0.161 & 0.161 & \cdots &    0 &    0 \\    0 & 0.0946 &    0 &    0 &    0 & \cdots & 0.0946 & 0.0946 \\ 0.161 &    0 & 0.228 & 0.228 & 0.228 & \cdots &    0 &    0 \\ 0.161 &    0 & 0.228 & 0.298 & 0.298 & \cdots &    0 &    0 \\ 0.161 &    0 & 0.228 & 0.298 & 0.565 & \cdots &    0 &    0 \\ \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\    0 & 0.0946 &    0 &    0 &    0 & \cdots &    1 & 0.867 \\    0 & 0.0946 &    0 &    0 &    0 & \cdots & 0.867 &    1 \end{bmatrix}}_{\textstyle\,\mathbf{A}_{\,116 \times 116}\,}
-```
+\mathrm{Cov}(\hat{\mathbf{u}}) \\=\\ \sigma_p^2 \cdot
+\underbrace{\begin{bmatrix} 0.161 & 0 & 0.161 & 0.161 & 0.161 & \cdots &
+0 & 0 \\ 0 & 0.0913 & 0 & 0 & 0 & \cdots & 0.0913 & 0.0913 \\ 0.161 & 0
+& 0.227 & 0.227 & 0.227 & \cdots & 0 & 0 \\ 0.161 & 0 & 0.227 & 0.297 &
+0.297 & \cdots & 0 & 0 \\ 0.161 & 0 & 0.227 & 0.297 & 0.564 & \cdots & 0
+& 0 \\ \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots &
+\vdots \\ 0 & 0.0913 & 0 & 0 & 0 & \cdots & 1 & 0.866 \\ 0 & 0.0913 & 0
+& 0 & 0 & \cdots & 0.866 & 1
+\end{bmatrix}}\_{\textstyle\\\mathbf{A}\_{\\116 \times 116}\\}
 
-The phylo random effect $`u`$ has covariance
-$`\sigma_p^2 \cdot \mathbf{A}`$, where $`\mathbf{A}`$ is the 116 × 116
-phylogenetic correlation matrix. Showing the head + tail rows / columns;
-full matrix is 116 × 116.
+The phylo random effect u has covariance \sigma_p^2 \cdot \mathbf{A},
+where \mathbf{A} is the 116 × 116 augmented phylogenetic **covariance**
+matrix (tips and internal nodes, the Hadfield–Nakagawa all-nodes
+representation). Its diagonal is *not* all 1: the leading rows shown
+here are internal nodes, whose self-covariance is \< 1 under all-nodes
+scaling; only the tip rows have unit diagonal. Showing the head + tail
+rows / columns; full matrix is 116 × 116.
 
 [Download as
 PDF](https://itchyshin.github.io/symbolizer/articles/fig-mcmc-phylo.pdf)
@@ -466,14 +471,17 @@ sym_brms$variance_components             # species + residual
 
 | parameter | group    | term        | sd_estimate | var_estimate |
 |:----------|:---------|:------------|:------------|:-------------|
-| mu        | species  | (Intercept) | 0.364       | 0.132        |
-| residual  | residual | Residual    | 0.170       | 0.0289       |
+| mu        | species  | (Intercept) | 0.341       | 0.117        |
+| residual  | residual | Residual    | 0.184       | 0.0337       |
 
 `symbolizer` reports `phylo_representation = "tips_only"` because `brms`
-works directly with the $`k \times k`$ tips-only $`\mathbf A`$ — no
+works directly with the k \times k tips-only \mathbf A — no
 internal-node augmentation. Compare with the MCMCglmm Face above where
 `phylo_representation = "all_nodes"`; the variance estimate
-$`\hat\sigma_p^2`$ is the same in expectation.
+\hat\sigma_p^2 is the same in expectation — the roughly 28 % Monte-Carlo
+gap between the two fits here (and the matching gap in \hat H^2)
+reflects short chains and differing default priors, not a difference in
+the underlying model.
 
 ``` r
 
@@ -482,46 +490,38 @@ assumption_table(sym_brms)
 
 | assumption | expression | biological meaning | status |
 |:---|:---|:---|:---|
-| conditional_distribution | $`\mathrm{Zr}_i \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2)`$ | Zr varies normally around its expected value | explicit |
-| linear_predictor | $`\mu_i = \beta_0 + \sum_k \beta_k X_{ki}`$ | Expected Zr is a linear combination of the mean-model predictors | explicit |
-| linear_predictor | $`\log(\sigma_i) = \gamma_0 + \sum_k \gamma_k Z_{ki}`$ | Log residual SD of Zr is a linear combination of the scale-model predictors | explicit |
-| independence_given_random_effects | $`\mathrm{Zr}_i \perp \mathrm{Zr}_j \mid X\, \mathbf{u} \text{ for } i \ne j`$ | Observations are conditionally independent given the predictors and the random effects | explicit |
-| positivity | $`\sigma_i > 0`$ | Residual SD is constrained positive via the log link | follows from the formula |
+| conditional_distribution | \mathrm{Zr}\_i \mid \mu_i,\\ \sigma_i \sim \mathrm{Normal}(\mu_i,\\ \sigma_i^2) | Zr varies normally around its expected value | explicit |
+| linear_predictor | \mu_i = \beta_0 + \sum_k \beta_k X\_{ki} | Expected Zr is a linear combination of the mean-model predictors | explicit |
+| independence_given_random_effects | \mathrm{Zr}\_i \perp \mathrm{Zr}\_j \mid X\\ \mathbf{u} \text{ for } i \ne j | Observations are conditionally independent given the predictors and the random effects | explicit |
 | no_missing_at_random | — | Observations are assumed not missing in a way that depends on the unobserved response | your responsibility |
-| phylo_random_effect | $`\mathbf{u}_p \sim \mathcal{N}(\mathbf{0}, \sigma_p^2 \mathbf{A})`$ | Species-level random effect with covariance proportional to the phylogenetic correlation matrix A | explicit |
-| phylo_A_positive_definite | $`\mathbf{A} \succ 0`$ | A is positive-definite k x k phylogenetic correlation matrix derived from a rooted tree under Brownian motion | follows from the formula |
-| phylo_tips_only_representation | $`A_{ij} = T_{ij}/T`$ | Tips-only k x k representation: A\_{ij} is shared branch length between species i and j divided by total tree height (Hadfield 2010) | follows from the formula |
-| phylo_brownian_motion | $`\mathrm{Var}(u_p) \propto \mathrm{time}`$ | Brownian motion prior: phylogenetic variance accumulates linearly with branch length | your responsibility |
+| phylo_random_effect | \mathbf{u}\_p \sim \mathcal{N}(\mathbf{0}, \sigma_p^2 \mathbf{A}) | Species-level random effect with covariance proportional to the phylogenetic correlation matrix A | explicit |
+| phylo_A_positive_definite | \mathbf{A} \succ 0 | A is positive-definite k \times k phylogenetic correlation matrix derived from a rooted tree under Brownian motion | follows from the formula |
+| phylo_tips_only_representation | A\_{ij} = T\_{ij}/T | Tips-only k \times k representation: A\_{ij} is shared branch length between species i and j divided by total tree height (Hadfield 2010) | follows from the formula |
+| phylo_brownian_motion | \mathrm{Var}(u_p) \propto \mathrm{time} | Brownian motion prior: phylogenetic variance accumulates linearly with branch length | your responsibility |
 | phylo_ultrametric_tree | — | Tree is ultrametric – non-ultrametric trees still produce a valid A but break the strict Brownian-motion variance interpretation | your responsibility |
 
 ### Face 3 (light): `phylolm::phylolm()` — the marginal PGLS form
 
 `phylolm` (Ho & Ané 2014) fits the same conceptual model in a
-*marginalised* form: instead of writing $`y = \beta_0 + u_p + e`$ with
-two separate variance components, `phylolm` absorbs $`u_p`$ into the
-residual to give
+*marginalised* form: instead of writing y = \beta_0 + u_p + e with two
+separate variance components, `phylolm` absorbs u_p into the residual to
+give
 
-``` math
-\mathrm{Zr}_i \;=\; \beta_0 + e'_i,\quad
-\mathbf e' \sim \mathcal N(\mathbf 0,\; \sigma^2\,\mathbf C(\alpha))
-```
+\mathrm{Zr}\_i \\=\\ \beta_0 + e'\_i,\quad \mathbf e' \sim \mathcal
+N(\mathbf 0,\\ \sigma^2\\\mathbf C(\alpha))
 
-where $`\mathbf C(\alpha)`$ is a tree-derived correlation matrix. For
-Pagel’s $`\lambda`$ model the connection to the RE form is precise:
+where \mathbf C(\alpha) is a tree-derived correlation matrix. For
+Pagel’s \lambda model the connection to the RE form is precise:
 
-``` math
-\mathbf C(\lambda) = \lambda\,\mathbf A + (1 - \lambda)\,\mathbf I,
-\qquad
-\sigma_p^2 = \lambda\,\sigma^2,
-\qquad
-\sigma_e^2 = (1 - \lambda)\,\sigma^2.
-```
+\mathbf C(\lambda) = \lambda\\\mathbf A + (1 - \lambda)\\\mathbf I,
+\qquad \sigma_p^2 = \lambda\\\sigma^2, \qquad \sigma_e^2 = (1 -
+\lambda)\\\sigma^2.
 
-So $`\lambda = \sigma_p^2 / (\sigma_p^2 + \sigma_e^2)`$ — the
-**phylogenetic heritability** $`H^2`$ from § “Animal-model unification”
-— and the two parameterisations agree on every prediction. `phylolm`’s
-advantage is speed: a closed-form ML fit in a fraction of a second
-instead of Stan’s compile + sample.
+So \lambda = \sigma_p^2 / (\sigma_p^2 + \sigma_e^2) — the **phylogenetic
+heritability** H^2 from § “Animal-model unification” — and the two
+parameterisations agree on every prediction. `phylolm`’s advantage is
+speed: a closed-form ML fit in a fraction of a second instead of Stan’s
+compile + sample.
 
 ``` r
 
@@ -539,15 +539,15 @@ sym_pl$metadata$phylo_representation   # "pgls_marginal"
 sym_pl$metadata$phylo_model            # "lambda"
 #> [1] "lambda"
 sym_pl$metadata$phylo_param            # estimated lambda
-#> [1] 0.7631645
-sym_pl$metadata$detected_signals       # "phylo"
-#> [1] "phylo"
+#> [1] 0.7617321
+sym_pl$metadata$detected_signals       # "phylo_marginal"
+#> [1] "phylo_marginal"
 sym_pl$variance_components             # single sigma^2 row
 ```
 
 | parameter | group | term                   | sd_estimate | var_estimate |
 |:----------|:------|:-----------------------|:------------|:-------------|
-| residual  | phylo | sigma^2 (phylogenetic) | 0.376       | 0.141        |
+| residual  | phylo | sigma^2 (phylogenetic) | 0.375       | 0.141        |
 
 ``` r
 
@@ -557,40 +557,39 @@ summary(fit_pl)
 #> phylolm(formula = Zr ~ 1, data = dat_pl, phy = tree, model = "lambda")
 #> 
 #>    AIC logLik 
-#>  27.13 -10.57 
+#>  27.12 -10.56 
 #> 
 #> Raw residuals:
 #>      Min       1Q   Median       3Q      Max 
-#> -0.51914 -0.23479 -0.12683  0.05359  1.20643 
+#> -0.51918 -0.23483 -0.12687  0.05356  1.20640 
 #> 
 #> Mean tip height: 1
 #> Parameter estimate(s) using ML:
-#> lambda : 0.7631645
-#> sigma2: 0.141141 
+#> lambda : 0.7617321
+#> sigma2: 0.1405798 
 #> 
 #> Coefficients:
-#>             Estimate  StdErr t.value  p.value   
-#> (Intercept)  0.38077 0.13955  2.7285 0.008369 **
+#>             Estimate  StdErr t.value p.value   
+#> (Intercept)  0.38081 0.13881  2.7434 0.00804 **
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #> 
 #> R-squared:     0 Adjusted R-squared:     0 
 #> 
-#> Note: p-values and R-squared are conditional on lambda=0.7631645.
+#> Note: p-values and R-squared are conditional on lambda=0.7617321.
 ```
 
-The bridge with the RE form: take the estimated $`\hat\sigma^2`$ and
-$`\hat\lambda`$ from the summary above, then
-$`\hat\sigma_p^2 = \hat\lambda\,\hat\sigma^2`$ and
-$`\hat\sigma_e^2 = (1-\hat\lambda)\,\hat\sigma^2`$. With this dataset,
-those reconciled values agree with the MCMCglmm estimates on the
-phylogenetic variance to within a couple of percent, but the residual
-variance $`\sigma_e^2`$ can differ by 20–30 % across the three packages
-— the variance *split* is weakly identified when there is one
-observation per species (see § “When unification breaks:
-identifiability” below). The total $`\hat\sigma_p^2 + \hat\sigma_e^2`$
-and the heritability $`\hat H^2 = \hat\lambda`$ are more stable than
-either component on its own.
+The bridge with the RE form: take the estimated \hat\sigma^2 and
+\hat\lambda from the summary above, then \hat\sigma_p^2 =
+\hat\lambda\\\hat\sigma^2 and \hat\sigma_e^2 =
+(1-\hat\lambda)\\\hat\sigma^2. With this dataset, those reconciled
+values agree with the MCMCglmm estimates on the phylogenetic variance to
+within a couple of percent, but the residual variance \sigma_e^2 can
+differ by 20–30 % across the three packages — the variance *split* is
+weakly identified when there is one observation per species (see § “When
+unification breaks: identifiability” below). The total \hat\sigma_p^2 +
+\hat\sigma_e^2 and the heritability \hat H^2 = \hat\lambda are more
+stable than either component on its own.
 
 ``` r
 
@@ -599,24 +598,24 @@ assumption_table(sym_pl)
 
 | assumption | expression | biological meaning | status |
 |:---|:---|:---|:---|
-| conditional_distribution | $`\mathrm{Zr}_i \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2)`$ | Zr varies normally around its expected value | explicit |
-| linear_predictor | $`\mu_i = \beta_0 + \sum_k \beta_k X_{ki}`$ | Expected Zr is a linear combination of the mean-model predictors | explicit |
-| linear_predictor | $`\log(\sigma_i) = \gamma_0 + \sum_k \gamma_k Z_{ki}`$ | Log residual SD of Zr is a linear combination of the scale-model predictors | explicit |
-| independence | $`\mathrm{Zr}_i \perp \mathrm{Zr}_j \mid X \text{ for } i \ne j`$ | Observations are conditionally independent given the predictors | follows from the formula |
-| positivity | $`\sigma_i > 0`$ | Residual SD is constrained positive via the log link | follows from the formula |
+| conditional_distribution | \mathrm{Zr}\_i \mid \mu_i,\\ \sigma_i \sim \mathrm{Normal}(\mu_i,\\ \sigma_i^2) | Zr varies normally around its expected value | explicit |
+| linear_predictor | \mu_i = \beta_0 + \sum_k \beta_k X\_{ki} | Expected Zr is a linear combination of the mean-model predictors | explicit |
 | no_missing_at_random | — | Observations are assumed not missing in a way that depends on the unobserved response | your responsibility |
-| phylo_random_effect | $`\mathbf{u}_p \sim \mathcal{N}(\mathbf{0}, \sigma_p^2 \mathbf{A})`$ | Species-level random effect with covariance proportional to the phylogenetic correlation matrix A | explicit |
-| phylo_A_positive_definite | $`\mathbf{A} \succ 0`$ | A is positive-definite k x k phylogenetic correlation matrix derived from a rooted tree under Brownian motion | follows from the formula |
-| phylo_tips_only_representation | $`A_{ij} = T_{ij}/T`$ | Tips-only k x k representation: A\_{ij} is shared branch length between species i and j divided by total tree height (Hadfield 2010) | follows from the formula |
-| phylo_brownian_motion | $`\mathrm{Var}(u_p) \propto \mathrm{time}`$ | Brownian motion prior: phylogenetic variance accumulates linearly with branch length | your responsibility |
-| phylo_ultrametric_tree | — | Tree is ultrametric – non-ultrametric trees still produce a valid A but break the strict Brownian-motion variance interpretation | your responsibility |
+| pgls_marginal_distribution | \mathbf{y} \mid \boldsymbol{\beta},\\ \sigma_p^2 \sim \mathcal{N}(\mathbf{X} \boldsymbol{\beta},\\ \sigma_p^2 \mathbf{A}) | Zr follows a multivariate normal with mean \mathbf{X}\boldsymbol{\beta} and a DENSE phylogenetic residual covariance (PGLS marginal form). Under Brownian motion that covariance is \sigma_p^2\mathbf{A}; under Pagel’s \lambda it is \sigma_p^2\[\lambda\mathbf{A} + (1-\lambda)\mathbf{I}\] – \lambda scales the phylogenetic off-diagonals while leaving the diagonal at \sigma_p^2. Either way the residuals are not independent across species. | explicit |
+| phylo_residual_covariance | \mathbf{e} \sim \mathcal{N}(\mathbf{0},\\ \sigma_p^2 \mathbf{A}),\quad \mathbf{y} = \mathbf{X} \boldsymbol{\beta} + \mathbf{e} | The phylogenetic signal lives entirely in the residual covariance: phylolm marginalises the species effect into \mathbf{e}, so \mathrm{Cov}(\mathbf{e}) = \sigma_p^2\mathbf{A} (under BM) or \sigma_p^2\[\lambda\mathbf{A} + (1-\lambda)\mathbf{I}\] (under Pagel’s \lambda) rather than a separate u_p random-effect tier. | explicit |
+| phylo_marginal_A_positive_definite | \mathbf{A} \succ 0 | \mathbf{A} is the positive-definite k \times k phylogenetic correlation matrix derived from the rooted tree. Under BM the residual covariance is \sigma_p^2\mathbf{A}; under Pagel’s \lambda it is \sigma_p^2\[\lambda\mathbf{A} + (1-\lambda)\mathbf{I}\]. | follows from the formula |
+| phylo_marginal_brownian_motion | \mathrm{Cov}(e_i\\ e_j) = \sigma_p^2 A\_{ij} \propto \text{shared branch length} | Brownian motion: residual covariance between two species is proportional to their shared evolutionary history (branch length). If OU / EB / kappa / delta is intended, refit with that correlation structure – the marginalization-bridge prose is calibrated to BM and Pagel’s lambda | your responsibility |
+| phylo_marginal_ultrametric_tree | — | Tree is ultrametric (all tips equidistant from the root); non-ultrametric trees still give a valid A but break the strict Brownian-motion variance interpretation | your responsibility |
 
 The cross-package agreement story is the point: every fit above attaches
-the same conceptual object — a phylogenetic correlation matrix
-$`\mathbf A`$ — even though the syntactic surface differs (RE bar in
-`MCMCglmm` and `brms`, marginalised residual covariance in `phylolm`).
-`symbolizer` produces the same `metadata$detected_signals = "phylo"`,
-the same symbol-dictionary row for $`\mathbf A`$, the same gated
+the same conceptual object — a phylogenetic correlation matrix \mathbf A
+— even though the syntactic surface differs (RE bar in `MCMCglmm` and
+`brms`, marginalised residual covariance in `phylolm`). The RE-form fits
+(`MCMCglmm`, `brms`) report `metadata$detected_signals = "phylo"`;
+`phylolm` reports `"phylo_marginal"`, the marginal-form variant of the
+same phylogenetic signal (it absorbs u_p into the residual, so there is
+no separate u_p tier to label). Either way `symbolizer` attaches the
+same symbol-dictionary row for \mathbf A and gates the matching
 phylogenetic assumption rows, no matter which parameterisation fitted
 the model.
 
@@ -624,23 +623,21 @@ the model.
 
 The phylogenetic random effect is the **same mathematical object** as
 the additive-genetic random effect in a quantitative-genetics animal
-model. The matrix $`\mathbf A`$ comes from a different source (a
-pedigree of dam-sire-offspring rather than a phylogenetic tree), but its
-meaning in the model is identical:
+model. The matrix \mathbf A comes from a different source (a pedigree of
+dam-sire-offspring rather than a phylogenetic tree), but its meaning in
+the model is identical:
 
-``` math
-\mathbf u_p \;\sim\; \mathcal N(\mathbf 0, \sigma_p^2\,\mathbf A),\qquad
-h^2 \;=\; \frac{\sigma_p^2}{\sigma_p^2 + \sigma_e^2}.
-```
+\mathbf u_p \\\sim\\ \mathcal N(\mathbf 0, \sigma_p^2\\\mathbf A),\qquad
+h^2 \\=\\ \frac{\sigma_p^2}{\sigma_p^2 + \sigma_e^2}.
 
 (The quantitative-genetics literature often writes the same quantities
-as $`\mathbf u_a`$, $`\sigma_A^2`$, and $`\sigma_E^2`$ — the “A” / “E”
-letters stand for *additive* and *environmental*. This article uses
-$`p`$ / $`e`$ throughout for consistency; the conversion is purely
-cosmetic.) The interpretation of $`\sigma_p^2`$ differs by domain: it’s
-*phylogenetic* variance among species in a phylogenetic comparative
-method, *additive genetic* variance among individuals in a
-quantitative-genetics animal model. `symbolizer`’s
+as \mathbf u_a, \sigma_A^2, and \sigma_E^2 — the “A” / “E” letters stand
+for *additive* and *environmental*. This article uses p / e throughout
+for consistency; the conversion is purely cosmetic.) The interpretation
+of \sigma_p^2 differs by domain: it’s *phylogenetic* variance among
+species in a phylogenetic comparative method, *additive genetic*
+variance among individuals in a quantitative-genetics animal model.
+`symbolizer`’s
 [`symbolize.MCMCglmm()`](https://itchyshin.github.io/symbolizer/reference/symbolize.MCMCglmm.md)
 handles both via the same `ginverse` detection branch, and `drmTMB`
 ships separate `phylo(term, tree)` and `animal(term, pedigree)` markers
@@ -662,32 +659,31 @@ correlation matrix has all the data information? Three reasons:
     ancestral character states.
 2.  **Numerical efficiency on large trees**. The all-nodes A-inverse is
     *sparse* (each internal node connects to its parent and children
-    only). Inverting the tips-only $`k \times k`$ matrix is
-    $`\mathcal O(k^3)`$; the sparse A-inverse path is much faster for
-    $`k > \sim 200`$.
+    only). Inverting the tips-only k \times k matrix is \mathcal O(k^3);
+    the sparse A-inverse path is much faster for k \> \sim 200.
 3.  **Partial observations**. If some species have measured traits and
     others are unobserved (but on the tree), the all-nodes form handles
     this naturally.
 
 On a balanced setup with all species observed, both representations give
-the same $`\hat\sigma_p^2`$ to machine precision — the Hadfield-Nakagawa
+the same \hat\sigma_p^2 to machine precision — the Hadfield-Nakagawa
 equivalence.
 
 ## Spatial: same grammar, different matrix
 
-For spatial dependence, $`\mathbf M`$ is built from pairwise geographic
+For spatial dependence, \mathbf M is built from pairwise geographic
 distances and a kernel. The standard choices are:
 
-| Kernel | Formula | Decay |
-|----|----|----|
-| Exponential | $`C(d) = \exp(-d/\rho)`$ | Power |
-| Squared-exponential (Gaussian) | $`C(d) = \exp(-d^2/\rho^2)`$ | Sharp |
-| Matérn | $`C(d; \kappa, \nu)`$ | Tunable smoothness |
+| Kernel                         | Formula                  | Decay              |
+|--------------------------------|--------------------------|--------------------|
+| Exponential                    | C(d) = \exp(-d/\rho)     | Power              |
+| Squared-exponential (Gaussian) | C(d) = \exp(-d^2/\rho^2) | Sharp              |
+| Matérn                         | C(d; \kappa, \nu)        | Tunable smoothness |
 
 Two fits *illustrate* the structurally identical grammar with
-$`\boldsymbol\Omega`$ in place of $`\mathbf A`$ — these are
-**pseudocode** (the spatial demo data + mesh would be set up in a
-separate spatial article, not here):
+\boldsymbol\Omega in place of \mathbf A — these are **pseudocode** (the
+spatial demo data + mesh would be set up in a separate spatial article,
+not here):
 
 ``` r
 
@@ -718,13 +714,11 @@ The unification works mathematically, but practical inference depends on
 the data. When you stack a phylogenetic tier and a non-phylogenetic
 species-level tier on the same grouping column,
 
-``` math
-y_i = \beta_0 + u_{p_{k[i]}} + u_{s_{k[i]}} + e_i,\qquad
-u_p \sim \mathcal N(0, \sigma_p^2 \mathbf A),\quad
-u_s \sim \mathcal N(0, \sigma_s^2 \mathbf I),
-```
+y_i = \beta_0 + u\_{p\_{k\[i\]}} + u\_{s\_{k\[i\]}} + e_i,\qquad u_p
+\sim \mathcal N(0, \sigma_p^2 \mathbf A),\quad u_s \sim \mathcal N(0,
+\sigma_s^2 \mathbf I),
 
-the variance components $`\sigma_p^2`$ and $`\sigma_s^2`$ are *weakly
+the variance components \sigma_p^2 and \sigma_s^2 are *weakly
 identified*: their sum is precisely estimable but the split between them
 is not (Hadfield & Nakagawa 2010 §3.2; Mizuno et al. 2026 §4). With
 strong phylogenetic signal (Pagel’s λ near 1) the split is informative;
@@ -737,16 +731,15 @@ resolve.
 ## Forward links
 
 - **v0.22 — Phylogenetic meta-analysis (Mizuno et al. 2026)**. This
-  article fits the general phylo-GLMM with $`\sigma_e^2`$*estimated*.
-  The meta-analytic case where the sampling variance $`v_i`$ is
-  **known** per study is its own surface — `metafor::rma.mv(V = V, ...)`
-  is the canonical interface, with `glmmTMB::equalto` (reserved) and
+  article fits the general phylo-GLMM with \sigma_e^2 *estimated*. The
+  meta-analytic case where the sampling variance v_i is **known** per
+  study is its own surface — `metafor::rma.mv(V = V, ...)` is the
+  canonical interface, with `glmmTMB::equalto` (reserved) and
   `brms::se(sqrt(vi))` as bridges.
-- **v0.24 — Location-scale on $`\mathbf M`$ (Nakagawa et al. 2025
-  *MEE*)**. The dependence parameter itself can have a submodel:
-  $`\sigma_p \sim z`$ across clades, $`\rho \sim z`$ across
-  environments. Symbolizer’s drmTMB extractor is the right home for the
-  phylogenetic location-scale model.
+- **v0.24 — Location-scale on \mathbf M (Nakagawa et al. 2025 *MEE*)**.
+  The dependence parameter itself can have a submodel: \sigma_p \sim z
+  across clades, \rho \sim z across environments. Symbolizer’s drmTMB
+  extractor is the right home for the phylogenetic location-scale model.
 - **drmTMB deep dives**:
   [`vignette("phylogenetic-models", package = "drmTMB")`](https://itchyshin.github.io/drmTMB/articles/phylogenetic-models.html),
   [`vignette("animal-models", package = "drmTMB")`](https://itchyshin.github.io/drmTMB/articles/animal-models.html),

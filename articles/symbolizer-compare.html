@@ -11,7 +11,8 @@
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
 <link rel="icon" sizes="any" href="../favicon.ico">
 <link rel="manifest" href="../site.webmanifest">
-<script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<!-- katex math --><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" integrity="sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script><script src="../katex-auto.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
@@ -331,9 +332,11 @@ reduced: <code>log(food)</code> disappears from the mu submodel and
 section quantifies the cost: the full model uses more df but pays that
 back in log-likelihood; AIC and BIC pick the model that balances the
 two.</p>
-<p><code>delta = right - left</code>. A negative AIC delta means the
-<em>right</em> fit (here, the reduced model) has lower AIC than the
-<em>left</em> (here, the full model). Read the sign before you read the
+<p><code>delta = right - left</code>, so the sign tells you which fit
+AIC prefers: a <strong>negative</strong> delta means the <em>right</em>
+fit (here, the reduced model) has the lower — better — AIC; a
+<strong>positive</strong> delta means the <em>left</em> fit (the full
+model) does. Read the sign of the delta column above before you read the
 magnitude.</p>
 <p><strong>Takeaway.</strong> Same data, same family — pass
 <code>metrics = TRUE</code> and read the delta column to do model
@@ -536,8 +539,10 @@ independence assumption is in force.</p>
 an <code>independence</code> row (status <code>implied</code>). The
 right fit drops that row and adds an
 <code>independence_given_random_effects</code> row (status
-<code>stated</code>). <code>compare_symbolic</code> marks the change
-with <code>*</code> in the print output and surfaces both rows.</p></li>
+<code>stated</code>). <code>compare_symbolic</code> surfaces both rows
+and marks them as differing — at the console <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> adds a
+<code>*</code>; in this knitted table the change shows as
+<code>same_status</code> = <code>FALSE</code>.</p></li>
 <li><p><strong>The Metrics section quantifies the random-intercept
 cost.</strong> Adding <code>(1 | site)</code> uses one extra df (the
 variance of the site intercept). Whether it’s worth it depends on the
@@ -875,8 +880,7 @@ didn’t converge, the structural diff is misleading.</li>
 <code><a href="https://itchyshin.github.io/drmTMB/reference/check_drm.html" class="external-link">check_drm()</a></code> for Hessian-rank diagnostics on drmTMB; for
 gllvmTMB latent-variable models,
 <code><a href="../articles/symbolizer-gllvm.html">vignette("symbolizer-gllvm")</a></code> Section 7 covers the
-rotation-and-sign identifiability of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝚲</mi><mi>B</mi></msub><annotation encoding="application/x-tex">\boldsymbol{\Lambda}_B</annotation></semantics></math>.</li>
+rotation-and-sign identifiability of <span class="math inline">\boldsymbol{\Lambda}_B</span>.</li>
 <li>
 <strong>“Which coefficients changed by how much?”</strong> — that’s
 a coefficient-level numeric question. Use

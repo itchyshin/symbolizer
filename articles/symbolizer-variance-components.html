@@ -11,7 +11,8 @@
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
 <link rel="icon" sizes="any" href="../favicon.ico">
 <link rel="manifest" href="../site.webmanifest">
-<script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<!-- katex math --><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" integrity="sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script><script src="../katex-auto.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
@@ -81,9 +82,7 @@ the total variation into a <em>between-group</em> part and a
 reports that split, and <code><a href="../reference/icc.html">icc()</a></code> reports the
 <strong>intraclass correlation</strong>: the share of variation that is
 between groups. For repeated measurements of the same individuals, the
-ICC is exactly the <strong>repeatability</strong>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>R</mi><annotation encoding="application/x-tex">R</annotation></semantics></math>
-– the quantity the <a href="https://cran.r-project.org/package=rptR" class="external-link">rptR</a> package was
+ICC is exactly the <strong>repeatability</strong> <span class="math inline">R</span> – the quantity the <a href="https://cran.r-project.org/package=rptR" class="external-link">rptR</a> package was
 built to estimate (Nakagawa &amp; Schielzeth 2010; Stoffel, Nakagawa
 &amp; Schielzeth 2017).</p>
 <p>This vignette uses ordinary GLMMs from <code>lme4</code> and
@@ -118,8 +117,8 @@ one row per source, as a share of the total:</p>
 <div class="sym-vc-panel">
 <p class="sym-caption">
 <strong>Where does the variation live?</strong> Where the variation
-lives – each row is one source of variance, shown as a share of the
-total.
+lives – each row is one variance component (shown as a share of the
+total when a single total variance is defined).
 </p>
 <div class="sym-vc-bar sym-vc-stacked" role="img" aria-label="variance partition" style="display:flex;width:100%;height:1.8rem;border-radius:4px;overflow:hidden;font-size:0.78rem;line-height:1.8rem;margin:0.4rem 0">
 <div style="width:69.4%;background:#2c7fb8;color:#fff;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="ind">
@@ -214,10 +213,9 @@ binomial GLMM with a <code>(1 | nest)</code> random intercept.</p>
 <span><span class="va">sym_b</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/symbolize.html">symbolize</a></span><span class="op">(</span><span class="va">fit_b</span><span class="op">)</span></span></code></pre></div>
 <p>For a binomial model there is no residual variance on the observed
 0/1 scale. The model lives on the <strong>latent (logit) scale</strong>,
-where the residual variance is the known constant
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>π</mi><mn>2</mn></msup><mi>/</mi><mn>3</mn></mrow><annotation encoding="application/x-tex">\pi^2/3</annotation></semantics></math>.
-So <code><a href="../reference/icc.html">icc()</a></code> reports a <strong>latent-scale</strong> ICC, and
-labels it as such – with the caption that keeps you honest:</p>
+where the residual variance is the known constant <span class="math inline">\pi^2/3</span>. So <code><a href="../reference/icc.html">icc()</a></code> reports a
+<strong>latent-scale</strong> ICC, and labels it as such – with the
+caption that keeps you honest:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/icc.html">icc</a></span><span class="op">(</span><span class="va">sym_b</span><span class="op">)</span></span></code></pre></div>
 <div class="sym-vc-panel">
@@ -233,8 +231,7 @@ survive, <strong>not</strong> a proportion of variance in the realized
 0/1 outcome. <code>symbolizer</code> refuses to pretend otherwise.</p>
 <p><strong>Takeaway.</strong> Proportion and binary data get a
 repeatability too – but on the latent scale, with the residual fixed at
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>π</mi><mn>2</mn></msup><mi>/</mi><mn>3</mn></mrow><annotation encoding="application/x-tex">\pi^2/3</annotation></semantics></math>
-(logit) or 1 (probit).</p>
+<span class="math inline">\pi^2/3</span> (logit) or 1 (probit).</p>
 </div>
 <div class="section level2">
 <h2 id="the-same-reading-from-a-different-engine-glmmtmb">3. The same reading from a different engine:

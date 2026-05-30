@@ -112,25 +112,19 @@ sym <- symbolize(
 the index form above and the matrix form below. On GitHub and pkgdown,
 it renders as:
 
-``` math
-\begin{aligned}
-W_i \mid \mu_i,\, \sigma_i & \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
-\mu_i & = \beta_{0} + \beta_{1} \, T_i \\
-\log(\sigma_i) & = \gamma_{0} + \gamma_{1} \, T_i
+\begin{aligned} W_i \mid \mu_i,\\ \sigma_i & \sim
+\mathrm{Normal}(\mu_i,\\ \sigma_i^2) \\ \mu_i & = \beta\_{0} +
+\beta\_{1} \\ T_i \\ \log(\sigma_i) & = \gamma\_{0} + \gamma\_{1} \\ T_i
 \end{aligned}
-```
 
-``` math
-\begin{aligned}
-\mathbf{w} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} & \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2)) \\
-\boldsymbol{\mu} & = \mathbf{X} \boldsymbol{\beta} \\
-\log(\boldsymbol{\sigma}) & = \mathbf{Z} \boldsymbol{\gamma}
-\end{aligned}
-```
+\begin{aligned} \mathbf{w} \mid \boldsymbol{\mu},\\ \boldsymbol{\sigma}
+& \sim \mathcal{N}(\boldsymbol{\mu},\\
+\mathrm{diag}(\boldsymbol{\sigma}^2)) \\ \boldsymbol{\mu} & = \mathbf{X}
+\boldsymbol{\beta} \\ \log(\boldsymbol{\sigma}) & = \mathbf{Z}
+\boldsymbol{\gamma} \end{aligned}
 
-Bold lowercase letters are vectors ($`\mathbf{w}`$,
-$`\boldsymbol{\beta}`$); bold uppercase letters are matrices
-($`\mathbf{X}`$, $`\mathbf{Z}`$).
+Bold lowercase letters are vectors (\mathbf{w}, \boldsymbol{\beta});
+bold uppercase letters are matrices (\mathbf{X}, \mathbf{Z}).
 
 ### The symbol dictionary
 
@@ -144,14 +138,14 @@ symbol_table(sym, notation = "both")
 
 | index | matrix | variable | units | role | shape | concrete | description |
 |:---|:---|:---|:---|:---|:---|:---|:---|
-| $`W_i`$ | $`\mathbf{w}`$ | body_mass | g | response | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ | response variable |
-| $`T_i`$ | — | temperature | C | predictor | column of design matrix | column of X (length 200) | continuous predictor |
-| $`\mu_i`$ | $`\boldsymbol{\mu}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ | conditional mu of body_mass |
-| $`\sigma_i`$ | $`\boldsymbol{\sigma}`$ | NA | NA | parameter | $`\mathbb{R}^n`$ | $`\mathbb{R}^{200}`$ | conditional sigma of body_mass |
-| $`\beta_{0}, \beta_{1}`$ | $`\boldsymbol{\beta}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\mu}`$ | $`\mathbb{R}^{2}`$ | mu submodel coefficients |
-| $`\gamma_{0}, \gamma_{1}`$ | $`\boldsymbol{\gamma}`$ | NA | NA | coefficient | $`\mathbb{R}^{p_\sigma}`$ | $`\mathbb{R}^{2}`$ | sigma submodel coefficients |
-| — | $`\mathbf{X}`$ | NA | NA | design_matrix | $`\mathbb{R}^{n \times p_\mu}`$ | $`\mathbb{R}^{200 \times 2}`$ | mu submodel design matrix |
-| — | $`\mathbf{Z}`$ | NA | NA | design_matrix | $`\mathbb{R}^{n \times p_\sigma}`$ | $`\mathbb{R}^{200 \times 2}`$ | sigma submodel design matrix |
+| W_i | \mathbf{w} | body_mass | g | response | \mathbb{R}^n | \mathbb{R}^{200} | response variable |
+| T_i | — | temperature | C | predictor | column of design matrix | column of X (length 200) | continuous predictor |
+| \mu_i | \boldsymbol{\mu} | NA | NA | parameter | \mathbb{R}^n | \mathbb{R}^{200} | conditional mu of body_mass |
+| \sigma_i | \boldsymbol{\sigma} | NA | NA | parameter | \mathbb{R}^n | \mathbb{R}^{200} | conditional sigma of body_mass |
+| \beta\_{0}, \beta\_{1} | \boldsymbol{\beta} | NA | NA | coefficient | \mathbb{R}^{p\_\mu} | \mathbb{R}^{2} | mu submodel coefficients |
+| \gamma\_{0}, \gamma\_{1} | \boldsymbol{\gamma} | NA | NA | coefficient | \mathbb{R}^{p\_\sigma} | \mathbb{R}^{2} | sigma submodel coefficients |
+| — | \mathbf{X} | NA | NA | design_matrix | \mathbb{R}^{n \times p\_\mu} | \mathbb{R}^{200 \times 2} | mu submodel design matrix |
+| — | \mathbf{Z} | NA | NA | design_matrix | \mathbb{R}^{n \times p\_\sigma} | \mathbb{R}^{200 \times 2} | sigma submodel design matrix |
 
 ### What is assumed
 
@@ -162,11 +156,11 @@ assumption_table(sym)
 
 | assumption | expression | biological meaning | status |
 |:---|:---|:---|:---|
-| conditional_distribution | $`W_i \mid \mu_i\, \sigma_i \sim \mathrm{Normal}(\mu_i\, \sigma_i^2)`$ | body_mass varies normally around its expected value | explicit |
-| linear_predictor | $`\mu_i = \beta_0 + \sum_k \beta_k X_{ki}`$ | Expected body_mass is a linear combination of the mean-model predictors | explicit |
-| linear_predictor | $`\log(\sigma_i) = \gamma_0 + \sum_k \gamma_k Z_{ki}`$ | Log residual SD of body_mass is a linear combination of the scale-model predictors | explicit |
-| independence | $`W_i \perp W_j \mid X \text{ for } i \ne j`$ | Observations are conditionally independent given the predictors | follows from the formula |
-| positivity | $`\sigma_i > 0`$ | Residual SD is constrained positive via the log link | follows from the formula |
+| conditional_distribution | W_i \mid \mu_i\\ \sigma_i \sim \mathrm{Normal}(\mu_i\\ \sigma_i^2) | body_mass varies normally around its expected value | explicit |
+| linear_predictor | \mu_i = \beta_0 + \sum_k \beta_k X\_{ki} | Expected body_mass is a linear combination of the mean-model predictors | explicit |
+| linear_predictor | \log(\sigma_i) = \gamma_0 + \sum_k \gamma_k Z\_{ki} | Log residual SD of body_mass is a linear combination of the scale-model predictors | explicit |
+| independence | W_i \perp W_j \mid X \text{ for } i \ne j | Observations are conditionally independent given the predictors | follows from the formula |
+| positivity | \sigma_i \> 0 | Residual SD is constrained positive via the log link | follows from the formula |
 | no_missing_at_random | — | Observations are assumed not missing in a way that depends on the unobserved response | your responsibility |
 
 ### What each coefficient means
@@ -216,24 +210,19 @@ with the predictors, and a residual SD that may also shift with its own
 predictors – so both the centre and the spread of the response are
 modeled.
 
-``` math
-\begin{aligned}
-W_i \mid \mu_i,\, \sigma_i & \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
-\mu_i & = \beta_{0} + \beta_{1} \, T_i \\
-\log(\sigma_i) & = \gamma_{0} + \gamma_{1} \, T_i
+\begin{aligned} W_i \mid \mu_i,\\ \sigma_i & \sim
+\mathrm{Normal}(\mu_i,\\ \sigma_i^2) \\ \mu_i & = \beta\_{0} +
+\beta\_{1} \\ T_i \\ \log(\sigma_i) & = \gamma\_{0} + \gamma\_{1} \\ T_i
 \end{aligned}
-```
 
 where:
 
-- $`W_i`$ — response variable  $`\mathbb{R}^{200}`$
-- $`T_i`$ — continuous predictor  column of X (length 200)
-- $`\mu_i`$ — conditional mu of body_mass  $`\mathbb{R}^{200}`$
-- $`\sigma_i`$ — conditional sigma of body_mass  $`\mathbb{R}^{200}`$
-- $`\beta_{0}, \beta_{1}`$ — mu submodel coefficients
-   $`\mathbb{R}^{2}`$
-- $`\gamma_{0}, \gamma_{1}`$ — sigma submodel coefficients
-   $`\mathbb{R}^{2}`$
+- W_i — response variable  \mathbb{R}^{200}
+- T_i — continuous predictor  column of X (length 200)
+- \mu_i — conditional mu of body_mass  \mathbb{R}^{200}
+- \sigma_i — conditional sigma of body_mass  \mathbb{R}^{200}
+- \beta\_{0}, \beta\_{1} — mu submodel coefficients  \mathbb{R}^{2}
+- \gamma\_{0}, \gamma\_{1} — sigma submodel coefficients  \mathbb{R}^{2}
 
 The same model in matrix form – the structural contract every textbook
 past chapter 4 switches to.
@@ -243,28 +232,21 @@ with the predictors, and a residual SD that may also shift with its own
 predictors – so both the centre and the spread of the response are
 modeled.
 
-``` math
-\begin{aligned}
-\mathbf{w} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} & \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2)) \\
-\boldsymbol{\mu} & = \mathbf{X} \boldsymbol{\beta} \\
-\log(\boldsymbol{\sigma}) & = \mathbf{Z} \boldsymbol{\gamma}
-\end{aligned}
-```
+\begin{aligned} \mathbf{w} \mid \boldsymbol{\mu},\\ \boldsymbol{\sigma}
+& \sim \mathcal{N}(\boldsymbol{\mu},\\
+\mathrm{diag}(\boldsymbol{\sigma}^2)) \\ \boldsymbol{\mu} & = \mathbf{X}
+\boldsymbol{\beta} \\ \log(\boldsymbol{\sigma}) & = \mathbf{Z}
+\boldsymbol{\gamma} \end{aligned}
 
 where:
 
-- $`\mathbf{w}`$ — response variable  $`\mathbb{R}^{200}`$
-- $`\boldsymbol{\mu}`$ — conditional mu of body_mass
-   $`\mathbb{R}^{200}`$
-- $`\boldsymbol{\sigma}`$ — conditional sigma of body_mass
-   $`\mathbb{R}^{200}`$
-- $`\boldsymbol{\beta}`$ — mu submodel coefficients  $`\mathbb{R}^{2}`$
-- $`\boldsymbol{\gamma}`$ — sigma submodel coefficients
-   $`\mathbb{R}^{2}`$
-- $`\mathbf{X}`$ — mu submodel design matrix
-   $`\mathbb{R}^{200 \times 2}`$
-- $`\mathbf{Z}`$ — sigma submodel design matrix
-   $`\mathbb{R}^{200 \times 2}`$
+- \mathbf{w} — response variable  \mathbb{R}^{200}
+- \boldsymbol{\mu} — conditional mu of body_mass  \mathbb{R}^{200}
+- \boldsymbol{\sigma} — conditional sigma of body_mass  \mathbb{R}^{200}
+- \boldsymbol{\beta} — mu submodel coefficients  \mathbb{R}^{2}
+- \boldsymbol{\gamma} — sigma submodel coefficients  \mathbb{R}^{2}
+- \mathbf{X} — mu submodel design matrix  \mathbb{R}^{200 \times 2}
+- \mathbf{Z} — sigma submodel design matrix  \mathbb{R}^{200 \times 2}
 
 The same matrix equation, with your actual numbers stacked inside the
 brackets – what the computer multiplies. Showing first 5 and last 2 rows
@@ -282,44 +264,56 @@ below.
 
 For observation *i* = 1 of your data:
 
-``` math
-\begin{aligned}
-W_{1} &= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{temperature}_{1} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
-31.5 &= 30.4 + 0.371 \times   14 + (-4.16) &\quad(\text{with your numbers}) \\
-&= \underbrace{35.6}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-4.16)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
+\begin{aligned} W\_{1} &= \hat\beta\_{0} +
+\hat\beta\_{1}\\\mathrm{temperature}\_{1} + \hat\varepsilon\_{1}
+&\quad(\text{response equation, one row of the model}) \\ 31.5 &= 30.4 +
+0.371 \times 14 + (-4.16) &\quad(\text{with your numbers}) \\ &=
+\underbrace{35.6}\_{\textstyle\\\hat\mu\_{1}\\\text{(predicted)}\\}
+\\+\\
+\underbrace{(-4.16)}\_{\textstyle\\\hat\varepsilon\_{1}\\\text{(residual)}\\}
 \end{aligned}
-```
 
 Stacking the same response equation for all *n* = 200 observations:
 
-``` math
-\underbrace{\begin{bmatrix} 31.5 \\ 36.6 \\ 27.8 \\ 42.2 \\ 31.2 \\ \vdots \\ 35.5 \\ 34.3 \end{bmatrix}}_{\textstyle\,\mathbf{w}_{\,200 \times 1}\;\text{(observed)}\,} \;=\; \underbrace{\begin{bmatrix}    1 &   14 \\    1 & 15.6 \\    1 & 18.6 \\    1 & 23.6 \\    1 &   13 \\ \vdots & \vdots \\    1 & 14.8 \\    1 & 21.7 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\,200 \times 2}\,}\, \underbrace{\begin{bmatrix} 30.4 \\ 0.371 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,2 \times 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} -4.16 \\ 0.355 \\ -9.53 \\ 3.02 \\ -4.02 \\ \vdots \\ -0.364 \\ -4.23 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,200 \times 1}\;\text{(residual)}\,}
-```
+\underbrace{\begin{bmatrix} 31.5 \\ 36.6 \\ 27.8 \\ 42.2 \\ 31.2 \\
+\vdots \\ 35.5 \\ 34.3 \end{bmatrix}}\_{\textstyle\\\mathbf{w}\_{\\200
+\times 1}\\\text{(observed)}\\} \\=\\ \underbrace{\begin{bmatrix} 1 & 14
+\\ 1 & 15.6 \\ 1 & 18.6 \\ 1 & 23.6 \\ 1 & 13 \\ \vdots & \vdots \\ 1 &
+14.8 \\ 1 & 21.7 \end{bmatrix}}\_{\textstyle\\\mathbf{X}\_{\\200 \times
+2}\\}\\ \underbrace{\begin{bmatrix} 30.4 \\ 0.371
+\end{bmatrix}}\_{\textstyle\\\hat{\boldsymbol{\beta}}\_{\\2 \times
+1}\\\text{(estimated)}\\} \\+\\ \underbrace{\begin{bmatrix} -4.16 \\
+0.355 \\ -9.53 \\ 3.02 \\ -4.02 \\ \vdots \\ -0.364 \\ -4.23
+\end{bmatrix}}\_{\textstyle\\\hat{\boldsymbol{\varepsilon}}\_{\\200
+\times 1}\\\text{(residual)}\\}
 
-**Left**: observed vector $`\mathbf{w}`$. **Middle**: the prediction
-$`\mathbf{X}\hat{\boldsymbol{\beta}} = \hat{\boldsymbol{\mu}}`$.
-**Right**: the residual vector
-$`\hat{\boldsymbol{\varepsilon}} = \mathbf{w} - \hat{\boldsymbol{\mu}}`$.
-Every row of this matrix equation is one of the response-equation rows
-from the worked row above.
+**Left**: observed vector \mathbf{w}. **Middle**: the prediction
+\mathbf{X}\hat{\boldsymbol{\beta}} = \hat{\boldsymbol{\mu}}. **Right**:
+the residual vector \hat{\boldsymbol{\varepsilon}} = \mathbf{w} -
+\hat{\boldsymbol{\mu}}. Every row of this matrix equation is one of the
+response-equation rows from the worked row above.
 
-And the $`\sigma`$ submodel (no observed counterpart – $`\sigma`$’s job
-is to describe the spread of $`\hat{\boldsymbol{\varepsilon}}`$). For
-the same observation *i* = 1:
+And the \sigma submodel (no observed counterpart – \sigma’s job is to
+describe the spread of \hat{\boldsymbol{\varepsilon}}). For the same
+observation *i* = 1:
 
-``` math
-\begin{aligned}
-\log\hat\sigma_{1} &= \hat\gamma_{0} + \hat\gamma_{1}\,\mathrm{temperature}_{1} &\quad(\text{sigma submodel for observation 1, log link}) \\
-\log\hat\sigma_{1} &= 0.799 + 0.0825 \times   14 = 1.95 &\quad(\text{with your numbers}) \\
-\hat\sigma_{1} &= \exp(1.95) \approx 7.04 &\quad(\text{predicted residual SD for observation 1})
-\end{aligned}
-```
+\begin{aligned} \log\hat\sigma\_{1} &= \hat\gamma\_{0} +
+\hat\gamma\_{1}\\\mathrm{temperature}\_{1} &\quad(\text{sigma submodel
+for observation 1, log link}) \\ \log\hat\sigma\_{1} &= 0.799 + 0.0825
+\times 14 = 1.95 &\quad(\text{with your numbers}) \\ \hat\sigma\_{1} &=
+\exp(1.95) \approx 7.04 &\quad(\text{predicted residual SD for
+observation 1}) \end{aligned}
 
 Stacking the same log-link equation for all *n* = 200 observations:
 
-``` math
-\log\!\underbrace{\begin{bmatrix} 7.04 \\ 8.03 \\ 10.3 \\ 15.6 \\ 6.51 \\ \vdots \\ 7.51 \\ 13.4 \end{bmatrix}}_{\textstyle\,\boldsymbol{\sigma}_{\,200 \times 1}\,} \;=\; \underbrace{\begin{bmatrix}    1 &   14 \\    1 & 15.6 \\    1 & 18.6 \\    1 & 23.6 \\    1 &   13 \\ \vdots & \vdots \\    1 & 14.8 \\    1 & 21.7 \end{bmatrix}}_{\textstyle\,\mathbf{X}_{\sigma,\,200 \times 2}\,}\, \underbrace{\begin{bmatrix} 0.799 \\ 0.0825 \end{bmatrix}}_{\textstyle\,\boldsymbol{\gamma}_{\,2 \times 1}\,}
-```
+\log\\\underbrace{\begin{bmatrix} 7.04 \\ 8.03 \\ 10.3 \\ 15.6 \\ 6.51
+\\ \vdots \\ 7.51 \\ 13.4
+\end{bmatrix}}\_{\textstyle\\\boldsymbol{\sigma}\_{\\200 \times 1}\\}
+\\=\\ \underbrace{\begin{bmatrix} 1 & 14 \\ 1 & 15.6 \\ 1 & 18.6 \\ 1 &
+23.6 \\ 1 & 13 \\ \vdots & \vdots \\ 1 & 14.8 \\ 1 & 21.7
+\end{bmatrix}}\_{\textstyle\\\mathbf{X}\_{\sigma,\\200 \times 2}\\}\\
+\underbrace{\begin{bmatrix} 0.799 \\ 0.0825
+\end{bmatrix}}\_{\textstyle\\\boldsymbol{\gamma}\_{\\2 \times 1}\\}
 
 On GitHub this section renders as static markup (GitHub doesn’t execute
 the inline JavaScript); on the pkgdown homepage the tabs are

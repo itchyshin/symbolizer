@@ -77,19 +77,16 @@ Fisher pass
 Before this release the Tab 3 worked-row helper hardcoded the Gaussian
 template
 
-``` math
-y_1 = \beta_0 + \beta_1 x_1 + \hat{\varepsilon}_1
-```
+y_1 = \beta_0 + \beta_1 x_1 + \hat{\varepsilon}\_1
 
 for every family. For non-identity-link families the displayed
-$`\hat{\mu}_1`$ was the **linear predictor** $`\hat{\eta}_1`$ not the
-**response-scale predicted mean**, the additive $`\hat{\varepsilon}_1`$
-was meaningless (Poisson has no residual in its likelihood at all), and
-the rendered values were either off by orders of magnitude or
-mathematically impossible. The Beta widget displayed
-$`\hat{\mu}_1 = -0.95`$ – impossible for a Beta mean which must be in
-$`(0,1)`$; the correct response-scale value is
-$`\mathrm{logistic}(-0.95) = 0.279`$.
+\hat{\mu}\_1 was the **linear predictor** \hat{\eta}\_1 not the
+**response-scale predicted mean**, the additive \hat{\varepsilon}\_1 was
+meaningless (Poisson has no residual in its likelihood at all), and the
+rendered values were either off by orders of magnitude or mathematically
+impossible. The Beta widget displayed \hat{\mu}\_1 = -0.95 – impossible
+for a Beta mean which must be in (0,1); the correct response-scale value
+is \mathrm{logistic}(-0.95) = 0.279.
 
 #### Three slices (TDD)
 
@@ -104,39 +101,38 @@ historic behaviour is preserved.
 **Slice 2 – `R/render-three-views.R`:** the Tab 3 worked-row helper
 becomes family-aware and emits one of three shapes:
 
-- **Additive Gaussian** (Gaussian, Student-t):
-  $`y_1 = \beta_0 + \beta_1 x_1 + \hat{\varepsilon}_1`$ – the historic
-  form, kept for back-compat.
-- **Additive log** (Lognormal):
-  $`\log(y_1) = \beta_0 + \beta_1 x_1 + \hat{\varepsilon}_1^{(\log)}`$ –
-  the residual is on the log scale where the Gaussian noise lives.
+- **Additive Gaussian** (Gaussian, Student-t): y_1 = \beta_0 + \beta_1
+  x_1 + \hat{\varepsilon}\_1 – the historic form, kept for back-compat.
+- **Additive log** (Lognormal): \log(y_1) = \beta_0 + \beta_1 x_1 +
+  \hat{\varepsilon}\_1^{(\log)} – the residual is on the log scale where
+  the Gaussian noise lives.
 - **Generalized** (Poisson, Beta, Binomial, Gamma, NegBinom):
-  $`\hat{\eta}_1 = \beta_0 + \beta_1 x_1`$, then
-  $`\hat{\mu}_1 = \mathrm{link}^{-1}(\hat{\eta}_1)`$, then
-  $`y_1 \sim \mathrm{Family}(\hat{\mu}_1, \ldots)`$ – no spurious
-  additive $`\hat{\varepsilon}_1`$.
+  \hat{\eta}\_1 = \beta_0 + \beta_1 x_1, then \hat{\mu}\_1 =
+  \mathrm{link}^{-1}(\hat{\eta}\_1), then y_1 \sim
+  \mathrm{Family}(\hat{\mu}\_1, \ldots) – no spurious additive
+  \hat{\varepsilon}\_1.
 
 **Slice 3 – `R/render-three-views.R` (sigma submodel):**
 `three_views_worked_row_sigma()` takes the family argument and labels
-the $`\hat{\sigma}_1`$ submodel correctly per family:
+the \hat{\sigma}\_1 submodel correctly per family:
 
 - gaussian / student: predicted residual SD (unchanged)
-- lognormal: log-scale residual SD (SD of $`\log y`$)
-- beta: predicted **precision $`\hat{\phi}_1`$** (NOT an SD)
+- lognormal: log-scale residual SD (SD of \log y)
+- beta: predicted **precision \hat{\phi}\_1** (NOT an SD)
 - gamma: predicted dispersion
-- nbinom1 / nbinom2: predicted dispersion (size parameter $`k`$)
+- nbinom1 / nbinom2: predicted dispersion (size parameter k)
 
 #### Tests
 
 - `tests/testthat/test-symbolize-drmtmb-link-scale.R` (9 expectations):
-  Poisson $`\hat{\mu}_1 = \exp(\hat{\eta}_1)`$; Beta
-  $`\hat{\mu}_1 \in (0,1)`$; Lognormal $`\hat{\mu}_1 = \hat{\eta}_1`$
-  (drmTMB identity-on-mu); Gaussian back-compat.
+  Poisson \hat{\mu}\_1 = \exp(\hat{\eta}\_1); Beta \hat{\mu}\_1 \in
+  (0,1); Lognormal \hat{\mu}\_1 = \hat{\eta}\_1 (drmTMB identity-on-mu);
+  Gaussian back-compat.
 - `tests/testthat/test-three-views-worked-row-families.R` (5
-  expectations): Poisson drops spurious $`\varepsilon`$; Poisson shows
-  $`\exp`$ back-transform; Beta shows response-scale $`\hat{\mu}_1`$
-  matching \$\sym\$expanded$`mu_hat[[1]]`$; Beta $`\sigma`$ row labelled
-  as precision $`\phi`$; Gaussian-identity keeps the historic shape.
+  expectations): Poisson drops spurious \varepsilon; Poisson shows \exp
+  back-transform; Beta shows response-scale \hat{\mu}\_1 matching
+  \symexpandedmu_hat\[\[1\]\]; Beta \sigma row labelled as precision
+  \phi; Gaussian-identity keeps the historic shape.
 - `tests/testthat/test-expand.R`: slot list updated to include
   `eta_hat`.
 
@@ -192,9 +188,8 @@ include each tier’s BLUP. Single-tier fits keep the historic shape (no
 
 Per the Fisher protocol from `docs/specs/import-from-sisters.md`:
 
-``` math
-\mathbf{X}\hat{\boldsymbol{\beta}} + \sum_g \mathbf{Z}_g \hat{\mathbf{u}}_g = \hat{\boldsymbol{\mu}}
-```
+\mathbf{X}\hat{\boldsymbol{\beta}} + \sum_g \mathbf{Z}\_g
+\hat{\mathbf{u}}\_g = \hat{\boldsymbol{\mu}}
 
 verified to 2.5e-14 on the Pottier thermal subset (35 species × 39
 studies × 164 effects), well under the protocol tolerance of 1e-9.
@@ -236,7 +231,7 @@ Closure holds for both the iid tier (study) and the structured tier
 - New `tests/testthat/test-symbolize-drmtmb-per-tier-Z.R` (30
   expectations): two-tier iid fit surfaces both Z, Pottier
   meta-multilevel surfaces study + phylogeny with full Fisher closure at
-  1e-9, single-RE back-compat $`Z_g/`$u alias semantics.
+  1e-9, single-RE back-compat Z_g/u alias semantics.
 - `tests/testthat/test-expand.R` updated to list the new slot names on
   `$expanded`.
 - Full suite: `FAIL 0 | SKIP 0 | PASS 1891` (+30 from new tests beyond
@@ -274,9 +269,9 @@ integer-coded), `model.matrix` does NOT build a one-hot incidence
 matrix. It returns a single-column matrix carrying the literal integer
 values. The widget Tab 3 then displayed a `164 x 1` Z column of raw
 study integers `[3, 3, 3, ..., 147, 147]` next to a `39`-vector of
-BLUPs, and the displayed $`\mathbf{Z}\hat{\mathbf{u}}`$ arithmetic in
-the worked row was meaningless (`3.29e-18` instead of the true BLUP
-value `9.74e-11` for study_ID = 3).
+BLUPs, and the displayed \mathbf{Z}\hat{\mathbf{u}} arithmetic in the
+worked row was meaningless (`3.29e-18` instead of the true BLUP value
+`9.74e-11` for study_ID = 3).
 
 Surfaced by the maintainer’s Fisher-pass on the v0.22.1.2 rendered
 widget – the V1 Florence and V3 Noether audits had both rubber-stamped
@@ -314,20 +309,22 @@ prose.
 New helper `latex_marginal_cov_block(x)` in `R/render-three-views.R`
 emits a LaTeX `Cov(y) = ...` block of the form
 
-``` math
-\underbrace{\mathrm{Cov}(\mathbf{y})}_{n \times n} = \underbrace{\sigma_g^2\, \mathbf{A}}_{\text{phylogeny tier}} + \underbrace{\sigma_g^2\, \mathbf{Z}_g\,\mathbf{Z}_g^{\!\top}}_{\text{study tier}} + \underbrace{\mathrm{diag}(\mathbf{v})}_{\text{known sampling}}
-```
+\underbrace{\mathrm{Cov}(\mathbf{y})}\_{n \times n} =
+\underbrace{\sigma_g^2\\ \mathbf{A}}\_{\text{phylogeny tier}} +
+\underbrace{\sigma_g^2\\
+\mathbf{Z}\_g\\\mathbf{Z}\_g^{\\\top}}\_{\text{study tier}} +
+\underbrace{\mathrm{diag}(\mathbf{v})}\_{\text{known sampling}}
 
 with one underbrace-labeled term per random-effect tier (structured
-tiers carry $`\mathbf{A}`$; unstructured tiers use
-$`\mathbf{Z}_g\mathbf{Z}_g^\top`$) plus a `diag(v)` term when
+tiers carry \mathbf{A}; unstructured tiers use
+\mathbf{Z}\_g\mathbf{Z}\_g^\top) plus a `diag(v)` term when
 [`meta_V()`](https://itchyshin.github.io/drmTMB/reference/meta_V.html)
 is detected. The helper returns `NULL` for trivial cases (single iid RE
 without `meta_V`) so simple fits aren’t cluttered.
 
 Wired into `as_html_three_views.symbolized_model` Tab 3. Mutually
-exclusive with the existing gllvm $`\boldsymbol{\Sigma}_B`$ /
-$`\boldsymbol{\Sigma}_W`$ stacked block — gllvm fits never carry
+exclusive with the existing gllvm \boldsymbol{\Sigma}\_B /
+\boldsymbol{\Sigma}\_W stacked block — gllvm fits never carry
 `meta_analysis` in `detected_signals` and never expose
 `metadata$structured_matrix_for_group`, so the new block fires only on
 meta-analysis / multilevel widgets.
@@ -351,9 +348,8 @@ fits return `NULL`. Suite at `FAIL 0 | SKIP 0 | PASS 1847`.
 
 Closes the V2 Pat-lens blocker on `symbolizer-meta-analysis.Rmd` §4: the
 article’s central thesis equation – the phylogenetic random effect
-$`\mathbf{u}_p \sim \mathcal{N}(\mathbf{0},\,
-\sigma_p^2\,\mathbf{A})`$ – now appears in the rendered widget across
-all three tabs.
+\mathbf{u}\_p \sim \mathcal{N}(\mathbf{0},\\ \sigma_p^2\\\mathbf{A}) –
+now appears in the rendered widget across all three tabs.
 
 #### What changed
 
@@ -371,15 +367,15 @@ into its internal sparse-precision pipeline rather than
 `fit$random_effects`).
 
 `drm_build_components()` now receives `structured_matrix_for_group` and
-emits $`\mathbf{u}_g \sim \mathcal{N}(\mathbf{0},\, \sigma_g^2\,
-\mathbf{A}_{k \times k})`$ (matrix form) and $`\mathbf{u}_g \sim
-\mathcal{N}(\mathbf{0},\, \sigma_g^2\, \mathbf{A})`$ (index form) for
-any structured tier, instead of falling through to $`\mathbf{I}_n`$.
+emits \mathbf{u}\_g \sim \mathcal{N}(\mathbf{0},\\ \sigma_g^2\\
+\mathbf{A}\_{k \times k}) (matrix form) and \mathbf{u}\_g \sim
+\mathcal{N}(\mathbf{0},\\ \sigma_g^2\\ \mathbf{A}) (index form) for any
+structured tier, instead of falling through to \mathbf{I}\_n.
 
 The linear-predictor matrix form disambiguates multiple intercept-only
-RE groups: single-RE fits keep the historic bare $`\mathbf{u}`$,
-multi-RE fits emit $`\mathbf{u}_{g_1} + \mathbf{u}_{g_2}`$ so the
-multilevel structure is visible.
+RE groups: single-RE fits keep the historic bare \mathbf{u}, multi-RE
+fits emit \mathbf{u}\_{g_1} + \mathbf{u}\_{g_2} so the multilevel
+structure is visible.
 
 `sym$metadata$structured_matrices` is now populated when drmTMB detects
 [`phylo()`](https://itchyshin.github.io/drmTMB/reference/phylo.html) /
@@ -392,10 +388,10 @@ consumers.
 
 `test-symbolize-drmtmb-meta-multilevel.R` gains two un-skipped tests
 covering the variance_components phylo tier and the matrix- form
-equation row $`\mathbf{u}_{\text{phylogeny}} \sim
-\mathcal{N}(\mathbf{0},\, \sigma_{\text{phylogeny}}^2\,
-\mathbf{A}_{35 \times 35})`$, plus a new test for
-`metadata$structured_matrices`. Suite at FAIL 0 \| SKIP 0 \| PASS 1845.
+equation row \mathbf{u}\_{\text{phylogeny}} \sim
+\mathcal{N}(\mathbf{0},\\ \sigma\_{\text{phylogeny}}^2\\ \mathbf{A}\_{35
+\times 35}), plus a new test for `metadata$structured_matrices`. Suite
+at FAIL 0 \| SKIP 0 \| PASS 1845.
 
 #### Vignette
 
@@ -423,11 +419,10 @@ meta-analysis with three Faces:
   `metafor::rma.mv(yi, V = vi, random = list(~1|phylogeny, ~1|study), R = list(phylogeny = A))`.
 
 Widget 2 (id = `sym-phylomultilevel-...`) renders the per-tier
-$`\boldsymbol{\Sigma}`$ decomposition in Tab 3, mirroring the
-v0.21.6-redo gllvm Σ-block layout. The article switches data from the §3
-BCG fixture to a 35-species / 164-effect subset of the Pottier et
-al. (2022) thermal acclimation data shipped at
-`inst/extdata/thermal_subset.csv`.
+\boldsymbol{\Sigma} decomposition in Tab 3, mirroring the v0.21.6-redo
+gllvm Σ-block layout. The article switches data from the §3 BCG fixture
+to a 35-species / 164-effect subset of the Pottier et al. (2022) thermal
+acclimation data shipped at `inst/extdata/thermal_subset.csv`.
 
 #### Extractor additions
 
@@ -467,10 +462,10 @@ al. (2022) thermal acclimation data shipped at
   × meta-analytic + phylo-multilevel.
 - 7 new rows in `inst/extdata/assumption-templates.csv` for
   `family = gaussian` with `requires = meta_analysis`: the meta-analytic
-  likelihood ($`y_k \mid \theta_k \sim
-  \mathrm{Normal}(\theta_k,\, v_k)`$), the known-sampling-variance
-  caveat ($`v_k`$ is an input, not a parameter), the moderator
-  - random-effect linear predictor for $`\theta_k`$, conditional
+  likelihood (y_k \mid \theta_k \sim \mathrm{Normal}(\theta_k,\\ v_k)),
+  the known-sampling-variance caveat (v_k is an input, not a parameter),
+  the moderator
+  - random-effect linear predictor for \theta_k, conditional
     independence, and three reader-responsibilities (no publication
     bias, correct effect metric, no missing-at-random). Rows fire only
     when
@@ -493,13 +488,13 @@ al. (2022) thermal acclimation data shipped at
 ### v0.21.6-redo – gllvm two-tier widget: syndromes + integrated plasticity
 
 A pedagogical rewrite of `symbolizer-gllvm.html` around the Nakagawa et
-al. (in prep) framework: behavioural syndromes
-($`\boldsymbol{\Sigma}_B = \boldsymbol{\Lambda}_B \boldsymbol{\Lambda}_B^\top + \boldsymbol{\Psi}_B`$)
-plus integrated plasticity
-($`\boldsymbol{\Sigma}_W = \boldsymbol{\Lambda}_W \boldsymbol{\Lambda}_W^\top + \boldsymbol{\Psi}_W`$).
-The previous v0.21.5-redo two-widget split (between-only without Psi_B
-vs with Psi_B) was a toy and is removed; the new widgets build up across
-**tiers** instead.
+al. (in prep) framework: behavioural syndromes (\boldsymbol{\Sigma}\_B =
+\boldsymbol{\Lambda}\_B \boldsymbol{\Lambda}\_B^\top +
+\boldsymbol{\Psi}\_B) plus integrated plasticity (\boldsymbol{\Sigma}\_W
+= \boldsymbol{\Lambda}\_W \boldsymbol{\Lambda}\_W^\top +
+\boldsymbol{\Psi}\_W). The previous v0.21.5-redo two-widget split
+(between-only without Psi_B vs with Psi_B) was a toy and is removed; the
+new widgets build up across **tiers** instead.
 
 #### Article structure (11 sections)
 
@@ -509,20 +504,19 @@ vs with Psi_B) was a toy and is removed; the new widgets build up across
   carrying both Lambda_B (5×2) and Lambda_W (5×1).
 - §3 NEW – univariate motivation via
   [`lme4::lmer`](https://rdrr.io/pkg/lme4/man/lmer.html); classical
-  repeatability $`R = \sigma^2_u / (\sigma^2_u + \sigma^2_e)`$ (Nakagawa
-  & Schielzeth 2010).
-- §4 NEW – factor-analytic motivation: $`T(T+1)/2`$ vs $`T(d+1) -
-  d(d-1)/2`$ parameter counting.
+  repeatability R = \sigma^2_u / (\sigma^2_u + \sigma^2_e) (Nakagawa &
+  Schielzeth 2010).
+- §4 NEW – factor-analytic motivation: T(T+1)/2 vs T(d+1) - d(d-1)/2
+  parameter counting.
 - §5 The model in symbols – long form / wide form, both tiers explicit.
-- §6 **Widget 1** – behavioural syndromes ($`\Sigma_B`$ only).
-- §7 **Widget 2** – adds integrated plasticity ($`\Sigma_W`$). Documents
-  gllvmTMB’s $`\sigma_\varepsilon`$ auto-suppression when
+- §6 **Widget 1** – behavioural syndromes (\Sigma_B only).
+- §7 **Widget 2** – adds integrated plasticity (\Sigma_W). Documents
+  gllvmTMB’s \sigma\_\varepsilon auto-suppression when
   `unique(0 + trait | obs)` is present.
-- §8 Reading biologically – $`c^2`$ + $`\psi^*`$ per tier, $`R_t`$
-  per-trait, phenotypic-correlation decomposition
-  $`r_P = r_B\sqrt{R_t R_m} + r_W\sqrt{(1-R_t)(1-R_m)}`$ (Dingemanse &
-  Dochtermann 2013).
-- §9 Identifiability – rotation, sign, AND $`\sigma_\varepsilon`$
+- §8 Reading biologically – c^2 + \psi^\* per tier, R_t per-trait,
+  phenotypic-correlation decomposition r_P = r_B\sqrt{R_t R_m} +
+  r_W\sqrt{(1-R_t)(1-R_m)} (Dingemanse & Dochtermann 2013).
+- §9 Identifiability – rotation, sign, AND \sigma\_\varepsilon
   auto-suppression as expected behaviour.
 - §10 NEW – the `glmmTMB` bridge:
   [`latent()`](https://itchyshin.github.io/gllvmTMB/reference/latent.html)/[`unique()`](https://rdrr.io/r/base/unique.html)
@@ -535,36 +529,36 @@ vs with Psi_B) was a toy and is removed; the new widgets build up across
 
 `$expanded` now carries the two-tier widget contract:
 
-- `Lambda_W` ($`n_\text{traits} \times d_W`$) – within-individual
+- `Lambda_W` (n\_\text{traits} \times d_W) – within-individual
   reduced-rank loadings.
-- `Z_W` ($`n_\text{obs} \times d_W`$) – per-observation latent scores
+- `Z_W` (n\_\text{obs} \times d_W) – per-observation latent scores
   (expanded from gllvmTMB’s `unit_obs`-level via `site_species_id`).
-- `Psi_W` (length $`n_\text{traits}`$) – per-trait within-individual
+- `Psi_W` (length n\_\text{traits}) – per-trait within-individual
   uniqueness SDs.
-- `Sigma_W` ($`n_\text{traits} \times n_\text{traits}`$) – algebraic
-  closure $`\Lambda_W \Lambda_W^\top + \mathrm{diag}(\Psi_W^2)`$.
-- `Repeatability` (length $`n_\text{traits}`$) – per-trait
-  $`R_t = (\Sigma_B)_{tt} / [(\Sigma_B)_{tt} + (\Sigma_W)_{tt}]`$.
+- `Sigma_W` (n\_\text{traits} \times n\_\text{traits}) – algebraic
+  closure \Lambda_W \Lambda_W^\top + \mathrm{diag}(\Psi_W^2).
+- `Repeatability` (length n\_\text{traits}) – per-trait R_t =
+  (\Sigma_B)\_{tt} / \[(\Sigma_B)\_{tt} + (\Sigma_W)\_{tt}\].
 
-Sigma_B now prefers the algebraic closure $`\Lambda_B \Lambda_B^\top +
-\mathrm{diag}(\Psi_B^2)`$ over `fit$report$Sigma_B` (which only contains
-$`\Lambda_B \Lambda_B^\top`$ – the Psi_B diagonal was being dropped
-under the prior behaviour).
+Sigma_B now prefers the algebraic closure \Lambda_B \Lambda_B^\top +
+\mathrm{diag}(\Psi_B^2) over `fit$report$Sigma_B` (which only contains
+\Lambda_B \Lambda_B^\top – the Psi_B diagonal was being dropped under
+the prior behaviour).
 
 #### Renderer extension (`as_html_three_views` Tab 3)
 
 A new `latex_implied_cov_block(tier, Sigma, Lambda, Psi)` emitter
 conditionally appends an implied-covariance block per tier when the
-relevant slots are populated. Widget 1 (between-only) shows the
-$`\Sigma_B`$ block; Widget 2 (two-tier) shows both $`\Sigma_B`$ and
-$`\Sigma_W`$ blocks plus a per-trait $`R_t`$ row. Non-gllvm fits are
-unaffected (the emitter returns NULL when the slots are absent).
+relevant slots are populated. Widget 1 (between-only) shows the \Sigma_B
+block; Widget 2 (two-tier) shows both \Sigma_B and \Sigma_W blocks plus
+a per-trait R_t row. Non-gllvm fits are unaffected (the emitter returns
+NULL when the slots are absent).
 
 #### Tests (TDD-first)
 
 - `tests/testthat/test-symbolize-gllvmtmb-two-tier.R` – 36 assertions
   covering the two-tier extractor contract, closure equalities to
-  $`10^{-6}`$, repeatability formula, between-only graceful NULL.
+  10^{-6}, repeatability formula, between-only graceful NULL.
 - `tests/testthat/test-render-implied-cov.R` – 11 assertions on the
   emitter’s tier / NULL-safety / labels.
 - `tests/testthat/test-three-views-implied-cov.R` – 10 assertions on Tab
@@ -596,15 +590,15 @@ Dropped from this article (moved elsewhere): metafor (meta-analytic
 scope → v0.22), glmmTMB (propto two-scalar → defer), drmTMB
 location-scale phylo (→ v0.24), gllvmTMB community-phylo (→ separate
 arc). The §6 model statement now distinguishes the **estimated**
-$`\sigma_e^2`$ from the **known** sampling variance $`v_i`$ (Cinar et
-al. 2022, *Methods in Ecology and Evolution*).
+\sigma_e^2 from the **known** sampling variance v_i (Cinar et al. 2022,
+*Methods in Ecology and Evolution*).
 
 #### New: `symbolize.phylolm()` extractor
 
 PGLS marginal form support. BM and Pagel’s lambda evolutionary models.
 New capability rows; `metadata$phylo_representation = "pgls_marginal"`;
 `metadata$phylo_model` + `metadata$phylo_param`. End-to-end on the Moura
-data: $`\hat\lambda = 0.7632`$.
+data: \hat\lambda = 0.7632.
 
 #### B6 fix (Ayumi report)
 
@@ -640,14 +634,14 @@ handles arbitrary nesting. 7 unit tests pin the contract.
   `n_obs == n_distinct_levels`, the Tab 3 stacked block drops the
   random-effect incidence matrix Z (which is then the identity on the
   observed levels and renders as a wall of zeros) and emits the
-  per-observation random effect $`\hat{\mathbf{u}}_{n\times 1}`$
-  directly. Z is retained for multi-obs-per-level cases (repeated
-  measures, multi-effect-size meta-analyses).
+  per-observation random effect \hat{\mathbf{u}}\_{n\times 1} directly.
+  Z is retained for multi-obs-per-level cases (repeated measures,
+  multi-effect-size meta-analyses).
 - **All-nodes dim propagation**: when MCMCglmm’s `ginverse` carries the
   Hadfield-Nakagawa all-nodes representation, the symbol dictionary +
   matrix-form equation now report the augmented dimension
-  (e.g. $`\mathbf{A}_{116 \times 116}`$ for a 60-tip tree), matching
-  what the Tab 3 stacked block shows.
+  (e.g. \mathbf{A}\_{116 \times 116} for a 60-tip tree), matching what
+  the Tab 3 stacked block shows.
 
 #### Consistency sweep (12 classes)
 
@@ -670,8 +664,8 @@ along with V1 Florence, V2 Pat, V3 Noether audit reports. Highlights:
   / interpretation outputs in a `<div class="table-responsive">` so the
   right-edge status column scrolls instead of clipping.
 - **`σ_p` naming canonical**: §6 model, §Animal-model unification, and
-  the heritability output now all use $`\sigma_p^2`$ / $`\sigma_e^2`$;
-  the quantitative-genetics A/E alias is noted once.
+  the heritability output now all use \sigma_p^2 / \sigma_e^2; the
+  quantitative-genetics A/E alias is noted once.
 - **Hidden scaffolding**: the `pdf_alongside_html()` helper chunk
   - the `shim_mcmcglmm()` chunk are now `echo = FALSE`; they no longer
     leak into the article.
@@ -877,7 +871,7 @@ recur.
   set, the biology caption above the equation block now reads “Species
   are not independent observations. Closely related species tend to have
   similar trait values because of shared evolutionary history; the
-  phylogenetic correlation matrix $`\mathbf{A}`$ encodes those expected
+  phylogenetic correlation matrix \mathbf{A} encodes those expected
   similarities…” – replacing the default Gaussian “Each observation is
   normally distributed…” gloss which was conceptually wrong for
   comparative phylogenetic models. Same for
@@ -895,7 +889,7 @@ recur.
   with `pdf_document`; requires a working LaTeX install (TinyTeX or
   system).
 - **Gloss dimensions wrapped in `$...$`.** Inline `\mathbb{R}^{...}`
-  expressions inside mixed prose (“scalar; $`\mathbb{R}^{15}`$ in matrix
+  expressions inside mixed prose (“scalar; \mathbb{R}^{15} in matrix
   form”) now wrap correctly.
 
 #### Phylogenetic / structural-covariance distribution line
@@ -1137,10 +1131,10 @@ The Mizuno, Williams, Lagisz, Senior, Nakagawa tutorial unifies
 phylogenetic and spatial meta-analysis: they are the same multilevel
 random-effects model, differing only in what “distance” means
 (evolutionary time vs geographic distance). The next release will ship a
-single article that teaches both via the shared
-$`p \sim \mathcal N(0, \sigma^2_p \mathbf M)`$ structure – with
-$`\mathbf M`$ being the phylogenetic correlation matrix $`\mathbf A`$
-(phylo) or a kernel-derived spatial matrix (spatial).
+single article that teaches both via the shared p \sim \mathcal N(0,
+\sigma^2_p \mathbf M) structure – with \mathbf M being the phylogenetic
+correlation matrix \mathbf A (phylo) or a kernel-derived spatial matrix
+(spatial).
 
 As a scaffold, three new `Planned or reserved` rows have been added to
 `inst/extdata/capabilities.csv`:
@@ -1242,11 +1236,10 @@ estimates** – that is the audit-process gap this release documents.
 
 v0.16 introduced detection of `glmmTMB`’s `propto(0 + obs | g, V)`
 covariance block and framed it as “the GLMM bridge to metafor”:
-[`vignette("symbolizer-meta")`](https://itchyshin.github.io/symbolizer/articles/symbolizer-meta.md)
-Face 2 said *“`propto(0 + obs | g, V)` **fixes** the residual covariance
-to the known `V`, which is exactly what `rma.mv(..., V = V)` does in
-`metafor`. Structurally identical; syntactically different.”* The
-info-row in
+`vignette("symbolizer-meta")` Face 2 said *“`propto(0 + obs | g, V)`
+**fixes** the residual covariance to the known `V`, which is exactly
+what `rma.mv(..., V = V)` does in `metafor`. Structurally identical;
+syntactically different.”* The info-row in
 [`warning_table()`](https://itchyshin.github.io/symbolizer/reference/warning_table.md)
 carried the same claim: *“sigma_residual is fixed
 (sampling-variance-known)”*. Every downstream reference to propto in
@@ -1453,11 +1446,11 @@ cold.
 
 #### Notation cleanup
 
-- The sigma-submodel design matrix is now rendered as
-  $`\mathbf{X}_\sigma`$ rather than $`\mathbf{Z}`$. $`\mathbf{Z}`$ is
-  reserved for random-effect design matrices, matching the convention in
-  Pinheiro & Bates and the lme4 paper. Noether’s audit flagged the
-  earlier `Z`-overload as the single biggest notational tell.
+- The sigma-submodel design matrix is now rendered as \mathbf{X}\_\sigma
+  rather than \mathbf{Z}. \mathbf{Z} is reserved for random-effect
+  design matrices, matching the convention in Pinheiro & Bates and the
+  lme4 paper. Noether’s audit flagged the earlier `Z`-overload as the
+  single biggest notational tell.
 - Dimension annotations now use textbook subscript form
   `\mathbf{X}_{n \times p}` rather than the programming-type-annotation
   form `\mathbf{X}\,(n \times p)`.
@@ -1875,10 +1868,10 @@ meta-analytic model via
 [`metafor::rma.mv`](https://wviechtb.github.io/metafor/reference/rma.mv.html),
 `glmmTMB` with `propto()`, and `drmTMB` location-scale. Shows
 [`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
-output side by side, explains the variance ($`\tau^2`$, $`\alpha`$) vs
-SD ($`\sigma`$, $`\gamma`$) parameterization gap with the
-$`\alpha_k \approx 2 \gamma_k`$ relationship, and points to when each
-package is the natural choice.
+output side by side, explains the variance (\tau^2, \alpha) vs SD
+(\sigma, \gamma) parameterization gap with the \alpha_k \approx 2
+\gamma_k relationship, and points to when each package is the natural
+choice.
 
 The article is reachable from a new pkgdown navbar group “Cross-package
 bridges”.
@@ -1970,9 +1963,7 @@ two shipped in v0.16.0:
 - ✅ glmmTMB `equalto()` / `propto()` detection – **shipped in v0.16.0**
   (Slice C).
 - ✅ Cross-package “Three faces of meta-analysis” article – **shipped in
-  v0.16.0** as
-  [`vignette("symbolizer-meta")`](https://itchyshin.github.io/symbolizer/articles/symbolizer-meta.md)
-  (Slice D).
+  v0.16.0** as `vignette("symbolizer-meta")` (Slice D).
 - Double-hierarchical location-scale via brms (Nakagawa et al. 2025 Eq
   19-22): random effects on the scale part with bivariate (u^(l), u^(s))
   distribution. Still planned.

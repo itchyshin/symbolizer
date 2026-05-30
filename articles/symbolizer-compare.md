@@ -149,9 +149,11 @@ disappears from the sigma submodel. The Metrics section quantifies the
 cost: the full model uses more df but pays that back in log-likelihood;
 AIC and BIC pick the model that balances the two.
 
-`delta = right - left`. A negative AIC delta means the *right* fit
-(here, the reduced model) has lower AIC than the *left* (here, the full
-model). Read the sign before you read the magnitude.
+`delta = right - left`, so the sign tells you which fit AIC prefers: a
+**negative** delta means the *right* fit (here, the reduced model) has
+the lower — better — AIC; a **positive** delta means the *left* fit (the
+full model) does. Read the sign of the delta column above before you
+read the magnitude.
 
 **Takeaway.** Same data, same family — pass `metrics = TRUE` and read
 the delta column to do model selection on top of the structural diff.
@@ -239,8 +241,10 @@ Two things to notice:
 1.  **The Assumptions section flips.** The left fit has an
     `independence` row (status `implied`). The right fit drops that row
     and adds an `independence_given_random_effects` row (status
-    `stated`). `compare_symbolic` marks the change with `*` in the print
-    output and surfaces both rows.
+    `stated`). `compare_symbolic` surfaces both rows and marks them as
+    differing — at the console
+    [`print()`](https://rdrr.io/r/base/print.html) adds a `*`; in this
+    knitted table the change shows as `same_status` = `FALSE`.
 
 2.  **The Metrics section quantifies the random-intercept cost.** Adding
     `(1 | site)` uses one extra df (the variance of the site intercept).
@@ -386,7 +390,7 @@ about how these models are specified?”* It does **not** answer:
   models,
   [`vignette("symbolizer-gllvm")`](https://itchyshin.github.io/symbolizer/articles/symbolizer-gllvm.md)
   Section 7 covers the rotation-and-sign identifiability of
-  $`\boldsymbol{\Lambda}_B`$.
+  \boldsymbol{\Lambda}\_B.
 - **“Which coefficients changed by how much?”** — that’s a
   coefficient-level numeric question. Use
   `parameter_interpretation(sym_a)` and

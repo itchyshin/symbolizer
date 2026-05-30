@@ -14,7 +14,7 @@ reports that split, and
 [`icc()`](https://itchyshin.github.io/symbolizer/reference/icc.md)
 reports the **intraclass correlation**: the share of variation that is
 between groups. For repeated measurements of the same individuals, the
-ICC is exactly the **repeatability** $`R`$ – the quantity the
+ICC is exactly the **repeatability** R – the quantity the
 [rptR](https://cran.r-project.org/package=rptR) package was built to
 estimate (Nakagawa & Schielzeth 2010; Stoffel, Nakagawa & Schielzeth
 2017).
@@ -57,7 +57,8 @@ variance_partition(sym_g)
 ```
 
 **Where does the variation live?** Where the variation lives – each row
-is one source of variance, shown as a share of the total.
+is one variance component (shown as a share of the total when a single
+total variance is defined).
 
 ind 69.4%
 
@@ -109,7 +110,7 @@ sym_b <- symbolize(fit_b)
 
 For a binomial model there is no residual variance on the observed 0/1
 scale. The model lives on the **latent (logit) scale**, where the
-residual variance is the known constant $`\pi^2/3`$. So
+residual variance is the known constant \pi^2/3. So
 [`icc()`](https://itchyshin.github.io/symbolizer/reference/icc.md)
 reports a **latent-scale** ICC, and labels it as such – with the caption
 that keeps you honest:
@@ -129,7 +130,7 @@ a proportion of variance in the realized 0/1 outcome. `symbolizer`
 refuses to pretend otherwise.
 
 **Takeaway.** Proportion and binary data get a repeatability too – but
-on the latent scale, with the residual fixed at $`\pi^2/3`$ (logit) or 1
+on the latent scale, with the residual fixed at \pi^2/3 (logit) or 1
 (probit).
 
 ## 3. The same reading from a different engine: `glmmTMB`
