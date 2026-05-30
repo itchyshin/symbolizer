@@ -3,6 +3,12 @@ url: https://itchyshin.github.io/symbolizer/
 template:
   bootstrap: 5
   bootswatch: flatly
+  # Render math with MathJax 3, not pandoc's native MathML default. Native
+  # MathML brackets do not stretch around <mtable> in Chrome (the matrix
+  # blocks in the drmTMB / structural-dependence / families articles and the
+  # three-views widgets), and the widgets' window.MathJax.typesetPromise()
+  # calls are no-ops without MathJax loaded. (v0.21-redo Pattern L.)
+  math-rendering: mathjax
   bslib:
     # Reddish / brick primary so symbolizer is visually distinct from its
     # teal-themed sister packages (drmTMB, gllvmTMB use #0f7887).
