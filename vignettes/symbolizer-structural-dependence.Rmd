@@ -173,7 +173,7 @@ Three notes that often trip up first readers:
 2. The Moura data was *built* as a meta-analytic dataset (one Fisher-$z$ per species, aggregated from many effect-size estimates). We use only $\mathrm{Zr}$ here; the $v_i$ column is set aside. That's a pedagogical choice — a clean phylo-LMM is easier to read than a meta-analytic phylo-LMM, and it keeps this article focused on the structural-dependence axis.
 3. `phylolm` fits a **marginalised** version of this same model: it absorbs $u_p$ into the residual to give $\mathrm{Zr} \sim \mathcal N(\beta_0 \mathbf 1, \sigma^2 \mathbf C(\alpha))$ where $\sigma^2 \mathbf C(\alpha) = \sigma_p^2 \mathbf A + \sigma_e^2 \mathbf I$ in the Pagel-$\lambda$ parametrisation. The § "Face 3" Face below makes the bridge explicit.
 
-The phylogenetic correlation matrix $\mathbf A$ carries realistic biology — most species pairs are distantly related (median off-diagonal $\approx 0.03$) while a handful are close (top 1 % above 0.85). Compare with the degenerate `rcoal(15)` simulation used in earlier drafts where 75 % of pairs were above 0.91.
+The phylogenetic correlation matrix $\mathbf A$ carries realistic biology — most species pairs are distantly related (median off-diagonal $\approx 0.09$) while a handful are close (top 1 % above 0.85). Compare with the degenerate `rcoal(15)` simulation used in earlier drafts where 75 % of pairs were above 0.91.
 
 ### Face 1 (deep dive): `MCMCglmm` with `ginverse = list(species = Ainv)`
 

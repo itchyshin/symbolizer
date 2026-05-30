@@ -148,6 +148,66 @@ subscript + `study_ID`):
   `test-double-subscript.R`. Full suite green (the lone `expand` failure is the
   known `Matrix::expand` S4-masking load-order flake #7 — passes in isolation).
 
+**Post-KaTeX multi-agent re-audit — 2026-05-30 (6 content reviewers + a visual
+layout pass, reconciled).** After the KaTeX migration the rebuilt site was
+re-audited: a workflow of one reviewer per article (reading-quality /
+consistency / correctness / stale / leaked-source) plus an orchestrator-driven
+browser layout sweep. Result: prose sound on all 6; **4 blockers, 8 majors,
+9 minors** reconciled. Key findings + status:
+
+- **Wave 1 — FIXED + verified + committed:**
+  - **B3 (blocker)** structural-dependence MCMCglmm variance bar rendered as an
+    escaped `<pre><code>` — the bar emitters indented inner `<div>`s >= 4
+    spaces, which Pandoc parses as an indented code block. Fixed: emit the bar
+    HTML flush (no >= 4-space lines) in both `vc_bar_stacked` /
+    `vc_bar_per_component`. Verified: 0 escaped-div code-blocks in the rebuilt
+    page; real coloured segment divs present.
+  - **gllvm §5 overflow (major) + families clip (minor)** wide display
+    equations spilled their containers and collided (long-form +349px in a
+    380px column). Fixed globally: `.katex-display { overflow-x: auto }` in
+    `pkgdown/extra.css` (scroll, never overlap). Verified in `docs/extra.css`.
+  - **M8 (major)** structural-dependence prose "median off-diagonal ~0.03"
+    contradicted the printed 0.093 -> corrected to ~0.09.
+  - **dead MathJax hook (minor)** on-tab-switch re-typeset called
+    `MathJax.typesetPromise` (dead under KaTeX) -> now KaTeX
+    `renderMathInElement` with a MathJax fallback for standalone exports.
+  - **Stale-test correction** for the earlier `gv_esc` fix (commit `0cb1462`
+    era): `test-symbolize-drmtmb-meta-multilevel.R:67` still asserted the
+    unescaped `\mathbf{Z}_{study_ID}`; updated to the escaped
+    `\mathbf{Z}_{study\_ID}` (the correct, KaTeX-safe output). *(Verification
+    note: this test was already red after `gv_esc` and I missed it by reading
+    only `tail -20` of the suite -- read the full FAIL list, not the tail.)*
+
+- **Remaining waves (the maintainer asked for all of it; deeper + interdependent
+  -- centred on `expand()` under-population):**
+  - **B1 (blocker)** Tab 3 empty because `X = NULL` is hardcoded in 7
+    extractors (base:169, brms:463, mcmcglmm:178, lme4:177, glmmtmb:562,
+    sdmtmb:152, mgcv:174) -> populate `X`/`mu_hat` via `model.matrix`/`fitted`
+    so the widget's "numbers" tab fills.
+  - **B2 (blocker)** structural-dependence MCMCglmm Tab 3 worked row does not
+    close (`mu_1 = 0.366 ~ 0.214`) and the stacked block omits the `+Zu` term
+    it captions -> render the RE term + a single consistent `mu_1`.
+  - **M1 (major)** location-scale gloss says "residual SD is constant" above a
+    `log(sigma_i)=...` equation: root cause is `sigma_varies` derived from
+    `expanded$X_sigma` (unpopulated for drmTMB) -> detect from model structure.
+  - **M2 (major)** `study_ID` still renders as a nested sub-subscript in ~8
+    non-cov-block spots (`\sigma_{study_ID}`, `u_{study_ID(i)}`) -> escape
+    group-name underscores at the symbol-assignment level (broader than the
+    cov-block `gv_esc`).
+  - **M3/M4** ladder cross-tab `Z` naming + indexed `sigma_i` on constant-SD
+    rungs; **M5** phylolm assumption template states pure-BM covariance under
+    `model='lambda'`; **M7** MCMCglmm augmented matrix mislabelled
+    "correlation A, diagonal=1"; plus ~8 minors (leaked ASCII math in gloss
+    cells, Beta odds-ratio wording, brms "same in expectation" caveat, gllvm
+    rank-1 sign, meta s4.3 VC-panel location, get-started glossary/tab-order).
+  - **NOT a source bug:** the gllvm "didn't evaluate" blocker the reviewers saw
+    was a build-environment artifact (drmTMB/gllvmTMB absent at my rebuild);
+    rebuilt with both present -> 44 widget nodes, 39 chunk outputs, 0 KaTeX
+    errors. Version-drift strings the gllvm reviewer flagged are out-of-tree
+    (not in committed source; DESCRIPTION is 0.20.2).
+
+Full reconciled list: workflow `wf_f3e925bf-d34` result (this session).
+
 **Remaining — feature / deep-extractor work (recommend fresh sessions, each a
 small design+implement cycle; none are one-line fixes):**
 - **P5** worked-row folds the random effect into the residual on the

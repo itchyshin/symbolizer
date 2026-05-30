@@ -41,3 +41,19 @@ img.logo {
     margin-left: 20px !important;
   }
 }
+
+/*
+ * Wide display equations: scroll, do not overflow/collide.
+ *
+ * Some equations are intrinsically wider than their container -- the gllvm
+ * "model in symbols" long/wide forms sit in ~380px side-by-side columns yet
+ * render 600-730px wide, and the families BetaBinomial line slightly exceeds
+ * the main column. Under KaTeX a too-wide .katex-display otherwise spills out
+ * and visually collides with neighbouring content. Give every display block a
+ * horizontal scrollbar so it stays inside its column and never overlaps.
+ */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 2px 0;   /* keep the scrollbar clear of the equation glyphs */
+}

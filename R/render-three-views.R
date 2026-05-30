@@ -2083,10 +2083,15 @@ vc_bar_stacked <- function(vp) {
       "<div style=\"width:%s%%;background:%s;color:%s;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis\" title=\"%s\">%s %s%%</div>",
       w, col, txt, vp$component[[i]], vp$component[[i]], w)
   }, character(1L))
+  # Emit flush (no leading indentation, no inter-div newlines): a line
+  # indented >= 4 spaces is parsed by Pandoc as an indented code block, which
+  # is exactly what turned these inner <div>s into an escaped <pre><code>
+  # block on the rendered page (variance bar showed raw markup). Keep the
+  # whole bar on as few lines as possible so no child line is code-blocked.
   paste0(
-    "  <div class=\"sym-vc-bar sym-vc-stacked\" role=\"img\" aria-label=\"variance partition\" style=\"display:flex;width:100%;height:1.8rem;border-radius:4px;overflow:hidden;font-size:0.78rem;line-height:1.8rem;margin:0.4rem 0\">\n    ",
-    paste(segs, collapse = "\n    "),
-    "\n  </div>\n"
+    "<div class=\"sym-vc-bar sym-vc-stacked\" role=\"img\" aria-label=\"variance partition\" style=\"display:flex;width:100%;height:1.8rem;border-radius:4px;overflow:hidden;font-size:0.78rem;line-height:1.8rem;margin:0.4rem 0\">",
+    paste(segs, collapse = ""),
+    "</div>\n"
   )
 }
 
@@ -2097,17 +2102,19 @@ vc_bar_per_component <- function(vp) {
     w   <- formatC(100 * vp$pct[[i]], digits = 1L, format = "f")
     res <- grepl("^Residual", vp$component[[i]])
     col <- if (res) "#d9d9d9" else pal[[((i - 1L) %% length(pal)) + 1L]]
+    # Flush, single-line rows: any line indented >= 4 spaces would be
+    # Pandoc-parsed as an indented code block and rendered as escaped source.
     sprintf(paste0(
-      "    <div class=\"sym-vc-row\" style=\"display:flex;align-items:center;margin:0.25rem 0;font-size:0.8rem\">\n",
-      "      <span style=\"flex:0 0 38%%;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis\">%s</span>\n",
-      "      <span style=\"flex:1;background:#f3f4f6;border-radius:3px;overflow:hidden\"><span style=\"display:block;width:%s%%;background:%s;color:#fff;padding:0.1rem 0.35rem;white-space:nowrap;box-sizing:border-box\">%s%%</span></span>\n",
-      "    </div>"),
+      "<div class=\"sym-vc-row\" style=\"display:flex;align-items:center;margin:0.25rem 0;font-size:0.8rem\">",
+      "<span style=\"flex:0 0 38%%;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis\">%s</span>",
+      "<span style=\"flex:1;background:#f3f4f6;border-radius:3px;overflow:hidden\"><span style=\"display:block;width:%s%%;background:%s;color:#fff;padding:0.1rem 0.35rem;white-space:nowrap;box-sizing:border-box\">%s%%</span></span>",
+      "</div>"),
       vp$component[[i]], w, col, w)
   }, character(1L))
   paste0(
-    "  <div class=\"sym-vc-bar sym-vc-bars\" role=\"img\" aria-label=\"variance partition\" style=\"margin:0.4rem 0\">\n",
-    paste(rows, collapse = "\n"),
-    "\n  </div>\n"
+    "<div class=\"sym-vc-bar sym-vc-bars\" role=\"img\" aria-label=\"variance partition\" style=\"margin:0.4rem 0\">",
+    paste(rows, collapse = ""),
+    "</div>\n"
   )
 }
 
@@ -2319,7 +2326,13 @@ r"---((function() {
       p.classList.toggle("sym-active", on);
       if (on) { p.removeAttribute("hidden"); } else { p.setAttribute("hidden", ""); }
     });
-    if (typeof window.MathJax !== "undefined" && window.MathJax.typesetPromise) {
+    // Re-render math in the newly shown panel. KaTeX (the pkgdown site
+    // renderer) exposes renderMathInElement and already typesets hidden
+    // panels at load, so this is belt-and-braces; fall back to MathJax for
+    // standalone exports that still bootstrap MathJax from a CDN.
+    if (typeof window.renderMathInElement === "function") {
+      try { window.renderMathInElement(panels[idx], {throwOnError: false}); } catch (e) {}
+    } else if (typeof window.MathJax !== "undefined" && window.MathJax.typesetPromise) {
       try { window.MathJax.typesetPromise([panels[idx]]); } catch (e) {}
     }
   }
