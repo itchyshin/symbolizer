@@ -217,11 +217,28 @@ base_rhs_expr <- function(f) {
   if (length(f) == 3L) f[[3L]] else f[[2L]]
 }
 
+# Shared default response-symbol renderer. Every extractor's
+# *_resolve_response_symbol delegates here when the user supplies no symbol,
+# so a snake_case response renders identically across packages (page-audit
+# P6b / Pattern G). Escapes underscores so MathJax does not parse the name
+# as a subscript (the `body_m ass` bug) and wraps multi-letter names in
+# \mathrm{} so they render upright as one identifier, with the
+# per-observation subscript `_i` matching the linear-predictor indexing.
+#' @keywords internal
+default_response_symbol <- function(response) {
+  esc <- gsub("_", "\\_", response, fixed = TRUE)
+  if (nchar(response) > 1L) {
+    paste0("\\mathrm{", esc, "}_i")
+  } else {
+    paste0(esc, "_i")
+  }
+}
+
 base_resolve_response_symbol <- function(response, symbols) {
   if (!is.null(symbols) && !is.null(symbols[[response]])) {
     return(as.character(symbols[[response]]))
   }
-  response
+  default_response_symbol(response)
 }
 
 base_build_submodels <- function(entries, fit, param, link_mu) {

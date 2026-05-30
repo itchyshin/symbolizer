@@ -228,7 +228,7 @@ lme4_resolve_response_symbol <- function(response, symbols) {
   if (!is.null(symbols) && !is.null(symbols[[response]])) {
     return(as.character(symbols[[response]]))
   }
-  response
+  default_response_symbol(response)
 }
 
 lme4_build_submodels <- function(entries, fit, param, link_mu) {

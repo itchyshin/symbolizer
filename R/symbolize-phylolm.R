@@ -297,12 +297,7 @@ phylolm_resolve_response_symbol <- function(response, symbols) {
   if (!is.null(symbols) && !is.null(symbols[[response]])) {
     return(as.character(symbols[[response]]))
   }
-  esc <- gsub("_", "\\_", response, fixed = TRUE)
-  if (nchar(response) > 1L) {
-    paste0("\\mathrm{", esc, "}_i")
-  } else {
-    paste0(esc, "_i")
-  }
+  default_response_symbol(response)
 }
 
 phylolm_build_submodels <- function(entries, fit, param, link_mu) {

@@ -252,7 +252,7 @@ mgcv_resolve_response_symbol <- function(response, symbols) {
   if (!is.null(symbols) && !is.null(symbols[[response]])) {
     return(as.character(symbols[[response]]))
   }
-  response
+  default_response_symbol(response)
 }
 
 mgcv_build_submodels <- function(entries, param, link_mu) {

@@ -676,17 +676,7 @@ drm_resolve_response_symbol <- function(response, symbols) {
   if (!is.null(symbols) && response %in% names(symbols)) {
     return(unname(symbols[[response]]))
   }
-  # Default: use the column name directly as a scalar subscript_i.
-  # Escape any underscores in the column name so MathJax doesn't parse
-  # them as subscripts (the "body_m ass_i" rendering bug). Wrap
-  # multi-character names in \mathrm{...} so multi-letter variable
-  # names render upright as a single identifier.
-  esc <- gsub("_", "\\_", response, fixed = TRUE)
-  if (nchar(response) > 1L) {
-    paste0("\\mathrm{", esc, "}_i")
-  } else {
-    paste0(esc, "_i")
-  }
+  default_response_symbol(response)
 }
 
 drm_resolve_biv_response_symbol <- function(response, symbols, which) {
