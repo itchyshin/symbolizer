@@ -142,6 +142,14 @@ symbolize.gam <- function(fit, symbols = NULL, units = NULL,
     response_symbol_1 = response_symbol, response_symbol_2 = NA_character_
   )
   submodels  <- mgcv_build_submodels(entries, param, link)
+  # An mgcv gam/bam fit estimates at most a SINGLE constant scale parameter
+  # (gaussian residual variance fit$sig2, Gamma scale phi) and never a
+  # dispersion SUBMODEL -- its submodels table carries only `mu`. Flag this so
+  # the shared drmTMB builders drop the phantom log-linked sigma submodel from
+  # the assumptions block and gloss sigma_i as a constant scale (not "on the
+  # log scale"). Self-correcting: if a future mgcv extractor ever adds a
+  # dispersion submodel, the flag flips off and the real submodel is kept.
+  constant_scale <- !any(submodels$parameter %in% c("sigma", "sigma1", "sigma2"))
   terms_tbl  <- drm_build_terms(entries, data, symbols)
   fixed_eff  <- mgcv_build_fixed_effects(terms_tbl, fit)
   re_tbl     <- drm_build_random_effects(list(NULL))
@@ -157,12 +165,13 @@ symbolize.gam <- function(fit, symbols = NULL, units = NULL,
     terms_tbl, response, response_symbol, response_symbol_matrix,
     response_units, family, submodels, units, data, n_obs, re_tbl,
     response_1 = response, response_2 = NA_character_,
-    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_
+    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_,
+    constant_scale = constant_scale
   )
   assumptions <- drm_build_assumptions(
     family, response, response_symbol, re_tbl,
     response_1 = response, response_2 = NA_character_,
-    link_mu = link
+    link_mu = link, constant_scale = constant_scale
   )
   interp <- drm_build_interpretation(
     fixed_eff, family, response, data,

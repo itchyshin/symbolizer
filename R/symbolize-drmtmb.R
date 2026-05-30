@@ -1639,7 +1639,8 @@ drm_build_symbol_dictionary <- function(terms_tbl, response, response_symbol,
                                         response_1 = NULL, response_2 = NULL,
                                         response_symbol_1 = NULL,
                                         response_symbol_2 = NULL,
-                                        structured_matrices = NULL) {
+                                        structured_matrices = NULL,
+                                        constant_scale = FALSE) {
   # `structured_matrices` (v0.21+): optional list of rows to append for
   # structured-covariance matrices (phylogenetic A, spatial Omega, etc.).
   # Each entry is a named list with the same fields as a symbol_dictionary
@@ -1769,14 +1770,14 @@ drm_build_symbol_dictionary <- function(terms_tbl, response, response_symbol,
   # larger => tighter, the opposite of an SD), Gamma (dispersion), NegBin
   # (overdispersion), etc. Source the meaning from the per-family
   # scale_meaning column of family-parameterizations.csv.
-  sigma_meaning_lookup <- function(fam) {
+  sigma_meaning_lookup <- function(fam, column = "scale_meaning") {
     tbl <- tryCatch(load_template("family-parameterizations"),
                     error = function(e) NULL)
     if (is.null(tbl) || !"family" %in% names(tbl) ||
-        !"scale_meaning" %in% names(tbl)) return("")
+        !column %in% names(tbl)) return("")
     hit <- tbl[tbl$family == fam, , drop = FALSE]
     if (nrow(hit) == 0L) return("")
-    sm <- hit$scale_meaning[[1L]]
+    sm <- hit[[column]][[1L]]
     if (is.na(sm) || !nzchar(sm)) "" else sm
   }
   for (i in seq_len(nrow(submodels))) {
@@ -1829,6 +1830,17 @@ drm_build_symbol_dictionary <- function(terms_tbl, response, response_symbol,
       meta_normal     = "residual heterogeneity SD (tau)",
       "residual scale"
     )
+    # Constant-scale guard (v0.22.5 #10): the default glosses above assume a
+    # drmTMB-style log-link dispersion submodel (e.g. "(on the log scale)").
+    # A fit with a SINGLE constant scalar scale and NO dispersion submodel
+    # (an mgcv gam/bam Gamma reports phi directly, not on the log scale)
+    # needs an honest constant-scale gloss instead. Source it from the
+    # `scale_meaning_constant` column of family-parameterizations.csv; fall
+    # back to the log-scale switch value if no constant gloss is templated.
+    if (isTRUE(constant_scale)) {
+      cm <- sigma_meaning_lookup(family, column = "scale_meaning_constant")
+      if (nzchar(cm)) desc <- cm
+    }
     rows[[length(rows) + 1L]] <- tibble::tibble(
       symbol = "\\sigma_i",
       symbol_matrix = "\\boldsymbol{\\sigma}",
@@ -1944,11 +1956,26 @@ drm_build_assumptions <- function(family, response, response_symbol,
                                   re_tbl = NULL,
                                   response_1 = NULL, response_2 = NULL,
                                   detected_signals = character(0L),
-                                  link_mu = NULL) {
+                                  link_mu = NULL,
+                                  constant_scale = FALSE) {
   tbl <- load_template("assumption-templates")
   rows <- tbl[tbl$family == family, , drop = FALSE]
   if (nrow(rows) == 0L) {
     cli::cli_abort("No assumption template rows for family {.val {family}}.")
+  }
+  # Constant-scale guard (v0.22.5 #10): some fitted classes estimate a SINGLE
+  # scalar dispersion / scale parameter with NO dispersion submodel and NO log
+  # link on the scale (e.g. an mgcv gam/bam Gamma or gaussian fit reports one
+  # phi / residual variance directly). The shared family templates carry a
+  # `sigma` submodel block -- a log-linked linear_predictor `log(sigma_i) =
+  # gamma_0 + sum_k gamma_k Z_{ki}` plus a positivity row -- that describes a
+  # drmTMB-style location-scale model such a fit does NOT have. Drop those
+  # phantom sigma-submodel rows when the caller flags a constant scale. The
+  # single scalar value lives in variance_components, not in an assumptions
+  # submodel. drmTMB / glmmTMB / brms location-scale fits keep the default
+  # `constant_scale = FALSE`, so their real sigma submodel is untouched.
+  if (isTRUE(constant_scale)) {
+    rows <- rows[rows$submodel != "sigma" | is.na(rows$submodel), , drop = FALSE]
   }
   # v0.21+ requires-column gating. Rows can carry a `requires` value naming
   # a structured-dependence signal (phylo / spatial / animal / temporal /
