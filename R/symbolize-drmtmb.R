@@ -2260,6 +2260,16 @@ drm_build_interpretation <- function(fixed_eff, family, response, data,
   } else {
     NULL
   }
+  # Variables appearing in an interaction term. Interaction rows carry
+  # variable = "x:sex" (colon-joined component names, no contrast-level
+  # suffix), so split on ":". A factor contrast whose factor is in this set
+  # reads as the difference at the interacting predictor's reference (0), not
+  # the marginal average -- it gets the interaction-aware template (E3 / P7).
+  interacting_vars <- {
+    iv <- fixed_eff$variable[fixed_eff$role == "interaction"]
+    iv <- iv[!is.na(iv)]
+    if (length(iv)) unique(unlist(strsplit(iv, ":", fixed = TRUE))) else character(0)
+  }
   rows <- list()
   for (i in seq_len(nrow(fixed_eff))) {
     r <- fixed_eff[i, , drop = FALSE]
@@ -2269,6 +2279,15 @@ drm_build_interpretation <- function(fixed_eff, family, response, data,
       intercept_less = r$submodel %in% intercept_less_submodels
     )
     if (is.na(cr)) next
+    # E3: a factor contrast whose factor interacts gets the interaction-aware
+    # template when one exists for this (family, submodel); otherwise it keeps
+    # the plain marginal reading (no regression for families without the row).
+    if (identical(cr, "factor_contrast") && !is.na(r$variable) &&
+        r$variable %in% interacting_vars &&
+        any(tbl$family == family & tbl$submodel == r$submodel &
+            tbl$coefficient_role == "factor_contrast_interaction")) {
+      cr <- "factor_contrast_interaction"
+    }
     template <- tbl[
       tbl$family == family &
         tbl$submodel == r$submodel &
