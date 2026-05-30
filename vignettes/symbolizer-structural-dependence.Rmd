@@ -140,7 +140,7 @@ cat("A off-diagonal quantiles (25/50/75/99%): ",
           collapse = " / "), "\n")
 ```
 
-The two representations encode the **same** Brownian-motion prior. The tips-only version is the operational default for `metafor`, `glmmTMB::propto`, and `brms::gr(cov = A)`. The all-nodes version is what `MCMCglmm` uses internally (`ginverse = list(animal = Ainv)`) and what `drmTMB::phylo()` builds under the hood (`drmTMB` cites Hadfield & Nakagawa 2010 explicitly in its `?phylo` help page). The all-nodes form is *richer*: it gives access to ancestral-state BLUPs at internal nodes; the tips-only form marginalises those out. In a balanced setup the two agree on the variance estimate $\hat\sigma_p^2$ — a result we'll return to in § "Tips vs all-nodes".
+The two representations encode the **same** Brownian-motion prior. The tips-only version is the operational default for `metafor`, `glmmTMB::propto`, and `brms::gr(cov = A)`. The all-nodes version is what `MCMCglmm` uses internally (`ginverse = list(animal = Ainv)`) and what `drmTMB::phylo()` builds under the hood (`drmTMB` cites Hadfield & Nakagawa 2010 explicitly in its `?phylo` help page). The all-nodes form is *richer*: it gives access to ancestral-state BLUPs at internal nodes; the tips-only form marginalises those out. In a balanced setup the two agree on the variance estimate $\hat\sigma_p^2$ — a result we'll return to in § "Tips-only vs all-nodes".
 
 ## Three packages, one phylogenetic LMM
 
@@ -300,7 +300,7 @@ sym_brms$metadata$detected_signals       # "phylo"
 sym_brms$variance_components             # species + residual
 ```
 
-`symbolizer` reports `phylo_representation = "tips_only"` because `brms` works directly with the $k \times k$ tips-only $\mathbf A$ — no internal-node augmentation. Compare with the MCMCglmm Face above where `phylo_representation = "all_nodes"`; the variance estimate $\hat\sigma_p^2$ is the same in expectation.
+`symbolizer` reports `phylo_representation = "tips_only"` because `brms` works directly with the $k \times k$ tips-only $\mathbf A$ — no internal-node augmentation. Compare with the MCMCglmm Face above where `phylo_representation = "all_nodes"`; the variance estimate $\hat\sigma_p^2$ is the same in expectation — the roughly 28 % Monte-Carlo gap between the two fits here (and the matching gap in $\hat H^2$) reflects short chains and differing default priors, not a difference in the underlying model.
 
 ```{r brms-assumptions}
 assumption_table(sym_brms)
@@ -339,7 +339,7 @@ sym_pl <- symbolize(fit_pl, data = dat_pl)
 sym_pl$metadata$phylo_representation   # "pgls_marginal"
 sym_pl$metadata$phylo_model            # "lambda"
 sym_pl$metadata$phylo_param            # estimated lambda
-sym_pl$metadata$detected_signals       # "phylo"
+sym_pl$metadata$detected_signals       # "phylo_marginal"
 sym_pl$variance_components             # single sigma^2 row
 ```
 
@@ -353,7 +353,7 @@ The bridge with the RE form: take the estimated $\hat\sigma^2$ and $\hat\lambda$
 assumption_table(sym_pl)
 ```
 
-The cross-package agreement story is the point: every fit above attaches the same conceptual object — a phylogenetic correlation matrix $\mathbf A$ — even though the syntactic surface differs (RE bar in `MCMCglmm` and `brms`, marginalised residual covariance in `phylolm`). `symbolizer` produces the same `metadata$detected_signals = "phylo"`, the same symbol-dictionary row for $\mathbf A$, the same gated phylogenetic assumption rows, no matter which parameterisation fitted the model.
+The cross-package agreement story is the point: every fit above attaches the same conceptual object — a phylogenetic correlation matrix $\mathbf A$ — even though the syntactic surface differs (RE bar in `MCMCglmm` and `brms`, marginalised residual covariance in `phylolm`). The RE-form fits (`MCMCglmm`, `brms`) report `metadata$detected_signals = "phylo"`; `phylolm` reports `"phylo_marginal"`, the marginal-form variant of the same phylogenetic signal (it absorbs $u_p$ into the residual, so there is no separate $u_p$ tier to label). Either way `symbolizer` attaches the same symbol-dictionary row for $\mathbf A$ and gates the matching phylogenetic assumption rows, no matter which parameterisation fitted the model.
 
 ## Animal-model unification
 

@@ -44,3 +44,22 @@ test_that("symbolize.sdmTMB LaTeX renders the spatial random field", {
   expect_match(tex, "Normal", fixed = TRUE)
   expect_match(tex, "u_{site", fixed = TRUE)
 })
+
+# Audit B1: the sdmTMB extractor must surface the fixed-effects design
+# matrix X and the FE coefficient vector so Tab 3 fills with data. The
+# spatial random field is NOT in X (it is a structured-covariance block),
+# so mu_hat is the fixed-effects prediction X*beta and the residual
+# y - mu_hat carries the field + noise.
+test_that("symbolize.sdmTMB populates expanded$X / beta (audit B1)", {
+  fit <- fit_sdmtmb_gaussian_spatial()
+  sym <- symbolize(fit)
+  ex <- sym$expanded
+  expect_true(is.matrix(ex$X))
+  expect_equal(nrow(ex$X), sym$model$n_obs)
+  expect_equal(length(ex$beta), ncol(ex$X))
+  expect_equal(as.numeric(ex$mu_hat),
+               as.numeric(ex$X %*% ex$beta), tolerance = 1e-6)
+  html <- as_html_three_views(sym)
+  expect_false(grepl("not captured", html))
+  expect_match(html, "mathbf\\{X\\}")
+})

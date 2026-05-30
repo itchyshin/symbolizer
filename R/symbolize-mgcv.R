@@ -182,8 +182,21 @@ symbolize.gam <- function(fit, symbols = NULL, units = NULL,
     entries, components, response,
     response_1 = response, response_2 = NA_character_
   )
-  expanded <- list(y = data[[response]], X = NULL, Z = NULL,
+  # Tab 3 ("equations with data") needs the design matrix X, the
+  # response-scale fitted mean mu_hat, and the link-scale linear predictor
+  # eta_hat; without X the stacked-matrix + worked-row block falls back to
+  # the "design matrix not captured" placeholder (audit B1). For a gam the
+  # `model.matrix(fit)` columns include the smooth basis and align with
+  # `coef(fit)`, so X*beta = eta_hat. Each accessor is wrapped so a fit
+  # that cannot produce a model matrix degrades to NULL.
+  X_mat   <- tryCatch(stats::model.matrix(fit), error = function(e) NULL)
+  mu_hat  <- tryCatch(as.numeric(stats::fitted(fit)), error = function(e) NULL)
+  eta_hat <- tryCatch(as.numeric(stats::predict(fit, type = "link")),
+                      error = function(e) mu_hat)
+  e_resid <- tryCatch(as.numeric(stats::residuals(fit)), error = function(e) NULL)
+  expanded <- list(y = data[[response]], X = X_mat, Z = NULL,
                    beta = stats::coef(fit), u = NULL,
+                   eta_hat = eta_hat, mu_hat = mu_hat, e = e_resid,
                    fitted = stats::fitted(fit),
                    residuals = stats::residuals(fit))
 

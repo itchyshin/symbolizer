@@ -1395,13 +1395,41 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L,
       "\\mathrm{Cov}(\\hat{\\mathbf{u}}) \\;=\\; %s \\cdot \\underbrace{%s}_{\\textstyle\\,%s\\,}",
       sigma_sym, M_mat_tex, M_lab
     )
-    M_caption <- sprintf(
-      "<p class=\"sym-caption\" style=\"font-size:0.85em;color:#6b7280;margin-top:0.4rem\">The %s random effect $u$ has covariance $%s \\cdot %s$, where $%s$ is the %d &times; %d %s correlation matrix. Showing the head + tail rows / columns; full matrix is %d &times; %d.</p>\n",
-      M_kind, sigma_sym, M_sym, M_sym, k, k,
-      switch(M_kind,
-        phylo = "phylogenetic", spatial = "spatial", "structured"),
-      k, k
-    )
+    # Audit M7: under the Hadfield-Nakagawa all-nodes augmentation the
+    # supplied phylogenetic matrix spans tips AND internal nodes, so its
+    # leading-diagonal entries are NOT all 1 -- the internal-node rows have
+    # self-(co)variance < 1 under all-nodes scaling; only the tip rows have
+    # unit diagonal. Calling such a matrix "the correlation matrix A"
+    # (which a reader expects to have a unit diagonal) is wrong. Detect the
+    # non-unit diagonal and either annotate the internal-node rows (phylo)
+    # or fall back to the neutral "covariance matrix" wording.
+    M_diag <- tryCatch(diag(ex$M), error = function(e) numeric(0))
+    diag_all_unit <- length(M_diag) > 0L &&
+      all(abs(M_diag - 1) < 1e-6)
+    M_kind_word <- switch(M_kind,
+      phylo = "phylogenetic", spatial = "spatial", "structured")
+    if (diag_all_unit) {
+      # Genuine correlation matrix (tips-only / unit diagonal): keep the
+      # historic "correlation matrix" wording.
+      M_caption <- sprintf(
+        "<p class=\"sym-caption\" style=\"font-size:0.85em;color:#6b7280;margin-top:0.4rem\">The %s random effect $u$ has covariance $%s \\cdot %s$, where $%s$ is the %d &times; %d %s correlation matrix. Showing the head + tail rows / columns; full matrix is %d &times; %d.</p>\n",
+        M_kind, sigma_sym, M_sym, M_sym, k, k, M_kind_word, k, k
+      )
+    } else if (identical(M_kind, "phylo")) {
+      # All-nodes augmented phylogenetic matrix: leading rows are internal
+      # nodes whose self-covariance is < 1.
+      M_caption <- sprintf(
+        "<p class=\"sym-caption\" style=\"font-size:0.85em;color:#6b7280;margin-top:0.4rem\">The %s random effect $u$ has covariance $%s \\cdot %s$, where $%s$ is the %d &times; %d augmented phylogenetic <strong>covariance</strong> matrix (tips and internal nodes, the Hadfield&ndash;Nakagawa all-nodes representation). Its diagonal is <em>not</em> all 1: the leading rows shown here are internal nodes, whose self-covariance is &lt; 1 under all-nodes scaling; only the tip rows have unit diagonal. Showing the head + tail rows / columns; full matrix is %d &times; %d.</p>\n",
+        M_kind, sigma_sym, M_sym, M_sym, k, k, k, k
+      )
+    } else {
+      # Non-phylo structured matrix with a non-unit diagonal: neutral
+      # "covariance matrix" wording rather than "correlation matrix".
+      M_caption <- sprintf(
+        "<p class=\"sym-caption\" style=\"font-size:0.85em;color:#6b7280;margin-top:0.4rem\">The %s random effect $u$ has covariance $%s \\cdot %s$, where $%s$ is the %d &times; %d %s covariance matrix. Showing the head + tail rows / columns; full matrix is %d &times; %d.</p>\n",
+        M_kind, sigma_sym, M_sym, M_sym, k, k, M_kind_word, k, k
+      )
+    }
   }
 
   # --- Stitch: worked row + matrix block, paired per submodel -----------
@@ -1721,6 +1749,29 @@ three_views_worked_row <- function(ex, resp_sym = "\\mathbf{y}",
   # meaningless ε for Poisson / Beta.
   fam_spec_wr <- worked_row_family_spec(family)
   shape <- fam_spec_wr$shape
+
+  # Fallback RE contribution. A fit WITH random effects whose per-tier
+  # Z_g / u were not populated -- e.g. an all-nodes phylogenetic MCMCglmm
+  # fit, where the tip-level BLUPs are not extracted from the augmented
+  # structure -- leaves re_terms empty, yet mu_hat = X*beta + (RE
+  # contribution). For a same-scale additive (identity-link Gaussian)
+  # family the gap mu_hat - X*beta IS that aggregate RE contribution; show
+  # it as one \hat{u}_1 term so the worked row closes (X*beta + u-hat =
+  # mu-hat) instead of printing a misleading `X*beta \approx mu_hat` where
+  # the two numbers visibly differ. Gated by a relative threshold so
+  # ordinary display-rounding noise on a no-RE fit never spawns a spurious
+  # term. (Audit B2: caught on the structural-dependence MCMCglmm widget.)
+  if (length(re_terms_sym) == 0L && shape == "additive_gaussian") {
+    re_gap <- mu1 - lp_disp
+    if (abs(re_gap) > 0.02 * (abs(mu1) + 1)) {
+      sym_terms <- c(sym_terms, "\\hat{u}_{1}")
+      num_terms <- c(num_terms, sprintf("(%s)", fmt(re_gap)))
+      num_vals  <- c(num_vals, as.numeric(fmt(re_gap)))
+      sym_rhs <- paste(sym_terms, collapse = " + ")
+      num_rhs <- join_signed_terms(num_terms)
+      lp_disp <- sum(num_vals)
+    }
+  }
 
   if (shape == "additive_gaussian") {
     # v0.22.4 #155: separate the linear-predictor build (row 2, shown with
@@ -2160,6 +2211,40 @@ vc_icc_line <- function(ic) {
     sc, formatC(v, digits = 3L, format = "f"), cap_html)
 }
 
+# Does this fit model the residual SD with predictors (a genuine
+# location-scale / dispersion submodel), as opposed to a single constant
+# residual SD? Audit M1: read the MODEL STRUCTURE, not just the expanded
+# numeric arrays. Two tells, either sufficient:
+#   1. A sigma / dispersion submodel row in `x$submodels` whose formula
+#      RHS carries at least one non-intercept term.
+#   2. The expanded sigma design matrix `X_sigma` has more than one
+#      column (the historic signal -- kept so fits that surface X_sigma
+#      but not a tidy submodels row still register).
+three_views_sigma_varies <- function(x) {
+  # Tell 1: structural -- the sigma / dispersion submodel formula.
+  sm <- tryCatch(x$submodels, error = function(e) NULL)
+  if (!is.null(sm) && is.data.frame(sm) &&
+      all(c("parameter", "formula") %in% names(sm))) {
+    sig_rows <- sm[sm$parameter %in% c("sigma", "disp", "dispersion"), ,
+                   drop = FALSE]
+    if (nrow(sig_rows) > 0L) {
+      has_pred <- vapply(sig_rows$formula, function(f) {
+        tt <- tryCatch(stats::terms(stats::as.formula(f)),
+                       error = function(e) NULL)
+        !is.null(tt) && length(attr(tt, "term.labels")) > 0L
+      }, logical(1L))
+      if (any(has_pred)) return(TRUE)
+    }
+  }
+  # Tell 2: numeric -- a multi-column sigma design matrix.
+  xs <- tryCatch(x$expanded$X_sigma, error = function(e) NULL)
+  g  <- tryCatch(x$expanded$gamma,   error = function(e) NULL)
+  if (!is.null(xs) && !is.null(g) && !is.null(ncol(xs)) && ncol(xs) > 1L) {
+    return(TRUE)
+  }
+  FALSE
+}
+
 three_views_biology_gloss <- function(x) {
   family <- tryCatch(x$model$family, error = function(e) NULL)
   if (is.null(family) || !nzchar(family)) return("")
@@ -2229,16 +2314,14 @@ three_views_biology_gloss <- function(x) {
     return(paste0("  <p class=\"sym-biology\">", sentence, "</p>\n"))
   }
 
-  has_sigma_submodel <- !is.null(x$expanded) &&
-                       !is.null(x$expanded$X_sigma) &&
-                       !is.null(x$expanded$gamma)
-  # A constant-sigma fit has X_sigma populated but with a single
-  # intercept-only column -- the model says `sigma_i = exp(gamma_0)`,
-  # i.e. the same value for every observation. Treat this the same as
-  # no sigma submodel for the purpose of the biology gloss.
-  sigma_varies <- has_sigma_submodel &&
-                  !is.null(ncol(x$expanded$X_sigma)) &&
-                  ncol(x$expanded$X_sigma) > 1L
+  # Audit M1: detect a varying residual SD from the MODEL STRUCTURE, not
+  # only from the expanded numeric arrays. Some extractors (e.g. drmTMB
+  # bivariate-Gaussian, or any sigma submodel whose per-dpar design is
+  # not surfaced) carry a real `sigma ~ predictor` submodel without ever
+  # populating `expanded$X_sigma`; deriving sigma_varies from X_sigma
+  # alone then mislabels them as homoscedastic ("the residual SD is
+  # constant") even though the SD is modelled on the log scale.
+  sigma_varies <- three_views_sigma_varies(x)
   has_re <- !is.null(x$random_effects) &&
             (is.data.frame(x$random_effects) || is.list(x$random_effects)) &&
             length(x$random_effects) > 0L

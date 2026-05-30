@@ -27,7 +27,11 @@ test_that("mgcv Gamma sigma_i gloss does not falsely say 'on the log scale'", {
   sym <- symbolize(fit)
   sd <- sym$symbol_dictionary
   # which() is NA-safe: the dictionary has a design-matrix row with symbol = NA.
-  sig <- sd[which(sd$symbol == "\\sigma_i"), , drop = FALSE]
+  # Audit M4: a single-phi mgcv Gamma fit has a CONSTANT dispersion (no
+  # per-observation scale submodel), so the residual-scale symbol is the
+  # unindexed scalar \sigma, not \sigma_i (the i subscript is reserved for
+  # genuine location-scale fits whose SD varies by row).
+  sig <- sd[which(sd$symbol == "\\sigma"), , drop = FALSE]
   expect_equal(nrow(sig), 1L)
   desc <- sig$description[[1L]]
   # The single-phi mgcv fit reports the dispersion directly, NOT on a log scale.

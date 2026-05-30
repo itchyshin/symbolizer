@@ -505,16 +505,21 @@ summaries; $R_t$ is the per-trait repeatability; phenotypic correlations
 decompose as a weighted mix of between and within. All three readings
 fall out of the same two fitted matrices.
 
-## 9. Identifiability gotchas: rotation, sign, and the within-tier σ_ε
+## 9. Identifiability gotchas: rotation, sign, and the within-tier σε
 
 The loading matrices $\boldsymbol{\Lambda}_B, \boldsymbol{\Lambda}_W$
-are identified only up to **rotation** and **sign** when their rank
-exceeds 1. Two fits that produce indistinguishable likelihoods can have
+are identified up to **per-column sign at any rank**, and
+*additionally* up to **rotation when their rank exceeds 1**. So even
+the rank-1 $\boldsymbol{\Lambda}_W$ in this fit is fixed only up to a
+column reflection: flipping every entry in a column and the
+corresponding latent scores leaves the likelihood unchanged. Two fits
+that produce indistinguishable likelihoods can therefore have
 entirely different-looking $\boldsymbol{\Lambda}_B$ — this is the
 classical factor-analysis identifiability problem. The implied
 covariance $\boldsymbol{\Sigma}_B = \boldsymbol{\Lambda}_B
 \boldsymbol{\Lambda}_B^{\!\top} + \boldsymbol{\Psi}_B$ is invariant
-under rotation; $\boldsymbol{\Lambda}_B$ itself is not.
+under both rotation and sign change; $\boldsymbol{\Lambda}_B$ itself
+is not.
 
 Two practical conventions, both surfaced in
 `assumption_table(sym)`:

@@ -42,8 +42,7 @@ what each word means in a biology context.
 glossary <- data.frame(
   word = c(
     "response", "predictor", "factor", "submodel", "linear predictor",
-    "design matrix", "coefficient", "link function", "random intercept",
-    "latent variable", "loading"
+    "design matrix", "coefficient", "link function"
   ),
   meaning = c(
     "the outcome you measured (e.g., body mass, abundance).",
@@ -53,10 +52,7 @@ glossary <- data.frame(
     "the sum that determines a parameter for an observation: intercept + slope x predictor + ... Sometimes a link function (e.g., log) is applied first.",
     "the table the computer multiplies coefficients by to get fitted values. Each row is one observation; each column is one term.",
     "a single number the model estimates: an intercept, a slope, or a factor contrast.",
-    "the transformation between a parameter's natural scale (e.g., a count) and the scale the linear predictor works on (e.g., log-count).",
-    "a per-group offset that lets each group have its own baseline, while assuming those offsets follow a shared distribution.",
-    "an unmeasured axis the model uses to explain shared variation across traits or species. (Used in gllvmTMB.)",
-    "how strongly a single trait or species responds to a latent axis."
+    "the transformation between a parameter's natural scale (e.g., a count) and the scale the linear predictor works on (e.g., log-count)."
   ),
   stringsAsFactors = FALSE
 )
@@ -118,9 +114,10 @@ symbols ($\mu_i$, $\beta_0$, $\beta_1$, $T_i$).
 ### 2. Three views of the fit
 
 `as_html_three_views()` is a self-contained widget with three tabs over the same
-fit: the matrix-form **equation**, the per-observation **index** form, and the
-**numbers** actually flowing through — the response column, the design-matrix
-rows, the coefficient vector, and the fitted mean $\hat{\boldsymbol{\mu}}$.
+fit, in the order they appear in the widget: the per-observation **index** form,
+the matrix-form **equation**, and **equations with data** — the response column,
+the design-matrix rows, the coefficient vector, and the fitted mean
+$\hat{\boldsymbol{\mu}}$.
 
 ```{r three-views, results = 'asis'}
 as_html_three_views(sym, head = 5, tail = 2)

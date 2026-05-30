@@ -368,10 +368,10 @@ sym_phylo <- symbolize(
 as_html_three_views(sym_phylo, id = "phylo-multilevel")
 ```
 
-Tabs 1 and 2 carry the index- and matrix-form equations and the
-variance-component panel showing the two estimated tiers
-($\sigma_{\text{study}}^2$ and $\sigma_p^2\,\mathbf{A}$) alongside the
-known sampling tier $v_{kt}$. (The "with your numbers" tab falls back to
+Tab 1 carries the index-form equation and the variance-component
+panel showing the two estimated tiers ($\sigma_{\text{study}}^2$ and
+$\sigma_p^2\,\mathbf{A}$) alongside the known sampling tier $v_{kt}$;
+Tab 2 carries the matrix form. (The "with your numbers" tab falls back to
 a note for `rma.mv` — `symbolize()` does not yet expand metafor's design
 matrix into per-row arrays — so the structure lives on Tabs 1–2.)
 

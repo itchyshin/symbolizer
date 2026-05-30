@@ -618,14 +618,22 @@ drm_param_greek_bold <- function(dpar) {
 }
 
 drm_design_matrix_symbol <- function(dpar) {
+  # Audit M3: the scale (sigma) submodel design matrix is \mathbf{X}_\sigma,
+  # NOT \mathbf{Z}. \mathbf{Z} is reserved exclusively for the random-effects
+  # incidence matrix (it maps the group-level BLUPs \mathbf{u} onto the n
+  # observations). Tab 3's stacked-matrix block already renamed the scale
+  # design to \mathbf{X}_\sigma (Noether's audit); routing the symbol
+  # through here keeps Tab 2 (the matrix view) and the symbol glossary
+  # consistent, so the same fit never shows \mathbf{Z} meaning two
+  # different matrices across tabs.
   switch(
     dpar,
     mu     = "\\mathbf{X}",
     mu1    = "\\mathbf{X}_{1}",
     mu2    = "\\mathbf{X}_{2}",
-    sigma  = "\\mathbf{Z}",
-    sigma1 = "\\mathbf{Z}_{1}",
-    sigma2 = "\\mathbf{Z}_{2}",
+    sigma  = "\\mathbf{X}_{\\sigma}",
+    sigma1 = "\\mathbf{X}_{\\sigma_{1}}",
+    sigma2 = "\\mathbf{X}_{\\sigma_{2}}",
     rho12  = "\\mathbf{W}",
     zi     = "\\mathbf{X}_{\\mathrm{zi}}",
     hu     = "\\mathbf{X}_{\\mathrm{hu}}",
@@ -1167,6 +1175,27 @@ drm_build_expanded <- function(fit, re_per_entry, has_re,
   )
 }
 
+# Render a data-derived group / column name safely as a LaTeX subscript
+# (audit M2). A snake_case name such as `study_ID` interpolated raw into
+# a subscript -- e.g. `\sigma_{study_ID}`, `u_{study_ID(i)}`,
+# `\mathbf{u}_{study_ID}` -- is read by KaTeX as a nested double
+# subscript (`_{study` then a stray `_ID`), so it renders wrong. Wrap
+# multi-token names in `\mathrm{...}` with the underscore escaped so the
+# whole name reads upright as one identifier; leave single-token names
+# (`g`, `species`) untouched so the historical simple symbols are
+# unchanged.
+#' @keywords internal
+drm_group_subscript <- function(group_var) {
+  if (length(group_var) != 1L || is.na(group_var) || !nzchar(group_var)) {
+    return(group_var)
+  }
+  if (grepl("_", group_var, fixed = TRUE)) {
+    sprintf("\\mathrm{%s}", gsub("_", "\\_", group_var, fixed = TRUE))
+  } else {
+    group_var
+  }
+}
+
 drm_build_random_effects <- function(re_per_entry) {
   filled <- Filter(Negate(is.null), re_per_entry)
   if (length(filled) == 0L) return(NULL)
@@ -1193,17 +1222,20 @@ drm_build_random_effects <- function(re_per_entry) {
         row <- sel[[k]]
         idx <- k - 1L  # 0-based index, matches the math convention
         out$component_index[[row]] <- idx
+        # Escape snake_case group names for safe subscript rendering
+        # (audit M2); single-token names pass through unchanged.
+        gv_sub <- drm_group_subscript(gv)
         if (n_comp == 1L) {
           # Intercept-only: keep the historical simple symbols.
-          out$u_symbol_index[[row]]  <- sprintf("u_{%s(i)}", gv)
+          out$u_symbol_index[[row]]  <- sprintf("u_{%s(i)}", gv_sub)
           out$u_symbol_matrix[[row]] <- "\\mathbf{u}"
-          out$sigma_symbol[[row]]    <- sprintf("\\sigma_{%s}", gv)
+          out$sigma_symbol[[row]]    <- sprintf("\\sigma_{%s}", gv_sub)
         } else {
           # Multi-component: numbered subscripts. Intercept gets 0,
           # slopes get 1, 2, ...
-          out$u_symbol_index[[row]]  <- sprintf("u_{%d,%s(i)}", idx, gv)
+          out$u_symbol_index[[row]]  <- sprintf("u_{%d,%s(i)}", idx, gv_sub)
           out$u_symbol_matrix[[row]] <- sprintf("\\mathbf{u}_{%d}", idx)
-          out$sigma_symbol[[row]]    <- sprintf("\\sigma_{u_{%d,%s}}", idx, gv)
+          out$sigma_symbol[[row]]    <- sprintf("\\sigma_{u_{%d,%s}}", idx, gv_sub)
         }
         # For non-intercept components, record the predictor that
         # multiplies u_k in the linear predictor.
@@ -1281,8 +1313,10 @@ drm_build_covariance_components <- function(re_tbl) {
             component_1 = comps[[i]],
             component_2 = comps[[j]],
             rho_symbol  = sprintf("\\rho_{u_{%d,%s},\\, u_{%d,%s}}",
-                                  re_tbl$component_index[sel][[i]], gv,
-                                  re_tbl$component_index[sel][[j]], gv),
+                                  re_tbl$component_index[sel][[i]],
+                                  drm_group_subscript(gv),
+                                  re_tbl$component_index[sel][[j]],
+                                  drm_group_subscript(gv)),
             description = sprintf(
               "within-%s correlation between the random %s and the random %s on %s",
               gv,
@@ -1397,6 +1431,9 @@ drm_build_components <- function(submodels, terms_tbl, re_tbl, response_symbol,
       groups <- unique(re_for_dpar$group_var)
       mat_terms <- vapply(groups, function(gv) {
         sel <- which(re_for_dpar$group_var == gv)
+        # Escape snake_case group names for safe subscript rendering
+        # (audit M2); single-token names pass through unchanged.
+        gv_sub <- drm_group_subscript(gv)
         if (length(sel) == 1L &&
             is.na(re_for_dpar$predictor_factor[[sel[[1L]]]])) {
           # Intercept-only group: bare \mathbf{u} when there's only one
@@ -1404,11 +1441,11 @@ drm_build_components <- function(submodels, terms_tbl, re_tbl, response_symbol,
           if (length(groups) == 1L) {
             re_for_dpar$u_symbol_matrix[[sel[[1L]]]]
           } else {
-            sprintf("\\mathbf{u}_{%s}", gv)
+            sprintf("\\mathbf{u}_{%s}", gv_sub)
           }
         } else {
           # Multi-component (random intercept + slopes): \mathbf{Z}_g \mathbf{u}_g.
-          sprintf("\\mathbf{Z}_{%s}\\, \\mathbf{u}_{%s}", gv, gv)
+          sprintf("\\mathbf{Z}_{%s}\\, \\mathbf{u}_{%s}", gv_sub, gv_sub)
         }
       }, character(1L))
       re_mat <- paste(mat_terms, collapse = " + ")
@@ -1433,6 +1470,10 @@ drm_build_components <- function(submodels, terms_tbl, re_tbl, response_symbol,
     for (kk in seq_len(nrow(re_keys))) {
       sm <- re_keys$submodel[[kk]]
       g  <- re_keys$group_var[[kk]]
+      # Escape snake_case group names for safe LaTeX subscript rendering
+      # (audit M2). `g` itself stays raw for internal row names and data
+      # matching; `g_sub` is what goes inside `_{...}` subscripts.
+      g_sub <- drm_group_subscript(g)
       sel <- which(re_tbl$submodel == sm & re_tbl$group_var == g)
       n_comp <- length(sel)
       n_levels <- re_tbl$n_levels[[sel[[1L]]]]
@@ -1462,17 +1503,17 @@ drm_build_components <- function(submodels, terms_tbl, re_tbl, response_symbol,
         if (!is.null(struct_sym)) {
           eq_index <- sprintf(
             "\\mathbf{u}_{%s} \\sim \\mathcal{N}(\\mathbf{0},\\, %s^2 %s)",
-            g, sym, struct_sym
+            g_sub, sym, struct_sym
           )
           eq_matrix <- sprintf(
             "\\mathbf{u}_{%s} \\sim \\mathcal{N}(\\mathbf{0},\\, %s^2 %s_{%d \\times %d})",
-            g, sym, struct_sym, n_levels, n_levels
+            g_sub, sym, struct_sym, n_levels, n_levels
           )
         } else {
-          eq_index <- sprintf("u_{%s} \\sim \\mathcal{N}(0,\\, %s^2)", g, sym)
+          eq_index <- sprintf("u_{%s} \\sim \\mathcal{N}(0,\\, %s^2)", g_sub, sym)
           eq_matrix <- sprintf(
             "\\mathbf{u}_{%s} \\sim \\mathcal{N}(\\mathbf{0},\\, %s^2 \\mathbf{I}_{%d})",
-            g, sym, n_levels
+            g_sub, sym, n_levels
           )
         }
         rows[[length(rows) + 1L]] <- tibble::tibble(
@@ -1494,11 +1535,11 @@ drm_build_components <- function(submodels, terms_tbl, re_tbl, response_symbol,
           submodel = sm,
           equation = sprintf(
             "%s \\sim \\mathcal{N}_{%d}(\\mathbf{0},\\, \\boldsymbol{\\Sigma}_{u,%s})",
-            idx_vec, n_comp, g
+            idx_vec, n_comp, g_sub
           ),
           equation_matrix = sprintf(
             "\\mathbf{u}_{%s} \\sim \\mathcal{N}_{%d}(\\mathbf{0},\\, \\boldsymbol{\\Sigma}_{u,%s})",
-            g, n_comp, g
+            g_sub, n_comp, g_sub
           ),
           status = "stated"
         )
@@ -1513,8 +1554,8 @@ drm_build_components <- function(submodels, terms_tbl, re_tbl, response_symbol,
           if (i < j) {
             off_terms[[length(off_terms) + 1L]] <- sprintf(
               "\\rho_{u_{%d,%s},u_{%d,%s}}\\, %s\\, %s",
-              re_tbl$component_index[sel][[i]], g,
-              re_tbl$component_index[sel][[j]], g,
+              re_tbl$component_index[sel][[i]], g_sub,
+              re_tbl$component_index[sel][[j]], g_sub,
               sigmas[[i]], sigmas[[j]]
             )
           }
@@ -1523,7 +1564,7 @@ drm_build_components <- function(submodels, terms_tbl, re_tbl, response_symbol,
         sigma_mat <- if (n_comp == 2L) {
           sprintf(
             "\\boldsymbol{\\Sigma}_{u,%s} = \\begin{pmatrix} %s & %s \\\\ %s & %s \\end{pmatrix}",
-            g,
+            g_sub,
             diag_terms[[1L]], off_terms[[1L]],
             off_terms[[1L]], diag_terms[[2L]]
           )
@@ -1532,7 +1573,7 @@ drm_build_components <- function(submodels, terms_tbl, re_tbl, response_symbol,
           # rather than spelling out the full matrix.
           sprintf(
             "\\boldsymbol{\\Sigma}_{u,%s} = \\mathbf{D}_{u,%s}\\, \\boldsymbol{\\Omega}_{u,%s}\\, \\mathbf{D}_{u,%s} \\text{ where } \\mathbf{D}_{u,%s} = \\mathrm{diag}(%s)",
-            g, g, g, g, g,
+            g_sub, g_sub, g_sub, g_sub, g_sub,
             paste(sigmas, collapse = ",\\, ")
           )
         }
@@ -1832,7 +1873,14 @@ drm_build_symbol_dictionary <- function(terms_tbl, response, response_symbol,
       if (nzchar(cm)) desc <- cm
     }
     rows[[length(rows) + 1L]] <- tibble::tibble(
-      symbol = "\\sigma_i",
+      # Audit M4: this row is added only for fits with NO scale submodel
+      # (lm, lmer, MCMCglmm, brms / glmmTMB Gaussian, metafor) -- i.e. a
+      # single residual SD that is constant across observations (the
+      # dimension below says so). The symbol must therefore be the
+      # unindexed scalar `\sigma`, not `\sigma_i`; the per-observation
+      # subscript is reserved for genuine location-scale fits whose sigma
+      # submodel makes the SD vary by row.
+      symbol = "\\sigma",
       symbol_matrix = "\\boldsymbol{\\sigma}",
       variable = NA_character_,
       units = NA_character_,
@@ -1886,13 +1934,16 @@ drm_build_symbol_dictionary <- function(terms_tbl, response, response_symbol,
     for (i in seq_len(nrow(re_tbl))) {
       g <- re_tbl$group_var[[i]]
       G <- re_tbl$n_levels[[i]]
+      # Escape snake_case group names for safe LaTeX subscript rendering
+      # (audit M2); `g` stays raw for the plain-text variable / description.
+      g_sub <- drm_group_subscript(g)
       rows[[length(rows) + 1L]] <- tibble::tibble(
         symbol             = re_tbl$u_symbol_index[[i]],
-        symbol_matrix      = sprintf("\\mathbf{u}_{%s}", g),
+        symbol_matrix      = sprintf("\\mathbf{u}_{%s}", g_sub),
         variable           = g,
         units              = NA_character_,
         role               = "random_intercept",
-        dimension          = sprintf("scalar; $\\mathbb{R}^{G_{%s}}$ in matrix form", g),
+        dimension          = sprintf("scalar; $\\mathbb{R}^{G_{%s}}$ in matrix form", g_sub),
         dimension_concrete = sprintf("scalar; $\\mathbb{R}^{%d}$ in matrix form", G),
         description        = sprintf("random intercept by %s", g)
       )

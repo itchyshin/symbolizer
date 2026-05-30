@@ -171,8 +171,22 @@ base_symbolize_impl <- function(fit, family, link, class_name, package_name,
     entries, components, response,
     response_1 = response, response_2 = NA_character_
   )
-  expanded <- list(y = data[[response]], X = NULL, Z = NULL,
+  # Tab 3 ("equations with data") consumes `X` (design matrix), `mu_hat`
+  # (response-scale fitted mean) and `eta_hat` (link-scale linear
+  # predictor); without them the worked-row + stacked-matrix block fall
+  # back to the "design matrix not captured" placeholder (audit B1).
+  # `fitted(fit)` is the response-scale mean for both lm and glm;
+  # `predict(fit, type = "link")` is the link-scale linear predictor
+  # (identical to mu_hat for the identity link). Each accessor is wrapped
+  # so a class that cannot produce a model matrix degrades to NULL.
+  X_mat   <- tryCatch(stats::model.matrix(fit), error = function(e) NULL)
+  mu_hat  <- tryCatch(as.numeric(stats::fitted(fit)), error = function(e) NULL)
+  eta_hat <- tryCatch(as.numeric(stats::predict(fit, type = "link")),
+                      error = function(e) mu_hat)
+  e_resid <- tryCatch(as.numeric(stats::residuals(fit)), error = function(e) NULL)
+  expanded <- list(y = data[[response]], X = X_mat, Z = NULL,
                    beta = stats::coef(fit), u = NULL,
+                   eta_hat = eta_hat, mu_hat = mu_hat, e = e_resid,
                    fitted = stats::fitted(fit),
                    residuals = stats::residuals(fit))
 

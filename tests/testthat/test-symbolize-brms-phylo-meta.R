@@ -66,9 +66,12 @@ test_that("brms phylo + multilevel: only the phylo group gets A, plain group sta
     fixed = TRUE
   )
   # study_ID is a plain (1 | study_ID) tier -> stays scalar iid (no A).
+  # Audit M2: the snake_case group name is wrapped as \mathrm{study\_ID}
+  # so KaTeX renders it as one upright identifier rather than a nested
+  # double subscript.
   expect_match(
     tex,
-    "u_{study_ID} & \\sim \\mathcal{N}(0,\\, \\sigma_{study_ID}^2)",
+    "u_{\\mathrm{study\\_ID}} & \\sim \\mathcal{N}(0,\\, \\sigma_{\\mathrm{study\\_ID}}^2)",
     fixed = TRUE
   )
 })

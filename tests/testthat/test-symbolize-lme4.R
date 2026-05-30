@@ -52,3 +52,26 @@ test_that("lme4 symbolize produces valid LaTeX", {
   tex <- as_latex(sym)
   expect_match(tex, "Normal", fixed = TRUE)
 })
+
+# Audit B1: the lme4 extractor must surface the fixed-effects design
+# matrix X, the per-group incidence matrix Z and BLUPs u, so Tab 3
+# fills with data and the worked row closes on mu_hat = X*beta + Z*u.
+test_that("symbolize.lmerMod populates expanded$X / Z_g / u (audit B1)", {
+  fit <- fit_lmer_simple()
+  sym <- symbolize(fit)
+  ex <- sym$expanded
+  expect_true(is.matrix(ex$X))
+  expect_equal(nrow(ex$X), sym$model$n_obs)
+  expect_equal(length(ex$beta), ncol(ex$X))
+  expect_true(is.matrix(ex$Z_g))
+  expect_equal(nrow(ex$Z_g), sym$model$n_obs)
+  expect_equal(length(ex$u), ncol(ex$Z_g))
+  # fitted = X*beta + Z*u exactly for a Gaussian lmer, so mu_hat matches.
+  recon <- as.numeric(ex$X %*% ex$beta) + as.numeric(ex$Z_g %*% ex$u)
+  expect_equal(as.numeric(ex$mu_hat), recon, tolerance = 1e-8)
+  expect_equal(as.numeric(ex$mu_hat),
+               as.numeric(stats::fitted(fit)), tolerance = 1e-8)
+  html <- as_html_three_views(sym)
+  expect_false(grepl("not captured", html))
+  expect_match(html, "mathbf\\{X\\}")
+})

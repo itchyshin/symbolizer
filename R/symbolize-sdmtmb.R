@@ -173,8 +173,30 @@ symbolize.sdmTMB <- function(fit, symbols = NULL, units = NULL,
     entries, components, response,
     response_1 = response, response_2 = NA_character_
   )
-  expanded <- list(y = data[[response]], X = NULL, Z = NULL,
-                   beta = NULL, u = NULL, fitted = NULL, residuals = NULL)
+  # Tab 3 ("equations with data") needs the fixed-effects design matrix X,
+  # the coefficient vector beta, and the linear predictor; without X the
+  # stacked-matrix + worked-row block falls back to the "design matrix not
+  # captured" placeholder (audit B1). `model.matrix(fit)` is the
+  # fixed-effects design (it does NOT contain the spatial random field --
+  # that is a structured-covariance block, surfaced separately), so
+  # eta_hat = X*beta and mu_hat = link_inv(eta_hat) are the fixed-effects
+  # prediction. The residual y - mu_hat then carries the spatial field +
+  # observation noise, which keeps the Gaussian response equation closing
+  # row-by-row. Each accessor is wrapped so a fit that cannot produce a
+  # model matrix degrades to NULL (the prior behaviour).
+  X_mat   <- tryCatch(stats::model.matrix(fit), error = function(e) NULL)
+  beta    <- tryCatch(stats::coef(fit), error = function(e) NULL)
+  eta_hat <- if (!is.null(X_mat) && !is.null(beta) &&
+                 ncol(X_mat) == length(beta)) {
+    drop(X_mat %*% beta)
+  } else NULL
+  mu_hat  <- if (is.null(eta_hat)) NULL else drm_apply_link_inverse(eta_hat, link)
+  e_resid <- if (!is.null(mu_hat)) as.numeric(data[[response]]) - mu_hat else NULL
+  expanded <- list(y = data[[response]], X = X_mat, Z = NULL,
+                   beta = if (is.null(beta)) NULL else as.numeric(beta),
+                   u = NULL, eta_hat = eta_hat, mu_hat = mu_hat, e = e_resid,
+                   fitted = tryCatch(stats::fitted(fit), error = function(e) NULL),
+                   residuals = e_resid)
 
   metadata <- list(
     call = fit$call,

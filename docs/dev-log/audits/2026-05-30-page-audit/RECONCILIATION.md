@@ -178,18 +178,34 @@ browser layout sweep. Result: prose sound on all 6; **4 blockers, 8 majors,
     note: this test was already red after `gv_esc` and I missed it by reading
     only `tail -20` of the suite -- read the full FAIL list, not the tail.)*
 
-- **Remaining waves (the maintainer asked for all of it; deeper + interdependent
-  -- centred on `expand()` under-population):**
+- **Wave 2 — FIXED + verified** (maintainer: "fix them all"). A workflow of 3
+  file-partitioned fix agents (extractors+renderer / CSV / vignette prose) +
+  an orchestrator integration gate (full suite, all-11 rebuild, KaTeX +
+  overflow sweeps, browser eyeball of the three critical widgets). Suite green
+  bar the known `Matrix::expand` S4-masking flake; 0 snapshot churn; all 11
+  articles rebuilt OK; 0 KaTeX errors site-wide. Two agent "high-confidence"
+  claims the rendered page disqualified, fixed by the orchestrator: the CSV
+  agent produced no edits (done by hand), and B2 was only half-done (extractor
+  data populated, HTML worked-row renderer not wired) -- *the rendered page is
+  the gate, not the agent's self-report*.
   - **B1 (blocker)** Tab 3 empty because `X = NULL` is hardcoded in 7
-    extractors (base:169, brms:463, mcmcglmm:178, lme4:177, glmmtmb:562,
-    sdmtmb:152, mgcv:174) -> populate `X`/`mu_hat` via `model.matrix`/`fitted`
-    so the widget's "numbers" tab fills.
-  - **B2 (blocker)** structural-dependence MCMCglmm Tab 3 worked row does not
-    close (`mu_1 = 0.366 ~ 0.214`) and the stacked block omits the `+Zu` term
-    it captions -> render the RE term + a single consistent `mu_1`.
-  - **M1 (major)** location-scale gloss says "residual SD is constant" above a
-    `log(sigma_i)=...` equation: root cause is `sigma_varies` derived from
-    `expanded$X_sigma` (unpopulated for drmTMB) -> detect from model structure.
+    extractors (base, brms, mcmcglmm, lme4, glmmtmb, sdmtmb, mgcv) -> populate
+    `X`/`mu_hat` via `model.matrix`/`fitted` (tryCatch-guarded). Verified:
+    get-started Tab 3 now renders the design matrix (0 "not captured").
+  - **B2 (blocker)** structural-dependence MCMCglmm Tab 3 worked row did not
+    close (`mu_1 = 0.366 \approx 0.214`) and the stacked block omitted the
+    `+Zu` term it captioned. The agent populated `Z_g`/`u` for ordinary RE
+    fits but the all-nodes phylo MCMCglmm fit (no tip-BLUP extraction) left
+    them NULL. Orchestrator fallback in `three_views_worked_row`: for a
+    same-scale additive-Gaussian fit with no explicit RE term, the gap
+    `mu_hat - X*beta` IS the aggregate RE contribution -> show it as one
+    `\hat{u}_1` term (relative-threshold gated so rounding noise on no-RE fits
+    never spawns a spurious term). Verified rendered: `0.366 + (-0.152)
+    \approx 0.214` (closes).
+  - **M1 (major)** location-scale gloss "residual SD is constant" above a
+    `log(sigma_i)=...` equation -> new `three_views_sigma_varies()` reads the
+    sigma/dispersion submodel formula from model STRUCTURE (term labels), not
+    the unpopulated `expanded$X_sigma`.
   - **M2 (major)** `study_ID` still renders as a nested sub-subscript in ~8
     non-cov-block spots (`\sigma_{study_ID}`, `u_{study_ID(i)}`) -> escape
     group-name underscores at the symbol-assignment level (broader than the

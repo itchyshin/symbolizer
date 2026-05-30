@@ -86,3 +86,22 @@ test_that("symbolize.glmmTMB's interpretation tibble carries the CI columns", {
   # At least one row should have non-NA CI bounds (the intercept and slope)
   expect_true(sum(!is.na(interp$confint_low)) >= 1L)
 })
+
+# Audit B1: the glmmTMB extractor must surface the conditional design
+# matrix X and the response-scale fitted mean so Tab 3 fills with data.
+test_that("symbolize.glmmTMB populates expanded$X / mu_hat (audit B1)", {
+  fit <- fit_glmm_poisson()  # FE-only Poisson (log link)
+  sym <- symbolize(fit)
+  ex <- sym$expanded
+  expect_true(is.matrix(ex$X))
+  expect_equal(nrow(ex$X), sym$model$n_obs)
+  expect_equal(length(ex$beta), ncol(ex$X))
+  # eta_hat = X*beta on link scale; mu_hat = exp(eta_hat) = fitted.
+  expect_equal(as.numeric(ex$eta_hat),
+               as.numeric(ex$X %*% ex$beta), tolerance = 1e-6)
+  expect_equal(as.numeric(ex$mu_hat),
+               as.numeric(stats::fitted(fit)), tolerance = 1e-6)
+  html <- as_html_three_views(sym)
+  expect_false(grepl("not captured", html))
+  expect_match(html, "mathbf\\{X\\}")
+})

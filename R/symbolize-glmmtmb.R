@@ -585,12 +585,27 @@ glmm_build_variance_components <- function(fit, re_per_entry) {
 # skips NULL fields gracefully.
 glmm_build_expanded <- function(fit, re_per_entry, has_re) {
   y <- stats::model.response(fit$frame)
+  # Tab 3 ("equations with data") needs the conditional (mu) design
+  # matrix X, the response-scale fitted mean mu_hat, and the link-scale
+  # linear predictor eta_hat; without X the stacked-matrix + worked-row
+  # block falls back to the "design matrix not captured" placeholder
+  # (audit B1). `model.matrix(fit)` returns the cond submodel design
+  # matrix, aligned with `fixef(fit)$cond`. Each accessor is wrapped in
+  # tryCatch so a fit that cannot produce one degrades to NULL.
+  X_mat   <- tryCatch(stats::model.matrix(fit), error = function(e) NULL)
+  mu_hat  <- tryCatch(as.numeric(stats::fitted(fit)), error = function(e) NULL)
+  eta_hat <- tryCatch(as.numeric(stats::predict(fit, type = "link")),
+                      error = function(e) mu_hat)
+  e_resid <- tryCatch(as.numeric(stats::residuals(fit)), error = function(e) NULL)
   list(
     y = if (is.numeric(y)) as.numeric(y) else NULL,
-    X = NULL,
+    X = X_mat,
     Z = NULL,
     beta = glmmTMB::fixef(fit)$cond,
     u = NULL,
+    eta_hat = eta_hat,
+    mu_hat = mu_hat,
+    e = e_resid,
     fitted = stats::fitted(fit),
     residuals = stats::residuals(fit)
   )

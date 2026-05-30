@@ -230,8 +230,10 @@ symbolize.MCMCglmm <- function(fit, symbols = NULL, units = NULL,
     entries, components, response,
     response_1 = response, response_2 = NA_character_
   )
-  expanded <- list(y = data[[response]], X = NULL, Z = NULL,
-                   beta = NULL, u = NULL, fitted = NULL, residuals = NULL)
+  expanded <- mcmcglmm_build_expanded(
+    fit, re_tbl, response, data, link,
+    structured_matrix_for_group = structured_matrix_for_group
+  )
 
   heritability_tbl <- mcmcglmm_heritability_row(vc_tbl)
   metadata <- list(
@@ -341,6 +343,114 @@ mcmcglmm_re_terms <- function(fit, dpar, data) {
     )
   }
   do.call(rbind, rows)
+}
+
+# Build the `expanded` numeric arrays (Tab 3 "equations with data").
+#
+# MCMCglmm stores the fixed-effects design in `fit$X` (a sparse
+# dgCMatrix, columns = fixed-effect coefficient names) and the
+# random-effects design in `fit$Z` (columns named `<group>.<level>`).
+# Surfacing X fills Tab 3's stacked-matrix + worked-row block instead of
+# the "design matrix not captured" placeholder (audit B1).
+#
+# When the fit saved the per-level random effects (`pr = TRUE`), the
+# posterior means of those columns appear in `fit$Sol` alongside the
+# fixed effects. Splitting Sol's columns by membership in
+# colnames(fit$X) (fixed) vs colnames(fit$Z) (random) recovers `beta`
+# and the BLUP vector `u`. The conditional fitted mean is then
+# mu_hat = X*beta + Z*u (identity link). This is audit B2: previously
+# the worked row showed `mu_hat_1 = 0.366 (= X*beta, intercept-only)
+# \approx 0.214 (= full fitted mean)` -- two different numbers joined by
+# \approx -- because u was never surfaced. With u present the worked
+# row and the stacked block both close on X*beta + u row-by-row.
+#
+# When `pr = FALSE` (the default) Sol carries only the fixed effects, so
+# u / Z_g stay NULL and mu_hat = X*beta -- which equals predict(fit)
+# (random effects marginalised out). The worked row then shows a single
+# consistent mu_hat with no dangling RE term.
+mcmcglmm_build_expanded <- function(fit, re_tbl, response, data, link,
+                                    structured_matrix_for_group = NULL) {
+  X_mat <- tryCatch({
+    if (!is.null(fit$X)) as.matrix(fit$X) else NULL
+  }, error = function(e) NULL)
+  sol_means <- if (!is.null(fit$Sol)) colMeans(fit$Sol) else NULL
+
+  fe_names <- if (!is.null(X_mat)) colnames(X_mat) else NULL
+  beta <- if (!is.null(sol_means) && !is.null(fe_names) &&
+              all(fe_names %in% names(sol_means))) {
+    as.numeric(sol_means[fe_names])
+  } else NULL
+
+  # Per-tier random-effect incidence matrices Z_g and BLUPs u. fit$Z's
+  # columns are named `<group_var>.<level>`; we slice them per group so
+  # multi-tier fits (phylo + study) emit one Z block per tier (matching
+  # the per-tier rendering the three-views widget already supports). The
+  # per-level posterior means come from the matching fit$Sol columns;
+  # absent (pr = FALSE) the tier is skipped.
+  Z_full <- tryCatch({
+    if (!is.null(fit$Z)) as.matrix(fit$Z) else NULL
+  }, error = function(e) NULL)
+  Z_per_tier <- list()
+  u_per_tier <- list()
+  tier_kind  <- character(0L)
+  group_vars <- if (!is.null(re_tbl) && nrow(re_tbl) > 0L) {
+    unique(re_tbl$group_var)
+  } else character(0L)
+  if (!is.null(Z_full) && !is.null(sol_means) && length(group_vars) > 0L) {
+    z_cn <- colnames(Z_full)
+    for (gv in group_vars) {
+      cols <- which(startsWith(z_cn, paste0(gv, ".")))
+      if (length(cols) == 0L) next
+      Zg <- Z_full[, cols, drop = FALSE]
+      sol_cols <- z_cn[cols]
+      if (!all(sol_cols %in% names(sol_means))) next
+      u_g <- as.numeric(sol_means[sol_cols])
+      # Strip the `<group>.` prefix so column labels read as bare levels.
+      colnames(Zg) <- sub(paste0("^", gv, "\\."), "", sol_cols)
+      Z_per_tier[[gv]] <- Zg
+      u_per_tier[[gv]] <- u_g
+      is_structured <- !is.null(structured_matrix_for_group) &&
+                       !is.null(structured_matrix_for_group[[gv]])
+      tier_kind[[gv]] <- if (is_structured) "structured" else "iid"
+    }
+  }
+  Z_g <- if (length(Z_per_tier) > 0L) Z_per_tier[[1L]] else NULL
+  u   <- if (length(u_per_tier) > 0L) u_per_tier[[1L]] else NULL
+
+  eta_hat <- if (!is.null(X_mat) && !is.null(beta) &&
+                 ncol(X_mat) == length(beta)) {
+    drop(X_mat %*% beta)
+  } else NULL
+  if (!is.null(eta_hat) && length(Z_per_tier) > 0L) {
+    for (gv in names(Z_per_tier)) {
+      Z_gv <- Z_per_tier[[gv]]; u_gv <- u_per_tier[[gv]]
+      if (!is.null(Z_gv) && !is.null(u_gv)) {
+        eta_hat <- eta_hat + drop(Z_gv %*% u_gv)
+      }
+    }
+  }
+  mu_hat <- if (is.null(eta_hat)) NULL else drm_apply_link_inverse(eta_hat, link)
+  y <- data[[response]]
+  e_resid <- if (!is.null(mu_hat) && length(mu_hat) == length(y)) {
+    as.numeric(y) - mu_hat
+  } else NULL
+
+  list(
+    y          = y,
+    X          = X_mat,
+    Z          = NULL,
+    beta       = beta,
+    u          = u,
+    Z_g        = Z_g,
+    Z_per_tier = Z_per_tier,
+    u_per_tier = u_per_tier,
+    tier_kind  = tier_kind,
+    eta_hat    = eta_hat,
+    mu_hat     = mu_hat,
+    e          = e_resid,
+    fitted     = mu_hat,
+    residuals  = e_resid
+  )
 }
 
 # Fixed-effects tibble. Pull post.mean + 95% credible bounds from

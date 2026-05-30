@@ -262,7 +262,7 @@ symbolize.brmsfit <- function(fit, symbols = NULL, units = NULL,
     entries, components, response,
     response_1 = response, response_2 = NA_character_
   )
-  expanded <- brms_build_expanded(fit)
+  expanded <- brms_build_expanded(fit, link)
 
   metadata <- list(
     call = fit$call,
@@ -579,17 +579,42 @@ brms_build_variance_components <- function(fit, re_per_entry) {
   do.call(rbind, rows)
 }
 
-# Minimal expanded block. brms doesn't expose the design matrix as
-# cleanly; use posterior_summary's point estimates.
-brms_build_expanded <- function(fit) {
+# Expanded block. brms does not respond to stats::model.matrix(), but
+# `brms::standata(fit)$X` is the (population-level) conditional design
+# matrix, with columns aligned to `brms::fixef(fit)`. Surfacing it fills
+# Tab 3's stacked-matrix + worked-row block instead of the "design matrix
+# not captured" placeholder (audit B1). eta_hat = X*beta is the
+# population-level linear predictor and mu_hat = link_inv(eta_hat) its
+# response-scale mean; for models with group-level (random) effects the
+# residual y - mu_hat carries those effects, which keeps the Gaussian
+# response equation closing row-by-row. Each accessor is wrapped so a fit
+# whose design matrix cannot be recovered degrades to NULL.
+brms_build_expanded <- function(fit, link = "identity") {
+  beta  <- tryCatch(brms::fixef(fit)[, "Estimate"], error = function(e) NULL)
+  X_mat <- tryCatch({
+    sx <- brms::standata(fit)$X
+    if (is.matrix(sx)) sx else NULL
+  }, error = function(e) NULL)
+  eta_hat <- if (!is.null(X_mat) && !is.null(beta) &&
+                 ncol(X_mat) == length(beta)) {
+    drop(X_mat %*% beta)
+  } else NULL
+  mu_hat  <- if (is.null(eta_hat)) NULL else drm_apply_link_inverse(eta_hat, link)
+  y <- as.numeric(fit$data[[brms_response_name(fit)]])
+  e_resid <- if (!is.null(mu_hat) && length(mu_hat) == length(y)) {
+    y - mu_hat
+  } else NULL
   list(
-    y = as.numeric(fit$data[[brms_response_name(fit)]]),
-    X = NULL,
+    y = y,
+    X = X_mat,
     Z = NULL,
-    beta = brms::fixef(fit)[, "Estimate"],
+    beta = if (is.null(beta)) NULL else as.numeric(beta),
     u = NULL,
-    fitted = NULL,
-    residuals = NULL
+    eta_hat = eta_hat,
+    mu_hat = mu_hat,
+    e = e_resid,
+    fitted = mu_hat,
+    residuals = e_resid
   )
 }
 

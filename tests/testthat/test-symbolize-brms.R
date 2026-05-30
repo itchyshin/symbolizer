@@ -64,3 +64,21 @@ test_that("parameter_interpretation on a brmsfit carries the credible band", {
                   names(interp)))
   expect_true(all(interp$ci_method == "credible"))
 })
+
+# Audit B1: the brms extractor must surface the population-level design
+# matrix (from standata(fit)$X, aligned to fixef) and the response-scale
+# mean so Tab 3 fills with data instead of the placeholder.
+test_that("symbolize.brmsfit populates expanded$X / mu_hat (audit B1)", {
+  skip_if_brms_too_slow()
+  sym <- symbolize(fit_brms_gaussian_simple())
+  ex <- sym$expanded
+  expect_true(is.matrix(ex$X))
+  expect_equal(nrow(ex$X), sym$model$n_obs)
+  expect_equal(length(ex$beta), ncol(ex$X))
+  # Gaussian identity link, FE-only fit: mu_hat = X*beta.
+  expect_equal(as.numeric(ex$mu_hat),
+               as.numeric(ex$X %*% ex$beta), tolerance = 1e-6)
+  html <- as_html_three_views(sym)
+  expect_false(grepl("not captured", html))
+  expect_match(html, "mathbf\\{X\\}")
+})

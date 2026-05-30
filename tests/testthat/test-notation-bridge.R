@@ -10,8 +10,11 @@ test_that("components carry both index and matrix equation forms", {
                "\\\\boldsymbol\\{\\\\mu\\} = \\\\mathbf\\{X\\} \\\\boldsymbol\\{\\\\beta\\}")
   sg_row <- sym$components[sym$components$submodel == "sigma" &
                              !is.na(sym$components$submodel), , drop = FALSE]
+  # Audit M3: the scale-submodel design matrix is \mathbf{X}_\sigma, not
+  # \mathbf{Z} (\mathbf{Z} is reserved for the random-effects incidence
+  # matrix). This keeps Tab 2 consistent with Tab 3 / the symbol glossary.
   expect_match(sg_row$equation_matrix,
-               "\\\\log\\(\\\\boldsymbol\\{\\\\sigma\\}\\) = \\\\mathbf\\{Z\\} \\\\boldsymbol\\{\\\\gamma\\}")
+               "\\\\log\\(\\\\boldsymbol\\{\\\\sigma\\}\\) = \\\\mathbf\\{X\\}_\\{\\\\sigma\\} \\\\boldsymbol\\{\\\\gamma\\}")
 })
 
 test_that("symbol_dictionary carries abstract and concrete dimension columns", {
@@ -27,7 +30,9 @@ test_that("symbol_dictionary carries abstract and concrete dimension columns", {
   expect_equal(resp$dimension,          "\\mathbb{R}^n")
   expect_equal(resp$dimension_concrete, "\\mathbb{R}^{80}")
   des <- d[d$role == "design_matrix", , drop = FALSE]
-  expect_setequal(des$symbol_matrix, c("\\mathbf{X}", "\\mathbf{Z}"))
+  # Audit M3: the sigma-submodel design matrix is \mathbf{X}_\sigma, not
+  # \mathbf{Z}.
+  expect_setequal(des$symbol_matrix, c("\\mathbf{X}", "\\mathbf{X}_{\\sigma}"))
   expect_setequal(des$dimension_concrete,
                   c("\\mathbb{R}^{80 \\times 2}", "\\mathbb{R}^{80 \\times 2}"))
   beta <- d[d$role == "coefficient" & grepl("beta", d$symbol), , drop = FALSE]
