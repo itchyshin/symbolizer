@@ -71,7 +71,11 @@ extract_terms <- function(formula, data, submodel,
     if (!is.null(symbols) && var %in% names(symbols)) {
       return(unname(symbols[[var]]))
     }
-    paste0(var, "_i")
+    # Same default renderer as the response symbol: escape underscores and
+    # wrap multi-letter names upright in \mathrm{} so a snake_case predictor
+    # (body_size) does not render as italic `body` subscript `size`
+    # (page-audit P6b).
+    default_response_symbol(var)
   }
 
   classify_term <- function(term_label, col_name) {

@@ -24,3 +24,13 @@ test_that("lm with a snake_case response renders the name math-safe", {
   expect_true(grepl("\\mu_i", tex, fixed = TRUE))
   expect_true(grepl("\\beta_{0}", tex, fixed = TRUE))
 })
+
+test_that("a snake_case predictor renders math-safe (P6b-2, lookup_symbol)", {
+  set.seed(1)
+  d <- data.frame(mass = rnorm(30), body_size = rnorm(30))
+  sym <- symbolize(lm(mass ~ body_size, data = d))
+  tex <- as_latex(sym, notation = "index")
+  expect_true(grepl("\\mathrm{body\\_size}_i", tex, fixed = TRUE))
+  expect_false(grepl("body_size_i", tex, fixed = TRUE))  # raw underscore gone
+  expect_true(grepl("\\beta_{1}", tex, fixed = TRUE))     # coef subscript intact
+})
