@@ -113,10 +113,31 @@ factors render `\mathrm{body\_mass}_i` / `\mathrm{body\_size}_i`, zero raw
 underscore-in-math; suite green; only extract-terms snapshots churned
 (escaping-only, accepted).
 
-**Still deferred to maintainer** (core-renderer with wide churn / feature):
-P6b-3 (symbol_table `\mathbf{}` wrap + `poly()` deparse + factor_contrast
-`[var = level]` raw variable — no flagged snake_case-factor case today);
-broader phantom-σ sweep (lm/lmer/glmmTMB/mcmcglmm/sdmtmb); P5 worked-row
-RE-fold; P7 factor-template-under-interaction; gllvm Λ outer-product; P1
-feature-half (family-aware `$expanded` for lm/glm). See
-`.memory/reports/2026-05-30-page-audit-fixes.md`.
+**Phantom-σ sweep — FIXED for lm / glm / lmer / glmmTMB** (commit
+`fix(assumptions)`): the `constant_scale` guard drops the phantom
+location-scale σ rows on homoscedastic Gaussian fits (base + lme4
+unconditional; glmmTMB gated on `has_sigma_sub` so a real dispformula keeps
+them). Verified (test-phantom-sigma.R; suite 2224; no churn). brms already
+done in P2.
+
+**Remaining — feature / deep-extractor work (recommend fresh sessions, each a
+small design+implement cycle; none are one-line fixes):**
+- **P5** worked-row folds the random effect into the residual on the
+  structural-dependence drmTMB **phylo** fit — root cause is that drmTMB
+  consumes `phylo()` into its sparse-precision pipeline, so `expand()$Z_g/u`
+  is unpopulated and `has_re` is false. Needs `symbolize.drmTMB` to expose the
+  phylo tier in `expand()` (the caption logic already shows `+ Zû` when it can).
+- **P7** factor_contrast reading is wrong under an interaction (it's the
+  difference at the interacting var = 0, not the average) — needs the
+  interpretation builder to detect the interaction and switch templates.
+- **gllvm Λ** Tab-3 renders the raw 5×2 loading, not the 5×5 outer product —
+  needs a design call on rendering `ΛΛᵀ`.
+- **P1 feature-half** family-aware `$expanded` for base lm/glm so the
+  get-started Poisson widget's Tab 3 renders numbers (must be link-aware: η̂
+  then μ̂=exp(η̂), no additive ε).
+- **P6b-3** symbol_table `\mathbf{}` wrap + `poly()` deparse + factor_contrast
+  `[var = level]` raw variable (no flagged snake_case-factor case today).
+- **phantom-σ** mcmcglmm + sdmtmb (probe-first; sdmTMB `phi` must be confirmed
+  not a legitimate σ row).
+
+See `.memory/reports/2026-05-30-page-audit-fixes.md`.
