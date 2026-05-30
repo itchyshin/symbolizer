@@ -64,6 +64,14 @@ symbolize.sdmTMB <- function(fit, symbols = NULL, units = NULL,
   }
   family <- fit$family$family
   link   <- fit$family$link %||% "identity"
+  # Delta / two-component fits (e.g. delta_gamma()) set fit$family$family to
+  # a length-2 vector such as c("binomial", "Gamma"). Route those to the
+  # delta_model capability gate (Planned or reserved) BEFORE the scalar
+  # guards below, which would otherwise hit a length>1 vector in `||` and
+  # abort with the opaque base-R "'length = 2' in coercion to 'logical(1)'".
+  if (length(family) > 1L) {
+    capability_check("sdmTMB", paste(family, collapse = "/"), "delta_model")
+  }
   if (is.null(family) || !nzchar(family)) {
     cli::cli_abort("Could not resolve {.code fit$family$family}.")
   }
@@ -121,29 +129,45 @@ symbolize.sdmTMB <- function(fit, symbols = NULL, units = NULL,
   submodels  <- sdmtmb_build_submodels(entries, param, link)
   terms_tbl  <- drm_build_terms(entries, data, symbols)
   fixed_eff  <- sdmtmb_build_fixed_effects(terms_tbl, fit)
-  re_per_entry <- list(sdmtmb_build_re_per_entry(has_spatial, has_spatiotemporal))
+  mesh_n     <- sdmtmb_mesh_n(fit)
+  re_per_entry <- list(sdmtmb_build_re_per_entry(
+    has_spatial, has_spatiotemporal, mesh_n = mesh_n
+  ))
   re_tbl     <- drm_build_random_effects(re_per_entry)
   vc_tbl     <- sdmtmb_build_variance_components(fit, has_spatial, has_spatiotemporal)
   cov_tbl    <- drm_build_covariance_components(re_tbl)
+  # Spatial / spatiotemporal fields are spatially-correlated Gaussian
+  # random fields, NOT iid intercepts. Route their distribution lines and
+  # symbol-dictionary entries through the structured-covariance machinery
+  # (matrix symbol \boldsymbol{\Omega}) so no equation asserts independence.
+  structured_matrix_for_group <-
+    sdmtmb_structured_matrix_for_group(has_spatial, has_spatiotemporal)
+  structured_matrices <-
+    sdmtmb_structured_matrices(has_spatial, has_spatiotemporal, mesh_n)
+  detected_signals <- if (has_spatial || has_spatiotemporal) "spatial" else character(0L)
   components <- drm_build_components(
     submodels, terms_tbl, re_tbl,
     response_symbol, response_symbol_matrix,
     family = family,
-    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_
+    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_,
+    structured_matrix_for_group = structured_matrix_for_group
   )
   symbol_dict <- drm_build_symbol_dictionary(
     terms_tbl, response, response_symbol, response_symbol_matrix,
     response_units, family, submodels, units, data, n_obs, re_tbl,
     response_1 = response, response_2 = NA_character_,
-    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_
+    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_,
+    structured_matrices = structured_matrices
   )
   assumptions <- drm_build_assumptions(
     family, response, response_symbol, re_tbl,
-    response_1 = response, response_2 = NA_character_
+    response_1 = response, response_2 = NA_character_,
+    detected_signals = detected_signals
   )
   interp <- drm_build_interpretation(
     fixed_eff, family, response, data,
-    response_1 = response, response_2 = NA_character_
+    response_1 = response, response_2 = NA_character_,
+    detected_signals = detected_signals
   )
   bridge <- drm_build_formula_bridge(
     entries, components, response,
@@ -163,6 +187,12 @@ symbolize.sdmTMB <- function(fit, symbols = NULL, units = NULL,
     ),
     spatial = has_spatial,
     spatiotemporal = has_spatiotemporal,
+    # Structured-dependence signals so the three-views renderer surfaces the
+    # spatial covariance block (Cov(u) = sigma_O^2 Omega) in every view,
+    # rather than treating the field as an unstructured iid intercept.
+    spatial_representation = if (has_spatial || has_spatiotemporal) "gmrf_spde" else NULL,
+    structured_matrix_for_group = structured_matrix_for_group,
+    detected_signals = detected_signals,
     created_by = "symbolize.sdmTMB"
   )
 
@@ -305,11 +335,25 @@ sdmtmb_hit_name <- function(row) {
   row$term_label
 }
 
+# Number of spatial random-field knots (mesh vertices). This is the
+# dimension of the spatial covariance matrix Omega; the field is mapped to
+# the n observations via the SPDE projection matrix. Falls back to NA when
+# the mesh vertex count cannot be read (rendered defensively downstream).
+sdmtmb_mesh_n <- function(fit) {
+  n <- tryCatch(fit$spde$mesh$n, error = function(e) NULL)
+  if (is.null(n) || length(n) != 1L || !is.finite(n)) return(NA_integer_)
+  as.integer(n)
+}
+
 # Render the spatial / spatiotemporal random fields in the same shape
 # drm_build_random_effects() expects. Each field appears as a "group"
-# with a single component (the intercept of the field). NULL when no
-# random fields are present.
-sdmtmb_build_re_per_entry <- function(has_spatial, has_spatiotemporal) {
+# with a single component (the intercept of the field). The covariance is
+# NOT iid: it is a spatially-correlated Gaussian random field, surfaced via
+# structured_matrix_for_group in symbolize.sdmTMB(). `n_levels` is the mesh
+# vertex (knot) count so the matrix-form dimension reads concretely rather
+# than leaking a literal NA. NULL when no random fields are present.
+sdmtmb_build_re_per_entry <- function(has_spatial, has_spatiotemporal,
+                                      mesh_n = NA_integer_) {
   rows <- list()
   if (has_spatial) {
     rows[[length(rows) + 1L]] <- tibble::tibble(
@@ -318,7 +362,7 @@ sdmtmb_build_re_per_entry <- function(has_spatial, has_spatiotemporal) {
       lhs_expr    = "1",
       group_var   = "site",
       component   = "(Intercept)",
-      n_levels    = NA_integer_
+      n_levels    = mesh_n
     )
   }
   if (has_spatiotemporal) {
@@ -328,11 +372,61 @@ sdmtmb_build_re_per_entry <- function(has_spatial, has_spatiotemporal) {
       lhs_expr    = "1",
       group_var   = "site_time",
       component   = "(Intercept)",
-      n_levels    = NA_integer_
+      n_levels    = mesh_n
     )
   }
   if (length(rows) == 0L) return(NULL)
   do.call(rbind, rows)
+}
+
+# Map each present random field to its structured spatial covariance matrix
+# symbol (\boldsymbol{\Omega}). This routes the matrix- and index-form
+# random-effect distribution lines through drm_build_components()'s
+# structured-covariance branch instead of the iid identity, so the spatial
+# field is no longer mis-rendered as independence. NULL when no fields.
+sdmtmb_structured_matrix_for_group <- function(has_spatial, has_spatiotemporal) {
+  groups <- character(0L)
+  if (has_spatial) groups <- c(groups, "site")
+  if (has_spatiotemporal) groups <- c(groups, "site_time")
+  if (length(groups) == 0L) return(NULL)
+  stats::setNames(as.list(rep("\\boldsymbol{\\Omega}", length(groups))), groups)
+}
+
+# Symbol-dictionary rows for the spatial covariance matrix Omega, mirroring
+# the phylogenetic-A rows other extractors emit. NULL when no fields.
+sdmtmb_structured_matrices <- function(has_spatial, has_spatiotemporal, mesh_n) {
+  dim_concrete <- if (is.na(mesh_n)) {
+    "\\mathbb{R}^{m \\times m}"
+  } else {
+    sprintf("\\mathbb{R}^{%d \\times %d}", mesh_n, mesh_n)
+  }
+  out <- list()
+  if (has_spatial) {
+    out[[length(out) + 1L]] <- list(
+      symbol             = "\\boldsymbol{\\Omega}",
+      symbol_matrix      = "\\boldsymbol{\\Omega}",
+      variable           = "site",
+      units              = NA_character_,
+      role               = "structured_correlation_spatial",
+      dimension          = "\\mathbb{R}^{m \\times m}",
+      dimension_concrete = dim_concrete,
+      description        = "spatial correlation matrix of the Gaussian random field over the mesh knots (Matern field via the SPDE / GMRF approximation; range and marginal SD in the variance components)"
+    )
+  }
+  if (has_spatiotemporal) {
+    out[[length(out) + 1L]] <- list(
+      symbol             = "\\boldsymbol{\\Omega}",
+      symbol_matrix      = "\\boldsymbol{\\Omega}",
+      variable           = "site_time",
+      units              = NA_character_,
+      role               = "structured_correlation_spatiotemporal",
+      dimension          = "\\mathbb{R}^{m \\times m}",
+      dimension_concrete = dim_concrete,
+      description        = "spatial correlation matrix of the spatiotemporal Gaussian random field over the mesh knots at each time step (Matern field via the SPDE / GMRF approximation)"
+    )
+  }
+  if (length(out) == 0L) return(NULL)
+  out
 }
 
 # Variance components from sdmTMB::tidy(fit, "ran_pars"). Carries
