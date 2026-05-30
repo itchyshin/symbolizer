@@ -193,10 +193,16 @@ if (requireNamespace("glmmTMB", quietly = TRUE)) {
 }
 ```
 
-The bridge: `dispformula = ~0` fixes the Gaussian dispersion at 1, and
-`weights = 1/vi` makes each observation's effective residual variance
-equal to $v_k$ rather than 1 — which reproduces the meta-analytic
-likelihood. The estimated random-intercept variance is $\hat\tau^2$.
+The bridge: `dispformula = ~0` fixes the Gaussian dispersion and
+`weights = 1/vi` make each observation's residual variance track $v_k$,
+so the random-intercept variance plays the role of $\hat\tau^2$. The two
+land close but not identical — glmmTMB's hierarchical fit gives
+$\hat\tau^2 \approx 0.44$ against metafor's marginal REML estimate of
+$0.31$ (the values printed above). With one effect per trial the
+random-intercept and residual tiers are separated only by the weights, so
+the hierarchical (glmmTMB) and marginal (metafor) parameterizations need
+not converge on the same $\hat\tau^2$; metafor's `rma()` remains the
+canonical interface for traditional pooling.
 
 *Note:* `glmmTMB::propto(…, V)` is **not** a meta-analytic surface — it
 estimates a *free scalar* multiplying a known covariance (the phylogenetic
@@ -219,7 +225,7 @@ if (requireNamespace("drmTMB", quietly = TRUE)) {
     data    = dat
   )
   cat("drmTMB residual sigma^2:",
-      round(fit_drm$report$sigma_eps^2, 3),
+      round(sigma(fit_drm)[1]^2, 3),
       "\n")
 } else {
   cat("drmTMB not installed; skipping Face 3.\n")
@@ -238,9 +244,9 @@ known sampling variances $v_k$.
 | Package | Call | Captures $\tau^2$ as |
 |---|---|---|
 | `metafor` | `rma(yi, vi, data = dat)` | `fit$tau2` directly. |
-| `glmmTMB` | `glmmTMB(yi ~ 1 + (1\|study), weights = 1/vi, dispformula = ~0)` | `VarCorr(fit)$cond$study[1]`. |
+| `glmmTMB` | glmmTMB(yi ~ 1 + (1 \| study), weights = 1/vi, dispformula = ~0) | `VarCorr(fit)$cond$study[1]`. |
 | `drmTMB` | `drmTMB(drm_formula(yi ~ 1), weights = 1/vi)` | Residual $\sigma_\varepsilon^2$ (no separate $\tau^2$ without a random intercept). |
-| `brms` | `brm(yi \| se(sqrt(vi)) ~ 1 + (1\|study))` | Random-intercept SD posterior. |
+| `brms` | brm(yi \| se(sqrt(vi)) ~ 1 + (1 \| study)) | Random-intercept SD posterior. |
 | `MCMCglmm` | `MCMCglmm(yi ~ 1, random = ~ study, mev = vi)` | `VCV[,"study"]` posterior. |
 
 The math is one model; the syntax differs by package. The bridge
@@ -318,38 +324,40 @@ cat(sprintf("%d effects across %d species across %d studies; habitats: %s\n",
             paste(sort(unique(dat$habitat)), collapse = ", ")))
 ```
 
-### 4.3 Face 1 — `drmTMB` (deep dive)
+### 4.3 Face 1 — `metafor::rma.mv` (deep dive)
 
-The model adds the §3 study-tier random effect to a phylogenetic
-random effect with covariance $\sigma_p^2\,\mathbf{A}$, on top of
-the known per-effect sampling variance $v_k$. In drmTMB's idiom
-that is one formula with two markers: `meta_V()` *inside* the
-formula (replacing brms's response-side `se(sqrt(vi))`) and
-`phylo()` *inside* the formula too (replacing brms's
-`gr(., cov = A)`). One gotcha: drmTMB's formula parser does NOT
-accept namespace-qualified names inside the formula, so we bind
-the helpers to local names first.
+`metafor` was built for meta-analysis and converges cleanly on this
+two-tier model: `V = Var_dARR` carries the known per-effect sampling
+variances, `random = list(~ 1 | phylogeny, ~ 1 | study_ID)` declares the
+two random tiers, and `R = list(phylogeny = A)` attaches the phylogenetic
+correlation $\mathbf{A}$.
 
-```{r drmtmb-fit-phylo, message = FALSE, warning = FALSE}
-library(drmTMB)
-
-# drmTMB requires unqualified names INSIDE the formula -- bind locally.
-bf      <- drmTMB::drm_formula
-meta_V  <- drmTMB::meta_V
-phylo   <- drmTMB::phylo
-
-fit_drm_phylo <- drmTMB::drmTMB(
-  bf(
-    dARR ~ 1 + habitat +
-            meta_V(V = Var_dARR) +
-            phylo(1 | phylogeny, tree = tree) +
-            (1 | study_ID),
-    sigma ~ 1),
-  family = stats::gaussian(),
+```{r metafor-fit-phylo, message = FALSE}
+library(metafor)
+library(ape)
+A_phylo <- ape::vcv.phylo(tree, corr = TRUE)
+fit_metafor_phylo <- rma.mv(
+  yi     = dARR,
+  V      = Var_dARR,
+  mods   = ~ 1 + habitat,
+  random = list(~ 1 | phylogeny, ~ 1 | study_ID),
+  R      = list(phylogeny = A_phylo),
   data   = dat
 )
-sym_drm_phylo <- symbolize(
-  fit_drm_phylo,
+fit_metafor_phylo$sigma2
+```
+
+The two `$sigma2` rows are, in order, the phylogenetic tier $\sigma_p^2$
+($\approx 0.003$) and the study tier $\sigma_{\text{study}}^2$
+($\approx 0.036$). On the Pottier thermal subset the **study-level
+variance dominates the phylogenetic variance by an order of magnitude** —
+most heterogeneity in dARR sits between studies rather than along the
+phylogeny. (Heritability reading: $H^2 = \sigma_p^2 /
+(\sigma_p^2 + \sigma_{\text{study}}^2) \approx 0.07$.)
+
+```{r metafor-symbolize-phylo, message = FALSE}
+sym_phylo <- symbolize(
+  fit_metafor_phylo,
   context = "phylogenetic multilevel meta-analysis"
 )
 ```
@@ -357,18 +365,15 @@ sym_drm_phylo <- symbolize(
 #### Three views — phylogenetic multilevel
 
 ```{r widget-phylo, results = 'asis', echo = FALSE, message = FALSE}
-as_html_three_views(sym_drm_phylo, id = "phylo-multilevel")
+as_html_three_views(sym_phylo, id = "phylo-multilevel")
 ```
 
-The widget's **Tab 3** decomposes the marginal variance into the known
-sampling tier $v_{kt}$ and the two estimated tiers
-($\sigma_{\text{study}}^2$, $\sigma_p^2\,\mathbf{A}_{kk}$). Tabs 1
-and 2 carry the matching index- and matrix-form equations, including
-the phylogenetic line $\mathbf{u}_p \sim \mathcal{N}(\mathbf{0},\,
-\sigma_p^2\,\mathbf{A})$ — drmTMB consumes `phylo()` into its
-internal sparse-precision pipeline rather than `fit$random_effects`,
-and `symbolize.drmTMB()` synthesises the structured tier so the
-widget renders the full two-tier model (v0.22.1.1).
+Tabs 1 and 2 carry the index- and matrix-form equations and the
+variance-component panel showing the two estimated tiers
+($\sigma_{\text{study}}^2$ and $\sigma_p^2\,\mathbf{A}$) alongside the
+known sampling tier $v_{kt}$. (The "with your numbers" tab falls back to
+a note for `rma.mv` — `symbolize()` does not yet expand metafor's design
+matrix into per-row arrays — so the structure lives on Tabs 1–2.)
 
 ### 4.4 Face 2 — `brms` (light, with `se(sqrt(vi))` + `gr(., cov = A)`)
 
@@ -395,39 +400,44 @@ The cross-package bridge (cf. §7): brms `se(sqrt(vi))` ↔ drmTMB
 `meta_V(V = vi)`; brms `gr(g, cov = A)` ↔ drmTMB
 `phylo(1 | g, tree = ...)`.
 
-### 4.5 Face 3 — `metafor::rma.mv` (light)
+### 4.5 Face 3 — `drmTMB` (the idiom, caveated)
 
-`metafor` was built for meta-analysis; `rma.mv()` accepts `V = vi` for
-the known sampling variances and `R = list(... = A)` for the
-phylogenetic correlation:
+drmTMB expresses the same two-tier model as a single formula with two
+markers: `meta_V()` for the known sampling variances (replacing brms's
+response-side `se(sqrt(vi))`) and `phylo()` for the phylogenetic tier
+(replacing brms's `gr(., cov = A)`). One gotcha: drmTMB's parser does not
+accept namespace-qualified names inside the formula, so bind the helpers
+to local names first.
 
-```{r metafor-fit-phylo}
-library(metafor)
-A_phylo <- ape::vcv.phylo(tree, corr = TRUE)
-fit_metafor_phylo <- rma.mv(
-  yi     = dARR,
-  V      = Var_dARR,
-  mods   = ~ 1 + habitat,
-  random = list(~ 1 | phylogeny, ~ 1 | study_ID),
-  R      = list(phylogeny = A_phylo),
+```{r drmtmb-fit-phylo, eval = FALSE}
+library(drmTMB)
+# drmTMB requires unqualified names INSIDE the formula -- bind locally.
+bf <- drmTMB::drm_formula; meta_V <- drmTMB::meta_V; phylo <- drmTMB::phylo
+
+fit_drm_phylo <- drmTMB::drmTMB(
+  bf(dARR ~ 1 + habitat +
+          meta_V(V = Var_dARR) +
+          phylo(1 | phylogeny, tree = tree) +
+          (1 | study_ID)),
+  family = stats::gaussian(),
   data   = dat
 )
-fit_metafor_phylo$sigma2
 ```
 
-The two `$sigma2` rows correspond, in the listed order, to the
-phylogenetic tier $\sigma_p^2$ (first row) and the study tier
-$\sigma_{\text{study}}^2$ (second row). On the Pottier thermal
-subset, the study-level variance dominates the phylogenetic
-variance by an order of magnitude — most heterogeneity in dARR
-sits between studies rather than along the phylogeny. (Heritability
-reading: $H^2 = \sigma_p^2 / (\sigma_p^2 + \sigma_{\text{study}}^2)$.)
+**Caveat:** at the time of writing this `meta_V() + phylo() + (1 | study)`
+combination does **not** converge for drmTMB — it returns `pdHess = FALSE`
+and collapses the two estimated tiers toward zero (the same numerical
+fragility documented in §5.4, reported upstream as
+[itchyshin/drmTMB#417](https://github.com/itchyshin/drmTMB/issues/417)).
+We therefore lead with `metafor::rma.mv` (§4.3) for the converged
+decomposition; the drmTMB idiom is shown here for syntax reference.
 
-**Takeaway.** Three packages, one math. drmTMB leads with the
-cleanest meta-analytic idiom (`meta_V` + `phylo` inside the formula);
-brms and metafor offer equivalent fits via package-specific syntax.
-The next step (§5) adds the location-scale extension — modelling
-$\tau^2$ itself as a function of the moderator.
+**Takeaway.** Three packages, one math. metafor gives the converged
+two-tier decomposition (study variance dominates the phylogenetic
+variance here); brms gives the equivalent Bayesian fit; drmTMB offers the
+most compact idiom (`meta_V` + `phylo` in one formula) but does not yet
+converge on this model (#417). The next step (§5) adds the location-scale
+extension — modelling $\tau^2$ itself as a function of the moderator.
 
 ## 5. Location-scale meta-analysis
 
@@ -528,11 +538,14 @@ fit_ls_drm <- drmTMB::drmTMB(
 drmTMB::fixef(fit_ls_drm, "sigma")   # gamma on the log-SD scale
 ```
 
-drmTMB recovers the same scale coefficients as glmmTMB. **Caveat:** at the
-time of writing drmTMB returns these point estimates but flags
-`pdHess = FALSE` for the `meta_V() + sigma`-submodel combination (even on
-clean simulated data), so its standard errors here are not trustworthy —
-we lead with glmmTMB for that reason and reported the issue upstream
+drmTMB's scale submodel gives the **same qualitative reading** as glmmTMB —
+a negative habitat slope, so terrestrial effects are less heterogeneous —
+but at a different magnitude ($\hat\gamma_{\text{terrestrial}} \approx -1.16$
+here against glmmTMB's $-0.84$): the two packages decompose the residual
+heterogeneity slightly differently. **Caveat:** the `meta_V() + sigma`-submodel
+combination is numerically delicate — drmTMB sometimes flags `pdHess = FALSE`
+for it, so its standard errors are not always trustworthy. We lead with
+glmmTMB for that reason and reported the convergence issue upstream
 ([itchyshin/drmTMB#417](https://github.com/itchyshin/drmTMB/issues/417)).
 drmTMB also does **not** accept `offset()` inside the `sigma` formula;
 `meta_V()` is its mechanism for the known variances.
