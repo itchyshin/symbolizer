@@ -1071,10 +1071,18 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L,
   has_mu    <- !is.null(ex$X)       && !is.null(ex$beta) && !is.null(ex$mu_hat)
   has_M     <- !is.null(ex$M) && is.matrix(ex$M) && nrow(ex$M) > 0L
   if (!has_mu) {
+    # Honest, MathJax-safe fallback. No bare `$` (the site-wide MathJax
+    # parses `$...$` as inline math, so a dev-facing `expanded$X` string
+    # renders as garbled math), and no internal accessor names or issue
+    # links on a reader-facing surface. Class-agnostic so it cannot go
+    # stale as more extractors capture the design matrix.
     return(paste0(
-      "<p><em>The matrix-with-data view needs <code>expanded$X</code>, ",
-      "<code>expanded$beta</code>, and <code>expanded$mu_hat</code>. ",
-      "This extractor populates only the response vector. See issue #9.</em></p>\n"
+      "<p><em>This view shows the actual numbers flowing through the fit ",
+      "&mdash; the response, the design matrix, the coefficients, and the ",
+      "fitted values. For this model the per-observation design matrix was ",
+      "not captured when it was symbolized, so only the response is ",
+      "available here. The <strong>Index</strong> and <strong>Matrix</strong> ",
+      "tabs above show the full structure of the fit.</em></p>\n"
     ))
   }
 

@@ -1,8 +1,9 @@
 # Tests for the knit_print methods in R/knit-print.R.
 #
 # Each method must (i) return a `knit_asis` object, (ii) emit a markdown
-# pipe table or LaTeX block, and (iii) wrap anything that looks like LaTeX
-# in `$...$` via the internal sym_dollar() helper.
+# pipe table, an HTML table (formula_bridge / random_effects, whose cells
+# carry `|`), or a LaTeX block, and (iii) wrap anything that looks like
+# LaTeX in `$...$` via the internal sym_dollar() helper.
 
 make_kp_sym <- function() {
   fit <- fit_drm_location_scale()
@@ -80,10 +81,30 @@ test_that("knit_print.symbolizer_formula_bridge keeps both math columns by defau
   expect_match(rendered, "math (matrix)", fixed = TRUE)
 })
 
-test_that("knit_print.symbolizer_formula_bridge backticks R syntax", {
+test_that("knit_print.symbolizer_formula_bridge renders R syntax as <code>", {
   sym <- make_kp_sym()
   rendered <- as.character(knitr::knit_print(formula_bridge(sym)))
-  expect_match(rendered, "`body_mass ~ temperature`", fixed = TRUE)
+  expect_match(rendered, "<code>body_mass ~ temperature</code>", fixed = TRUE)
+})
+
+test_that("formula_bridge / random_effects render `|` terms without pipe leaks", {
+  # Regression (page-audit P3): a markdown pipe table parses the column
+  # boundary on `|` before the cell is parsed as markdown, so a code span
+  # can never carry a literal pipe -- `\|` and `&#124;` both leak verbatim
+  # inside backticks (the drmtmb / roadmap `(1 \| site)` bug). The R-syntax
+  # and random-effect term columns therefore render as an HTML table with
+  # <code> cells, which sidesteps the pipe-table parser.
+  fit <- fit_drm_with_re()
+  sym <- symbolize(fit)
+  fb  <- as.character(knitr::knit_print(formula_bridge(sym)))
+  re  <- as.character(knitr::knit_print(sym$random_effects))
+  both <- paste(fb, re)
+  expect_false(grepl("\\|", both, fixed = TRUE))         # no backslash-pipe
+  expect_false(grepl("&#124;", both, fixed = TRUE))      # no html-entity pipe
+  expect_false(grepl("&amp;#124;", both, fixed = TRUE))  # no double-escaped pipe
+  # the random-effect term IS shown, in <code>, carrying a literal pipe
+  expect_match(re, "<code>", fixed = TRUE)
+  expect_true(grepl("|", re, fixed = TRUE))
 })
 
 # ---- knit_print.symbolizer_interpretation -----------------------------------
