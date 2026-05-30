@@ -43,8 +43,8 @@ across temperature, sex, and site — and climb four rungs:
 | --- | --- | --- |
 | 1 | `lm(body_mass ~ temperature)` | distribution + linear predictor |
 | 2 | `lm(body_mass ~ temperature + sex)` | a factor: dummy-encoded contrast |
-| 3 | `lmer(body_mass ~ temperature + sex + (1\|site))` | a random intercept + variance components |
-| 4 | `drmTMB(body_mass ~ temperature + sex + (1\|site), sigma ~ temperature)` | heteroscedasticity: variance depends on temperature |
+| 3 | lmer(body_mass ~ temperature + sex + (1 \| site)) | a random intercept + variance components |
+| 4 | drmTMB(body_mass ~ temperature + sex + (1 \| site), sigma ~ temperature) | heteroscedasticity: variance depends on temperature |
 
 The reader-facing surface stays exactly the same: at every rung you
 call `symbolize(fit)`, then `as_latex()` / `symbol_table()` /

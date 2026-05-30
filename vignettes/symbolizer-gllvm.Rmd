@@ -594,9 +594,9 @@ fit_two_tier_glmm <- glmmTMB::glmmTMB(value ~ 0 + trait +
 
 | `gllvmTMB` | `glmmTMB` | Math |
 |---|---|---|
-| `latent(0 + trait \| g, d = k)` | `rr(0 + trait \| g, d = k)` | $\boldsymbol{\Lambda}_g$ of rank $k$ |
-| `unique(0 + trait \| g)` | `diag(0 + trait \| g)` | $\boldsymbol{\Psi}_g$ diagonal |
-| auto-suppression of $\sigma_\epsilon$ on `unique(.\|obs)` | `dispformula = ~0` | both prevent double-counting $\boldsymbol{\Psi}_W$ vs $\sigma_\epsilon^2$ |
+| latent(0 + trait \| g, d = k) | rr(0 + trait \| g, d = k) | $\boldsymbol{\Lambda}_g$ of rank $k$ |
+| unique(0 + trait \| g) | diag(0 + trait \| g) | $\boldsymbol{\Psi}_g$ diagonal |
+| auto-suppression of $\sigma_\epsilon$ on unique(. \| obs) | `dispformula = ~0` | both prevent double-counting $\boldsymbol{\Psi}_W$ vs $\sigma_\epsilon^2$ |
 
 Both packages return the same fitted $\boldsymbol{\Lambda},
 \boldsymbol{\Psi}, \boldsymbol{\Sigma}$ matrices to numerical
