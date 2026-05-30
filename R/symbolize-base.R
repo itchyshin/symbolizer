@@ -134,7 +134,8 @@ base_symbolize_impl <- function(fit, family, link, class_name, package_name,
 
   distribution <- drm_build_distribution(
     family, response_symbol, response_symbol_matrix,
-    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_
+    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_,
+    constant_scale = TRUE  # lm / glm: single residual SD / fixed dispersion
   )
   submodels  <- base_build_submodels(entries, fit, param, link)
   terms_tbl  <- drm_build_terms(entries, data, symbols)
@@ -146,7 +147,8 @@ base_symbolize_impl <- function(fit, family, link, class_name, package_name,
     submodels, terms_tbl, re_tbl,
     response_symbol, response_symbol_matrix,
     family = family,
-    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_
+    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_,
+    constant_scale = TRUE  # lm / glm: sigma is constant -> write \sigma, not \sigma_i
   )
   symbol_dict <- drm_build_symbol_dictionary(
     terms_tbl, response, response_symbol, response_symbol_matrix,
@@ -156,7 +158,12 @@ base_symbolize_impl <- function(fit, family, link, class_name, package_name,
   )
   assumptions <- drm_build_assumptions(
     family, response, response_symbol, re_tbl,
-    response_1 = response, response_2 = NA_character_
+    response_1 = response, response_2 = NA_character_,
+    # lm / glm are homoscedastic: a single residual SD (Gaussian) or a
+    # fixed/scalar dispersion -- never a scale submodel. Drop the
+    # location-scale sigma rows the shared Gaussian template carries
+    # (audit P2 phantom-sigma sweep); the scalar lives in variance_components.
+    constant_scale = TRUE
   )
   interp <- drm_build_interpretation(
     fixed_eff, family, response, data,
@@ -166,8 +173,22 @@ base_symbolize_impl <- function(fit, family, link, class_name, package_name,
     entries, components, response,
     response_1 = response, response_2 = NA_character_
   )
-  expanded <- list(y = data[[response]], X = NULL, Z = NULL,
+  # Tab 3 ("equations with data") consumes `X` (design matrix), `mu_hat`
+  # (response-scale fitted mean) and `eta_hat` (link-scale linear
+  # predictor); without them the worked-row + stacked-matrix block fall
+  # back to the "design matrix not captured" placeholder (audit B1).
+  # `fitted(fit)` is the response-scale mean for both lm and glm;
+  # `predict(fit, type = "link")` is the link-scale linear predictor
+  # (identical to mu_hat for the identity link). Each accessor is wrapped
+  # so a class that cannot produce a model matrix degrades to NULL.
+  X_mat   <- tryCatch(stats::model.matrix(fit), error = function(e) NULL)
+  mu_hat  <- tryCatch(as.numeric(stats::fitted(fit)), error = function(e) NULL)
+  eta_hat <- tryCatch(as.numeric(stats::predict(fit, type = "link")),
+                      error = function(e) mu_hat)
+  e_resid <- tryCatch(as.numeric(stats::residuals(fit)), error = function(e) NULL)
+  expanded <- list(y = data[[response]], X = X_mat, Z = NULL,
                    beta = stats::coef(fit), u = NULL,
+                   eta_hat = eta_hat, mu_hat = mu_hat, e = e_resid,
                    fitted = stats::fitted(fit),
                    residuals = stats::residuals(fit))
 
@@ -217,11 +238,28 @@ base_rhs_expr <- function(f) {
   if (length(f) == 3L) f[[3L]] else f[[2L]]
 }
 
+# Shared default response-symbol renderer. Every extractor's
+# *_resolve_response_symbol delegates here when the user supplies no symbol,
+# so a snake_case response renders identically across packages (page-audit
+# P6b / Pattern G). Escapes underscores so MathJax does not parse the name
+# as a subscript (the `body_m ass` bug) and wraps multi-letter names in
+# \mathrm{} so they render upright as one identifier, with the
+# per-observation subscript `_i` matching the linear-predictor indexing.
+#' @keywords internal
+default_response_symbol <- function(response) {
+  esc <- gsub("_", "\\_", response, fixed = TRUE)
+  if (nchar(response) > 1L) {
+    paste0("\\mathrm{", esc, "}_i")
+  } else {
+    paste0(esc, "_i")
+  }
+}
+
 base_resolve_response_symbol <- function(response, symbols) {
   if (!is.null(symbols) && !is.null(symbols[[response]])) {
     return(as.character(symbols[[response]]))
   }
-  response
+  default_response_symbol(response)
 }
 
 base_build_submodels <- function(entries, fit, param, link_mu) {

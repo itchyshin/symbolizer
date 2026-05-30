@@ -3,6 +3,17 @@ url: https://itchyshin.github.io/symbolizer/
 template:
   bootstrap: 5
   bootswatch: flatly
+  # Render math with KaTeX (not pandoc's native MathML default, and not
+  # MathJax). Native MathML brackets do not stretch around <mtable> in Chrome
+  # (matrix blocks + three-views widgets) -- the original reason we left the
+  # MathML default. We previously used MathJax, but its combined CDN bundle
+  # (tex-mml-chtml) cannot autoload the `boldsymbol` extension ("No version
+  # information available for component [tex]/boldsymbol"), so bold-Greek
+  # vectors (\boldsymbol{\mu} etc.) in the matrix-notation equations rendered
+  # as red raw text site-wide. KaTeX bundles \boldsymbol + stretchy delimiters
+  # and renders every block at load (including the widgets' hidden tabs), so
+  # the widgets' window.MathJax.typesetPromise() calls become harmless no-ops.
+  math-rendering: katex
   bslib:
     # Reddish / brick primary so symbolizer is visually distinct from its
     # teal-themed sister packages (drmTMB, gllvmTMB use #0f7887).
@@ -31,10 +42,10 @@ navbar:
 
 articles:
   - title: "Get started"
-    desc: "Start here. The ladder builds up from lm() to location-scale on one shared dataset."
+    desc: "Start here: a five-minute quickstart, then the ladder that builds up from lm() to location-scale on one shared dataset."
     contents:
-      - symbolizer-ladder
       - symbolizer
+      - symbolizer-ladder
   - title: "Deep dives"
     contents:
       - symbolizer-drmtmb
@@ -47,7 +58,6 @@ articles:
     contents:
       - symbolizer-structural-dependence
       - symbolizer-meta-analysis
-      - symbolizer-meta
   - title: "Where we're going"
     contents:
       - symbolizer-roadmap

@@ -71,7 +71,11 @@ extract_terms <- function(formula, data, submodel,
     if (!is.null(symbols) && var %in% names(symbols)) {
       return(unname(symbols[[var]]))
     }
-    paste0(var, "_i")
+    # Same default renderer as the response symbol: escape underscores and
+    # wrap multi-letter names upright in \mathrm{} so a snake_case predictor
+    # (body_size) does not render as italic `body` subscript `size`
+    # (page-audit P6b).
+    default_response_symbol(var)
   }
 
   classify_term <- function(term_label, col_name) {
@@ -86,8 +90,27 @@ extract_terms <- function(formula, data, submodel,
       if (length(m) == 3L) list(fn = m[2L], inner = m[3L])
       else                list(fn = "",   inner = p)
     })
-    vars <- vapply(piece_info, `[[`, character(1L), "inner")
+    # For a function-call piece like poly(x, 2) or ns(x, df = 3), the variable
+    # is the FIRST argument, not the whole arg list. Take the substring up to
+    # the first top-level comma so trailing arguments (degree, df, ...) do not
+    # leak into the math subscript (B82). Bracket/paren-aware so an inner call
+    # such as poly(I(x), 2) keeps "I(x)".
+    first_arg <- function(s) {
+      chars <- strsplit(s, "", fixed = TRUE)[[1L]]
+      depth <- 0L
+      for (i in seq_along(chars)) {
+        ch <- chars[[i]]
+        if (ch == "(" || ch == "[") depth <- depth + 1L
+        else if (ch == ")" || ch == "]") depth <- depth - 1L
+        else if (ch == "," && depth == 0L) return(trimws(substr(s, 1L, i - 1L)))
+      }
+      trimws(s)
+    }
     fns  <- vapply(piece_info, `[[`, character(1L), "fn")
+    vars <- vapply(seq_along(piece_info), function(k) {
+      inner <- piece_info[[k]]$inner
+      if (nzchar(piece_info[[k]]$fn)) first_arg(inner) else inner
+    }, character(1L))
 
     col_pieces <- strsplit(col_name, ":", fixed = TRUE)[[1L]]
     levels_ <- character(length(pieces))
@@ -129,8 +152,12 @@ extract_terms <- function(formula, data, submodel,
                           symbol, coef_symbol) {
     if (role == "intercept") return(coef_symbol)
     if (role == "factor_contrast") {
+      # variable + level are raw R names; escape underscores so a snake_case
+      # factor (body_size) does not render `body` subscript `size` (B81 family).
       return(sprintf("%s \\, [%s = \\mathrm{%s}]",
-                     coef_symbol, variable, contrast_level))
+                     coef_symbol,
+                     escape_underscores_for_latex(variable),
+                     escape_underscores_for_latex(contrast_level)))
     }
     if (role == "interaction") {
       vars <- strsplit(variable, ":", fixed = TRUE)[[1L]]

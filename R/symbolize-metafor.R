@@ -111,19 +111,21 @@ symbolize.rma.uni <- function(fit, symbols = NULL, units = NULL,
   }
   n_obs <- as.integer(fit$k %||% nrow(data))
 
-  # Synthesize a formula from fit$X / fit$beta. Drop the intercept name
-  # ("intrcpt") so R's extract_terms picks it up as the implicit
-  # intercept. Other columns become predictors.
-  beta_names <- rownames(fit$beta) %||% names(stats::coef(fit))
-  pred_names <- setdiff(beta_names, c("intrcpt", "(Intercept)"))
-  rhs_text <- if (length(pred_names) == 0L) "1" else paste(pred_names, collapse = " + ")
-  cond_form <- stats::as.formula(paste(response, "~", rhs_text))
+  # Build the mu formula from the ORIGINAL moderator formula (fit$formula.mods)
+  # when available, falling back to the design-matrix dummy names. Ensure every
+  # variable it references is a column of `data` (the fallback path may
+  # reference fit$X dummy columns that fit$data lacks).
+  cond_form <- metafor_cond_formula(fit, response, data)
+  has_pred  <- metafor_has_predictors(cond_form)
+  for (m in setdiff(all.vars(cond_form), c(response, names(data)))) {
+    if (!is.null(fit$X) && m %in% colnames(fit$X)) data[[m]] <- as.numeric(fit$X[, m])
+  }
 
   entries <- list(
     list(
       dpar = "mu",
       response = response,
-      rhs = if (length(pred_names) == 0L) quote(1) else metafor_rhs_expr(cond_form),
+      rhs = if (!has_pred) quote(1) else metafor_rhs_expr(cond_form),
       expr = cond_form,
       position = 1L
     )
@@ -298,26 +300,23 @@ symbolize.rma.mv <- function(fit, symbols = NULL, units = NULL,
   if (is.null(data)) data <- data.frame(yi = fit$yi, vi = fit$vi)
   n_obs <- as.integer(fit$k %||% nrow(data))
 
-  beta_names <- rownames(fit$beta) %||% names(stats::coef(fit))
-  pred_names <- setdiff(beta_names, c("intrcpt", "(Intercept)"))
-  rhs_text <- if (length(pred_names) == 0L) "1" else paste(pred_names, collapse = " + ")
-  cond_form <- stats::as.formula(paste(response, "~", rhs_text))
-
-  # Bring moderator columns into a fresh `data` frame so drm_build_terms
-  # can resolve them (rma.mv's data slot may not carry them).
-  if (length(pred_names) > 0L && !is.null(fit$X)) {
-    for (m in pred_names) {
-      if (!m %in% names(data) && m %in% colnames(fit$X)) {
-        data[[m]] <- as.numeric(fit$X[, m])
-      }
-    }
+  # Prefer the original moderator formula over design-matrix dummy names
+  # (same root-cause fix as rma.uni: factor moderators must keep their
+  # contrast structure, and `~ x - 1` must keep its missing intercept).
+  cond_form <- metafor_cond_formula(fit, response, data)
+  has_pred  <- metafor_has_predictors(cond_form)
+  # Bring any formula variable not already in `data` from the design matrix
+  # (the dummy-name fallback path references fit$X columns; the formula.mods
+  # path's real moderator columns are already present in fit$data).
+  for (m in setdiff(all.vars(cond_form), c(response, names(data)))) {
+    if (!is.null(fit$X) && m %in% colnames(fit$X)) data[[m]] <- as.numeric(fit$X[, m])
   }
 
   entries <- list(
     list(
       dpar = "mu",
       response = response,
-      rhs = if (length(pred_names) == 0L) quote(1) else metafor_rhs_expr(cond_form),
+      rhs = if (!has_pred) quote(1) else metafor_rhs_expr(cond_form),
       expr = cond_form,
       position = 1L
     )
@@ -714,10 +713,46 @@ metafor_build_submodels <- function(entries, param) {
   do.call(rbind, rows)
 }
 
+# Build the conditional (mu) formula for a metafor fit. Prefer the ORIGINAL
+# moderator formula carried on `fit$formula.mods` (e.g. `~ g`, `~ outcome - 1`)
+# over the design-matrix dummy row-names of `fit$beta` (gb, gc, outcomeA). The
+# dummy names are not columns of the data -- they crash extract_terms on factor
+# moderators ("object 'gb' not found") -- and even when they parse they lose
+# the factor-contrast structure and the no-intercept (`- 1`). Falls back to the
+# dummy-name reconstruction only when `formula.mods` is absent or its variables
+# are not all present in `data`.
+metafor_cond_formula <- function(fit, response, data) {
+  fm <- tryCatch(fit$formula.mods, error = function(e) NULL)
+  if (!is.null(fm)) {
+    vars <- all.vars(fm)
+    if (length(vars) == 0L || all(vars %in% names(data))) {
+      rhs <- sub("^\\s*~\\s*", "", paste(deparse(fm), collapse = " "))
+      if (!nzchar(trimws(rhs))) rhs <- "1"
+      return(stats::as.formula(paste(response, "~", rhs)))
+    }
+  }
+  beta_names <- rownames(fit$beta) %||% names(stats::coef(fit))
+  pred_names <- setdiff(beta_names, c("intrcpt", "(Intercept)"))
+  rhs <- if (length(pred_names) == 0L) "1" else paste(pred_names, collapse = " + ")
+  stats::as.formula(paste(response, "~", rhs))
+}
+
+# TRUE when the conditional formula carries any predictor term (vs intercept
+# only). Robust to `~ x - 1` (term.labels = "x", no intercept).
+metafor_has_predictors <- function(cond_form) {
+  length(attr(stats::terms(cond_form), "term.labels")) > 0L
+}
+
 # Map metafor's beta row name to the symbolizer term hit. metafor uses
-# "intrcpt" instead of "(Intercept)".
+# "intrcpt" instead of "(Intercept)", and names factor-contrast beta rows by
+# the model.matrix convention (variable + level, e.g. variable "g" + level "b"
+# = "gb") -- the term_label alone is just the variable name "g".
 metafor_hit_name <- function(row) {
   if (row$term_label == "(Intercept)") return("intrcpt")
+  if (!is.na(row$role) && row$role == "factor_contrast" &&
+      !is.na(row$contrast_level) && nzchar(as.character(row$contrast_level))) {
+    return(paste0(row$variable, row$contrast_level))
+  }
   row$term_label
 }
 

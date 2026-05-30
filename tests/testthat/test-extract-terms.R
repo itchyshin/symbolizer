@@ -81,7 +81,9 @@ test_that("one-sided formula works (sigma submodel)", {
 test_that("auto-generated symbols when user does not supply them", {
   dat <- data.frame(y = 1:5, temperature = 1:5)
   tt <- extract_terms(y ~ temperature, dat, "mu")
-  expect_equal(tt$symbol[[2L]], "temperature_i")
+  # Default symbol is math-safe (P6b): multi-letter names wrap upright in
+  # \mathrm{} so snake_case predictors do not italicise; underscores escaped.
+  expect_equal(tt$symbol[[2L]], "\\mathrm{temperature}_i")
 })
 
 test_that("user-supplied symbols override defaults", {

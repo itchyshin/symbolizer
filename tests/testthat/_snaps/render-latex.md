@@ -13,6 +13,6 @@
       \begin{aligned}
       \mathbf{w} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} & \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2)) \\
       \boldsymbol{\mu} & = \mathbf{X} \boldsymbol{\beta} \\
-      \log(\boldsymbol{\sigma}) & = \mathbf{Z} \boldsymbol{\gamma}
+      \log(\boldsymbol{\sigma}) & = \mathbf{X}_{\sigma} \boldsymbol{\gamma}
       \end{aligned}
 

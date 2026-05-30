@@ -142,7 +142,8 @@ lme4_symbolize_impl <- function(fit, family, link, class_name,
 
   distribution <- drm_build_distribution(
     family, response_symbol, response_symbol_matrix,
-    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_
+    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_,
+    constant_scale = TRUE  # lmer / glmer: a single residual SD, not a scale submodel
   )
   submodels  <- lme4_build_submodels(entries, fit, param, link)
   terms_tbl  <- drm_build_terms(entries_fe, data, symbols)
@@ -154,7 +155,8 @@ lme4_symbolize_impl <- function(fit, family, link, class_name,
     submodels, terms_tbl, re_tbl,
     response_symbol, response_symbol_matrix,
     family = family,
-    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_
+    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_,
+    constant_scale = TRUE  # lmer / glmer: a single residual SD
   )
   symbol_dict <- drm_build_symbol_dictionary(
     terms_tbl, response, response_symbol, response_symbol_matrix,
@@ -164,7 +166,11 @@ lme4_symbolize_impl <- function(fit, family, link, class_name,
   )
   assumptions <- drm_build_assumptions(
     family, response, response_symbol, re_tbl,
-    response_1 = response, response_2 = NA_character_
+    response_1 = response, response_2 = NA_character_,
+    # lmer / glmer are homoscedastic: a single residual SD (lmer) or no
+    # dispersion (glmer) -- never a scale submodel. Drop the location-scale
+    # sigma rows the shared Gaussian template carries (audit P2 phantom-sigma).
+    constant_scale = TRUE
   )
   interp <- drm_build_interpretation(
     fixed_eff, family, response, data,
@@ -174,10 +180,7 @@ lme4_symbolize_impl <- function(fit, family, link, class_name,
     entries, components, response,
     response_1 = response, response_2 = NA_character_
   )
-  expanded <- list(y = data[[response]], X = NULL, Z = NULL,
-                   beta = lme4::fixef(fit), u = NULL,
-                   fitted = stats::fitted(fit),
-                   residuals = stats::residuals(fit))
+  expanded <- lme4_build_expanded(fit, re_per_entry, has_re, response, link)
 
   metadata <- list(
     call = fit@call,
@@ -228,7 +231,7 @@ lme4_resolve_response_symbol <- function(response, symbols) {
   if (!is.null(symbols) && !is.null(symbols[[response]])) {
     return(as.character(symbols[[response]]))
   }
-  response
+  default_response_symbol(response)
 }
 
 lme4_build_submodels <- function(entries, fit, param, link_mu) {
@@ -278,6 +281,90 @@ lme4_re_terms <- function(fit, dpar) {
   }
   if (length(rows) == 0L) return(NULL)
   do.call(rbind, rows)
+}
+
+# Build the `expanded` numeric arrays (Tab 3 "equations with data").
+# The mu-submodel design matrix X comes from stats::model.matrix(fit);
+# without it the stacked-matrix + worked-row block fell back to the
+# "design matrix not captured" placeholder (audit B1). For a random-
+# intercept fit we also surface the per-group incidence matrix Z and
+# the BLUPs u so the worked-row arithmetic closes
+# (fitted = X*beta + Z*u, response scale). Each accessor is wrapped in
+# tryCatch so a fit that cannot produce a model matrix degrades to NULL
+# rather than erroring.
+lme4_build_expanded <- function(fit, re_per_entry, has_re, response, link) {
+  X_mat <- tryCatch(stats::model.matrix(fit), error = function(e) NULL)
+  beta  <- tryCatch(lme4::fixef(fit), error = function(e) NULL)
+  eta_hat <- if (!is.null(X_mat) && !is.null(beta) &&
+                 ncol(X_mat) == length(beta)) {
+    drop(X_mat %*% beta)
+  } else NULL
+
+  # Per-tier random-effect incidence matrices Z_g and BLUPs u, mirroring
+  # drm_build_expanded(): one entry per grouping factor. lme4's first
+  # slice handles intercept-only `(1 | g)` groups, so each Z_g is a 0/1
+  # incidence matrix mapping the g levels to the n observations.
+  data_fit <- fit@frame
+  Z_per_tier <- list()
+  u_per_tier <- list()
+  re_vals    <- tryCatch(lme4::ranef(fit), error = function(e) NULL)
+  if (any(has_re) && !is.null(re_vals)) {
+    for (i in which(has_re)) {
+      re_info <- re_per_entry[[i]]
+      if (is.null(re_info) || nrow(re_info) == 0L) next
+      for (gv in unique(re_info$group_var)) {
+        if (!(gv %in% names(data_fit)) || !(gv %in% names(re_vals))) next
+        re_g <- re_vals[[gv]]
+        if (!("(Intercept)" %in% colnames(re_g))) next
+        data_local <- data_fit
+        data_local[[gv]] <- factor(data_local[[gv]])
+        Zg <- stats::model.matrix(
+          stats::reformulate(paste0("0+", gv)), data = data_local
+        )
+        colnames(Zg) <- sub(paste0("^", gv), "", colnames(Zg))
+        u_g <- re_g[["(Intercept)"]]
+        names(u_g) <- rownames(re_g)
+        if (all(colnames(Zg) %in% names(u_g))) u_g <- u_g[colnames(Zg)]
+        Z_per_tier[[gv]] <- Zg
+        u_per_tier[[gv]] <- as.numeric(u_g)
+      }
+    }
+  }
+  Z_g <- if (length(Z_per_tier) > 0L) Z_per_tier[[1L]] else NULL
+  u   <- if (length(u_per_tier) > 0L) u_per_tier[[1L]] else NULL
+
+  # Add every tier's Z*u contribution to the linear predictor so eta_hat
+  # is the full conditional predictor, not just X*beta.
+  if (!is.null(eta_hat) && length(Z_per_tier) > 0L) {
+    for (gv in names(Z_per_tier)) {
+      Z_gv <- Z_per_tier[[gv]]; u_gv <- u_per_tier[[gv]]
+      if (!is.null(Z_gv) && !is.null(u_gv)) {
+        eta_hat <- eta_hat + drop(Z_gv %*% u_gv)
+      }
+    }
+  }
+  mu_hat <- if (is.null(eta_hat)) {
+    tryCatch(as.numeric(stats::fitted(fit)), error = function(e) NULL)
+  } else {
+    drm_apply_link_inverse(eta_hat, link)
+  }
+  e_resid <- tryCatch(as.numeric(stats::residuals(fit)), error = function(e) NULL)
+
+  list(
+    y          = data_fit[[response]],
+    X          = X_mat,
+    Z          = NULL,
+    beta       = if (is.null(beta)) NULL else as.numeric(beta),
+    u          = u,
+    Z_g        = Z_g,
+    Z_per_tier = Z_per_tier,
+    u_per_tier = u_per_tier,
+    eta_hat    = eta_hat,
+    mu_hat     = mu_hat,
+    e          = e_resid,
+    fitted     = tryCatch(stats::fitted(fit), error = function(e) NULL),
+    residuals  = e_resid
+  )
 }
 
 lme4_build_fixed_effects <- function(terms_tbl, fit, ci_method = "Wald") {

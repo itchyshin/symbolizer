@@ -76,3 +76,20 @@ test_that("gamm4$gam slot symbolizes via symbolize.gam", {
   expect_s3_class(sym, "symbolized_model")
   expect_true(sym$model$smooth_count >= 1L)
 })
+
+# Audit B1: the mgcv extractor must surface the design matrix (including
+# the smooth basis columns, aligned to coef(fit)) and the fitted mean so
+# Tab 3 fills with data.
+test_that("symbolize.gam populates expanded$X / mu_hat (audit B1)", {
+  fit <- fit_gam_simple()
+  sym <- symbolize(fit)
+  ex <- sym$expanded
+  expect_true(is.matrix(ex$X))
+  expect_equal(nrow(ex$X), sym$model$n_obs)
+  expect_equal(length(ex$beta), ncol(ex$X))   # basis cols align with coef()
+  expect_equal(as.numeric(ex$mu_hat),
+               as.numeric(stats::fitted(fit)), tolerance = 1e-6)
+  html <- as_html_three_views(sym)
+  expect_false(grepl("not captured", html))
+  expect_match(html, "mathbf\\{X\\}")
+})

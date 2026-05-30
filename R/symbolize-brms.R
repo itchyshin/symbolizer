@@ -131,18 +131,66 @@ symbolize.brmsfit <- function(fit, symbols = NULL, units = NULL,
     }
   }
 
-  param <- get_parameterization(family)
+  # v0.21+ structured-dependence detection. brms exposes phylogenetic /
+  # known-covariance random effects via `gr(group, cov = A)` inside a
+  # (1 | gr(group, cov = A)) term (the covariance matrix is stored in
+  # fit$data2). v0.22.1 meta-analytic detection: brms expresses a known
+  # per-study sampling variance via the response-side `se(...)` marker,
+  # e.g. `bf(y | se(sqrt(vi)) ~ ...)`. Both signals must be resolved
+  # BEFORE the distribution / parameterization / component builders run so
+  # the equation can carry (a) the structured matrix A in the random-effect
+  # covariance (matching symbolize-metafor.R / symbolize-mcmcglmm.R) and
+  # (b) the known-variance `meta_normal` distribution instead of a free
+  # residual sigma (matching symbolize-metafor.R L88 / symbolize-drmtmb.R).
+  detected_signals <- character(0L)
+  brms_phylo_groups <- brms_detect_phylo_groups(fit)
+  has_brms_phylo <- length(brms_phylo_groups) > 0L
+  if (has_brms_phylo) detected_signals <- c(detected_signals, "phylo")
+
+  has_se <- brms_detect_se(fit)
+  if (isTRUE(has_se)) detected_signals <- c(detected_signals, "meta_analysis")
+  detected_context <- if (isTRUE(has_se)) "meta_analysis" else NA_character_
+
+  # The capability gate is keyed on brms's *native* family (e.g. gaussian).
+  # Once a known sampling variance is detected, the equation, distribution,
+  # and assumption prose are rendered through the `meta_normal` family so a
+  # reader transcribes Normal(theta_i, v_i) with v_i KNOWN, not a freely
+  # estimated residual. The native `family` still drives capability_check;
+  # `render_family` drives every template lookup downstream.
+  render_family <- if (isTRUE(has_se)) "meta_normal" else family
+
+  # Map each phylo group to the structured correlation matrix symbol so the
+  # random-effect distribution line renders `sigma^2 A` (joint MVN) instead
+  # of the iid scalar `sigma^2`. NULL preserves iid behaviour for plain fits.
+  structured_matrix_for_group <- if (has_brms_phylo) {
+    stats::setNames(
+      as.list(rep("\\mathbf{A}", length(brms_phylo_groups))),
+      brms_phylo_groups
+    )
+  } else NULL
+
+  param <- get_parameterization(render_family)
   index <- list(observation = "i", individual = "j",
                 group = "g", trait = "k", time = "t")
 
   response_symbol <- brms_resolve_response_symbol(response, symbols)
   response_symbol_matrix <- drm_response_symbol_matrix(response_symbol)
+  # The meta_normal distribution template appends its own `_i`
+  # ("{response_symbol}_i \mid \theta_i ...") because the metafor path
+  # supplies a bare root ("y"). brms_resolve_response_symbol already
+  # appends `_i`, so strip the trailing index here to avoid a doubled
+  # "_i_i" subscript when rendering through the known-variance family.
+  # (The matrix symbol is derived above and strips `_i` internally, so
+  # it is unaffected.)
+  if (identical(render_family, "meta_normal")) {
+    response_symbol <- sub("_i$", "", response_symbol)
+  }
   response_units <- drm_resolve_units(response, units)
 
   model <- list(
     class = "brmsfit",
     package = "brms",
-    family = family,
+    family = render_family,
     response = response,
     n_obs = n_obs
   )
@@ -153,7 +201,7 @@ symbolize.brmsfit <- function(fit, symbols = NULL, units = NULL,
   }
 
   distribution <- drm_build_distribution(
-    family, response_symbol, response_symbol_matrix,
+    render_family, response_symbol, response_symbol_matrix,
     response_symbol_1 = response_symbol, response_symbol_2 = NA_character_
   )
   submodels  <- brms_build_submodels(entries, fit, param, link)
@@ -165,28 +213,14 @@ symbolize.brmsfit <- function(fit, symbols = NULL, units = NULL,
   components <- drm_build_components(
     submodels, terms_tbl, re_tbl,
     response_symbol, response_symbol_matrix,
-    family = family,
+    family = render_family,
+    structured_matrix_for_group = structured_matrix_for_group,
     response_symbol_1 = response_symbol, response_symbol_2 = NA_character_
   )
-  # v0.21+ structured-dependence detection. brms exposes phylogenetic /
-  # known-covariance random effects via `gr(group, cov = A)` inside a
-  # (1 | gr(group, cov = A)) term. Detect by scanning fit$ranef$cov
-  # (brms's per-RE-term metadata) for non-empty / non-NA `cov`. The
-  # covariance matrix is stored in fit$data2 under the matrix name.
-  detected_signals <- character(0L)
-  brms_phylo_groups <- character(0L)
-  ranef <- tryCatch(fit$ranef, error = function(e) NULL)
-  if (!is.null(ranef) && "cov" %in% names(ranef)) {
-    for (i in seq_len(nrow(ranef))) {
-      cv <- ranef$cov[[i]]
-      if (!is.null(cv) && !is.na(cv) && nzchar(as.character(cv))) {
-        brms_phylo_groups <- c(brms_phylo_groups, as.character(ranef$group[[i]]))
-      }
-    }
-    brms_phylo_groups <- unique(brms_phylo_groups)
-  }
-  has_brms_phylo <- length(brms_phylo_groups) > 0L
-  if (has_brms_phylo) detected_signals <- c(detected_signals, "phylo")
+  # Symbol-dictionary rows for each detected phylo group's A matrix. The
+  # group list (brms_phylo_groups) and detected_signals are resolved above,
+  # before the builders, so the structured matrix is also threaded into the
+  # component/equation builder via structured_matrix_for_group.
   structured_matrices <- if (has_brms_phylo) {
     lapply(brms_phylo_groups, function(g) list(
       symbol             = "\\mathbf{A}",
@@ -202,18 +236,25 @@ symbolize.brmsfit <- function(fit, symbols = NULL, units = NULL,
 
   symbol_dict <- drm_build_symbol_dictionary(
     terms_tbl, response, response_symbol, response_symbol_matrix,
-    response_units, family, submodels, units, data, n_obs, re_tbl,
+    response_units, render_family, submodels, units, data, n_obs, re_tbl,
     response_1 = response, response_2 = NA_character_,
     response_symbol_1 = response_symbol, response_symbol_2 = NA_character_,
     structured_matrices = structured_matrices
   )
   assumptions <- drm_build_assumptions(
-    family, response, response_symbol, re_tbl,
+    render_family, response, response_symbol, re_tbl,
     response_1 = response, response_2 = NA_character_,
-    detected_signals = detected_signals
+    detected_signals = detected_signals,
+    # A plain brms fit (no `bf(y ~ x, sigma ~ z)`) is homoscedastic: it has
+    # a single constant residual SD, not a scale submodel. The shared
+    # Gaussian template carries location-scale sigma rows (`log(sigma_i) =
+    # gamma_0 + ...`, `sigma_i > 0`) that describe machinery this fit does
+    # not have -- drop them via the constant-scale guard. A distributional
+    # `sigma ~ z` fit keeps them. (Audit P2: phantom sigma rows.)
+    constant_scale = !has_sigma_distributional
   )
   interp <- drm_build_interpretation(
-    fixed_eff, family, response, data,
+    fixed_eff, render_family, response, data,
     response_1 = response, response_2 = NA_character_,
     detected_signals = detected_signals
   )
@@ -221,26 +262,7 @@ symbolize.brmsfit <- function(fit, symbols = NULL, units = NULL,
     entries, components, response,
     response_1 = response, response_2 = NA_character_
   )
-  expanded <- brms_build_expanded(fit)
-
-  # v0.22.1: detect meta-analytic context. brms expresses known sampling
-  # variance via the response-side `se(...)` marker, e.g.
-  # `bf(y | se(sqrt(vi)) ~ ...)`. The canonical detection is to deparse
-  # the brms formula tree and grep for the `se(` marker on the response.
-  brms_formula_text <- tryCatch({
-    ff <- fit$formula
-    # brms stores the formula via brmsformula; deparse the top form
-    paste(deparse(ff), collapse = " ")
-  }, error = function(...) "")
-  # Fall back to deparsing fit$call$formula if fit$formula is opaque
-  if (!nzchar(brms_formula_text) || !grepl("\\|", brms_formula_text)) {
-    brms_formula_text <- tryCatch(
-      paste(deparse(fit$call$formula), collapse = " "),
-      error = function(...) brms_formula_text
-    )
-  }
-  has_se <- grepl("\\bse\\s*\\(", brms_formula_text)
-  detected_context <- if (isTRUE(has_se)) "meta_analysis" else NA_character_
+  expanded <- brms_build_expanded(fit, link)
 
   metadata <- list(
     call = fit$call,
@@ -300,6 +322,42 @@ brms_has_distributional_formula <- function(fit) {
 # Pull the RHS of an R formula as an unevaluated expression.
 brms_rhs_expr <- function(f) {
   if (length(f) == 3L) f[[3L]] else f[[2L]]
+}
+
+# Detect phylogenetic / known-covariance random-effect groups. brms attaches
+# a covariance matrix to a grouping factor via `(1 | gr(group, cov = A))`;
+# the per-RE-term metadata in fit$ranef carries a non-empty `cov` column for
+# such terms (the matrix itself lives in fit$data2). Returns the unique
+# grouping-factor names, or character(0) for a fit with no structured RE.
+brms_detect_phylo_groups <- function(fit) {
+  ranef <- tryCatch(fit$ranef, error = function(e) NULL)
+  if (is.null(ranef) || !("cov" %in% names(ranef))) return(character(0L))
+  groups <- character(0L)
+  for (i in seq_len(nrow(ranef))) {
+    cv <- ranef$cov[[i]]
+    if (!is.null(cv) && !is.na(cv) && nzchar(as.character(cv))) {
+      groups <- c(groups, as.character(ranef$group[[i]]))
+    }
+  }
+  unique(groups)
+}
+
+# Detect the meta-analytic known-sampling-variance marker. brms expresses a
+# known per-study sampling variance via the response-side `se(...)` addition
+# term, e.g. `bf(y | se(sqrt(vi)) ~ ...)`. Deparse the brmsformula and grep
+# for the marker; fall back to fit$call$formula if fit$formula is opaque.
+brms_detect_se <- function(fit) {
+  txt <- tryCatch(
+    paste(deparse(fit$formula), collapse = " "),
+    error = function(...) ""
+  )
+  if (!nzchar(txt) || !grepl("\\|", txt)) {
+    txt <- tryCatch(
+      paste(deparse(fit$call$formula), collapse = " "),
+      error = function(...) txt
+    )
+  }
+  grepl("\\bse\\s*\\(", txt)
 }
 
 # Response variable name from a brmsfit. brms's `fit$formula$resp` is
@@ -521,17 +579,42 @@ brms_build_variance_components <- function(fit, re_per_entry) {
   do.call(rbind, rows)
 }
 
-# Minimal expanded block. brms doesn't expose the design matrix as
-# cleanly; use posterior_summary's point estimates.
-brms_build_expanded <- function(fit) {
+# Expanded block. brms does not respond to stats::model.matrix(), but
+# `brms::standata(fit)$X` is the (population-level) conditional design
+# matrix, with columns aligned to `brms::fixef(fit)`. Surfacing it fills
+# Tab 3's stacked-matrix + worked-row block instead of the "design matrix
+# not captured" placeholder (audit B1). eta_hat = X*beta is the
+# population-level linear predictor and mu_hat = link_inv(eta_hat) its
+# response-scale mean; for models with group-level (random) effects the
+# residual y - mu_hat carries those effects, which keeps the Gaussian
+# response equation closing row-by-row. Each accessor is wrapped so a fit
+# whose design matrix cannot be recovered degrades to NULL.
+brms_build_expanded <- function(fit, link = "identity") {
+  beta  <- tryCatch(brms::fixef(fit)[, "Estimate"], error = function(e) NULL)
+  X_mat <- tryCatch({
+    sx <- brms::standata(fit)$X
+    if (is.matrix(sx)) sx else NULL
+  }, error = function(e) NULL)
+  eta_hat <- if (!is.null(X_mat) && !is.null(beta) &&
+                 ncol(X_mat) == length(beta)) {
+    drop(X_mat %*% beta)
+  } else NULL
+  mu_hat  <- if (is.null(eta_hat)) NULL else drm_apply_link_inverse(eta_hat, link)
+  y <- as.numeric(fit$data[[brms_response_name(fit)]])
+  e_resid <- if (!is.null(mu_hat) && length(mu_hat) == length(y)) {
+    y - mu_hat
+  } else NULL
   list(
-    y = as.numeric(fit$data[[brms_response_name(fit)]]),
-    X = NULL,
+    y = y,
+    X = X_mat,
     Z = NULL,
-    beta = brms::fixef(fit)[, "Estimate"],
+    beta = if (is.null(beta)) NULL else as.numeric(beta),
     u = NULL,
-    fitted = NULL,
-    residuals = NULL
+    eta_hat = eta_hat,
+    mu_hat = mu_hat,
+    e = e_resid,
+    fitted = mu_hat,
+    residuals = e_resid
   )
 }
 

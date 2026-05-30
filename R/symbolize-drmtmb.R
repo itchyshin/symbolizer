@@ -618,14 +618,22 @@ drm_param_greek_bold <- function(dpar) {
 }
 
 drm_design_matrix_symbol <- function(dpar) {
+  # Audit M3: the scale (sigma) submodel design matrix is \mathbf{X}_\sigma,
+  # NOT \mathbf{Z}. \mathbf{Z} is reserved exclusively for the random-effects
+  # incidence matrix (it maps the group-level BLUPs \mathbf{u} onto the n
+  # observations). Tab 3's stacked-matrix block already renamed the scale
+  # design to \mathbf{X}_\sigma (Noether's audit); routing the symbol
+  # through here keeps Tab 2 (the matrix view) and the symbol glossary
+  # consistent, so the same fit never shows \mathbf{Z} meaning two
+  # different matrices across tabs.
   switch(
     dpar,
     mu     = "\\mathbf{X}",
     mu1    = "\\mathbf{X}_{1}",
     mu2    = "\\mathbf{X}_{2}",
-    sigma  = "\\mathbf{Z}",
-    sigma1 = "\\mathbf{Z}_{1}",
-    sigma2 = "\\mathbf{Z}_{2}",
+    sigma  = "\\mathbf{X}_{\\sigma}",
+    sigma1 = "\\mathbf{X}_{\\sigma_{1}}",
+    sigma2 = "\\mathbf{X}_{\\sigma_{2}}",
     rho12  = "\\mathbf{W}",
     zi     = "\\mathbf{X}_{\\mathrm{zi}}",
     hu     = "\\mathbf{X}_{\\mathrm{hu}}",
@@ -676,17 +684,7 @@ drm_resolve_response_symbol <- function(response, symbols) {
   if (!is.null(symbols) && response %in% names(symbols)) {
     return(unname(symbols[[response]]))
   }
-  # Default: use the column name directly as a scalar subscript_i.
-  # Escape any underscores in the column name so MathJax doesn't parse
-  # them as subscripts (the "body_m ass_i" rendering bug). Wrap
-  # multi-character names in \mathrm{...} so multi-letter variable
-  # names render upright as a single identifier.
-  esc <- gsub("_", "\\_", response, fixed = TRUE)
-  if (nchar(response) > 1L) {
-    paste0("\\mathrm{", esc, "}_i")
-  } else {
-    paste0(esc, "_i")
-  }
+  default_response_symbol(response)
 }
 
 drm_resolve_biv_response_symbol <- function(response, symbols, which) {
@@ -777,13 +775,15 @@ drm_strip_markers <- function(expr) {
 drm_build_distribution <- function(family, response_symbol,
                                    response_symbol_matrix,
                                    response_symbol_1 = NULL,
-                                   response_symbol_2 = NULL) {
+                                   response_symbol_2 = NULL,
+                                   constant_scale = FALSE) {
   tex <- drm_distribution_template(
     family,
     response_symbol = response_symbol,
     response_symbol_matrix = response_symbol_matrix,
     response_symbol_1 = response_symbol_1,
-    response_symbol_2 = response_symbol_2
+    response_symbol_2 = response_symbol_2,
+    constant_scale = constant_scale
   )
   tibble::tibble(
     family = family,
@@ -803,7 +803,8 @@ drm_build_distribution <- function(family, response_symbol,
 drm_distribution_template <- function(family, response_symbol,
                                       response_symbol_matrix,
                                       response_symbol_1 = NULL,
-                                      response_symbol_2 = NULL) {
+                                      response_symbol_2 = NULL,
+                                      constant_scale = FALSE) {
   tbl <- load_template("family-distributions")
   hit <- tbl[tbl$family == family, , drop = FALSE]
   if (nrow(hit) == 0L) {
@@ -822,8 +823,19 @@ drm_distribution_template <- function(family, response_symbol,
     response_symbol_1      = response_symbol_1 %||% "",
     response_symbol_2      = response_symbol_2 %||% ""
   )
+  index_latex <- drm_substitute(hit$index_latex[[1L]], mapping)
+  # When the residual SD / dispersion is constant across observations (no
+  # scale submodel -- lm, lmer, an intercept-only dispformula, ...), the
+  # per-observation index on sigma is over-specified: write \sigma, not
+  # \sigma_i (audit M4 -- the indexed form wrongly implied heteroscedasticity
+  # from Rung 1 of the ladder). Targeted fixed-string swap: it leaves \mu_i,
+  # \sigma_{1i} (bivariate), and \sigma_p (phylogenetic) untouched. The matrix
+  # form already uses \boldsymbol{\sigma} with no per-observation index.
+  if (isTRUE(constant_scale)) {
+    index_latex <- gsub("\\sigma_i", "\\sigma", index_latex, fixed = TRUE)
+  }
   list(
-    index_latex  = drm_substitute(hit$index_latex[[1L]],  mapping),
+    index_latex  = index_latex,
     matrix_latex = drm_substitute(hit$matrix_latex[[1L]], mapping)
   )
 }
@@ -1177,6 +1189,27 @@ drm_build_expanded <- function(fit, re_per_entry, has_re,
   )
 }
 
+# Render a data-derived group / column name safely as a LaTeX subscript
+# (audit M2). A snake_case name such as `study_ID` interpolated raw into
+# a subscript -- e.g. `\sigma_{study_ID}`, `u_{study_ID(i)}`,
+# `\mathbf{u}_{study_ID}` -- is read by KaTeX as a nested double
+# subscript (`_{study` then a stray `_ID`), so it renders wrong. Wrap
+# multi-token names in `\mathrm{...}` with the underscore escaped so the
+# whole name reads upright as one identifier; leave single-token names
+# (`g`, `species`) untouched so the historical simple symbols are
+# unchanged.
+#' @keywords internal
+drm_group_subscript <- function(group_var) {
+  if (length(group_var) != 1L || is.na(group_var) || !nzchar(group_var)) {
+    return(group_var)
+  }
+  if (grepl("_", group_var, fixed = TRUE)) {
+    sprintf("\\mathrm{%s}", gsub("_", "\\_", group_var, fixed = TRUE))
+  } else {
+    group_var
+  }
+}
+
 drm_build_random_effects <- function(re_per_entry) {
   filled <- Filter(Negate(is.null), re_per_entry)
   if (length(filled) == 0L) return(NULL)
@@ -1203,17 +1236,20 @@ drm_build_random_effects <- function(re_per_entry) {
         row <- sel[[k]]
         idx <- k - 1L  # 0-based index, matches the math convention
         out$component_index[[row]] <- idx
+        # Escape snake_case group names for safe subscript rendering
+        # (audit M2); single-token names pass through unchanged.
+        gv_sub <- drm_group_subscript(gv)
         if (n_comp == 1L) {
           # Intercept-only: keep the historical simple symbols.
-          out$u_symbol_index[[row]]  <- sprintf("u_{%s(i)}", gv)
+          out$u_symbol_index[[row]]  <- sprintf("u_{%s(i)}", gv_sub)
           out$u_symbol_matrix[[row]] <- "\\mathbf{u}"
-          out$sigma_symbol[[row]]    <- sprintf("\\sigma_{%s}", gv)
+          out$sigma_symbol[[row]]    <- sprintf("\\sigma_{%s}", gv_sub)
         } else {
           # Multi-component: numbered subscripts. Intercept gets 0,
           # slopes get 1, 2, ...
-          out$u_symbol_index[[row]]  <- sprintf("u_{%d,%s(i)}", idx, gv)
+          out$u_symbol_index[[row]]  <- sprintf("u_{%d,%s(i)}", idx, gv_sub)
           out$u_symbol_matrix[[row]] <- sprintf("\\mathbf{u}_{%d}", idx)
-          out$sigma_symbol[[row]]    <- sprintf("\\sigma_{u_{%d,%s}}", idx, gv)
+          out$sigma_symbol[[row]]    <- sprintf("\\sigma_{u_{%d,%s}}", idx, gv_sub)
         }
         # For non-intercept components, record the predictor that
         # multiplies u_k in the linear predictor.
@@ -1291,8 +1327,10 @@ drm_build_covariance_components <- function(re_tbl) {
             component_1 = comps[[i]],
             component_2 = comps[[j]],
             rho_symbol  = sprintf("\\rho_{u_{%d,%s},\\, u_{%d,%s}}",
-                                  re_tbl$component_index[sel][[i]], gv,
-                                  re_tbl$component_index[sel][[j]], gv),
+                                  re_tbl$component_index[sel][[i]],
+                                  drm_group_subscript(gv),
+                                  re_tbl$component_index[sel][[j]],
+                                  drm_group_subscript(gv)),
             description = sprintf(
               "within-%s correlation between the random %s and the random %s on %s",
               gv,
@@ -1314,7 +1352,8 @@ drm_build_components <- function(submodels, terms_tbl, re_tbl, response_symbol,
                                   family = "gaussian",
                                   response_symbol_1 = NULL,
                                   response_symbol_2 = NULL,
-                                  structured_matrix_for_group = NULL) {
+                                  structured_matrix_for_group = NULL,
+                                  constant_scale = FALSE) {
   # v0.21.1+ `structured_matrix_for_group`: optional named list mapping
   # random-effect group name to a LaTeX matrix symbol (e.g.,
   # list(species = "\\mathbf{A}") for a phylogenetic random effect, or
@@ -1331,7 +1370,8 @@ drm_build_components <- function(submodels, terms_tbl, re_tbl, response_symbol,
     response_symbol        = response_symbol,
     response_symbol_matrix = response_symbol_matrix,
     response_symbol_1      = response_symbol_1,
-    response_symbol_2      = response_symbol_2
+    response_symbol_2      = response_symbol_2,
+    constant_scale         = constant_scale
   )
   rows <- list()
   rows[[1L]] <- tibble::tibble(
@@ -1407,6 +1447,9 @@ drm_build_components <- function(submodels, terms_tbl, re_tbl, response_symbol,
       groups <- unique(re_for_dpar$group_var)
       mat_terms <- vapply(groups, function(gv) {
         sel <- which(re_for_dpar$group_var == gv)
+        # Escape snake_case group names for safe subscript rendering
+        # (audit M2); single-token names pass through unchanged.
+        gv_sub <- drm_group_subscript(gv)
         if (length(sel) == 1L &&
             is.na(re_for_dpar$predictor_factor[[sel[[1L]]]])) {
           # Intercept-only group: bare \mathbf{u} when there's only one
@@ -1414,11 +1457,11 @@ drm_build_components <- function(submodels, terms_tbl, re_tbl, response_symbol,
           if (length(groups) == 1L) {
             re_for_dpar$u_symbol_matrix[[sel[[1L]]]]
           } else {
-            sprintf("\\mathbf{u}_{%s}", gv)
+            sprintf("\\mathbf{u}_{%s}", gv_sub)
           }
         } else {
           # Multi-component (random intercept + slopes): \mathbf{Z}_g \mathbf{u}_g.
-          sprintf("\\mathbf{Z}_{%s}\\, \\mathbf{u}_{%s}", gv, gv)
+          sprintf("\\mathbf{Z}_{%s}\\, \\mathbf{u}_{%s}", gv_sub, gv_sub)
         }
       }, character(1L))
       re_mat <- paste(mat_terms, collapse = " + ")
@@ -1443,6 +1486,10 @@ drm_build_components <- function(submodels, terms_tbl, re_tbl, response_symbol,
     for (kk in seq_len(nrow(re_keys))) {
       sm <- re_keys$submodel[[kk]]
       g  <- re_keys$group_var[[kk]]
+      # Escape snake_case group names for safe LaTeX subscript rendering
+      # (audit M2). `g` itself stays raw for internal row names and data
+      # matching; `g_sub` is what goes inside `_{...}` subscripts.
+      g_sub <- drm_group_subscript(g)
       sel <- which(re_tbl$submodel == sm & re_tbl$group_var == g)
       n_comp <- length(sel)
       n_levels <- re_tbl$n_levels[[sel[[1L]]]]
@@ -1472,17 +1519,17 @@ drm_build_components <- function(submodels, terms_tbl, re_tbl, response_symbol,
         if (!is.null(struct_sym)) {
           eq_index <- sprintf(
             "\\mathbf{u}_{%s} \\sim \\mathcal{N}(\\mathbf{0},\\, %s^2 %s)",
-            g, sym, struct_sym
+            g_sub, sym, struct_sym
           )
           eq_matrix <- sprintf(
             "\\mathbf{u}_{%s} \\sim \\mathcal{N}(\\mathbf{0},\\, %s^2 %s_{%d \\times %d})",
-            g, sym, struct_sym, n_levels, n_levels
+            g_sub, sym, struct_sym, n_levels, n_levels
           )
         } else {
-          eq_index <- sprintf("u_{%s} \\sim \\mathcal{N}(0,\\, %s^2)", g, sym)
+          eq_index <- sprintf("u_{%s} \\sim \\mathcal{N}(0,\\, %s^2)", g_sub, sym)
           eq_matrix <- sprintf(
             "\\mathbf{u}_{%s} \\sim \\mathcal{N}(\\mathbf{0},\\, %s^2 \\mathbf{I}_{%d})",
-            g, sym, n_levels
+            g_sub, sym, n_levels
           )
         }
         rows[[length(rows) + 1L]] <- tibble::tibble(
@@ -1504,11 +1551,11 @@ drm_build_components <- function(submodels, terms_tbl, re_tbl, response_symbol,
           submodel = sm,
           equation = sprintf(
             "%s \\sim \\mathcal{N}_{%d}(\\mathbf{0},\\, \\boldsymbol{\\Sigma}_{u,%s})",
-            idx_vec, n_comp, g
+            idx_vec, n_comp, g_sub
           ),
           equation_matrix = sprintf(
             "\\mathbf{u}_{%s} \\sim \\mathcal{N}_{%d}(\\mathbf{0},\\, \\boldsymbol{\\Sigma}_{u,%s})",
-            g, n_comp, g
+            g_sub, n_comp, g_sub
           ),
           status = "stated"
         )
@@ -1523,8 +1570,8 @@ drm_build_components <- function(submodels, terms_tbl, re_tbl, response_symbol,
           if (i < j) {
             off_terms[[length(off_terms) + 1L]] <- sprintf(
               "\\rho_{u_{%d,%s},u_{%d,%s}}\\, %s\\, %s",
-              re_tbl$component_index[sel][[i]], g,
-              re_tbl$component_index[sel][[j]], g,
+              re_tbl$component_index[sel][[i]], g_sub,
+              re_tbl$component_index[sel][[j]], g_sub,
               sigmas[[i]], sigmas[[j]]
             )
           }
@@ -1533,7 +1580,7 @@ drm_build_components <- function(submodels, terms_tbl, re_tbl, response_symbol,
         sigma_mat <- if (n_comp == 2L) {
           sprintf(
             "\\boldsymbol{\\Sigma}_{u,%s} = \\begin{pmatrix} %s & %s \\\\ %s & %s \\end{pmatrix}",
-            g,
+            g_sub,
             diag_terms[[1L]], off_terms[[1L]],
             off_terms[[1L]], diag_terms[[2L]]
           )
@@ -1542,7 +1589,7 @@ drm_build_components <- function(submodels, terms_tbl, re_tbl, response_symbol,
           # rather than spelling out the full matrix.
           sprintf(
             "\\boldsymbol{\\Sigma}_{u,%s} = \\mathbf{D}_{u,%s}\\, \\boldsymbol{\\Omega}_{u,%s}\\, \\mathbf{D}_{u,%s} \\text{ where } \\mathbf{D}_{u,%s} = \\mathrm{diag}(%s)",
-            g, g, g, g, g,
+            g_sub, g_sub, g_sub, g_sub, g_sub,
             paste(sigmas, collapse = ",\\, ")
           )
         }
@@ -1639,7 +1686,8 @@ drm_build_symbol_dictionary <- function(terms_tbl, response, response_symbol,
                                         response_1 = NULL, response_2 = NULL,
                                         response_symbol_1 = NULL,
                                         response_symbol_2 = NULL,
-                                        structured_matrices = NULL) {
+                                        structured_matrices = NULL,
+                                        constant_scale = FALSE) {
   # `structured_matrices` (v0.21+): optional list of rows to append for
   # structured-covariance matrices (phylogenetic A, spatial Omega, etc.).
   # Each entry is a named list with the same fields as a symbol_dictionary
@@ -1769,14 +1817,14 @@ drm_build_symbol_dictionary <- function(terms_tbl, response, response_symbol,
   # larger => tighter, the opposite of an SD), Gamma (dispersion), NegBin
   # (overdispersion), etc. Source the meaning from the per-family
   # scale_meaning column of family-parameterizations.csv.
-  sigma_meaning_lookup <- function(fam) {
+  sigma_meaning_lookup <- function(fam, column = "scale_meaning") {
     tbl <- tryCatch(load_template("family-parameterizations"),
                     error = function(e) NULL)
     if (is.null(tbl) || !"family" %in% names(tbl) ||
-        !"scale_meaning" %in% names(tbl)) return("")
+        !column %in% names(tbl)) return("")
     hit <- tbl[tbl$family == fam, , drop = FALSE]
     if (nrow(hit) == 0L) return("")
-    sm <- hit$scale_meaning[[1L]]
+    sm <- hit[[column]][[1L]]
     if (is.na(sm) || !nzchar(sm)) "" else sm
   }
   for (i in seq_len(nrow(submodels))) {
@@ -1829,8 +1877,26 @@ drm_build_symbol_dictionary <- function(terms_tbl, response, response_symbol,
       meta_normal     = "residual heterogeneity SD (tau)",
       "residual scale"
     )
+    # Constant-scale guard (v0.22.5 #10): the default glosses above assume a
+    # drmTMB-style log-link dispersion submodel (e.g. "(on the log scale)").
+    # A fit with a SINGLE constant scalar scale and NO dispersion submodel
+    # (an mgcv gam/bam Gamma reports phi directly, not on the log scale)
+    # needs an honest constant-scale gloss instead. Source it from the
+    # `scale_meaning_constant` column of family-parameterizations.csv; fall
+    # back to the log-scale switch value if no constant gloss is templated.
+    if (isTRUE(constant_scale)) {
+      cm <- sigma_meaning_lookup(family, column = "scale_meaning_constant")
+      if (nzchar(cm)) desc <- cm
+    }
     rows[[length(rows) + 1L]] <- tibble::tibble(
-      symbol = "\\sigma_i",
+      # Audit M4: this row is added only for fits with NO scale submodel
+      # (lm, lmer, MCMCglmm, brms / glmmTMB Gaussian, metafor) -- i.e. a
+      # single residual SD that is constant across observations (the
+      # dimension below says so). The symbol must therefore be the
+      # unindexed scalar `\sigma`, not `\sigma_i`; the per-observation
+      # subscript is reserved for genuine location-scale fits whose sigma
+      # submodel makes the SD vary by row.
+      symbol = "\\sigma",
       symbol_matrix = "\\boldsymbol{\\sigma}",
       variable = NA_character_,
       units = NA_character_,
@@ -1884,13 +1950,16 @@ drm_build_symbol_dictionary <- function(terms_tbl, response, response_symbol,
     for (i in seq_len(nrow(re_tbl))) {
       g <- re_tbl$group_var[[i]]
       G <- re_tbl$n_levels[[i]]
+      # Escape snake_case group names for safe LaTeX subscript rendering
+      # (audit M2); `g` stays raw for the plain-text variable / description.
+      g_sub <- drm_group_subscript(g)
       rows[[length(rows) + 1L]] <- tibble::tibble(
         symbol             = re_tbl$u_symbol_index[[i]],
-        symbol_matrix      = sprintf("\\mathbf{u}_{%s}", g),
+        symbol_matrix      = sprintf("\\mathbf{u}_{%s}", g_sub),
         variable           = g,
         units              = NA_character_,
         role               = "random_intercept",
-        dimension          = sprintf("scalar; $\\mathbb{R}^{G_{%s}}$ in matrix form", g),
+        dimension          = sprintf("scalar; $\\mathbb{R}^{G_{%s}}$ in matrix form", g_sub),
         dimension_concrete = sprintf("scalar; $\\mathbb{R}^{%d}$ in matrix form", G),
         description        = sprintf("random intercept by %s", g)
       )
@@ -1918,14 +1987,52 @@ drm_build_symbol_dictionary <- function(terms_tbl, response, response_symbol,
   do.call(rbind, rows)
 }
 
+# Honest link-aware prose for a given link, from inst/extdata/link-readings.csv.
+# Returns the matching row, the generic "*" fallback, or NULL.
+drm_link_reading <- function(link) {
+  tbl <- tryCatch(load_template("link-readings"), error = function(e) NULL)
+  if (is.null(tbl) || !"link" %in% names(tbl)) return(NULL)
+  hit <- tbl[tbl$link == link, , drop = FALSE]
+  if (nrow(hit) == 0L) hit <- tbl[tbl$link == "*", , drop = FALSE]
+  if (nrow(hit) == 0L) return(NULL)
+  hit[1L, , drop = FALSE]
+}
+
+# TRUE when an explicit fit link differs from the family's default link
+# (family-parameterizations.csv link_mu). When they match, the family-keyed
+# prose is already correct, so no override is needed (NULL link_mu => FALSE,
+# preserving behaviour for every caller that does not pass a link).
+drm_link_overrides_default <- function(family, link_mu) {
+  if (is.null(link_mu) || is.na(link_mu) || !nzchar(link_mu)) return(FALSE)
+  default <- tryCatch(get_parameterization(family)$link_mu,
+                      error = function(e) NA_character_)
+  !is.na(default) && nzchar(default) && !identical(link_mu, default)
+}
+
 drm_build_assumptions <- function(family, response, response_symbol,
                                   re_tbl = NULL,
                                   response_1 = NULL, response_2 = NULL,
-                                  detected_signals = character(0L)) {
+                                  detected_signals = character(0L),
+                                  link_mu = NULL,
+                                  constant_scale = FALSE) {
   tbl <- load_template("assumption-templates")
   rows <- tbl[tbl$family == family, , drop = FALSE]
   if (nrow(rows) == 0L) {
     cli::cli_abort("No assumption template rows for family {.val {family}}.")
+  }
+  # Constant-scale guard (v0.22.5 #10): some fitted classes estimate a SINGLE
+  # scalar dispersion / scale parameter with NO dispersion submodel and NO log
+  # link on the scale (e.g. an mgcv gam/bam Gamma or gaussian fit reports one
+  # phi / residual variance directly). The shared family templates carry a
+  # `sigma` submodel block -- a log-linked linear_predictor `log(sigma_i) =
+  # gamma_0 + sum_k gamma_k Z_{ki}` plus a positivity row -- that describes a
+  # drmTMB-style location-scale model such a fit does NOT have. Drop those
+  # phantom sigma-submodel rows when the caller flags a constant scale. The
+  # single scalar value lives in variance_components, not in an assumptions
+  # submodel. drmTMB / glmmTMB / brms location-scale fits keep the default
+  # `constant_scale = FALSE`, so their real sigma submodel is untouched.
+  if (isTRUE(constant_scale)) {
+    rows <- rows[rows$submodel != "sigma" | is.na(rows$submodel), , drop = FALSE]
   }
   # v0.21+ requires-column gating. Rows can carry a `requires` value naming
   # a structured-dependence signal (phylo / spatial / animal / temporal /
@@ -1935,14 +2042,45 @@ drm_build_assumptions <- function(family, response, response_symbol,
   # case covers pre-existing field-shift parse issues in the CSV).
   if ("requires" %in% names(rows)) {
     req <- rows$requires
-    known <- c("phylo", "spatial", "animal", "temporal", "meta_analysis")
+    known <- c("phylo", "phylo_marginal", "spatial", "animal",
+               "temporal", "meta_analysis")
     keep <- is.na(req) | req == "" | !(req %in% known) |
             (req %in% detected_signals)
     rows <- rows[keep, , drop = FALSE]
   }
   has_re <- !is.null(re_tbl) && nrow(re_tbl) > 0L
-  drop_assumption <- if (has_re) "independence" else "independence_given_random_effects"
-  rows <- rows[rows$assumption != drop_assumption, , drop = FALSE]
+  # A structured-dependence signal (e.g. phylo_marginal from phylolm's PGLS
+  # residual covariance) breaks the plain conditional-independence claim even
+  # when there is no random-effect tibble: the dependence lives in the dense
+  # residual covariance, not in a u_p tier. Drop the unconditional
+  # `independence` row in that case too, so the headline assumptions do not
+  # self-contradict the phylo-covariance rows. Guarded strictly by the
+  # signal so ordinary Gaussian fits (no signal, no re_tbl) keep `independence`.
+  structured_dependence_signals <- c("phylo_marginal", "spatial", "temporal")
+  has_structured_dependence <- any(detected_signals %in%
+                                     structured_dependence_signals)
+  if (has_structured_dependence) {
+    # The dependence lives in a dense residual covariance and there is no
+    # random-effect tier (phylolm marginalizes u_p into e). BOTH independence
+    # variants are then false / misleading -- drop them and let the
+    # marginal-covariance rows carry the dependence statement.
+    drop_assumption <- c("independence", "independence_given_random_effects")
+  } else if (has_re) {
+    drop_assumption <- "independence"
+  } else {
+    drop_assumption <- "independence_given_random_effects"
+  }
+  rows <- rows[!(rows$assumption %in% drop_assumption), , drop = FALSE]
+  # phylolm's PGLS marginal form has a single scalar sigma^2 and no scale
+  # (distributional) submodel, so the generic Gaussian sigma-submodel
+  # boilerplate (log(sigma_i) = gamma_0 + ..., sigma_i > 0) describes
+  # machinery that does not exist. Drop those scale-submodel rows under the
+  # marginal-PGLS signal only; location-scale Gaussian fits (drmTMB) carry
+  # no phylo_marginal signal and keep their sigma submodel rows.
+  if ("phylo_marginal" %in% detected_signals) {
+    rows <- rows[is.na(rows$submodel) | rows$submodel != "sigma", ,
+                 drop = FALSE]
+  }
   mapping <- list(
     response = response,
     response_symbol = response_symbol,
@@ -1954,7 +2092,7 @@ drm_build_assumptions <- function(family, response, response_symbol,
                  character(1L), mapping = mapping, USE.NAMES = FALSE)
   meaning <- vapply(rows$biological_meaning, drm_substitute,
                     character(1L), mapping = mapping, USE.NAMES = FALSE)
-  tibble::tibble(
+  out <- tibble::tibble(
     family = rows$family,
     submodel = rows$submodel,
     assumption = rows$assumption,
@@ -1962,6 +2100,24 @@ drm_build_assumptions <- function(family, response, response_symbol,
     biological_meaning = meaning,
     status = rows$status
   )
+  # Link-honesty: when the fit uses a non-default link (e.g. mgcv Gamma's
+  # inverse), the family-keyed linear_predictor template names the wrong link.
+  # Replace its left-hand side + meaning with the actual link's prose.
+  if (drm_link_overrides_default(family, link_mu)) {
+    lr <- drm_link_reading(link_mu)
+    if (!is.null(lr)) {
+      # Only the mean submodel's linear predictor names the mu link; the sigma
+      # submodel row keeps its own log(sigma_i) = ... template.
+      lp <- which(out$assumption == "linear_predictor" &
+                    out$submodel %in% c("mu", "mu1", "mu2"))
+      if (length(lp) >= 1L) {
+        out$expression_latex[lp] <- paste0(lr$lp_lhs[[1L]],
+          " = \\beta_0 + \\sum_k \\beta_k X_{ki}")
+        out$biological_meaning[lp] <- lr$link_meaning[[1L]]
+      }
+    }
+  }
+  out
 }
 
 ref_for_var <- function(var, data) {
@@ -2048,7 +2204,8 @@ drm_interaction_subs <- function(row, data) {
 
 drm_build_interpretation <- function(fixed_eff, family, response, data,
                                      response_1 = NULL, response_2 = NULL,
-                                     detected_signals = character(0L)) {
+                                     detected_signals = character(0L),
+                                     link_mu = NULL) {
   empty <- tibble::tibble(
     submodel = character(0),
     term_label = character(0),
@@ -2094,6 +2251,25 @@ drm_build_interpretation <- function(fixed_eff, family, response, data,
     )
     names(has_int)[!has_int]
   }
+  # Link-honesty: when the fit uses a non-default link, the family-keyed
+  # readings name the wrong link scale (e.g. "Log mean ... exp(beta)" for an
+  # inverse-link Gamma). Override the mean-submodel link/natural readings with
+  # the actual link's honest prose. NULL link_mu => no override.
+  lr_override <- if (drm_link_overrides_default(family, link_mu)) {
+    drm_link_reading(link_mu)
+  } else {
+    NULL
+  }
+  # Variables appearing in an interaction term. Interaction rows carry
+  # variable = "x:sex" (colon-joined component names, no contrast-level
+  # suffix), so split on ":". A factor contrast whose factor is in this set
+  # reads as the difference at the interacting predictor's reference (0), not
+  # the marginal average -- it gets the interaction-aware template (E3 / P7).
+  interacting_vars <- {
+    iv <- fixed_eff$variable[fixed_eff$role == "interaction"]
+    iv <- iv[!is.na(iv)]
+    if (length(iv)) unique(unlist(strsplit(iv, ":", fixed = TRUE))) else character(0)
+  }
   rows <- list()
   for (i in seq_len(nrow(fixed_eff))) {
     r <- fixed_eff[i, , drop = FALSE]
@@ -2103,6 +2279,15 @@ drm_build_interpretation <- function(fixed_eff, family, response, data,
       intercept_less = r$submodel %in% intercept_less_submodels
     )
     if (is.na(cr)) next
+    # E3: a factor contrast whose factor interacts gets the interaction-aware
+    # template when one exists for this (family, submodel); otherwise it keeps
+    # the plain marginal reading (no regression for families without the row).
+    if (identical(cr, "factor_contrast") && !is.na(r$variable) &&
+        r$variable %in% interacting_vars &&
+        any(tbl$family == family & tbl$submodel == r$submodel &
+            tbl$coefficient_role == "factor_contrast_interaction")) {
+      cr <- "factor_contrast_interaction"
+    }
     template <- tbl[
       tbl$family == family &
         tbl$submodel == r$submodel &
@@ -2110,6 +2295,10 @@ drm_build_interpretation <- function(fixed_eff, family, response, data,
       , drop = FALSE
     ]
     if (nrow(template) == 0L) next
+    if (!is.null(lr_override) && r$submodel %in% c("mu", "mu1", "mu2")) {
+      template$link_scale_reading[[1L]]    <- lr_override$link_scale_reading[[1L]]
+      template$natural_scale_reading[[1L]] <- lr_override$natural_scale_reading[[1L]]
+    }
     variable <- if (is.na(r$variable)) "" else r$variable
     level <- if (is.na(r$contrast_level)) "" else r$contrast_level
     transform <- if (is.na(r$transform)) "" else r$transform

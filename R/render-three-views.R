@@ -114,8 +114,10 @@ as_html_three_views.symbolized_model <- function(x, head = 5L, tail = 2L,
   # (Tab 1, where coefficients are introduced) so it travels with PDF
   # export and a Methods-section paste instead of being orphaned in the
   # surrounding article prose.
-  coef_reading_txt <- three_views_coef_reading(tryCatch(x$model$family,
-                                                        error = function(e) NULL))
+  coef_reading_txt <- three_views_coef_reading(
+    tryCatch(x$model$family, error = function(e) NULL),
+    link = tryCatch(x$submodels$link[[1L]], error = function(e) NULL),
+    response = tryCatch(x$distribution$response_symbol[[1L]], error = function(e) NULL))
   coef_gloss <- if (nzchar(coef_reading_txt)) {
     paste0("  <p class=\"sym-biology\"><strong>Coefficient reading.</strong> ",
            coef_reading_txt, "</p>\n")
@@ -404,7 +406,9 @@ pdf_three_views_rmd_body <- function(x, head = 5L, tail = 2L,
   # v0.22.4 #6: response-scale coefficient reading, carried into the PDF
   # so it survives export (it used to live only in the article prose).
   coef_txt <- three_views_coef_reading(
-    tryCatch(x$model$family, error = function(e) NULL))
+    tryCatch(x$model$family, error = function(e) NULL),
+    link = tryCatch(x$submodels$link[[1L]], error = function(e) NULL),
+    response = tryCatch(x$distribution$response_symbol[[1L]], error = function(e) NULL))
   coef_line <- if (nzchar(coef_txt)) {
     c(sprintf("_**Coefficient reading.** %s_", coef_txt), "")
   } else character(0L)
@@ -755,6 +759,17 @@ escape_underscores_for_latex <- function(s) {
   gsub("_", "\\_", s, fixed = TRUE)
 }
 
+# Wrap a base symbol in a group `{...}` when it already carries a real
+# subscript, so that appending another subscript (observation index `_{1}`,
+# dimension `_{600 \times 1}`, etc.) lands on the whole symbol as a single
+# subscript rather than producing an illegal double subscript. KaTeX rejects
+# `y_{ij}_{1}` ("Double subscript") whereas `{y_{ij}}_{1}` is valid. A `\_`
+# (escaped literal underscore, e.g. inside `\mathbf{body\_mass}`) is NOT a
+# subscript operator, so it is excluded via the negative look-behind.
+subscriptable_base <- function(s) {
+  if (grepl("(?<!\\\\)_", s, perl = TRUE)) sprintf("{%s}", s) else s
+}
+
 # Join a vector of LaTeX numeric term strings into a sum, folding a
 # leading minus sign on any term into the binary operator so the result
 # reads `a - b` rather than the glued `a + -b` (punch-list #7). The first
@@ -906,14 +921,18 @@ latex_marginal_cov_block <- function(x) {
   re_terms <- vapply(groups, function(gv) {
     sel    <- which(re_mu$group_var == gv)[[1L]]
     sigma  <- re_mu$sigma_symbol[[sel]]
+    # Escape underscores in the group name: a snake_case group (study_ID)
+    # is illegal inside \text{} under KaTeX ("Expected 'EOF', got '_'") and
+    # renders as a nested subscript inside \mathbf{Z}_{...}.
+    gv_esc <- escape_underscores_for_latex(gv)
     if (is_structured(gv)) {
       struct_sym <- smfg[[gv]]
       body  <- sprintf("%s^2\\, %s", sigma, struct_sym)
-      label <- sprintf("\\text{%s tier}", gv)
+      label <- sprintf("\\text{%s tier}", gv_esc)
     } else {
       body  <- sprintf("%s^2\\, \\mathbf{Z}_{%s}\\mathbf{Z}_{%s}^{\\!\\top}",
-                       sigma, gv, gv)
-      label <- sprintf("\\text{%s tier}", gv)
+                       sigma, gv_esc, gv_esc)
+      label <- sprintf("\\text{%s tier}", gv_esc)
     }
     underbrace(body, label)
   }, character(1L))
@@ -937,18 +956,30 @@ latex_implied_cov_block <- function(tier = c("B", "W"), Sigma, Lambda, Psi) {
   else
     "within-individual implied covariance"
   T_n <- nrow(Sigma); d <- ncol(Lambda)
-  sigma_mat <- latex_mat(Sigma, rows = seq_len(min(T_n, 7L)))
-  lam_mat   <- latex_mat(Lambda, rows = seq_len(min(T_n, 7L)))
-  psi_mat   <- latex_mat(diag(Psi^2), rows = seq_len(min(T_n, 7L)))
+  rows <- seq_len(min(T_n, 7L))
+  # Full chain Lambda -> Lambda Lambda^T + Psi^2 = Sigma. The block previously
+  # rendered the raw T x d loading matrix under the "Lambda Lambda^T" label,
+  # so the displayed equation did not close dimensionally (T x T = T x d +
+  # T x T). Show the loadings as their own factor, then the T x T OUTER
+  # PRODUCT under the Lambda Lambda^T label (E1).
+  load_mat  <- latex_mat(Lambda, rows = rows)                  # T x d loadings
+  llt_mat   <- latex_mat(Lambda %*% t(Lambda), rows = rows)    # T x T outer product
+  sigma_mat <- latex_mat(Sigma, rows = rows)                   # T x T implied covariance
+  psi_mat   <- latex_mat(diag(Psi^2), rows = rows)             # T x T diagonal uniquenesses
+  # `\times` stays in math mode (outside \text) -- inside \text{} KaTeX would
+  # render it literally (old B8). "loadings" is the only text token.
+  load_lab  <- sprintf("\\boldsymbol{\\Lambda}_%s\\;(%d \\times %d\\text{ loadings})",
+                       tier, T_n, d)
   sigma_lab <- sprintf("\\boldsymbol{\\Sigma}_%s\\;\\text{(%s)}",
                        tier, caption)
   lam_lab   <- sprintf("\\boldsymbol{\\Lambda}_%s\\,\\boldsymbol{\\Lambda}_%s^{\\!\\top}",
                        tier, tier)
   psi_lab   <- sprintf("\\boldsymbol{\\Psi}_%s^{\\,2}", tier)
   paste0(
+    "$$\n", underbrace(load_mat, load_lab), "\n$$\n",
     "$$\n",
     underbrace(sigma_mat, sigma_lab),
-    " \\;=\\; ", underbrace(lam_mat, lam_lab),
+    " \\;=\\; ", underbrace(llt_mat, lam_lab),
     " \\;+\\; ", underbrace(psi_mat, psi_lab),
     "\n$$\n"
   )
@@ -1067,10 +1098,18 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L,
   has_mu    <- !is.null(ex$X)       && !is.null(ex$beta) && !is.null(ex$mu_hat)
   has_M     <- !is.null(ex$M) && is.matrix(ex$M) && nrow(ex$M) > 0L
   if (!has_mu) {
+    # Honest, MathJax-safe fallback. No bare `$` (the site-wide MathJax
+    # parses `$...$` as inline math, so a dev-facing `expanded$X` string
+    # renders as garbled math), and no internal accessor names or issue
+    # links on a reader-facing surface. Class-agnostic so it cannot go
+    # stale as more extractors capture the design matrix.
     return(paste0(
-      "<p><em>The matrix-with-data view needs <code>expanded$X</code>, ",
-      "<code>expanded$beta</code>, and <code>expanded$mu_hat</code>. ",
-      "This extractor populates only the response vector. See issue #9.</em></p>\n"
+      "<p><em>This view shows the actual numbers flowing through the fit ",
+      "&mdash; the response, the design matrix, the coefficients, and the ",
+      "fitted values. For this model the per-observation design matrix was ",
+      "not captured when it was symbolized, so only the response is ",
+      "available here. The <strong>Index</strong> and <strong>Matrix</strong> ",
+      "tabs above show the full structure of the fit.</em></p>\n"
     ))
   }
 
@@ -1149,7 +1188,7 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L,
   beta_vec <- latex_vec(ex$beta)
   eps_vec  <- if (emit_eps) latex_vec(eps_vals, rows) else NULL
   y_lab    <- sprintf("%s_{\\,%d \\times 1}\\;\\text{(%s)}",
-                      lhs_sym, n, lhs_role)
+                      subscriptable_base(lhs_sym), n, lhs_role)
   X_lab    <- sprintf("\\mathbf{X}_{\\,%d \\times %d}", n, ncol(ex$X))
   beta_lab <- sprintf("\\hat{\\boldsymbol{\\beta}}_{\\,%d \\times 1}\\;\\text{(estimated)}",
                       length(ex$beta))
@@ -1368,13 +1407,41 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L,
       "\\mathrm{Cov}(\\hat{\\mathbf{u}}) \\;=\\; %s \\cdot \\underbrace{%s}_{\\textstyle\\,%s\\,}",
       sigma_sym, M_mat_tex, M_lab
     )
-    M_caption <- sprintf(
-      "<p class=\"sym-caption\" style=\"font-size:0.85em;color:#6b7280;margin-top:0.4rem\">The %s random effect $u$ has covariance $%s \\cdot %s$, where $%s$ is the %d &times; %d %s correlation matrix. Showing the head + tail rows / columns; full matrix is %d &times; %d.</p>\n",
-      M_kind, sigma_sym, M_sym, M_sym, k, k,
-      switch(M_kind,
-        phylo = "phylogenetic", spatial = "spatial", "structured"),
-      k, k
-    )
+    # Audit M7: under the Hadfield-Nakagawa all-nodes augmentation the
+    # supplied phylogenetic matrix spans tips AND internal nodes, so its
+    # leading-diagonal entries are NOT all 1 -- the internal-node rows have
+    # self-(co)variance < 1 under all-nodes scaling; only the tip rows have
+    # unit diagonal. Calling such a matrix "the correlation matrix A"
+    # (which a reader expects to have a unit diagonal) is wrong. Detect the
+    # non-unit diagonal and either annotate the internal-node rows (phylo)
+    # or fall back to the neutral "covariance matrix" wording.
+    M_diag <- tryCatch(diag(ex$M), error = function(e) numeric(0))
+    diag_all_unit <- length(M_diag) > 0L &&
+      all(abs(M_diag - 1) < 1e-6)
+    M_kind_word <- switch(M_kind,
+      phylo = "phylogenetic", spatial = "spatial", "structured")
+    if (diag_all_unit) {
+      # Genuine correlation matrix (tips-only / unit diagonal): keep the
+      # historic "correlation matrix" wording.
+      M_caption <- sprintf(
+        "<p class=\"sym-caption\" style=\"font-size:0.85em;color:#6b7280;margin-top:0.4rem\">The %s random effect $u$ has covariance $%s \\cdot %s$, where $%s$ is the %d &times; %d %s correlation matrix. Showing the head + tail rows / columns; full matrix is %d &times; %d.</p>\n",
+        M_kind, sigma_sym, M_sym, M_sym, k, k, M_kind_word, k, k
+      )
+    } else if (identical(M_kind, "phylo")) {
+      # All-nodes augmented phylogenetic matrix: leading rows are internal
+      # nodes whose self-covariance is < 1.
+      M_caption <- sprintf(
+        "<p class=\"sym-caption\" style=\"font-size:0.85em;color:#6b7280;margin-top:0.4rem\">The %s random effect $u$ has covariance $%s \\cdot %s$, where $%s$ is the %d &times; %d augmented phylogenetic <strong>covariance</strong> matrix (tips and internal nodes, the Hadfield&ndash;Nakagawa all-nodes representation). Its diagonal is <em>not</em> all 1: the leading rows shown here are internal nodes, whose self-covariance is &lt; 1 under all-nodes scaling; only the tip rows have unit diagonal. Showing the head + tail rows / columns; full matrix is %d &times; %d.</p>\n",
+        M_kind, sigma_sym, M_sym, M_sym, k, k, k, k
+      )
+    } else {
+      # Non-phylo structured matrix with a non-unit diagonal: neutral
+      # "covariance matrix" wording rather than "correlation matrix".
+      M_caption <- sprintf(
+        "<p class=\"sym-caption\" style=\"font-size:0.85em;color:#6b7280;margin-top:0.4rem\">The %s random effect $u$ has covariance $%s \\cdot %s$, where $%s$ is the %d &times; %d %s covariance matrix. Showing the head + tail rows / columns; full matrix is %d &times; %d.</p>\n",
+        M_kind, sigma_sym, M_sym, M_sym, k, k, M_kind_word, k, k
+      )
+    }
   }
 
   # --- Stitch: worked row + matrix block, paired per submodel -----------
@@ -1623,8 +1690,11 @@ three_views_worked_row <- function(ex, resp_sym = "\\mathbf{y}",
       # already \mathrm{name}, just append _{1}
       sprintf("%s_{1}", s)
     } else {
-      # fallback: assume it's a plain symbol, subscript 1
-      sprintf("%s_{1}", s)
+      # fallback: assume it's a plain symbol, subscript 1. If it already
+      # carries a subscript (gllvm multi-trait `y_{ij}`), wrap it so the
+      # observation index is a single subscript -- `{y_{ij}}_{1}`, not the
+      # illegal double subscript `y_{ij}_{1}` that KaTeX rejects.
+      sprintf("%s_{1}", subscriptable_base(s))
     }
   }
   beta_k <- function(k) sprintf("\\hat\\beta_{%d}", k - 1L)
@@ -1691,6 +1761,29 @@ three_views_worked_row <- function(ex, resp_sym = "\\mathbf{y}",
   # meaningless ε for Poisson / Beta.
   fam_spec_wr <- worked_row_family_spec(family)
   shape <- fam_spec_wr$shape
+
+  # Fallback RE contribution. A fit WITH random effects whose per-tier
+  # Z_g / u were not populated -- e.g. an all-nodes phylogenetic MCMCglmm
+  # fit, where the tip-level BLUPs are not extracted from the augmented
+  # structure -- leaves re_terms empty, yet mu_hat = X*beta + (RE
+  # contribution). For a same-scale additive (identity-link Gaussian)
+  # family the gap mu_hat - X*beta IS that aggregate RE contribution; show
+  # it as one \hat{u}_1 term so the worked row closes (X*beta + u-hat =
+  # mu-hat) instead of printing a misleading `X*beta \approx mu_hat` where
+  # the two numbers visibly differ. Gated by a relative threshold so
+  # ordinary display-rounding noise on a no-RE fit never spawns a spurious
+  # term. (Audit B2: caught on the structural-dependence MCMCglmm widget.)
+  if (length(re_terms_sym) == 0L && shape == "additive_gaussian") {
+    re_gap <- mu1 - lp_disp
+    if (abs(re_gap) > 0.02 * (abs(mu1) + 1)) {
+      sym_terms <- c(sym_terms, "\\hat{u}_{1}")
+      num_terms <- c(num_terms, sprintf("(%s)", fmt(re_gap)))
+      num_vals  <- c(num_vals, as.numeric(fmt(re_gap)))
+      sym_rhs <- paste(sym_terms, collapse = " + ")
+      num_rhs <- join_signed_terms(num_terms)
+      lp_disp <- sum(num_vals)
+    }
+  }
 
   if (shape == "additive_gaussian") {
     # v0.22.4 #155: separate the linear-predictor build (row 2, shown with
@@ -1941,8 +2034,18 @@ three_views_symbol_gloss <- function(x, notation = c("matrix", "index")) {
 # inst/extdata/coef-readings.csv (architectural rule: no string-spliced
 # prose in R). Returns "" for families without a clean single-slope
 # reading (latent-variable / ordinal), so the caller emits nothing.
-three_views_coef_reading <- function(family) {
+three_views_coef_reading <- function(family, link = NULL, response = NULL) {
   if (is.null(family) || !nzchar(family)) return("")
+  # Link-honesty: a non-default link makes the family-default response-scale
+  # reading wrong (e.g. mgcv Gamma's inverse link is not "exp(beta) multiplies
+  # the mean"). Emit the actual link's honest natural-scale reading instead.
+  if (!is.null(link) && nzchar(link) && drm_link_overrides_default(family, link)) {
+    lr <- drm_link_reading(link)
+    if (!is.null(lr)) {
+      resp <- if (!is.null(response) && nzchar(response)) response else "the response"
+      return(gsub("{response}", resp, lr$natural_scale_reading[[1L]], fixed = TRUE))
+    }
+  }
   tbl <- tryCatch(load_template("coef-readings"), error = function(e) NULL)
   if (is.null(tbl) || !"family" %in% names(tbl)) return("")
   hit <- tbl[tbl$family == family, , drop = FALSE]
@@ -2043,10 +2146,15 @@ vc_bar_stacked <- function(vp) {
       "<div style=\"width:%s%%;background:%s;color:%s;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis\" title=\"%s\">%s %s%%</div>",
       w, col, txt, vp$component[[i]], vp$component[[i]], w)
   }, character(1L))
+  # Emit flush (no leading indentation, no inter-div newlines): a line
+  # indented >= 4 spaces is parsed by Pandoc as an indented code block, which
+  # is exactly what turned these inner <div>s into an escaped <pre><code>
+  # block on the rendered page (variance bar showed raw markup). Keep the
+  # whole bar on as few lines as possible so no child line is code-blocked.
   paste0(
-    "  <div class=\"sym-vc-bar sym-vc-stacked\" role=\"img\" aria-label=\"variance partition\" style=\"display:flex;width:100%;height:1.8rem;border-radius:4px;overflow:hidden;font-size:0.78rem;line-height:1.8rem;margin:0.4rem 0\">\n    ",
-    paste(segs, collapse = "\n    "),
-    "\n  </div>\n"
+    "<div class=\"sym-vc-bar sym-vc-stacked\" role=\"img\" aria-label=\"variance partition\" style=\"display:flex;width:100%;height:1.8rem;border-radius:4px;overflow:hidden;font-size:0.78rem;line-height:1.8rem;margin:0.4rem 0\">",
+    paste(segs, collapse = ""),
+    "</div>\n"
   )
 }
 
@@ -2057,17 +2165,19 @@ vc_bar_per_component <- function(vp) {
     w   <- formatC(100 * vp$pct[[i]], digits = 1L, format = "f")
     res <- grepl("^Residual", vp$component[[i]])
     col <- if (res) "#d9d9d9" else pal[[((i - 1L) %% length(pal)) + 1L]]
+    # Flush, single-line rows: any line indented >= 4 spaces would be
+    # Pandoc-parsed as an indented code block and rendered as escaped source.
     sprintf(paste0(
-      "    <div class=\"sym-vc-row\" style=\"display:flex;align-items:center;margin:0.25rem 0;font-size:0.8rem\">\n",
-      "      <span style=\"flex:0 0 38%%;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis\">%s</span>\n",
-      "      <span style=\"flex:1;background:#f3f4f6;border-radius:3px;overflow:hidden\"><span style=\"display:block;width:%s%%;background:%s;color:#fff;padding:0.1rem 0.35rem;white-space:nowrap;box-sizing:border-box\">%s%%</span></span>\n",
-      "    </div>"),
+      "<div class=\"sym-vc-row\" style=\"display:flex;align-items:center;margin:0.25rem 0;font-size:0.8rem\">",
+      "<span style=\"flex:0 0 38%%;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis\">%s</span>",
+      "<span style=\"flex:1;background:#f3f4f6;border-radius:3px;overflow:hidden\"><span style=\"display:block;width:%s%%;background:%s;color:#fff;padding:0.1rem 0.35rem;white-space:nowrap;box-sizing:border-box\">%s%%</span></span>",
+      "</div>"),
       vp$component[[i]], w, col, w)
   }, character(1L))
   paste0(
-    "  <div class=\"sym-vc-bar sym-vc-bars\" role=\"img\" aria-label=\"variance partition\" style=\"margin:0.4rem 0\">\n",
-    paste(rows, collapse = "\n"),
-    "\n  </div>\n"
+    "<div class=\"sym-vc-bar sym-vc-bars\" role=\"img\" aria-label=\"variance partition\" style=\"margin:0.4rem 0\">",
+    paste(rows, collapse = ""),
+    "</div>\n"
   )
 }
 
@@ -2111,6 +2221,40 @@ vc_icc_line <- function(ic) {
   sprintf(
     "  <p class=\"sym-vc-icc\" style=\"margin:0.4rem 0\"><strong>ICC (%s scale):</strong> %s.%s</p>\n",
     sc, formatC(v, digits = 3L, format = "f"), cap_html)
+}
+
+# Does this fit model the residual SD with predictors (a genuine
+# location-scale / dispersion submodel), as opposed to a single constant
+# residual SD? Audit M1: read the MODEL STRUCTURE, not just the expanded
+# numeric arrays. Two tells, either sufficient:
+#   1. A sigma / dispersion submodel row in `x$submodels` whose formula
+#      RHS carries at least one non-intercept term.
+#   2. The expanded sigma design matrix `X_sigma` has more than one
+#      column (the historic signal -- kept so fits that surface X_sigma
+#      but not a tidy submodels row still register).
+three_views_sigma_varies <- function(x) {
+  # Tell 1: structural -- the sigma / dispersion submodel formula.
+  sm <- tryCatch(x$submodels, error = function(e) NULL)
+  if (!is.null(sm) && is.data.frame(sm) &&
+      all(c("parameter", "formula") %in% names(sm))) {
+    sig_rows <- sm[sm$parameter %in% c("sigma", "disp", "dispersion"), ,
+                   drop = FALSE]
+    if (nrow(sig_rows) > 0L) {
+      has_pred <- vapply(sig_rows$formula, function(f) {
+        tt <- tryCatch(stats::terms(stats::as.formula(f)),
+                       error = function(e) NULL)
+        !is.null(tt) && length(attr(tt, "term.labels")) > 0L
+      }, logical(1L))
+      if (any(has_pred)) return(TRUE)
+    }
+  }
+  # Tell 2: numeric -- a multi-column sigma design matrix.
+  xs <- tryCatch(x$expanded$X_sigma, error = function(e) NULL)
+  g  <- tryCatch(x$expanded$gamma,   error = function(e) NULL)
+  if (!is.null(xs) && !is.null(g) && !is.null(ncol(xs)) && ncol(xs) > 1L) {
+    return(TRUE)
+  }
+  FALSE
 }
 
 three_views_biology_gloss <- function(x) {
@@ -2182,16 +2326,14 @@ three_views_biology_gloss <- function(x) {
     return(paste0("  <p class=\"sym-biology\">", sentence, "</p>\n"))
   }
 
-  has_sigma_submodel <- !is.null(x$expanded) &&
-                       !is.null(x$expanded$X_sigma) &&
-                       !is.null(x$expanded$gamma)
-  # A constant-sigma fit has X_sigma populated but with a single
-  # intercept-only column -- the model says `sigma_i = exp(gamma_0)`,
-  # i.e. the same value for every observation. Treat this the same as
-  # no sigma submodel for the purpose of the biology gloss.
-  sigma_varies <- has_sigma_submodel &&
-                  !is.null(ncol(x$expanded$X_sigma)) &&
-                  ncol(x$expanded$X_sigma) > 1L
+  # Audit M1: detect a varying residual SD from the MODEL STRUCTURE, not
+  # only from the expanded numeric arrays. Some extractors (e.g. drmTMB
+  # bivariate-Gaussian, or any sigma submodel whose per-dpar design is
+  # not surfaced) carry a real `sigma ~ predictor` submodel without ever
+  # populating `expanded$X_sigma`; deriving sigma_varies from X_sigma
+  # alone then mislabels them as homoscedastic ("the residual SD is
+  # constant") even though the SD is modelled on the log scale.
+  sigma_varies <- three_views_sigma_varies(x)
   has_re <- !is.null(x$random_effects) &&
             (is.data.frame(x$random_effects) || is.list(x$random_effects)) &&
             length(x$random_effects) > 0L
@@ -2279,7 +2421,13 @@ r"---((function() {
       p.classList.toggle("sym-active", on);
       if (on) { p.removeAttribute("hidden"); } else { p.setAttribute("hidden", ""); }
     });
-    if (typeof window.MathJax !== "undefined" && window.MathJax.typesetPromise) {
+    // Re-render math in the newly shown panel. KaTeX (the pkgdown site
+    // renderer) exposes renderMathInElement and already typesets hidden
+    // panels at load, so this is belt-and-braces; fall back to MathJax for
+    // standalone exports that still bootstrap MathJax from a CDN.
+    if (typeof window.renderMathInElement === "function") {
+      try { window.renderMathInElement(panels[idx], {throwOnError: false}); } catch (e) {}
+    } else if (typeof window.MathJax !== "undefined" && window.MathJax.typesetPromise) {
       try { window.MathJax.typesetPromise([panels[idx]]); } catch (e) {}
     }
   }

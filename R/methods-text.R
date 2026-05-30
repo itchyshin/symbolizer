@@ -213,6 +213,14 @@ methods_slots_for <- function(sym) {
     slots$response             <- sym$model$response %||% "the response"
     slots$response_units_clause <- methods_units_clause(sym, slots$response)
     slots$mu_predictors_clause    <- methods_predictors_clause(sym, "mu")
+  } else if (identical(cls, "glmerMod") &&
+             family %in% c("poisson", "binomial")) {
+    # glmer poisson / binomial share the lmerMod slot shape: a single
+    # response, a mu submodel, and a random-effect clause. The
+    # family-specific link / ratio wording lives in the CSV template.
+    slots$response             <- sym$model$response %||% "the response"
+    slots$response_units_clause <- methods_units_clause(sym, slots$response)
+    slots$mu_predictors_clause    <- methods_predictors_clause(sym, "mu")
   }
 
   slots

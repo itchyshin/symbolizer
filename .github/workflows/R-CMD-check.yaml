@@ -25,4 +25,11 @@ jobs:
       - uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
-          build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
+          # Vignettes are NOT built/checked on CI: they fit heavy MCMC models
+          # (brms / MCMCglmm) and emit PDF figures via as_pdf_three_views(),
+          # which needs a TeX distribution the runner does not install. They are
+          # built and checked locally (devtools::check / pkgdown) per the
+          # repo's "local checks over CI" policy. CI keeps the fast, portable
+          # R-code / docs / examples / tests checks.
+          args: 'c("--no-manual", "--no-vignettes", "--as-cran")'
+          build_args: 'c("--no-manual", "--no-build-vignettes")'

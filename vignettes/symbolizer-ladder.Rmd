@@ -1,5 +1,5 @@
 ---
-title: "Building up: from `lm` to location-scale"
+title: "Building up: from lm to location-scale"
 description: >
   One synthetic dataset, four models of increasing complexity, the same
   `symbolize()` call. Watch the symbolic equation grow one row at a
@@ -27,6 +27,10 @@ knitr::opts_chunk$set(
 
 ## The idea
 
+> **New to symbolizer?** Skim `vignette("symbolizer")` first — a five-minute
+> quickstart on a single model. This article is the next step up: it climbs from
+> `lm` to a location-scale model so you can watch the symbolic story grow.
+
 `symbolizer` turns any fitted model into a structured symbolic
 specification. To see *what* that buys you, the easiest path is to
 fit a sequence of models — each adding one feature — and watch the
@@ -39,8 +43,8 @@ across temperature, sex, and site — and climb four rungs:
 | --- | --- | --- |
 | 1 | `lm(body_mass ~ temperature)` | distribution + linear predictor |
 | 2 | `lm(body_mass ~ temperature + sex)` | a factor: dummy-encoded contrast |
-| 3 | `lmer(body_mass ~ temperature + sex + (1\|site))` | a random intercept + variance components |
-| 4 | `drmTMB(body_mass ~ temperature + sex + (1\|site), sigma ~ temperature)` | heteroscedasticity: variance depends on temperature |
+| 3 | lmer(body_mass ~ temperature + sex + (1 \| site)) | a random intercept + variance components |
+| 4 | drmTMB(body_mass ~ temperature + sex + (1 \| site), sigma ~ temperature) | heteroscedasticity: variance depends on temperature |
 
 The reader-facing surface stays exactly the same: at every rung you
 call `symbolize(fit)`, then `as_latex()` / `symbol_table()` /
@@ -321,6 +325,6 @@ covers — `glmmTMB`, `brms`, `MCMCglmm`, `sdmTMB`, `metafor`,
 - For meta-analysis with `metafor` and `drmTMB` location-scale
   (plus `glmmTMB`'s `propto()` as the related phylogenetic /
   structured-covariance pattern, not strict meta-analysis), see
-  `vignette("symbolizer-meta")`.
+  `vignette("symbolizer-meta-analysis")`.
 - For the full capability matrix and what's planned next, see
   `vignette("symbolizer-roadmap")`.

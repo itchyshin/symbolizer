@@ -102,7 +102,7 @@ Two coefficients on the mu submodel:
   mean.
 - The **`sexmale` contrast** estimate (`r if (exists("sym1")) round(sym1$fixed_effects$estimate[2], 2) else "5"`) is the **difference** between male
   and female means. It is *not* the male mean. To get the male mean you
-  add: `intercept + sexmale = r round(sum(sym1$fixed_effects$estimate[1:2]), 2)`.
+  add the intercept and the contrast: `intercept + sexmale` = `r if (exists("sym1")) round(sum(sym1$fixed_effects$estimate[1:2]), 2) else "35"`.
 
 The biological reading in the table — *"Average body_mass differs
 between male and the reference"* — is the same statement in templated
@@ -361,7 +361,7 @@ the dedicated continuous-by-factor interaction reading:
 parameter_interpretation(sym4, scale = "biological")
 ```
 
-Read the prose above in place of a templated row. The interaction is
+The interaction row carries its own templated reading. It is
 ecologically the most interesting coefficient in the fit — the slope
 of `body_mass` on `body_size` *depends on* `sex`, which is exactly what
 "interaction" means.
@@ -554,8 +554,9 @@ gives you the cell-mean translation on demand:
 parameter_interpretation(sym5, scale = "biological")
 ```
 
-Three interaction rows are again silent. Read the cell-mean translations
-above in their place.
+Each of the three interaction rows carries its own templated
+*difference-of-differences* reading; `group_means()` gives the cell-mean
+translation on demand.
 
 **Takeaway.** A factor-by-factor interaction coefficient is a
 *difference of differences*: how much the gap between two non-reference
@@ -838,6 +839,6 @@ apply this three-step audit before you interpret anything.
 The point of `symbolize()` is to make every layer of this translation
 visible: the design matrix shows the dummies, the symbol table marks
 the references, and `parameter_interpretation()` reads each templated
-coefficient on the biological scale. The interaction layer is on the
-template roadmap; until it lands, the cell-mean translation in this
-vignette is the manual fallback.
+coefficient on the biological scale — including the continuous-by-factor
+and factor-by-factor interaction rows. `group_means()` / `group_slopes()`
+give the cell-mean and per-level-slope translations on demand.

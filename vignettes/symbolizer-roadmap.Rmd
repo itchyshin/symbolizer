@@ -18,9 +18,9 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 ```
 
 `symbolizer` is built first for two TMB sister packages — `drmTMB` and
-`gllvmTMB` — with planned extensions across the GLMM ecosystem used in
-ecology and evolution: `glmmTMB`, `brms`, `MCMCglmm`, `sdmTMB`, `lme4`,
-`stats::lm` / `stats::glm`, `metafor`, and `mgcv`.
+`gllvmTMB` — and now reads across the GLMM ecosystem used in ecology and
+evolution: `glmmTMB`, `brms`, `MCMCglmm`, `sdmTMB`, `lme4`,
+`stats::lm` / `stats::glm`, `metafor`, `mgcv`, and `phylolm`.
 
 The **capability registry** (`symbolizer_capabilities()`) is the source
 of truth: any class / family / component not marked Stable or First
@@ -37,7 +37,7 @@ message.
 | Planned or reserved     | The grammar may exist, but `symbolize()` rejects it as design-only.                  |
 | Unsupported or blocked  | Do not use as analysis syntax; fit the nearest implemented model.                    |
 
-## What's covered today (v0.1 – v0.18.x)
+## What's covered today (v0.1 – v0.22.x)
 
 ### Model classes
 
@@ -53,10 +53,14 @@ message.
 | **stats** | `lm`, `glm` | lm (Gaussian), glm (Gaussian / binomial / poisson / Gamma) |
 | **metafor** | `rma.uni`, `rma.mv` | Random / mixed-effects meta-analysis + meta-regression + multilevel `~ 1 | study / id` + structured (phylogenetic) random effects via `R = list(...)` |
 | **mgcv** | `gam`, `bam` | gaussian / poisson / binomial / Gamma + `s(x)` + `s(x, by =)` + `te(x, z)`; `gamm` / `gamm4` covered via the `$gam` slot |
+| **phylolm** | `phylolm` | Phylogenetic Gaussian regression (PGLS); Brownian-motion / OU residual correlation via the `phylo` marker |
 
-That's 10 package families, 14 fitted-class methods, ~30 family-class
+That's 11 package families, 14 fitted-class methods, ~30 family-class
 combinations with their own assumption / interpretation / methods-text
-prose coverage.
+prose coverage. **Phylogenetic (`phylo` / structured-covariance) support
+landed (First slice, v0.21)** across `drmTMB`, `metafor`, `brms`,
+`MCMCglmm`, `glmmTMB`, and `gllvmTMB`, plus the standalone `phylolm` PGLS
+extractor — see `vignette("symbolizer-structural-dependence")`.
 
 ### Cross-cutting surfaces
 
@@ -73,15 +77,19 @@ prose coverage.
 | `as_dag()` structural model diagram (nodes / edges + `$mermaid` and `$tikz` slots since v0.18) | First slice |
 | `simulate_recipe()` generative pseudocode + runnable R code for the fitted model | First slice (v0.18) |
 | `as_html_three_views()` interactive Equation / Index / Matrix-with-data widget | First slice |
+| `as_pdf_three_views()` standalone PDF of the three-views widget | First slice |
+| `explain()` first-call plain-English summary of a `symbolized_model` | First slice |
+| `notation_bridge()` index ↔ matrix notation cross-reference | First slice |
+| `variance_partition()` / `icc()` variance decomposition + repeatability (ICC) | First slice |
 
 ## What's planned
 
 | Target | Theme |
 | --- | --- |
-| v0.19+ | brms negative-binomial + other distributional dpars (`nu ~ z`, `phi ~ z`); glmmTMB hurdle (`truncated_nbinom2 + ziformula`); MCMCglmm flexible covariance (`us(trait):unit`, `idh(trait):unit`); deeper publication-bias and I² / CV partitioning for `metafor`. |
-| Considered | Phylogenetic flagship (`phylolm`, `phyloglm`, `phyr::pglmm`, `sommer`); `nlme::lme` standalone; `survival`; `ordinal::clm`; `geepack`; `marginaleffects` / `ggeffects` companion layer; `DHARMa` / `performance` / `gratia` integration as `warning_table()` sources. |
+| Near-term | brms negative-binomial + other distributional dpars (`nu ~ z`, `phi ~ z`); glmmTMB hurdle (`truncated_nbinom2 + ziformula`); MCMCglmm flexible covariance (`us(trait):unit`, `idh(trait):unit`); deeper publication-bias and I² / CV partitioning for `metafor`. |
+| Considered | Remaining phylogenetic classes (`phyloglm`, `phyr::pglmm`, `sommer`) — the `phylolm` PGLS flagship and structured-covariance phylo bridges across the six classes above have **shipped**; `nlme::lme` standalone; `survival`; `ordinal::clm`; `geepack`; `marginaleffects` / `ggeffects` companion layer; `DHARMa` / `performance` / `gratia` integration as `warning_table()` sources. |
 
-Items previously listed here that have **shipped** in the v0.13 -- v0.18
+Items previously listed here that have **shipped** in the v0.13 -- v0.22
 window are now in the Release history table below. The kept-public
 function surface stays tight: new model-class support arrives as S3
 methods (invisible in `ls("package:symbolizer")`), not as new exported
@@ -99,7 +107,7 @@ helpers.
 | v0.4 | drmTMB zero-inflation / hurdle / cumulative_logit |
 | v0.5 | gllvmTMB binomial (first non-Gaussian latent-variable family) |
 | v0.6 | `as_dag(sym)` structural model diagram (DOT) |
-| v0.7 | glmmTMB Gaussian + `(1 \| g)` + `dispformula` |
+| v0.7 | glmmTMB Gaussian + (1 \| g) + `dispformula` |
 | v0.8 – v0.10 | brms, MCMCglmm, lme4, stats::lm / stats::glm Gaussian first slices |
 | v0.11.x | Non-Gaussian glmmTMB / glmer / brms families; robustness sweep |
 | v0.12 | sdmTMB spatial fields; MCMCglmm animal models |
@@ -108,11 +116,14 @@ helpers.
 | v0.14.1 | metafor `rma.mv` (multilevel + structured / phylogenetic) |
 | v0.15 | metafor `rma.uni` location-scale (`scale = ~ z`, `rma.ls`); `tau2_scale` capability row |
 | v0.16 | metafor `rma.mv` `struct = "UN"` (bivariate / multivariate meta-analysis); glmmTMB `propto` covariance code → originally framed as meta-analysis bridge (**corrected in v0.20**: propto is the phylogenetic / structured-covariance pattern, not meta-analysis); "three faces of meta-analysis" article |
-| v0.17 | "Building up" ladder vignette (`lm` → `lm + sex` → `lmer + (1 \| site)` → `drmTMB` location-scale on one shared dataset); homepage three-views widget screenshot |
+| v0.17 | "Building up" ladder vignette (`lm` → `lm + sex` → `lmer` + (1 \| site) → `drmTMB` location-scale on one shared dataset); homepage three-views widget screenshot |
 | v0.18 | `simulate_recipe(sym)` (numbered pseudocode + family-aware runnable R); `as_dag(sym)$mermaid` and `$tikz` slots for diagram rendering |
 | v0.18.1 | Audit pass: `@references` blocks on all 10 extractors; widget HTML render fix (de-indent `<button>` lines so pandoc stops wrapping them as code blocks); inline-R guards in vignettes |
 | v0.18.2 | Tab-switching JavaScript fix in `as_html_three_views()` (raw R string so `\"` escapes inside `querySelectorAll` survive into the browser) |
-| v0.18.3 | Pipe-encoding fix in `knit_print.symbolizer_formula_bridge` (`(1 \| group)` no longer renders as literal `&amp;#124;`); roadmap article rewritten to match shipped reality |
+| v0.18.3 | First pipe-encoding fix in `formula_bridge` rendering; roadmap article rewritten to match shipped reality |
+| v0.19 – v0.20 | Audit passes (Fisher / Emmy / Pat / Rose lenses); `propto` reframed as the phylogenetic / structured-covariance pattern (not a meta-analysis bridge); phylogenetic capability scaffold; R-output vs LaTeX parity fixes across articles |
+| v0.21 | **Phylogenetic flagship**: `vignette("symbolizer-structural-dependence")`; `phylo` structured-covariance bridges across `drmTMB` / `metafor` / `brms` / `MCMCglmm` / `glmmTMB` / `gllvmTMB`; `phylolm` PGLS extractor; three-views widget rollout; standalone HTML + PDF export + Copy-LaTeX buttons |
+| v0.22 | Meta-analysis bridges (`meta_known_vi`, `meta_phylo_multilevel`) + consolidated `vignette("symbolizer-meta-analysis")`; `variance_partition()` / `icc()` repeatability; mgcv poisson / binomial / Gamma smooths; family-aware Tab-3 worked rows |
 
 See `NEWS.md` (Changelog tab) for the full per-release log.
 
@@ -126,10 +137,11 @@ is rejected by default; instead, we extend existing functions with
 new arguments and use articles to organise and explain.
 
 Core public functions (the things users actually call):
-`symbolize()`, `as_latex()`, `equations()`, `symbol_table()`,
-`assumption_table()`, `formula_bridge()`,
-`parameter_interpretation()`, `model_card()`, `as_dag()`,
+`symbolize()`, `explain()`, `as_latex()`, `equations()`,
+`symbol_table()`, `assumption_table()`, `formula_bridge()`,
+`notation_bridge()`, `parameter_interpretation()`,
+`variance_partition()`, `icc()`, `model_card()`, `as_dag()`,
 `compare_symbolic()`, `methods_text()`, `warning_table()`,
 `group_means()`, `group_slopes()`, `expand()`,
-`as_html_three_views()`, `simulate_recipe()`,
-`symbolizer_capabilities()`.
+`as_html_three_views()`, `as_pdf_three_views()`,
+`simulate_recipe()`, `symbolizer_capabilities()`.

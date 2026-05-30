@@ -192,3 +192,90 @@ test_that("matrix summary mentions the RE contribution only when RE is present",
   )
   expect_false(grepl("random-effect", sr_block_fe, fixed = TRUE))
 })
+
+# Audit M1: the location-scale biology gloss must read sigma-varies from
+# the MODEL STRUCTURE (the sigma submodel formula), not only from the
+# expanded numeric arrays. A fit with `sigma ~ predictor` must say the
+# residual SD varies; a plain homoscedastic fit must say it is constant.
+test_that("biology gloss detects sigma-varies from model structure (audit M1)", {
+  sv <- getFromNamespace("three_views_sigma_varies", "symbolizer")
+  gloss <- getFromNamespace("three_views_biology_gloss", "symbolizer")
+
+  sym_ls <- symbolize(fit_drm_location_scale())  # sigma ~ temperature
+  expect_true(sv(sym_ls))
+  expect_false(grepl("constant", gloss(sym_ls)))
+
+  # Audit scenario: a real sigma submodel but X_sigma not surfaced in the
+  # expanded arrays -- structure-based detection must still fire.
+  sym_no_xs <- sym_ls
+  sym_no_xs$expanded$X_sigma <- NULL
+  sym_no_xs$expanded$gamma   <- NULL
+  expect_true(sv(sym_no_xs))
+  expect_false(grepl("constant", gloss(sym_no_xs)))
+
+  # A plain homoscedastic Gaussian (no RE, no sigma submodel) still says
+  # the residual SD is constant.
+  sym_lm <- symbolize(stats::lm(mpg ~ wt, data = mtcars))
+  expect_false(sv(sym_lm))
+  expect_match(gloss(sym_lm), "constant")
+})
+
+# Audit M3: the scale-submodel design matrix is \mathbf{X}_\sigma in BOTH
+# Tab 2 (the matrix equation) and the symbol glossary; \mathbf{Z} is
+# reserved for the random-effects design (Z*u). The same fit must never
+# show \mathbf{Z} meaning the sigma design.
+test_that("scale-submodel design is X_sigma, not Z, across tabs (audit M3)", {
+  sym <- symbolize(fit_drm_with_re())  # mu ~ temp + (1|g), sigma ~ temp
+  comp <- sym$components
+  sig_eq <- comp$equation_matrix[comp$kind == "linear_predictor" &
+                                   comp$submodel == "sigma"]
+  expect_match(sig_eq, "\\mathbf{X}_{\\sigma} \\boldsymbol{\\gamma}",
+               fixed = TRUE)
+  expect_false(grepl("\\mathbf{Z} \\boldsymbol{\\gamma}", sig_eq, fixed = TRUE))
+  # Glossary: the sigma design is X_sigma; Z (if present) is the RE design.
+  des <- sym$symbol_dictionary[sym$symbol_dictionary$role == "design_matrix", ]
+  expect_true("\\mathbf{X}_{\\sigma}" %in% des$symbol_matrix)
+  expect_false("\\mathbf{Z}" %in% des$symbol_matrix)
+})
+
+# Audit M4: a fit with a single constant residual SD (no scale submodel)
+# uses the unindexed scalar \sigma, not \sigma_i.
+test_that("constant-SD fits use unindexed sigma in the glossary (audit M4)", {
+  for (fit in list(stats::lm(mpg ~ wt, data = mtcars))) {
+    sym <- symbolize(fit)
+    r <- sym$symbol_dictionary[sym$symbol_dictionary$role == "residual_sd", ]
+    expect_equal(nrow(r), 1L)
+    expect_equal(r$symbol, "\\sigma")
+    expect_false("\\sigma_i" %in% sym$symbol_dictionary$symbol)
+  }
+})
+
+# Audit M7: when the structured covariance matrix is the all-nodes
+# augmented phylogenetic block (non-unit diagonal -- internal-node rows
+# have self-covariance < 1), the caption must NOT call it "the correlation
+# matrix A" with an implied unit diagonal. A tips-only (unit-diagonal)
+# matrix keeps the "correlation matrix" wording.
+test_that("phylo matrix caption distinguishes augmented vs correlation (audit M7)", {
+  blk <- getFromNamespace("three_views_matrix_block", "symbolizer")
+  sym <- symbolize(fit_drm_location_scale())
+  k <- 8L
+
+  # All-nodes augmented: internal-node rows have diagonal < 1.
+  A_aug <- diag(k)
+  diag(A_aug)[1:3] <- c(0.6, 0.7, 0.55)
+  sym_aug <- sym
+  sym_aug$expanded$M <- A_aug
+  sym_aug$metadata$phylo_representation <- "all_nodes"
+  html_aug <- withr::with_output_sink(tempfile(), blk(sym_aug))
+  expect_match(html_aug, "internal node")
+  expect_false(grepl("phylogenetic correlation matrix", html_aug, fixed = TRUE))
+
+  # Tips-only (unit diagonal): keep the "correlation matrix" wording.
+  A_corr <- diag(k)
+  sym_corr <- sym
+  sym_corr$expanded$M <- A_corr
+  sym_corr$metadata$phylo_representation <- "tips_only"
+  html_corr <- withr::with_output_sink(tempfile(), blk(sym_corr))
+  expect_match(html_corr, "phylogenetic correlation matrix")
+  expect_false(grepl("internal node", html_corr, fixed = TRUE))
+})

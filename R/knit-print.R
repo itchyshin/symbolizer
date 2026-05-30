@@ -58,6 +58,34 @@ sym_kable_responsive <- function(df, col.names = NULL) {
           ""), collapse = "\n")
 }
 
+# HTML-escape plain text destined for an escape = FALSE kable cell. Order
+# matters: `&` first, then `<`/`>`.
+#' @keywords internal
+esc_html <- function(x) {
+  x <- gsub("&", "&amp;", x, fixed = TRUE)
+  x <- gsub("<", "&lt;",  x, fixed = TRUE)
+  gsub(">", "&gt;", x, fixed = TRUE)
+}
+
+# Render as an HTML-format table (not a markdown pipe table). Required when
+# a cell must carry a literal `|` inside monospace -- R mixed-model syntax
+# `(1 | g)`. A pipe table parses the column boundary on `|` BEFORE the cell
+# is parsed as markdown, so a code span can never hold a literal pipe: `\|`
+# and `&#124;` both render verbatim inside backticks (leaking `(1 \| g)` /
+# `(1 &#124; g)`). HTML format sidesteps the pipe-table parser; pandoc still
+# converts any `$...$` math inside the asis HTML block, so math cells render.
+# Callers must pre-escape plain columns with `esc_html()` and wrap code /
+# math columns themselves (escape = FALSE here).
+#' @keywords internal
+sym_kable_html <- function(df, col.names = NULL) {
+  if (!requireNamespace("knitr", quietly = TRUE)) return(invisible(df))
+  if (is.null(col.names)) {
+    knitr::kable(df, format = "html", escape = FALSE)
+  } else {
+    knitr::kable(df, col.names = col.names, format = "html", escape = FALSE)
+  }
+}
+
 #' @exportS3Method knitr::knit_print
 knit_print.symbolizer_symbol_table <- function(x, ...) {
   df <- as.data.frame(x, stringsAsFactors = FALSE)
@@ -100,14 +128,18 @@ knit_print.symbolizer_formula_bridge <- function(x, ...) {
   if ("mathematics" %in% names(df))        df$mathematics <- sym_dollar(df$mathematics)
   if ("mathematics_matrix" %in% names(df)) df$mathematics_matrix <- sym_dollar(df$mathematics_matrix)
   if ("r_syntax" %in% names(df)) {
-    # Pre-escape `|` so pandoc's pipe-table parser doesn't HTML-encode
-    # it to `&#124;` (which then gets `&` -> `&amp;` re-escaped, surfacing
-    # as literal `&amp;#124;` on the rendered page). R syntax for mixed
-    # models -- `(1 | group)` -- routinely contains `|`. Without this
-    # escape the literal entity appears in every formula_bridge() table
-    # that mentions a random effect. Patched in v0.18.3 after Pat's audit.
-    df$r_syntax <- gsub("|", "\\|", df$r_syntax, fixed = TRUE)
-    df$r_syntax <- paste0("`", df$r_syntax, "`")
+    # The "R syntax" column carries mixed-model formulas containing `|`
+    # (e.g. `(1 | site)`). A markdown pipe table parses the column
+    # boundary on `|` before the cell is parsed as markdown, so a code
+    # span can never hold a literal pipe -- both `\|` and `&#124;` leak
+    # verbatim inside backticks. Render the table as HTML and wrap the
+    # syntax in <code> (see sym_kable_html). Pre-escape first so an R
+    # comparison operator in a transform never breaks the markup.
+    df$r_syntax <- paste0("<code>", esc_html(df$r_syntax), "</code>")
+  }
+  if ("submodel" %in% names(df)) df$submodel <- esc_html(df$submodel)
+  if ("statistical_meaning" %in% names(df)) {
+    df$statistical_meaning <- esc_html(df$statistical_meaning)
   }
   cols <- intersect(
     c("submodel", "r_syntax", "statistical_meaning",
@@ -118,7 +150,7 @@ knit_print.symbolizer_formula_bridge <- function(x, ...) {
                  statistical_meaning = "meaning",
                  mathematics = "math (index)",
                  mathematics_matrix = "math (matrix)")[cols]
-  kab <- sym_kable(df[, cols, drop = FALSE], col.names = unname(col.names))
+  kab <- sym_kable_html(df[, cols, drop = FALSE], col.names = unname(col.names))
   knitr::asis_output(paste(c("", kab, ""), collapse = "\n"))
 }
 
@@ -357,25 +389,27 @@ knit_print.symbolizer_random_effects <- function(x, ...) {
   if (!requireNamespace("knitr", quietly = TRUE)) return(print(x))
   df <- as.data.frame(x, stringsAsFactors = FALSE)
 
-  # Escape `|` in term labels so a kable pipe-table row like
-  # `(1 | site)` does not start a new column.
+  # The term column carries mixed-model syntax with `|` (e.g. `(1 | site)`).
+  # A markdown pipe table cannot hold a literal pipe inside monospace, so
+  # render via HTML (sym_kable_html) and wrap the term in <code>.
   term_lab <- if ("term_label" %in% names(df)) {
-    gsub("|", "\\|", df$term_label, fixed = TRUE)
+    ifelse(nzchar(df$term_label),
+           paste0("<code>", esc_html(df$term_label), "</code>"),
+           "\u2014")
   } else {
-    rep("", nrow(df))
+    rep("\u2014", nrow(df))
   }
-  term_lab <- ifelse(nzchar(term_lab), paste0("`", term_lab, "`"), "\u2014")
 
   out <- data.frame(
-    submodel  = if ("submodel" %in% names(df))  df$submodel  else "",
+    submodel  = if ("submodel" %in% names(df))  esc_html(df$submodel)  else "",
     term      = term_lab,
-    group     = if ("group_var" %in% names(df)) df$group_var else "",
+    group     = if ("group_var" %in% names(df)) esc_html(df$group_var) else "",
     levels    = if ("n_levels"  %in% names(df)) df$n_levels  else NA_integer_,
     effect    = if ("u_symbol_index" %in% names(df)) sym_dollar(df$u_symbol_index) else "",
     sd        = if ("sigma_symbol"   %in% names(df)) sym_dollar(df$sigma_symbol)   else "",
     stringsAsFactors = FALSE
   )
-  kab <- sym_kable(
+  kab <- sym_kable_html(
     out,
     col.names = c("submodel", "term", "group", "levels",
                   "random effect", "between-group SD")

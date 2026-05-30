@@ -29,8 +29,10 @@ test_that("equations()$matrix carries the matrix-form LaTeX lines", {
   expect_match(mu_row$matrix,
                "^\\\\boldsymbol\\{\\\\mu\\} = \\\\mathbf\\{X\\} \\\\boldsymbol\\{\\\\beta\\}$")
   sg_row <- eq[eq$submodel == "sigma" & !is.na(eq$submodel), , drop = FALSE]
+  # Audit M3: the scale-submodel design matrix is \mathbf{X}_\sigma, not
+  # \mathbf{Z}.
   expect_match(sg_row$matrix,
-               "\\\\mathbf\\{Z\\} \\\\boldsymbol\\{\\\\gamma\\}")
+               "\\\\mathbf\\{X\\}_\\{\\\\sigma\\} \\\\boldsymbol\\{\\\\gamma\\}")
 })
 
 test_that("equations() records the notation attribute and accepts all values", {

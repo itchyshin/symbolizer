@@ -142,6 +142,14 @@ symbolize.gam <- function(fit, symbols = NULL, units = NULL,
     response_symbol_1 = response_symbol, response_symbol_2 = NA_character_
   )
   submodels  <- mgcv_build_submodels(entries, param, link)
+  # An mgcv gam/bam fit estimates at most a SINGLE constant scale parameter
+  # (gaussian residual variance fit$sig2, Gamma scale phi) and never a
+  # dispersion SUBMODEL -- its submodels table carries only `mu`. Flag this so
+  # the shared drmTMB builders drop the phantom log-linked sigma submodel from
+  # the assumptions block and gloss sigma_i as a constant scale (not "on the
+  # log scale"). Self-correcting: if a future mgcv extractor ever adds a
+  # dispersion submodel, the flag flips off and the real submodel is kept.
+  constant_scale <- !any(submodels$parameter %in% c("sigma", "sigma1", "sigma2"))
   terms_tbl  <- drm_build_terms(entries, data, symbols)
   fixed_eff  <- mgcv_build_fixed_effects(terms_tbl, fit)
   re_tbl     <- drm_build_random_effects(list(NULL))
@@ -157,22 +165,38 @@ symbolize.gam <- function(fit, symbols = NULL, units = NULL,
     terms_tbl, response, response_symbol, response_symbol_matrix,
     response_units, family, submodels, units, data, n_obs, re_tbl,
     response_1 = response, response_2 = NA_character_,
-    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_
+    response_symbol_1 = response_symbol, response_symbol_2 = NA_character_,
+    constant_scale = constant_scale
   )
   assumptions <- drm_build_assumptions(
     family, response, response_symbol, re_tbl,
-    response_1 = response, response_2 = NA_character_
+    response_1 = response, response_2 = NA_character_,
+    link_mu = link, constant_scale = constant_scale
   )
   interp <- drm_build_interpretation(
     fixed_eff, family, response, data,
-    response_1 = response, response_2 = NA_character_
+    response_1 = response, response_2 = NA_character_,
+    link_mu = link
   )
   bridge <- drm_build_formula_bridge(
     entries, components, response,
     response_1 = response, response_2 = NA_character_
   )
-  expanded <- list(y = data[[response]], X = NULL, Z = NULL,
+  # Tab 3 ("equations with data") needs the design matrix X, the
+  # response-scale fitted mean mu_hat, and the link-scale linear predictor
+  # eta_hat; without X the stacked-matrix + worked-row block falls back to
+  # the "design matrix not captured" placeholder (audit B1). For a gam the
+  # `model.matrix(fit)` columns include the smooth basis and align with
+  # `coef(fit)`, so X*beta = eta_hat. Each accessor is wrapped so a fit
+  # that cannot produce a model matrix degrades to NULL.
+  X_mat   <- tryCatch(stats::model.matrix(fit), error = function(e) NULL)
+  mu_hat  <- tryCatch(as.numeric(stats::fitted(fit)), error = function(e) NULL)
+  eta_hat <- tryCatch(as.numeric(stats::predict(fit, type = "link")),
+                      error = function(e) mu_hat)
+  e_resid <- tryCatch(as.numeric(stats::residuals(fit)), error = function(e) NULL)
+  expanded <- list(y = data[[response]], X = X_mat, Z = NULL,
                    beta = stats::coef(fit), u = NULL,
+                   eta_hat = eta_hat, mu_hat = mu_hat, e = e_resid,
                    fitted = stats::fitted(fit),
                    residuals = stats::residuals(fit))
 
@@ -241,7 +265,7 @@ mgcv_resolve_response_symbol <- function(response, symbols) {
   if (!is.null(symbols) && !is.null(symbols[[response]])) {
     return(as.character(symbols[[response]]))
   }
-  response
+  default_response_symbol(response)
 }
 
 mgcv_build_submodels <- function(entries, param, link_mu) {
@@ -385,6 +409,23 @@ mgcv_build_variance_components <- function(fit) {
       sd_estimate  = sqrt(as.numeric(fit$sig2)),
       var_estimate = as.numeric(fit$sig2),
       kind         = "residual"
+    )
+  }
+  # Non-Gaussian families with an estimated scale (e.g. Gamma, scat) carry a
+  # single constant dispersion phi = fit$sig2 = summary(fit)$dispersion. In the
+  # drmTMB Gamma parameterisation the equation's sigma_i satisfies
+  # sigma_i^2 = phi (Var = sigma^2 * mu^2), so var_estimate = phi = sigma_i^2 and
+  # sd_estimate = sqrt(phi) = sigma_i. Fixed-scale families (poisson, binomial:
+  # scale.estimated FALSE) carry no scale parameter and get no row.
+  if (!identical(fit$family$family, "gaussian") &&
+      !is.null(fit$sig2) && isTRUE(fit$scale.estimated)) {
+    rows[[length(rows) + 1L]] <- tibble::tibble(
+      parameter    = "sigma",
+      group        = "dispersion",
+      term         = "Dispersion (scale)",
+      sd_estimate  = sqrt(as.numeric(fit$sig2)),
+      var_estimate = as.numeric(fit$sig2),
+      kind         = "dispersion"
     )
   }
   if (!is.null(fit$sp) && length(fit$sp) > 0L) {

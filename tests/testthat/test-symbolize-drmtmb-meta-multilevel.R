@@ -63,8 +63,11 @@ test_that("latex_marginal_cov_block emits one term per tier + diag(v)", {
   expect_true(!is.null(block))
   # Structured phylo tier carries A.
   expect_match(block, "\\\\mathbf\\{A\\}", perl = TRUE)
-  # Unstructured study tier carries Z Z^T.
-  expect_match(block, "\\\\mathbf\\{Z\\}_\\{study_ID\\}", perl = TRUE)
+  # Unstructured study tier carries Z Z^T. The snake_case group name has its
+  # underscore escaped (`study\_ID`) so KaTeX does not read `_{study_ID}` as a
+  # nested double subscript -- see subscriptable group-name escaping in
+  # render-three-views.R's implied-covariance block.
+  expect_match(block, "\\\\mathbf\\{Z\\}_\\{study\\\\_ID\\}", perl = TRUE)
   # Meta-analytic sampling-variance tier carries diag(v).
   expect_match(block, "\\\\mathrm\\{diag\\}\\(\\\\mathbf\\{v\\}\\)",
                perl = TRUE)

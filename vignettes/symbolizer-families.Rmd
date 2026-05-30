@@ -160,9 +160,14 @@ sym <- symbolize(fit)
 render_math(sym$distribution$latex)
 ```
 
-**Coefficient reading on mu:** `exp(beta)` is the *odds ratio* of
-the success probability. A coefficient of `0.3` means a unit
-increase in `x` multiplies the odds by `exp(0.3) ≈ 1.35`.
+**Coefficient reading on mu:** `exp(beta)` is the *odds ratio* for
+the mean proportion $\mu / (1 - \mu)$ — a Beta response is a
+continuous proportion in $(0, 1)$, not a binary success/failure trial.
+As an *illustrative* example (not the fit shown below), a coefficient
+of `0.3` would mean a unit increase in `x` multiplies those odds by
+`exp(0.3) ≈ 1.35`. The fitted slope for this widget is small and the
+fit is U-shaped (both Beta shape parameters $< 1$); read the actual
+fitted coefficient in the widget below.
 
 #### Three views of the Beta fit
 

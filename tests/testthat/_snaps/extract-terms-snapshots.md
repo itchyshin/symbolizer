@@ -4,11 +4,11 @@
       print_full(result)
     Output
       # A tibble: 3 x 9
-        submodel term_label  variable role            contrast_level transform symbol coefficient_symbol latex_term                           
-        <chr>    <chr>       <chr>    <chr>           <chr>          <chr>     <chr>  <chr>              <chr>                                
-      1 mu       (Intercept) <NA>     intercept       <NA>           ""        <NA>   "\\beta_{0}"       "\\beta_{0}"                         
-      2 mu       site        site     factor_contrast B              ""        site_i "\\beta_{1}"       "\\beta_{1} \\, [site = \\mathrm{B}]"
-      3 mu       site        site     factor_contrast C              ""        site_i "\\beta_{2}"       "\\beta_{2} \\, [site = \\mathrm{C}]"
+        submodel term_label  variable role            contrast_level transform symbol             coefficient_symbol latex_term                           
+        <chr>    <chr>       <chr>    <chr>           <chr>          <chr>     <chr>              <chr>              <chr>                                
+      1 mu       (Intercept) <NA>     intercept       <NA>           ""         <NA>              "\\beta_{0}"       "\\beta_{0}"                         
+      2 mu       site        site     factor_contrast B              ""        "\\mathrm{site}_i" "\\beta_{1}"       "\\beta_{1} \\, [site = \\mathrm{B}]"
+      3 mu       site        site     factor_contrast C              ""        "\\mathrm{site}_i" "\\beta_{2}"       "\\beta_{2} \\, [site = \\mathrm{C}]"
 
 # continuous x continuous interaction
 
@@ -16,12 +16,12 @@
       print_full(result)
     Output
       # A tibble: 4 x 9
-        submodel term_label  variable role        contrast_level transform symbol coefficient_symbol latex_term                  
-        <chr>    <chr>       <chr>    <chr>       <chr>          <chr>     <chr>  <chr>              <chr>                       
-      1 mu       (Intercept) <NA>     intercept   <NA>           ""        <NA>   "\\beta_{0}"       "\\beta_{0}"                
-      2 mu       x           x        predictor   <NA>           ""        X_i    "\\beta_{1}"       "\\beta_{1} \\, X_i"        
-      3 mu       z           z        predictor   <NA>           ""        Z_i    "\\beta_{2}"       "\\beta_{2} \\, Z_i"        
-      4 mu       x:z         x:z      interaction <NA>           ""        x:z_i  "\\beta_{3}"       "\\beta_{3} \\, X_i \\, Z_i"
+        submodel term_label  variable role        contrast_level transform symbol            coefficient_symbol latex_term                  
+        <chr>    <chr>       <chr>    <chr>       <chr>          <chr>     <chr>             <chr>              <chr>                       
+      1 mu       (Intercept) <NA>     intercept   <NA>           ""         <NA>             "\\beta_{0}"       "\\beta_{0}"                
+      2 mu       x           x        predictor   <NA>           ""        "X_i"             "\\beta_{1}"       "\\beta_{1} \\, X_i"        
+      3 mu       z           z        predictor   <NA>           ""        "Z_i"             "\\beta_{2}"       "\\beta_{2} \\, Z_i"        
+      4 mu       x:z         x:z      interaction <NA>           ""        "\\mathrm{x:z}_i" "\\beta_{3}"       "\\beta_{3} \\, X_i \\, Z_i"
 
 # continuous x factor interaction
 
@@ -29,12 +29,12 @@
       print_full(result)
     Output
       # A tibble: 4 x 9
-        submodel term_label  variable role            contrast_level transform symbol  coefficient_symbol latex_term                             
-        <chr>    <chr>       <chr>    <chr>           <chr>          <chr>     <chr>   <chr>              <chr>                                  
-      1 mu       (Intercept) <NA>     intercept       <NA>           ""        <NA>    "\\beta_{0}"       "\\beta_{0}"                           
-      2 mu       x           x        predictor       <NA>           ""        X_i     "\\beta_{1}"       "\\beta_{1} \\, X_i"                   
-      3 mu       sex         sex      factor_contrast male           ""        S_i     "\\beta_{2}"       "\\beta_{2} \\, [sex = \\mathrm{male}]"
-      4 mu       x:sex       x:sex    interaction     -:male         ""        x:sex_i "\\beta_{3}"       "\\beta_{3} \\, X_i \\, S_i"           
+        submodel term_label  variable role            contrast_level transform symbol              coefficient_symbol latex_term                             
+        <chr>    <chr>       <chr>    <chr>           <chr>          <chr>     <chr>               <chr>              <chr>                                  
+      1 mu       (Intercept) <NA>     intercept       <NA>           ""         <NA>               "\\beta_{0}"       "\\beta_{0}"                           
+      2 mu       x           x        predictor       <NA>           ""        "X_i"               "\\beta_{1}"       "\\beta_{1} \\, X_i"                   
+      3 mu       sex         sex      factor_contrast male           ""        "S_i"               "\\beta_{2}"       "\\beta_{2} \\, [sex = \\mathrm{male}]"
+      4 mu       x:sex       x:sex    interaction     -:male         ""        "\\mathrm{x:sex}_i" "\\beta_{3}"       "\\beta_{3} \\, X_i \\, S_i"           
 
 # factor x factor interaction
 
@@ -42,12 +42,12 @@
       print_full(result)
     Output
       # A tibble: 4 x 9
-        submodel term_label  variable role            contrast_level transform symbol coefficient_symbol latex_term                         
-        <chr>    <chr>       <chr>    <chr>           <chr>          <chr>     <chr>  <chr>              <chr>                              
-      1 mu       (Intercept) <NA>     intercept       <NA>           ""        <NA>   "\\beta_{0}"       "\\beta_{0}"                       
-      2 mu       a           a        factor_contrast a2             ""        a_i    "\\beta_{1}"       "\\beta_{1} \\, [a = \\mathrm{a2}]"
-      3 mu       b           b        factor_contrast b2             ""        b_i    "\\beta_{2}"       "\\beta_{2} \\, [b = \\mathrm{b2}]"
-      4 mu       a:b         a:b      interaction     a2:b2          ""        a:b_i  "\\beta_{3}"       "\\beta_{3} \\, a_i \\, b_i"       
+        submodel term_label  variable role            contrast_level transform symbol            coefficient_symbol latex_term                         
+        <chr>    <chr>       <chr>    <chr>           <chr>          <chr>     <chr>             <chr>              <chr>                              
+      1 mu       (Intercept) <NA>     intercept       <NA>           ""         <NA>             "\\beta_{0}"       "\\beta_{0}"                       
+      2 mu       a           a        factor_contrast a2             ""        "a_i"             "\\beta_{1}"       "\\beta_{1} \\, [a = \\mathrm{a2}]"
+      3 mu       b           b        factor_contrast b2             ""        "b_i"             "\\beta_{2}"       "\\beta_{2} \\, [b = \\mathrm{b2}]"
+      4 mu       a:b         a:b      interaction     a2:b2          ""        "\\mathrm{a:b}_i" "\\beta_{3}"       "\\beta_{3} \\, a_i \\, b_i"       
 
 # offset with function call (log)
 
@@ -101,11 +101,11 @@
       print_full(result)
     Output
       # A tibble: 3 x 9
-        submodel term_label  variable role           contrast_level transform symbol coefficient_symbol latex_term                         
-        <chr>    <chr>       <chr>    <chr>          <chr>          <chr>     <chr>  <chr>              <chr>                              
-      1 mu       (Intercept) <NA>     intercept      <NA>           ""        <NA>   "\\beta_{0}"       "\\beta_{0}"                       
-      2 mu       x           x        predictor      <NA>           ""        X_i    "\\beta_{1}"       "\\beta_{1} \\, X_i"               
-      3 mu       I(x^2)      x^2      transformation <NA>           "I"       x^2_i  "\\beta_{2}"       "\\beta_{2} \\, \\mathrm{I}(x^2_i)"
+        submodel term_label  variable role           contrast_level transform symbol            coefficient_symbol latex_term                                   
+        <chr>    <chr>       <chr>    <chr>          <chr>          <chr>     <chr>             <chr>              <chr>                                        
+      1 mu       (Intercept) <NA>     intercept      <NA>           ""         <NA>             "\\beta_{0}"       "\\beta_{0}"                                 
+      2 mu       x           x        predictor      <NA>           ""        "X_i"             "\\beta_{1}"       "\\beta_{1} \\, X_i"                         
+      3 mu       I(x^2)      x^2      transformation <NA>           "I"       "\\mathrm{x^2}_i" "\\beta_{2}"       "\\beta_{2} \\, \\mathrm{I}(\\mathrm{x^2}_i)"
 
 # poly(x, 2) orthogonal polynomial
 
@@ -113,11 +113,11 @@
       print_full(result)
     Output
       # A tibble: 3 x 9
-        submodel term_label  variable role           contrast_level transform symbol coefficient_symbol latex_term                             
-        <chr>    <chr>       <chr>    <chr>          <chr>          <chr>     <chr>  <chr>              <chr>                                  
-      1 mu       (Intercept) <NA>     intercept      <NA>           ""        <NA>   "\\beta_{0}"       "\\beta_{0}"                           
-      2 mu       poly(x, 2)  x, 2     transformation <NA>           "poly"    x, 2_i "\\beta_{1}"       "\\beta_{1} \\, \\mathrm{poly}(x, 2_i)"
-      3 mu       poly(x, 2)  x, 2     transformation <NA>           "poly"    x, 2_i "\\beta_{2}"       "\\beta_{2} \\, \\mathrm{poly}(x, 2_i)"
+        submodel term_label  variable role           contrast_level transform symbol coefficient_symbol latex_term                          
+        <chr>    <chr>       <chr>    <chr>          <chr>          <chr>     <chr>  <chr>              <chr>                               
+      1 mu       (Intercept) <NA>     intercept      <NA>           ""        <NA>   "\\beta_{0}"       "\\beta_{0}"                        
+      2 mu       poly(x, 2)  x        transformation <NA>           "poly"    X_i    "\\beta_{1}"       "\\beta_{1} \\, \\mathrm{poly}(X_i)"
+      3 mu       poly(x, 2)  x        transformation <NA>           "poly"    X_i    "\\beta_{2}"       "\\beta_{2} \\, \\mathrm{poly}(X_i)"
 
 # one-sided formula on sigma submodel with gamma coefficients
 

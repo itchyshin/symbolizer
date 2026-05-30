@@ -87,7 +87,7 @@ MCMCglmm,*,*,Planned or reserved,,Non-Gaussian families and flexible residual co
 sdmTMB,gaussian,mu,First slice,0.12.0,Gaussian conditional submodel (identity link) from sdmTMB::sdmTMB().
 sdmTMB,gaussian,omega,First slice,0.12.0,"Spatial random field omega(s_i) ~ GMRF(0, Q(kappa)) via spatial = ""on""."
 sdmTMB,gaussian,epsilon,First slice,0.12.0,"Spatiotemporal field epsilon(s_i, t) ~ GMRF(0, Q(kappa)) via the time = arg."
-sdmTMB,gaussian,delta_model,Planned or reserved,,"Delta (hurdle / two-component) sdmTMB models."
+sdmTMB,*,delta_model,Planned or reserved,,"Delta (hurdle / two-component) sdmTMB models. fit$family$family is a length-2 vector (e.g. delta_gamma()); routed here regardless of the component families."
 sdmTMB,*,*,Planned or reserved,,Non-Gaussian families and spatial_varying / share_range still planned..x.
 lmerMod,gaussian,mu,First slice,0.10.0,Gaussian conditional submodel (identity link) from lme4::lmer().
 lmerMod,gaussian,random_effects,First slice,0.10.0,"Random intercepts (1 | g) and (1 + x | g) on the conditional submodel; nested / crossed still planned."
@@ -115,7 +115,10 @@ gam,gaussian,mu,First slice,0.14.0,mgcv gam / bam Gaussian additive model (ident
 gam,gaussian,smooth,First slice,0.14.0,"Smooth terms (s(x), s(x, by = factor), te(x, z)) summarised by basis dimension and edf in metadata$smooths."
 gam,poisson,mu,First slice,0.14.0,mgcv gam / bam Poisson additive model (log link).
 gam,binomial,mu,First slice,0.14.0,mgcv gam / bam Binomial additive model (logit link).
-gam,Gamma,mu,First slice,0.14.0,mgcv gam / bam Gamma additive model (log link).
+gam,Gamma,mu,First slice,0.14.0,"mgcv gam / bam Gamma additive model; link-honest prose for the default inverse link and the log link."
+gam,poisson,smooth,First slice,0.22.5,"Smooth terms (s(x), te(x, z)) in a Poisson additive model (log link); summarised by basis dimension and edf in metadata$smooths."
+gam,binomial,smooth,First slice,0.22.5,"Smooth terms (s(x), te(x, z)) in a Binomial additive model (logit link); summarised by basis dimension and edf in metadata$smooths."
+gam,Gamma,smooth,First slice,0.22.5,"Smooth terms (s(x), te(x, z)) in a Gamma additive model; link-honest prose for the default inverse link and the log link, and the Gamma scale phi captured into variance_components."
 gam,*,*,Planned or reserved,,"Other families (tw, nb, scat, multinom, ziP, ...) and non-default smooths still planned."
 bam,*,*,Planned or reserved,,bam inherits from gam; see gam capability rows.
 drmTMB,gaussian,phylo,First slice,0.21.0,"drmTMB::phylo(term, tree) and drmTMB::animal(term, pedigree) markers. Internally uses Hadfield & Nakagawa (2010) A-inverse sparse-precision (all-nodes: latent vector spans tips + internal nodes). Extractor sets metadata$phylo_representation = ""all_nodes""."

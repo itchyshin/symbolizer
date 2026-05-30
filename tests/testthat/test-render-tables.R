@@ -35,7 +35,9 @@ test_that("symbol_table(notation = 'matrix') keeps matrix-form rows only", {
   expect_false("symbol"        %in% names(st))
   expect_true("\\mathbf{w}" %in% st$symbol_matrix)
   expect_true("\\mathbf{X}" %in% st$symbol_matrix)
-  expect_true("\\mathbf{Z}" %in% st$symbol_matrix)
+  # Audit M3: the sigma-submodel design matrix is \mathbf{X}_\sigma, not
+  # \mathbf{Z} (\mathbf{Z} is reserved for the random-effects design).
+  expect_true("\\mathbf{X}_{\\sigma}" %in% st$symbol_matrix)
   # Predictors without a matrix form are dropped.
   expect_false("temperature" %in% st$variable)
   # ...but body_mass (response) has a matrix form and is kept.
