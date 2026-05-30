@@ -198,6 +198,12 @@ The bridge: `dispformula = ~0` fixes the Gaussian dispersion at 1, and
 equal to $v_k$ rather than 1 — which reproduces the meta-analytic
 likelihood. The estimated random-intercept variance is $\hat\tau^2$.
 
+*Note:* `glmmTMB::propto(…, V)` is **not** a meta-analytic surface — it
+estimates a *free scalar* multiplying a known covariance (the phylogenetic
+/ structured-covariance pattern; see
+`vignette("symbolizer-structural-dependence")`). The meta-analytic bridge
+here is `weights = 1/v_k` with `dispformula = ~ 0`, as above.
+
 ### 3.4 Face 3 — `drmTMB` (light)
 
 `drmTMB` is symbolizer's distributional-regression workhorse. For
@@ -425,37 +431,148 @@ $\tau^2$ itself as a function of the moderator.
 
 ## 5. Location-scale meta-analysis
 
-*(Scaffold; full coverage lands in v0.22.2.)*
+The first two flavors modelled the *mean* effect and (in §4) split the
+between-study tier by phylogeny. The location-scale flavor asks a
+different question: **does a moderator predict the _heterogeneity_
+itself?** — are aquatic species' thermal-acclimation effects more variable
+than terrestrial ones, separately from any difference in their average?
 
-When moderators predict heterogeneity, fit the variance side:
+### 5.1 The model in symbols
+
+Both the mean and the heterogeneity SD become regressions:
 
 $$
-y_k \sim \mathcal{N}(\mu(x_k), v_k + \tau^2(x_k)),
-\quad
+y_k \sim \mathcal{N}\!\big(\mu(x_k),\; v_k + \tau^2(x_k)\big),
+\qquad
+\mu(x_k) = \beta_0 + \beta_1 x_k,
+\qquad
 \log \tau(x_k) = \gamma_0 + \gamma_1 x_k.
 $$
 
-The deep Face is
-`drmTMB::drmTMB(drm_formula(yi ~ x, sigma ~ x + offset(0.5*log(vi))),
-                family = gaussian())`.
-The `offset(0.5*log(vi))` term makes the σ-submodel additive on the
-known sampling variances — `glmmTMB::glmmTMB(..., dispformula = ~ x,
-weights = 1/vi)` is an equivalent Face.
+$v_k$ is still the known per-effect sampling variance; $\tau(x_k)$ is the
+*estimated* heterogeneity SD, now a function of the moderator $x_k$
+(habitat). A non-zero $\gamma_1$ means the spread of true effects differs
+between habitats.
+
+### 5.2 Face 1 — `glmmTMB` (deep dive)
+
+glmmTMB expresses location-scale meta-analysis cleanly: the mean is the
+usual formula, the **dispersion formula** `dispformula = ~ habitat` is the
+log-SD scale model, and `weights = 1/v_k` pins the known sampling
+variances (as in §3.3).
+
+```{r ls-glmmtmb, message = FALSE, warning = FALSE}
+library(glmmTMB)
+dat$habitat <- factor(dat$habitat)
+fit_ls <- glmmTMB(
+  dARR ~ 1 + habitat,
+  dispformula = ~ 1 + habitat,   # log tau(x) = gamma_0 + gamma_1 * habitat
+  weights     = 1 / Var_dARR,    # pin the known sampling variances v_k
+  data        = dat
+)
+sym_ls <- symbolize(fit_ls, context = "location-scale meta-analysis")
+```
+
+#### Three views — location-scale
+
+```{r widget-ls, results = 'asis', echo = FALSE, message = FALSE}
+as_html_three_views(sym_ls, id = "locscale-meta")
+```
+
+The widget carries two submodels: the **mean** ($\mu$, identity link) and
+the **heterogeneity SD** ($\sigma \equiv \tau$, log link). The scale
+coefficient $\hat\gamma_{\text{terrestrial}} \approx -0.84$ reads on the
+log-SD scale: terrestrial effects are about $\exp(-0.84) \approx 0.43$
+times as heterogeneous as aquatic ones — the thermal-acclimation response
+is roughly half as variable on land as in water, beyond any difference in
+the mean.
+
+### 5.3 The variance-vs-SD parameterization gap
+
+Packages disagree about *what* they put the moderator on — the variance
+$\tau^2$ or the SD $\tau$ — and the coefficient symbol changes with it:
+
+| Package | Quantity modelled | Link | Coefficient |
+| --- | --- | --- | --- |
+| `metafor::rma(scale = ~ z)` | $\tau^2$ (variance) | $\log(\tau^2_k) = \alpha_0 + \alpha_1 z_k$ | $\alpha$ |
+| `glmmTMB(dispformula = ~ z)` | $\tau$ (SD) | $\log(\tau_k) = \gamma_0 + \gamma_1 z_k$ | $\gamma$ |
+| `drmTMB(sigma ~ z)` | $\sigma \equiv \tau$ (SD) | $\log(\sigma_k) = \gamma_0 + \gamma_1 z_k$ | $\gamma$ |
+
+The two conventions are mathematically equivalent. Because
+$\log(\tau^2) = 2\log(\tau) + \text{const}$, the slope on the variance
+scale is **twice** the slope on the SD scale:
+
+$$
+\alpha_k \;\approx\; 2\,\gamma_k.
+$$
+
+So a `metafor` location-scale slope of $\alpha = 0.4$ is the same
+biological signal as a `glmmTMB` / `drmTMB` slope of $\gamma \approx 0.2$:
+variance doubles ≈ SD increases by $\sqrt{2}$. `symbolizer` renders each
+faithfully — look for the coefficient symbol ($\alpha$ vs $\gamma$) and the
+$\tau^2$-vs-$\tau$ distinction in the LaTeX to know which convention is in
+play.
+
+### 5.4 Face 2 — `drmTMB` (light, with a caveat)
+
+drmTMB's location-scale idiom is `meta_V()` for the known sampling
+variances plus a `sigma ~ habitat` scale submodel:
+
+```{r ls-drmtmb, message = FALSE, warning = FALSE}
+library(drmTMB)
+bf <- drmTMB::drm_formula; meta_V <- drmTMB::meta_V
+fit_ls_drm <- drmTMB::drmTMB(
+  bf(dARR ~ 1 + habitat + meta_V(V = Var_dARR), sigma ~ 1 + habitat),
+  family = stats::gaussian(), data = dat
+)
+drmTMB::fixef(fit_ls_drm, "sigma")   # gamma on the log-SD scale
+```
+
+drmTMB recovers the same scale coefficients as glmmTMB. **Caveat:** at the
+time of writing drmTMB returns these point estimates but flags
+`pdHess = FALSE` for the `meta_V() + sigma`-submodel combination (even on
+clean simulated data), so its standard errors here are not trustworthy —
+we lead with glmmTMB for that reason and reported the issue upstream
+([itchyshin/drmTMB#417](https://github.com/itchyshin/drmTMB/issues/417)).
+drmTMB also does **not** accept `offset()` inside the `sigma` formula;
+`meta_V()` is its mechanism for the known variances.
+
+### 5.5 Takeaway
+
+Location-scale meta-analysis turns the heterogeneity itself into a
+regression. The biological payoff: you can ask *which conditions make
+effects more variable*, not just *what the average effect is*. glmmTMB is
+the cleanest converging Face today; metafor (`scale = ~ z`) models the same
+signal on the variance scale ($\alpha \approx 2\gamma$).
 
 ## 6. Reading biologically
 
-*(Will land in v0.22.3, after all three flavors' deep widgets ship.)*
+The three flavors share one statistical spine — separate the known
+sampling variance $v_k$ from the estimated heterogeneity — but each answers
+a different biological question. Tying the article's fitted numbers
+together:
 
-Three readings the article will tie together:
+- **Heterogeneity $\tau^2$ vs sampling $v_k$ (§3).** $\hat\tau^2 \approx
+  0.31$ ($I^2 \approx 92\%$) on the BCG trials means the *true* protective
+  effect genuinely differs from trial to trial — only about 8% of the
+  spread is sampling imprecision. A large $\tau^2$ is a finding ("the
+  effect is context-dependent"), not a nuisance.
+- **Phylogenetic structure $\sigma_p^2\mathbf{A}$ (§4).** On the thermal
+  data the study-level variance dominates the phylogenetic variance, so the
+  heritability reading $H^2 = \sigma_p^2 / (\sigma_p^2 +
+  \sigma_{\text{study}}^2)$ is small: most disagreement in the acclimation
+  response sits *between studies*, not *along the phylogeny* — related
+  species are not especially alike in their effect sizes here.
+- **Moderator-driven $\tau(x)$ (§5).** The scale slope
+  $\hat\gamma_{\text{terrestrial}} \approx -0.84$ exponentiates to
+  $\approx 0.43$: terrestrial thermal-acclimation effects are about half as
+  variable as aquatic ones. Read $\gamma$ on the log-SD scale and
+  exponentiate; on the variance scale the same signal is $\alpha \approx
+  2\gamma$ (§5.3).
 
-- **Heterogeneity τ² vs sampling v_k**: τ² is "real" disagreement
-  among studies; v_k is just imprecision.
-- **Phylogenetic structure σ_p²A**: when most heterogeneity sits on
-  the phylogeny, related species' effects co-vary even after $v_k$ is
-  accounted for. Read as: "the trait has a phylogenetic signal in its
-  effect size."
-- **Moderator-driven τ²(x)**: scale-regression coefficients γ are
-  read on the log-SD scale, exponentiated to multiplicative scale.
+In every case `symbolizer`'s job is the same: surface *which* variance is
+known and which is estimated, *what scale* each coefficient lives on, and
+*how* to read it back on the biological scale.
 
 ## 7. References
 

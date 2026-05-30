@@ -1,6 +1,7 @@
 # drmTMB report: location-scale meta-analysis — `offset()` rejected in `sigma`, and `meta_V() + sigma~x` returns pdHess = FALSE
 
 Date: 2026-05-30
+Filed upstream: https://github.com/itchyshin/drmTMB/issues/417
 From: symbolizer maintainer (building the location-scale meta-analysis vignette)
 drmTMB version probed: the `itchyshin/drmTMB` checkout installed locally on 2026-05-30
 (`drm_formula`, `meta_V`, location-scale `sigma ~` submodel).
