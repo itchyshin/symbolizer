@@ -96,9 +96,16 @@ Fixed the unambiguous / single-right-answer / testable subset; full suite green
 - **P3** pipe leaks → HTML `<code>` tables (+ regression test). **P2** phantom σ rows on brms gaussian. **P4** roadmap rewrite + drmtmb/factors stale-claim sweep. **P6a** ladder title. **compare** AIC-sign + `*`-marker.
 - Verified: roadmap/factors/compare render clean, 0 pipe leaks; brms gaussian has no σ rows.
 
-**Deferred to maintainer** (scientific-claim / re-fit / core-renderer with wide
-snapshot churn): meta-analysis numeric (§4 degenerate / §3.3 τ² gap / §3.4 blank /
-§5.4 claim — tied to drmTMB#417); P5 worked-row RE-fold; P6b underscore-escaping;
-P7 factor-template-under-interaction; gllvm Λ outer-product; broader phantom-σ
-sweep (lm/lmer/glmmTMB/…); P1 feature-half (family-aware `$expanded` for lm/glm).
-See `.memory/reports/2026-05-30-page-audit-fixes.md`.
+**Meta-analysis numerics — now FIXED** (root-caused against the real fits;
+commit `fix(meta)`): §3.4 blank σ² (wrong accessor → `sigma(fit)[1]^2` = 0.25);
+§3.3 τ² gap relabelled honestly (0.444 vs 0.313 is the 1-effect-per-study knife
+edge, not a REML/ML flip); §4 reordered to lead with the converging
+`metafor::rma.mv` (real tiers 0.003/0.036; widget no longer degenerate) and
+demote the non-converging drmTMB `meta_V()+phylo()` combo to a caveated idiom
+(#417); §5.4 "same coefficients" replaced with honest magnitudes (drmTMB γ −1.16
+vs glmmTMB −0.84); plus 2 newly-found §3.5 pipe leaks. Verified by full re-render.
+
+**Still deferred to maintainer** (core-renderer with wide snapshot churn):
+P5 worked-row RE-fold; P6b underscore-escaping; P7 factor-template-under-interaction;
+gllvm Λ outer-product; broader phantom-σ sweep (lm/lmer/glmmTMB/…); P1 feature-half
+(family-aware `$expanded` for lm/glm). See `.memory/reports/2026-05-30-page-audit-fixes.md`.
