@@ -573,7 +573,10 @@ The relevant rows are:
   (intercept-only `(1 | group)`)
 - `drmTMB / biv_gaussian / mu1`, `mu2`, `sigma1`, `sigma2`, `rho12` —
   **First slice** (see Section 6)
-- All non-Gaussian families — **Planned or reserved**
+- Student-t, lognormal, Gamma, beta, beta_binomial, Poisson, nbinom2,
+  truncated_nbinom2, cumulative_logit (with their zero-inflation and
+  hurdle submodels) — **First slice** (the `caps` table above is the
+  authoritative list)
 
 If you call `symbolize()` on an unsupported tuple, the package errors
 with a friendly *"Today we can read…"* message that names the row in

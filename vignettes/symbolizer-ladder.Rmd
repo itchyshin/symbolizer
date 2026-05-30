@@ -1,5 +1,5 @@
 ---
-title: "Building up: from `lm` to location-scale"
+title: "Building up: from lm to location-scale"
 description: >
   One synthetic dataset, four models of increasing complexity, the same
   `symbolize()` call. Watch the symbolic equation grow one row at a
