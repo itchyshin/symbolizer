@@ -10,12 +10,12 @@
 Source:
 [`DESCRIPTION`](https://github.com/itchyshin/symbolizer/blob/main/DESCRIPTION)
 
-Nakagawa S (2026). *symbolizer: Structured Symbolic Specifications,
-Interpretations, and Teachable Stories for Modern Statistical Models*. R
+Nakagawa S (2026). *symbolizer: Symbolic Specifications,
+Interpretations, and Teachable Stories for Statistical Models*. R
 package version 0.22.3, <https://itchyshin.github.io/symbolizer/>.
 
     @Manual{,
-      title = {symbolizer: Structured Symbolic Specifications, Interpretations, and Teachable Stories for Modern Statistical Models},
+      title = {symbolizer: Symbolic Specifications, Interpretations, and Teachable Stories for Statistical Models},
       author = {Shinichi Nakagawa},
       year = {2026},
       note = {R package version 0.22.3},

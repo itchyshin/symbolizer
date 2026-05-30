@@ -135,7 +135,7 @@ cat("species k =", nrow(dat),
 cat("A off-diagonal quantiles (25/50/75/99%): ",
     paste(round(quantile(A_tips[upper.tri(A_tips)], c(.25,.5,.75,.99)), 3),
           collapse = " / "), "\n")
-#> A off-diagonal quantiles (25/50/75/99%):  0 / 0.091 / 0.227 / 0.865
+#> A off-diagonal quantiles (25/50/75/99%):  0 / 0.095 / 0.228 / 0.866
 ```
 
 The two representations encode the **same** Brownian-motion prior. The
@@ -252,8 +252,8 @@ sym_mcmc$variance_components             # phylo + residual
 
 | parameter | group    | term        | sd_estimate | var_estimate |
 |:----------|:---------|:------------|:------------|:-------------|
-| mu        | species  | (Intercept) | 0.324       | 0.105        |
-| residual  | residual | Residual    | 0.215       | 0.0461       |
+| mu        | species  | (Intercept) | 0.325       | 0.105        |
+| residual  | residual | Residual    | 0.215       | 0.0460       |
 
 ``` r
 
@@ -261,12 +261,12 @@ sym_mcmc$metadata$heritability           # h^2 derived automatically
 #> # A tibble: 1 × 5
 #>   group   variance_A variance_E heritability reading                            
 #>   <chr>        <dbl>      <dbl>        <dbl> <chr>                              
-#> 1 species      0.105     0.0461        0.694 Heritability h^2 = sigma^2_p / (si…
+#> 1 species      0.105     0.0460        0.696 Heritability h^2 = sigma^2_p / (si…
 ```
 
 #### Three-views widget for the MCMCglmm fit
 
-[Skip three-views widget](#sym-mcmc-1780180818-end)
+[Skip three-views widget](#sym-mcmc-1780182195-end)
 
 ▸1. Index
 
@@ -310,11 +310,11 @@ where:
 is one variance component (shown as a share of the total when a single
 total variance is defined).
 
-species 69.4%
+species 69.6%
 
-Residual (within-group) 30.6%
+Residual (within-group) 30.4%
 
-**ICC (data scale):** 0.694. Data-scale ICC: the share of total variance
+**ICC (data scale):** 0.696. Data-scale ICC: the share of total variance
 that lies between groups – a genuine proportion of variance.
 
 Point estimates only; uncertainty not shown.
@@ -392,7 +392,7 @@ Stacking the same response equation for all *n* = 60 observations:
 \underbrace{\begin{bmatrix} 0.366
 \end{bmatrix}}\_{\textstyle\\\hat{\boldsymbol{\beta}}\_{\\1 \times
 1}\\\text{(estimated)}\\} \\+\\ \underbrace{\begin{bmatrix} -0.0485 \\
-0.351 \\ 0.0572 \\ 0.29 \\ 0.285 \\ \vdots \\ -0.178 \\ -0.0961
+0.351 \\ 0.057 \\ 0.289 \\ 0.285 \\ \vdots \\ -0.178 \\ -0.0958
 \end{bmatrix}}\_{\textstyle\\\hat{\boldsymbol{\varepsilon}}\_{\\60
 \times 1}\\\text{(residual)}\\}
 
@@ -414,12 +414,12 @@ gives this model its structural-dependence character:
 
 \mathrm{Cov}(\hat{\mathbf{u}}) \\=\\ \sigma_p^2 \cdot
 \underbrace{\begin{bmatrix} 0.161 & 0 & 0.161 & 0.161 & 0.161 & \cdots &
-0 & 0 \\ 0 & 0.0913 & 0 & 0 & 0 & \cdots & 0.0913 & 0.0913 \\ 0.161 & 0
-& 0.227 & 0.227 & 0.227 & \cdots & 0 & 0 \\ 0.161 & 0 & 0.227 & 0.297 &
-0.297 & \cdots & 0 & 0 \\ 0.161 & 0 & 0.227 & 0.297 & 0.564 & \cdots & 0
+0 & 0 \\ 0 & 0.0946 & 0 & 0 & 0 & \cdots & 0.0946 & 0.0946 \\ 0.161 & 0
+& 0.228 & 0.228 & 0.228 & \cdots & 0 & 0 \\ 0.161 & 0 & 0.228 & 0.298 &
+0.298 & \cdots & 0 & 0 \\ 0.161 & 0 & 0.228 & 0.298 & 0.565 & \cdots & 0
 & 0 \\ \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots &
-\vdots \\ 0 & 0.0913 & 0 & 0 & 0 & \cdots & 1 & 0.866 \\ 0 & 0.0913 & 0
-& 0 & 0 & \cdots & 0.866 & 1
+\vdots \\ 0 & 0.0946 & 0 & 0 & 0 & \cdots & 1 & 0.867 \\ 0 & 0.0946 & 0
+& 0 & 0 & \cdots & 0.867 & 1
 \end{bmatrix}}\_{\textstyle\\\mathbf{A}\_{\\116 \times 116}\\}
 
 The phylo random effect u has covariance \sigma_p^2 \cdot \mathbf{A},
@@ -471,8 +471,8 @@ sym_brms$variance_components             # species + residual
 
 | parameter | group    | term        | sd_estimate | var_estimate |
 |:----------|:---------|:------------|:------------|:-------------|
-| mu        | species  | (Intercept) | 0.341       | 0.117        |
-| residual  | residual | Residual    | 0.184       | 0.0337       |
+| mu        | species  | (Intercept) | 0.364       | 0.132        |
+| residual  | residual | Residual    | 0.170       | 0.0289       |
 
 `symbolizer` reports `phylo_representation = "tips_only"` because `brms`
 works directly with the k \times k tips-only \mathbf A — no
@@ -539,7 +539,7 @@ sym_pl$metadata$phylo_representation   # "pgls_marginal"
 sym_pl$metadata$phylo_model            # "lambda"
 #> [1] "lambda"
 sym_pl$metadata$phylo_param            # estimated lambda
-#> [1] 0.7617321
+#> [1] 0.7631645
 sym_pl$metadata$detected_signals       # "phylo_marginal"
 #> [1] "phylo_marginal"
 sym_pl$variance_components             # single sigma^2 row
@@ -547,7 +547,7 @@ sym_pl$variance_components             # single sigma^2 row
 
 | parameter | group | term                   | sd_estimate | var_estimate |
 |:----------|:------|:-----------------------|:------------|:-------------|
-| residual  | phylo | sigma^2 (phylogenetic) | 0.375       | 0.141        |
+| residual  | phylo | sigma^2 (phylogenetic) | 0.376       | 0.141        |
 
 ``` r
 
@@ -557,26 +557,26 @@ summary(fit_pl)
 #> phylolm(formula = Zr ~ 1, data = dat_pl, phy = tree, model = "lambda")
 #> 
 #>    AIC logLik 
-#>  27.12 -10.56 
+#>  27.13 -10.57 
 #> 
 #> Raw residuals:
 #>      Min       1Q   Median       3Q      Max 
-#> -0.51918 -0.23483 -0.12687  0.05356  1.20640 
+#> -0.51914 -0.23479 -0.12683  0.05359  1.20643 
 #> 
 #> Mean tip height: 1
 #> Parameter estimate(s) using ML:
-#> lambda : 0.7617321
-#> sigma2: 0.1405798 
+#> lambda : 0.7631645
+#> sigma2: 0.141141 
 #> 
 #> Coefficients:
-#>             Estimate  StdErr t.value p.value   
-#> (Intercept)  0.38081 0.13881  2.7434 0.00804 **
+#>             Estimate  StdErr t.value  p.value   
+#> (Intercept)  0.38077 0.13955  2.7285 0.008369 **
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #> 
 #> R-squared:     0 Adjusted R-squared:     0 
 #> 
-#> Note: p-values and R-squared are conditional on lambda=0.7617321.
+#> Note: p-values and R-squared are conditional on lambda=0.7631645.
 ```
 
 The bridge with the RE form: take the estimated \hat\sigma^2 and

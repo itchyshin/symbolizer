@@ -117,7 +117,7 @@ mean \hat{\boldsymbol{\mu}}.
 as_html_three_views(sym, head = 5, tail = 2)
 ```
 
-[Skip three-views widget](#sym-sym-1780180897-end)
+[Skip three-views widget](#sym-sym-1780182281-end)
 
 ▸1. Index
 

@@ -96,7 +96,7 @@ geometric mean by `exp(beta)`.
 as_html_three_views(sym, id = "lognormal")
 ```
 
-[Skip three-views widget](#sym-lognormal-1780180791-end)
+[Skip three-views widget](#sym-lognormal-1780182165-end)
 
 ▸1. Index
 
@@ -284,7 +284,7 @@ coefficient in the widget below.
 as_html_three_views(sym, id = "beta")
 ```
 
-[Skip three-views widget](#sym-beta-1780180792-end)
+[Skip three-views widget](#sym-beta-1780182166-end)
 
 ▸1. Index
 
@@ -432,6 +432,7 @@ dat <- data.frame(
 )
 fit <- drmTMB(drm_formula(cbind(successes, failures) ~ x, sigma ~ 1),
               family = beta_binomial(), data = dat)
+#> Warning in sqrt(diag(cov)): NaNs produced
 sym <- symbolize(fit)
 render_math(sym$distribution$latex)
 ```
@@ -474,7 +475,7 @@ multiplicative effect on the expected count.
 as_html_three_views(sym, id = "poisson")
 ```
 
-[Skip three-views widget](#sym-poisson-1780180793-end)
+[Skip three-views widget](#sym-poisson-1780182167-end)
 
 ▸1. Index
 
