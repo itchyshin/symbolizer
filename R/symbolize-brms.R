@@ -244,7 +244,14 @@ symbolize.brmsfit <- function(fit, symbols = NULL, units = NULL,
   assumptions <- drm_build_assumptions(
     render_family, response, response_symbol, re_tbl,
     response_1 = response, response_2 = NA_character_,
-    detected_signals = detected_signals
+    detected_signals = detected_signals,
+    # A plain brms fit (no `bf(y ~ x, sigma ~ z)`) is homoscedastic: it has
+    # a single constant residual SD, not a scale submodel. The shared
+    # Gaussian template carries location-scale sigma rows (`log(sigma_i) =
+    # gamma_0 + ...`, `sigma_i > 0`) that describe machinery this fit does
+    # not have -- drop them via the constant-scale guard. A distributional
+    # `sigma ~ z` fit keeps them. (Audit P2: phantom sigma rows.)
+    constant_scale = !has_sigma_distributional
   )
   interp <- drm_build_interpretation(
     fixed_eff, render_family, response, data,
