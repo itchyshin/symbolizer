@@ -4,7 +4,9 @@
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
+^\.git$
 ^\.github$
+^data-raw$
 ^CLAUDE\.md$
 ^AGENTS\.md$
 ^CONTRIBUTING\.md$
