@@ -147,10 +147,17 @@ symbolize.phylolm <- function(fit, symbols = NULL, units = NULL,
   entries_fe <- entries  # no RE bar to strip
   link <- "identity"
 
+  # PGLS marginal form: the headline distribution is the DENSE phylogenetic
+  # covariance N(X*beta, sigma_p^2 * A), NOT the ordinary-Gaussian
+  # N(mu, diag(sigma^2)). Look up the `gaussian_pgls` distribution template
+  # (family-distributions.csv) for both index and matrix notation, then patch
+  # the `family` column back to "gaussian" so the rest of the pipeline (which
+  # keys off the true family) is unaffected.
   distribution <- drm_build_distribution(
-    family, response_symbol, response_symbol_matrix,
+    "gaussian_pgls", response_symbol, response_symbol_matrix,
     response_symbol_1 = response_symbol, response_symbol_2 = NA_character_
   )
+  distribution$family <- family
   submodels <- phylolm_build_submodels(entries, fit, param, link)
   terms_tbl <- drm_build_terms(entries_fe, data, symbols)
   fixed_eff <- phylolm_build_fixed_effects(terms_tbl, fit)
@@ -161,7 +168,18 @@ symbolize.phylolm <- function(fit, symbols = NULL, units = NULL,
   # phylolm fits are always phylo (the phylogeny is the residual
   # structure). The structured-matrix bookkeeping mirrors MCMCglmm /
   # brms / drmTMB so downstream renderers treat A consistently.
-  detected_signals <- "phylo"
+  #
+  # The signal is `phylo_marginal`, NOT plain `phylo`: phylolm marginalizes
+  # the species effect into the residual covariance (Cov(e) = sigma_p^2 * A),
+  # so it has NO u_p random-effect tier. The shared `requires = phylo`
+  # assumption / interpretation rows describe a u_p ~ N(0, sigma_p^2 A)
+  # random effect (correct for brms / MCMCglmm / drmTMB, which DO have one)
+  # and would mislabel phylolm. `phylo_marginal` instead fires the
+  # marginal-covariance rows (requires = phylo_marginal) and suppresses the
+  # spurious scale-submodel rows. The phylo three-views / biology-gloss
+  # machinery keys off metadata$phylo_representation = "pgls_marginal", not
+  # off this signal, so it is unaffected.
+  detected_signals <- "phylo_marginal"
   structured_matrices <- list(list(
     symbol             = "\\mathbf{A}",
     symbol_matrix      = "\\mathbf{A}",
@@ -176,10 +194,17 @@ symbolize.phylolm <- function(fit, symbols = NULL, units = NULL,
     )
   ))
 
+  # Pass the `gaussian_pgls` family so the headline distribution block in
+  # `components` (which as_latex() / equations() render) carries the dense
+  # phylogenetic covariance N(X*beta, sigma_p^2 * A) rather than the generic
+  # gaussian N(mu, diag(sigma^2)). Inside drm_build_components(), `family`
+  # only selects the distribution-row template and the is_biv check; the
+  # mu-submodel linear-predictor rendering is driven by `submodels` /
+  # `coef_family`, so this does not perturb the mu = X*beta block.
   components <- drm_build_components(
     submodels, terms_tbl, re_tbl,
     response_symbol, response_symbol_matrix,
-    family = family,
+    family = "gaussian_pgls",
     response_symbol_1 = response_symbol, response_symbol_2 = NA_character_
   )
   symbol_dict <- drm_build_symbol_dictionary(

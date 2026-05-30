@@ -21,7 +21,11 @@ test_that("symbolize.phylolm sets model$class = 'phylolm', package = 'phylolm'",
 test_that("symbolize.phylolm sets detected_signals = 'phylo' (always)", {
   bundle <- fit_phylolm_bm()
   sym <- symbolize(bundle$fit, data = bundle$data)
-  expect_true("phylo" %in% sym$metadata$detected_signals)
+  # phylolm reports `phylo_marginal` (not plain `phylo`): the phylo signal
+  # lives in the dense residual covariance, not in a u_p random-effect tier.
+  # This distinguishes it from brms / MCMCglmm / drmTMB, which DO have a u_p.
+  expect_true("phylo_marginal" %in% sym$metadata$detected_signals)
+  expect_equal(sym$metadata$phylo_representation, "pgls_marginal")
 })
 
 test_that("symbolize.phylolm sets phylo_representation = 'pgls_marginal'", {
@@ -54,13 +58,17 @@ test_that("symbolize.phylolm adds a structured-correlation row for A", {
   expect_equal(a_row$symbol[[1L]], "\\mathbf{A}")
 })
 
-test_that("symbolize.phylolm fires phylo-gated assumption rows", {
+test_that("symbolize.phylolm fires phylo-gated (marginal) assumption rows", {
   bundle <- fit_phylolm_bm()
   sym <- symbolize(bundle$fit, data = bundle$data)
   a <- sym$assumptions
   expect_s3_class(a, "data.frame")
-  expect_true("phylo_random_effect" %in% a$assumption)
-  expect_true("phylo_brownian_motion" %in% a$assumption)
+  # The PGLS marginal-covariance rows fire (requires = phylo_marginal).
+  expect_true("phylo_residual_covariance" %in% a$assumption)
+  expect_true("phylo_marginal_brownian_motion" %in% a$assumption)
+  # The u_p random-effect row must NOT fire: phylolm has no u_p tier
+  # (the phylo signal is marginalized into the residual covariance).
+  expect_false("phylo_random_effect" %in% a$assumption)
 })
 
 test_that("symbolize.phylolm fixed_effects carries estimate + Wald SE + CI", {

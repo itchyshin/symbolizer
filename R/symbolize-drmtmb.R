@@ -1958,14 +1958,45 @@ drm_build_assumptions <- function(family, response, response_symbol,
   # case covers pre-existing field-shift parse issues in the CSV).
   if ("requires" %in% names(rows)) {
     req <- rows$requires
-    known <- c("phylo", "spatial", "animal", "temporal", "meta_analysis")
+    known <- c("phylo", "phylo_marginal", "spatial", "animal",
+               "temporal", "meta_analysis")
     keep <- is.na(req) | req == "" | !(req %in% known) |
             (req %in% detected_signals)
     rows <- rows[keep, , drop = FALSE]
   }
   has_re <- !is.null(re_tbl) && nrow(re_tbl) > 0L
-  drop_assumption <- if (has_re) "independence" else "independence_given_random_effects"
-  rows <- rows[rows$assumption != drop_assumption, , drop = FALSE]
+  # A structured-dependence signal (e.g. phylo_marginal from phylolm's PGLS
+  # residual covariance) breaks the plain conditional-independence claim even
+  # when there is no random-effect tibble: the dependence lives in the dense
+  # residual covariance, not in a u_p tier. Drop the unconditional
+  # `independence` row in that case too, so the headline assumptions do not
+  # self-contradict the phylo-covariance rows. Guarded strictly by the
+  # signal so ordinary Gaussian fits (no signal, no re_tbl) keep `independence`.
+  structured_dependence_signals <- c("phylo_marginal", "spatial", "temporal")
+  has_structured_dependence <- any(detected_signals %in%
+                                     structured_dependence_signals)
+  if (has_structured_dependence) {
+    # The dependence lives in a dense residual covariance and there is no
+    # random-effect tier (phylolm marginalizes u_p into e). BOTH independence
+    # variants are then false / misleading -- drop them and let the
+    # marginal-covariance rows carry the dependence statement.
+    drop_assumption <- c("independence", "independence_given_random_effects")
+  } else if (has_re) {
+    drop_assumption <- "independence"
+  } else {
+    drop_assumption <- "independence_given_random_effects"
+  }
+  rows <- rows[!(rows$assumption %in% drop_assumption), , drop = FALSE]
+  # phylolm's PGLS marginal form has a single scalar sigma^2 and no scale
+  # (distributional) submodel, so the generic Gaussian sigma-submodel
+  # boilerplate (log(sigma_i) = gamma_0 + ..., sigma_i > 0) describes
+  # machinery that does not exist. Drop those scale-submodel rows under the
+  # marginal-PGLS signal only; location-scale Gaussian fits (drmTMB) carry
+  # no phylo_marginal signal and keep their sigma submodel rows.
+  if ("phylo_marginal" %in% detected_signals) {
+    rows <- rows[is.na(rows$submodel) | rows$submodel != "sigma", ,
+                 drop = FALSE]
+  }
   mapping <- list(
     response = response,
     response_symbol = response_symbol,
