@@ -759,6 +759,17 @@ escape_underscores_for_latex <- function(s) {
   gsub("_", "\\_", s, fixed = TRUE)
 }
 
+# Wrap a base symbol in a group `{...}` when it already carries a real
+# subscript, so that appending another subscript (observation index `_{1}`,
+# dimension `_{600 \times 1}`, etc.) lands on the whole symbol as a single
+# subscript rather than producing an illegal double subscript. KaTeX rejects
+# `y_{ij}_{1}` ("Double subscript") whereas `{y_{ij}}_{1}` is valid. A `\_`
+# (escaped literal underscore, e.g. inside `\mathbf{body\_mass}`) is NOT a
+# subscript operator, so it is excluded via the negative look-behind.
+subscriptable_base <- function(s) {
+  if (grepl("(?<!\\\\)_", s, perl = TRUE)) sprintf("{%s}", s) else s
+}
+
 # Join a vector of LaTeX numeric term strings into a sum, folding a
 # leading minus sign on any term into the binary operator so the result
 # reads `a - b` rather than the glued `a + -b` (punch-list #7). The first
@@ -910,14 +921,18 @@ latex_marginal_cov_block <- function(x) {
   re_terms <- vapply(groups, function(gv) {
     sel    <- which(re_mu$group_var == gv)[[1L]]
     sigma  <- re_mu$sigma_symbol[[sel]]
+    # Escape underscores in the group name: a snake_case group (study_ID)
+    # is illegal inside \text{} under KaTeX ("Expected 'EOF', got '_'") and
+    # renders as a nested subscript inside \mathbf{Z}_{...}.
+    gv_esc <- escape_underscores_for_latex(gv)
     if (is_structured(gv)) {
       struct_sym <- smfg[[gv]]
       body  <- sprintf("%s^2\\, %s", sigma, struct_sym)
-      label <- sprintf("\\text{%s tier}", gv)
+      label <- sprintf("\\text{%s tier}", gv_esc)
     } else {
       body  <- sprintf("%s^2\\, \\mathbf{Z}_{%s}\\mathbf{Z}_{%s}^{\\!\\top}",
-                       sigma, gv, gv)
-      label <- sprintf("\\text{%s tier}", gv)
+                       sigma, gv_esc, gv_esc)
+      label <- sprintf("\\text{%s tier}", gv_esc)
     }
     underbrace(body, label)
   }, character(1L))
@@ -1161,7 +1176,7 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L,
   beta_vec <- latex_vec(ex$beta)
   eps_vec  <- if (emit_eps) latex_vec(eps_vals, rows) else NULL
   y_lab    <- sprintf("%s_{\\,%d \\times 1}\\;\\text{(%s)}",
-                      lhs_sym, n, lhs_role)
+                      subscriptable_base(lhs_sym), n, lhs_role)
   X_lab    <- sprintf("\\mathbf{X}_{\\,%d \\times %d}", n, ncol(ex$X))
   beta_lab <- sprintf("\\hat{\\boldsymbol{\\beta}}_{\\,%d \\times 1}\\;\\text{(estimated)}",
                       length(ex$beta))
@@ -1635,8 +1650,11 @@ three_views_worked_row <- function(ex, resp_sym = "\\mathbf{y}",
       # already \mathrm{name}, just append _{1}
       sprintf("%s_{1}", s)
     } else {
-      # fallback: assume it's a plain symbol, subscript 1
-      sprintf("%s_{1}", s)
+      # fallback: assume it's a plain symbol, subscript 1. If it already
+      # carries a subscript (gllvm multi-trait `y_{ij}`), wrap it so the
+      # observation index is a single subscript -- `{y_{ij}}_{1}`, not the
+      # illegal double subscript `y_{ij}_{1}` that KaTeX rejects.
+      sprintf("%s_{1}", subscriptable_base(s))
     }
   }
   beta_k <- function(k) sprintf("\\hat\\beta_{%d}", k - 1L)

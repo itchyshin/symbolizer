@@ -120,6 +120,34 @@ unconditional; glmmTMB gated on `has_sigma_sub` so a real dispformula keeps
 them). Verified (test-phantom-sigma.R; suite 2224; no churn). brms already
 done in P2.
 
+**Math-rendering migration to KaTeX + KaTeX-surfaced fixes — FIXED**
+(commits `build(pkgdown)` KaTeX switch `0cb1462`, then `fix(render)` double-
+subscript + `study_ID`):
+- **`\boldsymbol` rendered as red raw text site-wide** (maintainer-flagged):
+  MathJax's combined CDN bundle (`tex-mml-chtml`) cannot autoload the
+  `[tex]/boldsymbol` extension, and pkgdown writes its math config *after* the
+  script tag, so bold-Greek vectors broke on every page. Fix: switch
+  `_pkgdown.yml` `math-rendering: mathjax → katex` (KaTeX bundles
+  `\boldsymbol` + stretchy delimiters and renders at load). Full site rebuilt.
+- **KaTeX is stricter than MathJax and surfaced 2 latent LaTeX bugs** the old
+  renderer had masked, both now fixed in `R/render-three-views.R`:
+  - **gllvm double subscript** (4 errors): the multi-trait response `y_{ij}`
+    took a second bare subscript (`y_{ij}_{1}` worked row; `y_{ij}_{600×1}`
+    matrix-block dimension) → "Double subscript". New `subscriptable_base()`
+    wraps an already-subscripted base in a group so the index is a single
+    subscript (`{y_{ij}}_{1}`). Closes the P6 gllvm `y_{ij}_{1}` minor.
+  - **meta `study_ID` group name** (1 error): the snake_case group went raw
+    into `\text{study_ID tier}` (illegal `_` in KaTeX text mode → "Expected
+    'EOF', got '_'") and `\mathbf{Z}_{study_ID}`. Fix routes the group name
+    through `escape_underscores_for_latex()` in the implied-covariance block.
+- Verified by a **site-wide KaTeX-error sweep** (hidden-iframe, counts
+  `.katex-error` per page): **0 errors across all 11 articles** (get-started
+  29, ladder 99, drmtmb 161, factors 240, families 120, variance-components 3,
+  gllvm 156, compare 1, structural-dependence 187, meta-analysis 192, roadmap
+  0). gllvm 4→0, meta 1→0; the other 9 stay clean. Regression test:
+  `test-double-subscript.R`. Full suite green (the lone `expand` failure is the
+  known `Matrix::expand` S4-masking load-order flake #7 — passes in isolation).
+
 **Remaining — feature / deep-extractor work (recommend fresh sessions, each a
 small design+implement cycle; none are one-line fixes):**
 - **P5** worked-row folds the random effect into the residual on the
