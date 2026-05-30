@@ -8,36 +8,35 @@ vignette: >
 ---
 
 ```{r setup, include = FALSE}
-has_drmTMB <- requireNamespace("drmTMB", quietly = TRUE)
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment  = "#>",
-  eval     = has_drmTMB
+  comment  = "#>"
 )
 ```
+
+`symbolizer` turns a fitted model into a *structured symbolic model* — an object
+your renderers read to produce publication-ready equations, assumption tables,
+and per-coefficient interpretations. This is the five-minute tour: one model, one
+`symbolize()` call, and the three things you get back. It runs on **base R alone**
+— nothing to install.
 
 ## Why structured symbolic models
 
 [`equatiomatic`](https://datalorax.github.io/equatiomatic/) renders a fitted
-model as a LaTeX string. That is enough when the only goal is a publishable
-equation. `symbolizer` returns a richer object: a *structured symbolic model*
-that other renderers can read. From the same object you can pull the equation,
-the symbol dictionary, the assumption table, the formula-to-math bridge, and
-the per-coefficient interpretation on link, natural, variance, and biological
-scales.
+model as a LaTeX string — enough when the only goal is a publishable equation.
+`symbolizer` returns a richer object: from the same `symbolized_model` you can
+pull the equation (in both index and matrix notation), the symbol dictionary, the
+assumption table (each assumption labelled *stated* / *implied* / *not checked*),
+the formula-to-math bridge, and the per-coefficient interpretation on link,
+natural, variance, and biological scales.
 
-The package is educator-first. It exposes equations in both index (scalar) and
-matrix notation side by side, and it labels every assumption as *stated*,
-*implied*, or *not checked* so a reader can see what the fit guarantees and
-what it does not.
-
-**Takeaway.** The product is the `symbolized_model` object; everything else is
-a renderer of that object.
+**Takeaway.** The product is the `symbolized_model` object; everything else is a
+renderer of that object.
 
 ## A short glossary
 
-If you don't read formula-grammar terminology fluently, here's the
-quickest possible map of what each word means in a biology context.
+If formula-grammar terminology isn't second nature, here's the quickest map of
+what each word means in a biology context.
 
 ```{r glossary, echo = FALSE}
 glossary <- data.frame(
@@ -51,12 +50,12 @@ glossary <- data.frame(
     "a variable you think influences the response.",
     "a categorical predictor with named levels (e.g., sex with \"female\" and \"male\").",
     "one piece of the formula. A location-scale model has two submodels: one for the mean (mu), one for the residual SD (sigma).",
-    "the sum that determines a parameter for an observation: intercept + slope x predictor + ... Sometimes a link function (e.g., log) is applied to make it work on its natural scale.",
-    "the table the computer multiplies coefficients by to get fitted values. Each row is one observation; each column is one term (intercept, slope, factor contrast, ...).",
+    "the sum that determines a parameter for an observation: intercept + slope x predictor + ... Sometimes a link function (e.g., log) is applied first.",
+    "the table the computer multiplies coefficients by to get fitted values. Each row is one observation; each column is one term.",
     "a single number the model estimates: an intercept, a slope, or a factor contrast.",
-    "the transformation between a parameter's natural scale (e.g., probability) and the scale the linear predictor works on (e.g., logit). For `sigma` in a location-scale model, the link is log, so the linear predictor models log(sigma).",
+    "the transformation between a parameter's natural scale (e.g., a count) and the scale the linear predictor works on (e.g., log-count).",
     "a per-group offset that lets each group have its own baseline, while assuming those offsets follow a shared distribution.",
-    "an unmeasured axis the model uses to explain shared variation in multiple traits or species. (Used in gllvmTMB.)",
+    "an unmeasured axis the model uses to explain shared variation across traits or species. (Used in gllvmTMB.)",
     "how strongly a single trait or species responds to a latent axis."
   ),
   stringsAsFactors = FALSE
@@ -64,278 +63,96 @@ glossary <- data.frame(
 knitr::kable(glossary, col.names = c("word", "meaning"))
 ```
 
-### How a factor becomes 0/1 columns
+(For how a factor becomes 0/1 dummy columns, and contrasts in depth, see
+`vignette("symbolizer-factors")`.)
 
-When you put a factor like `sex` (with levels `female`, `male`) in a formula,
-R automatically encodes the non-reference levels as **dummy variables**: 0/1
-columns the model can multiply by coefficients.
+## Your first fit
 
-| Observation | sex      | sexmale (dummy column) |
-| ----------- | -------- | ---------------------- |
-| 1           | female   | 0                      |
-| 2           | male     | 1                      |
-| 3           | female   | 0                      |
-
-For a `k`-level factor, R makes `k-1` dummy columns. The first level
-(alphabetical by default) is the **reference**: it doesn't get a column of its
-own and lives inside the intercept. `symbol_table()` marks the reference
-explicitly -- look for the `[reference]` tag in the description.
-
-The `sexmale` coefficient is the *difference* between male and female means at
-the reference values of any other predictors, not the male mean itself.
-
-**Takeaway.** A k-level factor produces k-1 dummy columns. The reference level
-lives inside the intercept; each contrast coefficient is a *difference* from
-the reference.
-
-**Takeaway.** If a word above is unfamiliar, treat the next section as a
-hands-on definition by example.
-
-## A first `symbolize()` call
-
-The canonical example is a Gaussian location-scale model fit with
-[`drmTMB`](https://itchyshin.github.io/drmTMB/): one submodel for the mean
-(`mu`), one for the residual standard deviation (`sigma`).
+We use a model every R user already has: a base-R Poisson GLM of a count against
+a predictor. No non-CRAN packages required.
 
 ```{r fit}
 library(symbolizer)
-library(drmTMB)
 
 set.seed(1)
 n <- 80
 temperature <- runif(n, 10, 25)
 dat <- data.frame(
-  body_mass   = rnorm(n, 30 + 0.4 * temperature, exp(0.5 + 0.1 * temperature)),
+  count       = rpois(n, exp(0.3 + 0.08 * temperature)),
   temperature = temperature
 )
 
-fit <- drmTMB(
-  drm_formula(body_mass ~ temperature, sigma ~ temperature),
-  family = gaussian(),
-  data   = dat
-)
+fit <- glm(count ~ temperature, family = poisson, data = dat)
 ```
 
 `symbolize()` is the single entry point. Pass user-facing symbols and units so
-the rendered equations carry biological meaning rather than R variable names:
+the equations carry biological meaning rather than R variable names:
 
 ```{r symbolize}
 sym <- symbolize(
   fit,
-  symbols = c(body_mass = "W_i", temperature = "T_i"),
-  units   = c(body_mass = "g",   temperature = "C"),
-  context = "avian body-size location-scale model"
+  symbols = c(count = "N_i", temperature = "T_i"),
+  units   = c(temperature = "C"),
+  context = "abundance ~ temperature, Poisson GLM"
 )
 ```
 
-**Takeaway.** One call gives you the structured object; the next sections
-unpack what it carries.
+That's it — `sym` is the structured object. The rest of this page shows the three
+things it gives you.
 
-## Equations in both notations
+## The three things symbolizer gives you
 
-`equations()` returns one row per renderable block (conditional distribution,
-each linear predictor, and any random-effect distribution). It always carries
-both notations as columns; the `notation` argument only controls how the
-result prints.
+### 1. The equation, in real math
 
-```{r equations}
-equations(sym)
-```
+`equations()` returns one row per renderable block; `as_latex()` produces the
+string you splice into a manuscript. The Poisson log link shows up explicitly:
 
-`as_latex()` produces the LaTeX string ready to splice into a document. With
-`notation = "both"` the index and matrix forms are stacked in two `aligned`
-blocks. Pasting the output into a math-aware renderer (the pkgdown site
-emits MathML through pandoc; Quarto and most LaTeX renderers use KaTeX or
-MathJax) shows them as proper math:
-
-```{r as-latex-print}
-cat(as_latex(sym, notation = "both"))
-```
-
-```{r as-latex-math, results = 'asis'}
+```{r equation, results = 'asis'}
 cat("$$", as_latex(sym, notation = "both"), "$$", sep = "\n")
 ```
 
-The matrix form follows a simple convention: bold lowercase is a vector
-($\boldsymbol{\mu}$, $\boldsymbol{\beta}$), bold uppercase is a matrix
-($\mathbf{X}$, $\mathbf{Z}$), and Greek vectors keep their Greek glyph.
+Bold lowercase is a vector ($\boldsymbol{\mu}$, $\boldsymbol{\beta}$), bold
+uppercase a matrix ($\mathbf{X}$); the index form drops to per-observation
+symbols ($\mu_i$, $\beta_0$, $\beta_1$, $T_i$).
 
-`notation_bridge()` is the educator-facing table that pairs every piece of the
-model with its counterpart in the other notation and tags the shape:
+### 2. Three views of the fit
 
-```{r notation-bridge}
-notation_bridge(sym)
-```
-
-Read it as follows: the `dimension` column is the shape rule
-(`\mathbb{R}^n`, `\mathbb{R}^{n \times p_\mu}`), and the `dimension_concrete`
-column plugs in the actual sizes from this fit (`\mathbb{R}^{80}`,
-`\mathbb{R}^{80 \times 2}`).
-
-**Takeaway.** Both notations always coexist; the bridge teaches the reader to
-move between them without translating by hand.
-
-## Three views of your model
-
-The dual-notation equations cover *what shape* the model has. To see *what
-numbers* actually flow through that shape, call `as_html_three_views(sym)`:
-a single self-contained HTML widget with three tabs over the same fit.
+`as_html_three_views()` is a self-contained widget with three tabs over the same
+fit: the matrix-form **equation**, the per-observation **index** form, and the
+**numbers** actually flowing through — the response column, the design-matrix
+rows, the coefficient vector, and the fitted mean $\hat{\boldsymbol{\mu}}$.
 
 ```{r three-views, results = 'asis'}
 as_html_three_views(sym, head = 5, tail = 2)
 ```
 
-Tab 1 (Equation) is the structural contract -- $\mathbf{y}$, $\boldsymbol{\mu}$,
-$\boldsymbol{\beta}$, $\mathbf{X}$ -- with no indices. Tab 2 (Index) drops to
-per-observation form: $y_i$, $\mu_i$, $\beta_0$, $\beta_1$, $T_i$. Tab 3 (Matrix
-with data) actually stacks the numeric arrays: the response column, the rows
-of the design matrix, the coefficient vector, fitted $\hat{\boldsymbol{\mu}}$
-and $\hat{\boldsymbol{\sigma}}$. The accessor that returns those numeric arrays
-without the HTML wrapping is `expand(sym)`.
+### 3. What each coefficient means
 
-**Takeaway.** Three views, one fit. A biologist can flip between *the shape of
-the model*, *what happens per observation*, and *the data the computer is
-actually multiplying*.
+`parameter_interpretation()` reads every estimate on the scales that make sense
+for the model. For a Poisson GLM the natural-scale reading is the **rate ratio**:
+$\exp(\hat\beta)$ multiplies the expected count per unit of the predictor.
 
-## Symbols, assumptions, formula bridge
-
-`symbol_table()` lists every symbol that appears in the equations together
-with its role, units, dimension, and description. Dimensions appear in both
-abstract and concrete forms.
-
-```{r symbol-table}
-symbol_table(sym)
-```
-
-`assumption_table()` distinguishes three statuses: **stated** assumptions are
-in the formula (distribution, link, linear predictor); **implied** assumptions
-follow from the parameterisation (positivity of $\sigma$, conditional
-independence); **not_checked** assumptions are still the user's responsibility
-(missing-at-random).
-
-```{r assumption-table}
-assumption_table(sym)
-```
-
-**Note.** The status column shows whether the assumption is *explicit*
-(written in the formula), *follows from the formula* (implied by the link or
-parameterization), or *your responsibility* (something `symbolizer` cannot
-check from the fit, e.g. missing-at-random).
-
-`formula_bridge()` translates R syntax to mathematics. Each submodel has its
-R formula on the left, a plain-English meaning, and the corresponding math in
-both notations.
-
-```{r formula-bridge}
-formula_bridge(sym)
-```
-
-**Takeaway.** What the model says, what it assumes, and how its R syntax maps
-to math live in three separate tables — so reviewers can audit each one
-independently.
-
-## Parameter interpretation
-
-`parameter_interpretation()` reads each fixed-effect estimate on multiple
-scales. By default (`scale = "all"`) it shows link, natural, variance (for
-$\sigma$ coefficients), and biological readings together:
-
-```{r parameter-interpretation}
+```{r interpretation}
 parameter_interpretation(sym)
 ```
 
-The `scale` argument filters to a single reading. The `"biological"` scale is
-the one that goes in a results paragraph:
+**Takeaway.** One `symbolize()` call → the equation, the three-views widget, and a
+per-coefficient reading you can paste straight into a Methods section.
 
-```{r parameter-interpretation-biological}
-parameter_interpretation(sym, scale = "biological")
-```
+## Where to go next
 
-**Takeaway.** Every coefficient has an interpretation on every scale that
-makes sense for its submodel; the package writes them so you do not have to.
-
-## Random intercepts (first slice)
-
-`symbolizer` supports Gaussian random intercepts of the form `(1 | group)` as a
-*first slice* on every class that carries them. The same `symbolize()` call
-works; the equation set picks up the random-intercept term and a new
-distribution row, and the structured object gains a `random_effects` and
-`variance_components` tibble.
-
-```{r re-fit}
-set.seed(2)
-n        <- 80
-n_groups <- 6
-group    <- factor(rep(letters[seq_len(n_groups)], length.out = n))
-temperature <- runif(n, 10, 25)
-re <- rnorm(n_groups, sd = 1)
-dat_re <- data.frame(
-  body_mass = rnorm(
-    n,
-    30 + 0.4 * temperature + re[as.integer(group)],
-    exp(0.5 + 0.05 * temperature)
-  ),
-  temperature = temperature,
-  group       = group
-)
-
-fit_re <- drmTMB(
-  drm_formula(body_mass ~ temperature + (1 | group), sigma ~ temperature),
-  family = gaussian(),
-  data   = dat_re
-)
-
-sym_re <- symbolize(
-  fit_re,
-  symbols = c(body_mass = "W_i", temperature = "T_i"),
-  units   = c(body_mass = "g",   temperature = "C")
-)
-```
-
-The mu linear predictor now carries a $+ u_{group(i)}$ term, and a new
-distributional row appears for the random intercepts:
-
-```{r re-equations}
-equations(sym_re)
-```
-
-```{r re-latex, results = 'asis'}
-cat("$$", as_latex(sym_re, notation = "both"), "$$", sep = "\n")
-```
-
-The grouping structure is exposed as tidy tibbles, ready to feed into reports
-or other renderers:
-
-```{r re-tables}
-sym_re$random_effects
-sym_re$variance_components
-```
-
-**Takeaway.** The same object carries everything a reader needs to discuss
-random structure — what is grouped, how many levels, and which
-between-group SD (`sd(group)`) goes with which submodel.
-
-## What's supported, what's planned
-
-`symbolizer_capabilities()` is the registry that gates `symbolize()`. Each row
-carries one of five status words: **Stable**, **First slice**, **Opt-in
-control**, **Planned or reserved**, or **Unsupported**. `symbolize()`
-currently reads ten package families: `drmTMB`, `gllvmTMB`, `glmmTMB`,
-`brms`, `lme4` (`lmer` + `glmer`), `MCMCglmm` (including animal models),
-`sdmTMB` (spatial + spatiotemporal fields), `stats::lm` / `stats::glm`,
-`metafor` (`rma.uni` + `rma.mv`, including location-scale meta-regression),
-and `mgcv::gam` / `mgcv::bam` (with `gamm` / `gamm4` via the `$gam` slot).
-The Gaussian location-scale path on `drmTMB` shown above is the most
-mature; other classes are mostly First slice.
-
-```{r capabilities}
-symbolizer_capabilities()
-```
-
-For the full capability matrix and what's planned next, see
-`vignette("symbolizer-roadmap")`. If `symbolize()` errors with a
-capability message, the registry tells you which version is scheduled
-to lift it.
-
-**Takeaway.** The registry is the single source of truth for "what works".
-Read the status word before designing around an unsupported tuple.
+- **Build up from `lm` to location-scale**, one rung at a time on a shared
+  dataset — `vignette("symbolizer-ladder")`.
+- **A tour of non-Gaussian families** (Gamma, beta, binomial, negative binomial,
+  …) — `vignette("symbolizer-families")`.
+- **Factors, dummies, and interactions** in depth —
+  `vignette("symbolizer-factors")`.
+- **Random effects, ICC, and repeatability** —
+  `vignette("symbolizer-variance-components")`.
+- **The full function reference** — `symbol_table()`, `assumption_table()`,
+  `formula_bridge()`, `notation_bridge()`, `model_card()`, `expand()`,
+  `as_dag()`, and the rest — in the package's *Reference* index.
+- **What's supported and what's planned** across the ten model families
+  `symbolize()` reads (`drmTMB`, `gllvmTMB`, `glmmTMB`, `brms`, `lme4`,
+  `MCMCglmm`, `sdmTMB`, `stats::lm`/`glm`, `metafor`, `mgcv`) —
+  `vignette("symbolizer-roadmap")`, or call `symbolizer_capabilities()`.

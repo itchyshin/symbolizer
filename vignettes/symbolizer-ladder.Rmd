@@ -27,6 +27,10 @@ knitr::opts_chunk$set(
 
 ## The idea
 
+> **New to symbolizer?** Skim `vignette("symbolizer")` first — a five-minute
+> quickstart on a single model. This article is the next step up: it climbs from
+> `lm` to a location-scale model so you can watch the symbolic story grow.
+
 `symbolizer` turns any fitted model into a structured symbolic
 specification. To see *what* that buys you, the easiest path is to
 fit a sequence of models — each adding one feature — and watch the
