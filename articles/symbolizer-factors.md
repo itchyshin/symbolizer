@@ -361,7 +361,7 @@ the `0`s and `1`s of the dummy column sit next to the continuous
 as_html_three_views(sym3)
 ```
 
-[Skip three-views widget](#sym-sym-1780182159-end)
+[Skip three-views widget](#sym-sym-1780184011-end)
 
 ▸1. Index
 

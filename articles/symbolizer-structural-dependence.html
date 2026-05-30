@@ -229,7 +229,7 @@ symmetric positive-definite.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"A off-diagonal quantiles (25/50/75/99%): "</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">A_tips</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/lower.tri.html" class="external-link">upper.tri</a></span><span class="op">(</span><span class="va">A_tips</span><span class="op">)</span><span class="op">]</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.25</span>,<span class="fl">.5</span>,<span class="fl">.75</span>,<span class="fl">.99</span><span class="op">)</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>,</span>
 <span>          collapse <span class="op">=</span> <span class="st">" / "</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; A off-diagonal quantiles (25/50/75/99%):  0 / 0.095 / 0.228 / 0.866</span></span></code></pre></div>
+<span><span class="co">#&gt; A off-diagonal quantiles (25/50/75/99%):  0 / 0.091 / 0.227 / 0.865</span></span></code></pre></div>
 <p>The two representations encode the <strong>same</strong>
 Brownian-motion prior. The tips-only version is the operational default
 for <code>metafor</code>, <code>glmmTMB::propto</code>, and
@@ -417,7 +417,7 @@ vector form is for the matrix algebra.</p>
 <td align="left">mu</td>
 <td align="left">species</td>
 <td align="left">(Intercept)</td>
-<td align="left">0.325</td>
+<td align="left">0.324</td>
 <td align="left">0.105</td>
 </tr>
 <tr class="even">
@@ -425,7 +425,7 @@ vector form is for the matrix algebra.</p>
 <td align="left">residual</td>
 <td align="left">Residual</td>
 <td align="left">0.215</td>
-<td align="left">0.0460</td>
+<td align="left">0.0461</td>
 </tr>
 </tbody>
 </table>
@@ -434,7 +434,7 @@ vector form is for the matrix algebra.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 5</span></span></span>
 <span><span class="co">#&gt;   group   variance_A variance_E heritability reading                            </span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                              </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> species      0.105     0.046<span style="text-decoration: underline;">0</span>        0.696 Heritability h^2 = sigma^2_p / (si…</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> species      0.105     0.046<span style="text-decoration: underline;">1</span>        0.694 Heritability h^2 = sigma^2_p / (si…</span></span></code></pre></div>
 <div class="section level4">
 <h4 id="three-views-widget-for-the-mcmcglmm-fit">Three-views widget for the MCMCglmm fit<a class="anchor" aria-label="anchor" href="#three-views-widget-for-the-mcmcglmm-fit"></a>
 </h4>
@@ -462,21 +462,21 @@ vector form is for the matrix algebra.</p>
 .sym-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .sym-skip { position: absolute; top: -100px; left: 0; padding: 0.4rem 0.7rem; background: #8a1f22; color: #fff; text-decoration: none; font-size: 0.85rem; z-index: 5; }
 .sym-skip:focus { top: 0; }</style>
-<div id="sym-mcmc-1780182195" class="sym-tabs">
-<a class="sym-skip" href="#sym-mcmc-1780182195-end">Skip three-views
+<div id="sym-mcmc-1780184045" class="sym-tabs">
+<a class="sym-skip" href="#sym-mcmc-1780184045-end">Skip three-views
 widget</a>
 <div class="sym-tablist" role="tablist" aria-label="Three views of the model">
-<button type="button" class="sym-tab sym-active" role="tab" id="sym-mcmc-1780182195-tab-idx" aria-controls="sym-mcmc-1780182195-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
+<button type="button" class="sym-tab sym-active" role="tab" id="sym-mcmc-1780184045-tab-idx" aria-controls="sym-mcmc-1780184045-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>1. Index
 </button>
-<button type="button" class="sym-tab" role="tab" id="sym-mcmc-1780182195-tab-eq" aria-controls="sym-mcmc-1780182195-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
+<button type="button" class="sym-tab" role="tab" id="sym-mcmc-1780184045-tab-eq" aria-controls="sym-mcmc-1780184045-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>2. Matrix
 </button>
-<button type="button" class="sym-tab" role="tab" id="sym-mcmc-1780182195-tab-mat" aria-controls="sym-mcmc-1780182195-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
+<button type="button" class="sym-tab" role="tab" id="sym-mcmc-1780184045-tab-mat" aria-controls="sym-mcmc-1780184045-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>3. Equations with data
 </button>
 </div>
-<div id="sym-mcmc-1780182195-panel-idx" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-mcmc-1780182195-tab-idx" data-panel="idx" tabindex="0">
+<div id="sym-mcmc-1780184045-panel-idx" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-mcmc-1780184045-tab-idx" data-panel="idx" tabindex="0">
 <p class="sym-caption">
 What happens for each observation <em>i</em> – the per-individual
 reading.
@@ -543,15 +543,15 @@ lives – each row is one variance component (shown as a share of the
 total when a single total variance is defined).
 </p>
 <div class="sym-vc-bar sym-vc-stacked" role="img" aria-label="variance partition" style="display:flex;width:100%;height:1.8rem;border-radius:4px;overflow:hidden;font-size:0.78rem;line-height:1.8rem;margin:0.4rem 0">
-<div style="width:69.6%;background:#2c7fb8;color:#fff;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="species">
-species 69.6%
+<div style="width:69.4%;background:#2c7fb8;color:#fff;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="species">
+species 69.4%
 </div>
-<div style="width:30.4%;background:#d9d9d9;color:#333;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="Residual (within-group)">
-Residual (within-group) 30.4%
+<div style="width:30.6%;background:#d9d9d9;color:#333;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="Residual (within-group)">
+Residual (within-group) 30.6%
 </div>
 </div>
 <p class="sym-vc-icc" style="margin:0.4rem 0">
-<strong>ICC (data scale):</strong> 0.696. <span style="color:#6b7280;font-style:italic">Data-scale ICC: the share of
+<strong>ICC (data scale):</strong> 0.694. <span style="color:#6b7280;font-style:italic">Data-scale ICC: the share of
 total variance that lies between groups – a genuine proportion of
 variance.</span>
 </p>
@@ -560,7 +560,7 @@ Point estimates only; uncertainty not shown.
 </p>
 </div>
 </div>
-<div id="sym-mcmc-1780182195-panel-eq" class="sym-panel" role="tabpanel" aria-labelledby="sym-mcmc-1780182195-tab-eq" data-panel="eq" hidden="" tabindex="0">
+<div id="sym-mcmc-1780184045-panel-eq" class="sym-panel" role="tabpanel" aria-labelledby="sym-mcmc-1780184045-tab-eq" data-panel="eq" hidden="" tabindex="0">
 <p class="sym-caption">
 The same model in matrix form – the structural contract every textbook
 past chapter 4 switches to.
@@ -622,7 +622,7 @@ k_{species}}</span></span>
 </li>
 </ul></details>
 </div>
-<div id="sym-mcmc-1780182195-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-mcmc-1780182195-tab-mat" data-panel="mat" hidden="" tabindex="0">
+<div id="sym-mcmc-1780184045-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-mcmc-1780184045-tab-mat" data-panel="mat" hidden="" tabindex="0">
 <p class="sym-caption">
 The same matrix equation, with your actual numbers stacked inside the
 brackets – what the computer multiplies. Showing first 5 and last 2 rows
@@ -673,7 +673,7 @@ observations:
 \underbrace{\begin{bmatrix} 0.366
 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\beta}}_{\,1 \times
 1}\;\text{(estimated)}\,} \;+\; \underbrace{\begin{bmatrix} -0.0485 \\
-0.351 \\ 0.057 \\ 0.289 \\ 0.285 \\ \vdots \\ -0.178 \\ -0.0958
+0.351 \\ 0.0572 \\ 0.29 \\ 0.285 \\ \vdots \\ -0.178 \\ -0.0961
 \end{bmatrix}}_{\textstyle\,\hat{\boldsymbol{\varepsilon}}_{\,60 \times
 1}\;\text{(residual)}\,}
 </span>
@@ -702,16 +702,16 @@ character:
 <span class="math display">
 \mathrm{Cov}(\hat{\mathbf{u}}) \;=\; \sigma_p^2 \cdot
 \underbrace{\begin{bmatrix} 0.161 &amp;    0 &amp; 0.161 &amp; 0.161
-&amp; 0.161 &amp; \cdots &amp;    0 &amp;    0 \\    0 &amp; 0.0946
-&amp;    0 &amp;    0 &amp;    0 &amp; \cdots &amp; 0.0946 &amp; 0.0946
-\\ 0.161 &amp;    0 &amp; 0.228 &amp; 0.228 &amp; 0.228 &amp; \cdots
-&amp;    0 &amp;    0 \\ 0.161 &amp;    0 &amp; 0.228 &amp; 0.298 &amp;
-0.298 &amp; \cdots &amp;    0 &amp;    0 \\ 0.161 &amp;    0 &amp; 0.228
-&amp; 0.298 &amp; 0.565 &amp; \cdots &amp;    0 &amp;    0 \\ \vdots
+&amp; 0.161 &amp; \cdots &amp;    0 &amp;    0 \\    0 &amp; 0.0913
+&amp;    0 &amp;    0 &amp;    0 &amp; \cdots &amp; 0.0913 &amp; 0.0913
+\\ 0.161 &amp;    0 &amp; 0.227 &amp; 0.227 &amp; 0.227 &amp; \cdots
+&amp;    0 &amp;    0 \\ 0.161 &amp;    0 &amp; 0.227 &amp; 0.297 &amp;
+0.297 &amp; \cdots &amp;    0 &amp;    0 \\ 0.161 &amp;    0 &amp; 0.227
+&amp; 0.297 &amp; 0.564 &amp; \cdots &amp;    0 &amp;    0 \\ \vdots
 &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp;
-\vdots &amp; \vdots \\    0 &amp; 0.0946 &amp;    0 &amp;    0
-&amp;    0 &amp; \cdots &amp;    1 &amp; 0.867 \\    0 &amp; 0.0946
-&amp;    0 &amp;    0 &amp;    0 &amp; \cdots &amp; 0.867 &amp;    1
+\vdots &amp; \vdots \\    0 &amp; 0.0913 &amp;    0 &amp;    0
+&amp;    0 &amp; \cdots &amp;    1 &amp; 0.866 \\    0 &amp; 0.0913
+&amp;    0 &amp;    0 &amp;    0 &amp; \cdots &amp; 0.866 &amp;    1
 \end{bmatrix}}_{\textstyle\,\mathbf{A}_{\,116 \times 116}\,}
 </span>
 </div>
@@ -728,9 +728,9 @@ full matrix is 116 × 116.
 </p>
 </div>
 </div>
-<span id="sym-mcmc-1780182195-end" tabindex="-1"></span>
+<span id="sym-mcmc-1780184045-end" tabindex="-1"></span>
 <script>(function() {
-  var root = document.getElementById("sym-mcmc-1780182195");
+  var root = document.getElementById("sym-mcmc-1780184045");
   if (!root) return;
   var tabs   = Array.prototype.slice.call(root.querySelectorAll("[role=\"tab\"]"));
   var panels = Array.prototype.slice.call(root.querySelectorAll("[role=\"tabpanel\"]"));
@@ -818,15 +818,15 @@ first build).</p>
 <td align="left">mu</td>
 <td align="left">species</td>
 <td align="left">(Intercept)</td>
-<td align="left">0.364</td>
-<td align="left">0.132</td>
+<td align="left">0.341</td>
+<td align="left">0.117</td>
 </tr>
 <tr class="even">
 <td align="left">residual</td>
 <td align="left">residual</td>
 <td align="left">Residual</td>
-<td align="left">0.170</td>
-<td align="left">0.0289</td>
+<td align="left">0.184</td>
+<td align="left">0.0337</td>
 </tr>
 </tbody>
 </table>
@@ -972,7 +972,7 @@ fraction of a second instead of Stan’s compile + sample.</p>
 <span><span class="va">sym_pl</span><span class="op">$</span><span class="va">metadata</span><span class="op">$</span><span class="va">phylo_model</span>            <span class="co"># "lambda"</span></span>
 <span><span class="co">#&gt; [1] "lambda"</span></span>
 <span><span class="va">sym_pl</span><span class="op">$</span><span class="va">metadata</span><span class="op">$</span><span class="va">phylo_param</span>            <span class="co"># estimated lambda</span></span>
-<span><span class="co">#&gt; [1] 0.7631645</span></span>
+<span><span class="co">#&gt; [1] 0.7617321</span></span>
 <span><span class="va">sym_pl</span><span class="op">$</span><span class="va">metadata</span><span class="op">$</span><span class="va">detected_signals</span>       <span class="co"># "phylo_marginal"</span></span>
 <span><span class="co">#&gt; [1] "phylo_marginal"</span></span>
 <span><span class="va">sym_pl</span><span class="op">$</span><span class="va">variance_components</span>             <span class="co"># single sigma^2 row</span></span></code></pre></div>
@@ -988,7 +988,7 @@ fraction of a second instead of Stan’s compile + sample.</p>
 <td align="left">residual</td>
 <td align="left">phylo</td>
 <td align="left">sigma^2 (phylogenetic)</td>
-<td align="left">0.376</td>
+<td align="left">0.375</td>
 <td align="left">0.141</td>
 </tr></tbody>
 </table>
@@ -999,26 +999,26 @@ fraction of a second instead of Stan’s compile + sample.</p>
 <span><span class="co">#&gt; phylolm(formula = Zr ~ 1, data = dat_pl, phy = tree, model = "lambda")</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;    AIC logLik </span></span>
-<span><span class="co">#&gt;  27.13 -10.57 </span></span>
+<span><span class="co">#&gt;  27.12 -10.56 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Raw residuals:</span></span>
 <span><span class="co">#&gt;      Min       1Q   Median       3Q      Max </span></span>
-<span><span class="co">#&gt; -0.51914 -0.23479 -0.12683  0.05359  1.20643 </span></span>
+<span><span class="co">#&gt; -0.51918 -0.23483 -0.12687  0.05356  1.20640 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Mean tip height: 1</span></span>
 <span><span class="co">#&gt; Parameter estimate(s) using ML:</span></span>
-<span><span class="co">#&gt; lambda : 0.7631645</span></span>
-<span><span class="co">#&gt; sigma2: 0.141141 </span></span>
+<span><span class="co">#&gt; lambda : 0.7617321</span></span>
+<span><span class="co">#&gt; sigma2: 0.1405798 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Coefficients:</span></span>
-<span><span class="co">#&gt;             Estimate  StdErr t.value  p.value   </span></span>
-<span><span class="co">#&gt; (Intercept)  0.38077 0.13955  2.7285 0.008369 **</span></span>
+<span><span class="co">#&gt;             Estimate  StdErr t.value p.value   </span></span>
+<span><span class="co">#&gt; (Intercept)  0.38081 0.13881  2.7434 0.00804 **</span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; R-squared:     0 Adjusted R-squared:     0 </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Note: p-values and R-squared are conditional on lambda=0.7631645.</span></span></code></pre></div>
+<span><span class="co">#&gt; Note: p-values and R-squared are conditional on lambda=0.7617321.</span></span></code></pre></div>
 <p>The bridge with the RE form: take the estimated <span class="math inline">\hat\sigma^2</span> and <span class="math inline">\hat\lambda</span> from the summary above, then
 <span class="math inline">\hat\sigma_p^2 =
 \hat\lambda\,\hat\sigma^2</span> and <span class="math inline">\hat\sigma_e^2 =
