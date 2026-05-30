@@ -64,6 +64,12 @@
 #' @export
 symbolize.gllvmTMB <- function(fit, symbols = NULL, units = NULL,
                                context = NULL, ...) {
+  if (!requireNamespace("gllvmTMB", quietly = TRUE)) {
+    cli::cli_abort(c(
+      "{.pkg gllvmTMB} is needed to symbolize this fit.",
+      i = "Install it with {.code remotes::install_github(\"itchyshin/gllvmTMB\")}."
+    ))
+  }
   family <- fit$family$family
   if (!nzchar(family)) {
     cli::cli_abort("Could not resolve {.code fit$family$family}.")
