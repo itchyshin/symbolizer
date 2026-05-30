@@ -164,7 +164,11 @@ lme4_symbolize_impl <- function(fit, family, link, class_name,
   )
   assumptions <- drm_build_assumptions(
     family, response, response_symbol, re_tbl,
-    response_1 = response, response_2 = NA_character_
+    response_1 = response, response_2 = NA_character_,
+    # lmer / glmer are homoscedastic: a single residual SD (lmer) or no
+    # dispersion (glmer) -- never a scale submodel. Drop the location-scale
+    # sigma rows the shared Gaussian template carries (audit P2 phantom-sigma).
+    constant_scale = TRUE
   )
   interp <- drm_build_interpretation(
     fixed_eff, family, response, data,

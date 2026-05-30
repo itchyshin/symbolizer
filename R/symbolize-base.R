@@ -156,7 +156,12 @@ base_symbolize_impl <- function(fit, family, link, class_name, package_name,
   )
   assumptions <- drm_build_assumptions(
     family, response, response_symbol, re_tbl,
-    response_1 = response, response_2 = NA_character_
+    response_1 = response, response_2 = NA_character_,
+    # lm / glm are homoscedastic: a single residual SD (Gaussian) or a
+    # fixed/scalar dispersion -- never a scale submodel. Drop the
+    # location-scale sigma rows the shared Gaussian template carries
+    # (audit P2 phantom-sigma sweep); the scalar lives in variance_components.
+    constant_scale = TRUE
   )
   interp <- drm_build_interpretation(
     fixed_eff, family, response, data,

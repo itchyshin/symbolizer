@@ -233,7 +233,11 @@ symbolize.glmmTMB <- function(fit, symbols = NULL, units = NULL,
   assumptions <- drm_build_assumptions(
     family, response, response_symbol, re_tbl,
     response_1 = response, response_2 = NA_character_,
-    detected_signals = detected_signals
+    detected_signals = detected_signals,
+    # Keep the location-scale sigma rows only for a real dispersion submodel
+    # (dispformula with predictors). A default ~1 dispformula is
+    # homoscedastic, so drop the phantom sigma rows (audit P2 phantom-sigma).
+    constant_scale = !has_sigma_sub
   )
   interp <- drm_build_interpretation(
     fixed_eff, family, response, data,
