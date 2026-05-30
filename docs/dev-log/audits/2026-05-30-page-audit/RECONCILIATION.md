@@ -85,3 +85,20 @@ factor_contrast template wording when an interaction is present.
 Per-article detail in the sibling `.md` files. Two agents (get-started, gllvm) hit a
 529 on finalize; get-started was audited inline (this dir's `symbolizer.md`); gllvm wrote
 its file before failing.
+
+## Fixes applied — 2026-05-30 (capability-remediation, unpushed)
+
+Fixed the unambiguous / single-right-answer / testable subset; full suite green
+(FAIL 0 | PASS 2204 → 2209). Commits: `fix(render)` P1+P3, `fix(factors)`,
+`docs(roadmap,drmtmb,ladder)` P4+P6a, `fix(brms)` P2, `docs(compare)`.
+
+- **All 3 blockers cleared**: meta §5 Tab-3 garble (P1), factors Step-1 inline-R leak, roadmap version drift (P4).
+- **P3** pipe leaks → HTML `<code>` tables (+ regression test). **P2** phantom σ rows on brms gaussian. **P4** roadmap rewrite + drmtmb/factors stale-claim sweep. **P6a** ladder title. **compare** AIC-sign + `*`-marker.
+- Verified: roadmap/factors/compare render clean, 0 pipe leaks; brms gaussian has no σ rows.
+
+**Deferred to maintainer** (scientific-claim / re-fit / core-renderer with wide
+snapshot churn): meta-analysis numeric (§4 degenerate / §3.3 τ² gap / §3.4 blank /
+§5.4 claim — tied to drmTMB#417); P5 worked-row RE-fold; P6b underscore-escaping;
+P7 factor-template-under-interaction; gllvm Λ outer-product; broader phantom-σ
+sweep (lm/lmer/glmmTMB/…); P1 feature-half (family-aware `$expanded` for lm/glm).
+See `.memory/reports/2026-05-30-page-audit-fixes.md`.
