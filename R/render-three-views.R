@@ -2233,19 +2233,18 @@ vc_icc_line <- function(ic) {
 #      column (the historic signal -- kept so fits that surface X_sigma
 #      but not a tidy submodels row still register).
 three_views_sigma_varies <- function(x) {
-  # Tell 1: structural -- the sigma / dispersion submodel formula.
+  # Tell 1: structural -- the precomputed `has_predictors` flag on the sigma /
+  # dispersion submodel. The flag is set in the object-construction layer
+  # (add_submodel_predictor_flag); renderers consume it rather than parsing the
+  # formula string here.
   sm <- tryCatch(x$submodels, error = function(e) NULL)
   if (!is.null(sm) && is.data.frame(sm) &&
-      all(c("parameter", "formula") %in% names(sm))) {
+      all(c("parameter", "has_predictors") %in% names(sm))) {
     sig_rows <- sm[sm$parameter %in% c("sigma", "disp", "dispersion"), ,
                    drop = FALSE]
     if (nrow(sig_rows) > 0L) {
-      has_pred <- vapply(sig_rows$formula, function(f) {
-        tt <- tryCatch(stats::terms(stats::as.formula(f)),
-                       error = function(e) NULL)
-        !is.null(tt) && length(attr(tt, "term.labels")) > 0L
-      }, logical(1L))
-      if (any(has_pred)) return(TRUE)
+      has_pred <- sig_rows$has_predictors
+      if (any(!is.na(has_pred) & has_pred)) return(TRUE)
     }
   }
   # Tell 2: numeric -- a multi-column sigma design matrix.

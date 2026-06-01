@@ -30,6 +30,16 @@ A read-only package audit surfaced several low-risk doc/build issues, fixed here
   `compare_symbolic()`, `parameter_interpretation()`, and `notation_bridge()`.
 * **Removed two unused test fixtures** (`fit_metafor_phylo_meta`,
   `fx_two_level_factor`).
+* **`methods_text()` clause phrases moved to a template** (architectural
+  rule). The reusable English phrases (random-effect clauses, zero-inflation /
+  hurdle / sigma extras, unit and rho-12 phrasings, editorial reminders) now
+  live in `inst/extdata/methods-phrases.csv` and are looked up via
+  `load_template()`; the R code only chooses which phrase and fills the slots.
+  Output is unchanged.
+* **Renderers no longer parse formulas.** The three-views "does sigma vary?"
+  check now reads a `has_predictors` flag precomputed on `submodels` in the
+  object constructor (`add_submodel_predictor_flag`), instead of re-parsing the
+  submodel formula string at render time.
 
 ## Variance-components surface -- "where does the variation live?"
 
