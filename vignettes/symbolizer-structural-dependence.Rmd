@@ -11,12 +11,23 @@ vignette: >
 ---
 
 ```{r setup, include = FALSE}
+# Every fitted chunk below depends on Suggests packages; guard the whole
+# vignette so it degrades to source-only (no eval) when any is absent,
+# matching the sibling vignettes (e.g. symbolizer-meta-analysis.Rmd).
+has_pkgs <- requireNamespace("metadat", quietly = TRUE) &&
+            requireNamespace("ape", quietly = TRUE) &&
+            requireNamespace("metafor", quietly = TRUE) &&
+            requireNamespace("MCMCglmm", quietly = TRUE) &&
+            requireNamespace("brms", quietly = TRUE) &&
+            requireNamespace("phylolm", quietly = TRUE) &&
+            requireNamespace("symbolizer", quietly = TRUE)
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   fig.align = "center",
   fig.width = 6,
-  fig.height = 3.5
+  fig.height = 3.5,
+  eval = has_pkgs
 )
 library(symbolizer)
 set.seed(1)

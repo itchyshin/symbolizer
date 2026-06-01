@@ -46,9 +46,9 @@ pdf_alongside_html <- function(sym, basename, title) {
 > available for `drmTMB`. The biology of each is different — what
 > kind of response it fits, what the link does, and how to read the
 > `mu` coefficient. The same `symbolize(fit)` interface now applies
-> to ten package families (`drmTMB`, `gllvmTMB`, `glmmTMB`, `brms`,
+> to eleven package families (`drmTMB`, `gllvmTMB`, `glmmTMB`, `brms`,
 > `lme4`, `MCMCglmm`, `sdmTMB`, `stats::lm` / `stats::glm`, `metafor`,
-> `mgcv`); see the [Roadmap article](symbolizer-roadmap.html) for the
+> `mgcv`, `phylolm`); see the [Roadmap article](symbolizer-roadmap.html) for the
 > full capability matrix.*
 
 The non-Gaussian families covered here all use the same

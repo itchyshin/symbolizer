@@ -252,6 +252,7 @@ symbolize.gam <- function(fit, symbols = NULL, units = NULL,
 # bam inherits from gam, so a default method-resolution would already
 # hit symbolize.gam. Adding the explicit method for clarity and so
 # class(fit)[1L] == "bam" prints correctly in errors.
+#' @rdname symbolize.gam
 #' @export
 symbolize.bam <- symbolize.gam
 

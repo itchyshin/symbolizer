@@ -1,5 +1,26 @@
 # symbolizer (development version)
 
+## Audit remediation -- docs, vignette build-safety, pkgdown framing
+
+A read-only package audit surfaced several low-risk doc/build issues, fixed here:
+
+* **`symbolize.bam` is now documented.** The exported `bam` method had no
+  `\alias`, producing an R CMD check "undocumented S3 method" warning and no
+  reference page for an advertised class; it now shares the `symbolize.gam`
+  topic via `@rdname`.
+* **`symbolizer-structural-dependence` vignette is now build-safe.** It gained
+  the `eval = requireNamespace(...)` setup guard every sibling vignette already
+  had, so `pkgdown::build_site()` no longer fails when a Suggests package
+  (MCMCglmm / brms / phylolm / metafor / ape / metadat) is absent.
+* **Family count corrected to eleven.** The quickstart and families vignettes
+  and the README undercounted the supported families as "ten" and omitted
+  `phylolm`; all now list eleven families including `phylolm`.
+* **README status legend** now uses the canonical "Unsupported or blocked"
+  status word (was "Unsupported").
+* **pkgdown Articles index** now has a `desc:` framing line on every group
+  (Deep dives / Cross-package bridges / Where we're going), not just "Get
+  started".
+
 ## Variance-components surface -- "where does the variation live?"
 
 A mixed model's payoff for a biologist is *where the variation lives* and

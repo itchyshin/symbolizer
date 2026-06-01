@@ -149,7 +149,7 @@ per-coefficient reading you can paste straight into a Methods section.
 - **The full function reference** — `symbol_table()`, `assumption_table()`,
   `formula_bridge()`, `notation_bridge()`, `model_card()`, `expand()`,
   `as_dag()`, and the rest — in the package's *Reference* index.
-- **What's supported and what's planned** across the ten model families
+- **What's supported and what's planned** across the eleven model families
   `symbolize()` reads (`drmTMB`, `gllvmTMB`, `glmmTMB`, `brms`, `lme4`,
-  `MCMCglmm`, `sdmTMB`, `stats::lm`/`glm`, `metafor`, `mgcv`) —
+  `MCMCglmm`, `sdmTMB`, `stats::lm`/`glm`, `metafor`, `mgcv`, `phylolm`) —
   `vignette("symbolizer-roadmap")`, or call `symbolizer_capabilities()`.
