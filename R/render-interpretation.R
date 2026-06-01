@@ -22,6 +22,8 @@
 #' @return A tibble (S3 class `symbolizer_interpretation`) with `submodel`,
 #'   `term_label`, `coefficient_role`, `estimate`, and one or more reading
 #'   columns. The `"scale"` attribute records which scale was requested.
+#' @examples
+#' # parameter_interpretation(symbolize(glm(am ~ wt, binomial(), data = mtcars)))
 #' @export
 parameter_interpretation <- function(x,
                                      scale = c("all", "link", "natural",

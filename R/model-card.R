@@ -38,6 +38,8 @@
 #'   `recommended_plots`, `marginal_means` (NULL when the model has no
 #'   factors), `marginal_slopes` (NULL when no continuous-by-* interaction
 #'   is present).
+#' @examples
+#' # model_card(symbolize(lm(mpg ~ wt, data = mtcars)))
 #' @export
 model_card <- function(x, ...) {
   UseMethod("model_card")

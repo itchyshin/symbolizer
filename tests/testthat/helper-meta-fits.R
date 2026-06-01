@@ -66,19 +66,3 @@ fit_brms_phylo_meta <- function() {
     file = "/tmp/fit_brms_phylo_meta_cache"
   )
 }
-
-fit_metafor_phylo_meta <- function() {
-  testthat::skip_if_not_installed("metafor")
-  testthat::skip_if_not_installed("ape")
-  dat  <- .read_thermal_subset()
-  tree <- .read_thermal_tree()
-  A_phylo <- ape::vcv.phylo(tree, corr = TRUE)
-  metafor::rma.mv(
-    yi     = dARR,
-    V      = Var_dARR,
-    mods   = ~ 1 + habitat,
-    random = list(~ 1 | phylogeny, ~ 1 | study_ID),
-    R      = list(phylogeny = A_phylo),
-    data   = dat
-  )
-}

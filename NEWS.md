@@ -20,6 +20,16 @@ A read-only package audit surfaced several low-risk doc/build issues, fixed here
 * **pkgdown Articles index** now has a `desc:` framing line on every group
   (Deep dives / Cross-package bridges / Where we're going), not just "Get
   started".
+* **New test guards the capability vocabulary.** `test-capabilities.R` now
+  asserts every `status` is one of the five canonical words, and documents
+  that the friendly-named `brms` / `metafor` advertisement rows in the
+  "today we can read" message are intentional (the gate dispatches via
+  `brmsfit` / `rma.mv`), so future audits don't misread them as mis-keyed.
+* **Reference examples.** Added illustrative `@examples` to `explain()`,
+  `model_card()`, `as_dag()`, `variance_partition()`, `icc()`,
+  `compare_symbolic()`, `parameter_interpretation()`, and `notation_bridge()`.
+* **Removed two unused test fixtures** (`fit_metafor_phylo_meta`,
+  `fx_two_level_factor`).
 
 ## Variance-components surface -- "where does the variation live?"
 
