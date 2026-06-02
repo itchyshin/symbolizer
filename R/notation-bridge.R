@@ -19,6 +19,8 @@
 #' @param ... Reserved for future use.
 #'
 #' @return A tibble with columns `concept`, `index`, `matrix`, `dimension`.
+#' @examples
+#' # notation_bridge(symbolize(lm(mpg ~ wt, data = mtcars)))
 #' @export
 notation_bridge <- function(x, ...) {
   UseMethod("notation_bridge")

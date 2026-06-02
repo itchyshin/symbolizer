@@ -70,6 +70,12 @@ new_symbolized_model <- function(
                                     class(variance_components))
   }
 
+  # Precompute, in the model-building layer, whether each submodel's linear
+  # predictor carries predictor terms. Renderers consume this flag instead of
+  # re-parsing the formula string (architectural rule: no renderer parses
+  # formulas itself).
+  submodels <- add_submodel_predictor_flag(submodels)
+
   obj <- list(
     model = model,
     index = index,
@@ -148,6 +154,25 @@ validate_symbolized_model <- function(x) {
     }
   }
   invisible(x)
+}
+
+# Add a logical `has_predictors` column to the submodels tibble, recording
+# whether each submodel's formula has any term labels (predictors beyond the
+# intercept). Computed once here, in the object-construction layer, so that
+# renderers can read structure rather than parsing the formula string. A
+# no-op when there is no `formula` column or the flag is already present.
+add_submodel_predictor_flag <- function(submodels) {
+  if (is.null(submodels) || !is.data.frame(submodels) ||
+      !("formula" %in% names(submodels)) ||
+      "has_predictors" %in% names(submodels)) {
+    return(submodels)
+  }
+  submodels$has_predictors <- vapply(submodels$formula, function(f) {
+    tt <- tryCatch(stats::terms(stats::as.formula(f)),
+                   error = function(e) NULL)
+    !is.null(tt) && length(attr(tt, "term.labels")) > 0L
+  }, logical(1L))
+  submodels
 }
 
 #' @export

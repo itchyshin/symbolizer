@@ -2,9 +2,12 @@
 % Please edit documentation in R/symbolize-mgcv.R
 \name{symbolize.gam}
 \alias{symbolize.gam}
+\alias{symbolize.bam}
 \title{Symbolize an mgcv gam / bam fit (additive grammar, v0.14 first slice)}
 \usage{
 \method{symbolize}{gam}(fit, symbols = NULL, units = NULL, context = NULL, ...)
+
+\method{symbolize}{bam}(fit, symbols = NULL, units = NULL, context = NULL, ...)
 }
 \arguments{
 \item{fit}{A fitted statistical model object.}

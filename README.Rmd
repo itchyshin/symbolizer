@@ -43,7 +43,7 @@ options(crayon.enabled = FALSE)
 | Index and matrix notation side by side | — | `equations(sym, notation = "both")`, `notation_bridge(sym)` |
 | Three views with real data | — | `expand(sym)`, `as_html_three_views(sym)` |
 
-**Currently reads ten package families** (14 fitted-class methods, 30+ family-class combinations): the two TMB sister packages [`drmTMB`](https://itchyshin.github.io/drmTMB/) and [`gllvmTMB`](https://itchyshin.github.io/gllvmTMB/), the broader GLMM ecosystem `glmmTMB`, `brms`, `lme4` (`lmer` + `glmer`), `MCMCglmm` (including animal models), `sdmTMB` (spatial + spatiotemporal random fields), `stats::lm` / `stats::glm`, the meta-analytic framework `metafor` (`rma.uni` + `rma.mv` with multilevel / structured / location-scale variants), and additive models via `mgcv::gam` / `mgcv::bam` (with `gamm` / `gamm4` covered through the `$gam` slot). See the [Roadmap article](articles/symbolizer-roadmap.html) for the full capability matrix; `symbolizer_capabilities()` is the in-package source of truth, and any class / family / component not marked Stable or First slice there will be refused by `symbolize()`.
+**Currently reads eleven package families** (14 fitted-class methods, 30+ family-class combinations): the two TMB sister packages [`drmTMB`](https://itchyshin.github.io/drmTMB/) and [`gllvmTMB`](https://itchyshin.github.io/gllvmTMB/), the broader GLMM ecosystem `glmmTMB`, `brms`, `lme4` (`lmer` + `glmer`), `MCMCglmm` (including animal models), `sdmTMB` (spatial + spatiotemporal random fields), `stats::lm` / `stats::glm`, the meta-analytic framework `metafor` (`rma.uni` + `rma.mv` with multilevel / structured / location-scale variants), additive models via `mgcv::gam` / `mgcv::bam` (with `gamm` / `gamm4` covered through the `$gam` slot), and phylogenetic GLS via `phylolm`. See the [Roadmap article](articles/symbolizer-roadmap.html) for the full capability matrix; `symbolizer_capabilities()` is the in-package source of truth, and any class / family / component not marked Stable or First slice there will be refused by `symbolize()`.
 
 ## Install
 
@@ -148,7 +148,7 @@ Pre-release. Read status words consistently:
 | First slice         | Fitted and tested, but intentionally narrow.                                        |
 | Opt-in control      | Available for hardening, not a general modelling guarantee.                         |
 | Planned or reserved | Public grammar may exist, but `symbolize()` should reject it as design-only.        |
-| Unsupported         | Do not use as analysis syntax; fit the nearest implemented model.                   |
+| Unsupported or blocked | Do not use as analysis syntax; fit the nearest implemented model.                |
 
 ### At a glance
 

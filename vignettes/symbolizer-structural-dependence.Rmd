@@ -11,16 +11,34 @@ vignette: >
 ---
 
 ```{r setup, include = FALSE}
+# Every fitted chunk below depends on Suggests packages; guard the whole
+# vignette so it degrades to source-only (no eval) when any is absent,
+# matching the sibling vignettes (e.g. symbolizer-meta-analysis.Rmd).
+has_pkgs <- requireNamespace("metadat", quietly = TRUE) &&
+            requireNamespace("ape", quietly = TRUE) &&
+            requireNamespace("metafor", quietly = TRUE) &&
+            requireNamespace("MCMCglmm", quietly = TRUE) &&
+            requireNamespace("brms", quietly = TRUE) &&
+            requireNamespace("phylolm", quietly = TRUE) &&
+            requireNamespace("symbolizer", quietly = TRUE)
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   fig.align = "center",
   fig.width = 6,
-  fig.height = 3.5
+  fig.height = 3.5,
+  eval = has_pkgs
 )
 library(symbolizer)
 set.seed(1)
 ```
+
+> *Phylogenetic, animal-model, and spatial random effects are the same
+> model written three ways — only the matrix that encodes the dependence
+> changes. This article is for biologists fitting any of those
+> structures; by the end you'll be able to see the shared grammar
+> `symbolize()` reads across `MCMCglmm`, `brms`, and `phylolm`, and how
+> the dependence matrix is the one piece that differs.*
 
 If you have ever written `(1 | species)` for an animal model, `gr(species, cov = A)` in `brms`, or `s(x, y, bs = "gp")` for a spatial process, you have been writing the **same model** three times — only the matrix that encodes the dependence changes. This article is the first in `symbolizer`'s **concept-axis series**; it teaches the *dependence-structure* axis of GLMM grammar through one **deep-dive** Face and two **light** Faces across three R packages: `MCMCglmm`, `brms`, and `phylolm`. The scope is the **phylogenetic LMM** with $\sigma_e^2$ estimated; the *meta-analytic* form (with $v_i$ known sampling variances) is its own surface in the v0.22 article.
 

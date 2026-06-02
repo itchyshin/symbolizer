@@ -568,17 +568,18 @@ Pre-release. Read status words consistently:
 | First slice | Fitted and tested, but intentionally narrow. |
 | Opt-in control | Available for hardening, not a general modelling guarantee. |
 | Planned or reserved | Public grammar may exist, but `symbolize()` should reject it as design-only. |
-| Unsupported | Do not use as analysis syntax; fit the nearest implemented model. |
+| Unsupported or blocked | Do not use as analysis syntax; fit the nearest implemented model. |
 
 ### At a glance
 
-`symbolize()` reads **10 package families / 14 fitted-class methods /
+`symbolize()` reads **11 package families / 14 fitted-class methods /
 30+ family-class combinations** today: `drmTMB`, `gllvmTMB`, `glmmTMB`,
 `brms`, `lme4` (`lmer` + `glmer`), `MCMCglmm` (including animal models
 via `ginverse`), `sdmTMB` (spatial + spatiotemporal fields), `stats::lm`
 / `stats::glm`, `metafor` (`rma.uni` + `rma.mv` with multilevel /
-structured / phylogenetic random effects), and `mgcv::gam` / `mgcv::bam`
-(additive smooths; `gamm` / `gamm4` via `$gam`).
+structured / phylogenetic random effects), `mgcv::gam` / `mgcv::bam`
+(additive smooths; `gamm` / `gamm4` via `$gam`), and `phylolm`
+(phylogenetic GLS).
 
 For the full **capability matrix, release history, status vocabulary,
 and what’s planned next**, see [the Roadmap

@@ -36,6 +36,8 @@ formula_vars <- function(f) {
 
 #' Wrap a vector of equation lines in `aligned` environment
 #' @param lines Character vector of LaTeX equation lines.
+#' @return A single character string: `lines` joined with `\\` line breaks and
+#'   wrapped in a LaTeX `aligned` environment.
 #' @keywords internal
 wrap_aligned <- function(lines) {
   body <- paste(lines, collapse = " \\\\\n")

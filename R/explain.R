@@ -38,6 +38,8 @@
 #'   underlying `symbolized_model`), `equations`, `symbols`, `assumptions`,
 #'   `bridge`, `interpretation`, `variance_components` (NULL when the model
 #'   has no random effects), `notation_bridge`.
+#' @examples
+#' # explain(symbolize(lm(mpg ~ wt, data = mtcars)))
 #' @export
 explain <- function(fit, symbols = NULL, units = NULL, context = NULL, ...) {
   sym <- symbolize(fit, symbols = symbols, units = units,

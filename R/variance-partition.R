@@ -80,6 +80,9 @@ variance_reading <- function(key, ...) {
 #'   variance source. Columns: `component`, `variance`, `sd`, `pct`. Carries a
 #'   `reason` attribute (character or `NA`) explaining an all-`NA` `pct`.
 #' @seealso [icc()] for the single-number intraclass correlation.
+#' @examples
+#' # variance_partition(symbolize(lme4::lmer(Reaction ~ Days + (1 | Subject),
+#' #                                         data = lme4::sleepstudy)))
 #' @export
 variance_partition <- function(x, ...) {
   UseMethod("variance_partition")
@@ -158,6 +161,9 @@ variance_partition.symbolized_model <- function(x, ...) {
 #'   `scale` (`"data"`, `"latent"`, or `NA`), `reason` (character or `NA`), and
 #'   `caption` (character or `NA`). Prints a one-line reading at the console.
 #' @seealso [variance_partition()] for the full source-by-source breakdown.
+#' @examples
+#' # icc(symbolize(lme4::lmer(Reaction ~ Days + (1 | Subject),
+#' #                          data = lme4::sleepstudy)))
 #' @export
 icc <- function(x, ...) {
   UseMethod("icc")

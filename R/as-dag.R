@@ -26,6 +26,8 @@
 #'   slots: `nodes` (tibble), `edges` (tibble), `dot` (single
 #'   character string with the GraphViz / DOT representation).
 #'
+#' @examples
+#' # as_dag(symbolize(lm(mpg ~ wt, data = mtcars)))
 #' @export
 as_dag <- function(x, ...) {
   UseMethod("as_dag")

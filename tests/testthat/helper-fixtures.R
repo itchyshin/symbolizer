@@ -11,13 +11,6 @@ fx_continuous_pair <- function() {
   )
 }
 
-fx_two_level_factor <- function() {
-  data.frame(
-    y = 1:6,
-    sex = factor(rep(c("female", "male"), 3))
-  )
-}
-
 fx_three_level_factor <- function() {
   data.frame(
     y = 1:9,

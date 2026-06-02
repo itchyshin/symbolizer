@@ -6,6 +6,10 @@
 \usage{
 clear_template_cache()
 }
+\value{
+Invisibly returns \code{NULL}; called for its side effect of emptying the
+per-session template cache.
+}
 \description{
 Internal helper. Useful in tests that modify templates between calls.
 }

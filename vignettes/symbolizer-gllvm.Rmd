@@ -18,6 +18,12 @@ knitr::opts_chunk$set(
 )
 ```
 
+> *Latent-variable models compress many correlated traits into a few
+> interpretable axes. This article is for behavioural and community
+> ecologists fitting `gllvmTMB`; by the end you'll be able to read the
+> loadings, communalities, and trait correlations a reduced-rank model
+> produces, and see how `symbolize()` renders the latent structure.*
+
 ## 1. The biological question
 
 A behavioural ecologist measures five traits — boldness in a novel arena,
@@ -452,7 +458,7 @@ the shared axes explain; $\psi^*_{g,t}$ is what's idiosyncratic to that
 trait at that tier.
 
 ```{r communality}
-extract_communality(fit_two_tier)
+gllvmTMB::extract_communality(fit_two_tier)
 ```
 
 Mapping back to §1's named behaviours: **t1 = boldness, t2 =
@@ -488,12 +494,12 @@ $$
 so the phenotypic-level correlation is a *weighted mix* of the
 between-individual and within-individual correlations, weighted by how
 much of each trait's variance lives at each tier (Dingemanse &
-Dochtermann 2013). Symbolizer's `extract_correlations(fit)` returns
+Dochtermann 2013). gllvmTMB's `extract_correlations(fit)` returns
 all three matrices ($\boldsymbol{C}_B, \boldsymbol{C}_W,
 \boldsymbol{C}_P$) so a reader can verify this empirically:
 
 ```{r correlations}
-co <- extract_correlations(fit_two_tier)
+co <- gllvmTMB::extract_correlations(fit_two_tier)
 co_B <- co[co$tier == "B", c("trait_i", "trait_j", "correlation")]
 co_W <- co[co$tier == "W", c("trait_i", "trait_j", "correlation")]
 head(co_B)
@@ -535,7 +541,7 @@ Two practical conventions, both surfaced in
   rotation; the **block structure** is what the reader interprets.
 
 ```{r loadings}
-getLoadings(fit_two_tier, rotate = "varimax")
+gllvmTMB::getLoadings(fit_two_tier, rotate = "varimax")
 ```
 
 A second category of identifiability concerns the **row-level residual

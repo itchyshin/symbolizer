@@ -47,6 +47,7 @@ articles:
       - symbolizer
       - symbolizer-ladder
   - title: "Deep dives"
+    desc: "One renderer or concept at a time: the drmTMB extractor, factor contrasts and interactions, non-Gaussian families, variance components, latent variables (gllvm), and structural model comparison."
     contents:
       - symbolizer-drmtmb
       - symbolizer-factors
@@ -55,10 +56,12 @@ articles:
       - symbolizer-gllvm
       - symbolizer-compare
   - title: "Cross-package bridges"
+    desc: "Models whose structure lives in another package: phylogenetic, animal-model, and spatial dependence, and meta-analysis across metafor / brms / MCMCglmm."
     contents:
       - symbolizer-structural-dependence
       - symbolizer-meta-analysis
   - title: "Where we're going"
+    desc: "The capability roadmap: what is Stable, what is a First slice, and what is planned or reserved."
     contents:
       - symbolizer-roadmap
 
@@ -157,6 +160,7 @@ reference:
   - title: "Internal: capability registry"
     contents:
       - capability_check
+      - friendly_status
   - title: "Internal: template loader"
     contents:
       - load_template

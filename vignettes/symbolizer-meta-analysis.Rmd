@@ -17,6 +17,12 @@ knitr::opts_chunk$set(
 )
 ```
 
+> *Meta-analysis pools study-level effects that each carry a known
+> sampling variance. This article is for anyone running `metafor`,
+> `brms`, or `MCMCglmm` meta-analyses; by the end you'll be able to read
+> how `symbolize()` renders the three common flavors — random-effects,
+> phylogenetic, and location-scale — side by side across the packages.*
+
 ## 1. Three flavors of meta-analysis
 
 Meta-analysis pools $K$ study-level effect sizes $y_k$, each with a

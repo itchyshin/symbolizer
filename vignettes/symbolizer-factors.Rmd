@@ -17,6 +17,13 @@ knitr::opts_chunk$set(
 set.seed(20260524)
 ```
 
+> *Categorical predictors are where model output most often misleads a
+> biologist — `sexmale` is not "average male body mass." This article is
+> for anyone fitting models with factors and interactions; by the end
+> you'll be able to read every dummy-coded coefficient and interaction
+> term for what it actually says, and see how `symbolize()` spells out
+> the contrast each one encodes.*
+
 A biologist sees `body_mass ~ sex + temperature` and the model fits. The
 output table lists a coefficient for `sexmale`. The obvious reading is
 "average male body mass" — and the obvious reading is wrong. The

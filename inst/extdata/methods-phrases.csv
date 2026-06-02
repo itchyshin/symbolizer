@@ -1,0 +1,25 @@
+key,template
+predictors_intercept_only,an intercept only
+sigma_pair_both_io,both intercept-only
+sigma_pair_first_io,"the first scale intercept-only, the second a function of %s"
+sigma_pair_second_io,"the first scale a function of %s, the second intercept-only"
+sigma_pair_neither_io,"the first scale a function of %s, the second a function of %s"
+rho12_io,with an intercept only on the Fisher-z linear predictor
+rho12_varies,as a function of %s on the Fisher-z linear predictor
+re_no_component,A random intercept was included for %s.
+re_intercept_only,a random intercept for `%s`
+re_slope_single,a random slope on `%s`
+re_slopes_multi,random slopes on %s
+re_intercept_and_slope,a random intercept and %s for `%s`
+re_slope_only,%s for `%s`
+re_verb_singular,was
+re_verb_plural,were
+re_included_sentence," %s %s included in the model."
+zi_extra," A zero-inflation component modelled the probability of a structural zero on the logit scale as a function of %s; the conditional distribution is a mixture P(Y=0) = pi_zi + (1 - pi_zi) * f(0 | mu, ...)."
+hu_extra," A hurdle component modelled the probability of a zero on the logit scale as a function of %s; positives were drawn from the zero-truncated form of the count distribution."
+sigma_extra_glmmtmb," The residual standard deviation was modelled on the log scale as a function of %s."
+units_clause," (units: %s)"
+units_clause_biv_both," (units: %s and %s respectively)"
+reminder_draft,This is a draft. Confirm every claim against your fit before pasting.
+reminder_version,"Package version `%s` was read from the local install; verify it matches what you actually fit with."
+reminder_re,"Random-effect structure described here; if you used a more complex RE structure (random slopes, nested, crossed), reword that sentence."
