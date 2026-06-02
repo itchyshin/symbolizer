@@ -9,6 +9,10 @@ wrap_aligned(lines)
 \arguments{
 \item{lines}{Character vector of LaTeX equation lines.}
 }
+\value{
+A single character string: \code{lines} joined with \verb{\\} line breaks and
+wrapped in a LaTeX \code{aligned} environment.
+}
 \description{
 Wrap a vector of equation lines in \code{aligned} environment
 }

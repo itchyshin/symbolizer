@@ -160,6 +160,7 @@ reference:
   - title: "Internal: capability registry"
     contents:
       - capability_check
+      - friendly_status
   - title: "Internal: template loader"
     contents:
       - load_template

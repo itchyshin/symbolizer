@@ -40,6 +40,13 @@ A read-only package audit surfaced several low-risk doc/build issues, fixed here
   check now reads a `has_predictors` flag precomputed on `submodels` in the
   object constructor (`add_submodel_predictor_flag`), instead of re-parsing the
   submodel formula string at render time.
+* **Article prefaces.** The factors, gllvm, meta-analysis, and
+  structural-dependence vignettes now open with a one-paragraph
+  what / who / what-you'll-be-able-to-do preface, matching the rest of the set.
+* **Doc polish.** Consistent `$...$` inline math in the variance-components
+  vignette; `gllvmTMB::` qualification on the latent-variable accessors in the
+  gllvm vignette; `friendly_status` added to the reference index; `@return`
+  added to `wrap_aligned()` and `clear_template_cache()`.
 
 ## Variance-components surface -- "where does the variation live?"
 

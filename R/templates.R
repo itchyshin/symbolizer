@@ -32,6 +32,8 @@ load_template <- function(name) {
 #' Clear the template cache
 #'
 #' Internal helper. Useful in tests that modify templates between calls.
+#' @return Invisibly returns `NULL`; called for its side effect of emptying the
+#'   per-session template cache.
 #' @keywords internal
 clear_template_cache <- function() {
   rm(list = ls(envir = .symbolizer_template_cache),

@@ -33,6 +33,13 @@ library(symbolizer)
 set.seed(1)
 ```
 
+> *Phylogenetic, animal-model, and spatial random effects are the same
+> model written three ways — only the matrix that encodes the dependence
+> changes. This article is for biologists fitting any of those
+> structures; by the end you'll be able to see the shared grammar
+> `symbolize()` reads across `MCMCglmm`, `brms`, and `phylolm`, and how
+> the dependence matrix is the one piece that differs.*
+
 If you have ever written `(1 | species)` for an animal model, `gr(species, cov = A)` in `brms`, or `s(x, y, bs = "gp")` for a spatial process, you have been writing the **same model** three times — only the matrix that encodes the dependence changes. This article is the first in `symbolizer`'s **concept-axis series**; it teaches the *dependence-structure* axis of GLMM grammar through one **deep-dive** Face and two **light** Faces across three R packages: `MCMCglmm`, `brms`, and `phylolm`. The scope is the **phylogenetic LMM** with $\sigma_e^2$ estimated; the *meta-analytic* form (with $v_i$ known sampling variances) is its own surface in the v0.22 article.
 
 ## The shared grammar
