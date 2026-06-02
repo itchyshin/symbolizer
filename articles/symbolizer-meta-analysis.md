@@ -1,5 +1,13 @@
 # Three flavors of meta-analysis: a cross-package tour
 
+> *Meta-analysis pools study-level effects that each carry a known
+> sampling variance. This article is for anyone running `metafor`,
+> `brms`, or `MCMCglmm` meta-analyses; by the end you’ll be able to read
+> how
+> [`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
+> renders the three common flavors — random-effects, phylogenetic, and
+> location-scale — side by side across the packages.*
+
 ## 1. Three flavors of meta-analysis
 
 Meta-analysis pools K study-level effect sizes y_k, each with a
@@ -390,7 +398,7 @@ sym_phylo <- symbolize(
 
 #### Three views — phylogenetic multilevel
 
-[Skip three-views widget](#sym-phylomultilevel-1780184036-end)
+[Skip three-views widget](#sym-phylomultilevel-1780398282-end)
 
 ▸1. Index
 
@@ -657,7 +665,7 @@ sym_ls <- symbolize(fit_ls, context = "location-scale meta-analysis")
 
 #### Three views — location-scale
 
-[Skip three-views widget](#sym-locscalemeta-1780184036-end)
+[Skip three-views widget](#sym-locscalemeta-1780398283-end)
 
 ▸1. Index
 

@@ -117,7 +117,7 @@ mean \hat{\boldsymbol{\mu}}.
 as_html_three_views(sym, head = 5, tail = 2)
 ```
 
-[Skip three-views widget](#sym-sym-1780184127-end)
+[Skip three-views widget](#sym-sym-1780398375-end)
 
 ▸1. Index
 
@@ -251,11 +251,12 @@ reading you can paste straight into a Methods section.
   [`expand()`](https://itchyshin.github.io/symbolizer/reference/expand.md),
   [`as_dag()`](https://itchyshin.github.io/symbolizer/reference/as_dag.md),
   and the rest — in the package’s *Reference* index.
-- **What’s supported and what’s planned** across the ten model families
+- **What’s supported and what’s planned** across the eleven model
+  families
   [`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
   reads (`drmTMB`, `gllvmTMB`, `glmmTMB`, `brms`, `lme4`, `MCMCglmm`,
   `sdmTMB`, [`stats::lm`](https://rdrr.io/r/stats/lm.html)/`glm`,
-  `metafor`, `mgcv`) —
+  `metafor`, `mgcv`, `phylolm`) —
   [`vignette("symbolizer-roadmap")`](https://itchyshin.github.io/symbolizer/articles/symbolizer-roadmap.md),
   or call
   [`symbolizer_capabilities()`](https://itchyshin.github.io/symbolizer/reference/symbolizer_capabilities.md).

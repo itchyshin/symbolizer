@@ -37,6 +37,34 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="symbolizer-development-version">symbolizer (development version)<a class="anchor" aria-label="anchor" href="#symbolizer-development-version"></a></h2>
 <div class="section level3">
+<h3 id="audit-remediation--docs-vignette-build-safety-pkgdown-framing-development-version">Audit remediation – docs, vignette build-safety, pkgdown framing<a class="anchor" aria-label="anchor" href="#audit-remediation--docs-vignette-build-safety-pkgdown-framing-development-version"></a></h3>
+<p>A read-only package audit surfaced several low-risk doc/build issues, fixed here:</p>
+<ul><li>
+<strong><code>symbolize.bam</code> is now documented.</strong> The exported <code>bam</code> method had no <code>\alias</code>, producing an R CMD check “undocumented S3 method” warning and no reference page for an advertised class; it now shares the <code>symbolize.gam</code> topic via <code>@rdname</code>.</li>
+<li>
+<strong><code>symbolizer-structural-dependence</code> vignette is now build-safe.</strong> It gained the <code>eval = requireNamespace(...)</code> setup guard every sibling vignette already had, so <code><a href="https://pkgdown.r-lib.org/reference/build_site.html" class="external-link">pkgdown::build_site()</a></code> no longer fails when a Suggests package (MCMCglmm / brms / phylolm / metafor / ape / metadat) is absent.</li>
+<li>
+<strong>Family count corrected to eleven.</strong> The quickstart and families vignettes and the README undercounted the supported families as “ten” and omitted <code>phylolm</code>; all now list eleven families including <code>phylolm</code>.</li>
+<li>
+<strong>README status legend</strong> now uses the canonical “Unsupported or blocked” status word (was “Unsupported”).</li>
+<li>
+<strong>pkgdown Articles index</strong> now has a <code>desc:</code> framing line on every group (Deep dives / Cross-package bridges / Where we’re going), not just “Get started”.</li>
+<li>
+<strong>New test guards the capability vocabulary.</strong> <code>test-capabilities.R</code> now asserts every <code>status</code> is one of the five canonical words, and documents that the friendly-named <code>brms</code> / <code>metafor</code> advertisement rows in the “today we can read” message are intentional (the gate dispatches via <code>brmsfit</code> / <code>rma.mv</code>), so future audits don’t misread them as mis-keyed.</li>
+<li>
+<strong>Reference examples.</strong> Added illustrative <code>@examples</code> to <code><a href="../reference/explain.html">explain()</a></code>, <code><a href="../reference/model_card.html">model_card()</a></code>, <code><a href="../reference/as_dag.html">as_dag()</a></code>, <code><a href="../reference/variance_partition.html">variance_partition()</a></code>, <code><a href="../reference/icc.html">icc()</a></code>, <code><a href="../reference/compare_symbolic.html">compare_symbolic()</a></code>, <code><a href="../reference/parameter_interpretation.html">parameter_interpretation()</a></code>, and <code><a href="../reference/notation_bridge.html">notation_bridge()</a></code>.</li>
+<li>
+<strong>Removed two unused test fixtures</strong> (<code>fit_metafor_phylo_meta</code>, <code>fx_two_level_factor</code>).</li>
+<li>
+<strong><code><a href="../reference/methods_text.html">methods_text()</a></code> clause phrases moved to a template</strong> (architectural rule). The reusable English phrases (random-effect clauses, zero-inflation / hurdle / sigma extras, unit and rho-12 phrasings, editorial reminders) now live in <code>inst/extdata/methods-phrases.csv</code> and are looked up via <code><a href="../reference/load_template.html">load_template()</a></code>; the R code only chooses which phrase and fills the slots. Output is unchanged.</li>
+<li>
+<strong>Renderers no longer parse formulas.</strong> The three-views “does sigma vary?” check now reads a <code>has_predictors</code> flag precomputed on <code>submodels</code> in the object constructor (<code>add_submodel_predictor_flag</code>), instead of re-parsing the submodel formula string at render time.</li>
+<li>
+<strong>Article prefaces.</strong> The factors, gllvm, meta-analysis, and structural-dependence vignettes now open with a one-paragraph what / who / what-you’ll-be-able-to-do preface, matching the rest of the set.</li>
+<li>
+<strong>Doc polish.</strong> Consistent <code>$...$</code> inline math in the variance-components vignette; <code>gllvmTMB::</code> qualification on the latent-variable accessors in the gllvm vignette; <code>friendly_status</code> added to the reference index; <code>@return</code> added to <code><a href="../reference/wrap_aligned.html">wrap_aligned()</a></code> and <code><a href="../reference/clear_template_cache.html">clear_template_cache()</a></code>.</li>
+</ul></div>
+<div class="section level3">
 <h3 id="variance-components-surface--where-does-the-variation-live-development-version">Variance-components surface – “where does the variation live?”<a class="anchor" aria-label="anchor" href="#variance-components-surface--where-does-the-variation-live-development-version"></a></h3>
 <p>A mixed model’s payoff for a biologist is <em>where the variation lives</em> and <em>how repeatable a trait is</em>. symbolizer computed the variance components and then dropped them. This surface closes that gap, Gaussian-first, with a hard honesty contract. Spec: <code>docs/specs/variance-components.md</code>. Built in four TDD slices.</p>
 <ul><li>

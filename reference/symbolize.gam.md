@@ -12,6 +12,9 @@ specifications `s(x)`, `s(x, by = factor)`, and `te(x, z)`.
 ``` r
 # S3 method for class 'gam'
 symbolize(fit, symbols = NULL, units = NULL, context = NULL, ...)
+
+# S3 method for class 'bam'
+symbolize(fit, symbols = NULL, units = NULL, context = NULL, ...)
 ```
 
 ## Arguments

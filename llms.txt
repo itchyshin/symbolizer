@@ -331,21 +331,21 @@ Pre-release. Read status words consistently:
 | First slice | Fitted and tested, but intentionally narrow. |
 | Opt-in control | Available for hardening, not a general modelling guarantee. |
 | Planned or reserved | Public grammar may exist, but [`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md) should reject it as design-only. |
-| Unsupported | Do not use as analysis syntax; fit the nearest implemented model. |
+| Unsupported or blocked | Do not use as analysis syntax; fit the nearest implemented model. |
 
 ### At a glance
 
 [`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
-reads **10 package families / 14 fitted-class methods / 30+ family-class
+reads **11 package families / 14 fitted-class methods / 30+ family-class
 combinations** today: `drmTMB`, `gllvmTMB`, `glmmTMB`, `brms`, `lme4`
 (`lmer` + `glmer`), `MCMCglmm` (including animal models via `ginverse`),
 `sdmTMB` (spatial + spatiotemporal fields),
 [`stats::lm`](https://rdrr.io/r/stats/lm.html) /
 [`stats::glm`](https://rdrr.io/r/stats/glm.html), `metafor` (`rma.uni` +
 `rma.mv` with multilevel / structured / phylogenetic random effects),
-and [`mgcv::gam`](https://rdrr.io/pkg/mgcv/man/gam.html) /
+[`mgcv::gam`](https://rdrr.io/pkg/mgcv/man/gam.html) /
 [`mgcv::bam`](https://rdrr.io/pkg/mgcv/man/bam.html) (additive smooths;
-`gamm` / `gamm4` via `$gam`).
+`gamm` / `gamm4` via `$gam`), and `phylolm` (phylogenetic GLS).
 
 For the full **capability matrix, release history, status vocabulary,
 and what’s planned next**, see [the Roadmap
@@ -464,6 +464,7 @@ context here.
   : Symbolize a metafor rma.mv fit (multilevel / multivariate
   meta-analysis, v0.13.1)
 - [`symbolize(`*`<gam>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.gam.md)
+  [`symbolize(`*`<bam>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.gam.md)
   : Symbolize an mgcv gam / bam fit (additive grammar, v0.14 first
   slice)
 - [`symbolize(`*`<phylolm>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.phylolm.md)
@@ -594,6 +595,8 @@ every renderer reads.
 
 - [`capability_check()`](https://itchyshin.github.io/symbolizer/reference/capability_check.md)
   : Check whether a (class, family, component) tuple is supported
+- [`friendly_status()`](https://itchyshin.github.io/symbolizer/reference/friendly_status.md)
+  : Map an assumption-status key to a friendlier display label
 
 ## Internal: template loader
 
@@ -656,6 +659,10 @@ from lm() to location-scale on one shared dataset.
 
 ### Deep dives
 
+One renderer or concept at a time: the drmTMB extractor, factor
+contrasts and interactions, non-Gaussian families, variance components,
+latent variables (gllvm), and structural model comparison.
+
 - [Understanding a drmTMB fit with
   symbolizer](https://itchyshin.github.io/symbolizer/articles/symbolizer-drmtmb.md):
 - [Reading factors, dummies, and
@@ -671,12 +678,19 @@ from lm() to location-scale on one shared dataset.
 
 ### Cross-package bridges
 
+Models whose structure lives in another package: phylogenetic,
+animal-model, and spatial dependence, and meta-analysis across metafor /
+brms / MCMCglmm.
+
 - [Structural dependence: phylogenetic, animal-model, and spatial random
   effects](https://itchyshin.github.io/symbolizer/articles/symbolizer-structural-dependence.md):
 - [Three flavors of meta-analysis: a cross-package
   tour](https://itchyshin.github.io/symbolizer/articles/symbolizer-meta-analysis.md):
 
 ### Where we’re going
+
+The capability roadmap: what is Stable, what is a First slice, and what
+is planned or reserved.
 
 - [Roadmap and capability
   matrix](https://itchyshin.github.io/symbolizer/articles/symbolizer-roadmap.md):

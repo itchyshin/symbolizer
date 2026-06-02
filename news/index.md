@@ -2,6 +2,71 @@
 
 ## symbolizer (development version)
 
+### Audit remediation – docs, vignette build-safety, pkgdown framing
+
+A read-only package audit surfaced several low-risk doc/build issues,
+fixed here:
+
+- **`symbolize.bam` is now documented.** The exported `bam` method had
+  no `\alias`, producing an R CMD check “undocumented S3 method” warning
+  and no reference page for an advertised class; it now shares the
+  `symbolize.gam` topic via `@rdname`.
+- **`symbolizer-structural-dependence` vignette is now build-safe.** It
+  gained the `eval = requireNamespace(...)` setup guard every sibling
+  vignette already had, so
+  [`pkgdown::build_site()`](https://pkgdown.r-lib.org/reference/build_site.html)
+  no longer fails when a Suggests package (MCMCglmm / brms / phylolm /
+  metafor / ape / metadat) is absent.
+- **Family count corrected to eleven.** The quickstart and families
+  vignettes and the README undercounted the supported families as “ten”
+  and omitted `phylolm`; all now list eleven families including
+  `phylolm`.
+- **README status legend** now uses the canonical “Unsupported or
+  blocked” status word (was “Unsupported”).
+- **pkgdown Articles index** now has a `desc:` framing line on every
+  group (Deep dives / Cross-package bridges / Where we’re going), not
+  just “Get started”.
+- **New test guards the capability vocabulary.** `test-capabilities.R`
+  now asserts every `status` is one of the five canonical words, and
+  documents that the friendly-named `brms` / `metafor` advertisement
+  rows in the “today we can read” message are intentional (the gate
+  dispatches via `brmsfit` / `rma.mv`), so future audits don’t misread
+  them as mis-keyed.
+- **Reference examples.** Added illustrative `@examples` to
+  [`explain()`](https://itchyshin.github.io/symbolizer/reference/explain.md),
+  [`model_card()`](https://itchyshin.github.io/symbolizer/reference/model_card.md),
+  [`as_dag()`](https://itchyshin.github.io/symbolizer/reference/as_dag.md),
+  [`variance_partition()`](https://itchyshin.github.io/symbolizer/reference/variance_partition.md),
+  [`icc()`](https://itchyshin.github.io/symbolizer/reference/icc.md),
+  [`compare_symbolic()`](https://itchyshin.github.io/symbolizer/reference/compare_symbolic.md),
+  [`parameter_interpretation()`](https://itchyshin.github.io/symbolizer/reference/parameter_interpretation.md),
+  and
+  [`notation_bridge()`](https://itchyshin.github.io/symbolizer/reference/notation_bridge.md).
+- **Removed two unused test fixtures** (`fit_metafor_phylo_meta`,
+  `fx_two_level_factor`).
+- **[`methods_text()`](https://itchyshin.github.io/symbolizer/reference/methods_text.md)
+  clause phrases moved to a template** (architectural rule). The
+  reusable English phrases (random-effect clauses, zero-inflation /
+  hurdle / sigma extras, unit and rho-12 phrasings, editorial reminders)
+  now live in `inst/extdata/methods-phrases.csv` and are looked up via
+  [`load_template()`](https://itchyshin.github.io/symbolizer/reference/load_template.md);
+  the R code only chooses which phrase and fills the slots. Output is
+  unchanged.
+- **Renderers no longer parse formulas.** The three-views “does sigma
+  vary?” check now reads a `has_predictors` flag precomputed on
+  `submodels` in the object constructor (`add_submodel_predictor_flag`),
+  instead of re-parsing the submodel formula string at render time.
+- **Article prefaces.** The factors, gllvm, meta-analysis, and
+  structural-dependence vignettes now open with a one-paragraph what /
+  who / what-you’ll-be-able-to-do preface, matching the rest of the set.
+- **Doc polish.** Consistent `$...$` inline math in the
+  variance-components vignette; `gllvmTMB::` qualification on the
+  latent-variable accessors in the gllvm vignette; `friendly_status`
+  added to the reference index; `@return` added to
+  [`wrap_aligned()`](https://itchyshin.github.io/symbolizer/reference/wrap_aligned.md)
+  and
+  [`clear_template_cache()`](https://itchyshin.github.io/symbolizer/reference/clear_template_cache.md).
+
 ### Variance-components surface – “where does the variation live?”
 
 A mixed model’s payoff for a biologist is *where the variation lives*

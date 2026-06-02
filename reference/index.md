@@ -62,6 +62,7 @@ context here.
   : Symbolize a metafor rma.mv fit (multilevel / multivariate
   meta-analysis, v0.13.1)
 - [`symbolize(`*`<gam>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.gam.md)
+  [`symbolize(`*`<bam>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.gam.md)
   : Symbolize an mgcv gam / bam fit (additive grammar, v0.14 first
   slice)
 - [`symbolize(`*`<phylolm>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.phylolm.md)
@@ -192,6 +193,8 @@ every renderer reads.
 
 - [`capability_check()`](https://itchyshin.github.io/symbolizer/reference/capability_check.md)
   : Check whether a (class, family, component) tuple is supported
+- [`friendly_status()`](https://itchyshin.github.io/symbolizer/reference/friendly_status.md)
+  : Map an assumption-status key to a friendlier display label
 
 ## Internal: template loader
 

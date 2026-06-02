@@ -331,21 +331,21 @@ Pre-release. Read status words consistently:
 | First slice | Fitted and tested, but intentionally narrow. |
 | Opt-in control | Available for hardening, not a general modelling guarantee. |
 | Planned or reserved | Public grammar may exist, but [`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md) should reject it as design-only. |
-| Unsupported | Do not use as analysis syntax; fit the nearest implemented model. |
+| Unsupported or blocked | Do not use as analysis syntax; fit the nearest implemented model. |
 
 ### At a glance
 
 [`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
-reads **10 package families / 14 fitted-class methods / 30+ family-class
+reads **11 package families / 14 fitted-class methods / 30+ family-class
 combinations** today: `drmTMB`, `gllvmTMB`, `glmmTMB`, `brms`, `lme4`
 (`lmer` + `glmer`), `MCMCglmm` (including animal models via `ginverse`),
 `sdmTMB` (spatial + spatiotemporal fields),
 [`stats::lm`](https://rdrr.io/r/stats/lm.html) /
 [`stats::glm`](https://rdrr.io/r/stats/glm.html), `metafor` (`rma.uni` +
 `rma.mv` with multilevel / structured / phylogenetic random effects),
-and [`mgcv::gam`](https://rdrr.io/pkg/mgcv/man/gam.html) /
+[`mgcv::gam`](https://rdrr.io/pkg/mgcv/man/gam.html) /
 [`mgcv::bam`](https://rdrr.io/pkg/mgcv/man/bam.html) (additive smooths;
-`gamm` / `gamm4` via `$gam`).
+`gamm` / `gamm4` via `$gam`), and `phylolm` (phylogenetic GLS).
 
 For the full **capability matrix, release history, status vocabulary,
 and what’s planned next**, see [the Roadmap

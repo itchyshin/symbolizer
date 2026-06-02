@@ -13,3 +13,8 @@ wrap_aligned(lines)
 - lines:
 
   Character vector of LaTeX equation lines.
+
+## Value
+
+A single character string: `lines` joined with `\` line breaks and
+wrapped in a LaTeX `aligned` environment.

@@ -1,5 +1,13 @@
 # Reading factors, dummies, and interactions
 
+> *Categorical predictors are where model output most often misleads a
+> biologist — `sexmale` is not “average male body mass.” This article is
+> for anyone fitting models with factors and interactions; by the end
+> you’ll be able to read every dummy-coded coefficient and interaction
+> term for what it actually says, and see how
+> [`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
+> spells out the contrast each one encodes.*
+
 A biologist sees `body_mass ~ sex + temperature` and the model fits. The
 output table lists a coefficient for `sexmale`. The obvious reading is
 “average male body mass” — and the obvious reading is wrong. The
@@ -361,7 +369,7 @@ the `0`s and `1`s of the dummy column sit next to the continuous
 as_html_three_views(sym3)
 ```
 
-[Skip three-views widget](#sym-sym-1780184011-end)
+[Skip three-views widget](#sym-sym-1780398257-end)
 
 ▸1. Index
 

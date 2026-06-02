@@ -3,11 +3,11 @@
 > *This tour walks through the non-Gaussian distributional families
 > available for `drmTMB`. The biology of each is different — what kind
 > of response it fits, what the link does, and how to read the `mu`
-> coefficient. The same `symbolize(fit)` interface now applies to ten
+> coefficient. The same `symbolize(fit)` interface now applies to eleven
 > package families (`drmTMB`, `gllvmTMB`, `glmmTMB`, `brms`, `lme4`,
 > `MCMCglmm`, `sdmTMB`, [`stats::lm`](https://rdrr.io/r/stats/lm.html) /
-> [`stats::glm`](https://rdrr.io/r/stats/glm.html), `metafor`, `mgcv`);
-> see the [Roadmap
+> [`stats::glm`](https://rdrr.io/r/stats/glm.html), `metafor`, `mgcv`,
+> `phylolm`); see the [Roadmap
 > article](https://itchyshin.github.io/symbolizer/articles/symbolizer-roadmap.md)
 > for the full capability matrix.*
 
@@ -96,7 +96,7 @@ geometric mean by `exp(beta)`.
 as_html_three_views(sym, id = "lognormal")
 ```
 
-[Skip three-views widget](#sym-lognormal-1780184017-end)
+[Skip three-views widget](#sym-lognormal-1780398263-end)
 
 ▸1. Index
 
@@ -284,7 +284,7 @@ coefficient in the widget below.
 as_html_three_views(sym, id = "beta")
 ```
 
-[Skip three-views widget](#sym-beta-1780184018-end)
+[Skip three-views widget](#sym-beta-1780398264-end)
 
 ▸1. Index
 
@@ -432,6 +432,7 @@ dat <- data.frame(
 )
 fit <- drmTMB(drm_formula(cbind(successes, failures) ~ x, sigma ~ 1),
               family = beta_binomial(), data = dat)
+#> Warning in sqrt(diag(cov)): NaNs produced
 sym <- symbolize(fit)
 render_math(sym$distribution$latex)
 ```
@@ -474,7 +475,7 @@ multiplicative effect on the expected count.
 as_html_three_views(sym, id = "poisson")
 ```
 
-[Skip three-views widget](#sym-poisson-1780184018-end)
+[Skip three-views widget](#sym-poisson-1780398265-end)
 
 ▸1. Index
 

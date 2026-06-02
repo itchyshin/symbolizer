@@ -18,6 +18,10 @@ from lm() to location-scale on one shared dataset.
 
 ### Deep dives
 
+One renderer or concept at a time: the drmTMB extractor, factor
+contrasts and interactions, non-Gaussian families, variance components,
+latent variables (gllvm), and structural model comparison.
+
 - [Understanding a drmTMB fit with
   symbolizer](https://itchyshin.github.io/symbolizer/articles/symbolizer-drmtmb.md):
 - [Reading factors, dummies, and
@@ -33,12 +37,19 @@ from lm() to location-scale on one shared dataset.
 
 ### Cross-package bridges
 
+Models whose structure lives in another package: phylogenetic,
+animal-model, and spatial dependence, and meta-analysis across metafor /
+brms / MCMCglmm.
+
 - [Structural dependence: phylogenetic, animal-model, and spatial random
   effects](https://itchyshin.github.io/symbolizer/articles/symbolizer-structural-dependence.md):
 - [Three flavors of meta-analysis: a cross-package
   tour](https://itchyshin.github.io/symbolizer/articles/symbolizer-meta-analysis.md):
 
 ### Where we’re going
+
+The capability roadmap: what is Stable, what is a First slice, and what
+is planned or reserved.
 
 - [Roadmap and capability
   matrix](https://itchyshin.github.io/symbolizer/articles/symbolizer-roadmap.md):

@@ -7,3 +7,8 @@ Internal helper. Useful in tests that modify templates between calls.
 ``` r
 clear_template_cache()
 ```
+
+## Value
+
+Invisibly returns `NULL`; called for its side effect of emptying the
+per-session template cache.
