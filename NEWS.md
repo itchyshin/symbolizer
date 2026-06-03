@@ -1,5 +1,42 @@
 # symbolizer (development version)
 
+## gllvmTMB Poisson latent-variable family (First slice)
+
+`symbolize()` now reads `gllvmTMB` Poisson latent-variable models, alongside
+the Gaussian and binomial families. The new `(gllvmTMB, poisson, *)` tuples
+(`mu` / `Lambda_B` / `Sigma_B` / `Psi_B`) are registered as **First slice** in
+the capability registry, mirroring the binomial slice.
+
+* **Log-scale extractor.** `symbolize.gllvmTMB` maps the upstream `poisson`
+  family to the `gllvm_poisson` template slug. The distribution renders as
+  `Poisson(exp(mu_{t(j)} + (Lambda_B z_{B,i})_{t(j)}))` (index form) and the
+  matrix-form analogue; per-trait intercepts read as baseline expected counts
+  (`exp(mu_t)`) and loadings carry a multiplicative rate-ratio reading on the
+  log scale. There is no row-level residual SD (Poisson equidispersion); the
+  assumption surface states this and points overdispersed counts to `nbinom2`.
+* **Templated prose.** New `gllvm_poisson` rows in
+  `inst/extdata/family-parameterizations.csv`, `assumption-templates.csv`, and
+  `interpretation-templates.csv` (no string-spliced prose in `R/`).
+* **Family-aware `components` distribution row (correctness fix).**
+  `glm_build_components()` previously hardcoded the Gaussian
+  `Normal(..., sigma_eps^2)` distribution equation for *every* family, so the
+  binomial `components` table (consumed by `equations()` / `as_latex()` /
+  the three-views renderer) carried a Gaussian distribution line. The
+  distribution row is now sourced from the family-aware distribution tibble for
+  non-Gaussian families, so binomial reads `Bernoulli(logit^{-1}(...))` and
+  Poisson reads `Poisson(exp(...))` consistently across every view. Gaussian
+  output is unchanged.
+
+## Capability-registry honesty fix
+
+* **`drmTMB, gaussian, rho12`** was listed as `Planned or reserved` for
+  "bivariate residual correlation", but a univariate Gaussian has a single
+  response and no residual correlation -- bivariate residual correlation is the
+  `biv_gaussian` family (`drmTMB, biv_gaussian, rho12`, First slice since
+  0.1.0). The row is reclassified to `Unsupported or blocked` with a note
+  redirecting to `biv_gaussian`, so the registry never implies a univariate
+  `rho12` is forthcoming.
+
 ## Audit remediation -- docs, vignette build-safety, pkgdown framing
 
 A read-only package audit surfaced several low-risk doc/build issues, fixed here:

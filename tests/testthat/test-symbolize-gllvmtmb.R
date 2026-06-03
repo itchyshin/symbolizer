@@ -201,9 +201,15 @@ test_that("implied covariance row includes Psi_B when unique() present", {
   expect_match(icov$equation_matrix, "\\\\boldsymbol\\{\\\\Psi\\}_B")
 })
 
-test_that("capability gating rejects planned families (poisson)", {
-  fit_p <- fit_gllvm_poisson()
-  expect_error(symbolize(fit_p), "Planned or reserved")
+test_that("capability gating still rejects a planned gllvmTMB family (Gamma)", {
+  # Poisson is now a First-slice family (see test-symbolize-gllvmtmb-poisson.R);
+  # retarget the rejection-path assertion to a family that is still planned.
+  # The capability gate fires before any family-specific extraction, so we can
+  # exercise it by relabelling a fitted Gaussian object rather than fitting a
+  # Gamma model (gllvmTMB Gamma support is not yet implemented).
+  fit_g <- fit_gllvm_basic()
+  fit_g$family$family <- "Gamma"
+  expect_error(symbolize(fit_g), "Planned or reserved")
 })
 
 test_that("renderers consume symbolize.gllvmTMB output without error", {
