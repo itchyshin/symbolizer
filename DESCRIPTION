@@ -1,6 +1,6 @@
 Package: symbolizer
 Title: Symbolic Specifications, Interpretations, and Teachable Stories for Statistical Models
-Version: 0.22.3
+Version: 0.22.4
 Authors@R: c(
     person("Shinichi", "Nakagawa", email = "itchyshin@gmail.com",
            role = c("aut", "cre", "cph"),

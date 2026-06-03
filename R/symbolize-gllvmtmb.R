@@ -37,14 +37,17 @@
 # formulas; this extractor is the single source of truth for gllvmTMB.
 # ----------------------------------------------------------------------------
 
-#' Symbolize a gllvmTMB fit (Gaussian and binomial latent-variable models)
+#' Symbolize a gllvmTMB fit (Gaussian, binomial, and Poisson latent-variable models)
 #'
 #' Builds a [`symbolized_model`][new_symbolized_model] from a `gllvmTMB` fit.
-#' Covers the Gaussian and binomial B-tier latent-variable families:
+#' Covers the Gaussian, binomial, and Poisson B-tier latent-variable families:
 #' per-trait intercepts (`0 + trait`), the between-unit reduced-rank loading
 #' term (`latent(0 + trait | unit, d = K)`), and the optional per-trait unique
-#' variances (`unique(0 + trait | unit)`). Other families and covstructs
-#' return capability errors via [`capability_check()`].
+#' variances (`unique(0 + trait | unit)`). The binomial submodel reads on the
+#' logit scale and the Poisson submodel on the log scale; neither carries a
+#' separate row-level residual SD (the variance is determined by the mean).
+#' Other families and covstructs return capability errors via
+#' [`capability_check()`].
 #'
 #' @section Confidence intervals:
 #' Fixed-effect estimates and Wald-style approximate CIs are pulled
@@ -145,7 +148,8 @@ symbolize.gllvmTMB <- function(fit, symbols = NULL, units = NULL,
   d_W_int <- as.integer(fit$tmb_data$d_W %||% 0L)
   components   <- glm_build_components(
     response_symbol_scalar, response_symbol_matrix, d_B, fit,
-    has_within = has_within, d_W = d_W_int
+    has_within = has_within, d_W = d_W_int,
+    tpl_family = tpl_family, distribution = distribution
   )
   symbol_dict  <- glm_build_symbol_dictionary(
     terms_tbl, response, response_symbol_scalar, response_symbol_matrix,
@@ -320,6 +324,50 @@ glm_build_distribution <- function(response_symbol, response_symbol_matrix,
       )
     ))
   }
+  if (identical(tpl_family, "gllvm_poisson")) {
+    if (isTRUE(has_within)) {
+      return(tibble::tibble(
+        family = tpl_family,
+        response_symbol = response_symbol,
+        response_symbol_matrix = response_symbol_matrix,
+        parameters = "mu, Lambda_B, (Psi_B), Lambda_W, (Psi_W)",
+        latex = paste0(
+          response_symbol,
+          " \\mid \\mu_{t(j)}, \\boldsymbol{\\Lambda}_B, \\mathbf{z}_{B,i},",
+          " \\boldsymbol{\\Lambda}_W, \\mathbf{z}_{W,ij} \\sim ",
+          "\\mathrm{Poisson}(\\exp(\\mu_{t(j)} + ",
+          "(\\boldsymbol{\\Lambda}_B \\mathbf{z}_{B,i})_{t(j)} + ",
+          "(\\boldsymbol{\\Lambda}_W \\mathbf{z}_{W,ij})_{t(j)}))"
+        ),
+        latex_matrix = paste0(
+          response_symbol_matrix,
+          " \\mid \\boldsymbol{\\mu}, \\boldsymbol{\\Lambda}_B, \\mathbf{Z}_B,",
+          " \\boldsymbol{\\Lambda}_W, \\mathbf{Z}_W \\sim ",
+          "\\mathrm{Poisson}(\\exp(",
+          "\\mathbf{1}_n \\boldsymbol{\\mu}^\\top + \\mathbf{Z}_B \\boldsymbol{\\Lambda}_B^\\top + ",
+          "\\mathbf{Z}_W \\boldsymbol{\\Lambda}_W^\\top))"
+        )
+      ))
+    }
+    return(tibble::tibble(
+      family = tpl_family,
+      response_symbol = response_symbol,
+      response_symbol_matrix = response_symbol_matrix,
+      parameters = "mu, Lambda_B, (Psi_B)",
+      latex = paste0(
+        response_symbol,
+        " \\mid \\mu_{t(j)}, \\boldsymbol{\\Lambda}_B, \\mathbf{z}_{B,i} ",
+        "\\sim \\mathrm{Poisson}(\\exp(\\mu_{t(j)} + ",
+        "(\\boldsymbol{\\Lambda}_B \\mathbf{z}_{B,i})_{t(j)}))"
+      ),
+      latex_matrix = paste0(
+        response_symbol_matrix,
+        " \\mid \\boldsymbol{\\mu}, \\boldsymbol{\\Lambda}_B, \\mathbf{Z}_B ",
+        "\\sim \\mathrm{Poisson}(\\exp(",
+        "\\mathbf{1}_n \\boldsymbol{\\mu}^\\top + \\mathbf{Z}_B \\boldsymbol{\\Lambda}_B^\\top))"
+      )
+    ))
+  }
   # gllvm_gaussian, two-tier (Widget 2: with within-individual reduced-rank).
   # sigma_eps is auto-suppressed by gllvmTMB; the row-level conditional
   # covariance becomes Sigma_W = Lambda_W Lambda_W^T + Psi_W.
@@ -377,6 +425,7 @@ gllvm_template_family <- function(family) {
     family,
     gaussian = "gllvm_gaussian",
     binomial = "gllvm_binomial",
+    poisson  = "gllvm_poisson",
     # Anything else falls through to gllvm_gaussian — but the capability
     # check earlier in symbolize.gllvmTMB will have errored already if the
     # family is not registered. Defensive default only.
@@ -559,13 +608,30 @@ glm_build_variance_components <- function(fit) {
 }
 
 glm_build_components <- function(response_symbol, response_symbol_matrix,
-                                  d_B, fit, has_within = FALSE, d_W = 0L) {
+                                  d_B, fit, has_within = FALSE, d_W = 0L,
+                                  tpl_family = "gllvm_gaussian",
+                                  distribution = NULL) {
   rows <- list()
   # Distribution. When the fit carries a within-tier (Widget 2), the
   # conditional mean adds (Lambda_W z_{W,ij})_{t(j)} and sigma_eps is
   # auto-suppressed by gllvmTMB -- the row-level conditional covariance
   # becomes Sigma_W = Lambda_W Lambda_W^T + Psi_W.
-  if (isTRUE(has_within)) {
+  #
+  # For non-Gaussian families (binomial logit, Poisson log) there is no
+  # row-level residual SD, so reuse the family-aware latex already built by
+  # glm_build_distribution(). This keeps the components distribution row in
+  # lockstep with the distribution tibble (every view shows the same line)
+  # rather than falling back to the Gaussian Normal/sigma_eps form below.
+  if (!identical(tpl_family, "gllvm_gaussian") && !is.null(distribution)) {
+    rows[[length(rows) + 1L]] <- tibble::tibble(
+      name = "distribution",
+      kind = "distribution",
+      submodel = NA_character_,
+      equation = distribution$latex[[1L]],
+      equation_matrix = distribution$latex_matrix[[1L]],
+      status = "stated"
+    )
+  } else if (isTRUE(has_within)) {
     rows[[length(rows) + 1L]] <- tibble::tibble(
       name = "distribution",
       kind = "distribution",

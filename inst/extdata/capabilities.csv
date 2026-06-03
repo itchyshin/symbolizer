@@ -7,7 +7,7 @@ drmTMB,gaussian,hu,Planned or reserved,,Hurdle submodel.
 drmTMB,poisson,zi,First slice,0.4.0,"Zero-inflation submodel (logit link) layered on top of Poisson; mixture: P(Y=0) = pi_zi + (1 - pi_zi) * Poisson(0; mu)."
 drmTMB,nbinom2,zi,First slice,0.4.0,"Zero-inflation submodel (logit link) layered on top of nbinom2."
 drmTMB,truncated_nbinom2,hu,First slice,0.4.0,"Hurdle submodel (logit link) on truncated_nbinom2; two-part: P(Y=0) = pi_hu, and positives are drawn from the zero-truncated negative binomial."
-drmTMB,gaussian,rho12,Planned or reserved,,Bivariate residual correlation.
+drmTMB,gaussian,rho12,Unsupported or blocked,,"A univariate Gaussian has one response and no residual correlation; bivariate residual correlation between two responses is the biv_gaussian family (see the drmTMB,biv_gaussian,rho12 row, First slice since 0.1.0)."
 drmTMB,student,mu,First slice,0.2.2,Student-t location submodel with identity link.
 drmTMB,student,sigma,First slice,0.2.2,Student-t scale submodel with log link.
 drmTMB,student,nu,First slice,0.2.2,"Student-t degrees-of-freedom submodel with log(nu - 2) link; nu > 2 required for finite variance."
@@ -46,7 +46,10 @@ gllvmTMB,binomial,mu,First slice,0.5.0,Per-trait intercept submodel on the logit
 gllvmTMB,binomial,Lambda_B,First slice,0.5.0,Between-unit reduced-rank loading matrix for binomial latent variables.
 gllvmTMB,binomial,Sigma_B,First slice,0.5.0,"Implied between-unit covariance (on the logit scale) Lambda_B Lambda_B^T (+ Psi_B when unique term present)."
 gllvmTMB,binomial,Psi_B,First slice,0.5.0,Per-trait unique variance (on the logit scale) via unique(0 + trait | unit).
-gllvmTMB,poisson,*,Planned or reserved,,Poisson family.
+gllvmTMB,poisson,mu,First slice,0.22.4,Per-trait intercept submodel on the log scale via 0 + trait fixed effects.
+gllvmTMB,poisson,Lambda_B,First slice,0.22.4,Between-unit reduced-rank loading matrix for Poisson latent variables.
+gllvmTMB,poisson,Sigma_B,First slice,0.22.4,"Implied between-unit covariance (on the log scale) Lambda_B Lambda_B^T (+ Psi_B when unique term present)."
+gllvmTMB,poisson,Psi_B,First slice,0.22.4,Per-trait unique variance (on the log scale) via unique(0 + trait | unit).
 gllvmTMB,nbinom2,*,Planned or reserved,,Negative binomial family.
 gllvmTMB,Gamma,*,Planned or reserved,,Gamma family.
 gllvmTMB,lognormal,*,Planned or reserved,,Lognormal family.

@@ -2,7 +2,7 @@
 % Please edit documentation in R/symbolize-gllvmtmb.R
 \name{symbolize.gllvmTMB}
 \alias{symbolize.gllvmTMB}
-\title{Symbolize a gllvmTMB fit (Gaussian and binomial latent-variable models)}
+\title{Symbolize a gllvmTMB fit (Gaussian, binomial, and Poisson latent-variable models)}
 \usage{
 \method{symbolize}{gllvmTMB}(fit, symbols = NULL, units = NULL, context = NULL, ...)
 }
@@ -25,11 +25,14 @@ A \code{symbolized_model} object.
 }
 \description{
 Builds a \code{\link[=new_symbolized_model]{symbolized_model}} from a \code{gllvmTMB} fit.
-Covers the Gaussian and binomial B-tier latent-variable families:
+Covers the Gaussian, binomial, and Poisson B-tier latent-variable families:
 per-trait intercepts (\code{0 + trait}), the between-unit reduced-rank loading
 term (\code{latent(0 + trait | unit, d = K)}), and the optional per-trait unique
-variances (\code{unique(0 + trait | unit)}). Other families and covstructs
-return capability errors via \code{\link[=capability_check]{capability_check()}}.
+variances (\code{unique(0 + trait | unit)}). The binomial submodel reads on the
+logit scale and the Poisson submodel on the log scale; neither carries a
+separate row-level residual SD (the variance is determined by the mean).
+Other families and covstructs return capability errors via
+\code{\link[=capability_check]{capability_check()}}.
 }
 \section{Confidence intervals}{
 
