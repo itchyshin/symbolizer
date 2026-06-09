@@ -1,5 +1,6 @@
 ---
 title: "Where the variation lives: ICC and repeatability"
+description: "Partition variance into components, then read ICC and repeatability -- and which scale each number lives on."
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Where the variation lives: ICC and repeatability}

@@ -1,5 +1,6 @@
 ---
 title: "Reading factors, dummies, and interactions"
+description: "How factors, dummy coding, contrasts, and interactions appear in the equation -- and the pitfalls that trip up interpretation."
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Reading factors, dummies, and interactions}

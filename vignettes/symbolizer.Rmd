@@ -1,5 +1,6 @@
 ---
 title: "Get started with symbolizer"
+description: "A five-minute first contact: fit a model, then read its equation, assumptions, and plain-English interpretation."
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Get started with symbolizer}

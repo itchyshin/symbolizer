@@ -1,5 +1,6 @@
 ---
 title: "A tour of non-Gaussian families"
+description: "Poisson, Beta, Gamma, lognormal and more -- each family's distribution, link function, and coefficient reading."
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{A tour of non-Gaussian families}

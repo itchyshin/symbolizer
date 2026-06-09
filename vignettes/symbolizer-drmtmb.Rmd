@@ -1,5 +1,6 @@
 ---
 title: "Understanding a drmTMB fit with symbolizer"
+description: "Read a distributional (location-scale) regression: the mean submodel, the variance submodel, and what each coefficient means."
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Understanding a drmTMB fit with symbolizer}

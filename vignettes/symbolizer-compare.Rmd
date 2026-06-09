@@ -1,5 +1,6 @@
 ---
 title: "Comparing two symbolized models"
+description: "See what changes between two model specifications -- terms, assumptions, and structure -- side by side."
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Comparing two symbolized models}
