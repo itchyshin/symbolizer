@@ -1839,6 +1839,13 @@ drm_build_symbol_dictionary <- function(terms_tbl, response, response_symbol,
     desc_i <- if (identical(dpar, "sigma")) {
       sm <- sigma_meaning_lookup(family)
       if (nzchar(sm)) sm else sprintf("conditional %s of %s", dpar, param_owner(dpar))
+    } else if (dpar %in% c("mu", "mu1", "mu2")) {
+      # The mean parameter's gloss is family-aware too: "conditional mu of y" is
+      # wrong for Lognormal, where mu is the mean of log(Y), not of Y. Reuse the
+      # family-parameterizations lookup with the mean_meaning column; families
+      # with no override fall back to the generic "conditional mu of <response>".
+      mm <- sigma_meaning_lookup(family, "mean_meaning")
+      if (nzchar(mm)) mm else sprintf("conditional %s of %s", dpar, param_owner(dpar))
     } else {
       sprintf("conditional %s of %s", dpar, param_owner(dpar))
     }
