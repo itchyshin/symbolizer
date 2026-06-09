@@ -1,5 +1,25 @@
 # symbolizer (development version)
 
+## piecewiseSEM bridge + `drm_sem` registry entry
+
+* **New `symbolize.psem()` method.** Walks `piecewiseSEM::psem()` fits,
+  delegates each structural node to `symbolize.<class>()`, and returns a
+  `symbolized_psem` collator carrying the per-node `symbolized_model`
+  parts, the node names, and any `%~~%` residual covariance arcs.
+  Companion methods `as_latex.symbolized_psem`,
+  `equations.symbolized_psem`, and `assumption_table.symbolized_psem`
+  concatenate / row-bind the per-node output with a leading node column;
+  `%~~%` arcs surface as *Residual cov(y1, y2)* rows in the assumption
+  table (and only there — they are bidirected, not regressions).
+  Mean-only by construction; use the `drm_sem` path for distributional
+  / location-scale piecewise SEMs.
+* **`capabilities.csv` gains a `lives_in` column.** Records which
+  package owns each `(class, family, component)` method so cross-package
+  bridges are explicit. Existing rows are `lives_in = "symbolizer"`; the
+  new `drm_sem,*,*` advertisement row carries `lives_in = "drmSEM"`
+  (`symbolize.drm_sem` is defined in the drmSEM package and delegates
+  per node to `symbolize.drmTMB`).
+
 ## Audit remediation -- docs, vignette build-safety, pkgdown framing
 
 A read-only package audit surfaced several low-risk doc/build issues, fixed here:

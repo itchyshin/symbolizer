@@ -4,7 +4,7 @@
 \name{symbolizer-package}
 \alias{symbolizer}
 \alias{symbolizer-package}
-\title{symbolizer: Structured Symbolic Specifications, Interpretations, and Teachable Stories for Modern Statistical Models}
+\title{symbolizer: Symbolic Specifications, Interpretations, and Teachable Stories for Statistical Models}
 \description{
 \if{html}{\figure{logo.svg}{options: style='float: right' alt='logo' width='120'}}
 

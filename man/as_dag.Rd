@@ -35,3 +35,6 @@ object connects predictors, parameters, and the response. It does
 not show coefficient values; for those see
 \code{\link[=parameter_interpretation]{parameter_interpretation()}}.
 }
+\examples{
+# as_dag(symbolize(lm(mpg ~ wt, data = mtcars)))
+}

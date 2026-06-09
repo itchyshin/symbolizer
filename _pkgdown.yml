@@ -96,6 +96,7 @@ reference:
       - symbolize.rma.mv
       - symbolize.gam
       - symbolize.phylolm
+      - symbolize.psem
       - symbolizer_capabilities
   - title: "Read both notations"
     desc: "Educator-facing bridge between index and matrix forms."

@@ -44,6 +44,7 @@ Suggests:
     metafor,
     mgcv,
     phylolm,
+    piecewiseSEM,
     rmarkdown,
     sdmTMB,
     testthat (>= 3.0.0),
