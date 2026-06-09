@@ -8,7 +8,7 @@ symbolizer_capabilities()
 }
 \value{
 A tibble with columns \code{class}, \code{family}, \code{component}, \code{status},
-\code{since}, \code{notes}.
+\code{since}, \code{notes}, and \code{lives_in} (the package that owns the method).
 }
 \description{
 Returns the table of model classes, families, and components that

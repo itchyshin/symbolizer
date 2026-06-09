@@ -13,7 +13,7 @@
 #' - **Unsupported or blocked**: do not use as analysis syntax.
 #'
 #' @return A tibble with columns `class`, `family`, `component`, `status`,
-#'   `since`, `notes`.
+#'   `since`, `notes`, and `lives_in` (the package that owns the method).
 #' @export
 #' @examples
 #' symbolizer_capabilities()
