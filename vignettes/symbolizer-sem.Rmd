@@ -11,8 +11,8 @@ vignette: >
 ---
 
 ```{r setup, include = FALSE}
-# The live path in this article fits a `piecewiseSEM::psem()` from base-R
-# `lm()` nodes, so it runs wherever piecewiseSEM is installed. The drmSEM
+# The live path fits a `piecewiseSEM::psem()` on the bundled `keeley`
+# dataset, so it runs wherever piecewiseSEM is installed. The drmSEM
 # section is shown as reference code only (eval = FALSE) -- it needs the
 # off-CRAN drmSEM + a compiled drmTMB fit -- so the vignette stays
 # build-safe, matching the sibling cross-package articles.
@@ -24,50 +24,68 @@ knitr::opts_chunk$set(
   eval     = has_psem
 )
 library(symbolizer)
-set.seed(1)
 ```
 
 > *A piecewise structural equation model is a **system** of regressions —
-> one fitted model per response, wired together into a causal graph. This
-> article shows how `symbolize()` reads the whole system: it walks each
-> node, symbolizes it with the node's own class method, and hands back a
-> collator whose equations, assumption table, and HTML widget are stacked
-> node by node. Two flavours are covered: mean-only piecewise SEMs from
-> `piecewiseSEM`, and distributional (location-scale) piecewise SEMs from
-> `drmSEM`.*
+> one fitted model per response, wired together into a hypothesized causal
+> graph. This article shows how `symbolize()` reads the whole system: it
+> walks each node, symbolizes it with the node's own class method, and
+> hands back a collator whose equations, assumption table, and HTML widget
+> are stacked node by node. Two flavours are covered: mean-only piecewise
+> SEMs from `piecewiseSEM`, and distributional (location-scale — modelling
+> spread or skew, not just the mean) piecewise SEMs from `drmSEM`.*
+
+`symbolize()` reports the **structure** of a model system — its
+responses, predictors, links, and distributional assumptions — not the
+fitted coefficients, significance, or goodness-of-fit. The directed
+paths below are the analyst's *assumed* structure; whether the data
+support them is a separate question (see Shipley's d-separation test in
+`piecewiseSEM`).
 
 ## A SEM is a list of regressions
 
 Where a single GLM has one response, a piecewise SEM has several — each
-its own fitted model, each a **node** in a directed graph. A path that
-appears as a predictor in one node is a response in another. The model
-of avian fecundity below is three statements:
+its own fitted model, each a **node** in a directed graph. A variable
+that is a predictor in one node is a response in another.
 
-- `body_size ~ temperature` — body size tracks temperature,
-- `fecundity ~ body_size + rainfall` — fecundity tracks body size and rainfall,
-- `rainfall %~~% temperature` — the two climate drivers are correlated
-  (a residual covariance arc, **not** a regression).
+We use the `keeley` data bundled with `piecewiseSEM`: 90 plots of
+California shrubland surveyed after wildfire (Grace & Keeley 2006). Five
+of its columns appear below — stand **age**, **fire severity**
+(`firesev`), an **abiotic** favourability index (`abiotic`), plant
+**cover**, and species **richness** (`rich`). A simplified slice of the
+Grace & Keeley causal backbone posits four directed paths plus one
+correlated-error arc:
+
+- `firesev ~ age` — the model treats fire severity as a response to
+  stand age (older stands carry more accumulated fuel),
+- `cover ~ firesev` — plant cover as a response to fire severity,
+- `rich ~ abiotic + firesev` — richness as a response to abiotic
+  favourability and fire severity,
+- `rich %~~% cover` — richness and cover are allowed a residual
+  covariance (some shared unmeasured cause beyond their common
+  dependence on fire), declared as a bidirected arc, **not** a
+  regression. *(This arc is added here to illustrate the feature; the
+  age→firesev→cover/rich paths are the simplified published backbone.)*
 
 `piecewiseSEM::psem()` glues those fitted nodes into one object.
 `symbolize()` reads it as a unit.
 
 ```{r psem-fit, message = FALSE}
 library(piecewiseSEM)
+data(keeley)
 
-n <- 120
-d <- data.frame(temperature = rnorm(n), rainfall = rnorm(n))
-d$body_size <- 0.5 * d$temperature + rnorm(n)
-d$fecundity <- 0.4 * d$body_size + 0.3 * d$rainfall + rnorm(n)
-
-m_size <- lm(body_size ~ temperature, data = d)
-m_fec  <- lm(fecundity ~ body_size + rainfall, data = d)
-
-sem <- psem(m_size, m_fec, rainfall %~~% temperature, data = d)
+sem <- psem(
+  lm(firesev ~ age,              data = keeley),
+  lm(cover   ~ firesev,          data = keeley),
+  lm(rich    ~ abiotic + firesev, data = keeley),
+  rich %~~% cover,
+  data = keeley
+)
 
 sym <- symbolize(
   sem,
-  symbols = c(body_size = "S_i", fecundity = "F_i",
-              temperature = "T_i", rainfall = "R_i")
+  symbols = c(firesev = "F_i", cover = "C_i", rich = "R_i",
+              age = "A_i", abiotic = "B_i")
 )
 sym
 ```
@@ -102,8 +120,10 @@ cat(as_latex(sym))
 
 `assumption_table()` row-binds each node's assumptions, again with a
 leading `node` column. The `%~~%` arc surfaces here as a
-`Residual cov(...)` row — and **only** here. A bidirected arc is a
-covariance, not a regression, so it never appears as an equation:
+`Residual cov(...)` row — and **only** here. A bidirected arc (the
+`%~~%` arc) is a covariance, not a regression, so it never appears as an
+equation. It records only that two residuals *covary*; it neither names
+the source nor implies one response affects the other:
 
 ```{r psem-assumptions}
 assumption_table(sym)
@@ -111,9 +131,10 @@ assumption_table(sym)
 
 ## Three views of the whole SEM
 
-`as_html_three_views()` renders the interactive *Index / Matrix /
-Matrix-with-data* widget for **every node**, stacked under node headers.
-Each node carries its own real data through the third tab:
+`as_html_three_views()` renders the interactive three-views widget for
+**every node**, stacked under node headers: the per-observation *Index*
+form, the *Matrix* form, and the matrix form populated with the node's
+own real data (see `vignette("symbolizer")` for what each view shows).
 
 ```{r psem-widget, results = "asis", message = FALSE}
 as_html_three_views(sym, id = "psem")
@@ -122,45 +143,59 @@ as_html_three_views(sym, id = "psem")
 ## The distributional flavour: `drmSEM`
 
 A `piecewiseSEM` node is mean-only — one linear predictor per response.
-When a path needs a **distributional** structure (a scale submodel, a
-zero-inflation component, a residual correlation between two responses),
-the node is a `drmTMB` location-scale fit and the SEM is built with
+It can model how the **mean** of cover responds to fire severity, but not
+how the **spread** of cover changes. When a path needs a
+**distributional** structure (a scale submodel, a zero-inflation
+component, a residual correlation between two responses), the node is a
+`drmTMB` location-scale fit and the SEM is built with
 [`drmSEM::drm_sem()`](https://itchyshin.github.io/drmSEM/). `symbolize()`
 reads it through the `drmSEM`-side `symbolize.drm_sem` method, which
-delegates each node to `symbolize.drmTMB`:
+delegates each node to `symbolize.drmTMB`.
+
+The code below is **not run here** (it needs the `drmSEM` and `drmTMB`
+packages); it continues the same `keeley` story. Suppose we wanted to
+ask whether the residual *spread* of cover widens at high fire severity —
+plausible when severe burns produce divergent recovery — which the
+mean-only `lm()` node cannot express:
 
 ```{r drmsem-ref, eval = FALSE}
 library(drmSEM)
 library(drmTMB)
 
 sem <- drm_sem(
-  size = drm_node(drm_formula(size ~ temp, sigma ~ temp),
-                  family = gaussian()),
-  fec  = drm_node(drm_formula(fec ~ size + temp),
-                  family = gaussian()),
-  data = dat
+  # The `cover` node gains a SCALE submodel: `sigma ~ firesev` lets the
+  # variability of cover -- not just its mean -- depend on fire severity.
+  cover   = drm_node(drm_formula(cover ~ firesev, sigma ~ firesev),
+                     family = gaussian()),
+  firesev = drm_node(drm_formula(firesev ~ age),
+                     family = gaussian()),
+  data = keeley
 )
 
-sym <- symbolize(sem)   # dispatches to drmSEM::symbolize.drm_sem
-equations(sym)          # node column + per-node mu AND sigma rows
-assumption_table(sym)   # per-node assumptions, distributional
-as_html_three_views(sym)  # same stacked widget, location-scale nodes
+sym <- symbolize(sem)     # dispatches to drmSEM::symbolize.drm_sem
+sym                       # <symbolized_drm_sem>: 2 nodes ...
+equations(sym)            # node column + per-node mu AND sigma rows
+assumption_table(sym)     # per-node assumptions, distributional
+as_html_three_views(sym)  # the same stacked widget, location-scale nodes
 ```
 
-The `sigma ~ temp` submodel on the `size` node is what `piecewiseSEM`
-cannot express: it models the **spread** of body size as a function of
-temperature, not just the mean. Everything downstream — the equations,
-the assumption table, the HTML widget — works identically, because both
-collators share one parent class.
+Everything downstream — the equations, the assumption table, the HTML
+widget — works identically on the `drm_sem`, because both collators share
+one parent class. See the
+[drmSEM site](https://itchyshin.github.io/drmSEM/) for runnable
+distributional-SEM examples.
 
 ## Why the same methods work on both
 
-`symbolize.psem` tags its output `symbolized_model_set`; `drmSEM`'s
-`symbolize.drm_sem` tags its output the same way. Both store their nodes
-in a **named** `parts` list. So the rendering generics dispatch on the
-shared parent and read `names(x$parts)` — one implementation, two
-collators. The capability registry records which package owns each
-method:
+Every renderer you just saw — `equations()`, `as_latex()`,
+`assumption_table()`, `as_html_three_views()` — works identically on a
+`drm_sem`. Here is the mechanism. `symbolize.psem` tags its output
+`symbolized_psem`, which inherits from `symbolized_model_set`; `drmSEM`'s
+`symbolize.drm_sem` tags its output `symbolized_drm_sem`, which inherits
+from the same parent. Both store their nodes in a **named** `parts` list.
+So the rendering generics dispatch on the shared parent and read
+`names(x$parts)` — one implementation, two collators. The capability
+registry records which package owns each method:
 
 ```{r registry}
 caps <- symbolizer_capabilities()
@@ -170,7 +205,7 @@ caps[caps$class %in% c("piecewiseSEM", "drm_sem"),
 
 | | `piecewiseSEM` (`psem`) | `drmSEM` (`drm_sem`) |
 |---|---|---|
-| Per-node model | `lm` / `glm` / `lmer` / `glmer` / `glmmTMB` / `lme` | `drmTMB` location-scale |
+| Per-node model | `lm` / `glm` / `lmer` / `glmer` / `glmmTMB` | `drmTMB` location-scale |
 | Structure per node | mean only (one linear predictor) | distributional (`mu`, `sigma`, `nu`, `zi`, `hu`, `rho12`) |
 | Method lives in | `symbolizer` (bundled) | `drmSEM` |
 | Collator class | `symbolized_psem` → `symbolized_model_set` | `symbolized_drm_sem` → `symbolized_model_set` |
@@ -179,3 +214,19 @@ caps[caps$class %in% c("piecewiseSEM", "drm_sem"),
 Reach for `piecewiseSEM` when each response is adequately summarised by
 its mean; reach for `drmSEM` when a path's **variance, skew, or
 zero-inflation** is itself part of the story.
+
+## References
+
+Grace, J. B., & Keeley, J. E. (2006). A structural equation model
+analysis of postfire plant diversity in California shrublands.
+*Ecological Applications*, 16(2), 503–514.
+<https://doi.org/10.1890/1051-0761(2006)016%5B0503:ASEMAO%5D2.0.CO;2>
+
+Lefcheck, J. S. (2016). piecewiseSEM: Piecewise structural equation
+modelling in R for ecology, evolution, and systematics. *Methods in
+Ecology and Evolution*, 7(5), 573–579.
+<https://doi.org/10.1111/2041-210X.12512>
+
+Shipley, B. (2009). Confirmatory path analysis in a generalized
+multilevel context. *Ecology*, 90(2), 363–368.
+<https://doi.org/10.1890/08-1034.1>

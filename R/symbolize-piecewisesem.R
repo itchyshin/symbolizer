@@ -42,6 +42,17 @@
 #'   per-node `symbolized_model`s, named by response variable),
 #'   `node_names` (character), `cov_arcs` (character, declared `%~~%`
 #'   arcs as `"a ~~ b"` strings), and `metadata`.
+#'
+#' @references
+#' Lefcheck, J. S. (2016). piecewiseSEM: Piecewise structural equation
+#' modelling in R for ecology, evolution, and systematics. *Methods in
+#' Ecology and Evolution*, 7(5), 573-579. \doi{10.1111/2041-210X.12512}
+#'
+#' Shipley, B. (2009). Confirmatory path analysis in a generalized
+#' multilevel context. *Ecology*, 90(2), 363-368. \doi{10.1890/08-1034.1}
+#'
+#' @seealso The `keeley` dataset (Grace & Keeley 2006) bundled with
+#'   `piecewiseSEM`, used in `vignette("symbolizer-sem")`.
 #' @export
 symbolize.psem <- function(fit, symbols = NULL, units = NULL,
                            context = NULL, ...) {
