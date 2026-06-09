@@ -87,6 +87,47 @@ symbolize.psem <- function(fit, symbols = NULL, units = NULL,
   )
 }
 
+# ---- print -----------------------------------------------------------------
+
+#' Compact summary of a multi-node symbolized SEM
+#'
+#' Print method for `symbolized_model_set` — the shared parent of
+#' `symbolized_psem` and drmSEM's `symbolized_drm_sem`. Lists one line per
+#' node (response, family) instead of dumping the underlying list, and notes
+#' any declared `%~~%` covariance arcs. drmSEM ships its own more-specific
+#' `print.symbolized_drm_sem`, which takes precedence for `drm_sem` objects.
+#'
+#' @param x A `symbolized_model_set`.
+#' @param ... Ignored.
+#' @return `x`, invisibly.
+#' @export
+print.symbolized_model_set <- function(x, ...) {
+  nodes <- names(x$parts)
+  cls <- class(x)[[1L]]
+  # Plain stdout (cat) so the summary is predictable and capturable; this is
+  # a console print method, not cli messaging.
+  cat(sprintf("<%s>: %d node%s\n", cls, length(nodes),
+              if (length(nodes) == 1L) "" else "s"))
+  for (nm in nodes) {
+    part <- x$parts[[nm]]
+    fam <- tryCatch(part$model$family, error = function(e) NULL)
+    kind <- tryCatch(part$model$class, error = function(e) NULL)
+    detail <- paste(c(kind, fam), collapse = ", ")
+    if (nzchar(detail)) {
+      cat(sprintf("  - %s (%s)\n", nm, detail))
+    } else {
+      cat(sprintf("  - %s\n", nm))
+    }
+  }
+  arcs <- x$cov_arcs
+  if (!is.null(arcs) && length(arcs) > 0L) {
+    cat(sprintf("  %d residual covariance arc%s: %s\n",
+                length(arcs), if (length(arcs) == 1L) "" else "s",
+                paste(arcs, collapse = "; ")))
+  }
+  invisible(x)
+}
+
 # ---- companions: as_latex / equations / assumption_table -------------------
 
 #' @export
@@ -165,8 +206,11 @@ psem_cov_arc_row <- function(arc, template) {
     )
   }
   if ("biological_meaning" %in% names(row)) {
+    # Avoid a literal "%~~%" here: the double tilde is markdown strikethrough,
+    # so it is stripped when the assumption table renders through pandoc
+    # (vignette / pkgdown). The label column already names the arc.
     row$biological_meaning <- sprintf(
-      "Residual covariance between %s and %s declared via %%~~%%.",
+      "Residual covariance between %s and %s, declared explicitly (a bidirected arc, not a regression).",
       lhs, rhs
     )
   }

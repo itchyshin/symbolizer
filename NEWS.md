@@ -21,6 +21,15 @@
   (both key their nodes by `names(x$parts)`), so the one method serves
   either collator. `standalone` / `file` behave as on the single-model
   method.
+* **`print()` for the SEM collator.** `print.symbolized_model_set` gives
+  a compact one-line-per-node summary (response, family) plus any
+  declared covariance arcs, instead of dumping the underlying list.
+  Shared by `symbolized_psem`; drmSEM's `symbolized_drm_sem` keeps its
+  own more-specific method.
+* **New vignette `symbolizer-sem`.** "Multi-node structural equation
+  models: piecewiseSEM and drmSEM" — the mean-only `psem` path live, the
+  distributional `drm_sem` path as reference, the stacked three-views
+  widget, and the shared-design table.
 * **`capabilities.csv` gains a `lives_in` column.** Records which
   package owns each `(class, family, component)` method so cross-package
   bridges are explicit. Existing rows are `lives_in = "symbolizer"`; the

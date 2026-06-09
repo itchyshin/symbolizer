@@ -146,3 +146,23 @@ test_that("as_html_three_views(symbolized_psem, standalone = TRUE) is a full pag
   expect_match(html, "<!DOCTYPE html>", fixed = TRUE)
   expect_match(html, "MathJax", fixed = TRUE)
 })
+
+test_that("print(symbolized_psem) is a compact summary, not a raw list dump", {
+  bundle <- fit_psem_lm_chain()
+  sym <- symbolize(bundle$fit)
+  out <- paste(capture.output(print(sym)), collapse = "\n")
+  # Names every node, labels the object, and is short (not a $parts dump).
+  for (n in bundle$node_names) {
+    expect_match(out, n, fixed = TRUE)
+  }
+  expect_match(out, "symbolized_psem", fixed = TRUE)
+  expect_false(grepl("$parts", out, fixed = TRUE))
+})
+
+test_that("print(symbolized_psem) reports a declared covariance arc", {
+  bundle <- fit_psem_lm_with_cor()
+  sym <- symbolize(bundle$fit)
+  out <- paste(capture.output(print(sym)), collapse = "\n")
+  expect_match(out, "covariance", ignore.case = TRUE)
+  expect_invisible(print(sym))
+})
