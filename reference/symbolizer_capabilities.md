@@ -14,7 +14,7 @@ symbolizer_capabilities()
 ## Value
 
 A tibble with columns `class`, `family`, `component`, `status`, `since`,
-`notes`.
+`notes`, and `lives_in` (the package that owns the method).
 
 ## Details
 

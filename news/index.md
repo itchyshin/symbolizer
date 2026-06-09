@@ -2,6 +2,21 @@
 
 ## symbolizer (development version)
 
+### `symbolizer-sem` vignette: real data + team review
+
+- **The SEM vignette now uses real data.** The worked example was
+  rebuilt on `piecewiseSEM`’s bundled `keeley` dataset (Grace & Keeley
+  2006, 90 post-fire California shrubland plots:
+  `age → firesev → cover/rich`) in place of a made-up simulation. A team
+  review (Pat / Rose / Darwin / Fisher) tightened it: causal language is
+  hedged as the model’s *assumed* structure on observational data (with
+  an explicit “structure, not inference” note), the comparison table no
+  longer lists the unsupported `lme` node type, and the `%~~%` arc and
+  references (Grace & Keeley 2006, Lefcheck 2016, Shipley 2009) are
+  stated honestly. `symbolize.psem` gains an `@references` block;
+  [`symbolizer_capabilities()`](https://itchyshin.github.io/symbolizer/reference/symbolizer_capabilities.md)’s
+  `@return` now documents the `lives_in` column.
+
 ### piecewiseSEM bridge + `drm_sem` registry entry
 
 - **New

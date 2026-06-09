@@ -54,3 +54,20 @@ strings), and `metadata`.
 Each node is mean-structure only by construction. For distributional
 (location-scale) or multivariate structural equations, use the `drm_sem`
 path in the drmSEM package.
+
+## References
+
+Lefcheck, J. S. (2016). piecewiseSEM: Piecewise structural equation
+modelling in R for ecology, evolution, and systematics. *Methods in
+Ecology and Evolution*, 7(5), 573-579.
+[doi:10.1111/2041-210X.12512](https://doi.org/10.1111/2041-210X.12512)
+
+Shipley, B. (2009). Confirmatory path analysis in a generalized
+multilevel context. *Ecology*, 90(2), 363-368.
+[doi:10.1890/08-1034.1](https://doi.org/10.1890/08-1034.1)
+
+## See also
+
+The `keeley` dataset (Grace & Keeley 2006) bundled with `piecewiseSEM`,
+used in
+[`vignette("symbolizer-sem")`](https://itchyshin.github.io/symbolizer/articles/symbolizer-sem.md).
