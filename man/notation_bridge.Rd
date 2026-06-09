@@ -30,3 +30,6 @@ Columns:
 \verb{\\mathbb\{R\}^\{n \\times p_\\mu\}}, \code{scalar}).
 }
 }
+\examples{
+# notation_bridge(symbolize(lm(mpg ~ wt, data = mtcars)))
+}

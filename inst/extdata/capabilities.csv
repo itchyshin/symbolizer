@@ -1,135 +1,137 @@
-class,family,component,status,since,notes
-drmTMB,gaussian,mu,Stable,0.1.0,Univariate location submodel with identity link.
-drmTMB,gaussian,sigma,Stable,0.1.0,Univariate scale submodel with log link.
-drmTMB,gaussian,random_effects,First slice,0.3.1,"Random intercepts (1 | group) and random intercept + one slope (1 + x | group) on the mu submodel; nested / crossed / RE-on-sigma still planned."
-drmTMB,gaussian,zi,Planned or reserved,,Zero-inflation submodel.
-drmTMB,gaussian,hu,Planned or reserved,,Hurdle submodel.
-drmTMB,poisson,zi,First slice,0.4.0,"Zero-inflation submodel (logit link) layered on top of Poisson; mixture: P(Y=0) = pi_zi + (1 - pi_zi) * Poisson(0; mu)."
-drmTMB,nbinom2,zi,First slice,0.4.0,"Zero-inflation submodel (logit link) layered on top of nbinom2."
-drmTMB,truncated_nbinom2,hu,First slice,0.4.0,"Hurdle submodel (logit link) on truncated_nbinom2; two-part: P(Y=0) = pi_hu, and positives are drawn from the zero-truncated negative binomial."
-drmTMB,gaussian,rho12,Planned or reserved,,Bivariate residual correlation.
-drmTMB,student,mu,First slice,0.2.2,Student-t location submodel with identity link.
-drmTMB,student,sigma,First slice,0.2.2,Student-t scale submodel with log link.
-drmTMB,student,nu,First slice,0.2.2,"Student-t degrees-of-freedom submodel with log(nu - 2) link; nu > 2 required for finite variance."
-drmTMB,lognormal,mu,First slice,0.2.2,"Lognormal location submodel: mu is the mean of log(Y), identity link."
-drmTMB,lognormal,sigma,First slice,0.2.2,"Lognormal scale submodel: sigma is the SD of log(Y), log link."
-drmTMB,Gamma,mu,First slice,0.2.2,"Gamma location submodel (positive continuous response, default log link via stats::Gamma(link = ""log""))."
-drmTMB,Gamma,sigma,First slice,0.2.2,Gamma dispersion submodel on the log scale.
-drmTMB,beta,mu,First slice,0.2.2,"Beta location submodel: mu in (0, 1) via the logit link; response Y in (0, 1)."
-drmTMB,beta,sigma,First slice,0.2.2,Beta precision submodel on the log scale (larger sigma -> tighter distribution around mu).
-drmTMB,beta_binomial,mu,First slice,0.3.2,"Beta-binomial location submodel: mu in (0, 1) is the mean success probability via the logit link."
-drmTMB,beta_binomial,sigma,First slice,0.3.2,"Beta-binomial precision / overdispersion submodel on the log scale; larger sigma -> distribution tighter around mu (less overdispersion)."
-drmTMB,poisson,mu,First slice,0.2.2,Poisson count submodel with log link; no dispersion parameter.
-drmTMB,nbinom2,mu,First slice,0.2.2,"Negative binomial (type 2) count submodel with log link."
-drmTMB,nbinom2,sigma,First slice,0.2.2,"Negative binomial overdispersion submodel; variance = mu + mu^2/exp(sigma)."
-drmTMB,truncated_nbinom2,mu,First slice,0.3.2,"Zero-truncated negative binomial (type 2) count submodel with log link; response Y >= 1."
-drmTMB,truncated_nbinom2,sigma,First slice,0.3.2,"Zero-truncated nbinom2 overdispersion submodel on the log scale."
-drmTMB,cumulative_logit,mu,First slice,0.4.0,"Cumulative logit (proportional-odds) model for ordered categorical response; K-1 thresholds plus a shared slope vector."
-drmTMB,biv_gaussian,mu1,First slice,0.1.0,Bivariate Gaussian location submodel for the first response.
-drmTMB,biv_gaussian,mu2,First slice,0.1.0,Bivariate Gaussian location submodel for the second response.
-drmTMB,biv_gaussian,sigma1,First slice,0.1.0,Bivariate Gaussian scale submodel for the first response (log link).
-drmTMB,biv_gaussian,sigma2,First slice,0.1.0,Bivariate Gaussian scale submodel for the second response (log link).
-drmTMB,biv_gaussian,rho12,First slice,0.1.0,Residual correlation between the two responses (atanh_guarded link).
-gllvmTMB,gaussian,mu,First slice,0.1.0,Per-trait intercept submodel via 0 + trait fixed effects.
-gllvmTMB,gaussian,Lambda_B,First slice,0.1.0,Between-unit reduced-rank loading matrix via latent(0 + trait | unit).
-gllvmTMB,gaussian,Sigma_B,First slice,0.1.0,"Implied between-unit covariance Lambda_B Lambda_B^T (+ Psi_B when unique term present)."
-gllvmTMB,gaussian,Psi_B,First slice,0.1.0,Per-trait unique variance via unique(0 + trait | unit).
-gllvmTMB,gaussian,sigma_eps,First slice,0.1.0,Shared row-level residual SD.
-gllvmTMB,*,Lambda_W,First slice,0.21.6,Within-unit reduced-rank loadings via obs-level latent() covstruct.
-gllvmTMB,*,Psi_W,First slice,0.21.6,Per-trait within-unit unique variance via obs-level unique() covstruct.
-gllvmTMB,gaussian,Sigma_W,First slice,0.21.6,"Implied within-individual covariance Lambda_W Lambda_W^T (+ Psi_W when unique(0 + trait | obs) present)."
-gllvmTMB,gaussian,Repeatability,First slice,0.21.6,"Per-trait repeatability R_t = (Sigma_B)_tt / [(Sigma_B)_tt + (Sigma_W)_tt]."
-gllvmTMB,*,phylo,First slice,0.21.0,"Phylogenetic covstructs (phylo_rr / phylo_diag / phylo_scalar / phylo_slope); extractor surfaces metadata$phylo_representation = ""package_managed""."
-gllvmTMB,*,spatial,Planned or reserved,,Spatial covstructs.
-gllvmTMB,*,Sigma,Planned or reserved,,
-gllvmTMB,binomial,mu,First slice,0.5.0,Per-trait intercept submodel on the logit scale via 0 + trait fixed effects.
-gllvmTMB,binomial,Lambda_B,First slice,0.5.0,Between-unit reduced-rank loading matrix for binomial latent variables.
-gllvmTMB,binomial,Sigma_B,First slice,0.5.0,"Implied between-unit covariance (on the logit scale) Lambda_B Lambda_B^T (+ Psi_B when unique term present)."
-gllvmTMB,binomial,Psi_B,First slice,0.5.0,Per-trait unique variance (on the logit scale) via unique(0 + trait | unit).
-gllvmTMB,poisson,*,Planned or reserved,,Poisson family.
-gllvmTMB,nbinom2,*,Planned or reserved,,Negative binomial family.
-gllvmTMB,Gamma,*,Planned or reserved,,Gamma family.
-gllvmTMB,lognormal,*,Planned or reserved,,Lognormal family.
-gllvmTMB,Beta,*,Planned or reserved,,Beta family.
-gllvmTMB,betabinomial,*,Planned or reserved,,Beta-binomial family.
-gllvmTMB,tweedie,*,Planned or reserved,,Tweedie family.
-gllvmTMB,student,*,Planned or reserved,,Student-t family.
-gllvmTMB,ordinal_probit,*,Planned or reserved,,Ordinal probit family.
-glmmTMB,gaussian,mu,First slice,0.7.0,Gaussian conditional submodel (identity link).
-glmmTMB,gaussian,sigma,First slice,0.7.0,"Distributional sigma submodel from `dispformula = ~ z` (log link)."
-glmmTMB,gaussian,random_effects,First slice,0.7.0,"Random intercepts (1 | group) on the conditional submodel; nested / crossed / RE-on-sigma still planned."
-glmmTMB,gaussian,zi,Planned or reserved,,Zero-inflation submodel.
-glmmTMB,binomial,mu,First slice,0.11.0,Binomial / Bernoulli conditional submodel (logit link).
-glmmTMB,binomial,random_effects,First slice,0.11.0,"Random intercepts (1 | group) on the binomial conditional submodel."
-glmmTMB,poisson,mu,First slice,0.11.0,Poisson conditional submodel (log link).
-glmmTMB,poisson,random_effects,First slice,0.11.0,"Random intercepts (1 | group) on the poisson conditional submodel."
-glmmTMB,nbinom2,mu,First slice,0.11.0,Negative binomial (type 2) conditional submodel (log link).
-glmmTMB,nbinom2,sigma,First slice,0.11.0,"Overdispersion parameter (log link); size = exp(sigma)."
-glmmTMB,nbinom2,random_effects,First slice,0.11.0,"Random intercepts on the nbinom2 conditional submodel."
-glmmTMB,poisson,zi,First slice,0.11.0,"Zero-inflation submodel (logit link) on glmmTMB poisson via ziformula."
-glmmTMB,nbinom2,zi,First slice,0.11.0,"Zero-inflation submodel (logit link) on glmmTMB nbinom2 via ziformula."
-glmmTMB,gaussian,propto,First slice,0.16.0,"propto(0 + obs | g, R) covariance structure: Sigma = sigma^2 * R with sigma^2 estimated, the phylogenetic / pedigree / structured-covariance pattern. Surfaces an info row in warning_table() noting this is NOT the meta-analytic fixed-V pattern (that requires glmmTMB's planned equalto())."
-glmmTMB,binomial,propto,First slice,0.16.0,"propto() on a binomial conditional submodel (e.g., phylogenetic binomial GLMM)."
-glmmTMB,poisson,propto,First slice,0.16.0,"propto() on a poisson conditional submodel."
-glmmTMB,*,*,Planned or reserved,,Other families and submodels targeted for v0.11.x.
-brmsfit,gaussian,mu,First slice,0.8.0,Gaussian conditional submodel (identity link).
-brmsfit,gaussian,random_effects,First slice,0.8.0,"Random intercepts (1 | group) and (1 + x | group) on the conditional submodel; nested / crossed still planned."
-brmsfit,gaussian,sigma_distributional,First slice,0.11.0,brms distributional formula on sigma via bf(y ~ x; sigma ~ z); other dpars still planned.
-brmsfit,binomial,mu,First slice,0.11.2,"Binomial / Bernoulli conditional submodel (logit link); brms's bernoulli() is aliased to binomial internally."
-brmsfit,binomial,random_effects,First slice,0.11.2,Random intercepts on the binomial conditional submodel.
-brmsfit,poisson,mu,First slice,0.11.2,Poisson conditional submodel (log link).
-brmsfit,poisson,random_effects,First slice,0.11.2,Random intercepts on the poisson conditional submodel.
-brmsfit,*,*,Planned or reserved,,Other families and distributional dpars targeted for v0.11.x.
-MCMCglmm,gaussian,mu,First slice,0.9.0,Gaussian conditional submodel (identity link). Requires `data = ...` argument since MCMCglmm doesn't keep the data frame.
-MCMCglmm,gaussian,random_effects,First slice,0.9.0,"Random intercepts (~ g) on the conditional submodel; MCMCglmm's flexible covariance structures still planned."
-MCMCglmm,gaussian,animal,First slice,0.12.0,"Animal-model / phylogenetic random effect via ginverse = list(animal = Ainv); the variance-components row for the animal group is tagged kind = ""animal"" and heritability h^2 = sigma^2_A / (sigma^2_A + sigma^2_E) is derived and attached to metadata$heritability."
-MCMCglmm,*,*,Planned or reserved,,Non-Gaussian families and flexible residual covariance (us / idh) still planned for a later batch.
-sdmTMB,gaussian,mu,First slice,0.12.0,Gaussian conditional submodel (identity link) from sdmTMB::sdmTMB().
-sdmTMB,gaussian,omega,First slice,0.12.0,"Spatial random field omega(s_i) ~ GMRF(0, Q(kappa)) via spatial = ""on""."
-sdmTMB,gaussian,epsilon,First slice,0.12.0,"Spatiotemporal field epsilon(s_i, t) ~ GMRF(0, Q(kappa)) via the time = arg."
-sdmTMB,*,delta_model,Planned or reserved,,"Delta (hurdle / two-component) sdmTMB models. fit$family$family is a length-2 vector (e.g. delta_gamma()); routed here regardless of the component families."
-sdmTMB,*,*,Planned or reserved,,Non-Gaussian families and spatial_varying / share_range still planned..x.
-lmerMod,gaussian,mu,First slice,0.10.0,Gaussian conditional submodel (identity link) from lme4::lmer().
-lmerMod,gaussian,random_effects,First slice,0.10.0,"Random intercepts (1 | g) and (1 + x | g) on the conditional submodel; nested / crossed still planned."
-lmerMod,*,*,Planned or reserved,,Other lme4 features targeted for v0.11.x.
-glmerMod,binomial,mu,First slice,0.11.0,Binomial / Bernoulli conditional submodel (logit link) from lme4::glmer().
-glmerMod,binomial,random_effects,First slice,0.11.0,"Random intercepts (1 | g) on the binomial conditional submodel."
-glmerMod,poisson,mu,First slice,0.11.0,Poisson conditional submodel (log link) from lme4::glmer().
-glmerMod,poisson,random_effects,First slice,0.11.0,"Random intercepts (1 | g) on the poisson conditional submodel."
-glmerMod,*,*,Planned or reserved,,Other glmer families targeted for v0.11.x.
-lm,gaussian,mu,First slice,0.10.0,Gaussian fit from stats::lm().
-glm,gaussian,mu,First slice,0.10.0,Gaussian glm from stats::glm().
-glm,binomial,mu,First slice,0.10.0,Binomial / Bernoulli glm (logit link) from stats::glm().
-glm,poisson,mu,First slice,0.10.0,Poisson glm (log link) from stats::glm().
-glm,Gamma,mu,First slice,0.11.0,Gamma glm (log link by convention) from stats::glm().
-glm,*,*,Planned or reserved,,Other families (inverse.gaussian / quasi*) targeted for v0.11.x.
-rma.uni,meta_normal,mu,First slice,0.13.0,"metafor random / mixed-effects meta-regression: theta_i = beta_0 + sum beta_k x_ki + u_i."
-rma.uni,meta_normal,tau2,First slice,0.13.0,"Between-study heterogeneity variance tau^2; appears in variance_components with kind = ""heterogeneity""."
-rma.uni,meta_normal,tau2_scale,First slice,0.15.0,"Location-scale meta-regression (rma.ls): log(tau^2_i) = alpha_0 + sum alpha_k z_ki. metafor models the log VARIANCE (not log SD); alpha coefficients. References: Viechtbauer & López-López (2022), Nakagawa et al. (2025)."
-rma.uni,*,*,Planned or reserved,,"Non-meta_normal metrics (selection / publication-bias detection layer, double-hierarchical scale random effects) targeted for v0.16+."
-rma.mv,meta_normal,mu,First slice,0.13.1,"metafor multilevel / multivariate meta-regression: theta_i = beta_0 + sum beta_k x_ki + sum_r u_{r,i}."
-rma.mv,meta_normal,structured,First slice,0.13.1,"R-matrix structured random effects via R = list(phylo = phylo.cor); the tier renders as u_r ~ N(0, sigma^2_r * R_r) and is tagged kind = ""structured"" in variance_components."
-rma.mv,meta_normal,struct_UN,First slice,0.16.0,"Unstructured covariance between inner-level random effects via ~ inner | outer with struct = ""UN""; per-inner-level diagonal variances (kind = ""heterogeneity_un"") and off-diagonal correlations (kind = ""correlation"") appear in variance_components. Bivariate / multivariate meta-analysis pattern."
-rma.mv,*,*,Planned or reserved,,"Other covariance structures (HCS, AR, DIAG, ...) and selection / publication-bias variants still planned."
-gam,gaussian,mu,First slice,0.14.0,mgcv gam / bam Gaussian additive model (identity link).
-gam,gaussian,smooth,First slice,0.14.0,"Smooth terms (s(x), s(x, by = factor), te(x, z)) summarised by basis dimension and edf in metadata$smooths."
-gam,poisson,mu,First slice,0.14.0,mgcv gam / bam Poisson additive model (log link).
-gam,binomial,mu,First slice,0.14.0,mgcv gam / bam Binomial additive model (logit link).
-gam,Gamma,mu,First slice,0.14.0,"mgcv gam / bam Gamma additive model; link-honest prose for the default inverse link and the log link."
-gam,poisson,smooth,First slice,0.22.5,"Smooth terms (s(x), te(x, z)) in a Poisson additive model (log link); summarised by basis dimension and edf in metadata$smooths."
-gam,binomial,smooth,First slice,0.22.5,"Smooth terms (s(x), te(x, z)) in a Binomial additive model (logit link); summarised by basis dimension and edf in metadata$smooths."
-gam,Gamma,smooth,First slice,0.22.5,"Smooth terms (s(x), te(x, z)) in a Gamma additive model; link-honest prose for the default inverse link and the log link, and the Gamma scale phi captured into variance_components."
-gam,*,*,Planned or reserved,,"Other families (tw, nb, scat, multinom, ziP, ...) and non-default smooths still planned."
-bam,*,*,Planned or reserved,,bam inherits from gam; see gam capability rows.
-drmTMB,gaussian,phylo,First slice,0.21.0,"drmTMB::phylo(term, tree) and drmTMB::animal(term, pedigree) markers. Internally uses Hadfield & Nakagawa (2010) A-inverse sparse-precision (all-nodes: latent vector spans tips + internal nodes). Extractor sets metadata$phylo_representation = ""all_nodes""."
-metafor,*,phylo,First slice,0.21.0,"Phylogenetic meta-analysis via rma.mv(..., R = list(species = A)) where A is the k x k tips-only phylogenetic correlation matrix (Sigma_species = sigma^2_p * A, with sigma^2_p estimated). Distinct from V = V (fixed sampling covariance). Extractor discriminates phylo vs spatial vs generic by R-matrix group name."
-brms,*,phylo,First slice,0.21.0,"Phylogenetic random effect via gr(species, cov = A) inside (1 | gr(species, cov = A)) terms. A is the k x k tips-only phylogenetic correlation matrix. Extractor sets metadata$phylo_representation = ""tips_only""."
-MCMCglmm,*,phylo,First slice,0.21.0,"Phylogenetic random effect detected via fit$ginverse (the Hadfield-Nakagawa all-nodes A-inverse sparse-precision path). Same code path serves both phylogenetic comparative method use and animal-model quantitative-genetics use -- same A matrix, different source (tree vs pedigree). Extractor sets metadata$phylo_representation = ""all_nodes""."
-glmmTMB,*,phylo,First slice,0.21.0,"Phylogenetic random effect detected via propto(0 + group | g, A) blocks (blockCode 11). Full conditional covariance is sigma_p^2 * A + sigma_res^2 * I (two free scalars). Extractor sets metadata$phylo_representation = ""tips_only"" + emits the propto_two_scalars info row in warnings_registry."
-phylolm,gaussian,mu,First slice,0.21.4,"Phylogenetic GLS via phylolm::phylolm() with Gaussian outcome and identity link. PGLS marginal form: y = X*beta + e, e ~ N(0, sigma^2 * C(alpha)) where C(alpha) is a tree-derived correlation matrix. BM and Pagel's lambda first-slice; OU / EB / kappa / delta / trend deferred."
-phylolm,*,phylo,First slice,0.21.4,"Phylogenetic correlation is the residual structure -- no separate u_p random effect; phylolm marginalizes u_p into e. Extractor sets metadata$phylo_representation = ""pgls_marginal"" and records the evolutionary model in metadata$phylo_model."
-phylolm,*,*,Planned or reserved,,"OU / EB / kappa / delta / trend phylo models for phylolm and phyloglm GLM-family extractor planned for a later release."
-drmTMB,gaussian,meta_known_vi,First slice,0.22.1,Meta-analytic bridge via meta_V(V = vi); replaces brms se(sqrt(vi)).
-drmTMB,gaussian,meta_phylo_multilevel,First slice,0.22.1,"Phylo + multilevel meta-analysis via phylo(.|species) + multiple (.|group)."
-brms,gaussian,meta_known_vi,First slice,0.22.1,Meta-analytic bridge via se(sqrt(vi)).
-metafor,*,meta_phylo_multilevel,First slice,0.22.1,"rma.mv with V = vi + random = list(... ~ phylogeny) + R = list(phylogeny = A)."
+class,family,component,status,since,notes,lives_in
+drmTMB,gaussian,mu,Stable,0.1.0,Univariate location submodel with identity link.,symbolizer
+drmTMB,gaussian,sigma,Stable,0.1.0,Univariate scale submodel with log link.,symbolizer
+drmTMB,gaussian,random_effects,First slice,0.3.1,"Random intercepts (1 | group) and random intercept + one slope (1 + x | group) on the mu submodel; nested / crossed / RE-on-sigma still planned.",symbolizer
+drmTMB,gaussian,zi,Planned or reserved,,Zero-inflation submodel.,symbolizer
+drmTMB,gaussian,hu,Planned or reserved,,Hurdle submodel.,symbolizer
+drmTMB,poisson,zi,First slice,0.4.0,"Zero-inflation submodel (logit link) layered on top of Poisson; mixture: P(Y=0) = pi_zi + (1 - pi_zi) * Poisson(0; mu).",symbolizer
+drmTMB,nbinom2,zi,First slice,0.4.0,"Zero-inflation submodel (logit link) layered on top of nbinom2.",symbolizer
+drmTMB,truncated_nbinom2,hu,First slice,0.4.0,"Hurdle submodel (logit link) on truncated_nbinom2; two-part: P(Y=0) = pi_hu, and positives are drawn from the zero-truncated negative binomial.",symbolizer
+drmTMB,gaussian,rho12,Planned or reserved,,Bivariate residual correlation.,symbolizer
+drmTMB,student,mu,First slice,0.2.2,Student-t location submodel with identity link.,symbolizer
+drmTMB,student,sigma,First slice,0.2.2,Student-t scale submodel with log link.,symbolizer
+drmTMB,student,nu,First slice,0.2.2,"Student-t degrees-of-freedom submodel with log(nu - 2) link; nu > 2 required for finite variance.",symbolizer
+drmTMB,lognormal,mu,First slice,0.2.2,"Lognormal location submodel: mu is the mean of log(Y), identity link.",symbolizer
+drmTMB,lognormal,sigma,First slice,0.2.2,"Lognormal scale submodel: sigma is the SD of log(Y), log link.",symbolizer
+drmTMB,Gamma,mu,First slice,0.2.2,"Gamma location submodel (positive continuous response, default log link via stats::Gamma(link = ""log"")).",symbolizer
+drmTMB,Gamma,sigma,First slice,0.2.2,Gamma dispersion submodel on the log scale.,symbolizer
+drmTMB,beta,mu,First slice,0.2.2,"Beta location submodel: mu in (0, 1) via the logit link; response Y in (0, 1).",symbolizer
+drmTMB,beta,sigma,First slice,0.2.2,Beta precision submodel on the log scale (larger sigma -> tighter distribution around mu).,symbolizer
+drmTMB,beta_binomial,mu,First slice,0.3.2,"Beta-binomial location submodel: mu in (0, 1) is the mean success probability via the logit link.",symbolizer
+drmTMB,beta_binomial,sigma,First slice,0.3.2,"Beta-binomial precision / overdispersion submodel on the log scale; larger sigma -> distribution tighter around mu (less overdispersion).",symbolizer
+drmTMB,poisson,mu,First slice,0.2.2,Poisson count submodel with log link; no dispersion parameter.,symbolizer
+drmTMB,nbinom2,mu,First slice,0.2.2,"Negative binomial (type 2) count submodel with log link.",symbolizer
+drmTMB,nbinom2,sigma,First slice,0.2.2,"Negative binomial overdispersion submodel; variance = mu + mu^2/exp(sigma).",symbolizer
+drmTMB,truncated_nbinom2,mu,First slice,0.3.2,"Zero-truncated negative binomial (type 2) count submodel with log link; response Y >= 1.",symbolizer
+drmTMB,truncated_nbinom2,sigma,First slice,0.3.2,"Zero-truncated nbinom2 overdispersion submodel on the log scale.",symbolizer
+drmTMB,cumulative_logit,mu,First slice,0.4.0,"Cumulative logit (proportional-odds) model for ordered categorical response; K-1 thresholds plus a shared slope vector.",symbolizer
+drmTMB,biv_gaussian,mu1,First slice,0.1.0,Bivariate Gaussian location submodel for the first response.,symbolizer
+drmTMB,biv_gaussian,mu2,First slice,0.1.0,Bivariate Gaussian location submodel for the second response.,symbolizer
+drmTMB,biv_gaussian,sigma1,First slice,0.1.0,Bivariate Gaussian scale submodel for the first response (log link).,symbolizer
+drmTMB,biv_gaussian,sigma2,First slice,0.1.0,Bivariate Gaussian scale submodel for the second response (log link).,symbolizer
+drmTMB,biv_gaussian,rho12,First slice,0.1.0,Residual correlation between the two responses (atanh_guarded link).,symbolizer
+gllvmTMB,gaussian,mu,First slice,0.1.0,Per-trait intercept submodel via 0 + trait fixed effects.,symbolizer
+gllvmTMB,gaussian,Lambda_B,First slice,0.1.0,Between-unit reduced-rank loading matrix via latent(0 + trait | unit).,symbolizer
+gllvmTMB,gaussian,Sigma_B,First slice,0.1.0,"Implied between-unit covariance Lambda_B Lambda_B^T (+ Psi_B when unique term present).",symbolizer
+gllvmTMB,gaussian,Psi_B,First slice,0.1.0,Per-trait unique variance via unique(0 + trait | unit).,symbolizer
+gllvmTMB,gaussian,sigma_eps,First slice,0.1.0,Shared row-level residual SD.,symbolizer
+gllvmTMB,*,Lambda_W,First slice,0.21.6,Within-unit reduced-rank loadings via obs-level latent() covstruct.,symbolizer
+gllvmTMB,*,Psi_W,First slice,0.21.6,Per-trait within-unit unique variance via obs-level unique() covstruct.,symbolizer
+gllvmTMB,gaussian,Sigma_W,First slice,0.21.6,"Implied within-individual covariance Lambda_W Lambda_W^T (+ Psi_W when unique(0 + trait | obs) present).",symbolizer
+gllvmTMB,gaussian,Repeatability,First slice,0.21.6,"Per-trait repeatability R_t = (Sigma_B)_tt / [(Sigma_B)_tt + (Sigma_W)_tt].",symbolizer
+gllvmTMB,*,phylo,First slice,0.21.0,"Phylogenetic covstructs (phylo_rr / phylo_diag / phylo_scalar / phylo_slope); extractor surfaces metadata$phylo_representation = ""package_managed"".",symbolizer
+gllvmTMB,*,spatial,Planned or reserved,,Spatial covstructs.,symbolizer
+gllvmTMB,*,Sigma,Planned or reserved,,,symbolizer
+gllvmTMB,binomial,mu,First slice,0.5.0,Per-trait intercept submodel on the logit scale via 0 + trait fixed effects.,symbolizer
+gllvmTMB,binomial,Lambda_B,First slice,0.5.0,Between-unit reduced-rank loading matrix for binomial latent variables.,symbolizer
+gllvmTMB,binomial,Sigma_B,First slice,0.5.0,"Implied between-unit covariance (on the logit scale) Lambda_B Lambda_B^T (+ Psi_B when unique term present).",symbolizer
+gllvmTMB,binomial,Psi_B,First slice,0.5.0,Per-trait unique variance (on the logit scale) via unique(0 + trait | unit).,symbolizer
+gllvmTMB,poisson,*,Planned or reserved,,Poisson family.,symbolizer
+gllvmTMB,nbinom2,*,Planned or reserved,,Negative binomial family.,symbolizer
+gllvmTMB,Gamma,*,Planned or reserved,,Gamma family.,symbolizer
+gllvmTMB,lognormal,*,Planned or reserved,,Lognormal family.,symbolizer
+gllvmTMB,Beta,*,Planned or reserved,,Beta family.,symbolizer
+gllvmTMB,betabinomial,*,Planned or reserved,,Beta-binomial family.,symbolizer
+gllvmTMB,tweedie,*,Planned or reserved,,Tweedie family.,symbolizer
+gllvmTMB,student,*,Planned or reserved,,Student-t family.,symbolizer
+gllvmTMB,ordinal_probit,*,Planned or reserved,,Ordinal probit family.,symbolizer
+glmmTMB,gaussian,mu,First slice,0.7.0,Gaussian conditional submodel (identity link).,symbolizer
+glmmTMB,gaussian,sigma,First slice,0.7.0,"Distributional sigma submodel from `dispformula = ~ z` (log link).",symbolizer
+glmmTMB,gaussian,random_effects,First slice,0.7.0,"Random intercepts (1 | group) on the conditional submodel; nested / crossed / RE-on-sigma still planned.",symbolizer
+glmmTMB,gaussian,zi,Planned or reserved,,Zero-inflation submodel.,symbolizer
+glmmTMB,binomial,mu,First slice,0.11.0,Binomial / Bernoulli conditional submodel (logit link).,symbolizer
+glmmTMB,binomial,random_effects,First slice,0.11.0,"Random intercepts (1 | group) on the binomial conditional submodel.",symbolizer
+glmmTMB,poisson,mu,First slice,0.11.0,Poisson conditional submodel (log link).,symbolizer
+glmmTMB,poisson,random_effects,First slice,0.11.0,"Random intercepts (1 | group) on the poisson conditional submodel.",symbolizer
+glmmTMB,nbinom2,mu,First slice,0.11.0,Negative binomial (type 2) conditional submodel (log link).,symbolizer
+glmmTMB,nbinom2,sigma,First slice,0.11.0,"Overdispersion parameter (log link); size = exp(sigma).",symbolizer
+glmmTMB,nbinom2,random_effects,First slice,0.11.0,"Random intercepts on the nbinom2 conditional submodel.",symbolizer
+glmmTMB,poisson,zi,First slice,0.11.0,"Zero-inflation submodel (logit link) on glmmTMB poisson via ziformula.",symbolizer
+glmmTMB,nbinom2,zi,First slice,0.11.0,"Zero-inflation submodel (logit link) on glmmTMB nbinom2 via ziformula.",symbolizer
+glmmTMB,gaussian,propto,First slice,0.16.0,"propto(0 + obs | g, R) covariance structure: Sigma = sigma^2 * R with sigma^2 estimated, the phylogenetic / pedigree / structured-covariance pattern. Surfaces an info row in warning_table() noting this is NOT the meta-analytic fixed-V pattern (that requires glmmTMB's planned equalto()).",symbolizer
+glmmTMB,binomial,propto,First slice,0.16.0,"propto() on a binomial conditional submodel (e.g., phylogenetic binomial GLMM).",symbolizer
+glmmTMB,poisson,propto,First slice,0.16.0,"propto() on a poisson conditional submodel.",symbolizer
+glmmTMB,*,*,Planned or reserved,,Other families and submodels targeted for v0.11.x.,symbolizer
+brmsfit,gaussian,mu,First slice,0.8.0,Gaussian conditional submodel (identity link).,symbolizer
+brmsfit,gaussian,random_effects,First slice,0.8.0,"Random intercepts (1 | group) and (1 + x | group) on the conditional submodel; nested / crossed still planned.",symbolizer
+brmsfit,gaussian,sigma_distributional,First slice,0.11.0,brms distributional formula on sigma via bf(y ~ x; sigma ~ z); other dpars still planned.,symbolizer
+brmsfit,binomial,mu,First slice,0.11.2,"Binomial / Bernoulli conditional submodel (logit link); brms's bernoulli() is aliased to binomial internally.",symbolizer
+brmsfit,binomial,random_effects,First slice,0.11.2,Random intercepts on the binomial conditional submodel.,symbolizer
+brmsfit,poisson,mu,First slice,0.11.2,Poisson conditional submodel (log link).,symbolizer
+brmsfit,poisson,random_effects,First slice,0.11.2,Random intercepts on the poisson conditional submodel.,symbolizer
+brmsfit,*,*,Planned or reserved,,Other families and distributional dpars targeted for v0.11.x.,symbolizer
+MCMCglmm,gaussian,mu,First slice,0.9.0,Gaussian conditional submodel (identity link). Requires `data = ...` argument since MCMCglmm doesn't keep the data frame.,symbolizer
+MCMCglmm,gaussian,random_effects,First slice,0.9.0,"Random intercepts (~ g) on the conditional submodel; MCMCglmm's flexible covariance structures still planned.",symbolizer
+MCMCglmm,gaussian,animal,First slice,0.12.0,"Animal-model / phylogenetic random effect via ginverse = list(animal = Ainv); the variance-components row for the animal group is tagged kind = ""animal"" and heritability h^2 = sigma^2_A / (sigma^2_A + sigma^2_E) is derived and attached to metadata$heritability.",symbolizer
+MCMCglmm,*,*,Planned or reserved,,Non-Gaussian families and flexible residual covariance (us / idh) still planned for a later batch.,symbolizer
+sdmTMB,gaussian,mu,First slice,0.12.0,Gaussian conditional submodel (identity link) from sdmTMB::sdmTMB().,symbolizer
+sdmTMB,gaussian,omega,First slice,0.12.0,"Spatial random field omega(s_i) ~ GMRF(0, Q(kappa)) via spatial = ""on"".",symbolizer
+sdmTMB,gaussian,epsilon,First slice,0.12.0,"Spatiotemporal field epsilon(s_i, t) ~ GMRF(0, Q(kappa)) via the time = arg.",symbolizer
+sdmTMB,*,delta_model,Planned or reserved,,"Delta (hurdle / two-component) sdmTMB models. fit$family$family is a length-2 vector (e.g. delta_gamma()); routed here regardless of the component families.",symbolizer
+sdmTMB,*,*,Planned or reserved,,Non-Gaussian families and spatial_varying / share_range still planned..x.,symbolizer
+lmerMod,gaussian,mu,First slice,0.10.0,Gaussian conditional submodel (identity link) from lme4::lmer().,symbolizer
+lmerMod,gaussian,random_effects,First slice,0.10.0,"Random intercepts (1 | g) and (1 + x | g) on the conditional submodel; nested / crossed still planned.",symbolizer
+lmerMod,*,*,Planned or reserved,,Other lme4 features targeted for v0.11.x.,symbolizer
+glmerMod,binomial,mu,First slice,0.11.0,Binomial / Bernoulli conditional submodel (logit link) from lme4::glmer().,symbolizer
+glmerMod,binomial,random_effects,First slice,0.11.0,"Random intercepts (1 | g) on the binomial conditional submodel.",symbolizer
+glmerMod,poisson,mu,First slice,0.11.0,Poisson conditional submodel (log link) from lme4::glmer().,symbolizer
+glmerMod,poisson,random_effects,First slice,0.11.0,"Random intercepts (1 | g) on the poisson conditional submodel.",symbolizer
+glmerMod,*,*,Planned or reserved,,Other glmer families targeted for v0.11.x.,symbolizer
+lm,gaussian,mu,First slice,0.10.0,Gaussian fit from stats::lm().,symbolizer
+glm,gaussian,mu,First slice,0.10.0,Gaussian glm from stats::glm().,symbolizer
+glm,binomial,mu,First slice,0.10.0,Binomial / Bernoulli glm (logit link) from stats::glm().,symbolizer
+glm,poisson,mu,First slice,0.10.0,Poisson glm (log link) from stats::glm().,symbolizer
+glm,Gamma,mu,First slice,0.11.0,Gamma glm (log link by convention) from stats::glm().,symbolizer
+glm,*,*,Planned or reserved,,Other families (inverse.gaussian / quasi*) targeted for v0.11.x.,symbolizer
+rma.uni,meta_normal,mu,First slice,0.13.0,"metafor random / mixed-effects meta-regression: theta_i = beta_0 + sum beta_k x_ki + u_i.",symbolizer
+rma.uni,meta_normal,tau2,First slice,0.13.0,"Between-study heterogeneity variance tau^2; appears in variance_components with kind = ""heterogeneity"".",symbolizer
+rma.uni,meta_normal,tau2_scale,First slice,0.15.0,"Location-scale meta-regression (rma.ls): log(tau^2_i) = alpha_0 + sum alpha_k z_ki. metafor models the log VARIANCE (not log SD); alpha coefficients. References: Viechtbauer & López-López (2022), Nakagawa et al. (2025).",symbolizer
+rma.uni,*,*,Planned or reserved,,"Non-meta_normal metrics (selection / publication-bias detection layer, double-hierarchical scale random effects) targeted for v0.16+.",symbolizer
+rma.mv,meta_normal,mu,First slice,0.13.1,"metafor multilevel / multivariate meta-regression: theta_i = beta_0 + sum beta_k x_ki + sum_r u_{r,i}.",symbolizer
+rma.mv,meta_normal,structured,First slice,0.13.1,"R-matrix structured random effects via R = list(phylo = phylo.cor); the tier renders as u_r ~ N(0, sigma^2_r * R_r) and is tagged kind = ""structured"" in variance_components.",symbolizer
+rma.mv,meta_normal,struct_UN,First slice,0.16.0,"Unstructured covariance between inner-level random effects via ~ inner | outer with struct = ""UN""; per-inner-level diagonal variances (kind = ""heterogeneity_un"") and off-diagonal correlations (kind = ""correlation"") appear in variance_components. Bivariate / multivariate meta-analysis pattern.",symbolizer
+rma.mv,*,*,Planned or reserved,,"Other covariance structures (HCS, AR, DIAG, ...) and selection / publication-bias variants still planned.",symbolizer
+gam,gaussian,mu,First slice,0.14.0,mgcv gam / bam Gaussian additive model (identity link).,symbolizer
+gam,gaussian,smooth,First slice,0.14.0,"Smooth terms (s(x), s(x, by = factor), te(x, z)) summarised by basis dimension and edf in metadata$smooths.",symbolizer
+gam,poisson,mu,First slice,0.14.0,mgcv gam / bam Poisson additive model (log link).,symbolizer
+gam,binomial,mu,First slice,0.14.0,mgcv gam / bam Binomial additive model (logit link).,symbolizer
+gam,Gamma,mu,First slice,0.14.0,"mgcv gam / bam Gamma additive model; link-honest prose for the default inverse link and the log link.",symbolizer
+gam,poisson,smooth,First slice,0.22.5,"Smooth terms (s(x), te(x, z)) in a Poisson additive model (log link); summarised by basis dimension and edf in metadata$smooths.",symbolizer
+gam,binomial,smooth,First slice,0.22.5,"Smooth terms (s(x), te(x, z)) in a Binomial additive model (logit link); summarised by basis dimension and edf in metadata$smooths.",symbolizer
+gam,Gamma,smooth,First slice,0.22.5,"Smooth terms (s(x), te(x, z)) in a Gamma additive model; link-honest prose for the default inverse link and the log link, and the Gamma scale phi captured into variance_components.",symbolizer
+gam,*,*,Planned or reserved,,"Other families (tw, nb, scat, multinom, ziP, ...) and non-default smooths still planned.",symbolizer
+bam,*,*,Planned or reserved,,bam inherits from gam; see gam capability rows.,symbolizer
+drmTMB,gaussian,phylo,First slice,0.21.0,"drmTMB::phylo(term, tree) and drmTMB::animal(term, pedigree) markers. Internally uses Hadfield & Nakagawa (2010) A-inverse sparse-precision (all-nodes: latent vector spans tips + internal nodes). Extractor sets metadata$phylo_representation = ""all_nodes"".",symbolizer
+metafor,*,phylo,First slice,0.21.0,"Phylogenetic meta-analysis via rma.mv(..., R = list(species = A)) where A is the k x k tips-only phylogenetic correlation matrix (Sigma_species = sigma^2_p * A, with sigma^2_p estimated). Distinct from V = V (fixed sampling covariance). Extractor discriminates phylo vs spatial vs generic by R-matrix group name.",symbolizer
+brms,*,phylo,First slice,0.21.0,"Phylogenetic random effect via gr(species, cov = A) inside (1 | gr(species, cov = A)) terms. A is the k x k tips-only phylogenetic correlation matrix. Extractor sets metadata$phylo_representation = ""tips_only"".",symbolizer
+MCMCglmm,*,phylo,First slice,0.21.0,"Phylogenetic random effect detected via fit$ginverse (the Hadfield-Nakagawa all-nodes A-inverse sparse-precision path). Same code path serves both phylogenetic comparative method use and animal-model quantitative-genetics use -- same A matrix, different source (tree vs pedigree). Extractor sets metadata$phylo_representation = ""all_nodes"".",symbolizer
+glmmTMB,*,phylo,First slice,0.21.0,"Phylogenetic random effect detected via propto(0 + group | g, A) blocks (blockCode 11). Full conditional covariance is sigma_p^2 * A + sigma_res^2 * I (two free scalars). Extractor sets metadata$phylo_representation = ""tips_only"" + emits the propto_two_scalars info row in warnings_registry.",symbolizer
+phylolm,gaussian,mu,First slice,0.21.4,"Phylogenetic GLS via phylolm::phylolm() with Gaussian outcome and identity link. PGLS marginal form: y = X*beta + e, e ~ N(0, sigma^2 * C(alpha)) where C(alpha) is a tree-derived correlation matrix. BM and Pagel's lambda first-slice; OU / EB / kappa / delta / trend deferred.",symbolizer
+phylolm,*,phylo,First slice,0.21.4,"Phylogenetic correlation is the residual structure -- no separate u_p random effect; phylolm marginalizes u_p into e. Extractor sets metadata$phylo_representation = ""pgls_marginal"" and records the evolutionary model in metadata$phylo_model.",symbolizer
+phylolm,*,*,Planned or reserved,,"OU / EB / kappa / delta / trend phylo models for phylolm and phyloglm GLM-family extractor planned for a later release.",symbolizer
+drmTMB,gaussian,meta_known_vi,First slice,0.22.1,Meta-analytic bridge via meta_V(V = vi); replaces brms se(sqrt(vi)).,symbolizer
+drmTMB,gaussian,meta_phylo_multilevel,First slice,0.22.1,"Phylo + multilevel meta-analysis via phylo(.|species) + multiple (.|group).",symbolizer
+brms,gaussian,meta_known_vi,First slice,0.22.1,Meta-analytic bridge via se(sqrt(vi)).,symbolizer
+metafor,*,meta_phylo_multilevel,First slice,0.22.1,"rma.mv with V = vi + random = list(... ~ phylogeny) + R = list(phylogeny = A).",symbolizer
+piecewiseSEM,*,*,Stable,0.22.4,"Walks psem list-of-fits; each fitted node dispatches on its own class. Mean-only by construction (use drm_sem for distributional components).",symbolizer
+drm_sem,*,*,Stable,0.22.4,"Method lives in drmSEM::symbolize.drm_sem; walks sem$records and delegates to symbolize.drmTMB per node.",drmSEM

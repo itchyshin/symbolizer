@@ -41,6 +41,10 @@ Gaussian whose residual SD varies, or more than one random-effect term --
 misleading number. Use \code{\link[=variance_partition]{variance_partition()}} to see the full breakdown in
 those cases. Point estimate only; no confidence interval.
 }
+\examples{
+# icc(symbolize(lme4::lmer(Reaction ~ Days + (1 | Subject),
+#                          data = lme4::sleepstudy)))
+}
 \seealso{
 \code{\link[=variance_partition]{variance_partition()}} for the full source-by-source breakdown.
 }

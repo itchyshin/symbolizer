@@ -50,3 +50,8 @@ identifiability and convergence diagnostics, run \code{drmTMB::check_drm()}
 (or the analogous diagnostic for \code{gllvmTMB}) on each fit before
 interpreting the structural diff.
 }
+\examples{
+# a <- symbolize(lm(mpg ~ wt, data = mtcars))
+# b <- symbolize(lm(mpg ~ wt + hp, data = mtcars))
+# compare_symbolic(a, b)
+}

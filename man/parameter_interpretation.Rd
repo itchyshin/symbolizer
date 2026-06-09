@@ -37,3 +37,6 @@ The renderer is a pure consumer of \code{x$interpretation}. All prose was
 substituted from \code{inst/extdata/interpretation-templates.csv} at extract
 time; this surface only displays it.
 }
+\examples{
+# parameter_interpretation(symbolize(glm(am ~ wt, binomial(), data = mtcars)))
+}

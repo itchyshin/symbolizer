@@ -36,3 +36,6 @@ The bundle is a plain list; print it at the console for a structured
 walkthrough, or knit it inside a Quarto / R Markdown document for a
 heading-and-table section per piece.
 }
+\examples{
+# model_card(symbolize(lm(mpg ~ wt, data = mtcars)))
+}

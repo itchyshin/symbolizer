@@ -45,6 +45,8 @@ options(crayon.enabled = FALSE)
 
 **Currently reads eleven package families** (14 fitted-class methods, 30+ family-class combinations): the two TMB sister packages [`drmTMB`](https://itchyshin.github.io/drmTMB/) and [`gllvmTMB`](https://itchyshin.github.io/gllvmTMB/), the broader GLMM ecosystem `glmmTMB`, `brms`, `lme4` (`lmer` + `glmer`), `MCMCglmm` (including animal models), `sdmTMB` (spatial + spatiotemporal random fields), `stats::lm` / `stats::glm`, the meta-analytic framework `metafor` (`rma.uni` + `rma.mv` with multilevel / structured / location-scale variants), additive models via `mgcv::gam` / `mgcv::bam` (with `gamm` / `gamm4` covered through the `$gam` slot), and phylogenetic GLS via `phylolm`. See the [Roadmap article](articles/symbolizer-roadmap.html) for the full capability matrix; `symbolizer_capabilities()` is the in-package source of truth, and any class / family / component not marked Stable or First slice there will be refused by `symbolize()`.
 
+**Works with multi-node SEMs too.** `symbolize()` reads piecewise structural equation models in two flavours: mean-only piecewise SEMs from [`piecewiseSEM::psem()`](https://jslefche.github.io/piecewiseSEM/) via the bundled `symbolize.psem` method (each node delegates to `symbolize.<class>()`), and distributional / location-scale piecewise SEMs from [`drmSEM::drm_sem()`](https://itchyshin.github.io/drmSEM/) via the `drmSEM`-side `symbolize.drm_sem` method (each node delegates to `symbolize.drmTMB`). Both return a `symbolized_*` collator whose `as_latex()`, `equations()`, and `assumption_table()` companions emit per-node output stamped with the response variable.
+
 ## Install
 
 `symbolizer` is pre-CRAN. Install the development build from GitHub with `pak`:

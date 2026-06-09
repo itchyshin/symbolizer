@@ -56,10 +56,11 @@ articles:
       - symbolizer-gllvm
       - symbolizer-compare
   - title: "Cross-package bridges"
-    desc: "Models whose structure lives in another package: phylogenetic, animal-model, and spatial dependence, and meta-analysis across metafor / brms / MCMCglmm."
+    desc: "Models whose structure lives in another package: phylogenetic, animal-model, and spatial dependence, meta-analysis across metafor / brms / MCMCglmm, and multi-node structural equation models (piecewiseSEM / drmSEM)."
     contents:
       - symbolizer-structural-dependence
       - symbolizer-meta-analysis
+      - symbolizer-sem
   - title: "Where we're going"
     desc: "The capability roadmap: what is Stable, what is a First slice, and what is planned or reserved."
     contents:
@@ -96,6 +97,7 @@ reference:
       - symbolize.rma.mv
       - symbolize.gam
       - symbolize.phylolm
+      - symbolize.psem
       - symbolizer_capabilities
   - title: "Read both notations"
     desc: "Educator-facing bridge between index and matrix forms."

@@ -3,7 +3,7 @@ test_that("symbolizer_capabilities() returns the expected tibble shape", {
   expect_s3_class(caps, "tbl_df")
   expect_named(
     caps,
-    c("class", "family", "component", "status", "since", "notes")
+    c("class", "family", "component", "status", "since", "notes", "lives_in")
   )
   expect_gt(nrow(caps), 0L)
 })

@@ -10,7 +10,7 @@ wrap_aligned(lines)
 \item{lines}{Character vector of LaTeX equation lines.}
 }
 \value{
-A single character string: \code{lines} joined with \verb{\\} line breaks and
+A single character string: \code{lines} joined with \verb{\\\\} line breaks and
 wrapped in a LaTeX \code{aligned} environment.
 }
 \description{

@@ -49,3 +49,6 @@ heading-and-kable section per piece.
 Use \code{\link[=summary]{summary()}} on an already-symbolize'd object to get the same
 walkthrough without re-running \code{\link[=symbolize]{symbolize()}}.
 }
+\examples{
+# explain(symbolize(lm(mpg ~ wt, data = mtcars)))
+}

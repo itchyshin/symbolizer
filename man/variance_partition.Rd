@@ -35,6 +35,10 @@ shares of a total are not meaningful without a residual.
 Point estimates only; no confidence intervals (the package's uncertainty
 contract).
 }
+\examples{
+# variance_partition(symbolize(lme4::lmer(Reaction ~ Days + (1 | Subject),
+#                                         data = lme4::sleepstudy)))
+}
 \seealso{
 \code{\link[=icc]{icc()}} for the single-number intraclass correlation.
 }
