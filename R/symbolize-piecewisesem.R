@@ -78,7 +78,12 @@ symbolize.psem <- function(fit, symbols = NULL, units = NULL,
       cov_arcs = cov_arcs,
       metadata = metadata
     ),
-    class = "symbolized_psem"
+    # `symbolized_model_set` is the shared parent that drmSEM's
+    # `symbolized_drm_sem` also carries, so one
+    # `as_html_three_views.symbolized_model_set` method serves both
+    # collators. The method keys nodes by `names(x$parts)`, which both
+    # collators populate.
+    class = c("symbolized_psem", "symbolized_model_set")
   )
 }
 

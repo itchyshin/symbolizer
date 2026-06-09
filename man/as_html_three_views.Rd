@@ -2,9 +2,22 @@
 % Please edit documentation in R/render-three-views.R
 \name{as_html_three_views}
 \alias{as_html_three_views}
+\alias{as_html_three_views.symbolized_model_set}
 \title{Three-views HTML rendering of a symbolized_model}
 \usage{
 as_html_three_views(
+  x,
+  head = 5L,
+  tail = 2L,
+  head_cols = 5L,
+  tail_cols = 2L,
+  id = "sym",
+  standalone = FALSE,
+  file = NULL,
+  ...
+)
+
+\method{as_html_three_views}{symbolized_model_set}(
   x,
   head = 5L,
   tail = 2L,
@@ -68,4 +81,11 @@ Designed to be \code{cat()}-ed inside an Rmd / Quarto chunk with
 \code{results = 'asis'}. The host document supplies math rendering (MathJax /
 KaTeX via pandoc); this function emits semantic HTML, inline CSS, and a
 small tab-switching script.
+}
+\details{
+For a multi-node structural equation model (a \code{symbolized_model_set},
+the shared parent of \code{piecewiseSEM}'s \code{symbolized_psem} and drmSEM's
+\code{symbolized_drm_sem}), the per-node three-views widget is rendered for
+each node and stacked under a \verb{<h2>Node: <name></h2>} header. Nodes are
+read from \code{names(x$parts)}, so the same method serves either collator.
 }

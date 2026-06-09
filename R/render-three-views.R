@@ -289,6 +289,67 @@ as_html_three_views.symbolized_model <- function(x, head = 5L, tail = 2L,
   invisible(html)
 }
 
+#' @rdname as_html_three_views
+#' @details
+#' For a multi-node structural equation model (a `symbolized_model_set`,
+#' the shared parent of `piecewiseSEM`'s `symbolized_psem` and drmSEM's
+#' `symbolized_drm_sem`), the per-node three-views widget is rendered for
+#' each node and stacked under a `<h2>Node: <name></h2>` header. Nodes are
+#' read from `names(x$parts)`, so the same method serves either collator.
+#' @export
+as_html_three_views.symbolized_model_set <- function(x, head = 5L, tail = 2L,
+                                                      head_cols = 5L,
+                                                      tail_cols = 2L,
+                                                      id = "sym",
+                                                      standalone = FALSE,
+                                                      file = NULL, ...) {
+  nodes <- names(x$parts)
+  if (is.null(nodes) || length(nodes) == 0L) {
+    cli::cli_abort(c(
+      "{.arg x} has no nodes to render in {.code x$parts}.",
+      i = "A {.cls symbolized_model_set} must carry a named list of per-node models."
+    ))
+  }
+  sections <- vapply(seq_along(nodes), function(i) {
+    nm <- nodes[[i]]
+    # The single-model method `cat()`s its fragment as a side effect; capture
+    # that so nested calls don't leak to stdout, and keep only the return
+    # value. A per-node `id` keeps each widget's element ids distinct.
+    node_html <- NULL
+    utils::capture.output(
+      node_html <- as_html_three_views(
+        x$parts[[nm]],
+        head = head, tail = tail,
+        head_cols = head_cols, tail_cols = tail_cols,
+        id = paste0(id, "-", gsub("[^A-Za-z0-9]", "", nm)),
+        standalone = FALSE, file = NULL, ...
+      )
+    )
+    paste0(
+      "<section class=\"sym-node\">\n",
+      "<h2 class=\"sym-node-h\">Node: ", nm, "</h2>\n",
+      node_html, "\n</section>\n"
+    )
+  }, character(1L))
+  html <- paste(sections, collapse = "\n")
+  if (isTRUE(standalone)) {
+    html <- three_views_standalone_wrap(html, title = "symbolizer three views")
+  }
+  if (!is.null(file)) {
+    writeLines(html, con = file)
+    if (!isTRUE(standalone)) {
+      cli::cli_warn(c(
+        "Wrote a fragment to {.path {file}} but {.arg standalone} is FALSE.",
+        i = "Opening this file directly in a browser will NOT render math.",
+        i = "Pass {.code standalone = TRUE} for a self-contained HTML page."
+      ))
+    }
+    return(invisible(html))
+  }
+  cat(html)
+  invisible(html)
+}
+
 #' PDF rendering of a symbolized_model in three stacked sections
 #'
 #' @description

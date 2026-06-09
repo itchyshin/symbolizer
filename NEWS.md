@@ -13,6 +13,14 @@
   table (and only there — they are bidirected, not regressions).
   Mean-only by construction; use the `drm_sem` path for distributional
   / location-scale piecewise SEMs.
+* **HTML three-views for multi-node SEMs.** New
+  `as_html_three_views.symbolized_model_set` method renders the per-node
+  three-views widget for every node and stacks them under
+  `<h2>Node: <name></h2>` headers. `symbolized_model_set` is the shared
+  parent class of `symbolized_psem` and drmSEM's `symbolized_drm_sem`
+  (both key their nodes by `names(x$parts)`), so the one method serves
+  either collator. `standalone` / `file` behave as on the single-model
+  method.
 * **`capabilities.csv` gains a `lives_in` column.** Records which
   package owns each `(class, family, component)` method so cross-package
   bridges are explicit. Existing rows are `lives_in = "symbolizer"`; the

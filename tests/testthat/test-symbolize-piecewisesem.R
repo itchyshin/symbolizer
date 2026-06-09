@@ -96,3 +96,53 @@ test_that("drm_sem/*/* is registered with lives_in = drmSEM", {
   expect_equal(row$status, "Stable")
   expect_equal(row$lives_in, "drmSEM")
 })
+
+# ---- HTML view (shared symbolized_model_set parent) ------------------------
+# symbolize.psem tags its output `symbolized_model_set` so a single
+# `as_html_three_views.symbolized_model_set` method serves both the psem
+# collator and drmSEM's `symbolized_drm_sem` (which already carries that
+# parent class). The method stacks the per-node three-views widget under a
+# `<h2>Node: <name></h2>` header. Both collators key their nodes by name on
+# `x$parts`, so the method reads `names(x$parts)` and never needs to know
+# which collator it received.
+
+test_that("symbolize(psem) output carries the symbolized_model_set parent", {
+  bundle <- fit_psem_lm_chain()
+  sym <- symbolize(bundle$fit)
+  expect_s3_class(sym, "symbolized_model_set")
+})
+
+test_that("as_html_three_views(symbolized_psem) returns one HTML string", {
+  bundle <- fit_psem_lm_chain()
+  sym <- symbolize(bundle$fit)
+  html <- as_html_three_views(sym)
+  expect_type(html, "character")
+  expect_length(html, 1L)
+})
+
+test_that("as_html_three_views(symbolized_psem) stamps a header per node", {
+  bundle <- fit_psem_lm_chain()
+  sym <- symbolize(bundle$fit)
+  html <- as_html_three_views(sym)
+  for (n in bundle$node_names) {
+    expect_match(html, paste0("Node: ", n), fixed = TRUE)
+  }
+})
+
+test_that("as_html_three_views(symbolized_psem) embeds one widget per node", {
+  bundle <- fit_psem_lm_chain()
+  sym <- symbolize(bundle$fit)
+  html <- as_html_three_views(sym)
+  # Each single-model widget emits exactly one role="tablist"; a two-node
+  # collator must therefore carry two.
+  n_tablists <- length(gregexpr("role=\"tablist\"", html, fixed = TRUE)[[1L]])
+  expect_equal(n_tablists, length(bundle$node_names))
+})
+
+test_that("as_html_three_views(symbolized_psem, standalone = TRUE) is a full page", {
+  bundle <- fit_psem_lm_chain()
+  sym <- symbolize(bundle$fit)
+  html <- as_html_three_views(sym, standalone = TRUE)
+  expect_match(html, "<!DOCTYPE html>", fixed = TRUE)
+  expect_match(html, "MathJax", fixed = TRUE)
+})
