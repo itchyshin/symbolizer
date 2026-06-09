@@ -41,3 +41,9 @@ as_dag(x, ...)
 A list classed `c("symbolic_dag", "list")` with three slots: `nodes`
 (tibble), `edges` (tibble), `dot` (single character string with the
 GraphViz / DOT representation).
+
+## Examples
+
+``` r
+# as_dag(symbolize(lm(mpg ~ wt, data = mtcars)))
+```

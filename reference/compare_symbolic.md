@@ -63,3 +63,11 @@ compare_symbolic(sym_a, sym_b, metrics = FALSE, ...)
 A list classed `c("symbolic_comparison", "list")` with four slots
 (`meta`, `diff_submodels`, `diff_terms`, `diff_assumptions`), plus a
 fifth `diff_metrics` slot when `metrics = TRUE`.
+
+## Examples
+
+``` r
+# a <- symbolize(lm(mpg ~ wt, data = mtcars))
+# b <- symbolize(lm(mpg ~ wt + hp, data = mtcars))
+# compare_symbolic(a, b)
+```

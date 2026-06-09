@@ -34,8 +34,8 @@ matrices.
 | Index and matrix notation side by side | — | `equations(sym, notation = "both")`, `notation_bridge(sym)` |
 | Three views with real data | — | `expand(sym)`, `as_html_three_views(sym)` |
 
-**Currently reads ten package families** (14 fitted-class methods, 30+
-family-class combinations): the two TMB sister packages
+**Currently reads eleven package families** (14 fitted-class methods,
+30+ family-class combinations): the two TMB sister packages
 [`drmTMB`](https://itchyshin.github.io/drmTMB/) and
 [`gllvmTMB`](https://itchyshin.github.io/gllvmTMB/), the broader GLMM
 ecosystem `glmmTMB`, `brms`, `lme4` (`lmer` + `glmer`), `MCMCglmm`
@@ -43,16 +43,33 @@ ecosystem `glmmTMB`, `brms`, `lme4` (`lmer` + `glmer`), `MCMCglmm`
 fields), [`stats::lm`](https://rdrr.io/r/stats/lm.html) /
 [`stats::glm`](https://rdrr.io/r/stats/glm.html), the meta-analytic
 framework `metafor` (`rma.uni` + `rma.mv` with multilevel / structured /
-location-scale variants), and additive models via
+location-scale variants), additive models via
 [`mgcv::gam`](https://rdrr.io/pkg/mgcv/man/gam.html) /
 [`mgcv::bam`](https://rdrr.io/pkg/mgcv/man/bam.html) (with `gamm` /
-`gamm4` covered through the `$gam` slot). See the [Roadmap
+`gamm4` covered through the `$gam` slot), and phylogenetic GLS via
+`phylolm`. See the [Roadmap
 article](https://itchyshin.github.io/symbolizer/articles/symbolizer-roadmap.md)
 for the full capability matrix;
 [`symbolizer_capabilities()`](https://itchyshin.github.io/symbolizer/reference/symbolizer_capabilities.md)
 is the in-package source of truth, and any class / family / component
 not marked Stable or First slice there will be refused by
 [`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md).
+
+**Works with multi-node SEMs too.**
+[`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
+reads piecewise structural equation models in two flavours: mean-only
+piecewise SEMs from
+[`piecewiseSEM::psem()`](https://jslefche.github.io/piecewiseSEM/) via
+the bundled `symbolize.psem` method (each node delegates to
+`symbolize.<class>()`), and distributional / location-scale piecewise
+SEMs from [`drmSEM::drm_sem()`](https://itchyshin.github.io/drmSEM/) via
+the `drmSEM`-side `symbolize.drm_sem` method (each node delegates to
+`symbolize.drmTMB`). Both return a `symbolized_*` collator whose
+[`as_latex()`](https://itchyshin.github.io/symbolizer/reference/as_latex.md),
+[`equations()`](https://itchyshin.github.io/symbolizer/reference/equations.md),
+and
+[`assumption_table()`](https://itchyshin.github.io/symbolizer/reference/assumption_table.md)
+companions emit per-node output stamped with the response variable.
 
 ## Install
 

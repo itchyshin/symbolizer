@@ -34,8 +34,8 @@ matrices.
 | Index and matrix notation side by side | — | `equations(sym, notation = "both")`, `notation_bridge(sym)` |
 | Three views with real data | — | `expand(sym)`, `as_html_three_views(sym)` |
 
-**Currently reads ten package families** (14 fitted-class methods, 30+
-family-class combinations): the two TMB sister packages
+**Currently reads eleven package families** (14 fitted-class methods,
+30+ family-class combinations): the two TMB sister packages
 [`drmTMB`](https://itchyshin.github.io/drmTMB/) and
 [`gllvmTMB`](https://itchyshin.github.io/gllvmTMB/), the broader GLMM
 ecosystem `glmmTMB`, `brms`, `lme4` (`lmer` + `glmer`), `MCMCglmm`
@@ -43,16 +43,33 @@ ecosystem `glmmTMB`, `brms`, `lme4` (`lmer` + `glmer`), `MCMCglmm`
 fields), [`stats::lm`](https://rdrr.io/r/stats/lm.html) /
 [`stats::glm`](https://rdrr.io/r/stats/glm.html), the meta-analytic
 framework `metafor` (`rma.uni` + `rma.mv` with multilevel / structured /
-location-scale variants), and additive models via
+location-scale variants), additive models via
 [`mgcv::gam`](https://rdrr.io/pkg/mgcv/man/gam.html) /
 [`mgcv::bam`](https://rdrr.io/pkg/mgcv/man/bam.html) (with `gamm` /
-`gamm4` covered through the `$gam` slot). See the [Roadmap
+`gamm4` covered through the `$gam` slot), and phylogenetic GLS via
+`phylolm`. See the [Roadmap
 article](https://itchyshin.github.io/symbolizer/articles/symbolizer-roadmap.md)
 for the full capability matrix;
 [`symbolizer_capabilities()`](https://itchyshin.github.io/symbolizer/reference/symbolizer_capabilities.md)
 is the in-package source of truth, and any class / family / component
 not marked Stable or First slice there will be refused by
 [`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md).
+
+**Works with multi-node SEMs too.**
+[`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
+reads piecewise structural equation models in two flavours: mean-only
+piecewise SEMs from
+[`piecewiseSEM::psem()`](https://jslefche.github.io/piecewiseSEM/) via
+the bundled `symbolize.psem` method (each node delegates to
+`symbolize.<class>()`), and distributional / location-scale piecewise
+SEMs from [`drmSEM::drm_sem()`](https://itchyshin.github.io/drmSEM/) via
+the `drmSEM`-side `symbolize.drm_sem` method (each node delegates to
+`symbolize.drmTMB`). Both return a `symbolized_*` collator whose
+[`as_latex()`](https://itchyshin.github.io/symbolizer/reference/as_latex.md),
+[`equations()`](https://itchyshin.github.io/symbolizer/reference/equations.md),
+and
+[`assumption_table()`](https://itchyshin.github.io/symbolizer/reference/assumption_table.md)
+companions emit per-node output stamped with the response variable.
 
 ## Install
 
@@ -406,8 +423,8 @@ GPL-3. Companion to [`drmTMB`](https://itchyshin.github.io/drmTMB/) and
 
 - [`symbolizer`](https://itchyshin.github.io/symbolizer/reference/symbolizer-package.md)
   [`symbolizer-package`](https://itchyshin.github.io/symbolizer/reference/symbolizer-package.md)
-  : symbolizer: Structured Symbolic Specifications, Interpretations, and
-  Teachable Stories for Modern Statistical Models
+  : symbolizer: Symbolic Specifications, Interpretations, and Teachable
+  Stories for Statistical Models
 
 ## First-time entry
 
@@ -434,41 +451,61 @@ context here.
 
 - [`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
   : Symbolize a fitted statistical model
+
 - [`symbolize(`*`<drmTMB>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.drmTMB.md)
   : Symbolize a drmTMB fit (Gaussian and bivariate Gaussian, v0.1)
+
 - [`symbolize(`*`<gllvmTMB>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.gllvmTMB.md)
   : Symbolize a gllvmTMB fit (Gaussian and binomial latent-variable
   models)
+
 - [`symbolize(`*`<glmmTMB>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.glmmTMB.md)
   : Symbolize a glmmTMB fit (Gaussian, v0.7 first slice)
+
 - [`symbolize(`*`<brmsfit>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.brmsfit.md)
   : Symbolize a brms fit (Gaussian, v0.8 first slice)
+
 - [`symbolize(`*`<MCMCglmm>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.MCMCglmm.md)
   : Symbolize an MCMCglmm fit (Gaussian, v0.9 first slice)
+
 - [`symbolize(`*`<lm>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.lm.md)
   : Symbolize a base R lm() fit (Gaussian, v0.10 first slice)
+
 - [`symbolize(`*`<glm>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.glm.md)
   : Symbolize a base R glm() fit (Gaussian / binomial / poisson, v0.10
   first slice)
+
 - [`symbolize(`*`<lmerMod>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.lmerMod.md)
   : Symbolize an lme4 lmer() fit (Gaussian, v0.10 first slice)
+
 - [`symbolize(`*`<glmerMod>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.glmerMod.md)
   : Symbolize an lme4 glmer() fit (binomial / poisson, v0.11 first
   slice)
+
 - [`symbolize(`*`<sdmTMB>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.sdmTMB.md)
   : Symbolize an sdmTMB fit (Gaussian, v0.12 first slice)
+
 - [`symbolize(`*`<rma.uni>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.rma.uni.md)
   : Symbolize a metafor rma.uni fit (meta-analysis / meta-regression,
   v0.13 first slice)
+
 - [`symbolize(`*`<rma.mv>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.rma.mv.md)
   : Symbolize a metafor rma.mv fit (multilevel / multivariate
   meta-analysis, v0.13.1)
+
 - [`symbolize(`*`<gam>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.gam.md)
   [`symbolize(`*`<bam>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.gam.md)
   : Symbolize an mgcv gam / bam fit (additive grammar, v0.14 first
   slice)
+
 - [`symbolize(`*`<phylolm>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.phylolm.md)
   : Symbolize a phylolm fit (Gaussian PGLS, v0.21.4 first slice)
+
+- [`symbolize(`*`<psem>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.psem.md)
+  :
+
+  Symbolize a piecewiseSEM `psem` fit
+
 - [`symbolizer_capabilities()`](https://itchyshin.github.io/symbolizer/reference/symbolizer_capabilities.md)
   : Symbolizer capability registry
 
@@ -715,8 +752,9 @@ latent variables (gllvm), and structural model comparison.
 ### Cross-package bridges
 
 Models whose structure lives in another package: phylogenetic,
-animal-model, and spatial dependence, and meta-analysis across metafor /
-brms / MCMCglmm.
+animal-model, and spatial dependence, meta-analysis across metafor /
+brms / MCMCglmm, and multi-node structural equation models (piecewiseSEM
+/ drmSEM).
 
 - [Structural dependence: phylogenetic, animal-model, and spatial random
   effects](https://itchyshin.github.io/symbolizer/articles/symbolizer-structural-dependence.md):
@@ -730,6 +768,9 @@ brms / MCMCglmm.
 
   The same meta-analytic model across metafor, glmmTMB, and drmTMB –
   known sampling variances and the heterogeneity they leave behind.
+
+- [Multi-node structural equation models: piecewiseSEM and
+  drmSEM](https://itchyshin.github.io/symbolizer/articles/symbolizer-sem.md):
 
 ### Where we’re going
 

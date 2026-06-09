@@ -43,3 +43,9 @@ A `symbolizer_model_card` (a list) with elements: `meta`, `equation`,
 `warnings`, `extraction_calls`, `recommended_plots`, `marginal_means`
 (NULL when the model has no factors), `marginal_slopes` (NULL when no
 continuous-by-\* interaction is present).
+
+## Examples
+
+``` r
+# model_card(symbolize(lm(mpg ~ wt, data = mtcars)))
+```

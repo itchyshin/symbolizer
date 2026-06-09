@@ -38,3 +38,9 @@ notation_bridge(x, ...)
 ## Value
 
 A tibble with columns `concept`, `index`, `matrix`, `dimension`.
+
+## Examples
+
+``` r
+# notation_bridge(symbolize(lm(mpg ~ wt, data = mtcars)))
+```

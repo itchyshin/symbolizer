@@ -1,4 +1,4 @@
-# symbolizer: Structured Symbolic Specifications, Interpretations, and Teachable Stories for Modern Statistical Models
+# symbolizer: Symbolic Specifications, Interpretations, and Teachable Stories for Statistical Models
 
 Turns fitted distributional, multivariate, latent-variable, spatial,
 mixed-effect, meta-analytic, and additive models into structured

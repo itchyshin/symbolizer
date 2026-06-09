@@ -64,8 +64,9 @@ latent variables (gllvm), and structural model comparison.
 ### Cross-package bridges
 
 Models whose structure lives in another package: phylogenetic,
-animal-model, and spatial dependence, and meta-analysis across metafor /
-brms / MCMCglmm.
+animal-model, and spatial dependence, meta-analysis across metafor /
+brms / MCMCglmm, and multi-node structural equation models (piecewiseSEM
+/ drmSEM).
 
 - [Structural dependence: phylogenetic, animal-model, and spatial random
   effects](https://itchyshin.github.io/symbolizer/articles/symbolizer-structural-dependence.md):
@@ -79,6 +80,9 @@ brms / MCMCglmm.
 
   The same meta-analytic model across metafor, glmmTMB, and drmTMB –
   known sampling variances and the heterogeneity they leave behind.
+
+- [Multi-node structural equation models: piecewiseSEM and
+  drmSEM](https://itchyshin.github.io/symbolizer/articles/symbolizer-sem.md):
 
 ### Where we’re going
 

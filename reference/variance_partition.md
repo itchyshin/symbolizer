@@ -45,3 +45,10 @@ a `reason` attribute (character or `NA`) explaining an all-`NA` `pct`.
 
 [`icc()`](https://itchyshin.github.io/symbolizer/reference/icc.md) for
 the single-number intraclass correlation.
+
+## Examples
+
+``` r
+# variance_partition(symbolize(lme4::lmer(Reaction ~ Days + (1 | Subject),
+#                                         data = lme4::sleepstudy)))
+```

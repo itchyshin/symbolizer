@@ -16,5 +16,5 @@ wrap_aligned(lines)
 
 ## Value
 
-A single character string: `lines` joined with `\` line breaks and
+A single character string: `lines` joined with `\\` line breaks and
 wrapped in a LaTeX `aligned` environment.

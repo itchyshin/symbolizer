@@ -54,3 +54,10 @@ A length-1 numeric (S3 class `symbolizer_icc`) with attributes `scale`
 
 [`variance_partition()`](https://itchyshin.github.io/symbolizer/reference/variance_partition.md)
 for the full source-by-source breakdown.
+
+## Examples
+
+``` r
+# icc(symbolize(lme4::lmer(Reaction ~ Days + (1 | Subject),
+#                          data = lme4::sleepstudy)))
+```

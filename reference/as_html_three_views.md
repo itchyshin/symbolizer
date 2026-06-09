@@ -29,6 +29,19 @@ as_html_three_views(
   file = NULL,
   ...
 )
+
+# S3 method for class 'symbolized_model_set'
+as_html_three_views(
+  x,
+  head = 5L,
+  tail = 2L,
+  head_cols = 5L,
+  tail_cols = 2L,
+  id = "sym",
+  standalone = FALSE,
+  file = NULL,
+  ...
+)
 ```
 
 ## Arguments
@@ -86,3 +99,11 @@ as_html_three_views(
 ## Value
 
 A character vector (HTML), invisible.
+
+## Details
+
+For a multi-node structural equation model (a `symbolized_model_set`,
+the shared parent of `piecewiseSEM`'s `symbolized_psem` and drmSEM's
+`symbolized_drm_sem`), the per-node three-views widget is rendered for
+each node and stacked under a `<h2>Node: <name></h2>` header. Nodes are
+read from `names(x$parts)`, so the same method serves either collator.

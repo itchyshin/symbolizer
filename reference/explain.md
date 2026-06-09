@@ -81,3 +81,9 @@ A `symbolized_explanation` object with elements `model` (the underlying
 `symbolized_model`), `equations`, `symbols`, `assumptions`, `bridge`,
 `interpretation`, `variance_components` (NULL when the model has no
 random effects), `notation_bridge`.
+
+## Examples
+
+``` r
+# explain(symbolize(lm(mpg ~ wt, data = mtcars)))
+```

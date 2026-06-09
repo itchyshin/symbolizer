@@ -4,8 +4,8 @@
 
 - [`symbolizer`](https://itchyshin.github.io/symbolizer/reference/symbolizer-package.md)
   [`symbolizer-package`](https://itchyshin.github.io/symbolizer/reference/symbolizer-package.md)
-  : symbolizer: Structured Symbolic Specifications, Interpretations, and
-  Teachable Stories for Modern Statistical Models
+  : symbolizer: Symbolic Specifications, Interpretations, and Teachable
+  Stories for Statistical Models
 
 ## First-time entry
 
@@ -32,41 +32,61 @@ context here.
 
 - [`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
   : Symbolize a fitted statistical model
+
 - [`symbolize(`*`<drmTMB>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.drmTMB.md)
   : Symbolize a drmTMB fit (Gaussian and bivariate Gaussian, v0.1)
+
 - [`symbolize(`*`<gllvmTMB>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.gllvmTMB.md)
   : Symbolize a gllvmTMB fit (Gaussian and binomial latent-variable
   models)
+
 - [`symbolize(`*`<glmmTMB>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.glmmTMB.md)
   : Symbolize a glmmTMB fit (Gaussian, v0.7 first slice)
+
 - [`symbolize(`*`<brmsfit>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.brmsfit.md)
   : Symbolize a brms fit (Gaussian, v0.8 first slice)
+
 - [`symbolize(`*`<MCMCglmm>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.MCMCglmm.md)
   : Symbolize an MCMCglmm fit (Gaussian, v0.9 first slice)
+
 - [`symbolize(`*`<lm>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.lm.md)
   : Symbolize a base R lm() fit (Gaussian, v0.10 first slice)
+
 - [`symbolize(`*`<glm>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.glm.md)
   : Symbolize a base R glm() fit (Gaussian / binomial / poisson, v0.10
   first slice)
+
 - [`symbolize(`*`<lmerMod>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.lmerMod.md)
   : Symbolize an lme4 lmer() fit (Gaussian, v0.10 first slice)
+
 - [`symbolize(`*`<glmerMod>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.glmerMod.md)
   : Symbolize an lme4 glmer() fit (binomial / poisson, v0.11 first
   slice)
+
 - [`symbolize(`*`<sdmTMB>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.sdmTMB.md)
   : Symbolize an sdmTMB fit (Gaussian, v0.12 first slice)
+
 - [`symbolize(`*`<rma.uni>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.rma.uni.md)
   : Symbolize a metafor rma.uni fit (meta-analysis / meta-regression,
   v0.13 first slice)
+
 - [`symbolize(`*`<rma.mv>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.rma.mv.md)
   : Symbolize a metafor rma.mv fit (multilevel / multivariate
   meta-analysis, v0.13.1)
+
 - [`symbolize(`*`<gam>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.gam.md)
   [`symbolize(`*`<bam>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.gam.md)
   : Symbolize an mgcv gam / bam fit (additive grammar, v0.14 first
   slice)
+
 - [`symbolize(`*`<phylolm>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.phylolm.md)
   : Symbolize a phylolm fit (Gaussian PGLS, v0.21.4 first slice)
+
+- [`symbolize(`*`<psem>`*`)`](https://itchyshin.github.io/symbolizer/reference/symbolize.psem.md)
+  :
+
+  Symbolize a piecewiseSEM `psem` fit
+
 - [`symbolizer_capabilities()`](https://itchyshin.github.io/symbolizer/reference/symbolizer_capabilities.md)
   : Symbolizer capability registry
 

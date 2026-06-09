@@ -37,6 +37,19 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="symbolizer-development-version">symbolizer (development version)<a class="anchor" aria-label="anchor" href="#symbolizer-development-version"></a></h2>
 <div class="section level3">
+<h3 id="piecewisesem-bridge--drm_sem-registry-entry-development-version">piecewiseSEM bridge + <code>drm_sem</code> registry entry<a class="anchor" aria-label="anchor" href="#piecewisesem-bridge--drm_sem-registry-entry-development-version"></a></h3>
+<ul><li>
+<strong>New <code><a href="../reference/symbolize.psem.html">symbolize.psem()</a></code> method.</strong> Walks <code><a href="https://rdrr.io/pkg/piecewiseSEM/man/psem.html" class="external-link">piecewiseSEM::psem()</a></code> fits, delegates each structural node to <code>symbolize.&lt;class&gt;()</code>, and returns a <code>symbolized_psem</code> collator carrying the per-node <code>symbolized_model</code> parts, the node names, and any <code>%~~%</code> residual covariance arcs. Companion methods <code>as_latex.symbolized_psem</code>, <code>equations.symbolized_psem</code>, and <code>assumption_table.symbolized_psem</code> concatenate / row-bind the per-node output with a leading node column; <code>%~~%</code> arcs surface as <em>Residual cov(y1, y2)</em> rows in the assumption table (and only there — they are bidirected, not regressions). Mean-only by construction; use the <code>drm_sem</code> path for distributional / location-scale piecewise SEMs.</li>
+<li>
+<strong>HTML three-views for multi-node SEMs.</strong> New <code>as_html_three_views.symbolized_model_set</code> method renders the per-node three-views widget for every node and stacks them under <code>&lt;h2&gt;Node: &lt;name&gt;&lt;/h2&gt;</code> headers. <code>symbolized_model_set</code> is the shared parent class of <code>symbolized_psem</code> and drmSEM’s <code>symbolized_drm_sem</code> (both key their nodes by <code>names(x$parts)</code>), so the one method serves either collator. <code>standalone</code> / <code>file</code> behave as on the single-model method.</li>
+<li>
+<strong><code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> for the SEM collator.</strong> <code>print.symbolized_model_set</code> gives a compact one-line-per-node summary (response, family) plus any declared covariance arcs, instead of dumping the underlying list. Shared by <code>symbolized_psem</code>; drmSEM’s <code>symbolized_drm_sem</code> keeps its own more-specific method.</li>
+<li>
+<strong>New vignette <code>symbolizer-sem</code>.</strong> “Multi-node structural equation models: piecewiseSEM and drmSEM” — the mean-only <code>psem</code> path live, the distributional <code>drm_sem</code> path as reference, the stacked three-views widget, and the shared-design table.</li>
+<li>
+<strong><code>capabilities.csv</code> gains a <code>lives_in</code> column.</strong> Records which package owns each <code>(class, family, component)</code> method so cross-package bridges are explicit. Existing rows are <code>lives_in = "symbolizer"</code>; the new <code>drm_sem,*,*</code> advertisement row carries <code>lives_in = "drmSEM"</code> (<code>symbolize.drm_sem</code> is defined in the drmSEM package and delegates per node to <code>symbolize.drmTMB</code>).</li>
+</ul></div>
+<div class="section level3">
 <h3 id="audit-remediation--docs-vignette-build-safety-pkgdown-framing-development-version">Audit remediation – docs, vignette build-safety, pkgdown framing<a class="anchor" aria-label="anchor" href="#audit-remediation--docs-vignette-build-safety-pkgdown-framing-development-version"></a></h3>
 <p>A read-only package audit surfaced several low-risk doc/build issues, fixed here:</p>
 <ul><li>
@@ -1304,7 +1317,7 @@ w_i = 1 / (v_i + tau^2)                      (inverse-variance weight)</code></p
 <li>group variable → house shape, lavender fill</li>
 <li>random effect → circle, orange fill Edges are styled by relationship: distribution edges are bold red; linear-predictor edges are solid; group / random-contribution edges are dashed.</li>
 </ul></li>
-<li>No new hard dependencies. To render the DAG live: paste the <code>$dot</code> string into <a href="https://dreampuf.github.io/GraphvizOnline/" class="external-link uri">https://dreampuf.github.io/GraphvizOnline/</a>, or pass it to <code>DiagrammeR::grViz()</code> (DiagrammeR is not a symbolizer dependency).</li>
+<li>No new hard dependencies. To render the DAG live: paste the <code>$dot</code> string into <a href="https://dreampuf.github.io/GraphvizOnline/" class="external-link uri">https://dreampuf.github.io/GraphvizOnline/</a>, or pass it to <code><a href="https://rich-iannone.github.io/DiagrammeR/reference/grViz.html" class="external-link">DiagrammeR::grViz()</a></code> (DiagrammeR is not a symbolizer dependency).</li>
 </ul></div>
 </div>
     <div class="section level2">
