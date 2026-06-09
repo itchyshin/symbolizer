@@ -17,7 +17,8 @@ matrix that encodes the dependence changes. This article is the first in
 Face and two **light** Faces across three R packages: `MCMCglmm`,
 `brms`, and `phylolm`. The scope is the **phylogenetic LMM** with
 \sigma_e^2 estimated; the *meta-analytic* form (with v_i known sampling
-variances) is its own surface in the v0.22 article.
+variances) is covered in the companion article,
+[`vignette("symbolizer-meta-analysis")`](https://itchyshin.github.io/symbolizer/articles/symbolizer-meta-analysis.md).
 
 ## The shared grammar
 
@@ -188,9 +189,11 @@ Three notes that often trip up first readers:
 1.  **\sigma_e^2 is estimated, not the per-effect sampling variance
     v_i.** In meta-analysis we’d also feed in v_i (a *known* sampling
     variance per study) via `metafor::rma.mv(V = vi, ...)`. That’s the
-    model class in the v0.22 article — same \sigma_p^2 \mathbf A
-    phylogenetic term, but with \mathbf V = \operatorname{diag}(v_i)
-    added on top of \sigma_e^2 \mathbf I (Cinar et al. 2022, Eq. 1–10).
+    model class in the companion
+    [`vignette("symbolizer-meta-analysis")`](https://itchyshin.github.io/symbolizer/articles/symbolizer-meta-analysis.md)
+    — same \sigma_p^2 \mathbf A phylogenetic term, but with \mathbf V =
+    \operatorname{diag}(v_i) added on top of \sigma_e^2 \mathbf I (Cinar
+    et al. 2022, Eq. 1–10).
 2.  The Moura data was *built* as a meta-analytic dataset (one Fisher-z
     per species, aggregated from many effect-size estimates). We use
     only \mathrm{Zr} here; the v_i column is set aside. That’s a
@@ -274,7 +277,7 @@ sym_mcmc$metadata$heritability           # h^2 derived automatically
 
 #### Three-views widget for the MCMCglmm fit
 
-[Skip three-views widget](#sym-mcmc-1780398293-end)
+[Skip three-views widget](#sym-mcmc-1781020681-end)
 
 ▸1. Index
 
@@ -738,10 +741,12 @@ resolve.
 
 ## Forward links
 
-- **v0.22 — Phylogenetic meta-analysis (Mizuno et al. 2026)**. This
-  article fits the general phylo-GLMM with \sigma_e^2 *estimated*. The
-  meta-analytic case where the sampling variance v_i is **known** per
-  study is its own surface — `metafor::rma.mv(V = V, ...)` is the
+- **Phylogenetic meta-analysis (Mizuno et al. 2026)** — already covered
+  in the companion
+  [`vignette("symbolizer-meta-analysis")`](https://itchyshin.github.io/symbolizer/articles/symbolizer-meta-analysis.md)
+  (§4). This article fits the general phylo-GLMM with \sigma_e^2
+  *estimated*; the meta-analytic case, where the per-study sampling
+  variance v_i is **known**, uses `metafor::rma.mv(V = V, ...)` as the
   canonical interface, with `glmmTMB::equalto` (reserved) and
   `brms::se(sqrt(vi))` as bridges.
 - **v0.24 — Location-scale on \mathbf M (Nakagawa et al. 2025 *MEE*)**.

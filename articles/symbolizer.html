@@ -18,6 +18,9 @@
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
 <meta property="og:title" content="Get started with symbolizer">
+<meta name="description" content="A five-minute first contact: fit a model, then read its equation, assumptions, and plain-English interpretation.">
+<meta property="og:description" content="A five-minute first contact: fit a model, then read its equation, assumptions, and plain-English interpretation.">
+<meta property="og:image" content="https://itchyshin.github.io/symbolizer/logo.svg">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -170,9 +173,12 @@ count against a predictor. No non-CRAN packages required.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">count</span> <span class="op">~</span> <span class="va">temperature</span>, family <span class="op">=</span> <span class="va">poisson</span>, data <span class="op">=</span> <span class="va">dat</span><span class="op">)</span></span></code></pre></div>
-<p><code><a href="../reference/symbolize.html">symbolize()</a></code> is the single entry point. Pass user-facing
-symbols and units so the equations carry biological meaning rather than
-R variable names:</p>
+<p><code><a href="../reference/symbolize.html">symbolize()</a></code> builds the structured object that every
+other function reads. (In a hurry? <code>explain(fit)</code> prints the
+equation, assumptions, and a coefficient reading in one call — the
+recommended first look for newcomers; here we build the object so we can
+explore each piece.) Pass user-facing symbols and units so the equations
+carry biological meaning rather than R variable names:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sym</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/symbolize.html">symbolize</a></span><span class="op">(</span></span>
 <span>  <span class="va">fit</span>,</span>
@@ -246,21 +252,21 @@ the fitted mean <span class="math inline">\hat{\boldsymbol{\mu}}</span>.</p>
 .sym-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .sym-skip { position: absolute; top: -100px; left: 0; padding: 0.4rem 0.7rem; background: #8a1f22; color: #fff; text-decoration: none; font-size: 0.85rem; z-index: 5; }
 .sym-skip:focus { top: 0; }</style>
-<div id="sym-sym-1780398375" class="sym-tabs">
-<a class="sym-skip" href="#sym-sym-1780398375-end">Skip three-views
+<div id="sym-sym-1781020763" class="sym-tabs">
+<a class="sym-skip" href="#sym-sym-1781020763-end">Skip three-views
 widget</a>
 <div class="sym-tablist" role="tablist" aria-label="Three views of the model">
-<button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1780398375-tab-idx" aria-controls="sym-sym-1780398375-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
+<button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1781020763-tab-idx" aria-controls="sym-sym-1781020763-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>1. Index
 </button>
-<button type="button" class="sym-tab" role="tab" id="sym-sym-1780398375-tab-eq" aria-controls="sym-sym-1780398375-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
+<button type="button" class="sym-tab" role="tab" id="sym-sym-1781020763-tab-eq" aria-controls="sym-sym-1781020763-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>2. Matrix
 </button>
-<button type="button" class="sym-tab" role="tab" id="sym-sym-1780398375-tab-mat" aria-controls="sym-sym-1780398375-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
+<button type="button" class="sym-tab" role="tab" id="sym-sym-1781020763-tab-mat" aria-controls="sym-sym-1781020763-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>3. Equations with data
 </button>
 </div>
-<div id="sym-sym-1780398375-panel-idx" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-sym-1780398375-tab-idx" data-panel="idx" tabindex="0">
+<div id="sym-sym-1781020763-panel-idx" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-sym-1781020763-tab-idx" data-panel="idx" tabindex="0">
 <p class="sym-caption">
 What happens for each observation <em>i</em> – the per-individual
 reading.
@@ -297,7 +303,7 @@ coefficients  <span class="sym-dim"><span class="math inline">\mathbb{R}^{2}</s
 </li>
 </ul></details>
 </div>
-<div id="sym-sym-1780398375-panel-eq" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1780398375-tab-eq" data-panel="eq" hidden="" tabindex="0">
+<div id="sym-sym-1781020763-panel-eq" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1781020763-tab-eq" data-panel="eq" hidden="" tabindex="0">
 <p class="sym-caption">
 The same model in matrix form – the structural contract every textbook
 past chapter 4 switches to.
@@ -334,7 +340,7 @@ coefficients  <span class="sym-dim"><span class="math inline">\mathbb{R}^{2}</s
 </li>
 </ul></details>
 </div>
-<div id="sym-sym-1780398375-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1780398375-tab-mat" data-panel="mat" hidden="" tabindex="0">
+<div id="sym-sym-1781020763-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1781020763-tab-mat" data-panel="mat" hidden="" tabindex="0">
 <p class="sym-caption">
 The same matrix equation, with your actual numbers stacked inside the
 brackets – what the computer multiplies. Showing first 5 and last 2 rows
@@ -399,9 +405,9 @@ shown in the worked row).
 </p>
 </div>
 </div>
-<span id="sym-sym-1780398375-end" tabindex="-1"></span>
+<span id="sym-sym-1781020763-end" tabindex="-1"></span>
 <script>(function() {
-  var root = document.getElementById("sym-sym-1780398375");
+  var root = document.getElementById("sym-sym-1781020763");
   if (!root) return;
   var tabs   = Array.prototype.slice.call(root.querySelectorAll("[role=\"tab\"]"));
   var panels = Array.prototype.slice.call(root.querySelectorAll("[role=\"tabpanel\"]"));

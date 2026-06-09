@@ -16,6 +16,10 @@ interface. The differences are in the LaTeX, the biological reading on
 each coefficient, and the assumption table. Every phrase you see below
 is templated from `inst/extdata/*.csv` — no LLM at runtime.
 
+Every fitted number shown below — in the worked-row widgets and the
+coefficient readings — is a **point estimate**; uncertainty (confidence
+or credible intervals) is not displayed.
+
 For Gaussian and bivariate Gaussian, see
 [`vignette("symbolizer-drmtmb")`](https://itchyshin.github.io/symbolizer/articles/symbolizer-drmtmb.md).
 For the matching pedagogy on factors and interactions, see
@@ -96,7 +100,7 @@ geometric mean by `exp(beta)`.
 as_html_three_views(sym, id = "lognormal")
 ```
 
-[Skip three-views widget](#sym-lognormal-1780398263-end)
+[Skip three-views widget](#sym-lognormal-1781020651-end)
 
 ▸1. Index
 
@@ -120,7 +124,8 @@ where:
 
 - y_i — response variable  \mathbb{R}^{100}
 - x_i — continuous predictor  column of X (length 100)
-- \mu_i — conditional mu of y  \mathbb{R}^{100}
+- \mu_i — conditional mean of log(Y) on the log scale; after exp, the
+  geometric mean (median) of Y  \mathbb{R}^{100}
 - \sigma_i — scale on the log-response  \mathbb{R}^{100}
 - \beta\_{0}, \beta\_{1} — mu submodel coefficients  \mathbb{R}^{2}
 - \gamma\_{0} — sigma submodel coefficients  \mathbb{R}^{1}
@@ -137,7 +142,8 @@ past chapter 4 switches to.
 where:
 
 - \mathbf{y} — response variable  \mathbb{R}^{100}
-- \boldsymbol{\mu} — conditional mu of y  \mathbb{R}^{100}
+- \boldsymbol{\mu} — conditional mean of log(Y) on the log scale; after
+  exp, the geometric mean (median) of Y  \mathbb{R}^{100}
 - \boldsymbol{\sigma} — scale on the log-response  \mathbb{R}^{100}
 - \boldsymbol{\beta} — mu submodel coefficients  \mathbb{R}^{2}
 - \boldsymbol{\gamma} — sigma submodel coefficients  \mathbb{R}^{1}
@@ -226,7 +232,9 @@ PDF](https://itchyshin.github.io/symbolizer/articles/fig-lognormal.pdf)
 
 `Y > 0`, log link by convention (`stats::Gamma(link = "log")`).
 Coefficients are multiplicative on the mean response, like lognormal —
-but the variance scales as `mu^2 * sigma^2`, not `log(Y)`.
+but the variance grows as `mu^2 * sigma^2` (a roughly constant
+coefficient of variation), whereas lognormal sets its spread on the
+`log(Y)` scale.
 
 ``` r
 
@@ -284,7 +292,7 @@ coefficient in the widget below.
 as_html_three_views(sym, id = "beta")
 ```
 
-[Skip three-views widget](#sym-beta-1780398264-end)
+[Skip three-views widget](#sym-beta-1781020652-end)
 
 ▸1. Index
 
@@ -475,7 +483,7 @@ multiplicative effect on the expected count.
 as_html_three_views(sym, id = "poisson")
 ```
 
-[Skip three-views widget](#sym-poisson-1780398265-end)
+[Skip three-views widget](#sym-poisson-1781020653-end)
 
 ▸1. Index
 

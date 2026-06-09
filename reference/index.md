@@ -79,7 +79,8 @@ Educator-facing bridge between index and matrix forms.
 
 ## See the data flow
 
-Numeric arrays behind the symbols, and the three-views HTML widget.
+Numeric arrays behind the symbols, and the three-views widget —
+interactive HTML and static PDF.
 
 - [`expand()`](https://itchyshin.github.io/symbolizer/reference/expand.md)
   : Expand a symbolized_model to its underlying numeric arrays
@@ -191,6 +192,9 @@ every renderer reads.
 
 ## Internal: capability registry
 
+The gate deciding which (class, family, component) tuples symbolize()
+supports, plus the human-readable status words.
+
 - [`capability_check()`](https://itchyshin.github.io/symbolizer/reference/capability_check.md)
   : Check whether a (class, family, component) tuple is supported
 - [`friendly_status()`](https://itchyshin.github.io/symbolizer/reference/friendly_status.md)
@@ -198,12 +202,18 @@ every renderer reads.
 
 ## Internal: template loader
 
+Reads and caches the prose / LaTeX templates in inst/extdata/\*.csv that
+every renderer draws from.
+
 - [`load_template()`](https://itchyshin.github.io/symbolizer/reference/load_template.md)
   : Load a template CSV from inst/extdata
 - [`clear_template_cache()`](https://itchyshin.github.io/symbolizer/reference/clear_template_cache.md)
   : Clear the template cache
 
 ## Internal: formula helpers
+
+Low-level formula-parsing and LaTeX-environment utilities shared across
+the extractors and renderers.
 
 - [`formula_lhs()`](https://itchyshin.github.io/symbolizer/reference/formula_lhs.md)
   : Get the left-hand side of a formula

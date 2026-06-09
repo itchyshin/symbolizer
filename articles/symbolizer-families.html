@@ -18,6 +18,9 @@
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
 <meta property="og:title" content="A tour of non-Gaussian families">
+<meta name="description" content="Poisson, Beta, Gamma, lognormal and more -- each family's distribution, link function, and coefficient reading.">
+<meta property="og:description" content="Poisson, Beta, Gamma, lognormal and more -- each family's distribution, link function, and coefficient reading.">
+<meta property="og:image" content="https://itchyshin.github.io/symbolizer/logo.svg">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -85,6 +88,9 @@ capability matrix.</em></p>
 the biological reading on each coefficient, and the assumption table.
 Every phrase you see below is templated from
 <code>inst/extdata/*.csv</code> — no LLM at runtime.</p>
+<p>Every fitted number shown below — in the worked-row widgets and the
+coefficient readings — is a <strong>point estimate</strong>; uncertainty
+(confidence or credible intervals) is not displayed.</p>
 <p>For Gaussian and bivariate Gaussian, see
 <code><a href="../articles/symbolizer-drmtmb.html">vignette("symbolizer-drmtmb")</a></code>. For the matching pedagogy on
 factors and interactions, see
@@ -221,21 +227,21 @@ excludes zero (CI method: <code>wald</code>).</em></p>
 .sym-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .sym-skip { position: absolute; top: -100px; left: 0; padding: 0.4rem 0.7rem; background: #8a1f22; color: #fff; text-decoration: none; font-size: 0.85rem; z-index: 5; }
 .sym-skip:focus { top: 0; }</style>
-<div id="sym-lognormal-1780398263" class="sym-tabs">
-<a class="sym-skip" href="#sym-lognormal-1780398263-end">Skip
+<div id="sym-lognormal-1781020651" class="sym-tabs">
+<a class="sym-skip" href="#sym-lognormal-1781020651-end">Skip
 three-views widget</a>
 <div class="sym-tablist" role="tablist" aria-label="Three views of the model">
-<button type="button" class="sym-tab sym-active" role="tab" id="sym-lognormal-1780398263-tab-idx" aria-controls="sym-lognormal-1780398263-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
+<button type="button" class="sym-tab sym-active" role="tab" id="sym-lognormal-1781020651-tab-idx" aria-controls="sym-lognormal-1781020651-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>1. Index
 </button>
-<button type="button" class="sym-tab" role="tab" id="sym-lognormal-1780398263-tab-eq" aria-controls="sym-lognormal-1780398263-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
+<button type="button" class="sym-tab" role="tab" id="sym-lognormal-1781020651-tab-eq" aria-controls="sym-lognormal-1781020651-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>2. Matrix
 </button>
-<button type="button" class="sym-tab" role="tab" id="sym-lognormal-1780398263-tab-mat" aria-controls="sym-lognormal-1780398263-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
+<button type="button" class="sym-tab" role="tab" id="sym-lognormal-1781020651-tab-mat" aria-controls="sym-lognormal-1781020651-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>3. Equations with data
 </button>
 </div>
-<div id="sym-lognormal-1780398263-panel-idx" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-lognormal-1780398263-tab-idx" data-panel="idx" tabindex="0">
+<div id="sym-lognormal-1781020651-panel-idx" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-lognormal-1781020651-tab-idx" data-panel="idx" tabindex="0">
 <p class="sym-caption">
 What happens for each observation <em>i</em> – the per-individual
 reading.
@@ -264,7 +270,8 @@ where:
 <span class="math inline">x_i</span> — continuous predictor  <span class="sym-dim">column of X (length 100)</span>
 </li>
 <li>
-<span class="math inline">\mu_i</span> — conditional mu of y  <span class="sym-dim"><span class="math inline">\mathbb{R}^{100}</span></span>
+<span class="math inline">\mu_i</span> — conditional mean of log(Y) on
+the log scale; after exp, the geometric mean (median) of Y  <span class="sym-dim"><span class="math inline">\mathbb{R}^{100}</span></span>
 </li>
 <li>
 <span class="math inline">\sigma_i</span> — scale on the log-response
@@ -280,7 +287,7 @@ coefficients  <span class="sym-dim"><span class="math inline">\mathbb{R}^{1}</s
 </li>
 </ul></details>
 </div>
-<div id="sym-lognormal-1780398263-panel-eq" class="sym-panel" role="tabpanel" aria-labelledby="sym-lognormal-1780398263-tab-eq" data-panel="eq" hidden="" tabindex="0">
+<div id="sym-lognormal-1781020651-panel-eq" class="sym-panel" role="tabpanel" aria-labelledby="sym-lognormal-1781020651-tab-eq" data-panel="eq" hidden="" tabindex="0">
 <p class="sym-caption">
 The same model in matrix form – the structural contract every textbook
 past chapter 4 switches to.
@@ -301,7 +308,8 @@ where:
 <span class="math inline">\mathbf{y}</span> — response variable  <span class="sym-dim"><span class="math inline">\mathbb{R}^{100}</span></span>
 </li>
 <li>
-<span class="math inline">\boldsymbol{\mu}</span> — conditional mu of y
+<span class="math inline">\boldsymbol{\mu}</span> — conditional mean of
+log(Y) on the log scale; after exp, the geometric mean (median) of Y
  <span class="sym-dim"><span class="math inline">\mathbb{R}^{100}</span></span>
 </li>
 <li>
@@ -327,7 +335,7 @@ design matrix  <span class="sym-dim"><span class="math inline">\mathbb{R}^{100 
 </li>
 </ul></details>
 </div>
-<div id="sym-lognormal-1780398263-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-lognormal-1780398263-tab-mat" data-panel="mat" hidden="" tabindex="0">
+<div id="sym-lognormal-1781020651-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-lognormal-1781020651-tab-mat" data-panel="mat" hidden="" tabindex="0">
 <p class="sym-caption">
 The same matrix equation, with your actual numbers stacked inside the
 brackets – what the computer multiplies. Showing first 5 and last 2 rows
@@ -426,9 +434,9 @@ observations:
 </div>
 </div>
 </div>
-<span id="sym-lognormal-1780398263-end" tabindex="-1"></span>
+<span id="sym-lognormal-1781020651-end" tabindex="-1"></span>
 <script>(function() {
-  var root = document.getElementById("sym-lognormal-1780398263");
+  var root = document.getElementById("sym-lognormal-1781020651");
   if (!root) return;
   var tabs   = Array.prototype.slice.call(root.querySelectorAll("[role=\"tab\"]"));
   var panels = Array.prototype.slice.call(root.querySelectorAll("[role=\"tabpanel\"]"));
@@ -482,7 +490,9 @@ observations:
 <p><code>Y &gt; 0</code>, log link by convention
 (<code>stats::Gamma(link = "log")</code>). Coefficients are
 multiplicative on the mean response, like lognormal — but the variance
-scales as <code>mu^2 * sigma^2</code>, not <code>log(Y)</code>.</p>
+grows as <code>mu^2 * sigma^2</code> (a roughly constant coefficient of
+variation), whereas lognormal sets its spread on the <code>log(Y)</code>
+scale.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>; <span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">100</span></span>
 <span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/GammaDist.html" class="external-link">rgamma</a></span><span class="op">(</span><span class="va">n</span>, shape <span class="op">=</span> <span class="fl">2</span>, rate <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span>,</span>
@@ -561,21 +571,21 @@ in the widget below.</p>
 .sym-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .sym-skip { position: absolute; top: -100px; left: 0; padding: 0.4rem 0.7rem; background: #8a1f22; color: #fff; text-decoration: none; font-size: 0.85rem; z-index: 5; }
 .sym-skip:focus { top: 0; }</style>
-<div id="sym-beta-1780398264" class="sym-tabs">
-<a class="sym-skip" href="#sym-beta-1780398264-end">Skip three-views
+<div id="sym-beta-1781020652" class="sym-tabs">
+<a class="sym-skip" href="#sym-beta-1781020652-end">Skip three-views
 widget</a>
 <div class="sym-tablist" role="tablist" aria-label="Three views of the model">
-<button type="button" class="sym-tab sym-active" role="tab" id="sym-beta-1780398264-tab-idx" aria-controls="sym-beta-1780398264-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
+<button type="button" class="sym-tab sym-active" role="tab" id="sym-beta-1781020652-tab-idx" aria-controls="sym-beta-1781020652-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>1. Index
 </button>
-<button type="button" class="sym-tab" role="tab" id="sym-beta-1780398264-tab-eq" aria-controls="sym-beta-1780398264-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
+<button type="button" class="sym-tab" role="tab" id="sym-beta-1781020652-tab-eq" aria-controls="sym-beta-1781020652-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>2. Matrix
 </button>
-<button type="button" class="sym-tab" role="tab" id="sym-beta-1780398264-tab-mat" aria-controls="sym-beta-1780398264-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
+<button type="button" class="sym-tab" role="tab" id="sym-beta-1781020652-tab-mat" aria-controls="sym-beta-1781020652-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>3. Equations with data
 </button>
 </div>
-<div id="sym-beta-1780398264-panel-idx" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-beta-1780398264-tab-idx" data-panel="idx" tabindex="0">
+<div id="sym-beta-1781020652-panel-idx" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-beta-1781020652-tab-idx" data-panel="idx" tabindex="0">
 <p class="sym-caption">
 What happens for each observation <em>i</em> – the per-individual
 reading.
@@ -626,7 +636,7 @@ coefficients  <span class="sym-dim"><span class="math inline">\mathbb{R}^{1}</s
 </li>
 </ul></details>
 </div>
-<div id="sym-beta-1780398264-panel-eq" class="sym-panel" role="tabpanel" aria-labelledby="sym-beta-1780398264-tab-eq" data-panel="eq" hidden="" tabindex="0">
+<div id="sym-beta-1781020652-panel-eq" class="sym-panel" role="tabpanel" aria-labelledby="sym-beta-1781020652-tab-eq" data-panel="eq" hidden="" tabindex="0">
 <p class="sym-caption">
 The same model in matrix form – the structural contract every textbook
 past chapter 4 switches to.
@@ -675,7 +685,7 @@ design matrix  <span class="sym-dim"><span class="math inline">\mathbb{R}^{100 
 </li>
 </ul></details>
 </div>
-<div id="sym-beta-1780398264-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-beta-1780398264-tab-mat" data-panel="mat" hidden="" tabindex="0">
+<div id="sym-beta-1781020652-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-beta-1781020652-tab-mat" data-panel="mat" hidden="" tabindex="0">
 <p class="sym-caption">
 The same matrix equation, with your actual numbers stacked inside the
 brackets – what the computer multiplies. Showing first 5 and last 2 rows
@@ -771,9 +781,9 @@ observations:
 </div>
 </div>
 </div>
-<span id="sym-beta-1780398264-end" tabindex="-1"></span>
+<span id="sym-beta-1781020652-end" tabindex="-1"></span>
 <script>(function() {
-  var root = document.getElementById("sym-beta-1780398264");
+  var root = document.getElementById("sym-beta-1781020652");
   if (!root) return;
   var tabs   = Array.prototype.slice.call(root.querySelectorAll("[role=\"tab\"]"));
   var panels = Array.prototype.slice.call(root.querySelectorAll("[role=\"tabpanel\"]"));
@@ -906,21 +916,21 @@ count.</p>
 .sym-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .sym-skip { position: absolute; top: -100px; left: 0; padding: 0.4rem 0.7rem; background: #8a1f22; color: #fff; text-decoration: none; font-size: 0.85rem; z-index: 5; }
 .sym-skip:focus { top: 0; }</style>
-<div id="sym-poisson-1780398265" class="sym-tabs">
-<a class="sym-skip" href="#sym-poisson-1780398265-end">Skip three-views
+<div id="sym-poisson-1781020653" class="sym-tabs">
+<a class="sym-skip" href="#sym-poisson-1781020653-end">Skip three-views
 widget</a>
 <div class="sym-tablist" role="tablist" aria-label="Three views of the model">
-<button type="button" class="sym-tab sym-active" role="tab" id="sym-poisson-1780398265-tab-idx" aria-controls="sym-poisson-1780398265-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
+<button type="button" class="sym-tab sym-active" role="tab" id="sym-poisson-1781020653-tab-idx" aria-controls="sym-poisson-1781020653-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>1. Index
 </button>
-<button type="button" class="sym-tab" role="tab" id="sym-poisson-1780398265-tab-eq" aria-controls="sym-poisson-1780398265-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
+<button type="button" class="sym-tab" role="tab" id="sym-poisson-1781020653-tab-eq" aria-controls="sym-poisson-1781020653-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>2. Matrix
 </button>
-<button type="button" class="sym-tab" role="tab" id="sym-poisson-1780398265-tab-mat" aria-controls="sym-poisson-1780398265-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
+<button type="button" class="sym-tab" role="tab" id="sym-poisson-1781020653-tab-mat" aria-controls="sym-poisson-1781020653-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>3. Equations with data
 </button>
 </div>
-<div id="sym-poisson-1780398265-panel-idx" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-poisson-1780398265-tab-idx" data-panel="idx" tabindex="0">
+<div id="sym-poisson-1781020653-panel-idx" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-poisson-1781020653-tab-idx" data-panel="idx" tabindex="0">
 <p class="sym-caption">
 What happens for each observation <em>i</em> – the per-individual
 reading.
@@ -957,7 +967,7 @@ coefficients  <span class="sym-dim"><span class="math inline">\mathbb{R}^{2}</s
 </li>
 </ul></details>
 </div>
-<div id="sym-poisson-1780398265-panel-eq" class="sym-panel" role="tabpanel" aria-labelledby="sym-poisson-1780398265-tab-eq" data-panel="eq" hidden="" tabindex="0">
+<div id="sym-poisson-1781020653-panel-eq" class="sym-panel" role="tabpanel" aria-labelledby="sym-poisson-1781020653-tab-eq" data-panel="eq" hidden="" tabindex="0">
 <p class="sym-caption">
 The same model in matrix form – the structural contract every textbook
 past chapter 4 switches to.
@@ -994,7 +1004,7 @@ coefficients  <span class="sym-dim"><span class="math inline">\mathbb{R}^{2}</s
 </li>
 </ul></details>
 </div>
-<div id="sym-poisson-1780398265-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-poisson-1780398265-tab-mat" data-panel="mat" hidden="" tabindex="0">
+<div id="sym-poisson-1781020653-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-poisson-1781020653-tab-mat" data-panel="mat" hidden="" tabindex="0">
 <p class="sym-caption">
 The same matrix equation, with your actual numbers stacked inside the
 brackets – what the computer multiplies. Showing first 5 and last 2 rows
@@ -1058,9 +1068,9 @@ shown in the worked row).
 </p>
 </div>
 </div>
-<span id="sym-poisson-1780398265-end" tabindex="-1"></span>
+<span id="sym-poisson-1781020653-end" tabindex="-1"></span>
 <script>(function() {
-  var root = document.getElementById("sym-poisson-1780398265");
+  var root = document.getElementById("sym-poisson-1781020653");
   if (!root) return;
   var tabs   = Array.prototype.slice.call(root.querySelectorAll("[role=\"tab\"]"));
   var panels = Array.prototype.slice.call(root.querySelectorAll("[role=\"tabpanel\"]"));

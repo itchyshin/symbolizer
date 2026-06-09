@@ -18,6 +18,9 @@
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
 <meta property="og:title" content="Latent variables in ecology: a gllvmTMB worked example">
+<meta name="description" content="Generalized linear latent-variable (GLLVM) models for multivariate ecology: factors, loadings, and the implied trait covariance.">
+<meta property="og:description" content="Generalized linear latent-variable (GLLVM) models for multivariate ecology: factors, loadings, and the implied trait covariance.">
+<meta property="og:image" content="https://itchyshin.github.io/symbolizer/logo.svg">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -421,21 +424,21 @@ unstructured.</p>
 .sym-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .sym-skip { position: absolute; top: -100px; left: 0; padding: 0.4rem 0.7rem; background: #8a1f22; color: #fff; text-decoration: none; font-size: 0.85rem; z-index: 5; }
 .sym-skip:focus { top: 0; }</style>
-<div id="sym-syndromes-1780398270" class="sym-tabs">
-<a class="sym-skip" href="#sym-syndromes-1780398270-end">Skip
+<div id="sym-syndromes-1781020658" class="sym-tabs">
+<a class="sym-skip" href="#sym-syndromes-1781020658-end">Skip
 three-views widget</a>
 <div class="sym-tablist" role="tablist" aria-label="Three views of the model">
-<button type="button" class="sym-tab sym-active" role="tab" id="sym-syndromes-1780398270-tab-idx" aria-controls="sym-syndromes-1780398270-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
+<button type="button" class="sym-tab sym-active" role="tab" id="sym-syndromes-1781020658-tab-idx" aria-controls="sym-syndromes-1781020658-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>1. Index
 </button>
-<button type="button" class="sym-tab" role="tab" id="sym-syndromes-1780398270-tab-eq" aria-controls="sym-syndromes-1780398270-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
+<button type="button" class="sym-tab" role="tab" id="sym-syndromes-1781020658-tab-eq" aria-controls="sym-syndromes-1781020658-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>2. Matrix
 </button>
-<button type="button" class="sym-tab" role="tab" id="sym-syndromes-1780398270-tab-mat" aria-controls="sym-syndromes-1780398270-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
+<button type="button" class="sym-tab" role="tab" id="sym-syndromes-1781020658-tab-mat" aria-controls="sym-syndromes-1781020658-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>3. Equations with data
 </button>
 </div>
-<div id="sym-syndromes-1780398270-panel-idx" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-syndromes-1780398270-tab-idx" data-panel="idx" tabindex="0">
+<div id="sym-syndromes-1781020658-panel-idx" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-syndromes-1781020658-tab-idx" data-panel="idx" tabindex="0">
 <p class="sym-caption">
 What happens for each observation <em>i</em> – the per-individual
 reading.
@@ -507,7 +510,7 @@ variance per trait  <span class="sym-dim">diagonal ^{5 }</span>
 </li>
 </ul></details>
 </div>
-<div id="sym-syndromes-1780398270-panel-eq" class="sym-panel" role="tabpanel" aria-labelledby="sym-syndromes-1780398270-tab-eq" data-panel="eq" hidden="" tabindex="0">
+<div id="sym-syndromes-1781020658-panel-eq" class="sym-panel" role="tabpanel" aria-labelledby="sym-syndromes-1781020658-tab-eq" data-panel="eq" hidden="" tabindex="0">
 <p class="sym-caption">
 The same model in matrix form – the structural contract every textbook
 past chapter 4 switches to.
@@ -569,7 +572,7 @@ unique variance per trait  <span class="sym-dim">diagonal ^{5 }</span>
 </li>
 </ul></details>
 </div>
-<div id="sym-syndromes-1780398270-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-syndromes-1780398270-tab-mat" data-panel="mat" hidden="" tabindex="0">
+<div id="sym-syndromes-1781020658-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-syndromes-1781020658-tab-mat" data-panel="mat" hidden="" tabindex="0">
 <p class="sym-caption">
 The same matrix equation, with your actual numbers stacked inside the
 brackets – what the computer multiplies. Showing first 5 and last 2 rows
@@ -683,9 +686,9 @@ implied covariance)}\,} \;=\; \underbrace{\begin{bmatrix} 0.667 &amp;
 </div>
 </div>
 </div>
-<span id="sym-syndromes-1780398270-end" tabindex="-1"></span>
+<span id="sym-syndromes-1781020658-end" tabindex="-1"></span>
 <script>(function() {
-  var root = document.getElementById("sym-syndromes-1780398270");
+  var root = document.getElementById("sym-syndromes-1781020658");
   if (!root) return;
   var tabs   = Array.prototype.slice.call(root.querySelectorAll("[role=\"tab\"]"));
   var panels = Array.prototype.slice.call(root.querySelectorAll("[role=\"tabpanel\"]"));
@@ -811,21 +814,21 @@ constraint for you; no <code>dispformula = ~0</code> ceremony required
 .sym-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .sym-skip { position: absolute; top: -100px; left: 0; padding: 0.4rem 0.7rem; background: #8a1f22; color: #fff; text-decoration: none; font-size: 0.85rem; z-index: 5; }
 .sym-skip:focus { top: 0; }</style>
-<div id="sym-twotier-1780398272" class="sym-tabs">
-<a class="sym-skip" href="#sym-twotier-1780398272-end">Skip three-views
+<div id="sym-twotier-1781020659" class="sym-tabs">
+<a class="sym-skip" href="#sym-twotier-1781020659-end">Skip three-views
 widget</a>
 <div class="sym-tablist" role="tablist" aria-label="Three views of the model">
-<button type="button" class="sym-tab sym-active" role="tab" id="sym-twotier-1780398272-tab-idx" aria-controls="sym-twotier-1780398272-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
+<button type="button" class="sym-tab sym-active" role="tab" id="sym-twotier-1781020659-tab-idx" aria-controls="sym-twotier-1781020659-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>1. Index
 </button>
-<button type="button" class="sym-tab" role="tab" id="sym-twotier-1780398272-tab-eq" aria-controls="sym-twotier-1780398272-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
+<button type="button" class="sym-tab" role="tab" id="sym-twotier-1781020659-tab-eq" aria-controls="sym-twotier-1781020659-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>2. Matrix
 </button>
-<button type="button" class="sym-tab" role="tab" id="sym-twotier-1780398272-tab-mat" aria-controls="sym-twotier-1780398272-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
+<button type="button" class="sym-tab" role="tab" id="sym-twotier-1781020659-tab-mat" aria-controls="sym-twotier-1781020659-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>3. Equations with data
 </button>
 </div>
-<div id="sym-twotier-1780398272-panel-idx" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-twotier-1780398272-tab-idx" data-panel="idx" tabindex="0">
+<div id="sym-twotier-1781020659-panel-idx" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-twotier-1781020659-tab-idx" data-panel="idx" tabindex="0">
 <p class="sym-caption">
 What happens for each observation <em>i</em> – the per-individual
 reading.
@@ -903,7 +906,7 @@ variance per trait  <span class="sym-dim">diagonal ^{5 }</span>
 </li>
 </ul></details>
 </div>
-<div id="sym-twotier-1780398272-panel-eq" class="sym-panel" role="tabpanel" aria-labelledby="sym-twotier-1780398272-tab-eq" data-panel="eq" hidden="" tabindex="0">
+<div id="sym-twotier-1781020659-panel-eq" class="sym-panel" role="tabpanel" aria-labelledby="sym-twotier-1781020659-tab-eq" data-panel="eq" hidden="" tabindex="0">
 <p class="sym-caption">
 The same model in matrix form – the structural contract every textbook
 past chapter 4 switches to.
@@ -971,7 +974,7 @@ unique variance per trait  <span class="sym-dim">diagonal ^{5 }</span>
 </li>
 </ul></details>
 </div>
-<div id="sym-twotier-1780398272-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-twotier-1780398272-tab-mat" data-panel="mat" hidden="" tabindex="0">
+<div id="sym-twotier-1781020659-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-twotier-1781020659-tab-mat" data-panel="mat" hidden="" tabindex="0">
 <p class="sym-caption">
 The same matrix equation, with your actual numbers stacked inside the
 brackets – what the computer multiplies. Showing first 5 and last 2 rows
@@ -1122,9 +1125,9 @@ Per-trait repeatability <span class="math inline">R_t = (\Sigma_B)_{tt}
 </p>
 </div>
 </div>
-<span id="sym-twotier-1780398272-end" tabindex="-1"></span>
+<span id="sym-twotier-1781020659-end" tabindex="-1"></span>
 <script>(function() {
-  var root = document.getElementById("sym-twotier-1780398272");
+  var root = document.getElementById("sym-twotier-1781020659");
   if (!root) return;
   var tabs   = Array.prototype.slice.call(root.querySelectorAll("[role=\"tab\"]"));
   var panels = Array.prototype.slice.call(root.querySelectorAll("[role=\"tabpanel\"]"));

@@ -62,8 +62,12 @@ fit <- glm(count ~ temperature, family = poisson, data = dat)
 ```
 
 [`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
-is the single entry point. Pass user-facing symbols and units so the
-equations carry biological meaning rather than R variable names:
+builds the structured object that every other function reads. (In a
+hurry? `explain(fit)` prints the equation, assumptions, and a
+coefficient reading in one call — the recommended first look for
+newcomers; here we build the object so we can explore each piece.) Pass
+user-facing symbols and units so the equations carry biological meaning
+rather than R variable names:
 
 ``` r
 
@@ -117,7 +121,7 @@ mean \hat{\boldsymbol{\mu}}.
 as_html_three_views(sym, head = 5, tail = 2)
 ```
 
-[Skip three-views widget](#sym-sym-1780398375-end)
+[Skip three-views widget](#sym-sym-1781020763-end)
 
 ▸1. Index
 

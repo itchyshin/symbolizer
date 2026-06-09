@@ -18,6 +18,9 @@
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
 <meta property="og:title" content="Where the variation lives: ICC and repeatability">
+<meta name="description" content="Partition variance into components, then read ICC and repeatability -- and which scale each number lives on.">
+<meta property="og:description" content="Partition variance into components, then read ICC and repeatability -- and which scale each number lives on.">
+<meta property="og:image" content="https://itchyshin.github.io/symbolizer/logo.svg">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -270,7 +273,13 @@ scale. When that does not exist, <code>symbolizer</code> returns
 <li>
 <strong>Count models (Poisson, negative binomial)</strong> have no
 fixed residual constant on the data scale, so the data-scale ICC is
-undefined.</li>
+undefined. (Unlike the binomial’s fixed <span class="math inline">\pi^2/3</span>, a count model’s latent/log-scale
+repeatability uses a <em>distribution-specific</em> observation-level
+variance – e.g. <span class="math inline">\ln(1 + 1/\lambda)</span> for
+the Poisson-log case (Nakagawa &amp; Schielzeth 2010). That latent-scale
+ICC is well defined, but <code>symbolizer</code> does not yet compute
+it, so it returns <code>NA</code> here rather than a half-specified
+number.)</li>
 <li>
 <strong>Location-scale Gaussian</strong> fits (where the residual SD
 itself varies across observations) have no single within-group
