@@ -142,7 +142,12 @@ that does not exist, `symbolizer` returns `NA` with a reason rather than a
 misleading number:
 
 * **Count models (Poisson, negative binomial)** have no fixed residual
-  constant on the data scale, so the data-scale ICC is undefined.
+  constant on the data scale, so the data-scale ICC is undefined. (Unlike the
+  binomial's fixed $\pi^2/3$, a count model's latent/log-scale repeatability
+  uses a *distribution-specific* observation-level variance -- e.g.
+  $\ln(1 + 1/\lambda)$ for the Poisson-log case (Nakagawa & Schielzeth 2010).
+  That latent-scale ICC is well defined, but `symbolizer` does not yet compute
+  it, so it returns `NA` here rather than a half-specified number.)
 * **Location-scale Gaussian** fits (where the residual SD itself varies across
   observations) have no single within-group variance.
 * **More than one random-effect term**: the variance partition is still
