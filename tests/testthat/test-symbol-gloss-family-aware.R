@@ -34,3 +34,31 @@ test_that("Lognormal sigma gloss is its log-scale meaning, not 'precision'", {
   expect_true(grepl("log-response", html),
               info = "Lognormal sigma gloss should carry its own log-scale meaning")
 })
+
+# Same family-blindness affected the MEAN parameter mu: "conditional mu of y"
+# is wrong for Lognormal, where mu is the mean of log(Y), not of Y. Source it
+# from the per-family mean_meaning column of family-parameterizations.csv.
+test_that("Lognormal mu gloss is the log-scale mean, not 'conditional mu of y'", {
+  skip_if_not_installed("drmTMB")
+  source(test_path("helper-drmtmb-fits.R"), local = TRUE)
+  fit <- suppressWarnings(fit_drm_lognormal())
+  sym <- symbolize(fit)
+  html <- as_html_three_views(sym, id = "test-ln-mu-gloss")
+
+  expect_false(grepl("conditional mu of", html),
+               info = "Lognormal mu gloss must not use the family-blind 'conditional mu of y'")
+  expect_true(grepl("mean of log", html),
+              info = "Lognormal mu gloss should say mu is the mean of log(Y)")
+})
+
+# Guard the fallback: a family with no mean_meaning override (Gaussian) keeps
+# the generic wording, so the override is targeted, not global.
+test_that("Gamma mu gloss keeps the generic fallback (no over-broad override)", {
+  skip_if_not_installed("drmTMB")
+  source(test_path("helper-drmtmb-fits.R"), local = TRUE)
+  fit <- suppressWarnings(fit_drm_gamma())
+  sym <- symbolize(fit)
+  html <- as_html_three_views(sym, id = "test-gamma-mu-gloss")
+  expect_false(grepl("mean of log", html),
+               info = "Gamma mu (no mean_meaning override) must not inherit the lognormal log-scale wording")
+})

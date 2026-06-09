@@ -1,5 +1,6 @@
 ---
 title: "Structural dependence: phylogenetic, animal-model, and spatial random effects"
+description: "Phylogenetic, animal-model, and spatial random effects as one grammar -- the same dependence model across metafor, MCMCglmm, brms, and phylolm."
 output:
   rmarkdown::html_vignette:
     toc: true
@@ -40,7 +41,7 @@ set.seed(1)
 > `symbolize()` reads across `MCMCglmm`, `brms`, and `phylolm`, and how
 > the dependence matrix is the one piece that differs.*
 
-If you have ever written `(1 | species)` for an animal model, `gr(species, cov = A)` in `brms`, or `s(x, y, bs = "gp")` for a spatial process, you have been writing the **same model** three times — only the matrix that encodes the dependence changes. This article is the first in `symbolizer`'s **concept-axis series**; it teaches the *dependence-structure* axis of GLMM grammar through one **deep-dive** Face and two **light** Faces across three R packages: `MCMCglmm`, `brms`, and `phylolm`. The scope is the **phylogenetic LMM** with $\sigma_e^2$ estimated; the *meta-analytic* form (with $v_i$ known sampling variances) is its own surface in the v0.22 article.
+If you have ever written `(1 | species)` for an animal model, `gr(species, cov = A)` in `brms`, or `s(x, y, bs = "gp")` for a spatial process, you have been writing the **same model** three times — only the matrix that encodes the dependence changes. This article is the first in `symbolizer`'s **concept-axis series**; it teaches the *dependence-structure* axis of GLMM grammar through one **deep-dive** Face and two **light** Faces across three R packages: `MCMCglmm`, `brms`, and `phylolm`. The scope is the **phylogenetic LMM** with $\sigma_e^2$ estimated; the *meta-analytic* form (with $v_i$ known sampling variances) is covered in the companion article, `vignette("symbolizer-meta-analysis")`.
 
 ## The shared grammar
 
@@ -187,7 +188,7 @@ where:
 
 Three notes that often trip up first readers:
 
-1. **$\sigma_e^2$ is estimated, not the per-effect sampling variance $v_i$.** In meta-analysis we'd also feed in $v_i$ (a *known* sampling variance per study) via `metafor::rma.mv(V = vi, ...)`. That's the model class in the v0.22 article — same $\sigma_p^2 \mathbf A$ phylogenetic term, but with $\mathbf V = \operatorname{diag}(v_i)$ added on top of $\sigma_e^2 \mathbf I$ (Cinar et al. 2022, Eq. 1–10).
+1. **$\sigma_e^2$ is estimated, not the per-effect sampling variance $v_i$.** In meta-analysis we'd also feed in $v_i$ (a *known* sampling variance per study) via `metafor::rma.mv(V = vi, ...)`. That's the model class in the companion `vignette("symbolizer-meta-analysis")` — same $\sigma_p^2 \mathbf A$ phylogenetic term, but with $\mathbf V = \operatorname{diag}(v_i)$ added on top of $\sigma_e^2 \mathbf I$ (Cinar et al. 2022, Eq. 1–10).
 2. The Moura data was *built* as a meta-analytic dataset (one Fisher-$z$ per species, aggregated from many effect-size estimates). We use only $\mathrm{Zr}$ here; the $v_i$ column is set aside. That's a pedagogical choice — a clean phylo-LMM is easier to read than a meta-analytic phylo-LMM, and it keeps this article focused on the structural-dependence axis.
 3. `phylolm` fits a **marginalised** version of this same model: it absorbs $u_p$ into the residual to give $\mathrm{Zr} \sim \mathcal N(\beta_0 \mathbf 1, \sigma^2 \mathbf C(\alpha))$ where $\sigma^2 \mathbf C(\alpha) = \sigma_p^2 \mathbf A + \sigma_e^2 \mathbf I$ in the Pagel-$\lambda$ parametrisation. The § "Face 3" Face below makes the bridge explicit.
 
@@ -439,7 +440,7 @@ the variance components $\sigma_p^2$ and $\sigma_s^2$ are *weakly identified*: t
 
 ## Forward links
 
-- **v0.22 — Phylogenetic meta-analysis (Mizuno et al. 2026)**. This article fits the general phylo-GLMM with $\sigma_e^2$ *estimated*. The meta-analytic case where the sampling variance $v_i$ is **known** per study is its own surface — `metafor::rma.mv(V = V, ...)` is the canonical interface, with `glmmTMB::equalto` (reserved) and `brms::se(sqrt(vi))` as bridges.
+- **Phylogenetic meta-analysis (Mizuno et al. 2026)** — already covered in the companion `vignette("symbolizer-meta-analysis")` (§4). This article fits the general phylo-GLMM with $\sigma_e^2$ *estimated*; the meta-analytic case, where the per-study sampling variance $v_i$ is **known**, uses `metafor::rma.mv(V = V, ...)` as the canonical interface, with `glmmTMB::equalto` (reserved) and `brms::se(sqrt(vi))` as bridges.
 - **v0.24 — Location-scale on $\mathbf M$ (Nakagawa et al. 2025 *MEE*)**. The dependence parameter itself can have a submodel: $\sigma_p \sim z$ across clades, $\rho \sim z$ across environments. Symbolizer's drmTMB extractor is the right home for the phylogenetic location-scale model.
 - **drmTMB deep dives**: `vignette("phylogenetic-models", package = "drmTMB")`, `vignette("animal-models", package = "drmTMB")`, `vignette("structural-dependence", package = "drmTMB")`.
 - **gllvmTMB deep dive**: `vignette("phylogenetic-gllvm", package = "gllvmTMB")`.

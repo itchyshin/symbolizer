@@ -1,5 +1,6 @@
 ---
 title: "Three flavors of meta-analysis: a cross-package tour"
+description: "The same meta-analytic model across metafor, glmmTMB, and drmTMB -- known sampling variances and the heterogeneity they leave behind."
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Three flavors of meta-analysis: a cross-package tour}

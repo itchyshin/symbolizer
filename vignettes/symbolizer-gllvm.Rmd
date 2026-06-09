@@ -1,5 +1,6 @@
 ---
 title: "Latent variables in ecology: a gllvmTMB worked example"
+description: "Generalized linear latent-variable (GLLVM) models for multivariate ecology: factors, loadings, and the implied trait covariance."
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Latent variables in ecology: a gllvmTMB worked example}

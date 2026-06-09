@@ -102,7 +102,7 @@ reference:
     contents:
       - notation_bridge
   - title: "See the data flow"
-    desc: "Numeric arrays behind the symbols, and the three-views HTML widget."
+    desc: "Numeric arrays behind the symbols, and the three-views widget — interactive HTML and static PDF."
     contents:
       - expand
       - as_html_three_views
@@ -158,14 +158,17 @@ reference:
       - extract_terms
       - get_parameterization
   - title: "Internal: capability registry"
+    desc: "The gate deciding which (class, family, component) tuples symbolize() supports, plus the human-readable status words."
     contents:
       - capability_check
       - friendly_status
   - title: "Internal: template loader"
+    desc: "Reads and caches the prose / LaTeX templates in inst/extdata/*.csv that every renderer draws from."
     contents:
       - load_template
       - clear_template_cache
   - title: "Internal: formula helpers"
+    desc: "Low-level formula-parsing and LaTeX-environment utilities shared across the extractors and renderers."
     contents:
       - formula_lhs
       - formula_rhs

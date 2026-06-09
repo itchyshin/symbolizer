@@ -1,5 +1,6 @@
 ---
 title: "Get started with symbolizer"
+description: "A five-minute first contact: fit a model, then read its equation, assumptions, and plain-English interpretation."
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Get started with symbolizer}
@@ -81,7 +82,10 @@ dat <- data.frame(
 fit <- glm(count ~ temperature, family = poisson, data = dat)
 ```
 
-`symbolize()` is the single entry point. Pass user-facing symbols and units so
+`symbolize()` builds the structured object that every other function reads. (In
+a hurry? `explain(fit)` prints the equation, assumptions, and a coefficient
+reading in one call — the recommended first look for newcomers; here we build the
+object so we can explore each piece.) Pass user-facing symbols and units so
 the equations carry biological meaning rather than R variable names:
 
 ```{r symbolize}
