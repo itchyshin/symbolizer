@@ -58,6 +58,10 @@ biological reading on each coefficient, and the assumption table.
 Every phrase you see below is templated from
 `inst/extdata/*.csv` — no LLM at runtime.
 
+Every fitted number shown below — in the worked-row widgets and the
+coefficient readings — is a **point estimate**; uncertainty (confidence
+or credible intervals) is not displayed.
+
 For Gaussian and bivariate Gaussian, see
 `vignette("symbolizer-drmtmb")`. For the matching pedagogy on
 factors and interactions, see `vignette("symbolizer-factors")`.
@@ -125,8 +129,9 @@ pdf_alongside_html(sym, "fig-lognormal.pdf",
 
 `Y > 0`, log link by convention (`stats::Gamma(link = "log")`).
 Coefficients are multiplicative on the mean response, like
-lognormal — but the variance scales as `mu^2 * sigma^2`, not
-`log(Y)`.
+lognormal — but the variance grows as `mu^2 * sigma^2` (a roughly
+constant coefficient of variation), whereas lognormal sets its
+spread on the `log(Y)` scale.
 
 ```{r gamma}
 set.seed(1); n <- 100
