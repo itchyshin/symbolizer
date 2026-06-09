@@ -89,17 +89,14 @@ symbolize.psem <- function(fit, symbols = NULL, units = NULL,
 
 # ---- print -----------------------------------------------------------------
 
-#' Compact summary of a multi-node symbolized SEM
-#'
-#' Print method for `symbolized_model_set` — the shared parent of
-#' `symbolized_psem` and drmSEM's `symbolized_drm_sem`. Lists one line per
-#' node (response, family) instead of dumping the underlying list, and notes
-#' any declared `%~~%` covariance arcs. drmSEM ships its own more-specific
-#' `print.symbolized_drm_sem`, which takes precedence for `drm_sem` objects.
-#'
-#' @param x A `symbolized_model_set`.
-#' @param ... Ignored.
-#' @return `x`, invisibly.
+# Compact summary of a multi-node symbolized SEM. Print method for the shared
+# parent of `symbolized_psem` and drmSEM's `symbolized_drm_sem`: one line per
+# node (response, family) instead of dumping the underlying list, plus any
+# declared `%~~%` covariance arcs. drmSEM ships its own more-specific
+# `print.symbolized_drm_sem`, which takes precedence for `drm_sem` objects.
+# Bare `@export` (no roxygen topic) matches every other print method in the
+# package, so no man page is generated and pkgdown's reference index stays
+# complete.
 #' @export
 print.symbolized_model_set <- function(x, ...) {
   nodes <- names(x$parts)
