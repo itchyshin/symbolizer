@@ -137,7 +137,7 @@ it renders as:
 \begin{aligned} \mathbf{w} \mid \boldsymbol{\mu},\\ \boldsymbol{\sigma}
 & \sim \mathcal{N}(\boldsymbol{\mu},\\
 \mathrm{diag}(\boldsymbol{\sigma}^2)) \\ \boldsymbol{\mu} & = \mathbf{X}
-\boldsymbol{\beta} \\ \log(\boldsymbol{\sigma}) & = \mathbf{Z}
+\boldsymbol{\beta} \\ \log(\boldsymbol{\sigma}) & = \mathbf{X}\_{\sigma}
 \boldsymbol{\gamma} \end{aligned}
 
 Bold lowercase letters are vectors (\mathbf{w}, \boldsymbol{\beta});
@@ -158,11 +158,11 @@ symbol_table(sym, notation = "both")
 | W_i | \mathbf{w} | body_mass | g | response | \mathbb{R}^n | \mathbb{R}^{200} | response variable |
 | T_i | — | temperature | C | predictor | column of design matrix | column of X (length 200) | continuous predictor |
 | \mu_i | \boldsymbol{\mu} | NA | NA | parameter | \mathbb{R}^n | \mathbb{R}^{200} | conditional mu of body_mass |
-| \sigma_i | \boldsymbol{\sigma} | NA | NA | parameter | \mathbb{R}^n | \mathbb{R}^{200} | conditional sigma of body_mass |
+| \sigma_i | \boldsymbol{\sigma} | NA | NA | parameter | \mathbb{R}^n | \mathbb{R}^{200} | residual standard deviation |
 | \beta\_{0}, \beta\_{1} | \boldsymbol{\beta} | NA | NA | coefficient | \mathbb{R}^{p\_\mu} | \mathbb{R}^{2} | mu submodel coefficients |
 | \gamma\_{0}, \gamma\_{1} | \boldsymbol{\gamma} | NA | NA | coefficient | \mathbb{R}^{p\_\sigma} | \mathbb{R}^{2} | sigma submodel coefficients |
 | — | \mathbf{X} | NA | NA | design_matrix | \mathbb{R}^{n \times p\_\mu} | \mathbb{R}^{200 \times 2} | mu submodel design matrix |
-| — | \mathbf{Z} | NA | NA | design_matrix | \mathbb{R}^{n \times p\_\sigma} | \mathbb{R}^{200 \times 2} | sigma submodel design matrix |
+| — | \mathbf{X}\_{\sigma} | NA | NA | design_matrix | \mathbb{R}^{n \times p\_\sigma} | \mathbb{R}^{200 \times 2} | sigma submodel design matrix |
 
 ### What is assumed
 
@@ -173,7 +173,7 @@ assumption_table(sym)
 
 | assumption | expression | biological meaning | status |
 |:---|:---|:---|:---|
-| conditional_distribution | W_i \mid \mu_i\\ \sigma_i \sim \mathrm{Normal}(\mu_i\\ \sigma_i^2) | body_mass varies normally around its expected value | explicit |
+| conditional_distribution | W_i \mid \mu_i,\\ \sigma_i \sim \mathrm{Normal}(\mu_i,\\ \sigma_i^2) | body_mass varies normally around its expected value | explicit |
 | linear_predictor | \mu_i = \beta_0 + \sum_k \beta_k X\_{ki} | Expected body_mass is a linear combination of the mean-model predictors | explicit |
 | linear_predictor | \log(\sigma_i) = \gamma_0 + \sum_k \gamma_k Z\_{ki} | Log residual SD of body_mass is a linear combination of the scale-model predictors | explicit |
 | independence | W_i \perp W_j \mid X \text{ for } i \ne j | Observations are conditionally independent given the predictors | follows from the formula |
@@ -212,7 +212,7 @@ with data — backed by the same `symbolized_model` object.
 as_html_three_views(sym)
 ```
 
-[Skip three-views widget](#sym-sym-1779794964-end)
+[Skip three-views widget](#sym-sym-1781095496-end)
 
 ▸1. Index
 
@@ -227,6 +227,10 @@ with the predictors, and a residual SD that may also shift with its own
 predictors – so both the centre and the spread of the response are
 modeled.
 
+**Coefficient reading.** On the response scale, \hat\beta is the
+additive change in the mean of the response for a one-unit increase in
+the predictor (identity link – no back-transformation needed).
+
 \begin{aligned} W_i \mid \mu_i,\\ \sigma_i & \sim
 \mathrm{Normal}(\mu_i,\\ \sigma_i^2) \\ \mu_i & = \beta\_{0} +
 \beta\_{1} \\ T_i \\ \log(\sigma_i) & = \gamma\_{0} + \gamma\_{1} \\ T_i
@@ -237,7 +241,7 @@ where:
 - W_i — response variable  \mathbb{R}^{200}
 - T_i — continuous predictor  column of X (length 200)
 - \mu_i — conditional mu of body_mass  \mathbb{R}^{200}
-- \sigma_i — conditional sigma of body_mass  \mathbb{R}^{200}
+- \sigma_i — residual standard deviation  \mathbb{R}^{200}
 - \beta\_{0}, \beta\_{1} — mu submodel coefficients  \mathbb{R}^{2}
 - \gamma\_{0}, \gamma\_{1} — sigma submodel coefficients  \mathbb{R}^{2}
 
@@ -252,18 +256,19 @@ modeled.
 \begin{aligned} \mathbf{w} \mid \boldsymbol{\mu},\\ \boldsymbol{\sigma}
 & \sim \mathcal{N}(\boldsymbol{\mu},\\
 \mathrm{diag}(\boldsymbol{\sigma}^2)) \\ \boldsymbol{\mu} & = \mathbf{X}
-\boldsymbol{\beta} \\ \log(\boldsymbol{\sigma}) & = \mathbf{Z}
+\boldsymbol{\beta} \\ \log(\boldsymbol{\sigma}) & = \mathbf{X}\_{\sigma}
 \boldsymbol{\gamma} \end{aligned}
 
 where:
 
 - \mathbf{w} — response variable  \mathbb{R}^{200}
 - \boldsymbol{\mu} — conditional mu of body_mass  \mathbb{R}^{200}
-- \boldsymbol{\sigma} — conditional sigma of body_mass  \mathbb{R}^{200}
+- \boldsymbol{\sigma} — residual standard deviation  \mathbb{R}^{200}
 - \boldsymbol{\beta} — mu submodel coefficients  \mathbb{R}^{2}
 - \boldsymbol{\gamma} — sigma submodel coefficients  \mathbb{R}^{2}
 - \mathbf{X} — mu submodel design matrix  \mathbb{R}^{200 \times 2}
-- \mathbf{Z} — sigma submodel design matrix  \mathbb{R}^{200 \times 2}
+- \mathbf{X}\_{\sigma} — sigma submodel design matrix  \mathbb{R}^{200
+  \times 2}
 
 The same matrix equation, with your actual numbers stacked inside the
 brackets – what the computer multiplies. Showing first 5 and last 2 rows
@@ -281,13 +286,15 @@ below.
 
 For observation *i* = 1 of your data:
 
-\begin{aligned} W\_{1} &= \hat\beta\_{0} +
+\begin{aligned} w\_{1} &= \hat\beta\_{0} +
 \hat\beta\_{1}\\\mathrm{temperature}\_{1} + \hat\varepsilon\_{1}
-&\quad(\text{response equation, one row of the model}) \\ 31.5 &= 30.4 +
-0.371 \times 14 + (-4.16) &\quad(\text{with your numbers}) \\ &=
+&\quad(\text{response equation, one row of the model}) \\ \hat\mu\_{1}
+&= 30.4 + 0.371 \times 14 \approx 35.6 &\quad(\text{predicted mean} =
+\text{linear predictor}) \\ w\_{1} &=
 \underbrace{35.6}\_{\textstyle\\\hat\mu\_{1}\\\text{(predicted)}\\}
 \\+\\
 \underbrace{(-4.16)}\_{\textstyle\\\hat\varepsilon\_{1}\\\text{(residual)}\\}
+&\quad(\text{observed} = \text{predicted mean} + \text{residual})
 \end{aligned}
 
 Stacking the same response equation for all *n* = 200 observations:

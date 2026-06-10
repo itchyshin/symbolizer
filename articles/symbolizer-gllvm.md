@@ -332,7 +332,7 @@ sym_syndromes <- symbolize(
 
 ### Three views — syndromes
 
-[Skip three-views widget](#sym-syndromes-1781047504-end)
+[Skip three-views widget](#sym-syndromes-1781100136-end)
 
 ▸1. Index
 
@@ -491,9 +491,9 @@ implied covariance)}\\} \\=\\ \underbrace{\begin{bmatrix} 0.667 & 0.219
 0.696 & 0.0784 & 0.983 & 0.108 & 0.844 \\ 0.125 & 0.0544 & 0.108 &
 0.0256 & 0.098 \\ 0.616 & 0.0846 & 0.844 & 0.098 & 0.727
 \end{bmatrix}}\_{\textstyle\\\boldsymbol{\Lambda}\_B\\\boldsymbol{\Lambda}\_B^{\\\top}\\}
-\\+\\ \underbrace{\begin{bmatrix} 0.358 & 0 & 0 & 0 & 0 \\ 0 & 3.29e-08
+\\+\\ \underbrace{\begin{bmatrix} 0.358 & 0 & 0 & 0 & 0 \\ 0 & 3.04e-08
 & 0 & 0 & 0 \\ 0 & 0 & 0.249 & 0 & 0 \\ 0 & 0 & 0 & 0.142 & 0 \\ 0 & 0 &
-0 & 0 & 2.74e-17
+0 & 0 & 5.67e-17
 \end{bmatrix}}\_{\textstyle\\\boldsymbol{\Psi}\_B^{\\2}\\}
 
 The widget’s **Tab 3 — Equations with data** carries the new
@@ -558,7 +558,7 @@ sym_two_tier <- symbolize(
 
 ### Three views — two-tier
 
-[Skip three-views widget](#sym-twotier-1781047505-end)
+[Skip three-views widget](#sym-twotier-1781100137-end)
 
 ▸1. Index
 
@@ -733,9 +733,9 @@ implied covariance)}\\} \\=\\ \underbrace{\begin{bmatrix} 0.522 & 0.161
 0.609 & 0.0438 & 0.874 & 0.0733 & 0.796 \\ 0.0672 & 0.0255 & 0.0733 &
 0.00884 & 0.0666 \\ 0.554 & 0.0377 & 0.796 & 0.0666 & 0.726
 \end{bmatrix}}\_{\textstyle\\\boldsymbol{\Lambda}\_B\\\boldsymbol{\Lambda}\_B^{\\\top}\\}
-\\+\\ \underbrace{\begin{bmatrix} 0.471 & 0 & 0 & 0 & 0 \\ 0 & 2.62e-08
+\\+\\ \underbrace{\begin{bmatrix} 0.471 & 0 & 0 & 0 & 0 \\ 0 & 2.51e-08
 & 0 & 0 & 0 \\ 0 & 0 & 0.357 & 0 & 0 \\ 0 & 0 & 0 & 0.187 & 0 \\ 0 & 0 &
-0 & 0 & 4.48e-15
+0 & 0 & 3.89e-16
 \end{bmatrix}}\_{\textstyle\\\boldsymbol{\Psi}\_B^{\\2}\\}
 
 Implied within-individual trait covariance \boldsymbol{\Sigma}\_W
@@ -809,7 +809,7 @@ trait at that tier.
 
 gllvmTMB::extract_communality(fit_two_tier)
 #>         t1         t2         t3         t4         t5 
-#> 0.52562443 0.99999985 0.70980078 0.04504126 1.00000000
+#> 0.52562455 0.99999986 0.70980056 0.04504144 1.00000000
 ```
 
 Mapping back to §1’s named behaviours: **t1 = boldness, t2 =
@@ -854,20 +854,20 @@ co_B <- co[co$tier == "B", c("trait_i", "trait_j", "correlation")]
 co_W <- co[co$tier == "W", c("trait_i", "trait_j", "correlation")]
 head(co_B)
 #>   trait_i trait_j correlation
-#> 1      t1      t2  0.38220776
-#> 2      t1      t3  0.55145501
-#> 3      t2      t3  0.09314368
-#> 4      t1      t4  0.15238387
-#> 5      t2      t4  0.13577795
-#> 6      t3      t4  0.14922597
+#> 1      t1      t2  0.38220752
+#> 2      t1      t3  0.55145490
+#> 3      t2      t3  0.09314298
+#> 4      t1      t4  0.15238423
+#> 5      t2      t4  0.13577794
+#> 6      t3      t4  0.14922635
 head(co_W)
 #>    trait_i trait_j correlation
-#> 11      t1      t2   0.8409836
+#> 11      t1      t2   0.8409837
 #> 12      t1      t3   0.8509604
-#> 13      t2      t3   0.7543394
+#> 13      t2      t3   0.7543396
 #> 14      t1      t4   0.8318400
-#> 15      t2      t4   0.7373900
-#> 16      t3      t4   0.7461378
+#> 15      t2      t4   0.7373902
+#> 16      t3      t4   0.7461380
 ```
 
 **Takeaway.** c^2 and \psi^\* per tier are the trait-level integration
@@ -906,11 +906,11 @@ Two practical conventions, both surfaced in `assumption_table(sym)`:
 
 gllvmTMB::getLoadings(fit_two_tier, rotate = "varimax")
 #>           LV1        LV2
-#> t1 0.63893162 0.33663848
-#> t2 0.02977114 0.42239648
-#> t3 0.93385722 0.03776525
-#> t4 0.07630714 0.05491925
-#> t5 0.85143883 0.02926573
+#> t1 0.63893170 0.33663804
+#> t2 0.02977121 0.42239669
+#> t3 0.93385659 0.03776435
+#> t4 0.07630731 0.05491915
+#> t5 0.85143879 0.02926521
 ```
 
 A second category of identifiability concerns the **row-level residual

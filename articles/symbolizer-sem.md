@@ -95,44 +95,22 @@ vapply(sym$parts, function(p) p$model$class, character(1))
 
 [`equations()`](https://itchyshin.github.io/symbolizer/reference/equations.md)
 row-binds every node’s equation block with a leading `node` column, so
-you can see the whole system at once:
+you can work with the whole system in R. The rendered widget below shows
+the same node equations without exposing raw LaTeX in the article:
 
 ``` r
 
 equations(sym)
 ```
 
-\begin{aligned} F_i \mid \mu_i,\\ \sigma \sim \mathrm{Normal}(\mu_i,\\
-\sigma^2) \\ \mu_i = \beta\_{0} + \beta\_{1} \\ A_i \\ C_i \mid \mu_i,\\
-\sigma \sim \mathrm{Normal}(\mu_i,\\ \sigma^2) \\ \mu_i = \beta\_{0} +
-\beta\_{1} \\ F_i \\ R_i \mid \mu_i,\\ \sigma \sim
-\mathrm{Normal}(\mu_i,\\ \sigma^2) \\ \mu_i = \beta\_{0} + \beta\_{1} \\
-B_i + \beta\_{2} \\ F_i \end{aligned}
-
 [`as_latex()`](https://itchyshin.github.io/symbolizer/reference/as_latex.md)
 concatenates the per-node LaTeX under `## Node:` headers, ready to
-splice into a manuscript:
+splice into a manuscript. The command is run during the vignette build,
+but the raw LaTeX string is not printed in the HTML article:
 
 ``` r
 
 cat(as_latex(sym))
-#> ## Node: firesev
-#> \begin{aligned}
-#> F_i \mid \mu_i,\, \sigma & \sim \mathrm{Normal}(\mu_i,\, \sigma^2) \\
-#> \mu_i & = \beta_{0} + \beta_{1} \, A_i
-#> \end{aligned}
-#> 
-#> ## Node: cover
-#> \begin{aligned}
-#> C_i \mid \mu_i,\, \sigma & \sim \mathrm{Normal}(\mu_i,\, \sigma^2) \\
-#> \mu_i & = \beta_{0} + \beta_{1} \, F_i
-#> \end{aligned}
-#> 
-#> ## Node: rich
-#> \begin{aligned}
-#> R_i \mid \mu_i,\, \sigma & \sim \mathrm{Normal}(\mu_i,\, \sigma^2) \\
-#> \mu_i & = \beta_{0} + \beta_{1} \, B_i + \beta_{2} \, F_i
-#> \end{aligned}
 ```
 
 ## The assumptions — including the covariance arc
@@ -182,7 +160,7 @@ as_html_three_views(sym, id = "psem")
 
 ## Node: firesev
 
-[Skip three-views widget](#sym-psemfiresev-1781047526-end)
+[Skip three-views widget](#sym-psemfiresev-1781100157-end)
 
 ▸1. Index
 
@@ -276,7 +254,7 @@ response-equation rows from the worked row above.
 
 ## Node: cover
 
-[Skip three-views widget](#sym-psemcover-1781047526-end)
+[Skip three-views widget](#sym-psemcover-1781100157-end)
 
 ▸1. Index
 
@@ -370,7 +348,7 @@ response-equation rows from the worked row above.
 
 ## Node: rich
 
-[Skip three-views widget](#sym-psemrich-1781047526-end)
+[Skip three-views widget](#sym-psemrich-1781100157-end)
 
 ▸1. Index
 

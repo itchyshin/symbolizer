@@ -186,7 +186,7 @@ W_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 \begin{aligned}
 \mathbf{w} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} &amp; \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2)) \\
 \boldsymbol{\mu} &amp; = \mathbf{X} \boldsymbol{\beta} \\
-\log(\boldsymbol{\sigma}) &amp; = \mathbf{Z} \boldsymbol{\gamma}
+\log(\boldsymbol{\sigma}) &amp; = \mathbf{X}_{\sigma} \boldsymbol{\gamma}
 \end{aligned}
 </span></p>
 <p>Bold lowercase letters are vectors (<span class="math inline">\mathbf{w}</span>, <span class="math inline">\boldsymbol{\beta}</span>); bold uppercase letters are matrices (<span class="math inline">\mathbf{X}</span>, <span class="math inline">\mathbf{Z}</span>).</p>
@@ -257,7 +257,7 @@ W_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 <td align="left">parameter</td>
 <td align="left"><span class="math inline">\mathbb{R}^n</span></td>
 <td align="left"><span class="math inline">\mathbb{R}^{200}</span></td>
-<td align="left">conditional sigma of body_mass</td>
+<td align="left">residual standard deviation</td>
 </tr>
 <tr>
 <td align="left"><span class="math inline">\beta_{0}, \beta_{1}</span></td>
@@ -291,7 +291,7 @@ W_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 </tr>
 <tr>
 <td align="left">—</td>
-<td align="left"><span class="math inline">\mathbf{Z}</span></td>
+<td align="left"><span class="math inline">\mathbf{X}_{\sigma}</span></td>
 <td align="left">NA</td>
 <td align="left">NA</td>
 <td align="left">design_matrix</td>
@@ -307,6 +307,7 @@ W_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 </h3>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/assumption_table.html">assumption_table</a></span><span class="op">(</span><span class="va">sym</span><span class="op">)</span></span></code></pre></div>
+<div class="table-responsive" style="overflow-x:auto;">
 <table class="table">
 <colgroup>
 <col width="25%">
@@ -323,7 +324,7 @@ W_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 <tbody>
 <tr>
 <td align="left">conditional_distribution</td>
-<td align="left"><span class="math inline">W_i \mid \mu_i\, \sigma_i \sim \mathrm{Normal}(\mu_i\, \sigma_i^2)</span></td>
+<td align="left"><span class="math inline">W_i \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2)</span></td>
 <td align="left">body_mass varies normally around its expected value</td>
 <td align="left">explicit</td>
 </tr>
@@ -359,6 +360,7 @@ W_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 </tr>
 </tbody>
 </table>
+</div>
 </div>
 <div class="section level3">
 <h3 id="what-each-coefficient-means">What each coefficient means<a class="anchor" aria-label="anchor" href="#what-each-coefficient-means"></a>
@@ -450,25 +452,28 @@ W_i \mid \mu_i,\, \sigma_i &amp; \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2) \\
 .sym-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .sym-skip { position: absolute; top: -100px; left: 0; padding: 0.4rem 0.7rem; background: #8a1f22; color: #fff; text-decoration: none; font-size: 0.85rem; z-index: 5; }
 .sym-skip:focus { top: 0; }</style>
-<div id="sym-sym-1779794964" class="sym-tabs">
-<p><a class="sym-skip" href="#sym-sym-1779794964-end">Skip three-views widget</a></p>
+<div id="sym-sym-1781095496" class="sym-tabs">
+<p><a class="sym-skip" href="#sym-sym-1781095496-end">Skip three-views widget</a></p>
 <div class="sym-tablist" role="tablist" aria-label="Three views of the model">
-<button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779794964-tab-idx" aria-controls="sym-sym-1779794964-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
-<span class="sym-tab-marker" aria-hidden="true">▸</span>1. Index
+<button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1781095496-tab-idx" aria-controls="sym-sym-1781095496-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
+<span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>1. Index
 </button>
-<button type="button" class="sym-tab" role="tab" id="sym-sym-1779794964-tab-eq" aria-controls="sym-sym-1779794964-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
-<span class="sym-tab-marker" aria-hidden="true">▸</span>2. Matrix
+<button type="button" class="sym-tab" role="tab" id="sym-sym-1781095496-tab-eq" aria-controls="sym-sym-1781095496-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
+<span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>2. Matrix
 </button>
-<button type="button" class="sym-tab" role="tab" id="sym-sym-1779794964-tab-mat" aria-controls="sym-sym-1779794964-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
-<span class="sym-tab-marker" aria-hidden="true">▸</span>3. Equations with data
+<button type="button" class="sym-tab" role="tab" id="sym-sym-1781095496-tab-mat" aria-controls="sym-sym-1781095496-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
+<span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>3. Equations with data
 </button>
 </div>
-<div id="sym-sym-1779794964-panel-idx" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-sym-1779794964-tab-idx" data-panel="idx" tabindex="0">
+<div id="sym-sym-1781095496-panel-idx" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-sym-1781095496-tab-idx" data-panel="idx" tabindex="0">
 <p class="sym-caption">
 What happens for each observation <em>i</em> – the per-individual reading.
 </p>
 <p class="sym-biology">
 Each observation is normally distributed around a mean that may shift with the predictors, and a residual SD that may also shift with its own predictors – so both the centre and the spread of the response are modeled.
+</p>
+<p class="sym-biology">
+<strong>Coefficient reading.</strong> On the response scale, <span class="math inline">\hat\beta</span> is the additive change in the mean of the response for a one-unit increase in the predictor (identity link – no back-transformation needed).
 </p>
 <div class="sym-eq">
 <p><span class="math display">\begin{aligned}
@@ -490,7 +495,7 @@ where:
 <span class="math inline">\mu_i</span> — conditional mu of body_mass  <span class="sym-dim"><span class="math inline">\mathbb{R}^{200}</span></span>
 </li>
 <li>
-<span class="math inline">\sigma_i</span> — conditional sigma of body_mass  <span class="sym-dim"><span class="math inline">\mathbb{R}^{200}</span></span>
+<span class="math inline">\sigma_i</span> — residual standard deviation  <span class="sym-dim"><span class="math inline">\mathbb{R}^{200}</span></span>
 </li>
 <li>
 <span class="math inline">\beta_{0}, \beta_{1}</span> — mu submodel coefficients  <span class="sym-dim"><span class="math inline">\mathbb{R}^{2}</span></span>
@@ -500,7 +505,7 @@ where:
 </li>
 </ul></details>
 </div>
-<div id="sym-sym-1779794964-panel-eq" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1779794964-tab-eq" data-panel="eq" hidden="" tabindex="0">
+<div id="sym-sym-1781095496-panel-eq" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1781095496-tab-eq" data-panel="eq" hidden="" tabindex="0">
 <p class="sym-caption">
 The same model in matrix form – the structural contract every textbook past chapter 4 switches to.
 </p>
@@ -511,7 +516,7 @@ Each observation is normally distributed around a mean that may shift with the p
 <p><span class="math display">\begin{aligned}
 \mathbf{w} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} &amp; \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2)) \\
 \boldsymbol{\mu} &amp; = \mathbf{X} \boldsymbol{\beta} \\
-\log(\boldsymbol{\sigma}) &amp; = \mathbf{Z} \boldsymbol{\gamma}
+\log(\boldsymbol{\sigma}) &amp; = \mathbf{X}_{\sigma} \boldsymbol{\gamma}
 \end{aligned}</span></p>
 </div>
 <details class="sym-gloss" open><summary>
@@ -524,7 +529,7 @@ where:
 <span class="math inline">\boldsymbol{\mu}</span> — conditional mu of body_mass  <span class="sym-dim"><span class="math inline">\mathbb{R}^{200}</span></span>
 </li>
 <li>
-<span class="math inline">\boldsymbol{\sigma}</span> — conditional sigma of body_mass  <span class="sym-dim"><span class="math inline">\mathbb{R}^{200}</span></span>
+<span class="math inline">\boldsymbol{\sigma}</span> — residual standard deviation  <span class="sym-dim"><span class="math inline">\mathbb{R}^{200}</span></span>
 </li>
 <li>
 <span class="math inline">\boldsymbol{\beta}</span> — mu submodel coefficients  <span class="sym-dim"><span class="math inline">\mathbb{R}^{2}</span></span>
@@ -536,11 +541,11 @@ where:
 <span class="math inline">\mathbf{X}</span> — mu submodel design matrix  <span class="sym-dim"><span class="math inline">\mathbb{R}^{200 \times 2}</span></span>
 </li>
 <li>
-<span class="math inline">\mathbf{Z}</span> — sigma submodel design matrix  <span class="sym-dim"><span class="math inline">\mathbb{R}^{200 \times 2}</span></span>
+<span class="math inline">\mathbf{X}_{\sigma}</span> — sigma submodel design matrix  <span class="sym-dim"><span class="math inline">\mathbb{R}^{200 \times 2}</span></span>
 </li>
 </ul></details>
 </div>
-<div id="sym-sym-1779794964-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1779794964-tab-mat" data-panel="mat" hidden="" tabindex="0">
+<div id="sym-sym-1781095496-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1781095496-tab-mat" data-panel="mat" hidden="" tabindex="0">
 <p class="sym-caption">
 The same matrix equation, with your actual numbers stacked inside the brackets – what the computer multiplies. Showing first 5 and last 2 rows of n = 200.
 </p>
@@ -554,9 +559,9 @@ For observation <em>i</em> = 1 of your data:
 <div class="sym-eq">
 <p><span class="math display">
 \begin{aligned}
-W_{1} &amp;= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{temperature}_{1} + \hat\varepsilon_{1} &amp;\quad(\text{response equation, one row of the model}) \\
-31.5 &amp;= 30.4 + 0.371 \times   14 + (-4.16) &amp;\quad(\text{with your numbers}) \\
-&amp;= \underbrace{35.6}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-4.16)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
+w_{1} &amp;= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{temperature}_{1} + \hat\varepsilon_{1} &amp;\quad(\text{response equation, one row of the model}) \\
+\hat\mu_{1} &amp;= 30.4 + 0.371 \times   14 \approx 35.6 &amp;\quad(\text{predicted mean} = \text{linear predictor}) \\
+w_{1} &amp;= \underbrace{35.6}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-4.16)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,} &amp;\quad(\text{observed} = \text{predicted mean} + \text{residual})
 \end{aligned}
 </span></p>
 </div>
@@ -593,9 +598,9 @@ Stacking the same log-link equation for all <em>n</em> = 200 observations:
 </div>
 </div>
 </div>
-<span id="sym-sym-1779794964-end" tabindex="-1"></span>
+<span id="sym-sym-1781095496-end" tabindex="-1"></span>
 <script>(function() {
-  var root = document.getElementById("sym-sym-1779794964");
+  var root = document.getElementById("sym-sym-1781095496");
   if (!root) return;
   var tabs   = Array.prototype.slice.call(root.querySelectorAll("[role=\"tab\"]"));
   var panels = Array.prototype.slice.call(root.querySelectorAll("[role=\"tabpanel\"]"));
@@ -611,7 +616,13 @@ Stacking the same log-link equation for all <em>n</em> = 200 observations:
       p.classList.toggle("sym-active", on);
       if (on) { p.removeAttribute("hidden"); } else { p.setAttribute("hidden", ""); }
     });
-    if (typeof window.MathJax !== "undefined" && window.MathJax.typesetPromise) {
+    // Re-render math in the newly shown panel. KaTeX (the pkgdown site
+    // renderer) exposes renderMathInElement and already typesets hidden
+    // panels at load, so this is belt-and-braces; fall back to MathJax for
+    // standalone exports that still bootstrap MathJax from a CDN.
+    if (typeof window.renderMathInElement === "function") {
+      try { window.renderMathInElement(panels[idx], {throwOnError: false}); } catch (e) {}
+    } else if (typeof window.MathJax !== "undefined" && window.MathJax.typesetPromise) {
       try { window.MathJax.typesetPromise([panels[idx]]); } catch (e) {}
     }
   }
