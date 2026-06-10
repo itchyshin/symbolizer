@@ -154,7 +154,7 @@ Pre-release. Read status words consistently:
 
 ### At a glance
 
-`symbolize()` reads **10 package families / 14 fitted-class methods / 30+ family-class combinations** today: `drmTMB`, `gllvmTMB`, `glmmTMB`, `brms`, `lme4` (`lmer` + `glmer`), `MCMCglmm` (including animal models via `ginverse`), `sdmTMB` (spatial + spatiotemporal fields), `stats::lm` / `stats::glm`, `metafor` (`rma.uni` + `rma.mv` with multilevel / structured / phylogenetic random effects), and `mgcv::gam` / `mgcv::bam` (additive smooths; `gamm` / `gamm4` via `$gam`).
+`symbolize()` reads **11 package families / 14 fitted-class methods / 30+ family-class combinations** today: `drmTMB`, `gllvmTMB`, `glmmTMB`, `brms`, `lme4` (`lmer` + `glmer`), `MCMCglmm` (including animal models via `ginverse`), `sdmTMB` (spatial + spatiotemporal fields), `stats::lm` / `stats::glm`, `metafor` (`rma.uni` + `rma.mv` with multilevel / structured / phylogenetic random effects), `mgcv::gam` / `mgcv::bam` (additive smooths; `gamm` / `gamm4` via `$gam`), and `phylolm` (phylogenetic GLS).
 
 For the full **capability matrix, release history, status vocabulary, and what's planned next**, see [the Roadmap article](articles/symbolizer-roadmap.html). The capability registry (`symbolizer_capabilities()`) is the source of truth — any class / family / component not marked Stable or First slice there will be refused by `symbolize()`.
 

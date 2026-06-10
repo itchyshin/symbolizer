@@ -54,11 +54,11 @@ fields), `stats::lm` / `stats::glm`, the meta-analytic framework
 `metafor` (`rma.uni` + `rma.mv` with multilevel / structured /
 location-scale variants), additive models via `mgcv::gam` / `mgcv::bam`
 (with `gamm` / `gamm4` covered through the `$gam` slot), and
-phylogenetic GLS via `phylolm`. See the
-[Roadmap article](articles/symbolizer-roadmap.html) for the full
-capability matrix; `symbolizer_capabilities()` is the in-package source
-of truth, and any class / family / component not marked Stable or First
-slice there will be refused by `symbolize()`.
+phylogenetic GLS via `phylolm`. See the [Roadmap
+article](articles/symbolizer-roadmap.html) for the full capability
+matrix; `symbolizer_capabilities()` is the in-package source of truth,
+and any class / family / component not marked Stable or First slice
+there will be refused by `symbolize()`.
 
 **Works with multi-node SEMs too.** `symbolize()` reads piecewise
 structural equation models in two flavours: mean-only piecewise SEMs
@@ -137,7 +137,7 @@ $$
 \begin{aligned}
 \mathbf{w} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} & \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2)) \\
 \boldsymbol{\mu} & = \mathbf{X} \boldsymbol{\beta} \\
-\log(\boldsymbol{\sigma}) & = \mathbf{Z} \boldsymbol{\gamma}
+\log(\boldsymbol{\sigma}) & = \mathbf{X}_{\sigma} \boldsymbol{\gamma}
 \end{aligned}
 $$
 
@@ -158,11 +158,11 @@ symbol_table(sym, notation = "both")
 | $W_i$ | $\mathbf{w}$ | body_mass | g | response | $\mathbb{R}^n$ | $\mathbb{R}^{200}$ | response variable |
 | $T_i$ | — | temperature | C | predictor | column of design matrix | column of X (length 200) | continuous predictor |
 | $\mu_i$ | $\boldsymbol{\mu}$ | NA | NA | parameter | $\mathbb{R}^n$ | $\mathbb{R}^{200}$ | conditional mu of body_mass |
-| $\sigma_i$ | $\boldsymbol{\sigma}$ | NA | NA | parameter | $\mathbb{R}^n$ | $\mathbb{R}^{200}$ | conditional sigma of body_mass |
+| $\sigma_i$ | $\boldsymbol{\sigma}$ | NA | NA | parameter | $\mathbb{R}^n$ | $\mathbb{R}^{200}$ | residual standard deviation |
 | $\beta_{0}, \beta_{1}$ | $\boldsymbol{\beta}$ | NA | NA | coefficient | $\mathbb{R}^{p_\mu}$ | $\mathbb{R}^{2}$ | mu submodel coefficients |
 | $\gamma_{0}, \gamma_{1}$ | $\boldsymbol{\gamma}$ | NA | NA | coefficient | $\mathbb{R}^{p_\sigma}$ | $\mathbb{R}^{2}$ | sigma submodel coefficients |
 | — | $\mathbf{X}$ | NA | NA | design_matrix | $\mathbb{R}^{n \times p_\mu}$ | $\mathbb{R}^{200 \times 2}$ | mu submodel design matrix |
-| — | $\mathbf{Z}$ | NA | NA | design_matrix | $\mathbb{R}^{n \times p_\sigma}$ | $\mathbb{R}^{200 \times 2}$ | sigma submodel design matrix |
+| — | $\mathbf{X}_{\sigma}$ | NA | NA | design_matrix | $\mathbb{R}^{n \times p_\sigma}$ | $\mathbb{R}^{200 \times 2}$ | sigma submodel design matrix |
 
 ### What is assumed
 
@@ -170,14 +170,18 @@ symbol_table(sym, notation = "both")
 assumption_table(sym)
 ```
 
+<div class="table-responsive" style="overflow-x:auto;">
+
 | assumption | expression | biological meaning | status |
 |:---|:---|:---|:---|
-| conditional_distribution | $W_i \mid \mu_i\, \sigma_i \sim \mathrm{Normal}(\mu_i\, \sigma_i^2)$ | body_mass varies normally around its expected value | explicit |
+| conditional_distribution | $W_i \mid \mu_i,\, \sigma_i \sim \mathrm{Normal}(\mu_i,\, \sigma_i^2)$ | body_mass varies normally around its expected value | explicit |
 | linear_predictor | $\mu_i = \beta_0 + \sum_k \beta_k X_{ki}$ | Expected body_mass is a linear combination of the mean-model predictors | explicit |
 | linear_predictor | $\log(\sigma_i) = \gamma_0 + \sum_k \gamma_k Z_{ki}$ | Log residual SD of body_mass is a linear combination of the scale-model predictors | explicit |
 | independence | $W_i \perp W_j \mid X \text{ for } i \ne j$ | Observations are conditionally independent given the predictors | follows from the formula |
 | positivity | $\sigma_i > 0$ | Residual SD is constrained positive via the log link | follows from the formula |
 | no_missing_at_random | — | Observations are assumed not missing in a way that depends on the unobserved response | your responsibility |
+
+</div>
 
 ### What each coefficient means
 
@@ -234,34 +238,36 @@ as_html_three_views(sym)
 .sym-skip { position: absolute; top: -100px; left: 0; padding: 0.4rem 0.7rem; background: #8a1f22; color: #fff; text-decoration: none; font-size: 0.85rem; z-index: 5; }
 .sym-skip:focus { top: 0; }</style>
 
-<div id="sym-sym-1779794964" class="sym-tabs">
+<div id="sym-sym-1781095496" class="sym-tabs">
 
-<a class="sym-skip" href="#sym-sym-1779794964-end">Skip three-views
+<a class="sym-skip" href="#sym-sym-1781095496-end">Skip three-views
 widget</a>
 
 <div class="sym-tablist" role="tablist"
 aria-label="Three views of the model">
 
-<button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1779794964-tab-idx" aria-controls="sym-sym-1779794964-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
+<button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1781095496-tab-idx" aria-controls="sym-sym-1781095496-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
 
-<span class="sym-tab-marker" aria-hidden="true">▸</span>1. Index
+<span class="sym-tab-marker" aria-hidden="true"
+style="margin-right:0.35em">▸</span>1. Index
 </button>
 
-<button type="button" class="sym-tab" role="tab" id="sym-sym-1779794964-tab-eq" aria-controls="sym-sym-1779794964-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
+<button type="button" class="sym-tab" role="tab" id="sym-sym-1781095496-tab-eq" aria-controls="sym-sym-1781095496-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
 
-<span class="sym-tab-marker" aria-hidden="true">▸</span>2. Matrix
+<span class="sym-tab-marker" aria-hidden="true"
+style="margin-right:0.35em">▸</span>2. Matrix
 </button>
 
-<button type="button" class="sym-tab" role="tab" id="sym-sym-1779794964-tab-mat" aria-controls="sym-sym-1779794964-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
+<button type="button" class="sym-tab" role="tab" id="sym-sym-1781095496-tab-mat" aria-controls="sym-sym-1781095496-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
 
-<span class="sym-tab-marker" aria-hidden="true">▸</span>3. Equations
-with data
+<span class="sym-tab-marker" aria-hidden="true"
+style="margin-right:0.35em">▸</span>3. Equations with data
 </button>
 
 </div>
 
-<div id="sym-sym-1779794964-panel-idx" class="sym-panel sym-active"
-role="tabpanel" aria-labelledby="sym-sym-1779794964-tab-idx"
+<div id="sym-sym-1781095496-panel-idx" class="sym-panel sym-active"
+role="tabpanel" aria-labelledby="sym-sym-1781095496-tab-idx"
 data-panel="idx" tabindex="0">
 
 <p class="sym-caption">
@@ -276,6 +282,14 @@ Each observation is normally distributed around a mean that may shift
 with the predictors, and a residual SD that may also shift with its own
 predictors – so both the centre and the spread of the response are
 modeled.
+</p>
+
+<p class="sym-biology">
+
+<strong>Coefficient reading.</strong> On the response scale, $\hat\beta$
+is the additive change in the mean of the response for a one-unit
+increase in the predictor (identity link – no back-transformation
+needed).
 </p>
 
 <div class="sym-eq">
@@ -317,7 +331,7 @@ $\mu_i$ — conditional mu of body_mass
 
 <li>
 
-$\sigma_i$ — conditional sigma of body_mass
+$\sigma_i$ — residual standard deviation
  <span class="sym-dim">$\mathbb{R}^{200}$</span>
 </li>
 
@@ -339,8 +353,8 @@ $\gamma_{0}, \gamma_{1}$ — sigma submodel coefficients
 
 </div>
 
-<div id="sym-sym-1779794964-panel-eq" class="sym-panel" role="tabpanel"
-aria-labelledby="sym-sym-1779794964-tab-eq" data-panel="eq" hidden=""
+<div id="sym-sym-1781095496-panel-eq" class="sym-panel" role="tabpanel"
+aria-labelledby="sym-sym-1781095496-tab-eq" data-panel="eq" hidden=""
 tabindex="0">
 
 <p class="sym-caption">
@@ -362,7 +376,7 @@ modeled.
 $$\begin{aligned}
 \mathbf{w} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} & \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2)) \\
 \boldsymbol{\mu} & = \mathbf{X} \boldsymbol{\beta} \\
-\log(\boldsymbol{\sigma}) & = \mathbf{Z} \boldsymbol{\gamma}
+\log(\boldsymbol{\sigma}) & = \mathbf{X}_{\sigma} \boldsymbol{\gamma}
 \end{aligned}$$
 
 </div>
@@ -390,7 +404,7 @@ $\boldsymbol{\mu}$ — conditional mu of body_mass
 
 <li>
 
-$\boldsymbol{\sigma}$ — conditional sigma of body_mass
+$\boldsymbol{\sigma}$ — residual standard deviation
  <span class="sym-dim">$\mathbb{R}^{200}$</span>
 </li>
 
@@ -414,7 +428,7 @@ $\mathbf{X}$ — mu submodel design matrix
 
 <li>
 
-$\mathbf{Z}$ — sigma submodel design matrix
+$\mathbf{X}_{\sigma}$ — sigma submodel design matrix
  <span class="sym-dim">$\mathbb{R}^{200 \times 2}$</span>
 </li>
 
@@ -424,8 +438,8 @@ $\mathbf{Z}$ — sigma submodel design matrix
 
 </div>
 
-<div id="sym-sym-1779794964-panel-mat" class="sym-panel" role="tabpanel"
-aria-labelledby="sym-sym-1779794964-tab-mat" data-panel="mat" hidden=""
+<div id="sym-sym-1781095496-panel-mat" class="sym-panel" role="tabpanel"
+aria-labelledby="sym-sym-1781095496-tab-mat" data-panel="mat" hidden=""
 tabindex="0">
 
 <p class="sym-caption">
@@ -456,9 +470,9 @@ For observation <em>i</em> = 1 of your data:
 
 $$
 \begin{aligned}
-W_{1} &= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{temperature}_{1} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
-31.5 &= 30.4 + 0.371 \times   14 + (-4.16) &\quad(\text{with your numbers}) \\
-&= \underbrace{35.6}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-4.16)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,}
+w_{1} &= \hat\beta_{0} + \hat\beta_{1}\,\mathrm{temperature}_{1} + \hat\varepsilon_{1} &\quad(\text{response equation, one row of the model}) \\
+\hat\mu_{1} &= 30.4 + 0.371 \times   14 \approx 35.6 &\quad(\text{predicted mean} = \text{linear predictor}) \\
+w_{1} &= \underbrace{35.6}_{\textstyle\,\hat\mu_{1}\,\text{(predicted)}\,} \;+\; \underbrace{(-4.16)}_{\textstyle\,\hat\varepsilon_{1}\,\text{(residual)}\,} &\quad(\text{observed} = \text{predicted mean} + \text{residual})
 \end{aligned}
 $$
 
@@ -526,9 +540,9 @@ $$
 
 </div>
 
-<span id="sym-sym-1779794964-end" tabindex="-1"></span>
+<span id="sym-sym-1781095496-end" tabindex="-1"></span>
 <script>(function() {
-  var root = document.getElementById("sym-sym-1779794964");
+  var root = document.getElementById("sym-sym-1781095496");
   if (!root) return;
   var tabs   = Array.prototype.slice.call(root.querySelectorAll("[role=\"tab\"]"));
   var panels = Array.prototype.slice.call(root.querySelectorAll("[role=\"tabpanel\"]"));
@@ -544,7 +558,13 @@ $$
       p.classList.toggle("sym-active", on);
       if (on) { p.removeAttribute("hidden"); } else { p.setAttribute("hidden", ""); }
     });
-    if (typeof window.MathJax !== "undefined" && window.MathJax.typesetPromise) {
+    // Re-render math in the newly shown panel. KaTeX (the pkgdown site
+    // renderer) exposes renderMathInElement and already typesets hidden
+    // panels at load, so this is belt-and-braces; fall back to MathJax for
+    // standalone exports that still bootstrap MathJax from a CDN.
+    if (typeof window.renderMathInElement === "function") {
+      try { window.renderMathInElement(panels[idx], {throwOnError: false}); } catch (e) {}
+    } else if (typeof window.MathJax !== "undefined" && window.MathJax.typesetPromise) {
       try { window.MathJax.typesetPromise([panels[idx]]); } catch (e) {}
     }
   }

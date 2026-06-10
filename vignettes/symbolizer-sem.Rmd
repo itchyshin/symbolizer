@@ -103,16 +103,19 @@ vapply(sym$parts, function(p) p$model$class, character(1))
 ## The equations, node by node
 
 `equations()` row-binds every node's equation block with a leading
-`node` column, so you can see the whole system at once:
+`node` column, so you can work with the whole system in R. The rendered
+widget below shows the same node equations without exposing raw LaTeX in
+the article:
 
-```{r psem-equations}
+```{r psem-equations, results = "hide"}
 equations(sym)
 ```
 
 `as_latex()` concatenates the per-node LaTeX under `## Node:` headers,
-ready to splice into a manuscript:
+ready to splice into a manuscript. The command is run during the vignette
+build, but the raw LaTeX string is not printed in the HTML article:
 
-```{r psem-latex}
+```{r psem-latex, results = "hide"}
 cat(as_latex(sym))
 ```
 
