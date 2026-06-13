@@ -863,21 +863,21 @@ continuous <code>body_size</code> column, with the coefficient vector
 .sym-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .sym-skip { position: absolute; top: -100px; left: 0; padding: 0.4rem 0.7rem; background: #8a1f22; color: #fff; text-decoration: none; font-size: 0.85rem; z-index: 5; }
 .sym-skip:focus { top: 0; }</style>
-<div id="sym-sym-1781376222" class="sym-tabs">
-<a class="sym-skip" href="#sym-sym-1781376222-end">Skip three-views
+<div id="sym-sym-1781379371" class="sym-tabs">
+<a class="sym-skip" href="#sym-sym-1781379371-end">Skip three-views
 widget</a>
 <div class="sym-tablist" role="tablist" aria-label="Three views of the model">
-<button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1781376222-tab-idx" aria-controls="sym-sym-1781376222-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
+<button type="button" class="sym-tab sym-active" role="tab" id="sym-sym-1781379371-tab-idx" aria-controls="sym-sym-1781379371-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>1. Index
 </button>
-<button type="button" class="sym-tab" role="tab" id="sym-sym-1781376222-tab-eq" aria-controls="sym-sym-1781376222-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
+<button type="button" class="sym-tab" role="tab" id="sym-sym-1781379371-tab-eq" aria-controls="sym-sym-1781379371-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>2. Matrix
 </button>
-<button type="button" class="sym-tab" role="tab" id="sym-sym-1781376222-tab-mat" aria-controls="sym-sym-1781376222-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
+<button type="button" class="sym-tab" role="tab" id="sym-sym-1781379371-tab-mat" aria-controls="sym-sym-1781379371-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>3. Equations with data
 </button>
 </div>
-<div id="sym-sym-1781376222-panel-idx" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-sym-1781376222-tab-idx" data-panel="idx" tabindex="0">
+<div id="sym-sym-1781379371-panel-idx" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-sym-1781379371-tab-idx" data-panel="idx" tabindex="0">
 <p class="sym-caption">
 What happens for each observation <em>i</em> – the per-individual
 reading.
@@ -932,7 +932,7 @@ coefficients  <span class="sym-dim"><span class="math inline">\mathbb{R}^{1}</s
 </li>
 </ul></details>
 </div>
-<div id="sym-sym-1781376222-panel-eq" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1781376222-tab-eq" data-panel="eq" hidden="" tabindex="0">
+<div id="sym-sym-1781379371-panel-eq" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1781379371-tab-eq" data-panel="eq" hidden="" tabindex="0">
 <p class="sym-caption">
 The same model in matrix form – the structural contract every textbook
 past chapter 4 switches to.
@@ -983,7 +983,7 @@ design matrix  <span class="sym-dim"><span class="math inline">\mathbb{R}^{120 
 </li>
 </ul></details>
 </div>
-<div id="sym-sym-1781376222-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1781376222-tab-mat" data-panel="mat" hidden="" tabindex="0">
+<div id="sym-sym-1781379371-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-sym-1781379371-tab-mat" data-panel="mat" hidden="" tabindex="0">
 <p class="sym-caption">
 The same matrix equation, with your actual numbers stacked inside the
 brackets – what the computer multiplies. Showing first 5 and last 2 rows
@@ -1080,9 +1080,9 @@ observations:
 </div>
 </div>
 </div>
-<span id="sym-sym-1781376222-end" tabindex="-1"></span>
+<span id="sym-sym-1781379371-end" tabindex="-1"></span>
 <script>(function() {
-  var root = document.getElementById("sym-sym-1781376222");
+  var root = document.getElementById("sym-sym-1781379371");
   if (!root) return;
   var tabs   = Array.prototype.slice.call(root.querySelectorAll("[role=\"tab\"]"));
   var panels = Array.prototype.slice.call(root.querySelectorAll("[role=\"tabpanel\"]"));
@@ -2434,212 +2434,140 @@ hand.</p>
 and adds 3 indicator column(s); each coefficient is the difference from
 A, not that group’s own mean.</p>
 <p><strong>Group means</strong></p>
+<p><strong>Group means</strong></p>
 <table class="table">
-<colgroup>
-<col width="12%">
-<col width="5%">
-<col width="9%">
-<col width="10%">
-<col width="12%">
-<col width="13%">
-<col width="14%">
-<col width="10%">
-<col width="9%">
-</colgroup>
 <thead><tr class="header">
 <th align="left">level_combo</th>
 <th align="left">site</th>
-<th align="right">estimate</th>
-<th align="right">std_error</th>
-<th align="right">confint_low</th>
-<th align="right">confint_high</th>
-<th align="left">excludes_zero</th>
-<th align="left">ci_method</th>
+<th align="left">estimate</th>
 <th align="left">scale</th>
+<th align="left">95% CI</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
 <td align="left">site=A</td>
 <td align="left">A</td>
-<td align="right">30.47159</td>
-<td align="right">0.4640327</td>
-<td align="right">29.56211</td>
-<td align="right">31.38108</td>
-<td align="left">TRUE</td>
-<td align="left">wald</td>
+<td align="left">30.5</td>
 <td align="left">response</td>
+<td align="left">29.6, 31.4 *</td>
 </tr>
 <tr class="even">
 <td align="left">site=B</td>
 <td align="left">B</td>
-<td align="right">32.37782</td>
-<td align="right">0.6164314</td>
-<td align="right">31.16964</td>
-<td align="right">33.58601</td>
-<td align="left">TRUE</td>
-<td align="left">wald</td>
+<td align="left">32.4</td>
 <td align="left">response</td>
+<td align="left">31.2, 33.6 *</td>
 </tr>
 <tr class="odd">
 <td align="left">site=C</td>
 <td align="left">C</td>
-<td align="right">33.87874</td>
-<td align="right">0.4018641</td>
-<td align="right">33.09110</td>
-<td align="right">34.66638</td>
-<td align="left">TRUE</td>
-<td align="left">wald</td>
+<td align="left">33.9</td>
 <td align="left">response</td>
+<td align="left">33.1, 34.7 *</td>
 </tr>
 <tr class="even">
 <td align="left">site=D</td>
 <td align="left">D</td>
-<td align="right">26.79645</td>
-<td align="right">0.4424378</td>
-<td align="right">25.92929</td>
-<td align="right">27.66361</td>
-<td align="left">TRUE</td>
-<td align="left">wald</td>
+<td align="left">26.8</td>
 <td align="left">response</td>
+<td align="left">25.9, 27.7 *</td>
 </tr>
 </tbody>
 </table>
+<p><em>Rows marked <code>*</code> have a 95% confidence interval that
+excludes zero (CI method: <code>wald</code>).</em></p>
 <p><strong>Pairwise contrasts</strong></p>
+<p><strong>Group contrasts (pairwise)</strong></p>
 <table class="table">
-<colgroup>
-<col width="7%">
-<col width="9%">
-<col width="7%">
-<col width="7%">
-<col width="9%">
-<col width="10%">
-<col width="11%">
-<col width="7%">
-<col width="7%">
-<col width="7%">
-<col width="5%">
-<col width="9%">
-</colgroup>
 <thead><tr class="header">
 <th align="left">contrast</th>
-<th align="left">level_combo</th>
-<th align="right">estimate</th>
-<th align="right">std_error</th>
-<th align="right">confint_low</th>
-<th align="right">confint_high</th>
-<th align="left">excludes_zero</th>
-<th align="left">ci_method</th>
-<th align="left">scale</th>
-<th align="left">method</th>
-<th align="left">adjust</th>
-<th align="left">effect_type</th>
+<th align="left">estimate</th>
+<th align="left">95% CI</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
 <td align="left">A - B</td>
-<td align="left"></td>
-<td align="right">-1.906230</td>
-<td align="right">0.7715659</td>
-<td align="right">-3.418472</td>
-<td align="right">-0.3939889</td>
-<td align="left">TRUE</td>
-<td align="left">wald</td>
-<td align="left">response</td>
-<td align="left">pairwise</td>
-<td align="left">none</td>
-<td align="left">difference</td>
+<td align="left">-1.91</td>
+<td align="left">-3.42, -0.394 *</td>
 </tr>
 <tr class="even">
 <td align="left">A - C</td>
-<td align="left"></td>
-<td align="right">-3.407147</td>
-<td align="right">0.6138575</td>
-<td align="right">-4.610285</td>
-<td align="right">-2.2040082</td>
-<td align="left">TRUE</td>
-<td align="left">wald</td>
-<td align="left">response</td>
-<td align="left">pairwise</td>
-<td align="left">none</td>
-<td align="left">difference</td>
+<td align="left">-3.41</td>
+<td align="left">-4.61, -2.20 *</td>
 </tr>
 <tr class="odd">
 <td align="left">A - D</td>
-<td align="left"></td>
-<td align="right">3.675143</td>
-<td align="right">0.6411533</td>
-<td align="right">2.418506</td>
-<td align="right">4.9317809</td>
-<td align="left">TRUE</td>
-<td align="left">wald</td>
-<td align="left">response</td>
-<td align="left">pairwise</td>
-<td align="left">none</td>
-<td align="left">difference</td>
+<td align="left">3.68</td>
+<td align="left">2.42, 4.93 *</td>
 </tr>
 <tr class="even">
 <td align="left">B - C</td>
-<td align="left"></td>
-<td align="right">-1.500916</td>
-<td align="right">0.7358549</td>
-<td align="right">-2.943166</td>
-<td align="right">-0.0586675</td>
-<td align="left">TRUE</td>
-<td align="left">wald</td>
-<td align="left">response</td>
-<td align="left">pairwise</td>
-<td align="left">none</td>
-<td align="left">difference</td>
+<td align="left">-1.50</td>
+<td align="left">-2.94, -0.0587 *</td>
 </tr>
 <tr class="odd">
 <td align="left">B - D</td>
-<td align="left"></td>
-<td align="right">5.581374</td>
-<td align="right">0.7587746</td>
-<td align="right">4.094203</td>
-<td align="right">7.0685447</td>
-<td align="left">TRUE</td>
-<td align="left">wald</td>
-<td align="left">response</td>
-<td align="left">pairwise</td>
-<td align="left">none</td>
-<td align="left">difference</td>
+<td align="left">5.58</td>
+<td align="left">4.09, 7.07 *</td>
 </tr>
 <tr class="even">
 <td align="left">C - D</td>
-<td align="left"></td>
-<td align="right">7.082290</td>
-<td align="right">0.5977006</td>
-<td align="right">5.910819</td>
-<td align="right">8.2537620</td>
-<td align="left">TRUE</td>
-<td align="left">wald</td>
-<td align="left">response</td>
-<td align="left">pairwise</td>
-<td align="left">none</td>
-<td align="left">difference</td>
+<td align="left">7.08</td>
+<td align="left">5.91, 8.25 *</td>
 </tr>
 </tbody>
 </table>
+<p><em>Values are differences; rows marked <code>*</code> have a 95%
+interval that excludes the null (0).</em></p>
 <p>The pairwise question — <em>which sites differ from each
 <strong>other</strong>?</em>, not just each versus the reference — is
 answered by <code><a href="../reference/group_contrasts.html">group_contrasts()</a></code>. It reports compatibility
 bands and never p-values; pass <code>adjust = "tukey"</code> for
 simultaneous (family-wise) intervals.</p>
 <div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/group_contrasts.html">group_contrasts</a></span><span class="op">(</span><span class="va">sym2</span>, by <span class="op">=</span> <span class="st">"site"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ── <span style="font-weight: bold;">Group contrasts (pairwise)</span> ──</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="font-style: italic;">A - B</span> estimate = <span style="color: #0000BB;">"-1.91"</span> (-3.42, -0.394) *</span></span>
-<span><span class="co">#&gt; <span style="font-style: italic;">A - C</span> estimate = <span style="color: #0000BB;">"-3.41"</span> (-4.61, -2.20) *</span></span>
-<span><span class="co">#&gt; <span style="font-style: italic;">A - D</span> estimate = <span style="color: #0000BB;">"3.68"</span> (2.42, 4.93) *</span></span>
-<span><span class="co">#&gt; <span style="font-style: italic;">B - C</span> estimate = <span style="color: #0000BB;">"-1.50"</span> (-2.94, -0.0587) *</span></span>
-<span><span class="co">#&gt; <span style="font-style: italic;">B - D</span> estimate = <span style="color: #0000BB;">"5.58"</span> (4.09, 7.07) *</span></span>
-<span><span class="co">#&gt; <span style="font-style: italic;">C - D</span> estimate = <span style="color: #0000BB;">"7.08"</span> (5.91, 8.25) *</span></span>
-<span><span class="co">#&gt; <span style="font-style: italic;">Intervals are per-contrast, not family-wise; pass adjust = "tukey" for</span></span></span>
-<span><span class="co">#&gt; <span style="font-style: italic;">simultaneous bands. Scale: response. CI method: wald. Adjustment: none. Rows</span></span></span>
-<span><span class="co">#&gt; <span style="font-style: italic;">marked `*` have a 95% interval that excludes the null.</span></span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/group_contrasts.html">group_contrasts</a></span><span class="op">(</span><span class="va">sym2</span>, by <span class="op">=</span> <span class="st">"site"</span><span class="op">)</span></span></code></pre></div>
+<p><strong>Group contrasts (pairwise)</strong></p>
+<table class="table">
+<thead><tr class="header">
+<th align="left">contrast</th>
+<th align="left">estimate</th>
+<th align="left">95% CI</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">A - B</td>
+<td align="left">-1.91</td>
+<td align="left">-3.42, -0.394 *</td>
+</tr>
+<tr class="even">
+<td align="left">A - C</td>
+<td align="left">-3.41</td>
+<td align="left">-4.61, -2.20 *</td>
+</tr>
+<tr class="odd">
+<td align="left">A - D</td>
+<td align="left">3.68</td>
+<td align="left">2.42, 4.93 *</td>
+</tr>
+<tr class="even">
+<td align="left">B - C</td>
+<td align="left">-1.50</td>
+<td align="left">-2.94, -0.0587 *</td>
+</tr>
+<tr class="odd">
+<td align="left">B - D</td>
+<td align="left">5.58</td>
+<td align="left">4.09, 7.07 *</td>
+</tr>
+<tr class="even">
+<td align="left">C - D</td>
+<td align="left">7.08</td>
+<td align="left">5.91, 8.25 *</td>
+</tr>
+</tbody>
+</table>
+<p><em>Values are differences; rows marked <code>*</code> have a 95%
+interval that excludes the null (0).</em></p>
 <p>For a web-facing version, <code>as_html_factor_views(sym2)</code>
 renders the same story as a four-tab interactive widget — coding scheme,
 group means, pairwise, interactions — with Confidence-Eye uncertainty
@@ -2692,24 +2620,24 @@ bands.</p>
 .fv-pt-sig { stroke:#a0282b; }
 .fv-star { color:#a0282b; }
 .fv-scale { font-size:0.72rem; color:#9ca3af; text-align:right; margin:0.1rem 0 0; }</style>
-<div id="symfv-symfv-1781376225" class="sym-tabs">
-<a class="sym-skip" href="#symfv-symfv-1781376225-end">Skip factor-views
+<div id="symfv-symfv-1781379373" class="sym-tabs">
+<a class="sym-skip" href="#symfv-symfv-1781379373-end">Skip factor-views
 widget</a>
 <div class="sym-tablist" role="tablist" aria-label="Factor views of the model">
-<button type="button" class="sym-tab sym-active" role="tab" id="symfv-symfv-1781376225-tab-coding" aria-controls="symfv-symfv-1781376225-panel-coding" aria-selected="true" tabindex="0" data-tab="coding">
+<button type="button" class="sym-tab sym-active" role="tab" id="symfv-symfv-1781379373-tab-coding" aria-controls="symfv-symfv-1781379373-panel-coding" aria-selected="true" tabindex="0" data-tab="coding">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>1. Coding scheme
 </button>
-<button type="button" class="sym-tab" role="tab" id="symfv-symfv-1781376225-tab-means" aria-controls="symfv-symfv-1781376225-panel-means" aria-selected="false" tabindex="-1" data-tab="means">
+<button type="button" class="sym-tab" role="tab" id="symfv-symfv-1781379373-tab-means" aria-controls="symfv-symfv-1781379373-panel-means" aria-selected="false" tabindex="-1" data-tab="means">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>2. Group means
 </button>
-<button type="button" class="sym-tab" role="tab" id="symfv-symfv-1781376225-tab-pair" aria-controls="symfv-symfv-1781376225-panel-pair" aria-selected="false" tabindex="-1" data-tab="pair">
+<button type="button" class="sym-tab" role="tab" id="symfv-symfv-1781379373-tab-pair" aria-controls="symfv-symfv-1781379373-panel-pair" aria-selected="false" tabindex="-1" data-tab="pair">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>3. Pairwise
 </button>
-<button type="button" class="sym-tab" role="tab" id="symfv-symfv-1781376225-tab-ix" aria-controls="symfv-symfv-1781376225-panel-ix" aria-selected="false" tabindex="-1" data-tab="ix">
+<button type="button" class="sym-tab" role="tab" id="symfv-symfv-1781379373-tab-ix" aria-controls="symfv-symfv-1781379373-panel-ix" aria-selected="false" tabindex="-1" data-tab="ix">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>4. Interactions
 </button>
 </div>
-<div id="symfv-symfv-1781376225-panel-coding" class="sym-panel sym-active" role="tabpanel" aria-labelledby="symfv-symfv-1781376225-tab-coding" data-panel="coding" tabindex="0">
+<div id="symfv-symfv-1781379373-panel-coding" class="sym-panel sym-active" role="tabpanel" aria-labelledby="symfv-symfv-1781379373-tab-coding" data-panel="coding" tabindex="0">
 <p class="sym-caption">
 How each categorical predictor is entered into the model.
 </p>
@@ -2733,7 +2661,7 @@ A, not that group’s own mean.
 </p>
 </div>
 </div>
-<div id="symfv-symfv-1781376225-panel-means" class="sym-panel" role="tabpanel" aria-labelledby="symfv-symfv-1781376225-tab-means" data-panel="means" hidden="" tabindex="0">
+<div id="symfv-symfv-1781379373-panel-means" class="sym-panel" role="tabpanel" aria-labelledby="symfv-symfv-1781379373-tab-means" data-panel="means" hidden="" tabindex="0">
 <p class="sym-caption">
 Each group’s expected response, with a 95% compatibility interval.
 </p>
@@ -2758,7 +2686,7 @@ scale: -2.77 to 37.4
 </p>
 </div>
 </div>
-<div id="symfv-symfv-1781376225-panel-pair" class="sym-panel" role="tabpanel" aria-labelledby="symfv-symfv-1781376225-tab-pair" data-panel="pair" hidden="" tabindex="0">
+<div id="symfv-symfv-1781379373-panel-pair" class="sym-panel" role="tabpanel" aria-labelledby="symfv-symfv-1781379373-tab-pair" data-panel="pair" hidden="" tabindex="0">
 <p class="sym-caption">
 Which levels differ from each other. The dashed line is the null.
 </p>
@@ -2795,7 +2723,7 @@ scale: -5.64 to 9.28
 </p>
 </div>
 </div>
-<div id="symfv-symfv-1781376225-panel-ix" class="sym-panel" role="tabpanel" aria-labelledby="symfv-symfv-1781376225-tab-ix" data-panel="ix" hidden="" tabindex="0">
+<div id="symfv-symfv-1781379373-panel-ix" class="sym-panel" role="tabpanel" aria-labelledby="symfv-symfv-1781379373-tab-ix" data-panel="ix" hidden="" tabindex="0">
 <p class="sym-caption">
 Where an effect depends on another predictor: the cells / slopes
 directly.
@@ -2805,9 +2733,9 @@ No interactions in this model.
 </p>
 </div>
 </div>
-<span id="symfv-symfv-1781376225-end" tabindex="-1"></span>
+<span id="symfv-symfv-1781379373-end" tabindex="-1"></span>
 <script>(function() {
-  var root = document.getElementById("symfv-symfv-1781376225");
+  var root = document.getElementById("symfv-symfv-1781379373");
   if (!root) return;
   var tabs   = Array.prototype.slice.call(root.querySelectorAll("[role=\"tab\"]"));
   var panels = Array.prototype.slice.call(root.querySelectorAll("[role=\"tabpanel\"]"));

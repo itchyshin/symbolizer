@@ -369,7 +369,7 @@ the `0`s and `1`s of the dummy column sit next to the continuous
 as_html_three_views(sym3)
 ```
 
-[Skip three-views widget](#sym-sym-1781376222-end)
+[Skip three-views widget](#sym-sym-1781379371-end)
 
 ▸1. Index
 
@@ -1230,23 +1230,33 @@ group’s own mean.
 
 **Group means**
 
-| level_combo | site | estimate | std_error | confint_low | confint_high | excludes_zero | ci_method | scale |
-|:---|:---|---:|---:|---:|---:|:---|:---|:---|
-| site=A | A | 30.47159 | 0.4640327 | 29.56211 | 31.38108 | TRUE | wald | response |
-| site=B | B | 32.37782 | 0.6164314 | 31.16964 | 33.58601 | TRUE | wald | response |
-| site=C | C | 33.87874 | 0.4018641 | 33.09110 | 34.66638 | TRUE | wald | response |
-| site=D | D | 26.79645 | 0.4424378 | 25.92929 | 27.66361 | TRUE | wald | response |
+**Group means**
+
+| level_combo | site | estimate | scale    | 95% CI        |
+|:------------|:-----|:---------|:---------|:--------------|
+| site=A      | A    | 30.5     | response | 29.6, 31.4 \* |
+| site=B      | B    | 32.4     | response | 31.2, 33.6 \* |
+| site=C      | C    | 33.9     | response | 33.1, 34.7 \* |
+| site=D      | D    | 26.8     | response | 25.9, 27.7 \* |
+
+*Rows marked `*` have a 95% confidence interval that excludes zero (CI
+method: `wald`).*
 
 **Pairwise contrasts**
 
-| contrast | level_combo | estimate | std_error | confint_low | confint_high | excludes_zero | ci_method | scale | method | adjust | effect_type |
-|:---|:---|---:|---:|---:|---:|:---|:---|:---|:---|:---|:---|
-| A - B |  | -1.906230 | 0.7715659 | -3.418472 | -0.3939889 | TRUE | wald | response | pairwise | none | difference |
-| A - C |  | -3.407147 | 0.6138575 | -4.610285 | -2.2040082 | TRUE | wald | response | pairwise | none | difference |
-| A - D |  | 3.675143 | 0.6411533 | 2.418506 | 4.9317809 | TRUE | wald | response | pairwise | none | difference |
-| B - C |  | -1.500916 | 0.7358549 | -2.943166 | -0.0586675 | TRUE | wald | response | pairwise | none | difference |
-| B - D |  | 5.581374 | 0.7587746 | 4.094203 | 7.0685447 | TRUE | wald | response | pairwise | none | difference |
-| C - D |  | 7.082290 | 0.5977006 | 5.910819 | 8.2537620 | TRUE | wald | response | pairwise | none | difference |
+**Group contrasts (pairwise)**
+
+| contrast | estimate | 95% CI            |
+|:---------|:---------|:------------------|
+| A - B    | -1.91    | -3.42, -0.394 \*  |
+| A - C    | -3.41    | -4.61, -2.20 \*   |
+| A - D    | 3.68     | 2.42, 4.93 \*     |
+| B - C    | -1.50    | -2.94, -0.0587 \* |
+| B - D    | 5.58     | 4.09, 7.07 \*     |
+| C - D    | 7.08     | 5.91, 8.25 \*     |
+
+*Values are differences; rows marked `*` have a 95% interval that
+excludes the null (0).*
 
 The pairwise question — *which sites differ from each **other**?*, not
 just each versus the reference — is answered by
@@ -1257,19 +1267,21 @@ It reports compatibility bands and never p-values; pass
 ``` r
 
 group_contrasts(sym2, by = "site")
-#> 
-#> ── Group contrasts (pairwise) ──
-#> 
-#> A - B estimate = "-1.91" (-3.42, -0.394) *
-#> A - C estimate = "-3.41" (-4.61, -2.20) *
-#> A - D estimate = "3.68" (2.42, 4.93) *
-#> B - C estimate = "-1.50" (-2.94, -0.0587) *
-#> B - D estimate = "5.58" (4.09, 7.07) *
-#> C - D estimate = "7.08" (5.91, 8.25) *
-#> Intervals are per-contrast, not family-wise; pass adjust = "tukey" for
-#> simultaneous bands. Scale: response. CI method: wald. Adjustment: none. Rows
-#> marked `*` have a 95% interval that excludes the null.
 ```
+
+**Group contrasts (pairwise)**
+
+| contrast | estimate | 95% CI            |
+|:---------|:---------|:------------------|
+| A - B    | -1.91    | -3.42, -0.394 \*  |
+| A - C    | -3.41    | -4.61, -2.20 \*   |
+| A - D    | 3.68     | 2.42, 4.93 \*     |
+| B - C    | -1.50    | -2.94, -0.0587 \* |
+| B - D    | 5.58     | 4.09, 7.07 \*     |
+| C - D    | 7.08     | 5.91, 8.25 \*     |
+
+*Values are differences; rows marked `*` have a 95% interval that
+excludes the null (0).*
 
 For a web-facing version, `as_html_factor_views(sym2)` renders the same
 story as a four-tab interactive widget — coding scheme, group means,
@@ -1280,7 +1292,7 @@ pairwise, interactions — with Confidence-Eye uncertainty bands.
 as_html_factor_views(sym2)
 ```
 
-[Skip factor-views widget](#symfv-symfv-1781376225-end)
+[Skip factor-views widget](#symfv-symfv-1781379373-end)
 
 ▸1. Coding scheme
 
