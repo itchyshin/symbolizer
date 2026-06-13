@@ -167,7 +167,9 @@ test_that("formula_bridge has one row per submodel mapping R to math", {
 test_that("expanded carries response matrix, Lambda_B, Z_B, sigma_eps", {
   fit <- fit_gllvm_basic()
   sym <- symbolize(fit)
-  ex <- expand(sym)
+  # Qualify the call: gllvmTMB pulls in Matrix, whose S4 `expand` generic can
+  # shadow symbolizer's S3 `expand` depending on attach order.
+  ex <- symbolizer::expand(sym)
   expect_true(is.matrix(ex$Y))
   expect_equal(dim(ex$Y), c(30L, 3L))
   expect_true(is.matrix(ex$Lambda_B))

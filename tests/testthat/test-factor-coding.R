@@ -191,7 +191,44 @@ test_that("Helmert coding names its scheme in the warning", {
   sym <- symbolize(lm(y ~ site, data = d))
   hit <- warning_table(sym)
   hit <- hit[hit$code == "non_default_contrasts", , drop = FALSE]
-  expect_match(hit$message, "helmert")
+  expect_match(hit$message, "Helmert contrasts")
+})
+
+test_that("a factor only inside an interaction is labelled interaction_only, no false reference", {
+  d <- make_factor_data()
+  fc <- build_factor_coding(d, extract_terms(y ~ 0 + x:site, d, "mu"))
+  row <- fc[fc$variable == "site", , drop = FALSE]
+  expect_equal(row$contrast_type, "interaction_only")
+  expect_true(is.na(row$reference_level))
+  expect_false(row$is_default_treatment)
+})
+
+test_that("interaction_only factors raise no non_default_contrasts warning", {
+  d <- make_factor_data()
+  sym <- symbolize(lm(y ~ 0 + x:site, data = d))
+  w <- warning_table(sym)
+  expect_equal(nrow(w[w$code == "non_default_contrasts", , drop = FALSE]), 0L)
+})
+
+test_that("non-first-base treatment warns about a non-default reference, not 'treatment contrasts'", {
+  d <- make_factor_data()
+  sym <- symbolize(lm(y ~ site, data = d, contrasts = list(site = "contr.SAS")))
+  hit <- warning_table(sym)
+  hit <- hit[hit$code == "non_default_contrasts", , drop = FALSE]
+  expect_equal(nrow(hit), 1L)
+  expect_match(hit$message, "non-default reference")
+  expect_false(grepl("uses treatment contrasts", hit$message))
+})
+
+test_that("factor levels with regex metacharacters / backslashes render literally", {
+  bs  <- rawToChar(as.raw(92L))
+  lvl <- paste0("dose", bs, "1")
+  prose <- factor_template_prose(
+    "factor_overview", "treatment",
+    list(variable = "grp", k = 2, levels = paste0("ctrl, ", lvl),
+         reference_level = "ctrl", n_dummy = 1)
+  )
+  expect_true(grepl(lvl, prose, fixed = TRUE))
 })
 
 test_that("validate_symbolized_model accepts NULL and a well-formed tibble", {

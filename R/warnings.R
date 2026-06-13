@@ -60,7 +60,10 @@ warnings_render <- function(tbl, code, slots) {
   }
   msg <- hit$template[[1L]]
   for (nm in names(slots)) {
-    msg <- gsub(paste0("\\{", nm, "\\}"), slots[[nm]], msg, fixed = FALSE)
+    # fixed = TRUE so a slot value with backslashes / regex metacharacters is
+    # substituted literally rather than treated as a replacement backreference.
+    msg <- gsub(paste0("{", nm, "}"), as.character(slots[[nm]]), msg,
+                fixed = TRUE)
   }
   context <- paste(
     vapply(names(slots), function(nm) sprintf("%s = %s", nm, slots[[nm]]),
@@ -111,16 +114,33 @@ coding_warnings <- function(factor_coding) {
   }
   tbl <- tryCatch(load_template("warning-templates"), error = function(e) NULL)
   if (is.null(tbl)) return(warnings_empty())
+  # Warn only when treatment-coding assumptions would mislead. Exempt
+  # cell_means (read correctly as group means) and interaction_only factors
+  # (no baseline is asserted, so there is nothing misleading to flag).
   flag <- !factor_coding$is_default_treatment &
-    factor_coding$contrast_type != "cell_means"
+    !(factor_coding$contrast_type %in% c("cell_means", "interaction_only"))
   idx <- which(flag)
   if (length(idx) == 0L) return(warnings_empty())
   rows <- lapply(idx, function(i) {
+    ct <- factor_coding$contrast_type[[i]]
+    # Human-facing scheme description. A flagged "treatment" type means
+    # treatment coding with a non-first base level (relevel / base = / SAS),
+    # so it must NOT read "uses treatment contrasts, not the default treatment
+    # coding" -- describe the non-default reference instead.
+    desc <- switch(
+      ct,
+      treatment = "a non-default reference level (treatment coding with a non-first base)",
+      sum       = "sum-to-zero contrasts",
+      helmert   = "Helmert contrasts",
+      poly      = "polynomial contrasts",
+      custom    = "a custom contrast scheme",
+      paste0(ct, " contrasts")
+    )
     warnings_render(
       tbl, code = "non_default_contrasts",
       slots = list(
         factor_name   = factor_coding$variable[[i]],
-        contrast_type = factor_coding$contrast_type[[i]]
+        contrast_desc = desc
       )
     )
   })

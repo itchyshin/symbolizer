@@ -28,13 +28,14 @@ is retained on \code{x$metadata$fit}.}
 continuous interactions, get the slope at those values of \code{z}.
 }}
 
-\item{scale}{One of \code{"response"} (default) or \code{"link"}. For
-identity-link families the two are equivalent. For other families
-the slope is reported on the requested scale: \code{"link"} gives the
-linear-predictor slope (which is what the coefficient table shows),
-\code{"response"} gives the slope after back-transformation. Note that
-for non-identity links the response-scale slope depends on the
-level of the predictor.}
+\item{scale}{One of \code{"response"} (default) or \code{"link"}. A \emph{slope} is the
+derivative of the linear predictor with respect to the continuous
+predictor, which \code{\link[emmeans:emtrends]{emmeans::emtrends()}} reports on the link scale
+regardless of \code{scale} -- so for \code{group_slopes()} the two scales coincide
+(unlike \code{\link[=group_means]{group_means()}}, where the response scale back-transforms). The
+argument is accepted and recorded on the \code{scale} column for consistency
+with the rest of the family; to read an effect on the response scale,
+compare group means with \code{\link[=group_means]{group_means()}} instead.}
 
 \item{ci_method}{Confidence-interval method. Defaults to
 \code{x$metadata$ci_method}. See \code{\link[=group_means]{group_means()}} for details.}
