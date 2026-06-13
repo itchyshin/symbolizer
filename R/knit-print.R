@@ -207,6 +207,39 @@ knit_print.symbolizer_group_slopes <- function(x, ...) {
   marg_kable(x, predictor = predictor)
 }
 
+#' @exportS3Method knitr::knit_print
+knit_print.symbolizer_group_contrasts <- function(x, ...) {
+  df <- as.data.frame(x, stringsAsFactors = FALSE)
+  fmt <- function(v) formatC(v, digits = 3, format = "fg", flag = "#")
+  eff    <- if ("effect_type" %in% names(df) && nrow(df) >= 1L) df$effect_type[[1L]] else "difference"
+  method <- if ("method" %in% names(df) && nrow(df) >= 1L) df$method[[1L]] else "pairwise"
+  if ("estimate" %in% names(df)) df$estimate <- fmt(df$estimate)
+  if (all(c("confint_low", "confint_high") %in% names(df))) {
+    has_ci <- !is.na(df$confint_low) & !is.na(df$confint_high)
+    band <- ifelse(has_ci, paste0(fmt(df$confint_low), ", ", fmt(df$confint_high)), "--")
+    if ("excludes_zero" %in% names(df)) {
+      band <- ifelse(isTRUE_vec(df$excludes_zero), paste0(band, " *"), band)
+    }
+    df$`95% CI` <- band
+  }
+  drop_cols <- c("confint_low", "confint_high", "excludes_zero", "ci_method",
+                 "std_error", "scale", "method", "adjust", "effect_type")
+  if ("level_combo" %in% names(df) && all(!nzchar(df$level_combo))) {
+    drop_cols <- c(drop_cols, "level_combo")
+  }
+  cols <- setdiff(names(df), drop_cols)
+  kab <- sym_kable(df[, cols, drop = FALSE])
+  null_lab <- if (eff %in% c("ratio", "odds_ratio")) "1" else "0"
+  what <- if (identical(eff, "odds_ratio")) "odds ratios" else
+          if (identical(eff, "ratio")) "ratios" else "differences"
+  header <- sprintf("**Group contrasts (%s)**", method)
+  footer <- sprintf(
+    "*Values are %s; rows marked `*` have a 95%% interval that excludes the null (%s).*",
+    what, null_lab
+  )
+  knitr::asis_output(paste(c("", header, "", kab, "", footer, ""), collapse = "\n"))
+}
+
 # Shared kable renderer for both group_means and group_slopes tibbles.
 #' @keywords internal
 marg_kable <- function(x, predictor = NULL) {
@@ -303,6 +336,10 @@ knit_print.symbolizer_model_card <- function(x, ...) {
   if (!is.null(x$marginal_slopes)) {
     sections <- c(sections, list(list(title = "Group slopes",
                                       obj = x$marginal_slopes)))
+  }
+  if (!is.null(x$marginal_contrasts)) {
+    sections <- c(sections, list(list(title = "Group contrasts",
+                                      obj = x$marginal_contrasts)))
   }
   parts <- c(header, context, "")
   for (s in sections) {

@@ -97,8 +97,7 @@ model_card.symbolized_model <- function(x, ...) {
 # available. Returns NULL on either count, or on any extraction error.
 model_card_marginal_means <- function(x) {
   if (!requireNamespace("emmeans", quietly = TRUE)) return(NULL)
-  d <- x$symbol_dictionary
-  if (is.null(d) || !any(d$role == "factor", na.rm = TRUE)) return(NULL)
+  if (length(marg_factors(x)) == 0L) return(NULL)
   tryCatch(group_means(x), error = function(e) NULL)
 }
 
@@ -136,10 +135,7 @@ model_card_marginal_slopes <- function(x) {
 # contrasts) in the card. Returns NULL otherwise or on any extraction error.
 model_card_marginal_contrasts <- function(x) {
   if (!requireNamespace("emmeans", quietly = TRUE)) return(NULL)
-  d <- x$symbol_dictionary
-  if (is.null(d)) return(NULL)
-  facs <- unique(d$variable[d$role == "factor" & !is.na(d$variable)])
-  facs <- facs[nzchar(facs)]
+  facs <- marg_factors(x)
   if (length(facs) == 0L) return(NULL)
   tryCatch(group_contrasts(x, by = facs[[1L]]), error = function(e) NULL)
 }
