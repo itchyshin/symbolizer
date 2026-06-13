@@ -1,11 +1,12 @@
 # One-call explainer for a fitted model
 
-`explain()` is the recommended entry point for first-time users. It runs
+`explain()` is the recommended entry point for **understanding** a fit.
+It runs
 [`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
 internally and returns a `symbolized_explanation` that bundles the
 original
 [`symbolized_model`](https://itchyshin.github.io/symbolizer/reference/new_symbolized_model.md)
-together with the six reader-facing pieces already rendered:
+together with the reader-facing pieces already rendered:
 
 - `equations` – the
   [`equations()`](https://itchyshin.github.io/symbolizer/reference/equations.md)
@@ -19,13 +20,15 @@ together with the six reader-facing pieces already rendered:
   [`assumption_table()`](https://itchyshin.github.io/symbolizer/reference/assumption_table.md)
   result
 
-- `bridge` – the
+- `formula_bridge` – the
   [`formula_bridge()`](https://itchyshin.github.io/symbolizer/reference/formula_bridge.md)
-  result
+  result (also available as the deprecated alias `bridge`)
 
 - `interpretation` – the
   [`parameter_interpretation()`](https://itchyshin.github.io/symbolizer/reference/parameter_interpretation.md)
   result
+
+- `factor_coding` – a one-line dummy-coding overview per factor
 
 - `variance_components` – where the variation lives (NULL when the model
   has no random effects)
@@ -33,6 +36,12 @@ together with the six reader-facing pieces already rendered:
 - `notation_bridge` – the
   [`notation_bridge()`](https://itchyshin.github.io/symbolizer/reference/notation_bridge.md)
   result
+
+Use `explain()` to *understand* a model; use
+[`model_card()`](https://itchyshin.github.io/symbolizer/reference/model_card.md)
+when you also want to *act* on it – it adds extraction calls,
+recommended plots, and marginal means / slopes / contrasts on top of the
+same pieces.
 
 Print the result at the console for a walkthrough led by a plain-English
 paragraph, or knit it inside a Quarto / R Markdown document for a
@@ -78,9 +87,15 @@ explain(fit, symbols = NULL, units = NULL, context = NULL, ...)
 ## Value
 
 A `symbolized_explanation` object with elements `model` (the underlying
-`symbolized_model`), `equations`, `symbols`, `assumptions`, `bridge`,
-`interpretation`, `variance_components` (NULL when the model has no
+`symbolized_model`), `equations`, `symbols`, `assumptions`,
+`formula_bridge` (and its deprecated alias `bridge`), `interpretation`,
+`factor_coding`, `variance_components` (NULL when the model has no
 random effects), `notation_bridge`.
+
+## See also
+
+[`model_card()`](https://itchyshin.github.io/symbolizer/reference/model_card.md)
+for the act-on-it bundle.
 
 ## Examples
 

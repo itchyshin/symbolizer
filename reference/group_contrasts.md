@@ -97,6 +97,10 @@ contrast. Columns: `contrast`, one column per `within` factor,
 [`group_means()`](https://itchyshin.github.io/symbolizer/reference/group_means.md),
 [`group_slopes()`](https://itchyshin.github.io/symbolizer/reference/group_slopes.md)
 
+Other marginal estimates:
+[`group_means()`](https://itchyshin.github.io/symbolizer/reference/group_means.md),
+[`group_slopes()`](https://itchyshin.github.io/symbolizer/reference/group_slopes.md)
+
 ## Examples
 
 ``` r

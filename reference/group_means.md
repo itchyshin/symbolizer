@@ -68,3 +68,9 @@ A tibble (S3 class `symbolizer_group_means`) with one row per level
 combination. Columns: `level_combo`, one column per factor in `by`,
 `estimate`, `std_error`, `confint_low`, `confint_high`, `excludes_zero`,
 `ci_method`, `scale`.
+
+## See also
+
+Other marginal estimates:
+[`group_contrasts()`](https://itchyshin.github.io/symbolizer/reference/group_contrasts.md),
+[`group_slopes()`](https://itchyshin.github.io/symbolizer/reference/group_slopes.md)

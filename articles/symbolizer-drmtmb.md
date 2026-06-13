@@ -379,7 +379,7 @@ to the actual numeric arrays — with both the
 as_html_three_views(sym_re)
 ```
 
-[Skip three-views widget](#sym-sym-1781371000-end)
+[Skip three-views widget](#sym-sym-1781372223-end)
 
 ▸1. Index
 
@@ -813,7 +813,9 @@ mc$extraction_calls
 #>                                                 Group means (alongside contrasts) 
 #>                                                    "symbolizer::group_means(sym)" 
 #>                                         Per-group slopes (alongside interactions) 
-#> "symbolizer::group_slopes(sym, continuous = <one of your continuous predictors>)"
+#> "symbolizer::group_slopes(sym, continuous = <one of your continuous predictors>)" 
+#>                                          Pairwise contrasts (which levels differ) 
+#>                    "symbolizer::group_contrasts(sym, by = <one of your factors>)"
 ```
 
 The ordering is intentional. A reader should know whether the fit is

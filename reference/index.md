@@ -151,8 +151,8 @@ interactions — in one call, or an interactive widget.
 
 ## Marginal estimates
 
-Per-group means, per-group slopes, and pairwise / vs-reference contrasts
-via emmeans — confidence bands, no p-values.
+The group\_\* family — per-group means, per-group slopes, and pairwise /
+vs-reference contrasts via emmeans. Confidence bands, no p-values.
 
 - [`group_means()`](https://itchyshin.github.io/symbolizer/reference/group_means.md)
   : Per-group marginal means for a symbolized model
