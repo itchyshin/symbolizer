@@ -143,12 +143,14 @@ factor_overview_lines <- function(sym) {
 # (factor x factor) or per-group slopes (continuous x factor).
 #' @keywords internal
 factor_interaction_pieces <- function(sym, factor_vars) {
-  terms_tbl <- sym$terms
-  if (is.null(terms_tbl) || nrow(terms_tbl) == 0L) return(list())
-  inter <- unique(terms_tbl$variable[terms_tbl$role == "interaction" &
-                                       !is.na(terms_tbl$variable)])
-  if (length(inter) == 0L) return(list())
   out <- list()
+  terms_tbl <- sym$terms
+  inter <- if (is.null(terms_tbl) || nrow(terms_tbl) == 0L) {
+    character(0L)
+  } else {
+    unique(terms_tbl$variable[terms_tbl$role == "interaction" &
+                                !is.na(terms_tbl$variable)])
+  }
   for (term in inter) {
     pieces <- strsplit(term, ":", fixed = TRUE)[[1L]]
     is_f   <- pieces %in% factor_vars
@@ -182,6 +184,32 @@ factor_interaction_pieces <- function(sym, factor_vars) {
         slopes = tryCatch(group_slopes(sym, continuous = cont),
                           error = function(e) NULL)
       )
+    }
+  }
+  # mgcv factor-by smooths: s(x, by = fac) is recorded in metadata$smooths
+  # (one row per by-level) with `variable` (the smoothed predictor) and
+  # `by_var` (the factor). Surface each (variable, by_var) pair once as a
+  # smooth-by-factor entry -- the shape of the smooth differs across levels.
+  sm <- sym$metadata$smooths
+  if (!is.null(sm) && all(c("variable", "by_var") %in% names(sm))) {
+    by_rows <- sm[!is.na(sm$by_var) & nzchar(sm$by_var), , drop = FALSE]
+    if (nrow(by_rows) > 0L) {
+      seen <- character(0L)
+      for (i in seq_len(nrow(by_rows))) {
+        cont <- by_rows$variable[[i]]
+        fac  <- by_rows$by_var[[i]]
+        key  <- paste0(cont, "", fac)
+        if (key %in% seen) next
+        seen <- c(seen, key)
+        out[[length(out) + 1L]] <- list(
+          term = sprintf("s(%s, by = %s)", cont, fac),
+          type = "smooth_by_factor",
+          overview = factor_template_prose("interaction_overview",
+                                           "smooth_by_factor",
+                                           list(cont = cont, fac = fac)),
+          cells = NULL, slopes = NULL
+        )
+      }
     }
   }
   out
