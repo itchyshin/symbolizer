@@ -92,3 +92,17 @@ test_that("user-supplied symbols override defaults", {
                       symbols = c(temperature = "T_i"))
   expect_equal(tt$symbol[[2L]], "T_i")
 })
+
+test_that("factor levels with LaTeX-special characters are escaped in the equation", {
+  expect_equal(escape_latex_text("male"), "male")        # plain text untouched
+  expect_equal(escape_latex_text("d_50%"), "d\\_50\\%")  # % escaped (no comment)
+  expect_equal(escape_latex_text("b&c"), "b\\&c")        # & escaped (no align tab)
+  expect_equal(escape_latex_text("d#e"), "d\\#e")        # # escaped
+
+  d <- data.frame(y = rnorm(20), grp = factor(rep(c("aaa", "d_50%"), each = 10)))
+  tt <- extract_terms(y ~ grp, d, "mu")
+  contrast_row <- tt[tt$role == "factor_contrast", , drop = FALSE]
+  # the latex_term must carry the escaped level, never a raw `%`
+  expect_true(any(grepl("d\\_50\\%", contrast_row$latex_term, fixed = TRUE)))
+  expect_false(any(grepl("50%}", contrast_row$latex_term, fixed = TRUE)))
+})
