@@ -1,5 +1,42 @@
 # symbolizer (development version)
 
+## Demystifying dummy / contrast coding (factors, multi-level, interactions)
+
+* **`explain_factors()`** is a new one-call explainer for the categorical
+  structure of a fit. For every factor it states the coding scheme in plain
+  language (its levels, which level is the reference, how many indicator
+  columns), then shows the per-group means and the pairwise comparisons; for
+  every interaction it gives the difference-of-differences reading together with
+  the inline cells (factor × factor) or per-group slopes (continuous × factor) —
+  so the reader never has to add coefficients by hand. A compact version of the
+  per-factor overview now also appears automatically inside `explain()` and
+  `model_card()`.
+
+* **`group_contrasts()`** joins `group_means()` / `group_slopes()` as the third
+  `emmeans` wrapper: pairwise (`"pairwise"`), each-versus-reference
+  (`"trt.vs.ctrl"`), consecutive, or polynomial comparisons of a factor's
+  levels, with an optional Tukey / `mvt` multiplicity widening. It reports
+  **confidence bands and never p-values**; on a log or logit response scale the
+  contrast is correctly a ratio / odds ratio whose null sits at 1, recorded in
+  the new `effect_type` column and the print footer.
+
+* **`as_html_factor_views()`** is an interactive four-tab HTML widget — coding
+  scheme, group means, pairwise, interactions — with Confidence-Eye uncertainty
+  bands (a pale compatibility region, a hollow point estimate, a dashed null
+  line). It is the web-facing companion to `explain_factors()`.
+
+* **Reliable reference levels for every class.** A new `factor_coding` field on
+  `symbolized_model` records each factor's levels, reference level, contrast
+  scheme (treatment / sum / Helmert / poly / SAS / custom / cell-means) and
+  number of indicator columns, detected from the contrasts the fit actually
+  used. It is populated by every extractor (`lm` / `glm`, `drmTMB`, `glmmTMB`,
+  `lme4`, `mgcv`, `metafor`, `sdmTMB`, `MCMCglmm`, `brms`).
+
+* **Detect-and-warn on non-default coding.** When a factor uses sum-to-zero,
+  Helmert, polynomial, or non-first-base coding — where a treatment-coding
+  reading would mislead — `symbolize()` now records a templated
+  `non_default_contrasts` row surfaced by `warning_table()`.
+
 ## `symbolizer-sem` vignette: real data + team review
 
 * **The SEM vignette now uses real data.** The worked example was rebuilt

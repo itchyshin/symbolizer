@@ -139,6 +139,7 @@ base_symbolize_impl <- function(fit, family, link, class_name, package_name,
   )
   submodels  <- base_build_submodels(entries, fit, param, link)
   terms_tbl  <- drm_build_terms(entries, data, symbols)
+  factor_cod <- build_factor_coding(data, terms_tbl, fit)
   fixed_eff  <- base_build_fixed_effects(terms_tbl, fit)
   re_tbl     <- drm_build_random_effects(list())  # no random effects on lm/glm
   vc_tbl     <- base_build_variance_components(fit, family)
@@ -221,6 +222,7 @@ base_symbolize_impl <- function(fit, family, link, class_name, package_name,
     random_effects      = re_tbl,
     variance_components = vc_tbl,
     covariance_components = cov_tbl,
+    factor_coding       = factor_cod,
     symbol_dictionary   = symbol_dict,
     assumptions         = assumptions,
     components          = components,

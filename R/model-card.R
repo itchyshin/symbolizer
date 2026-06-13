@@ -71,6 +71,7 @@ model_card.symbolized_model <- function(x, ...) {
     bridge            = notation_bridge(x),
     formula_bridge    = formula_bridge(x, notation = "both"),
     interpretation    = parameter_interpretation(x, scale = "all"),
+    factor_coding     = factor_overview_lines(x),
     variance_components = x$variance_components,
     warnings          = warning_table(x),
     extraction_calls  = model_card_extraction_calls(x),
@@ -224,6 +225,12 @@ print.symbolizer_model_card <- function(x, ...) {
   cli::cli_h2("Parameter interpretation")
   cli::cli_text("{.emph What each fitted coefficient says, in plain English.}")
   print(x$interpretation)
+
+  if (length(x$factor_coding) > 0L) {
+    cli::cli_h2("Factor coding")
+    cli::cli_text("{.emph How each categorical predictor is dummy-coded -- call {.fn explain_factors} for the group means and pairwise contrasts.}")
+    for (ln in x$factor_coding) cli::cli_text(ln)
+  }
 
   if (!is.null(x$warnings) && nrow(x$warnings) > 0L) {
     cli::cli_h2("Warnings")

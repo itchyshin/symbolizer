@@ -173,6 +173,7 @@ symbolize.rma.uni <- function(fit, symbols = NULL, units = NULL,
   )
   submodels  <- metafor_build_submodels(entries, param)
   terms_tbl  <- drm_build_terms(entries, data, symbols)
+  factor_cod <- build_factor_coding(data, terms_tbl, fit)
   fixed_eff  <- metafor_build_fixed_effects(terms_tbl, fit)
   re_per_entry <- list(metafor_build_re_per_entry(fit))
   re_tbl     <- drm_build_random_effects(re_per_entry)
@@ -238,6 +239,7 @@ symbolize.rma.uni <- function(fit, symbols = NULL, units = NULL,
     random_effects      = re_tbl,
     variance_components = vc_tbl,
     covariance_components = cov_tbl,
+    factor_coding       = factor_cod,
     symbol_dictionary   = symbol_dict,
     assumptions         = assumptions,
     components          = components,
@@ -367,6 +369,7 @@ symbolize.rma.mv <- function(fit, symbols = NULL, units = NULL,
   )
   submodels  <- metafor_build_submodels(entries, param)
   terms_tbl  <- drm_build_terms(entries, data, symbols)
+  factor_cod <- build_factor_coding(data, terms_tbl, fit)
   fixed_eff  <- metafor_build_fixed_effects(terms_tbl, fit)
   re_per_entry <- list(metafor_mv_build_re_per_entry(fit))
   re_tbl     <- drm_build_random_effects(re_per_entry)
@@ -507,6 +510,7 @@ symbolize.rma.mv <- function(fit, symbols = NULL, units = NULL,
     random_effects      = re_tbl,
     variance_components = vc_tbl,
     covariance_components = cov_tbl,
+    factor_coding       = factor_cod,
     symbol_dictionary   = symbol_dict,
     assumptions         = assumptions,
     components          = components,

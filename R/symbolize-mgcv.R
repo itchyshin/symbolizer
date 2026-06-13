@@ -151,6 +151,7 @@ symbolize.gam <- function(fit, symbols = NULL, units = NULL,
   # dispersion submodel, the flag flips off and the real submodel is kept.
   constant_scale <- !any(submodels$parameter %in% c("sigma", "sigma1", "sigma2"))
   terms_tbl  <- drm_build_terms(entries, data, symbols)
+  factor_cod <- build_factor_coding(data, terms_tbl, fit)
   fixed_eff  <- mgcv_build_fixed_effects(terms_tbl, fit)
   re_tbl     <- drm_build_random_effects(list(NULL))
   vc_tbl     <- mgcv_build_variance_components(fit)
@@ -238,6 +239,7 @@ symbolize.gam <- function(fit, symbols = NULL, units = NULL,
     random_effects      = re_tbl,
     variance_components = vc_tbl,
     covariance_components = cov_tbl,
+    factor_coding       = factor_cod,
     symbol_dictionary   = symbol_dict,
     assumptions         = assumptions,
     components          = components,

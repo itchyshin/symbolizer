@@ -148,6 +148,7 @@ symbolize.MCMCglmm <- function(fit, symbols = NULL, units = NULL,
   )
   submodels  <- mcmcglmm_build_submodels(entries, fit, param, link)
   terms_tbl  <- drm_build_terms(entries_fe, data, symbols)
+  factor_cod <- build_factor_coding(data, terms_tbl, fit)
   fixed_eff  <- mcmcglmm_build_fixed_effects(terms_tbl, fit)
   re_tbl     <- drm_build_random_effects(re_per_entry)
   vc_tbl     <- mcmcglmm_build_variance_components(fit, animal_groups)
@@ -243,6 +244,10 @@ symbolize.MCMCglmm <- function(fit, symbols = NULL, units = NULL,
     context = context %||% "",
     ci_method = "credible",
     fit = fit,
+    # MCMCglmm fits do not carry their model frame, and emmeans's
+    # recover_data.MCMCglmm needs it. Retain the data so the group_*
+    # wrappers can forward it via emmeans(..., data = metadata$data).
+    data = data,
     package_versions = list(
       symbolizer = utils::packageVersion("symbolizer"),
       MCMCglmm   = utils::packageVersion("MCMCglmm")
@@ -270,6 +275,7 @@ symbolize.MCMCglmm <- function(fit, symbols = NULL, units = NULL,
     random_effects      = re_tbl,
     variance_components = vc_tbl,
     covariance_components = cov_tbl,
+    factor_coding       = factor_cod,
     symbol_dictionary   = symbol_dict,
     assumptions         = assumptions,
     components          = components,

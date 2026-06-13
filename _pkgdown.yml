@@ -124,11 +124,17 @@ reference:
     desc: "Per-parameter readings on link, natural, variance, and biological scales."
     contents:
       - parameter_interpretation
+  - title: "Factors & dummy coding"
+    desc: "Demystify treatment / contrast coding for multi-level factors and interactions — in one call, or an interactive widget."
+    contents:
+      - explain_factors
+      - as_html_factor_views
   - title: "Marginal estimates"
-    desc: "Per-group means and per-group slopes via emmeans, alongside the contrast rows."
+    desc: "Per-group means, per-group slopes, and pairwise / vs-reference contrasts via emmeans — confidence bands, no p-values."
     contents:
       - group_means
       - group_slopes
+      - group_contrasts
   - title: "Variance components"
     desc: "Where the variation lives, and how repeatable a trait is (ICC / repeatability)."
     contents:

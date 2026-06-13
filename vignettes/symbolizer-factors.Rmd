@@ -814,6 +814,35 @@ symbol_table(sym_p6_raw)
 (uncorrelated polynomial terms); use `I(x^2)` when you want a literal
 quadratic interpretation.*
 
+## One call: `explain_factors()`
+
+Steps 1--6 unpack the coding by hand. In day-to-day use you can get the
+whole story in a single call. `explain_factors()` states each factor's
+coding scheme in plain language, then shows the per-group means and the
+pairwise comparisons; for interactions it prints the cells or per-group
+slopes directly, so you never have to add coefficients by hand.
+
+```{r explain-factors, eval = requireNamespace("emmeans", quietly = TRUE)}
+explain_factors(sym2)
+```
+
+The pairwise question --- *which sites differ from each **other**?*, not
+just each versus the reference --- is answered by `group_contrasts()`. It
+reports compatibility bands and never p-values; pass `adjust = "tukey"`
+for simultaneous (family-wise) intervals.
+
+```{r group-contrasts, eval = requireNamespace("emmeans", quietly = TRUE)}
+group_contrasts(sym2, by = "site")
+```
+
+For a web-facing version, `as_html_factor_views(sym2)` renders the same
+story as a four-tab interactive widget --- coding scheme, group means,
+pairwise, interactions --- with Confidence-Eye uncertainty bands.
+
+```{r factor-views-widget, results = "asis", eval = requireNamespace("emmeans", quietly = TRUE)}
+as_html_factor_views(sym2)
+```
+
 ## Closing: a checklist for reading any model with factors
 
 When you see a coefficient table from a model that contains factors,

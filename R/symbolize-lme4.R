@@ -147,6 +147,7 @@ lme4_symbolize_impl <- function(fit, family, link, class_name,
   )
   submodels  <- lme4_build_submodels(entries, fit, param, link)
   terms_tbl  <- drm_build_terms(entries_fe, data, symbols)
+  factor_cod <- build_factor_coding(data, terms_tbl, fit)
   fixed_eff  <- lme4_build_fixed_effects(terms_tbl, fit, ci_method = ci_method)
   re_tbl     <- drm_build_random_effects(re_per_entry)
   vc_tbl     <- lme4_build_variance_components(fit, family)
@@ -210,6 +211,7 @@ lme4_symbolize_impl <- function(fit, family, link, class_name,
     random_effects      = re_tbl,
     variance_components = vc_tbl,
     covariance_components = cov_tbl,
+    factor_coding       = factor_cod,
     symbol_dictionary   = symbol_dict,
     assumptions         = assumptions,
     components          = components,

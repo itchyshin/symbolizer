@@ -16,6 +16,7 @@ new_symbolized_model(
   variance_components = NULL,
   covariance_components = NULL,
   loadings = NULL,
+  factor_coding = NULL,
   symbol_dictionary,
   assumptions,
   components,
@@ -51,6 +52,11 @@ new_symbolized_model(
 \item{loadings}{A tibble of latent-factor loadings (rows: one per
 \verb{(submodel, trait, axis)} entry of a loading matrix) or \code{NULL}. Populated
 by extractors for reduced-rank latent-variable models such as gllvmTMB.}
+
+\item{factor_coding}{A tibble (one row per factor predictor) recording each
+factor's \code{levels}, \code{reference_level}, \code{contrast_type}, \code{n_dummies}, and
+\code{is_default_treatment}, or \code{NULL}. Populated during extraction by
+\code{build_factor_coding()}.}
 
 \item{symbol_dictionary}{A tibble of \verb{(symbol, variable, units, role, description)}.}
 
