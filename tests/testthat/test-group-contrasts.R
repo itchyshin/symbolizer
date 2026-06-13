@@ -114,6 +114,38 @@ test_that("group_contrasts.default rejects non-symbolized input", {
   expect_error(group_contrasts(list()), "no method")
 })
 
+test_that("effect_type follows the link, not the family name (non-canonical glm)", {
+  skip_if_no_emmeans()
+  set.seed(42)
+  d <- data.frame(grp = factor(rep(c("A", "B"), each = 25)))
+  mu <- c(A = 0.4, B = 0.625)[as.character(d$grp)]
+  d$y <- rgamma(50, shape = 6, rate = 6 / mu)
+  # Gamma with the default inverse link -> the response-scale contrast is an
+  # additive difference (null 0), not a ratio.
+  gc <- group_contrasts(symbolize(glm(y ~ grp, data = d, family = Gamma("inverse"))),
+                        by = "grp", scale = "response")
+  expect_equal(gc$effect_type[[1L]], "difference")
+})
+
+test_that("an interaction-only factor is recognised by the marginal layer", {
+  skip_if_no_emmeans()
+  di <- transform(mtcars, cyl = factor(cyl))
+  sym <- symbolize(lm(mpg ~ wt + wt:cyl, data = di))
+  expect_true("cyl" %in% symbolizer:::marg_factors(sym))
+  expect_s3_class(group_means(sym, by = "cyl"), "symbolizer_group_means")
+})
+
+test_that("group_contrasts has a knit_print that emits a markdown table, not cli text", {
+  skip_if_no_emmeans()
+  skip_if_not_installed("knitr")
+  dg <- transform(mtcars, gear = factor(gear))
+  gc <- group_contrasts(symbolize(lm(mpg ~ gear, data = dg)), by = "gear")
+  out <- as.character(knitr::knit_print(gc))
+  expect_match(out, "Group contrasts")
+  expect_true(grepl("|", out, fixed = TRUE))     # a pipe-table
+  expect_false(grepl("estimate = ", out))        # not the cli console form
+})
+
 test_that("print method names the method and the null", {
   skip_if_no_emmeans()
   set.seed(6)

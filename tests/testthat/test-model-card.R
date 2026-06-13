@@ -44,6 +44,14 @@ test_that("model_card marginal_contrasts is NULL for a factor-free model", {
   expect_null(card$marginal_contrasts)
 })
 
+test_that("model_card knit_print includes the Group contrasts section", {
+  skip_if_not_installed("emmeans")
+  skip_if_not_installed("knitr")
+  dg <- transform(mtcars, gear = factor(gear))
+  out <- as.character(knitr::knit_print(model_card(symbolize(lm(mpg ~ gear, data = dg)))))
+  expect_match(out, "Group contrasts")
+})
+
 test_that("model_card.default errors with pointer to symbolize()", {
   expect_error(model_card(list()), "no method")
 })

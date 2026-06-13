@@ -279,9 +279,20 @@ marg_check_family_supported <- function(x, fn_name) {
 
 # Factors detected from the symbol_dictionary (role == "factor").
 marg_factors <- function(x) {
+  out <- character(0L)
   d <- x$symbol_dictionary
-  if (is.null(d) || nrow(d) == 0L) return(character(0L))
-  out <- d$variable[d$role == "factor" & !is.na(d$variable)]
+  if (!is.null(d) && nrow(d) > 0L) {
+    out <- d$variable[d$role == "factor" & !is.na(d$variable)]
+  }
+  # Also include factors recorded in factor_coding -- notably interaction-only
+  # factors, which have no main-effect "factor" row in the symbol dictionary
+  # but are still valid emmeans `by` variables (estimated within the
+  # interaction). Keeps every surface (group_*, explain_factors, model_card,
+  # the widget) agreeing on the factor list.
+  fc <- x$factor_coding
+  if (!is.null(fc) && nrow(fc) > 0L) {
+    out <- c(out, fc$variable[!is.na(fc$variable)])
+  }
   unique(out[nzchar(out)])
 }
 
@@ -669,6 +680,21 @@ marg_tibble_contrasts <- function(df, by, within, method, adjust, ci_method,
     est_col <- setdiff(names(df),
                        c("contrast", within, "SE", "df", "asymp.LCL",
                          "asymp.UCL", "lower.CL", "upper.CL"))[[1L]]
+  }
+  # The estimate-column name emmeans emits is the reliable signal for the
+  # back-transform actually applied -- driven by the LINK, not the family name:
+  # "estimate" = a difference, "ratio" = a log back-transform, "odds.ratio" = a
+  # logit back-transform. Override the family-name-based effect_type so
+  # non-canonical-link glm fits (Gamma(inverse), gaussian(log), ...) get the
+  # correct null and label.
+  effect_type <- if (identical(scale, "link") || identical(est_col, "estimate")) {
+    "difference"
+  } else if (identical(est_col, "odds.ratio")) {
+    "odds_ratio"
+  } else if (identical(est_col, "ratio")) {
+    "ratio"
+  } else {
+    effect_type
   }
   lo_col <- marg_first_present(df, c("asymp.LCL", "lower.CL", "LCL", "lower.HPD"))
   hi_col <- marg_first_present(df, c("asymp.UCL", "upper.CL", "UCL", "upper.HPD"))

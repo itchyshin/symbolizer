@@ -285,6 +285,13 @@ knit_print.symbolized_factor_explanation <- function(x, ...) {
   }
   kab <- function(tb) {
     if (is.null(tb) || nrow(tb) == 0L) return(NULL)
+    # Use the group_* knit_print methods so internal columns (std_error,
+    # confint_low/high, excludes_zero, ci_method, ...) are dropped and the band
+    # is formatted, rather than dumping the raw tibble.
+    if (inherits(tb, c("symbolizer_group_means", "symbolizer_group_slopes",
+                       "symbolizer_group_contrasts"))) {
+      return(as.character(knitr::knit_print(tb)))
+    }
     paste(knitr::kable(as.data.frame(tb), format = "pipe"), collapse = "\n")
   }
   parts <- c("## Factors", "")

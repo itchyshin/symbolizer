@@ -152,12 +152,14 @@ extract_terms <- function(formula, data, submodel,
                           symbol, coef_symbol) {
     if (role == "intercept") return(coef_symbol)
     if (role == "factor_contrast") {
-      # variable + level are raw R names; escape underscores so a snake_case
-      # factor (body_size) does not render `body` subscript `size` (B81 family).
+      # variable + level are raw R data; escape every LaTeX-special character
+      # (not just `_`) so a level like `d_50%` or `b&c` renders literally inside
+      # \mathrm{} instead of comment-eating the line / injecting an alignment
+      # tab and breaking the equation (pdflatex + MathJax).
       return(sprintf("%s \\, [%s = \\mathrm{%s}]",
                      coef_symbol,
-                     escape_underscores_for_latex(variable),
-                     escape_underscores_for_latex(contrast_level)))
+                     escape_latex_text(variable),
+                     escape_latex_text(contrast_level)))
     }
     if (role == "interaction") {
       vars <- strsplit(variable, ":", fixed = TRUE)[[1L]]
@@ -258,4 +260,19 @@ extract_terms <- function(formula, data, submodel,
     do.call(rbind, rows)
   }
   out
+}
+
+# Escape the LaTeX-special characters that appear in raw R factor levels and
+# variable names so they render literally inside math mode (\mathrm{...})
+# rather than breaking the equation: `%` comments the rest of the line, `&`
+# adds an alignment tab inside `aligned`, and `# $ { } _` are active. Covers the
+# backslash-escapable set; `^ ~ \` are left alone (vanishingly rare in factor
+# levels). A normal level like "male" is returned unchanged.
+#' @keywords internal
+escape_latex_text <- function(s) {
+  s <- as.character(s)
+  for (ch in c("{", "}", "$", "&", "%", "#", "_")) {
+    s <- gsub(ch, paste0("\\", ch), s, fixed = TRUE)
+  }
+  s
 }
