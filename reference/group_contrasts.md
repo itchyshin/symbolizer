@@ -96,3 +96,23 @@ contrast. Columns: `contrast`, one column per `within` factor,
 
 [`group_means()`](https://itchyshin.github.io/symbolizer/reference/group_means.md),
 [`group_slopes()`](https://itchyshin.github.io/symbolizer/reference/group_slopes.md)
+
+## Examples
+
+``` r
+d <- transform(mtcars, gear = factor(gear))
+sym <- symbolize(lm(mpg ~ gear, data = d))
+if (requireNamespace("emmeans", quietly = TRUE)) {
+  # which gears differ from each other (not just from the reference)?
+  group_contrasts(sym, by = "gear")
+}
+#> 
+#> ── Group contrasts (pairwise) ──
+#> 
+#> gear3 - gear4 estimate = "-8.43" (-12.2, -4.70) *
+#> gear3 - gear5 estimate = "-5.27" (-10.2, -0.301) *
+#> gear4 - gear5 estimate = "3.15" (-1.97, 8.28)
+#> Intervals are per-contrast, not family-wise; pass adjust = "tukey" for
+#> simultaneous bands. Scale: response. CI method: wald. Adjustment: none. Rows
+#> marked `*` have a 95% interval that excludes the null.
+```

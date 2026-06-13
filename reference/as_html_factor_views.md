@@ -54,3 +54,13 @@ A character vector (HTML), invisibly.
 
 [`explain_factors()`](https://itchyshin.github.io/symbolizer/reference/explain_factors.md),
 [`as_html_three_views()`](https://itchyshin.github.io/symbolizer/reference/as_html_three_views.md)
+
+## Examples
+
+``` r
+d <- transform(mtcars, gear = factor(gear))
+sym <- symbolize(lm(mpg ~ gear, data = d))
+# write the interactive widget to a self-contained HTML file
+html <- as_html_factor_views(sym, standalone = TRUE,
+                             file = tempfile(fileext = ".html"))
+```

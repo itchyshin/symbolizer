@@ -96,6 +96,42 @@ with the inline cell means or per-group slopes.</p>
     <div class="dont-index"><p><code><a href="group_means.html">group_means()</a></code>, <code><a href="group_contrasts.html">group_contrasts()</a></code>, <code><a href="explain.html">explain()</a></code></p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/transform.html" class="external-link">transform</a></span><span class="op">(</span><span class="va">mtcars</span>, gear <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">gear</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"emmeans"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="co"># one call: coding scheme, group means, and pairwise contrasts per factor</span></span></span>
+<span class="r-in"><span>  <span class="fu">explain_factors</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">gear</span>, data <span class="op">=</span> <span class="va">d</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Factors in your &lt;lm&gt; model</span> <span style="color: #00BBBB;">──────────────────────────────────────────────────</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">gear</span> ──</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> `gear` has 3 levels (3, 4, 5). R uses 3 as the baseline and adds 2 indicator</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> column(s); each coefficient is the difference from 3, not that group's own</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> mean.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Group means</span> ──</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-style: italic;">gear=3</span> estimate = <span style="color: #0000BB;">"16.1"</span> (13.6, 18.6) *</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-style: italic;">gear=4</span> estimate = <span style="color: #0000BB;">"24.5"</span> (21.8, 27.3) *</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-style: italic;">gear=5</span> estimate = <span style="color: #0000BB;">"21.4"</span> (17.1, 25.7) *</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-style: italic;">Scale: response. CI method: wald. Rows marked `*` have a 95% interval that</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-style: italic;">excludes zero.</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Group contrasts (pairwise)</span> ──</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-style: italic;">gear3 - gear4</span> estimate = <span style="color: #0000BB;">"-8.43"</span> (-12.2, -4.70) *</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-style: italic;">gear3 - gear5</span> estimate = <span style="color: #0000BB;">"-5.27"</span> (-10.2, -0.301) *</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-style: italic;">gear4 - gear5</span> estimate = <span style="color: #0000BB;">"3.15"</span> (-1.97, 8.28)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-style: italic;">Intervals are per-contrast, not family-wise; pass adjust = "tukey" for</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-style: italic;">simultaneous bands. Scale: response. CI method: wald. Adjustment: none. Rows</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-style: italic;">marked `*` have a 95% interval that excludes the null.</span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
