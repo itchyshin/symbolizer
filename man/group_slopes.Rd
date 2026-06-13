@@ -63,3 +63,9 @@ Not supported on bivariate Gaussian (\code{biv_gaussian}) fits — see
 \code{\link[=group_means]{group_means()}} for the same limitation and the recommended
 alternatives.
 }
+\seealso{
+Other marginal estimates:
+\code{\link[=group_contrasts]{group_contrasts()}},
+\code{\link[=group_means]{group_means()}}
+}
+\concept{marginal estimates}

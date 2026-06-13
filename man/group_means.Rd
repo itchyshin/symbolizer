@@ -52,3 +52,9 @@ so the emmeans abstraction does not apply. Use
 \code{\link[drmTMB:predict_parameters]{drmTMB::predict_parameters()}} on the fit directly, or refit each
 response as a univariate Gaussian and call \code{group_means()} on each.
 }
+\seealso{
+Other marginal estimates:
+\code{\link[=group_contrasts]{group_contrasts()}},
+\code{\link[=group_slopes]{group_slopes()}}
+}
+\concept{marginal estimates}

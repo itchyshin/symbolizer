@@ -50,6 +50,27 @@ test_that("explain() populates every reader-facing piece", {
   expect_s3_class(ex$notation_bridge, "notation_bridge")
 })
 
+test_that("explain() exposes canonical bridge fields; bridge aliases formula_bridge", {
+  fit <- fit_drm_location_scale()
+  ex <- explain(fit)
+  expect_false(is.null(ex$formula_bridge))
+  expect_false(is.null(ex$notation_bridge))
+  expect_s3_class(ex$formula_bridge, "symbolizer_formula_bridge")
+  # back-compat: `bridge` is retained as the deprecated alias of formula_bridge
+  expect_identical(ex$bridge, ex$formula_bridge)
+})
+
+test_that("build_core_pieces returns the eight shared rendered pieces", {
+  sym <- symbolize(fit_drm_location_scale())
+  core <- symbolizer:::build_core_pieces(sym)
+  expect_setequal(
+    names(core),
+    c("equations", "symbols", "assumptions", "formula_bridge",
+      "notation_bridge", "interpretation", "factor_coding",
+      "variance_components")
+  )
+})
+
 test_that("explain() pre-rendered pieces are non-empty for a real fit", {
   fit <- fit_drm_location_scale()
   ex <- explain(fit)

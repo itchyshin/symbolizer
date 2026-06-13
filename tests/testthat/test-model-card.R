@@ -12,10 +12,13 @@ test_that("model_card returns the full bundle for drmTMB", {
   expect_setequal(
     names(card),
     c("meta", "equation", "symbols", "assumptions", "bridge",
-      "formula_bridge", "interpretation", "factor_coding",
+      "notation_bridge", "formula_bridge", "interpretation", "factor_coding",
       "variance_components", "warnings", "extraction_calls",
-      "recommended_plots", "marginal_means", "marginal_slopes")
+      "recommended_plots", "marginal_means", "marginal_slopes",
+      "marginal_contrasts")
   )
+  # `bridge` is the deprecated alias of `notation_bridge` in model_card output.
+  expect_identical(card$bridge, card$notation_bridge)
   expect_true(any(grepl("drmTMB::fixef", card$extraction_calls, fixed = TRUE)))
   expect_true(any(grepl("Residuals vs fitted", names(card$recommended_plots), fixed = TRUE)))
 })
@@ -26,6 +29,19 @@ test_that("model_card extraction calls switch by class for gllvmTMB", {
   card <- model_card(sym)
   expect_true(any(grepl("getLoadings", card$extraction_calls, fixed = TRUE)))
   expect_true(any(grepl("Loading plot", names(card$recommended_plots), fixed = TRUE)))
+})
+
+test_that("model_card surfaces marginal_contrasts for a factor model", {
+  skip_if_not_installed("emmeans")
+  d <- transform(mtcars, gear = factor(gear))
+  card <- model_card(symbolize(lm(mpg ~ gear, data = d)))
+  expect_s3_class(card$marginal_contrasts, "symbolizer_group_contrasts")
+  expect_false("p.value" %in% names(card$marginal_contrasts))
+})
+
+test_that("model_card marginal_contrasts is NULL for a factor-free model", {
+  card <- model_card(symbolize(lm(mpg ~ wt, data = mtcars)))
+  expect_null(card$marginal_contrasts)
 })
 
 test_that("model_card.default errors with pointer to symbolize()", {

@@ -54,6 +54,7 @@
 #'   level combination. Columns: `level_combo`, one column per factor in
 #'   `by`, `estimate`, `std_error`, `confint_low`, `confint_high`,
 #'   `excludes_zero`, `ci_method`, `scale`.
+#' @family marginal estimates
 #' @export
 group_means <- function(x, by = NULL, scale = c("response", "link"),
                         ci_method = NULL, ...) {
@@ -160,6 +161,7 @@ group_means.symbolized_model <- function(x, by = NULL,
 #'   stratum. Columns: `predictor`, `level_combo`, one column per stratifying
 #'   variable, `estimate`, `std_error`, `confint_low`, `confint_high`,
 #'   `excludes_zero`, `ci_method`, `scale`.
+#' @family marginal estimates
 #' @export
 group_slopes <- function(x, continuous, at = NULL,
                          scale = c("response", "link"),
@@ -531,6 +533,7 @@ marg_print_rows <- function(x, predictor = NULL) {
 #'   `estimate`, `std_error`, `confint_low`, `confint_high`, `excludes_zero`,
 #'   `ci_method`, `scale`, `method`, `adjust`, `effect_type`.
 #' @seealso [`group_means()`], [`group_slopes()`]
+#' @family marginal estimates
 #' @examples
 #' d <- transform(mtcars, gear = factor(gear))
 #' sym <- symbolize(lm(mpg ~ gear, data = d))

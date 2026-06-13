@@ -13,15 +13,17 @@
 #' One-call teaching bundle for a symbolized model
 #'
 #' @description
-#' `model_card()` returns the entire teachable package for a symbolized
-#' model in a single S3 object: equation, symbol dictionary, assumptions,
-#' notation bridge, formula bridge, per-coefficient interpretations,
-#' extraction calls (R code to pull out blocks of the fit), and
-#' recommended plots (one-line text recipes).
+#' `model_card()` is the entry point for **acting on** a fit. It returns
+#' everything [`explain()`] shows -- equation, symbol dictionary, assumptions,
+#' notation and formula bridges, per-coefficient interpretations, factor-coding
+#' overview, variance components -- and adds the act-on-it layer: extraction
+#' calls (R code to pull out blocks of the fit), recommended plots (one-line
+#' text recipes), and the marginal estimates ([`group_means()`] /
+#' [`group_slopes()`] / [`group_contrasts()`]).
 #'
-#' Use [`explain()`] when you want the first-time-user walkthrough of the
-#' symbols and equations. Use `model_card()` when you also want a quick
-#' reference of *what to extract from the fit and what to plot next*.
+#' Use [`explain()`] when you only want to *understand* the model; use
+#' `model_card()` when you also want a quick reference of *what to extract,
+#' what to plot, and how the groups compare*.
 #'
 #' The bundle is a plain list; print it at the console for a structured
 #' walkthrough, or knit it inside a Quarto / R Markdown document for a
@@ -32,12 +34,14 @@
 #' @param ... Reserved for future use.
 #'
 #' @return A `symbolizer_model_card` (a list) with elements:
-#'   `meta`, `equation`, `symbols`, `assumptions`, `bridge`,
-#'   `formula_bridge`, `interpretation`, `variance_components` (NULL when
-#'   the model has no random effects), `warnings`, `extraction_calls`,
-#'   `recommended_plots`, `marginal_means` (NULL when the model has no
-#'   factors), `marginal_slopes` (NULL when no continuous-by-* interaction
-#'   is present).
+#'   `meta`, `equation`, `symbols`, `assumptions`, `notation_bridge` (and its
+#'   deprecated alias `bridge`), `formula_bridge`, `interpretation`,
+#'   `factor_coding`, `variance_components` (NULL when the model has no random
+#'   effects), `warnings`, `extraction_calls`, `recommended_plots`,
+#'   `marginal_means` (NULL when the model has no factors), `marginal_slopes`
+#'   (NULL when no continuous-by-* interaction is present), and
+#'   `marginal_contrasts` (NULL when the model has no factor).
+#' @seealso [`explain()`] for the understand-only bundle.
 #' @examples
 #' # model_card(symbolize(lm(mpg ~ wt, data = mtcars)))
 #' @export
@@ -63,21 +67,27 @@ model_card.symbolized_model <- function(x, ...) {
     n_obs   = x$model$n_obs,
     context = x$metadata$context
   )
+  core <- build_core_pieces(x)
   out <- list(
     meta              = meta,
-    equation          = equations(x, notation = "both"),
-    symbols           = symbol_table(x, notation = "both"),
-    assumptions       = assumption_table(x),
-    bridge            = notation_bridge(x),
-    formula_bridge    = formula_bridge(x, notation = "both"),
-    interpretation    = parameter_interpretation(x, scale = "all"),
-    factor_coding     = factor_overview_lines(x),
-    variance_components = x$variance_components,
+    equation          = core$equations,
+    symbols           = core$symbols,
+    assumptions       = core$assumptions,
+    # `bridge` is a back-compat alias for the notation bridge. Deprecated in
+    # favour of the explicit `notation_bridge` / `formula_bridge` names, which
+    # mean the same thing in both model_card() and explain() output.
+    bridge            = core$notation_bridge,
+    notation_bridge   = core$notation_bridge,
+    formula_bridge    = core$formula_bridge,
+    interpretation    = core$interpretation,
+    factor_coding     = core$factor_coding,
+    variance_components = core$variance_components,
     warnings          = warning_table(x),
     extraction_calls  = model_card_extraction_calls(x),
     recommended_plots = model_card_recommended_plots(x),
     marginal_means    = model_card_marginal_means(x),
-    marginal_slopes   = model_card_marginal_slopes(x)
+    marginal_slopes   = model_card_marginal_slopes(x),
+    marginal_contrasts = model_card_marginal_contrasts(x)
   )
   class(out) <- c("symbolizer_model_card", "list")
   out
@@ -121,6 +131,19 @@ model_card_marginal_slopes <- function(x) {
   tryCatch(group_slopes(x, continuous = pick), error = function(e) NULL)
 }
 
+# Pre-render pairwise contrasts for the first factor when the model has one
+# and emmeans is available. Completes the group_* trio (means / slopes /
+# contrasts) in the card. Returns NULL otherwise or on any extraction error.
+model_card_marginal_contrasts <- function(x) {
+  if (!requireNamespace("emmeans", quietly = TRUE)) return(NULL)
+  d <- x$symbol_dictionary
+  if (is.null(d)) return(NULL)
+  facs <- unique(d$variable[d$role == "factor" & !is.na(d$variable)])
+  facs <- facs[nzchar(facs)]
+  if (length(facs) == 0L) return(NULL)
+  tryCatch(group_contrasts(x, by = facs[[1L]]), error = function(e) NULL)
+}
+
 # Class-specific extraction calls. Returns a named character vector of R
 # code lines that pull out the blocks a user typically wants from a fit of
 # this class. Keys are descriptions; values are the R code. Defaults to an
@@ -143,7 +166,8 @@ model_card_extraction_calls <- function(x) {
       "Symbolic story"           = "symbolizer::symbolize(fit)",
       "Teaching bundle"          = "symbolizer::model_card(symbolizer::symbolize(fit))",
       "Group means (alongside contrasts)"        = "symbolizer::group_means(sym)",
-      "Per-group slopes (alongside interactions)" = "symbolizer::group_slopes(sym, continuous = <one of your continuous predictors>)"
+      "Per-group slopes (alongside interactions)" = "symbolizer::group_slopes(sym, continuous = <one of your continuous predictors>)",
+      "Pairwise contrasts (which levels differ)"  = "symbolizer::group_contrasts(sym, by = <one of your factors>)"
     ),
     gllvmTMB = c(
       "Loading matrix Lambda_B"        = "gllvmTMB::getLoadings(fit)",
@@ -216,7 +240,7 @@ print.symbolizer_model_card <- function(x, ...) {
 
   cli::cli_h2("Notation bridge (index vs matrix)")
   cli::cli_text("{.emph Reading the same model in both notations side by side.}")
-  print(x$bridge)
+  print(x$notation_bridge)
 
   cli::cli_h2("Formula bridge (R syntax to mathematics)")
   cli::cli_text("{.emph What each piece of the R formula means mathematically.}")
@@ -247,6 +271,11 @@ print.symbolizer_model_card <- function(x, ...) {
     cli::cli_h2("Group slopes")
     cli::cli_text("{.emph Per-group slopes alongside the interaction contrasts above.}")
     print(x$marginal_slopes)
+  }
+  if (!is.null(x$marginal_contrasts)) {
+    cli::cli_h2("Group contrasts")
+    cli::cli_text("{.emph Pairwise comparisons -- which factor levels differ from each other.}")
+    print(x$marginal_contrasts)
   }
 
   cli::cli_h2("Extraction calls")
