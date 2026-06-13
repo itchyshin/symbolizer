@@ -107,13 +107,14 @@ continuous interactions, get the slope at those values of <code>z</code>.</p></l
 
 
 <dt id="arg-scale">scale<a class="anchor" aria-label="anchor" href="#arg-scale"></a></dt>
-<dd><p>One of <code>"response"</code> (default) or <code>"link"</code>. For
-identity-link families the two are equivalent. For other families
-the slope is reported on the requested scale: <code>"link"</code> gives the
-linear-predictor slope (which is what the coefficient table shows),
-<code>"response"</code> gives the slope after back-transformation. Note that
-for non-identity links the response-scale slope depends on the
-level of the predictor.</p></dd>
+<dd><p>One of <code>"response"</code> (default) or <code>"link"</code>. A <em>slope</em> is the
+derivative of the linear predictor with respect to the continuous
+predictor, which <code><a href="https://rvlenth.github.io/emmeans/reference/emtrends.html" class="external-link">emmeans::emtrends()</a></code> reports on the link scale
+regardless of <code>scale</code> – so for <code>group_slopes()</code> the two scales coincide
+(unlike <code><a href="group_means.html">group_means()</a></code>, where the response scale back-transforms). The
+argument is accepted and recorded on the <code>scale</code> column for consistency
+with the rest of the family; to read an effect on the response scale,
+compare group means with <code><a href="group_means.html">group_means()</a></code> instead.</p></dd>
 
 
 <dt id="arg-ci-method">ci_method<a class="anchor" aria-label="anchor" href="#arg-ci-method"></a></dt>
