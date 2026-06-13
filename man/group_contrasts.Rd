@@ -67,6 +67,14 @@ null value is 1, not 0 -- the \code{effect_type} column records which, and the
 Not supported on bivariate Gaussian (\code{biv_gaussian}) fits -- see
 \code{\link[=group_means]{group_means()}} for the limitation and alternatives.
 }
+\examples{
+d <- transform(mtcars, gear = factor(gear))
+sym <- symbolize(lm(mpg ~ gear, data = d))
+if (requireNamespace("emmeans", quietly = TRUE)) {
+  # which gears differ from each other (not just from the reference)?
+  group_contrasts(sym, by = "gear")
+}
+}
 \seealso{
 \code{\link[=group_means]{group_means()}}, \code{\link[=group_slopes]{group_slopes()}}
 }

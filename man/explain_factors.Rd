@@ -30,6 +30,13 @@ Pass a fitted model (it is run through \code{\link[=symbolize]{symbolize()}} for
 Print the result at the console for a walkthrough, or knit it inside a Quarto
 / R Markdown document for a heading-and-table section per factor.
 }
+\examples{
+d <- transform(mtcars, gear = factor(gear))
+if (requireNamespace("emmeans", quietly = TRUE)) {
+  # one call: coding scheme, group means, and pairwise contrasts per factor
+  explain_factors(lm(mpg ~ gear, data = d))
+}
+}
 \seealso{
 \code{\link[=group_means]{group_means()}}, \code{\link[=group_contrasts]{group_contrasts()}}, \code{\link[=explain]{explain()}}
 }

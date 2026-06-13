@@ -44,6 +44,12 @@
 #'
 #' @return A character vector (HTML), invisibly.
 #' @seealso [`explain_factors()`], [`as_html_three_views()`]
+#' @examples
+#' d <- transform(mtcars, gear = factor(gear))
+#' sym <- symbolize(lm(mpg ~ gear, data = d))
+#' # write the interactive widget to a self-contained HTML file
+#' html <- as_html_factor_views(sym, standalone = TRUE,
+#'                              file = tempfile(fileext = ".html"))
 #' @export
 as_html_factor_views <- function(x, id = "symfv", standalone = FALSE,
                                  file = NULL, ...) {
