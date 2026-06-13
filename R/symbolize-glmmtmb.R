@@ -195,6 +195,7 @@ symbolize.glmmTMB <- function(fit, symbols = NULL, units = NULL,
   )
   submodels  <- glmm_build_submodels(entries, fit, param, link)
   terms_tbl  <- drm_build_terms(entries_fe, data, symbols)
+  factor_cod <- build_factor_coding(data, terms_tbl, fit)
   fixed_eff  <- glmm_build_fixed_effects(terms_tbl, fit, ci_method = ci_method)
   re_tbl     <- drm_build_random_effects(re_per_entry)
   vc_tbl     <- glmm_build_variance_components(fit, re_per_entry)
@@ -289,6 +290,7 @@ symbolize.glmmTMB <- function(fit, symbols = NULL, units = NULL,
     random_effects      = re_tbl,
     variance_components = vc_tbl,
     covariance_components = cov_tbl,
+    factor_coding       = factor_cod,
     symbol_dictionary   = symbol_dict,
     assumptions         = assumptions,
     components          = components,

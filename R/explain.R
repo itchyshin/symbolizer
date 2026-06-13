@@ -61,6 +61,7 @@ new_symbolized_explanation <- function(sym) {
     assumptions     = assumption_table(sym),
     bridge          = formula_bridge(sym, notation = "both"),
     interpretation  = parameter_interpretation(sym, scale = "all"),
+    factor_coding   = factor_overview_lines(sym),
     # v0.22.x: surface where the variation lives. Previously dropped even
     # though every mixed-model extractor computes the variance components.
     variance_components = sym$variance_components,
@@ -94,6 +95,12 @@ print.symbolized_explanation <- function(x, ...) {
 
   cli::cli_h2("What each coefficient means")
   print(x$interpretation)
+
+  if (length(x$factor_coding) > 0L) {
+    cli::cli_h2("Factor coding")
+    cli::cli_text("{.emph How each categorical predictor is dummy-coded -- call {.fn explain_factors} for the group means and pairwise contrasts.}")
+    for (ln in x$factor_coding) cli::cli_text(ln)
+  }
 
   if (!is.null(x$variance_components) && nrow(x$variance_components) > 0L) {
     cli::cli_h2("How the variation splits")
@@ -139,6 +146,10 @@ knit_print.symbolized_explanation <- function(x, ...) {
       as.character(rendered),
       ""
     )
+  }
+  if (length(x$factor_coding) > 0L) {
+    parts <- c(parts, "### Factor coding", "",
+               paste0("- ", x$factor_coding), "")
   }
   knitr::asis_output(paste(parts, collapse = "\n"))
 }

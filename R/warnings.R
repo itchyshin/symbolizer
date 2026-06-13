@@ -84,6 +84,49 @@ warnings_empty <- function() {
   )
 }
 
+# Coerce any warnings tibble to the canonical 4-column shape. Some extractors
+# (base lm / glm) seed an empty 3-column registry without `context`; normalising
+# lets coding warnings rbind onto it cleanly.
+normalize_warnings <- function(w) {
+  if (is.null(w)) return(warnings_empty())
+  if (!"context" %in% names(w)) w$context <- rep("", nrow(w))
+  w[, c("code", "severity", "message", "context"), drop = FALSE]
+}
+
+merge_warnings <- function(existing, extra) {
+  base <- normalize_warnings(existing)
+  if (is.null(extra) || nrow(extra) == 0L) return(base)
+  rbind(base, normalize_warnings(extra))
+}
+
+# Detect-and-warn for non-default factor coding. A factor needs a warning when
+# its contrast scheme is not the default treatment coding (sum / Helmert / poly
+# / custom, or treatment with a non-first base) -- the coefficient table and the
+# `[reference]` tag assume treatment coding and would otherwise mislead.
+# Cell-means (`0 + factor`) is exempt: it is read correctly as group means.
+#' @keywords internal
+coding_warnings <- function(factor_coding) {
+  if (is.null(factor_coding) || nrow(factor_coding) == 0L) {
+    return(warnings_empty())
+  }
+  tbl <- tryCatch(load_template("warning-templates"), error = function(e) NULL)
+  if (is.null(tbl)) return(warnings_empty())
+  flag <- !factor_coding$is_default_treatment &
+    factor_coding$contrast_type != "cell_means"
+  idx <- which(flag)
+  if (length(idx) == 0L) return(warnings_empty())
+  rows <- lapply(idx, function(i) {
+    warnings_render(
+      tbl, code = "non_default_contrasts",
+      slots = list(
+        factor_name   = factor_coding$variable[[i]],
+        contrast_type = factor_coding$contrast_type[[i]]
+      )
+    )
+  })
+  do.call(rbind, rows)
+}
+
 # -- accessor ----------------------------------------------------------------
 
 #' Per-fit prose warnings for a symbolized model

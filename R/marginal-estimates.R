@@ -101,7 +101,7 @@ group_means.symbolized_model <- function(x, by = NULL,
   ci_method <- ci_method %||% x$metadata$ci_method %||% "wald"
   rhs <- paste(by, collapse = " * ")
   spec <- stats::as.formula(paste("~", rhs))
-  emm <- emmeans::emmeans(fit, spec)
+  emm <- marg_emmeans(fit, spec, x$metadata$data)
   # Lognormal special case: drmTMB exposes mu on the IDENTITY link
   # because mu represents log(Y), so emmeans's automatic back-transform
   # on type = "response" is a no-op (it can't see the implicit log). Tell
@@ -204,11 +204,8 @@ group_slopes.symbolized_model <- function(x, continuous, at = NULL,
   ci_method <- ci_method %||% x$metadata$ci_method %||% "wald"
   rhs <- paste(by_vars, collapse = " * ")
   spec <- stats::as.formula(paste("~", rhs))
-  emm <- if (length(at_list) > 0L) {
-    emmeans::emtrends(fit, spec, var = continuous, at = at_list)
-  } else {
-    emmeans::emtrends(fit, spec, var = continuous)
-  }
+  emm <- marg_emtrends(fit, spec, continuous, at = at_list,
+                       data = x$metadata$data)
   df <- as.data.frame(emm,
                       type = if (scale == "response") "response" else "link")
   marg_tibble_slopes(df, by_vars = by_vars, predictor = continuous,
@@ -257,6 +254,21 @@ marg_check_family_supported <- function(x, fn_name) {
            {.fn drmTMB::predict_parameters} on the fit directly.",
       i = "Alternatively, refit each response as a univariate Gaussian and
            call {.fn {fn_name}} on each."
+    ))
+  }
+  # metafor rma fits: emmeans ships no recover_data / emm_basis method for
+  # class `rma`, so the reference grid cannot be built. Gate with an
+  # explanatory message pointing at metafor's own moderator tools rather
+  # than letting emmeans raise its generic "Can't handle an object" error.
+  cls <- x$model$class %||% NA_character_
+  if (cls %in% c("rma.uni", "rma.mv", "rma")) {
+    cli::cli_abort(c(
+      "{.fn {fn_name}} does not support {.pkg metafor} ({.cls {cls}}) fits.",
+      i = "{.pkg emmeans} has no reference-grid method for {.cls rma} objects,
+           so per-group means and contrasts cannot be computed this way.",
+      i = "For moderator comparisons use {.pkg metafor}'s own tools:
+           {.fn metafor::predict} on a moderator grid, or
+           {.fn metafor::anova} for model-based contrasts."
     ))
   }
   invisible(TRUE)
@@ -342,8 +354,11 @@ marg_tibble_slopes <- function(df, by_vars, predictor, ci_method,
 marg_finalize <- function(df, by, ci_method, scale, est_col, klass, predictor) {
   estimate  <- df[[est_col]]
   se_col    <- if ("SE" %in% names(df)) "SE" else NA_character_
-  lo_col    <- marg_first_present(df, c("asymp.LCL", "lower.CL", "LCL"))
-  hi_col    <- marg_first_present(df, c("asymp.UCL", "upper.CL", "UCL"))
+  # `lower.HPD` / `upper.HPD` are the Bayesian credible-band columns emmeans
+  # emits for MCMCglmm and brms fits (no SE); the *.CL columns are the
+  # frequentist intervals. Try both so posterior fits keep their bands.
+  lo_col    <- marg_first_present(df, c("asymp.LCL", "lower.CL", "LCL", "lower.HPD"))
+  hi_col    <- marg_first_present(df, c("asymp.UCL", "upper.CL", "UCL", "upper.HPD"))
   std_error <- if (!is.na(se_col)) df[[se_col]] else rep(NA_real_, nrow(df))
   lo        <- if (!is.na(lo_col)) df[[lo_col]] else rep(NA_real_, nrow(df))
   hi        <- if (!is.na(hi_col)) df[[hi_col]] else rep(NA_real_, nrow(df))
@@ -372,6 +387,26 @@ marg_finalize <- function(df, by, ci_method, scale, est_col, klass, predictor) {
 marg_first_present <- function(df, candidates) {
   hit <- candidates[candidates %in% names(df)]
   if (length(hit) >= 1L) hit[[1L]] else NA_character_
+}
+
+# Call emmeans / emtrends, forwarding `data` ONLY when we actually retained one
+# (e.g. MCMCglmm, whose fit does not carry its model frame and whose
+# recover_data method needs it). Passing `data = NULL` explicitly is NOT the
+# same as omitting it -- emmeans then fails with "undefined columns selected".
+marg_emmeans <- function(fit, spec, data = NULL) {
+  if (is.null(data)) emmeans::emmeans(fit, spec)
+  else emmeans::emmeans(fit, spec, data = data)
+}
+
+marg_emtrends <- function(fit, spec, var, at = list(), data = NULL) {
+  has_at <- length(at) > 0L
+  if (is.null(data)) {
+    if (has_at) emmeans::emtrends(fit, spec, var = var, at = at)
+    else        emmeans::emtrends(fit, spec, var = var)
+  } else {
+    if (has_at) emmeans::emtrends(fit, spec, var = var, at = at, data = data)
+    else        emmeans::emtrends(fit, spec, var = var, data = data)
+  }
 }
 
 marg_level_combo <- function(df, by) {
@@ -439,3 +474,267 @@ marg_print_rows <- function(x, predictor = NULL) {
 }
 
 `%||%` <- function(a, b) if (is.null(a)) b else a
+
+# ----------------------------------------------------------------------------
+# group_contrasts(): pairwise / vs-reference comparisons of factor levels.
+#
+# The coefficient table shows each level versus the reference; group_means()
+# shows each level's mean. group_contrasts() answers the question those two
+# cannot: "which levels differ from each OTHER?" It delegates to
+# emmeans::contrast() and reports confidence bands with NO p-values (VISION:
+# light-touch uncertainty, compatibility bands only). Multiplicity is opt-in
+# via `adjust` -- it widens the band, it never adds a star.
+# ----------------------------------------------------------------------------
+
+#' Pairwise and reference contrasts between factor levels
+#'
+#' @description
+#' `group_contrasts()` compares the levels of a factor against each other
+#' (or against a reference), delegating to [`emmeans::contrast()`]. Use it for
+#' any multi-level factor where the coefficient table -- which only reports each
+#' level versus the reference -- leaves "which levels differ from each other?"
+#' unanswered.
+#'
+#' Each row is one contrast with a point estimate, standard error, 95%
+#' confidence band, and an `excludes_zero` flag. **No p-values are reported**:
+#' symbolizer shows compatibility bands, not tests. For families on a log or
+#' logit link the response-scale contrast is a *ratio* (or odds ratio), whose
+#' null value is 1, not 0 -- the `effect_type` column records which, and the
+#' `excludes_zero` flag is computed against the correct null.
+#'
+#' Not supported on bivariate Gaussian (`biv_gaussian`) fits -- see
+#' [`group_means()`] for the limitation and alternatives.
+#'
+#' @param x A [`symbolized_model`][new_symbolized_model] whose underlying fit is
+#'   retained on `x$metadata$fit`.
+#' @param by Character vector of factor name(s) whose levels are contrasted.
+#'   Defaults to all factors in the model.
+#' @param method Contrast family, passed to [`emmeans::contrast()`]:
+#'   `"pairwise"` (all pairs, default), `"trt.vs.ctrl"` (each level versus the
+#'   reference), `"revpairwise"`, `"consec"` (consecutive levels), or `"poly"`.
+#' @param within Optional factor name(s) to compute the contrasts *within each
+#'   level of* (emmeans `by`). Use this for the multi-factor case: pairwise
+#'   contrasts of one factor separately at each level of another.
+#' @param scale One of `"response"` (default) or `"link"`. On `"link"` the
+#'   contrast is an additive difference on the linear-predictor scale; on
+#'   `"response"` it is back-transformed (a ratio for log links, an odds ratio
+#'   for logit links).
+#' @param ci_method Confidence-interval method label; defaults to
+#'   `x$metadata$ci_method`. See [`group_means()`].
+#' @param adjust Multiplicity adjustment for the confidence bands: `"none"`
+#'   (default; one per-contrast interval), `"tukey"` (family-wise), or `"mvt"`.
+#'   This only widens the interval -- it never produces a p-value.
+#' @param ... Reserved for future use.
+#'
+#' @return A tibble (S3 class `symbolizer_group_contrasts`) with one row per
+#'   contrast. Columns: `contrast`, one column per `within` factor, `level_combo`,
+#'   `estimate`, `std_error`, `confint_low`, `confint_high`, `excludes_zero`,
+#'   `ci_method`, `scale`, `method`, `adjust`, `effect_type`.
+#' @seealso [`group_means()`], [`group_slopes()`]
+#' @export
+group_contrasts <- function(x, by = NULL,
+                            method = c("pairwise", "trt.vs.ctrl",
+                                       "revpairwise", "consec", "poly"),
+                            within = NULL, scale = c("response", "link"),
+                            ci_method = NULL,
+                            adjust = c("none", "tukey", "mvt"), ...) {
+  UseMethod("group_contrasts")
+}
+
+#' @export
+group_contrasts.default <- function(x, ...) {
+  cli::cli_abort(c(
+    "{.fn group_contrasts} has no method for objects of class {.cls {class(x)[1L]}}.",
+    i = "Pass the output of {.fn symbolize}."
+  ))
+}
+
+#' @export
+group_contrasts.symbolized_model <- function(x, by = NULL,
+                                             method = c("pairwise", "trt.vs.ctrl",
+                                                        "revpairwise", "consec",
+                                                        "poly"),
+                                             within = NULL,
+                                             scale = c("response", "link"),
+                                             ci_method = NULL,
+                                             adjust = c("none", "tukey", "mvt"),
+                                             ...) {
+  scale  <- match.arg(scale)
+  method <- match.arg(method)
+  adjust <- match.arg(adjust)
+  marg_require_emmeans()
+  marg_check_family_supported(x, "group_contrasts")
+  fit <- marg_require_fit(x, "group_contrasts")
+  factors <- marg_factors(x)
+  if (length(factors) == 0L) {
+    cli::cli_abort(c(
+      "This model has no factors -- {.fn group_contrasts} compares factor levels.",
+      i = "For continuous-predictor slopes use {.fn group_slopes}."
+    ))
+  }
+  if (is.null(by)) {
+    by <- factors
+  } else if (!is.character(by) || any(!nzchar(by))) {
+    cli::cli_abort("{.arg by} must be a non-empty character vector of factor names.")
+  }
+  unknown <- setdiff(by, factors)
+  if (length(unknown) > 0L) {
+    cli::cli_abort(c(
+      "Unknown factor{?s} in {.arg by}: {.val {unknown}}.",
+      i = "Known factors in this model: {.val {factors}}."
+    ))
+  }
+  if (!is.null(within)) {
+    if (!is.character(within) || any(!nzchar(within))) {
+      cli::cli_abort("{.arg within} must be a character vector of factor names.")
+    }
+    unknown_w <- setdiff(within, factors)
+    if (length(unknown_w) > 0L) {
+      cli::cli_abort(c(
+        "Unknown factor{?s} in {.arg within}: {.val {unknown_w}}.",
+        i = "Known factors in this model: {.val {factors}}."
+      ))
+    }
+    if (length(intersect(by, within)) > 0L) {
+      cli::cli_abort("{.arg by} and {.arg within} must not overlap.")
+    }
+  }
+  ci_method <- ci_method %||% x$metadata$ci_method %||% "wald"
+
+  # The reference grid must span both the contrasted factors and any `within`
+  # stratifiers (mirrors group_means' `*` join). emmeans then contrasts `by`
+  # within each combination of `within`.
+  grid_vars <- unique(c(by, within))
+  spec <- stats::as.formula(paste("~", paste(grid_vars, collapse = " * ")))
+  emm <- marg_emmeans(fit, spec, x$metadata$data)
+  # Lognormal identity-link special case (see group_means): tell emmeans about
+  # the implicit log transform so the response-scale contrast is a ratio of
+  # geometric means with a delta-method band.
+  if (identical(x$model$family, "lognormal") && scale == "response") {
+    emm <- stats::update(emm, tran = "log")
+  }
+  ctr <- emmeans::contrast(emm, method = method, by = within, adjust = adjust)
+
+  # CIs WITHOUT p-values: infer = c(CIs = TRUE, tests = FALSE) emits the
+  # confidence band and omits t.ratio / p.value. type = "response" back-
+  # transforms (a difference of logs becomes a RATIO).
+  df <- as.data.frame(summary(
+    ctr,
+    infer = c(TRUE, FALSE),
+    type  = if (scale == "response") "response" else "link",
+    level = 0.95
+  ))
+
+  effect_type <- marg_contrast_effect_type(x$model$family, scale)
+  marg_tibble_contrasts(df, by = by, within = within, method = method,
+                        adjust = adjust, ci_method = ci_method, scale = scale,
+                        effect_type = effect_type)
+}
+
+# Whether a response-scale contrast is a plain difference, a ratio (log link),
+# or an odds ratio (logit link). Link-scale contrasts are always differences.
+#' @keywords internal
+marg_contrast_effect_type <- function(family, scale) {
+  if (identical(scale, "link")) return("difference")
+  fam <- family %||% ""
+  log_link <- c("poisson", "nbinom2", "nbinom1", "Gamma", "gamma", "lognormal",
+                "truncated_nbinom2", "truncated_nbinom1", "truncated_poisson")
+  logit_link <- c("beta", "binomial", "beta_binomial", "betabinomial",
+                  "bernoulli", "cumulative_logit")
+  if (fam %in% log_link)   return("ratio")
+  if (fam %in% logit_link) return("odds_ratio")
+  "difference"
+}
+
+# Build the symbolizer_group_contrasts tibble from an emmeans contrast summary.
+# emmeans names the estimate column "estimate" (link scale), "ratio" (log
+# response) or "odds.ratio" (logit response). For ratios the null is 1, not 0,
+# so excludes_zero is computed against the correct null per effect_type.
+#' @keywords internal
+marg_tibble_contrasts <- function(df, by, within, method, adjust, ci_method,
+                                  scale, effect_type) {
+  est_col <- marg_first_present(df, c("estimate", "ratio", "odds.ratio"))
+  if (is.na(est_col)) {
+    est_col <- setdiff(names(df),
+                       c("contrast", within, "SE", "df", "asymp.LCL",
+                         "asymp.UCL", "lower.CL", "upper.CL"))[[1L]]
+  }
+  lo_col <- marg_first_present(df, c("asymp.LCL", "lower.CL", "LCL", "lower.HPD"))
+  hi_col <- marg_first_present(df, c("asymp.UCL", "upper.CL", "UCL", "upper.HPD"))
+  se_col <- if ("SE" %in% names(df)) "SE" else NA_character_
+
+  estimate  <- as.numeric(df[[est_col]])
+  std_error <- if (!is.na(se_col)) as.numeric(df[[se_col]]) else rep(NA_real_, nrow(df))
+  lo <- if (!is.na(lo_col)) as.numeric(df[[lo_col]]) else rep(NA_real_, nrow(df))
+  hi <- if (!is.na(hi_col)) as.numeric(df[[hi_col]]) else rep(NA_real_, nrow(df))
+
+  null_val <- if (effect_type %in% c("ratio", "odds_ratio")) 1 else 0
+  excludes_null <- !is.na(lo) & !is.na(hi) &
+    ((lo > null_val & hi > null_val) | (lo < null_val & hi < null_val))
+
+  contrast_lab <- if ("contrast" %in% names(df)) {
+    as.character(df$contrast)
+  } else rep(NA_character_, nrow(df))
+
+  out <- tibble::tibble(contrast = contrast_lab)
+  for (v in within) {
+    if (v %in% names(df)) out[[v]] <- df[[v]]
+  }
+  out$level_combo   <- if (length(within) > 0L) marg_level_combo(df, within) else rep("", nrow(df))
+  out$estimate      <- estimate
+  out$std_error     <- std_error
+  out$confint_low   <- lo
+  out$confint_high  <- hi
+  out$excludes_zero <- excludes_null   # name kept for column parity; null per effect_type
+  out$ci_method     <- rep(ci_method, nrow(out))
+  out$scale         <- rep(scale, nrow(out))
+  out$method        <- rep(method, nrow(out))
+  out$adjust        <- rep(adjust, nrow(out))
+  out$effect_type   <- rep(effect_type, nrow(out))
+  class(out) <- c("symbolizer_group_contrasts", "tbl_df", "tbl", "data.frame")
+  out
+}
+
+#' @export
+print.symbolizer_group_contrasts <- function(x, ...) {
+  method <- if ("method" %in% names(x) && nrow(x) >= 1L) x$method[[1L]] else "pairwise"
+  cli::cli_h2("Group contrasts ({method})")
+  marg_print_contrast_rows(x)
+  invisible(x)
+}
+
+marg_print_contrast_rows <- function(x) {
+  if (nrow(x) == 0L) {
+    cli::cli_text("{.emph (no rows)}")
+    return(invisible(x))
+  }
+  fmt <- function(v) formatC(v, digits = 3L, format = "fg", flag = "#")
+  eff <- if ("effect_type" %in% names(x)) x$effect_type[[1L]] else "difference"
+  for (i in seq_len(nrow(x))) {
+    lab <- x$contrast[[i]]
+    within_lab <- if ("level_combo" %in% names(x) && nzchar(x$level_combo[[i]])) {
+      paste0(" @ ", x$level_combo[[i]])
+    } else ""
+    est <- fmt(x$estimate[[i]])
+    lo  <- x$confint_low[[i]]
+    hi  <- x$confint_high[[i]]
+    ci_str <- if (!is.na(lo) && !is.na(hi)) paste0(" (", fmt(lo), ", ", fmt(hi), ")") else ""
+    marker <- if (isTRUE(x$excludes_zero[[i]])) " *" else ""
+    cli::cli_text("{.emph {lab}{within_lab}}  estimate = {.val {est}}{ci_str}{marker}")
+  }
+  scales <- unique(x$scale[!is.na(x$scale)])
+  cims   <- unique(x$ci_method[!is.na(x$ci_method)])
+  adj    <- if ("adjust" %in% names(x)) unique(x$adjust)[[1L]] else "none"
+  eff_note <- if (eff %in% c("ratio", "odds_ratio")) {
+    sprintf("Values are %s; the null is 1, not 0. ",
+            if (identical(eff, "odds_ratio")) "odds ratios" else "ratios")
+  } else ""
+  multi_note <- if (identical(adj, "none") && nrow(x) > 1L) {
+    "Intervals are per-contrast, not family-wise; pass adjust = \"tukey\" for simultaneous bands. "
+  } else ""
+  scale_note <- if (length(scales) == 1L) sprintf("Scale: %s. ", scales) else ""
+  ci_note    <- if (length(cims) == 1L) sprintf("CI method: %s. ", cims) else ""
+  cli::cli_text(
+    "{.emph {eff_note}{multi_note}{scale_note}{ci_note}Adjustment: {adj}. Rows marked {.code *} have a 95% interval that excludes the null.}"
+  )
+}

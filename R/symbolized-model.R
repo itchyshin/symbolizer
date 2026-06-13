@@ -19,6 +19,10 @@
 #' @param loadings A tibble of latent-factor loadings (rows: one per
 #'   `(submodel, trait, axis)` entry of a loading matrix) or `NULL`. Populated
 #'   by extractors for reduced-rank latent-variable models such as gllvmTMB.
+#' @param factor_coding A tibble (one row per factor predictor) recording each
+#'   factor's `levels`, `reference_level`, `contrast_type`, `n_dummies`, and
+#'   `is_default_treatment`, or `NULL`. Populated during extraction by
+#'   `build_factor_coding()`.
 #' @param symbol_dictionary A tibble of `(symbol, variable, units, role, description)`.
 #' @param assumptions A tibble of stated/implied assumptions.
 #' @param components A tibble: one row per renderable block.
@@ -46,6 +50,7 @@ new_symbolized_model <- function(
   variance_components = NULL,
   covariance_components = NULL,
   loadings = NULL,
+  factor_coding = NULL,
   symbol_dictionary,
   assumptions,
   components,
@@ -76,6 +81,12 @@ new_symbolized_model <- function(
   # formulas itself).
   submodels <- add_submodel_predictor_flag(submodels)
 
+  # Detect-and-warn for non-default factor coding. Computed centrally from the
+  # `factor_coding` field so every extractor gets the check without a per-class
+  # trigger; merged into the registry surfaced by `warning_table()`.
+  warnings_registry <- merge_warnings(warnings_registry,
+                                      coding_warnings(factor_coding))
+
   obj <- list(
     model = model,
     index = index,
@@ -88,6 +99,7 @@ new_symbolized_model <- function(
     variance_components = variance_components,
     covariance_components = covariance_components,
     loadings = loadings,
+    factor_coding = factor_coding,
     symbol_dictionary = symbol_dictionary,
     assumptions = assumptions,
     components = components,
@@ -126,7 +138,7 @@ validate_symbolized_model <- function(x) {
   )
   optional_tibble <- c("random_effects", "variance_components",
                        "covariance_components", "loadings",
-                       "warnings_registry")
+                       "factor_coding", "warnings_registry")
   for (f in required_list) {
     if (!is.list(x[[f]]) || length(x[[f]]) == 0L) {
       cli::cli_abort(c(

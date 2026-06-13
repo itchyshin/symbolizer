@@ -268,6 +268,7 @@ symbolize.drmTMB <- function(fit, symbols = NULL, units = NULL,
     terms_tbl <- terms_tbl[!(terms_tbl$submodel == "mu" &
                              terms_tbl$role == "intercept"), , drop = FALSE]
   }
+  factor_cod   <- build_factor_coding(data, terms_tbl, fit)
   fixed_eff    <- drm_build_fixed_effects(terms_tbl, fit, ci_method = ci_method)
   re_tbl       <- drm_build_random_effects(re_per_entry)
   vc_tbl       <- drm_build_variance_components(re_per_entry, fit$sdpars)
@@ -379,6 +380,7 @@ symbolize.drmTMB <- function(fit, symbols = NULL, units = NULL,
     random_effects      = re_tbl,
     variance_components = vc_tbl,
     covariance_components = cov_tbl,
+    factor_coding       = factor_cod,
     symbol_dictionary   = symbol_dict,
     assumptions         = assumptions,
     components          = components,

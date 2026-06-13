@@ -1,0 +1,13 @@
+template_kind,contrast_type,prose
+factor_overview,treatment,"`{variable}` has {k} levels ({levels}). R uses {reference_level} as the baseline and adds {n_dummy} indicator column(s); each coefficient is the difference from {reference_level}, not that group's own mean."
+factor_overview,cell_means,"`{variable}` has {k} levels ({levels}). With no intercept it is entered as cell means: each coefficient is that level's expected response directly."
+factor_overview,sum,"`{variable}` has {k} levels ({levels}) under sum-to-zero contrasts. Coefficients are deviations from the grand mean and there is no single reference level; use group_means() for the group-by-group picture."
+factor_overview,helmert,"`{variable}` has {k} levels ({levels}) under Helmert contrasts. Each coefficient compares a level to the mean of the earlier levels; there is no single reference level."
+factor_overview,poly,"`{variable}` has {k} ordered levels ({levels}) under polynomial contrasts. Coefficients are linear, quadratic and higher-order trends, not level-to-level differences."
+factor_overview,custom,"`{variable}` has {k} levels ({levels}) under a custom contrast matrix. Read each coefficient against its contrast column, and use group_means() for the group means."
+factor_overview,any,"`{variable}` has {k} levels ({levels})."
+interaction_overview,cont_factor,"The slope of {cont} changes across levels of {fac}. The coefficient table reports differences in slope from the reference group; the per-group slopes below give each group's actual slope."
+interaction_overview,factor_factor,"The effect of {fac_a} depends on {fac_b} (a difference of differences). The cells below give each combination's expected response directly, so you do not have to add coefficients by hand."
+interaction_overview,cont_cont,"The slope of {cont_a} changes with {cont_b}. Use group_slopes(at = ...) to read the slope at chosen values of {cont_b}."
+interaction_overview,smooth_by_factor,"The smooth effect of {cont} has a separate shape for each level of {fac} (a factor-by smooth, s({cont}, by = {fac})). These are curves, not single slopes, so they are not summarised by one coefficient -- compare the shapes with plot(fit) (or mgcv's plotting), and read a local slope at a chosen {cont} value with group_slopes()."
+no_factors_message,any,"This model has no factor predictors, so there is no dummy (contrast) coding to explain. Continuous predictors are read directly from their coefficients."
