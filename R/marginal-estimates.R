@@ -146,13 +146,14 @@ group_means.symbolized_model <- function(x, by = NULL,
 #'   * A character vector of factor names: stratify by those factors' levels.
 #'   * A named list (e.g. `list(z = c(-1, 0, 1))`): for continuous-by-
 #'     continuous interactions, get the slope at those values of `z`.
-#' @param scale One of `"response"` (default) or `"link"`. For
-#'   identity-link families the two are equivalent. For other families
-#'   the slope is reported on the requested scale: `"link"` gives the
-#'   linear-predictor slope (which is what the coefficient table shows),
-#'   `"response"` gives the slope after back-transformation. Note that
-#'   for non-identity links the response-scale slope depends on the
-#'   level of the predictor.
+#' @param scale One of `"response"` (default) or `"link"`. A *slope* is the
+#'   derivative of the linear predictor with respect to the continuous
+#'   predictor, which [`emmeans::emtrends()`] reports on the link scale
+#'   regardless of `scale` -- so for `group_slopes()` the two scales coincide
+#'   (unlike [`group_means()`], where the response scale back-transforms). The
+#'   argument is accepted and recorded on the `scale` column for consistency
+#'   with the rest of the family; to read an effect on the response scale,
+#'   compare group means with [`group_means()`] instead.
 #' @param ci_method Confidence-interval method. Defaults to
 #'   `x$metadata$ci_method`. See [group_means()] for details.
 #' @param ... Reserved for future use.

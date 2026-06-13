@@ -40,6 +40,17 @@ test_that("Confidence-Eye rows carry a region, hollow point, and null line", {
   expect_match(html, "class=\"fv-eye\"")
 })
 
+test_that("a continuous-by-continuous interaction shows no spurious 'install emmeans' note", {
+  skip_if_not_installed("emmeans")
+  set.seed(9)
+  d <- data.frame(y = rnorm(60), a = rnorm(60), b = rnorm(60))
+  html <- as_html_factor_views(symbolize(lm(y ~ a * b, data = d)),
+                               file = tempfile(fileext = ".html"))
+  # cont_cont has no cells/slopes by design; with emmeans installed there
+  # must be no "(install emmeans ...)" note.
+  expect_false(grepl("install emmeans", html))
+})
+
 test_that("no-factor models render a graceful coding message, not an error", {
   sym <- symbolize(lm(mpg ~ wt, data = mtcars))
   html <- as_html_factor_views(sym, file = tempfile(fileext = ".html"))

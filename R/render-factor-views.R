@@ -227,11 +227,16 @@ fv_interactions_panel <- function(x) {
   }
   blocks <- vapply(pieces, function(it) {
     tbl <- it$cells %||% it$slopes
-    label_col <- if (!is.null(it$slopes)) "level_combo" else "level_combo"
-    body <- if (is.null(tbl)) {
+    # cont_cont and smooth_by_factor have no cells/slopes table by design;
+    # only factor_factor / cont_factor would, so only those show the
+    # install-emmeans note (and only when emmeans is actually missing).
+    has_table_type <- it$type %in% c("factor_factor", "cont_factor")
+    body <- if (!is.null(tbl)) {
+      fv_eye_rows(tbl, "level_combo", null_val = 0)
+    } else if (has_table_type && !requireNamespace("emmeans", quietly = TRUE)) {
       "<p class=\"sym-caption\">(install emmeans for the cells / slopes)</p>"
     } else {
-      fv_eye_rows(tbl, label_col, null_val = 0)
+      ""
     }
     paste0("<div class=\"fv-block\"><div class=\"fv-block-h\">", fv_esc(it$term),
            "</div><p class=\"fv-prose\">", fv_esc(it$overview), "</p>", body,

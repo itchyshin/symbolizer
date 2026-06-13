@@ -110,7 +110,11 @@ factor_template_prose <- function(kind, contrast_type, slots) {
   if (nrow(hit) == 0L) return("")
   prose <- hit$prose[[1L]]
   for (nm in names(slots)) {
-    prose <- gsub(paste0("\\{", nm, "\\}"), slots[[nm]], prose)
+    # fixed = TRUE: both the {slot} pattern and the value are literal, so a
+    # level label containing backslashes or regex metacharacters is not
+    # mis-interpreted as a replacement backreference.
+    prose <- gsub(paste0("{", nm, "}"), as.character(slots[[nm]]), prose,
+                  fixed = TRUE)
   }
   prose
 }
@@ -161,6 +165,26 @@ factor_interaction_pieces <- function(sym, factor_vars) {
     pieces <- strsplit(term, ":", fixed = TRUE)[[1L]]
     is_f   <- pieces %in% factor_vars
     n_f    <- sum(is_f)
+    if (length(pieces) > 2L) {
+      # Higher-order (3-way+) interaction: name every term rather than make a
+      # two-variable claim that would mismatch the full cell / slope breakdown.
+      out[[length(out) + 1L]] <- list(
+        term = term,
+        type = if (n_f == length(pieces)) "factor_factor"
+               else if (n_f == 0L) "cont_cont" else "cont_factor",
+        overview = factor_template_prose(
+          "interaction_overview", "higher_order",
+          list(n_way = length(pieces), terms = paste(pieces, collapse = ", "))),
+        cells = if (n_f >= 2L) {
+          tryCatch(group_means(sym, by = pieces[is_f]), error = function(e) NULL)
+        } else NULL,
+        slopes = if (n_f >= 1L && n_f < length(pieces)) {
+          tryCatch(group_slopes(sym, continuous = pieces[!is_f][[1L]]),
+                   error = function(e) NULL)
+        } else NULL
+      )
+      next
+    }
     if (n_f == 0L) {
       out[[length(out) + 1L]] <- list(
         term = term, type = "cont_cont",

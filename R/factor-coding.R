@@ -69,6 +69,20 @@ factor_coding_spec <- function(v, data, terms_tbl, fit = NULL) {
   lev <- levels(f)
   k   <- length(lev)
 
+  # Factor that appears ONLY inside interaction terms (no main-effect
+  # factor_contrast row): R expands it there with no dropped baseline, so
+  # there is no single reference level. Reporting a treatment reference would
+  # be false; label it honestly and leave the reference NA.
+  has_main <- any(terms_tbl$role == "factor_contrast" &
+                    !is.na(terms_tbl$variable) & terms_tbl$variable == v)
+  if (!has_main) {
+    return(list(
+      variable = v, levels = lev, reference_level = NA_character_,
+      contrast_type = "interaction_only", n_dummies = k,
+      is_default_treatment = FALSE
+    ))
+  }
+
   # Intercept-less submodel -> the factor's columns are cell means, not
   # contrasts, regardless of the contrasts attribute.
   if (factor_is_cell_means(v, terms_tbl)) {

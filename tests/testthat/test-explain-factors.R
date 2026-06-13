@@ -75,6 +75,19 @@ test_that("a factor-by-factor interaction yields inline cells", {
   expect_s3_class(ff[[1L]]$cells, "symbolizer_group_means")
 })
 
+test_that("a three-way interaction overview names all participating terms", {
+  skip_if_not_installed("emmeans")
+  dm <- transform(mtcars, gear = factor(gear), cyl = factor(cyl), am = factor(am))
+  ex <- explain_factors(symbolize(lm(mpg ~ gear * cyl * am, data = dm)))
+  it <- Filter(function(z) z$term == "gear:cyl:am", ex$interactions)
+  expect_true(length(it) == 1L)
+  ov <- it[[1L]]$overview
+  expect_match(ov, "gear")
+  expect_match(ov, "cyl")
+  expect_match(ov, "am")          # the third term must not be dropped
+  expect_match(ov, "3-way")
+})
+
 test_that("the no-factor path returns a message, not an error", {
   e <- explain_factors(lm(mpg ~ wt, data = mtcars))
   expect_false(e$has_factors)
