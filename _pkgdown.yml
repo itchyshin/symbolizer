@@ -130,7 +130,7 @@ reference:
       - explain_factors
       - as_html_factor_views
   - title: "Marginal estimates"
-    desc: "Per-group means, per-group slopes, and pairwise / vs-reference contrasts via emmeans — confidence bands, no p-values."
+    desc: "The group_* family — per-group means, per-group slopes, and pairwise / vs-reference contrasts via emmeans. Confidence bands, no p-values."
     contents:
       - group_means
       - group_slopes

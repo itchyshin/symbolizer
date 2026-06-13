@@ -23,24 +23,31 @@ units, e.g. \code{c(body_mass = "g", temperature = "C")}.}
 \value{
 A \code{symbolized_explanation} object with elements \code{model} (the
 underlying \code{symbolized_model}), \code{equations}, \code{symbols}, \code{assumptions},
-\code{bridge}, \code{interpretation}, \code{variance_components} (NULL when the model
-has no random effects), \code{notation_bridge}.
+\code{formula_bridge} (and its deprecated alias \code{bridge}), \code{interpretation},
+\code{factor_coding}, \code{variance_components} (NULL when the model has no random
+effects), \code{notation_bridge}.
 }
 \description{
-\code{explain()} is the recommended entry point for first-time users. It runs
-\code{\link[=symbolize]{symbolize()}} internally and returns a \code{symbolized_explanation} that
+\code{explain()} is the recommended entry point for \strong{understanding} a fit. It
+runs \code{\link[=symbolize]{symbolize()}} internally and returns a \code{symbolized_explanation} that
 bundles the original \code{\link[=new_symbolized_model]{symbolized_model}} together
-with the six reader-facing pieces already rendered:
+with the reader-facing pieces already rendered:
 \itemize{
 \item \code{equations}        -- the \code{\link[=equations]{equations()}} tibble (both notations)
 \item \code{symbols}          -- the \code{\link[=symbol_table]{symbol_table()}} result
 \item \code{assumptions}      -- the \code{\link[=assumption_table]{assumption_table()}} result
-\item \code{bridge}           -- the \code{\link[=formula_bridge]{formula_bridge()}} result
+\item \code{formula_bridge}   -- the \code{\link[=formula_bridge]{formula_bridge()}} result (also available as
+the deprecated alias \code{bridge})
 \item \code{interpretation}   -- the \code{\link[=parameter_interpretation]{parameter_interpretation()}} result
+\item \code{factor_coding}    -- a one-line dummy-coding overview per factor
 \item \code{variance_components} -- where the variation lives (NULL when the model
 has no random effects)
 \item \code{notation_bridge}  -- the \code{\link[=notation_bridge]{notation_bridge()}} result
 }
+
+Use \code{explain()} to \emph{understand} a model; use \code{\link[=model_card]{model_card()}} when you also
+want to \emph{act} on it -- it adds extraction calls, recommended plots, and
+marginal means / slopes / contrasts on top of the same pieces.
 
 Print the result at the console for a walkthrough led by a plain-English
 paragraph, or knit it inside a Quarto / R Markdown document for a
@@ -51,4 +58,7 @@ walkthrough without re-running \code{\link[=symbolize]{symbolize()}}.
 }
 \examples{
 # explain(symbolize(lm(mpg ~ wt, data = mtcars)))
+}
+\seealso{
+\code{\link[=model_card]{model_card()}} for the act-on-it bundle.
 }

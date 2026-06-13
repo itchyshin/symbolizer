@@ -11,19 +11,25 @@
 #' One-call explainer for a fitted model
 #'
 #' @description
-#' `explain()` is the recommended entry point for first-time users. It runs
-#' [`symbolize()`] internally and returns a `symbolized_explanation` that
+#' `explain()` is the recommended entry point for **understanding** a fit. It
+#' runs [`symbolize()`] internally and returns a `symbolized_explanation` that
 #' bundles the original [`symbolized_model`][new_symbolized_model] together
-#' with the six reader-facing pieces already rendered:
+#' with the reader-facing pieces already rendered:
 #'
 #' * `equations`        -- the [`equations()`] tibble (both notations)
 #' * `symbols`          -- the [`symbol_table()`] result
 #' * `assumptions`      -- the [`assumption_table()`] result
-#' * `bridge`           -- the [`formula_bridge()`] result
+#' * `formula_bridge`   -- the [`formula_bridge()`] result (also available as
+#'   the deprecated alias `bridge`)
 #' * `interpretation`   -- the [`parameter_interpretation()`] result
+#' * `factor_coding`    -- a one-line dummy-coding overview per factor
 #' * `variance_components` -- where the variation lives (NULL when the model
 #'   has no random effects)
 #' * `notation_bridge`  -- the [`notation_bridge()`] result
+#'
+#' Use `explain()` to *understand* a model; use [`model_card()`] when you also
+#' want to *act* on it -- it adds extraction calls, recommended plots, and
+#' marginal means / slopes / contrasts on top of the same pieces.
 #'
 #' Print the result at the console for a walkthrough led by a plain-English
 #' paragraph, or knit it inside a Quarto / R Markdown document for a
@@ -36,8 +42,10 @@
 #'
 #' @return A `symbolized_explanation` object with elements `model` (the
 #'   underlying `symbolized_model`), `equations`, `symbols`, `assumptions`,
-#'   `bridge`, `interpretation`, `variance_components` (NULL when the model
-#'   has no random effects), `notation_bridge`.
+#'   `formula_bridge` (and its deprecated alias `bridge`), `interpretation`,
+#'   `factor_coding`, `variance_components` (NULL when the model has no random
+#'   effects), `notation_bridge`.
+#' @seealso [`model_card()`] for the act-on-it bundle.
 #' @examples
 #' # explain(symbolize(lm(mpg ~ wt, data = mtcars)))
 #' @export
@@ -54,18 +62,23 @@ new_symbolized_explanation <- function(sym) {
   if (!inherits(sym, "symbolized_model")) {
     cli::cli_abort("{.arg sym} must be a {.cls symbolized_model}.")
   }
+  core <- build_core_pieces(sym)
   out <- list(
     model           = sym,
-    equations       = equations(sym, notation = "both"),
-    symbols         = symbol_table(sym, notation = "both"),
-    assumptions     = assumption_table(sym),
-    bridge          = formula_bridge(sym, notation = "both"),
-    interpretation  = parameter_interpretation(sym, scale = "all"),
-    factor_coding   = factor_overview_lines(sym),
+    equations       = core$equations,
+    symbols         = core$symbols,
+    assumptions     = core$assumptions,
+    formula_bridge  = core$formula_bridge,
+    # `bridge` is a back-compat alias for the formula bridge. Deprecated in
+    # favour of the explicit `formula_bridge` / `notation_bridge` names, which
+    # mean the same thing in both explain() and model_card() output.
+    bridge          = core$formula_bridge,
+    interpretation  = core$interpretation,
+    factor_coding   = core$factor_coding,
     # v0.22.x: surface where the variation lives. Previously dropped even
     # though every mixed-model extractor computes the variance components.
-    variance_components = sym$variance_components,
-    notation_bridge = notation_bridge(sym)
+    variance_components = core$variance_components,
+    notation_bridge = core$notation_bridge
   )
   class(out) <- c("symbolized_explanation", "list")
   out
@@ -91,7 +104,7 @@ print.symbolized_explanation <- function(x, ...) {
   print(x$assumptions)
 
   cli::cli_h2("R syntax to mathematics")
-  print(x$bridge)
+  print(x$formula_bridge)
 
   cli::cli_h2("What each coefficient means")
   print(x$interpretation)
@@ -124,7 +137,7 @@ knit_print.symbolized_explanation <- function(x, ...) {
     list(title = "Equations", obj = x$equations),
     list(title = "Symbols", obj = x$symbols),
     list(title = "What's assumed", obj = x$assumptions),
-    list(title = "R syntax to mathematics", obj = x$bridge),
+    list(title = "R syntax to mathematics", obj = x$formula_bridge),
     list(title = "What each coefficient means", obj = x$interpretation),
     if (!is.null(x$variance_components) && nrow(x$variance_components) > 0L)
       list(title = "How the variation splits", obj = x$variance_components),

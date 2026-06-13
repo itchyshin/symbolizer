@@ -14,23 +14,26 @@ model_card(x, ...)
 }
 \value{
 A \code{symbolizer_model_card} (a list) with elements:
-\code{meta}, \code{equation}, \code{symbols}, \code{assumptions}, \code{bridge},
-\code{formula_bridge}, \code{interpretation}, \code{variance_components} (NULL when
-the model has no random effects), \code{warnings}, \code{extraction_calls},
-\code{recommended_plots}, \code{marginal_means} (NULL when the model has no
-factors), \code{marginal_slopes} (NULL when no continuous-by-* interaction
-is present).
+\code{meta}, \code{equation}, \code{symbols}, \code{assumptions}, \code{notation_bridge} (and its
+deprecated alias \code{bridge}), \code{formula_bridge}, \code{interpretation},
+\code{factor_coding}, \code{variance_components} (NULL when the model has no random
+effects), \code{warnings}, \code{extraction_calls}, \code{recommended_plots},
+\code{marginal_means} (NULL when the model has no factors), \code{marginal_slopes}
+(NULL when no continuous-by-* interaction is present), and
+\code{marginal_contrasts} (NULL when the model has no factor).
 }
 \description{
-\code{model_card()} returns the entire teachable package for a symbolized
-model in a single S3 object: equation, symbol dictionary, assumptions,
-notation bridge, formula bridge, per-coefficient interpretations,
-extraction calls (R code to pull out blocks of the fit), and
-recommended plots (one-line text recipes).
+\code{model_card()} is the entry point for \strong{acting on} a fit. It returns
+everything \code{\link[=explain]{explain()}} shows -- equation, symbol dictionary, assumptions,
+notation and formula bridges, per-coefficient interpretations, factor-coding
+overview, variance components -- and adds the act-on-it layer: extraction
+calls (R code to pull out blocks of the fit), recommended plots (one-line
+text recipes), and the marginal estimates (\code{\link[=group_means]{group_means()}} /
+\code{\link[=group_slopes]{group_slopes()}} / \code{\link[=group_contrasts]{group_contrasts()}}).
 
-Use \code{\link[=explain]{explain()}} when you want the first-time-user walkthrough of the
-symbols and equations. Use \code{model_card()} when you also want a quick
-reference of \emph{what to extract from the fit and what to plot next}.
+Use \code{\link[=explain]{explain()}} when you only want to \emph{understand} the model; use
+\code{model_card()} when you also want a quick reference of \emph{what to extract,
+what to plot, and how the groups compare}.
 
 The bundle is a plain list; print it at the console for a structured
 walkthrough, or knit it inside a Quarto / R Markdown document for a
@@ -38,4 +41,7 @@ heading-and-table section per piece.
 }
 \examples{
 # model_card(symbolize(lm(mpg ~ wt, data = mtcars)))
+}
+\seealso{
+\code{\link[=explain]{explain()}} for the understand-only bundle.
 }

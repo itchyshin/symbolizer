@@ -261,6 +261,7 @@ print.symbolized_model <- function(x, ...) {
 #'   the rendered pieces). Called for its printed walkthrough.
 #' @export
 summary.symbolized_model <- function(object, ...) {
+  fbridge <- formula_bridge(object, notation = "both")
   out <- list(
     model           = object$model,
     submodels       = object$submodels,
@@ -268,7 +269,10 @@ summary.symbolized_model <- function(object, ...) {
     equations       = equations(object, notation = "both"),
     symbols         = symbol_table(object, notation = "both"),
     assumptions     = assumption_table(object),
-    bridge          = formula_bridge(object, notation = "both"),
+    formula_bridge  = fbridge,
+    # `bridge` is a deprecated alias for `formula_bridge` (consistent with
+    # explain() output); use the explicit name.
+    bridge          = fbridge,
     interpretation  = parameter_interpretation(object, scale = "all"),
     notation_bridge = notation_bridge(object)
   )

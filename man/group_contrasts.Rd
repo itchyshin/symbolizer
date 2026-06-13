@@ -77,4 +77,9 @@ if (requireNamespace("emmeans", quietly = TRUE)) {
 }
 \seealso{
 \code{\link[=group_means]{group_means()}}, \code{\link[=group_slopes]{group_slopes()}}
+
+Other marginal estimates:
+\code{\link[=group_means]{group_means()}},
+\code{\link[=group_slopes]{group_slopes()}}
 }
+\concept{marginal estimates}
