@@ -379,7 +379,7 @@ to the actual numeric arrays — with both the
 as_html_three_views(sym_re)
 ```
 
-[Skip three-views widget](#sym-sym-1781100116-end)
+[Skip three-views widget](#sym-sym-1781369744-end)
 
 ▸1. Index
 
@@ -872,8 +872,8 @@ methods_text(sym)
 ```
 
 We fit a Gaussian location-scale model to 120 observations of body_mass
-(units: g) using the drmTMB package (version 0.1.3.9000) in R. The mean
-of body_mass was modelled as a linear function of `temperature`. The
+(units: g) using the drmTMB package (version 0.1.4) in R. The mean of
+body_mass was modelled as a linear function of `temperature`. The
 residual standard deviation was modelled on the log scale as a function
 of `temperature`. Parameters were estimated by maximum likelihood via
 the Template Model Builder framework. We report 95% Wald confidence
@@ -882,8 +882,8 @@ intervals on the fixed-effect coefficients.
 *Reminders:*
 
 - This is a draft. Confirm every claim against your fit before pasting.
-- Package version `0.1.3.9000` was read from the local install; verify
-  it matches what you actually fit with.
+- Package version `0.1.4` was read from the local install; verify it
+  matches what you actually fit with.
 
 Two things to notice in the output:
 
@@ -905,8 +905,8 @@ methods_text(sym_rich)
 ```
 
 We fit a Gaussian location-scale model to 200 observations of body_mass
-(units: g) using the drmTMB package (version 0.1.3.9000) in R. The mean
-of body_mass was modelled as a linear function of `temperature`, `food`,
+(units: g) using the drmTMB package (version 0.1.4) in R. The mean of
+body_mass was modelled as a linear function of `temperature`, `food`,
 and `sex`. The residual standard deviation was modelled on the log scale
 as a function of `temperature` and `sex`. A random intercept for `site`
 was included in the model. Parameters were estimated by maximum
@@ -916,8 +916,8 @@ confidence intervals on the fixed-effect coefficients.
 *Reminders:*
 
 - This is a draft. Confirm every claim against your fit before pasting.
-- Package version `0.1.3.9000` was read from the local install; verify
-  it matches what you actually fit with.
+- Package version `0.1.4` was read from the local install; verify it
+  matches what you actually fit with.
 - Random-effect structure described here; if you used a more complex RE
   structure (random slopes, nested, crossed), reword that sentence.
 
@@ -930,8 +930,8 @@ methods_text(sym_biv)
 
 We fit a bivariate Gaussian location-scale-correlation model to 80
 paired observations of growth and repro using the drmTMB package
-(version 0.1.3.9000) in R. The means of the two responses were modelled
-as linear functions of `x1` and `x2` respectively. The residual standard
+(version 0.1.4) in R. The means of the two responses were modelled as
+linear functions of `x1` and `x2` respectively. The residual standard
 deviations of the two responses were modelled on the log scale, with
 both intercept-only. The residual correlation between the two responses
 was modelled with an intercept only on the Fisher-z linear predictor.
@@ -942,8 +942,8 @@ fixed-effect coefficients.
 *Reminders:*
 
 - This is a draft. Confirm every claim against your fit before pasting.
-- Package version `0.1.3.9000` was read from the local install; verify
-  it matches what you actually fit with.
+- Package version `0.1.4` was read from the local install; verify it
+  matches what you actually fit with.
 
 The biv_gaussian template carries dedicated slots for `mu1`, `mu2`,
 `sigma1`, `sigma2`, and `rho12` so the paragraph names both responses

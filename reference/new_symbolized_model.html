@@ -62,6 +62,7 @@ to wrap the fields they have populated.</p>
 <span>  variance_components <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  covariance_components <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  loadings <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  factor_coding <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">symbol_dictionary</span>,</span>
 <span>  <span class="va">assumptions</span>,</span>
 <span>  <span class="va">components</span>,</span>
@@ -122,6 +123,13 @@ to wrap the fields they have populated.</p>
 <dd><p>A tibble of latent-factor loadings (rows: one per
 <code>(submodel, trait, axis)</code> entry of a loading matrix) or <code>NULL</code>. Populated
 by extractors for reduced-rank latent-variable models such as gllvmTMB.</p></dd>
+
+
+<dt id="arg-factor-coding">factor_coding<a class="anchor" aria-label="anchor" href="#arg-factor-coding"></a></dt>
+<dd><p>A tibble (one row per factor predictor) recording each
+factor's <code>levels</code>, <code>reference_level</code>, <code>contrast_type</code>, <code>n_dummies</code>, and
+<code>is_default_treatment</code>, or <code>NULL</code>. Populated during extraction by
+<code>build_factor_coding()</code>.</p></dd>
 
 
 <dt id="arg-symbol-dictionary">symbol_dictionary<a class="anchor" aria-label="anchor" href="#arg-symbol-dictionary"></a></dt>

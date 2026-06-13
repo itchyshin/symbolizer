@@ -565,15 +565,27 @@ scales.
 - [`parameter_interpretation()`](https://itchyshin.github.io/symbolizer/reference/parameter_interpretation.md)
   : Per-parameter interpretations for a symbolized model
 
+## Factors & dummy coding
+
+Demystify treatment / contrast coding for multi-level factors and
+interactions — in one call, or an interactive widget.
+
+- [`explain_factors()`](https://itchyshin.github.io/symbolizer/reference/explain_factors.md)
+  : Explain a model's factors and dummy coding in one call
+- [`as_html_factor_views()`](https://itchyshin.github.io/symbolizer/reference/as_html_factor_views.md)
+  : Interactive HTML widget for a model's factors and dummy coding
+
 ## Marginal estimates
 
-Per-group means and per-group slopes via emmeans, alongside the contrast
-rows.
+Per-group means, per-group slopes, and pairwise / vs-reference contrasts
+via emmeans — confidence bands, no p-values.
 
 - [`group_means()`](https://itchyshin.github.io/symbolizer/reference/group_means.md)
   : Per-group marginal means for a symbolized model
 - [`group_slopes()`](https://itchyshin.github.io/symbolizer/reference/group_slopes.md)
   : Per-group slopes for a continuous predictor
+- [`group_contrasts()`](https://itchyshin.github.io/symbolizer/reference/group_contrasts.md)
+  : Pairwise and reference contrasts between factor levels
 
 ## Variance components
 

@@ -21,6 +21,7 @@ new_symbolized_model(
   variance_components = NULL,
   covariance_components = NULL,
   loadings = NULL,
+  factor_coding = NULL,
   symbol_dictionary,
   assumptions,
   components,
@@ -83,6 +84,13 @@ new_symbolized_model(
   `(submodel, trait, axis)` entry of a loading matrix) or `NULL`.
   Populated by extractors for reduced-rank latent-variable models such
   as gllvmTMB.
+
+- factor_coding:
+
+  A tibble (one row per factor predictor) recording each factor's
+  `levels`, `reference_level`, `contrast_type`, `n_dummies`, and
+  `is_default_treatment`, or `NULL`. Populated during extraction by
+  `build_factor_coding()`.
 
 - symbol_dictionary:
 

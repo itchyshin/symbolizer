@@ -369,7 +369,7 @@ the `0`s and `1`s of the dummy column sit next to the continuous
 as_html_three_views(sym3)
 ```
 
-[Skip three-views widget](#sym-sym-1781100122-end)
+[Skip three-views widget](#sym-sym-1781369750-end)
 
 ▸1. Index
 
@@ -1204,6 +1204,158 @@ symbol_table(sym_p6_raw)
 **Rule of thumb.** *Use `poly(x, 2)` when you want orthogonal columns
 (uncorrelated polynomial terms); use `I(x^2)` when you want a literal
 quadratic interpretation.*
+
+## One call: `explain_factors()`
+
+Steps 1–6 unpack the coding by hand. In day-to-day use you can get the
+whole story in a single call.
+[`explain_factors()`](https://itchyshin.github.io/symbolizer/reference/explain_factors.md)
+states each factor’s coding scheme in plain language, then shows the
+per-group means and the pairwise comparisons; for interactions it prints
+the cells or per-group slopes directly, so you never have to add
+coefficients by hand.
+
+``` r
+
+explain_factors(sym2)
+```
+
+## Factors
+
+### site
+
+`site` has 4 levels (A, B, C, D). R uses A as the baseline and adds 3
+indicator column(s); each coefficient is the difference from A, not that
+group’s own mean.
+
+**Group means**
+
+| level_combo | site | estimate | std_error | confint_low | confint_high | excludes_zero | ci_method | scale |
+|:---|:---|---:|---:|---:|---:|:---|:---|:---|
+| site=A | A | 30.47159 | 0.4640327 | 29.56211 | 31.38108 | TRUE | wald | response |
+| site=B | B | 32.37782 | 0.6164314 | 31.16964 | 33.58601 | TRUE | wald | response |
+| site=C | C | 33.87874 | 0.4018641 | 33.09110 | 34.66638 | TRUE | wald | response |
+| site=D | D | 26.79645 | 0.4424378 | 25.92929 | 27.66361 | TRUE | wald | response |
+
+**Pairwise contrasts**
+
+| contrast | level_combo | estimate | std_error | confint_low | confint_high | excludes_zero | ci_method | scale | method | adjust | effect_type |
+|:---|:---|---:|---:|---:|---:|:---|:---|:---|:---|:---|:---|
+| A - B |  | -1.906230 | 0.7715659 | -3.418472 | -0.3939889 | TRUE | wald | response | pairwise | none | difference |
+| A - C |  | -3.407147 | 0.6138575 | -4.610285 | -2.2040082 | TRUE | wald | response | pairwise | none | difference |
+| A - D |  | 3.675143 | 0.6411533 | 2.418506 | 4.9317809 | TRUE | wald | response | pairwise | none | difference |
+| B - C |  | -1.500916 | 0.7358549 | -2.943166 | -0.0586675 | TRUE | wald | response | pairwise | none | difference |
+| B - D |  | 5.581374 | 0.7587746 | 4.094203 | 7.0685447 | TRUE | wald | response | pairwise | none | difference |
+| C - D |  | 7.082290 | 0.5977006 | 5.910819 | 8.2537620 | TRUE | wald | response | pairwise | none | difference |
+
+The pairwise question — *which sites differ from each **other**?*, not
+just each versus the reference — is answered by
+[`group_contrasts()`](https://itchyshin.github.io/symbolizer/reference/group_contrasts.md).
+It reports compatibility bands and never p-values; pass
+`adjust = "tukey"` for simultaneous (family-wise) intervals.
+
+``` r
+
+group_contrasts(sym2, by = "site")
+#> 
+#> ── Group contrasts (pairwise) ──
+#> 
+#> A - B estimate = "-1.91" (-3.42, -0.394) *
+#> A - C estimate = "-3.41" (-4.61, -2.20) *
+#> A - D estimate = "3.68" (2.42, 4.93) *
+#> B - C estimate = "-1.50" (-2.94, -0.0587) *
+#> B - D estimate = "5.58" (4.09, 7.07) *
+#> C - D estimate = "7.08" (5.91, 8.25) *
+#> Intervals are per-contrast, not family-wise; pass adjust = "tukey" for
+#> simultaneous bands. Scale: response. CI method: wald. Adjustment: none. Rows
+#> marked `*` have a 95% interval that excludes the null.
+```
+
+For a web-facing version, `as_html_factor_views(sym2)` renders the same
+story as a four-tab interactive widget — coding scheme, group means,
+pairwise, interactions — with Confidence-Eye uncertainty bands.
+
+``` r
+
+as_html_factor_views(sym2)
+```
+
+[Skip factor-views widget](#symfv-symfv-1781369753-end)
+
+▸1. Coding scheme
+
+▸2. Group means
+
+▸3. Pairwise
+
+▸4. Interactions
+
+How each categorical predictor is entered into the model.
+
+level ★ = reference (baseline)
+
+site
+
+A ★BCD
+
+treatment coding · 3 indicator columns
+
+`site` has 4 levels (A, B, C, D). R uses A as the baseline and adds 3
+indicator column(s); each coefficient is the difference from A, not that
+group’s own mean.
+
+Each group’s expected response, with a 95% compatibility interval.
+
+site
+
+site=A![](data:image/svg+xml;base64,PHN2ZyBjbGFzcz0iZnYtZXllIiB2aWV3Ym94PSIwIDAgMzQwIDMwIiBwcmVzZXJ2ZWFzcGVjdHJhdGlvPSJub25lIiByb2xlPSJpbWciPjxsaW5lIHgxPSIwIiB5MT0iMTUiIHgyPSIzNDAiIHkyPSIxNSIgY2xhc3M9ImZ2LWF4aXMiPjwvbGluZT48bGluZSB4MT0iMjMuNCIgeTE9IjMiIHgyPSIyMy40IiB5Mj0iMjciIGNsYXNzPSJmdi1udWxsIj48L2xpbmU+PHJlY3QgeD0iMjczLjQiIHk9IjkiIHdpZHRoPSIxNS40IiBoZWlnaHQ9IjEyIiByeD0iMyIgY2xhc3M9ImZ2LXJlZ2lvbiIgLz48Y2lyY2xlIGN4PSIyODEuMSIgY3k9IjE1IiByPSI0LjUiIGNsYXNzPSJmdi1wdCBmdi1wdC1zaWciPjwvY2lyY2xlPjwvc3ZnPg==)30.5
+(29.6, 31.4) ⋆
+
+site=B![](data:image/svg+xml;base64,PHN2ZyBjbGFzcz0iZnYtZXllIiB2aWV3Ym94PSIwIDAgMzQwIDMwIiBwcmVzZXJ2ZWFzcGVjdHJhdGlvPSJub25lIiByb2xlPSJpbWciPjxsaW5lIHgxPSIwIiB5MT0iMTUiIHgyPSIzNDAiIHkyPSIxNSIgY2xhc3M9ImZ2LWF4aXMiPjwvbGluZT48bGluZSB4MT0iMjMuNCIgeTE9IjMiIHgyPSIyMy40IiB5Mj0iMjciIGNsYXNzPSJmdi1udWxsIj48L2xpbmU+PHJlY3QgeD0iMjg3IiB5PSI5IiB3aWR0aD0iMjAuNCIgaGVpZ2h0PSIxMiIgcng9IjMiIGNsYXNzPSJmdi1yZWdpb24iIC8+PGNpcmNsZSBjeD0iMjk3LjIiIGN5PSIxNSIgcj0iNC41IiBjbGFzcz0iZnYtcHQgZnYtcHQtc2lnIj48L2NpcmNsZT48L3N2Zz4=)32.4
+(31.2, 33.6) ⋆
+
+site=C![](data:image/svg+xml;base64,PHN2ZyBjbGFzcz0iZnYtZXllIiB2aWV3Ym94PSIwIDAgMzQwIDMwIiBwcmVzZXJ2ZWFzcGVjdHJhdGlvPSJub25lIiByb2xlPSJpbWciPjxsaW5lIHgxPSIwIiB5MT0iMTUiIHgyPSIzNDAiIHkyPSIxNSIgY2xhc3M9ImZ2LWF4aXMiPjwvbGluZT48bGluZSB4MT0iMjMuNCIgeTE9IjMiIHgyPSIyMy40IiB5Mj0iMjciIGNsYXNzPSJmdi1udWxsIj48L2xpbmU+PHJlY3QgeD0iMzAzLjIiIHk9IjkiIHdpZHRoPSIxMy4zIiBoZWlnaHQ9IjEyIiByeD0iMyIgY2xhc3M9ImZ2LXJlZ2lvbiIgLz48Y2lyY2xlIGN4PSIzMDkuOSIgY3k9IjE1IiByPSI0LjUiIGNsYXNzPSJmdi1wdCBmdi1wdC1zaWciPjwvY2lyY2xlPjwvc3ZnPg==)33.9
+(33.1, 34.7) ⋆
+
+site=D![](data:image/svg+xml;base64,PHN2ZyBjbGFzcz0iZnYtZXllIiB2aWV3Ym94PSIwIDAgMzQwIDMwIiBwcmVzZXJ2ZWFzcGVjdHJhdGlvPSJub25lIiByb2xlPSJpbWciPjxsaW5lIHgxPSIwIiB5MT0iMTUiIHgyPSIzNDAiIHkyPSIxNSIgY2xhc3M9ImZ2LWF4aXMiPjwvbGluZT48bGluZSB4MT0iMjMuNCIgeTE9IjMiIHgyPSIyMy40IiB5Mj0iMjciIGNsYXNzPSJmdi1udWxsIj48L2xpbmU+PHJlY3QgeD0iMjQyLjciIHk9IjkiIHdpZHRoPSIxNC43IiBoZWlnaHQ9IjEyIiByeD0iMyIgY2xhc3M9ImZ2LXJlZ2lvbiIgLz48Y2lyY2xlIGN4PSIyNTAiIGN5PSIxNSIgcj0iNC41IiBjbGFzcz0iZnYtcHQgZnYtcHQtc2lnIj48L2NpcmNsZT48L3N2Zz4=)26.8
+(25.9, 27.7) ⋆
+
+scale: -2.77 to 37.4
+
+Which levels differ from each other. The dashed line is the null.
+
+site
+
+A -
+B![](data:image/svg+xml;base64,PHN2ZyBjbGFzcz0iZnYtZXllIiB2aWV3Ym94PSIwIDAgMzQwIDMwIiBwcmVzZXJ2ZWFzcGVjdHJhdGlvPSJub25lIiByb2xlPSJpbWciPjxsaW5lIHgxPSIwIiB5MT0iMTUiIHgyPSIzNDAiIHkyPSIxNSIgY2xhc3M9ImZ2LWF4aXMiPjwvbGluZT48bGluZSB4MT0iMTI4LjUiIHkxPSIzIiB4Mj0iMTI4LjUiIHkyPSIyNyIgY2xhc3M9ImZ2LW51bGwiPjwvbGluZT48cmVjdCB4PSI1MC42IiB5PSI5IiB3aWR0aD0iNjguOSIgaGVpZ2h0PSIxMiIgcng9IjMiIGNsYXNzPSJmdi1yZWdpb24iIC8+PGNpcmNsZSBjeD0iODUuMSIgY3k9IjE1IiByPSI0LjUiIGNsYXNzPSJmdi1wdCBmdi1wdC1zaWciPjwvY2lyY2xlPjwvc3ZnPg==)-1.91
+(-3.42, -0.394) ⋆
+
+A -
+C![](data:image/svg+xml;base64,PHN2ZyBjbGFzcz0iZnYtZXllIiB2aWV3Ym94PSIwIDAgMzQwIDMwIiBwcmVzZXJ2ZWFzcGVjdHJhdGlvPSJub25lIiByb2xlPSJpbWciPjxsaW5lIHgxPSIwIiB5MT0iMTUiIHgyPSIzNDAiIHkyPSIxNSIgY2xhc3M9ImZ2LWF4aXMiPjwvbGluZT48bGluZSB4MT0iMTI4LjUiIHkxPSIzIiB4Mj0iMTI4LjUiIHkyPSIyNyIgY2xhc3M9ImZ2LW51bGwiPjwvbGluZT48cmVjdCB4PSIyMy40IiB5PSI5IiB3aWR0aD0iNTQuOCIgaGVpZ2h0PSIxMiIgcng9IjMiIGNsYXNzPSJmdi1yZWdpb24iIC8+PGNpcmNsZSBjeD0iNTAuOSIgY3k9IjE1IiByPSI0LjUiIGNsYXNzPSJmdi1wdCBmdi1wdC1zaWciPjwvY2lyY2xlPjwvc3ZnPg==)-3.41
+(-4.61, -2.20) ⋆
+
+A -
+D![](data:image/svg+xml;base64,PHN2ZyBjbGFzcz0iZnYtZXllIiB2aWV3Ym94PSIwIDAgMzQwIDMwIiBwcmVzZXJ2ZWFzcGVjdHJhdGlvPSJub25lIiByb2xlPSJpbWciPjxsaW5lIHgxPSIwIiB5MT0iMTUiIHgyPSIzNDAiIHkyPSIxNSIgY2xhc3M9ImZ2LWF4aXMiPjwvbGluZT48bGluZSB4MT0iMTI4LjUiIHkxPSIzIiB4Mj0iMTI4LjUiIHkyPSIyNyIgY2xhc3M9ImZ2LW51bGwiPjwvbGluZT48cmVjdCB4PSIxODMuNiIgeT0iOSIgd2lkdGg9IjU3LjMiIGhlaWdodD0iMTIiIHJ4PSIzIiBjbGFzcz0iZnYtcmVnaW9uIiAvPjxjaXJjbGUgY3g9IjIxMi4yIiBjeT0iMTUiIHI9IjQuNSIgY2xhc3M9ImZ2LXB0IGZ2LXB0LXNpZyI+PC9jaXJjbGU+PC9zdmc+)3.68
+(2.42, 4.93) ⋆
+
+B -
+C![](data:image/svg+xml;base64,PHN2ZyBjbGFzcz0iZnYtZXllIiB2aWV3Ym94PSIwIDAgMzQwIDMwIiBwcmVzZXJ2ZWFzcGVjdHJhdGlvPSJub25lIiByb2xlPSJpbWciPjxsaW5lIHgxPSIwIiB5MT0iMTUiIHgyPSIzNDAiIHkyPSIxNSIgY2xhc3M9ImZ2LWF4aXMiPjwvbGluZT48bGluZSB4MT0iMTI4LjUiIHkxPSIzIiB4Mj0iMTI4LjUiIHkyPSIyNyIgY2xhc3M9ImZ2LW51bGwiPjwvbGluZT48cmVjdCB4PSI2MS40IiB5PSI5IiB3aWR0aD0iNjUuNyIgaGVpZ2h0PSIxMiIgcng9IjMiIGNsYXNzPSJmdi1yZWdpb24iIC8+PGNpcmNsZSBjeD0iOTQuMyIgY3k9IjE1IiByPSI0LjUiIGNsYXNzPSJmdi1wdCBmdi1wdC1zaWciPjwvY2lyY2xlPjwvc3ZnPg==)-1.50
+(-2.94, -0.0587) ⋆
+
+B -
+D![](data:image/svg+xml;base64,PHN2ZyBjbGFzcz0iZnYtZXllIiB2aWV3Ym94PSIwIDAgMzQwIDMwIiBwcmVzZXJ2ZWFzcGVjdHJhdGlvPSJub25lIiByb2xlPSJpbWciPjxsaW5lIHgxPSIwIiB5MT0iMTUiIHgyPSIzNDAiIHkyPSIxNSIgY2xhc3M9ImZ2LWF4aXMiPjwvbGluZT48bGluZSB4MT0iMTI4LjUiIHkxPSIzIiB4Mj0iMTI4LjUiIHkyPSIyNyIgY2xhc3M9ImZ2LW51bGwiPjwvbGluZT48cmVjdCB4PSIyMjEuOCIgeT0iOSIgd2lkdGg9IjY3LjgiIGhlaWdodD0iMTIiIHJ4PSIzIiBjbGFzcz0iZnYtcmVnaW9uIiAvPjxjaXJjbGUgY3g9IjI1NS43IiBjeT0iMTUiIHI9IjQuNSIgY2xhc3M9ImZ2LXB0IGZ2LXB0LXNpZyI+PC9jaXJjbGU+PC9zdmc+)5.58
+(4.09, 7.07) ⋆
+
+C -
+D![](data:image/svg+xml;base64,PHN2ZyBjbGFzcz0iZnYtZXllIiB2aWV3Ym94PSIwIDAgMzQwIDMwIiBwcmVzZXJ2ZWFzcGVjdHJhdGlvPSJub25lIiByb2xlPSJpbWciPjxsaW5lIHgxPSIwIiB5MT0iMTUiIHgyPSIzNDAiIHkyPSIxNSIgY2xhc3M9ImZ2LWF4aXMiPjwvbGluZT48bGluZSB4MT0iMTI4LjUiIHkxPSIzIiB4Mj0iMTI4LjUiIHkyPSIyNyIgY2xhc3M9ImZ2LW51bGwiPjwvbGluZT48cmVjdCB4PSIyNjMuMiIgeT0iOSIgd2lkdGg9IjUzLjQiIGhlaWdodD0iMTIiIHJ4PSIzIiBjbGFzcz0iZnYtcmVnaW9uIiAvPjxjaXJjbGUgY3g9IjI4OS45IiBjeT0iMTUiIHI9IjQuNSIgY2xhc3M9ImZ2LXB0IGZ2LXB0LXNpZyI+PC9jaXJjbGU+PC9zdmc+)7.08
+(5.91, 8.25) ⋆
+
+scale: -5.64 to 9.28
+
+Where an effect depends on another predictor: the cells / slopes
+directly.
+
+No interactions in this model.
 
 ## Closing: a checklist for reading any model with factors
 
