@@ -531,6 +531,13 @@ marg_print_rows <- function(x, predictor = NULL) {
 #'   `estimate`, `std_error`, `confint_low`, `confint_high`, `excludes_zero`,
 #'   `ci_method`, `scale`, `method`, `adjust`, `effect_type`.
 #' @seealso [`group_means()`], [`group_slopes()`]
+#' @examples
+#' d <- transform(mtcars, gear = factor(gear))
+#' sym <- symbolize(lm(mpg ~ gear, data = d))
+#' if (requireNamespace("emmeans", quietly = TRUE)) {
+#'   # which gears differ from each other (not just from the reference)?
+#'   group_contrasts(sym, by = "gear")
+#' }
 #' @export
 group_contrasts <- function(x, by = NULL,
                             method = c("pairwise", "trt.vs.ctrl",

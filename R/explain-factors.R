@@ -38,6 +38,12 @@
 #'
 #' @return A `symbolized_factor_explanation` object.
 #' @seealso [`group_means()`], [`group_contrasts()`], [`explain()`]
+#' @examples
+#' d <- transform(mtcars, gear = factor(gear))
+#' if (requireNamespace("emmeans", quietly = TRUE)) {
+#'   # one call: coding scheme, group means, and pairwise contrasts per factor
+#'   explain_factors(lm(mpg ~ gear, data = d))
+#' }
 #' @export
 explain_factors <- function(x, ...) {
   if (!inherits(x, "symbolized_model")) {

@@ -35,6 +35,13 @@ region with a darker interval outline and a hollow point estimate; the
 language is confidence/compatibility, never posterior. Tabs 2-4 need
 \pkg{emmeans}; without it they show a short note.
 }
+\examples{
+d <- transform(mtcars, gear = factor(gear))
+sym <- symbolize(lm(mpg ~ gear, data = d))
+# write the interactive widget to a self-contained HTML file
+html <- as_html_factor_views(sym, standalone = TRUE,
+                             file = tempfile(fileext = ".html"))
+}
 \seealso{
 \code{\link[=explain_factors]{explain_factors()}}, \code{\link[=as_html_three_views]{as_html_three_views()}}
 }
