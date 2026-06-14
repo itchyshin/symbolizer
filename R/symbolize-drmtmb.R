@@ -839,12 +839,20 @@ drm_distribution_template <- function(family, response_symbol,
   # from Rung 1 of the ladder). Targeted fixed-string swap: it leaves \mu_i,
   # \sigma_{1i} (bivariate), and \sigma_p (phylogenetic) untouched. The matrix
   # form already uses \boldsymbol{\sigma} with no per-observation index.
+  matrix_latex <- drm_substitute(hit$matrix_latex[[1L]], mapping)
   if (isTRUE(constant_scale)) {
     index_latex <- gsub("\\sigma_i", "\\sigma", index_latex, fixed = TRUE)
+    # The matrix form's diag(boldsymbol{sigma}^2) is a per-observation (vector)
+    # variance -- it claims heteroscedasticity. With a constant residual SD the
+    # covariance is the homoscedastic sigma^2 I, so rewrite it to match (audit
+    # M4 -- the matrix view, not just the index form, must reflect constant
+    # scale). Heteroscedastic fits (scale submodel / dispformula) keep diag().
+    matrix_latex <- gsub("\\mathrm{diag}(\\boldsymbol{\\sigma}^2)",
+                         "\\sigma^2 \\mathbf{I}_n", matrix_latex, fixed = TRUE)
   }
   list(
     index_latex  = index_latex,
-    matrix_latex = drm_substitute(hit$matrix_latex[[1L]], mapping)
+    matrix_latex = matrix_latex
   )
 }
 

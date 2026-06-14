@@ -131,3 +131,33 @@ test_that("symbolize.glmmTMB without random effects leaves Z_g / u NULL", {
   expect_null(ex$Z_g)
   expect_null(ex$u)
 })
+
+test_that("a constant-scale Gaussian matrix form is sigma^2 I, not a heteroscedastic diag", {
+  skip_if_not_installed("glmmTMB")
+  set.seed(1); n <- 80; x <- runif(n, 10, 25)
+  d <- data.frame(y = rnorm(n, 30 + 0.4 * x, 2), x = x)
+  m <- symbolize(glmmTMB::glmmTMB(y ~ x, data = d))$distribution$latex_matrix
+  expect_match(m, "\\sigma^2 \\mathbf{I}", fixed = TRUE)
+  expect_false(grepl("diag", m, fixed = TRUE))    # not the per-observation form
+  # a modelled dispersion (dispformula) genuinely IS heteroscedastic -> keep diag
+  d2 <- data.frame(y = rnorm(n, 30 + 0.4 * x, exp(0.3 + 0.05 * x)), x = x)
+  md <- symbolize(glmmTMB::glmmTMB(y ~ x, dispformula = ~ x, data = d2))$distribution$latex_matrix
+  expect_match(md, "diag", fixed = TRUE)
+})
+
+test_that("a glmmTMB dispformula reports a modelled residual, not a retrieval failure", {
+  skip_if_not_installed("glmmTMB")
+  set.seed(2); n <- 160; x <- runif(n, 10, 25)
+  g <- factor(rep(letters[1:10], length.out = n))
+  d <- data.frame(y = rnorm(n, 30 + 0.4 * x + rnorm(10)[g], exp(0.3 + 0.05 * x)),
+                  x = x, g = g)
+  sym <- symbolize(glmmTMB::glmmTMB(y ~ x + (1 | g), dispformula = ~ x, data = d))
+  # no misleading NA-valued residual row
+  vc <- sym$variance_components
+  expect_false(any(vc$group == "residual" & is.na(vc$sd_estimate)))
+  # icc() reports the residual as modelled (location-scale), not "could not retrieve"
+  ic <- icc(sym)
+  expect_true(is.na(as.numeric(ic)))
+  expect_no_match(attr(ic, "reason"), "could not retrieve")
+  expect_match(attr(ic, "reason"), "varies across observations|location-scale")
+})

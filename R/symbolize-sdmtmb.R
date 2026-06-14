@@ -467,7 +467,11 @@ sdmtmb_build_variance_components <- function(fit, has_spatial, has_spatiotempora
         parameter    = "mu",
         group        = sdmtmb_param_group(tm),
         term         = tm,
-        sd_estimate  = if (tm %in% c("sigma_O", "sigma_E", "phi")) est else NA_real_,
+        # `range` is the Matern correlation distance (the lag at which spatial
+        # correlation decays to ~0.13) -- a value biologists need to read the
+        # spatial field, so carry its estimate. It is a distance, NOT a variance,
+        # so it gets no var_estimate (kind = "spatial_range" labels it).
+        sd_estimate  = if (tm %in% c("sigma_O", "sigma_E", "phi", "range")) est else NA_real_,
         var_estimate = if (tm %in% c("sigma_O", "sigma_E", "phi")) est ^ 2 else NA_real_,
         kind         = sdmtmb_param_kind(tm)
       )
