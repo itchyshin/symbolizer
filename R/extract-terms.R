@@ -163,9 +163,28 @@ extract_terms <- function(formula, data, submodel,
     }
     if (role == "interaction") {
       vars <- strsplit(variable, ":", fixed = TRUE)[[1L]]
-      var_syms <- vapply(vars, lookup_symbol, character(1L))
+      # contrast_level holds one entry per piece (e.g. "b:-" for g:x with g at
+      # level b, x continuous). Render a factor piece as its contrast indicator
+      # `[g = b]` -- matching the main-effect factor form -- and a continuous /
+      # transformed piece as its symbol. Without this, a factor inside an
+      # interaction drew as a continuous variable and two distinct interaction
+      # coefficients rendered to identical LaTeX.
+      levels_ <- if (!is.na(contrast_level) && nzchar(contrast_level)) {
+        strsplit(contrast_level, ":", fixed = TRUE)[[1L]]
+      } else {
+        character(0L)
+      }
+      latex_pieces <- vapply(seq_along(vars), function(k) {
+        lv <- if (k <= length(levels_)) levels_[[k]] else "-"
+        if (!is.na(lv) && nzchar(lv) && !identical(lv, "-")) {
+          sprintf("[%s = \\mathrm{%s}]",
+                  escape_latex_text(vars[[k]]), escape_latex_text(lv))
+        } else {
+          lookup_symbol(vars[[k]])
+        }
+      }, character(1L))
       return(paste0(coef_symbol, " \\, ",
-                    paste(var_syms, collapse = " \\, ")))
+                    paste(latex_pieces, collapse = " \\, ")))
     }
     if (role == "transformation") {
       inner_sym <- lookup_symbol(variable)

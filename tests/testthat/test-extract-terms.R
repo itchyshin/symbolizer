@@ -106,3 +106,19 @@ test_that("factor levels with LaTeX-special characters are escaped in the equati
   expect_true(any(grepl("d\\_50\\%", contrast_row$latex_term, fixed = TRUE)))
   expect_false(any(grepl("50%}", contrast_row$latex_term, fixed = TRUE)))
 })
+
+test_that("a factor inside an interaction renders with its contrast level, not as continuous", {
+  d <- data.frame(y = rnorm(40), g = factor(rep(c("a", "b"), 20)), x = rnorm(40))
+  tt <- extract_terms(y ~ g:x, d, "mu")
+  ir <- tt[tt$role == "interaction", , drop = FALSE]
+  expect_true(any(grepl("[g = \\mathrm{b}]", ir$latex_term, fixed = TRUE)))
+  expect_false(any(grepl("g_i \\, x_i", ir$latex_term, fixed = TRUE)))
+})
+
+test_that("distinct interaction coefficients render to distinct LaTeX bodies", {
+  d <- data.frame(y = rnorm(60), g = factor(rep(c("a", "b", "c"), 20)), x = rnorm(60))
+  tt <- extract_terms(y ~ g:x, d, "mu")
+  ir <- tt[tt$role == "interaction", , drop = FALSE]
+  bodies <- gsub("\\\\beta_\\{[0-9]+\\}", "", ir$latex_term)  # strip coef subscript
+  expect_equal(length(unique(bodies)), nrow(ir))
+})

@@ -29,12 +29,12 @@
       print_full(result)
     Output
       # A tibble: 4 x 9
-        submodel term_label  variable role            contrast_level transform symbol              coefficient_symbol latex_term                             
-        <chr>    <chr>       <chr>    <chr>           <chr>          <chr>     <chr>               <chr>              <chr>                                  
-      1 mu       (Intercept) <NA>     intercept       <NA>           ""         <NA>               "\\beta_{0}"       "\\beta_{0}"                           
-      2 mu       x           x        predictor       <NA>           ""        "X_i"               "\\beta_{1}"       "\\beta_{1} \\, X_i"                   
-      3 mu       sex         sex      factor_contrast male           ""        "S_i"               "\\beta_{2}"       "\\beta_{2} \\, [sex = \\mathrm{male}]"
-      4 mu       x:sex       x:sex    interaction     -:male         ""        "\\mathrm{x:sex}_i" "\\beta_{3}"       "\\beta_{3} \\, X_i \\, S_i"           
+        submodel term_label  variable role            contrast_level transform symbol              coefficient_symbol latex_term                                     
+        <chr>    <chr>       <chr>    <chr>           <chr>          <chr>     <chr>               <chr>              <chr>                                          
+      1 mu       (Intercept) <NA>     intercept       <NA>           ""         <NA>               "\\beta_{0}"       "\\beta_{0}"                                   
+      2 mu       x           x        predictor       <NA>           ""        "X_i"               "\\beta_{1}"       "\\beta_{1} \\, X_i"                           
+      3 mu       sex         sex      factor_contrast male           ""        "S_i"               "\\beta_{2}"       "\\beta_{2} \\, [sex = \\mathrm{male}]"        
+      4 mu       x:sex       x:sex    interaction     -:male         ""        "\\mathrm{x:sex}_i" "\\beta_{3}"       "\\beta_{3} \\, X_i \\, [sex = \\mathrm{male}]"
 
 # factor x factor interaction
 
@@ -42,12 +42,12 @@
       print_full(result)
     Output
       # A tibble: 4 x 9
-        submodel term_label  variable role            contrast_level transform symbol            coefficient_symbol latex_term                         
-        <chr>    <chr>       <chr>    <chr>           <chr>          <chr>     <chr>             <chr>              <chr>                              
-      1 mu       (Intercept) <NA>     intercept       <NA>           ""         <NA>             "\\beta_{0}"       "\\beta_{0}"                       
-      2 mu       a           a        factor_contrast a2             ""        "a_i"             "\\beta_{1}"       "\\beta_{1} \\, [a = \\mathrm{a2}]"
-      3 mu       b           b        factor_contrast b2             ""        "b_i"             "\\beta_{2}"       "\\beta_{2} \\, [b = \\mathrm{b2}]"
-      4 mu       a:b         a:b      interaction     a2:b2          ""        "\\mathrm{a:b}_i" "\\beta_{3}"       "\\beta_{3} \\, a_i \\, b_i"       
+        submodel term_label  variable role            contrast_level transform symbol            coefficient_symbol latex_term                                                
+        <chr>    <chr>       <chr>    <chr>           <chr>          <chr>     <chr>             <chr>              <chr>                                                     
+      1 mu       (Intercept) <NA>     intercept       <NA>           ""         <NA>             "\\beta_{0}"       "\\beta_{0}"                                              
+      2 mu       a           a        factor_contrast a2             ""        "a_i"             "\\beta_{1}"       "\\beta_{1} \\, [a = \\mathrm{a2}]"                       
+      3 mu       b           b        factor_contrast b2             ""        "b_i"             "\\beta_{2}"       "\\beta_{2} \\, [b = \\mathrm{b2}]"                       
+      4 mu       a:b         a:b      interaction     a2:b2          ""        "\\mathrm{a:b}_i" "\\beta_{3}"       "\\beta_{3} \\, [a = \\mathrm{a2}] \\, [b = \\mathrm{b2}]"
 
 # offset with function call (log)
 
