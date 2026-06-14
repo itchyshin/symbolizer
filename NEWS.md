@@ -87,6 +87,13 @@
   the actual link: inverse → `1/\eta`, probit → `\Phi`, cloglog and others
   labelled honestly. Default-link models are unchanged.
 
+* **`glmmTMB` Tab 3 now shows the random-effect `Z u` block.** The stacked-matrix
+  and worked-row views displayed `y = X\hat\beta + \hat\varepsilon`, silently
+  dropping the random effects so the arithmetic did not close. The extractor now
+  populates the per-tier incidence matrices and conditional modes (mirroring the
+  `lme4` extractor), so the decomposition reads `y = X\hat\beta + Z\hat u +
+  \hat\varepsilon` and closes. Fixed-effects-only fits are unchanged.
+
 ## `symbolizer-sem` vignette: real data + team review
 
 * **The SEM vignette now uses real data.** The worked example was rebuilt

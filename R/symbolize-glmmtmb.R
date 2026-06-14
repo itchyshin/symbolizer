@@ -601,12 +601,48 @@ glmm_build_expanded <- function(fit, re_per_entry, has_re) {
   eta_hat <- tryCatch(as.numeric(stats::predict(fit, type = "link")),
                       error = function(e) mu_hat)
   e_resid <- tryCatch(as.numeric(stats::residuals(fit)), error = function(e) NULL)
+
+  # Per-tier random-effect incidence matrices Z_g and conditional modes u, so
+  # Tab 3's stacked matrix shows the Z*u block instead of an incoherent
+  # `y = X*beta + eps` that silently dropped the random effects. Mirrors the
+  # lme4 extractor: intercept-only `(1 | g)` tiers (first-slice scope), one Z_g
+  # per grouping factor in ranef(fit)$cond. eta_hat is left as predict(link) --
+  # which already includes the random effects -- because X*beta + sum(Z*u)
+  # reproduces it exactly for these tiers (verified), so no double counting.
+  frame      <- fit$frame
+  Z_per_tier <- list()
+  u_per_tier <- list()
+  re_vals    <- tryCatch(glmmTMB::ranef(fit)$cond, error = function(e) NULL)
+  if (any(has_re) && !is.null(re_vals)) {
+    for (gv in names(re_vals)) {
+      if (!(gv %in% names(frame))) next
+      re_g <- re_vals[[gv]]
+      if (!("(Intercept)" %in% colnames(re_g))) next
+      data_local <- frame
+      data_local[[gv]] <- factor(data_local[[gv]])
+      Zg <- stats::model.matrix(
+        stats::reformulate(paste0("0+", gv)), data = data_local
+      )
+      colnames(Zg) <- sub(paste0("^", gv), "", colnames(Zg))
+      u_g <- re_g[["(Intercept)"]]
+      names(u_g) <- rownames(re_g)
+      if (all(colnames(Zg) %in% names(u_g))) u_g <- u_g[colnames(Zg)]
+      Z_per_tier[[gv]] <- Zg
+      u_per_tier[[gv]] <- as.numeric(u_g)
+    }
+  }
+  Z_g <- if (length(Z_per_tier) > 0L) Z_per_tier[[1L]] else NULL
+  u   <- if (length(u_per_tier) > 0L) u_per_tier[[1L]] else NULL
+
   list(
     y = if (is.numeric(y)) as.numeric(y) else NULL,
     X = X_mat,
     Z = NULL,
     beta = glmmTMB::fixef(fit)$cond,
-    u = NULL,
+    u = u,
+    Z_g = Z_g,
+    Z_per_tier = Z_per_tier,
+    u_per_tier = u_per_tier,
     eta_hat = eta_hat,
     mu_hat = mu_hat,
     e = e_resid,
