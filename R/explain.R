@@ -47,7 +47,8 @@
 #'   effects), `notation_bridge`.
 #' @seealso [`model_card()`] for the act-on-it bundle.
 #' @examples
-#' # explain(symbolize(lm(mpg ~ wt, data = mtcars)))
+#' # `explain()` takes the fitted model directly -- it runs `symbolize()` for you.
+#' explain(lm(mpg ~ wt, data = mtcars))
 #' @export
 explain <- function(fit, symbols = NULL, units = NULL, context = NULL, ...) {
   sym <- symbolize(fit, symbols = symbols, units = units,

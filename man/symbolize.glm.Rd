@@ -31,8 +31,10 @@ and family-specific weights are deferred via the capability registry.
 }
 \section{Confidence intervals}{
 
-CIs come from \code{stats::confint(fit)}, which for \code{glm} uses profile
-likelihood by default. \code{ci_method} is labelled \code{"profile"}.
+CIs come from \code{stats::confint.default(fit)} — fast Wald intervals. (The
+default \code{stats::confint()} for a \code{glm} uses profile likelihood, which is
+slow; \code{symbolize()} uses the Wald form deliberately.) \code{ci_method} is
+labelled \code{"wald"}.
 }
 
 \references{

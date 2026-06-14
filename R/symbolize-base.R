@@ -72,8 +72,10 @@ symbolize.lm <- function(fit, symbols = NULL, units = NULL,
 #' and family-specific weights are deferred via the capability registry.
 #'
 #' @section Confidence intervals:
-#' CIs come from `stats::confint(fit)`, which for `glm` uses profile
-#' likelihood by default. `ci_method` is labelled `"profile"`.
+#' CIs come from `stats::confint.default(fit)` — fast Wald intervals. (The
+#' default `stats::confint()` for a `glm` uses profile likelihood, which is
+#' slow; `symbolize()` uses the Wald form deliberately.) `ci_method` is
+#' labelled `"wald"`.
 #'
 #' @inheritParams symbolize
 #'

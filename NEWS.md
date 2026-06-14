@@ -103,6 +103,14 @@
   `lme4` extractor), so the decomposition reads `y = X\hat\beta + Z\hat u +
   \hat\varepsilon` and closes. Fixed-effects-only fits are unchanged.
 
+* **Documentation corrections.** `symbolize.glm()`'s help wrongly said its
+  confidence intervals are profile-likelihood and labelled `"profile"`; it
+  actually uses fast Wald intervals (`confint.default()`) labelled `"wald"`.
+  The `explain()` example called `explain(symbolize(fit))`, which would error
+  (`explain()` takes the fit directly); it now reads `explain(lm(...))` and is
+  runnable. `VISION.md` listed the retired status word `Unsupported` instead of
+  `Unsupported or blocked`.
+
 ## `symbolizer-sem` vignette: real data + team review
 
 * **The SEM vignette now uses real data.** The worked example was rebuilt

@@ -54,8 +54,8 @@ These are non-negotiable and override speed of shipping.
 4. **Honest capability gate.** `symbolizer_capabilities()` is the
    single source of truth for what `symbolize()` can read today.
    Status words: Stable, First slice, Opt-in control, Planned or
-   reserved, Unsupported. Prose never claims more than the registry
-   allows.
+   reserved, Unsupported or blocked. Prose never claims more than the
+   registry allows.
 
 5. **Functionality before articles.** If a vignette would describe a
    surface that doesn't exist correctly today, fix the surface first.
