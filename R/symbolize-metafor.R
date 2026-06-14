@@ -757,6 +757,11 @@ metafor_hit_name <- function(row) {
       !is.na(row$contrast_level) && nzchar(as.character(row$contrast_level))) {
     return(paste0(row$variable, row$contrast_level))
   }
+  # A factor-involving interaction's beta row is named "gb:x" / "gb:hq", not the
+  # raw term label "g:x" -- reconstruct it so the estimate is not dropped to NA.
+  if (!is.na(row$role) && row$role == "interaction") {
+    return(mm_interaction_hit(row$term_label, row$contrast_level))
+  }
   row$term_label
 }
 

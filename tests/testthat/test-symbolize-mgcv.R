@@ -93,3 +93,24 @@ test_that("symbolize.gam populates expanded$X / mu_hat (audit B1)", {
   expect_false(grepl("not captured", html))
   expect_match(html, "mathbf\\{X\\}")
 })
+
+test_that("parametric factor-by-continuous interaction coefficients are not NA", {
+  skip_if_not_installed("mgcv")
+  set.seed(2L); n <- 200L
+  d <- data.frame(y = rnorm(n),
+                  g = factor(rep(c("a", "b", "c"), length.out = n)),
+                  x = rnorm(n), s = rnorm(n))
+  d$y <- d$y + (d$g == "b") * d$x * 2          # a real gb:x effect to recover
+  fit <- mgcv::gam(y ~ g * x + s(s), data = d)
+
+  sym <- symbolize(fit)
+  ir <- sym$fixed_effects[sym$fixed_effects$role == "interaction", , drop = FALSE]
+  expect_equal(nrow(ir), 2L)                   # gb:x and gc:x
+  # Previously NA: the term label "g:x" never matched the parametric
+  # coefficient name "gb:x". Now reconstructed and matched.
+  expect_true(all(is.finite(ir$estimate)))
+  expect_true(all(is.finite(ir$confint_low) & is.finite(ir$confint_high)))
+  expect_equal(sort(ir$estimate),
+               sort(as.numeric(stats::coef(fit)[c("gb:x", "gc:x")])),
+               tolerance = 1e-6)
+})

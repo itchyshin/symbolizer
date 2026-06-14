@@ -378,6 +378,16 @@ marg_finalize <- function(df, by, ci_method, scale, est_col, klass, predictor) {
   hi        <- if (!is.na(hi_col)) df[[hi_col]] else rep(NA_real_, nrow(df))
   excl_zero <- !is.na(lo) & !is.na(hi) & sign(lo) == sign(hi) &
     lo != 0 & hi != 0
+  # A group MEAN on a back-transformed non-negative response scale (a rate, a
+  # probability, a positive mean) "excludes zero" by construction, so the star
+  # is vacuous -- blank it (NA) rather than flag every row. Zero is an
+  # attainable null only on the identity / link scale, where emmeans keeps the
+  # estimate column named "emmean". Slopes (a zero slope is always meaningful)
+  # and contrasts (handled separately, null per effect_type) are unaffected.
+  if (identical(klass, "symbolizer_group_means") &&
+      !identical(est_col, "emmean")) {
+    excl_zero <- rep(NA, nrow(df))
+  }
   level_combo <- marg_level_combo(df, by)
   out <- tibble::tibble(level_combo = level_combo)
   for (v in by) {
@@ -480,10 +490,18 @@ marg_print_rows <- function(x, predictor = NULL) {
   scale_note <- if (length(scales) == 1L) {
     sprintf("Scale: %s. ", scales)
   } else ""
+  # Only explain the star when it can actually appear: for a back-transformed
+  # group mean every excludes_zero is NA (the star is vacuous), so the sentence
+  # would be misleading.
+  star_applies <- "excludes_zero" %in% names(x) && any(!is.na(x$excludes_zero))
   if (length(ci_methods) == 1L) {
-    cli::cli_text(
-      "{.emph {scale_note}CI method: {ci_methods}. Rows marked {.code *} have a 95% interval that excludes zero.}"
-    )
+    if (star_applies) {
+      cli::cli_text(
+        "{.emph {scale_note}CI method: {ci_methods}. Rows marked {.code *} have a 95% interval that excludes zero.}"
+      )
+    } else {
+      cli::cli_text("{.emph {scale_note}CI method: {ci_methods}.}")
+    }
   }
 }
 

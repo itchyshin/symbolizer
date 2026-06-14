@@ -160,6 +160,11 @@ symbolize.phylolm <- function(fit, symbols = NULL, units = NULL,
   distribution$family <- family
   submodels <- phylolm_build_submodels(entries, fit, param, link)
   terms_tbl <- drm_build_terms(entries_fe, data, symbols)
+  # Populate factor_coding (reference level + contrast scheme) like every other
+  # extractor; without it explain_factors() reports "no factor predictors" for a
+  # phylolm model with a factor, and the constructor's central coding_warnings()
+  # check never fires. data here is fit$model.frame (carries the factor columns).
+  factor_cod <- build_factor_coding(data, terms_tbl, fit)
   fixed_eff <- phylolm_build_fixed_effects(terms_tbl, fit)
   re_tbl    <- NULL
   vc_tbl    <- phylolm_build_variance_components(fit)
@@ -272,6 +277,7 @@ symbolize.phylolm <- function(fit, symbols = NULL, units = NULL,
     distribution        = distribution,
     submodels           = submodels,
     terms               = terms_tbl,
+    factor_coding       = factor_cod,
     fixed_effects       = fixed_eff,
     random_effects      = re_tbl,
     variance_components = vc_tbl,

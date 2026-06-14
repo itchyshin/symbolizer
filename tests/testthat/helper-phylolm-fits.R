@@ -17,6 +17,20 @@ fit_phylolm_bm <- function(seed = 31L, k = 10L) {
   list(fit = fit, data = dat, tree = tree, A = C)
 }
 
+fit_phylolm_factor <- function(seed = 33L, k = 18L) {
+  testthat::skip_if_not_installed("phylolm")
+  testthat::skip_if_not_installed("ape")
+  set.seed(seed)
+  tree <- ape::rcoal(k)
+  tree$tip.label <- paste0("sp", seq_len(k))
+  C <- ape::vcv(tree, corr = TRUE)
+  y <- as.numeric(crossprod(chol(C), rnorm(k)))
+  grp <- factor(rep(c("low", "mid", "high"), length.out = k))
+  dat <- data.frame(y = y, grp = grp, row.names = tree$tip.label)
+  fit <- phylolm::phylolm(y ~ grp, data = dat, phy = tree, model = "BM")
+  list(fit = fit, data = dat, tree = tree, A = C)
+}
+
 fit_phylolm_lambda <- function(seed = 32L, k = 10L) {
   testthat::skip_if_not_installed("phylolm")
   testthat::skip_if_not_installed("ape")

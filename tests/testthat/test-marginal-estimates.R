@@ -272,3 +272,31 @@ test_that("print method names the scale", {
   out <- paste(msgs, collapse = "")
   expect_match(out, "Scale: response", fixed = TRUE)
 })
+
+test_that("group_means does not vacuously star positive-support response means", {
+  skip_if_not_installed("emmeans")
+  set.seed(1); n <- 90
+  g <- factor(rep(c("a", "b", "c"), length.out = n))
+  d <- data.frame(g = g, y = rpois(n, c(a = 5, b = 12, c = 20)[g]))
+  gm <- group_means(symbolize(glm(y ~ g, family = poisson, data = d)),
+                    by = "g", scale = "response")
+  # Every rate is > 0, so "excludes zero" is vacuous -> blanked, not starred.
+  expect_true(all(is.na(gm$excludes_zero)))
+  # The print footer must not promise a star that can never appear.
+  out <- paste(testthat::capture_messages(print(gm)), collapse = "")
+  expect_no_match(out, "Rows marked", fixed = TRUE)
+
+  # Link scale keeps zero as an attainable null, so the flag is still computed.
+  gm_link <- group_means(symbolize(glm(y ~ g, family = poisson, data = d)),
+                         by = "g", scale = "link")
+  expect_false(all(is.na(gm_link$excludes_zero)))
+})
+
+test_that("group_means still flags a Gaussian mean whose interval excludes zero", {
+  skip_if_not_installed("emmeans")
+  set.seed(2); n <- 90
+  g <- factor(rep(c("a", "b", "c"), length.out = n))
+  d <- data.frame(g = g, y = rnorm(n, mean = c(a = 8, b = 9, c = 10)[g], sd = 1))
+  gm <- group_means(symbolize(lm(y ~ g, data = d)), by = "g", scale = "response")
+  expect_true(all(gm$excludes_zero))     # means ~8-10, intervals far from 0
+})
