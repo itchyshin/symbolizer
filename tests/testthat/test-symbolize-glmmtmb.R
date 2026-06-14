@@ -105,3 +105,29 @@ test_that("symbolize.glmmTMB populates expanded$X / mu_hat (audit B1)", {
   expect_false(grepl("not captured", html))
   expect_match(html, "mathbf\\{X\\}")
 })
+
+test_that("symbolize.glmmTMB populates the Z*u block so Tab 3 closes (audit #11)", {
+  sym <- symbolize(fit_glmm_gaussian_re())   # Gaussian (1 | g) random intercepts
+  ex  <- sym$expanded
+  expect_true(is.matrix(ex$Z_g))
+  expect_false(is.null(ex$u))
+  expect_equal(nrow(ex$Z_g), sym$model$n_obs)
+  expect_equal(ncol(ex$Z_g), length(ex$u))
+  # The decomposition must close: y_i = X_i*beta + (Z*u)_i + resid_i, and the
+  # link-scale predictor is the full conditional X*beta + Z*u (no double count).
+  i  <- 1L
+  xb <- sum(ex$X[i, ] * ex$beta)
+  zu <- sum(ex$Z_g[i, ] * ex$u)
+  expect_equal(ex$eta_hat[[i]], xb + zu, tolerance = 1e-6)
+  expect_equal(ex$y[[i]], xb + zu + (ex$y[[i]] - ex$mu_hat[[i]]), tolerance = 1e-6)
+  # The stacked matrix now surfaces the Z and u blocks instead of dropping them.
+  html <- as_html_three_views(sym)
+  expect_match(html, "mathbf\\{Z\\}")
+  expect_match(html, "mathbf\\{u\\}")
+})
+
+test_that("symbolize.glmmTMB without random effects leaves Z_g / u NULL", {
+  ex <- symbolize(fit_glmm_gaussian_simple())$expanded
+  expect_null(ex$Z_g)
+  expect_null(ex$u)
+})
