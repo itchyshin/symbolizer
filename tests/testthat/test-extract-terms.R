@@ -122,3 +122,65 @@ test_that("distinct interaction coefficients render to distinct LaTeX bodies", {
   bodies <- gsub("\\\\beta_\\{[0-9]+\\}", "", ir$latex_term)  # strip coef subscript
   expect_equal(length(unique(bodies)), nrow(ir))
 })
+
+# --- Integration: the model-frame path (route every real extractor takes) -----
+#
+# Every symbolize.* method hands extract_terms() the FITTED model's frame
+# (fit$model / fit@frame / fit$frame), not raw data. For a transformed predictor
+# that frame's columns are already the EVALUATED terms (e.g. `log(x)`, with no
+# raw `x`), so re-running model.frame on the formula used to crash with
+# "object 'x' not found". Every unit test above passes RAW data and so never hit
+# this path -- which is exactly how the crash shipped. These exercise it.
+
+test_that("extract_terms works when data is a model frame with a transformed column", {
+  set.seed(1)
+  d <- data.frame(y = rnorm(30), x = runif(30, 1, 5), z = rnorm(30))
+  mf <- lm(y ~ log(x) + z, data = d)$model    # columns: y | log(x) | z (no raw x)
+  expect_false("x" %in% names(mf))            # confirm the crash precondition
+  tt <- extract_terms(y ~ log(x) + z, mf, "mu")
+  expect_equal(tt$role, c("intercept", "transformation", "predictor"))
+  expect_equal(tt$variable, c(NA_character_, "x", "z"))
+  expect_match(tt$latex_term[[2L]], "mathrm\\{log\\}")
+})
+
+test_that("symbolize() handles every routine transform on a fitted model (no crash)", {
+  set.seed(1)
+  d <- data.frame(y = rnorm(60), x = runif(60, 1, 5), z = rnorm(60))
+  forms <- list(
+    log   = y ~ log(x) + z,
+    poly  = y ~ poly(x, 2) + z,
+    scale = y ~ scale(x) + z,
+    I     = y ~ I(x^2) + z,
+    ns    = y ~ splines::ns(x, 2) + z
+  )
+  for (nm in names(forms)) {
+    sym <- symbolize(lm(forms[[nm]], data = d))
+    expect_s3_class(sym, "symbolized_model")
+    expect_gt(nrow(sym$terms), 1L)
+    eq <- formula_bridge(sym, "index")$mathematics[[1L]]
+    expect_false(grepl("NA", eq, fixed = TRUE), info = nm)   # no leaked NA
+  }
+})
+
+test_that("namespaced splines::ns() is a transformation, not a mis-parsed interaction", {
+  set.seed(1)
+  d <- data.frame(y = rnorm(40), x = runif(40, 1, 5), z = rnorm(40))
+  mf <- lm(y ~ splines::ns(x, 2) + z, data = d)$model
+  tt <- extract_terms(y ~ splines::ns(x, 2) + z, mf, "mu")
+  ns_rows <- tt[tt$term_label == "splines::ns(x, 2)", , drop = FALSE]
+  expect_true(all(ns_rows$role == "transformation"))
+  expect_true(all(ns_rows$variable == "x"))
+  expect_false(any(is.na(ns_rows$variable)))
+})
+
+test_that("symbolize() handles transforms on glmmTMB and lme4 fits", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("lme4")
+  set.seed(2)
+  d <- data.frame(y = rnorm(60), x = runif(60, 1, 5), z = rnorm(60),
+                  g = factor(rep(letters[1:3], 20)))
+  expect_s3_class(symbolize(glmmTMB::glmmTMB(y ~ log(x) + z, data = d)),
+                  "symbolized_model")
+  expect_s3_class(symbolize(lme4::lmer(y ~ log(x) + (1 | g), data = d)),
+                  "symbolized_model")
+})

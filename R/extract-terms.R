@@ -47,7 +47,17 @@ extract_terms <- function(formula, data, submodel,
   }
 
   tt <- stats::terms(rhs_formula, data = data)
-  mf <- stats::model.frame(tt, data = data)
+  mf <- tryCatch(stats::model.frame(tt, data = data), error = function(e) NULL)
+  if (is.null(mf)) {
+    # `data` is already a model frame (the extractor passed fit$model /
+    # fit@frame): its columns are the EVALUATED terms, e.g. `log(x)`,
+    # `poly(x, 2)`, so re-running model.frame on the raw formula fails with
+    # "object 'x' not found". Use the frame directly with its own terms
+    # attribute, which references those evaluated columns.
+    mf <- data
+    fr_terms <- attr(data, "terms")
+    if (!is.null(fr_terms)) tt <- fr_terms
+  }
   mm <- stats::model.matrix(tt, mf)
 
   col_names  <- colnames(mm)
@@ -83,10 +93,17 @@ extract_terms <- function(formula, data, submodel,
       return(list(role = "intercept", variable = NA_character_,
                   contrast_level = NA_character_, transform = ""))
     }
-    pieces <- strsplit(term_label, ":", fixed = TRUE)[[1L]]
+    # Split on the interaction `:` but NOT the namespace `::`, so a term such as
+    # `splines::ns(x, 2)` stays one piece instead of mis-parsing as an
+    # interaction between `splines` and `ns(x, 2)` (which emitted a literal NA).
+    pieces <- strsplit(term_label, "(?<!:):(?!:)", perl = TRUE)[[1L]]
     has_interaction <- length(pieces) > 1L
     piece_info <- lapply(pieces, function(p) {
-      m <- regmatches(p, regexec("^([A-Za-z_.][A-Za-z0-9_.]*)\\((.+)\\)$", p))[[1L]]
+      # Optional `pkg::` prefix on the function name so `splines::ns(x, 2)` is
+      # read as fn = "ns", inner = "x, 2" (same as an attached `ns(x, 2)`).
+      m <- regmatches(p, regexec(
+        "^(?:[A-Za-z_.][A-Za-z0-9_.]*::)?([A-Za-z_.][A-Za-z0-9_.]*)\\((.+)\\)$",
+        p, perl = TRUE))[[1L]]
       if (length(m) == 3L) list(fn = m[2L], inner = m[3L])
       else                list(fn = "",   inner = p)
     })
@@ -112,7 +129,7 @@ extract_terms <- function(formula, data, submodel,
       if (nzchar(piece_info[[k]]$fn)) first_arg(inner) else inner
     }, character(1L))
 
-    col_pieces <- strsplit(col_name, ":", fixed = TRUE)[[1L]]
+    col_pieces <- strsplit(col_name, "(?<!:):(?!:)", perl = TRUE)[[1L]]
     levels_ <- character(length(pieces))
     for (k in seq_along(pieces)) {
       var_k <- vars[k]
