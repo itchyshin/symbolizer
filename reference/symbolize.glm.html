@@ -89,8 +89,10 @@ units, e.g. <code>c(body_mass = "g", temperature = "C")</code>.</p></dd>
     <h2 id="confidence-intervals">Confidence intervals<a class="anchor" aria-label="anchor" href="#confidence-intervals"></a></h2>
 
 
-<p>CIs come from <code>stats::confint(fit)</code>, which for <code>glm</code> uses profile
-likelihood by default. <code>ci_method</code> is labelled <code>"profile"</code>.</p>
+<p>CIs come from <code>stats::confint.default(fit)</code> — fast Wald intervals. (The
+default <code><a href="https://rdrr.io/r/stats/confint.html" class="external-link">stats::confint()</a></code> for a <code>glm</code> uses profile likelihood, which is
+slow; <code><a href="symbolize.html">symbolize()</a></code> uses the Wald form deliberately.) <code>ci_method</code> is
+labelled <code>"wald"</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

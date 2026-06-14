@@ -152,7 +152,149 @@ effects), <code>notation_bridge</code>.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># explain(symbolize(lm(mpg ~ wt, data = mtcars)))</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># `explain()` takes the fitted model directly -- it runs `symbolize()` for you.</span></span></span>
+<span class="r-in"><span><span class="fu">explain</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">wt</span>, data <span class="op">=</span> <span class="va">mtcars</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">== explaining your &lt;lm&gt; model ==</span> <span style="color: #00BBBB;">────────────────────────────────────────────</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> This is a gaussian model of `mpg` (n = 32) with 1 submodel: mu explains the</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> mean (using an identity link). Coefficients are fit by maximum likelihood via</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> stats.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Equations (both notations)</span> ──</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Equations</span> ──</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">distribution</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   index:  \mathrm{mpg}_i \mid \mu_i,\, \sigma \sim \mathrm{Normal}(\mu_i,\, \sigma^2)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   matrix: \mathbf{mpg} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2))</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">mu_linear_predictor</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   index:  \mu_i = \beta_{0} + \beta_{1} \, \mathrm{wt}_i</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   matrix: \boldsymbol{\mu} = \mathbf{X} \boldsymbol{\beta}</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">The symbols</span> ──</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Symbol dictionary (</span><span style="color: #0000BB; font-weight: bold;">"both"</span><span style="font-weight: bold;">)</span> ──</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">mpg [response]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> index: `\mathrm{mpg}_i`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> matrix: `\mathbf{mpg}`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dimension: `\mathbb{R}^n` (= `\mathbb{R}^{32}`)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-style: italic;">response variable</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">wt [predictor]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> index: `\mathrm{wt}_i`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> matrix: `(no matrix form)`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dimension: `column of design matrix` (= `column of X (length 32)`)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-style: italic;">continuous predictor</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">(parameter)</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> index: `\mu_i`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> matrix: `\boldsymbol{\mu}`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dimension: `\mathbb{R}^n` (= `\mathbb{R}^{32}`)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-style: italic;">conditional mu of mpg</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">(residual_sd)</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> index: `\sigma`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> matrix: `\boldsymbol{\sigma}`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dimension: `scalar (constant across observations)` (= `scalar`)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-style: italic;">residual standard deviation of mpg</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">(coefficient)</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> index: `\beta_{0}, \beta_{1}`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> matrix: `\boldsymbol{\beta}`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dimension: `\mathbb{R}^{p_\mu}` (= `\mathbb{R}^{2}`)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-style: italic;">mu submodel coefficients</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">(design_matrix)</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> index: `(no index form)`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> matrix: `\mathbf{X}`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dimension: `\mathbb{R}^{n \times p_\mu}` (= `\mathbb{R}^{32 \times 2}`)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-style: italic;">mu submodel design matrix</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">What's assumed</span> ──</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Assumptions</span> ──</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">conditional_distribution</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> expression: `\mathrm{mpg}_i \mid \mu_i,\, \sigma_i \sim</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> \mathrm{Normal}(\mu_i,\, \sigma_i^2)`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> meaning: mpg varies normally around its expected value</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> status: [<span style="color: #0000BB;">"explicit"</span>]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">linear_predictor (mu)</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> expression: `\mu_i = \beta_0 + \sum_k \beta_k X_{ki}`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> meaning: Expected mpg is a linear combination of the mean-model predictors</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> status: [<span style="color: #0000BB;">"explicit"</span>]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">independence</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> expression: `\mathrm{mpg}_i \perp \mathrm{mpg}_j \mid X \text{ for } i \ne j`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> meaning: Observations are conditionally independent given the predictors</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> status: [<span style="color: #0000BB;">"follows from the formula"</span>]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">no_missing_at_random</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> expression: `—`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> meaning: Observations are assumed not missing in a way that depends on the</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> unobserved response</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> status: [<span style="color: #0000BB;">"your responsibility"</span>]</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">R syntax to mathematics</span> ──</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Formula bridge (</span><span style="color: #0000BB; font-weight: bold;">"both"</span><span style="font-weight: bold;">)</span> ──</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">mu</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> R: `mpg ~ wt`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> meaning: Expected mpg is a linear function of the mean-model predictors</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> math: `\mu_i = \beta_{0} + \beta_{1} \, \mathrm{wt}_i`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> matrix: `\boldsymbol{\mu} = \mathbf{X} \boldsymbol{\beta}`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">What each coefficient means</span> ──</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Parameter interpretation (</span><span style="color: #0000BB; font-weight: bold;">"all"</span><span style="font-weight: bold;">)</span> ──</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">submodel: mu</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-style: italic;">(Intercept)</span> [<span style="color: #0000BB;">"intercept"</span>] estimate = <span style="color: #0000BB;">"37.3"</span> (33.5, 41.1) *</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> link: Expected mpg at the reference</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> natural: Expected mpg for the reference case</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> variance: —</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> biological: Baseline mpg in the reference condition</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-style: italic;">wt</span> [<span style="color: #0000BB;">"slope"</span>] estimate = <span style="color: #0000BB;">"-5.34"</span> (-6.49, -4.20) *</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> link: Linear change in expected mpg per unit of wt</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> natural: Expected mpg changes by -5.34 per unit of wt</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> variance: —</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> biological: A unit change in wt shifts the expected mpg by -5.34</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">How the variation splits</span> ──</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 5</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   parameter group    term     sd_estimate var_estimate</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> residual  residual Residual        3.05         9.28</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Index vs matrix notation</span> ──</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Notation bridge</span> ──</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">conditional_distribution</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> index: `\mathrm{mpg}_i \mid \mu_i,\, \sigma \sim \mathrm{Normal}(\mu_i,\,</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> \sigma^2)`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> matrix: `\mathbf{mpg} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} \sim</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2))`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dimension: `\mathbb{R}^n` (= `\mathbb{R}^{32}`)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">mu_linear_predictor</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> index: `\mu_i = \beta_{0} + \beta_{1} \, \mathrm{wt}_i`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> matrix: `\boldsymbol{\mu} = \mathbf{X} \boldsymbol{\beta}`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dimension: `\mathbb{R}^n` (= `\mathbb{R}^{32}`)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">mpg</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> index: `\mathrm{mpg}_i`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> matrix: `\mathbf{mpg}`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dimension: `\mathbb{R}^n` (= `\mathbb{R}^{32}`)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">parameter</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> index: `\mu_i`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> matrix: `\boldsymbol{\mu}`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dimension: `\mathbb{R}^n` (= `\mathbb{R}^{32}`)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">residual_sd</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> index: `\sigma`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> matrix: `\boldsymbol{\sigma}`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dimension: `scalar (constant across observations)` (= `scalar`)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">coefficient</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> index: `\beta_{0}, \beta_{1}`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> matrix: `\boldsymbol{\beta}`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dimension: `\mathbb{R}^{p_\mu}` (= `\mathbb{R}^{2}`)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">design_matrix</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> index: `--`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> matrix: `\mathbf{X}`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> dimension: `\mathbb{R}^{n \times p_\mu}` (= `\mathbb{R}^{32 \times 2}`)</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

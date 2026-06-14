@@ -139,6 +139,19 @@
   `y = X\hat\beta + Z\hat u + \hat\varepsilon` and closes.
   Fixed-effects-only fits are unchanged.
 
+- **Documentation corrections.**
+  [`symbolize.glm()`](https://itchyshin.github.io/symbolizer/reference/symbolize.glm.md)’s
+  help wrongly said its confidence intervals are profile-likelihood and
+  labelled `"profile"`; it actually uses fast Wald intervals
+  ([`confint.default()`](https://rdrr.io/r/stats/confint.html)) labelled
+  `"wald"`. The
+  [`explain()`](https://itchyshin.github.io/symbolizer/reference/explain.md)
+  example called `explain(symbolize(fit))`, which would error
+  ([`explain()`](https://itchyshin.github.io/symbolizer/reference/explain.md)
+  takes the fit directly); it now reads `explain(lm(...))` and is
+  runnable. `VISION.md` listed the retired status word `Unsupported`
+  instead of `Unsupported or blocked`.
+
 ### `symbolizer-sem` vignette: real data + team review
 
 - **The SEM vignette now uses real data.** The worked example was

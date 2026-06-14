@@ -46,8 +46,11 @@ A `symbolized_model` object.
 
 ## Confidence intervals
 
-CIs come from `stats::confint(fit)`, which for `glm` uses profile
-likelihood by default. `ci_method` is labelled `"profile"`.
+CIs come from `stats::confint.default(fit)` — fast Wald intervals. (The
+default [`stats::confint()`](https://rdrr.io/r/stats/confint.html) for a
+`glm` uses profile likelihood, which is slow;
+[`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
+uses the Wald form deliberately.) `ci_method` is labelled `"wald"`.
 
 ## References
 

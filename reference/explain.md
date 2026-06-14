@@ -100,5 +100,147 @@ for the act-on-it bundle.
 ## Examples
 
 ``` r
-# explain(symbolize(lm(mpg ~ wt, data = mtcars)))
+# `explain()` takes the fitted model directly -- it runs `symbolize()` for you.
+explain(lm(mpg ~ wt, data = mtcars))
+#> 
+#> ── == explaining your <lm> model == ────────────────────────────────────────────
+#> This is a gaussian model of `mpg` (n = 32) with 1 submodel: mu explains the
+#> mean (using an identity link). Coefficients are fit by maximum likelihood via
+#> stats.
+#> 
+#> ── Equations (both notations) ──
+#> 
+#> ── Equations ──
+#> 
+#> distribution
+#>   index:  \mathrm{mpg}_i \mid \mu_i,\, \sigma \sim \mathrm{Normal}(\mu_i,\, \sigma^2)
+#>   matrix: \mathbf{mpg} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2))
+#> mu_linear_predictor
+#>   index:  \mu_i = \beta_{0} + \beta_{1} \, \mathrm{wt}_i
+#>   matrix: \boldsymbol{\mu} = \mathbf{X} \boldsymbol{\beta}
+#> 
+#> ── The symbols ──
+#> 
+#> ── Symbol dictionary ("both") ──
+#> 
+#> mpg [response]
+#> index: `\mathrm{mpg}_i`
+#> matrix: `\mathbf{mpg}`
+#> dimension: `\mathbb{R}^n` (= `\mathbb{R}^{32}`)
+#> response variable
+#> wt [predictor]
+#> index: `\mathrm{wt}_i`
+#> matrix: `(no matrix form)`
+#> dimension: `column of design matrix` (= `column of X (length 32)`)
+#> continuous predictor
+#> (parameter)
+#> index: `\mu_i`
+#> matrix: `\boldsymbol{\mu}`
+#> dimension: `\mathbb{R}^n` (= `\mathbb{R}^{32}`)
+#> conditional mu of mpg
+#> (residual_sd)
+#> index: `\sigma`
+#> matrix: `\boldsymbol{\sigma}`
+#> dimension: `scalar (constant across observations)` (= `scalar`)
+#> residual standard deviation of mpg
+#> (coefficient)
+#> index: `\beta_{0}, \beta_{1}`
+#> matrix: `\boldsymbol{\beta}`
+#> dimension: `\mathbb{R}^{p_\mu}` (= `\mathbb{R}^{2}`)
+#> mu submodel coefficients
+#> (design_matrix)
+#> index: `(no index form)`
+#> matrix: `\mathbf{X}`
+#> dimension: `\mathbb{R}^{n \times p_\mu}` (= `\mathbb{R}^{32 \times 2}`)
+#> mu submodel design matrix
+#> 
+#> ── What's assumed ──
+#> 
+#> ── Assumptions ──
+#> 
+#> conditional_distribution
+#> expression: `\mathrm{mpg}_i \mid \mu_i,\, \sigma_i \sim
+#> \mathrm{Normal}(\mu_i,\, \sigma_i^2)`
+#> meaning: mpg varies normally around its expected value
+#> status: ["explicit"]
+#> linear_predictor (mu)
+#> expression: `\mu_i = \beta_0 + \sum_k \beta_k X_{ki}`
+#> meaning: Expected mpg is a linear combination of the mean-model predictors
+#> status: ["explicit"]
+#> independence
+#> expression: `\mathrm{mpg}_i \perp \mathrm{mpg}_j \mid X \text{ for } i \ne j`
+#> meaning: Observations are conditionally independent given the predictors
+#> status: ["follows from the formula"]
+#> no_missing_at_random
+#> expression: `—`
+#> meaning: Observations are assumed not missing in a way that depends on the
+#> unobserved response
+#> status: ["your responsibility"]
+#> 
+#> ── R syntax to mathematics ──
+#> 
+#> ── Formula bridge ("both") ──
+#> 
+#> mu
+#> R: `mpg ~ wt`
+#> meaning: Expected mpg is a linear function of the mean-model predictors
+#> math: `\mu_i = \beta_{0} + \beta_{1} \, \mathrm{wt}_i`
+#> matrix: `\boldsymbol{\mu} = \mathbf{X} \boldsymbol{\beta}`
+#> 
+#> ── What each coefficient means ──
+#> 
+#> ── Parameter interpretation ("all") ──
+#> 
+#> ── submodel: mu 
+#> (Intercept) ["intercept"] estimate = "37.3" (33.5, 41.1) *
+#> link: Expected mpg at the reference
+#> natural: Expected mpg for the reference case
+#> variance: —
+#> biological: Baseline mpg in the reference condition
+#> wt ["slope"] estimate = "-5.34" (-6.49, -4.20) *
+#> link: Linear change in expected mpg per unit of wt
+#> natural: Expected mpg changes by -5.34 per unit of wt
+#> variance: —
+#> biological: A unit change in wt shifts the expected mpg by -5.34
+#> 
+#> ── How the variation splits ──
+#> 
+#> # A tibble: 1 × 5
+#>   parameter group    term     sd_estimate var_estimate
+#>   <chr>     <chr>    <chr>          <dbl>        <dbl>
+#> 1 residual  residual Residual        3.05         9.28
+#> ── Index vs matrix notation ──
+#> 
+#> ── Notation bridge ──
+#> 
+#> conditional_distribution
+#> index: `\mathrm{mpg}_i \mid \mu_i,\, \sigma \sim \mathrm{Normal}(\mu_i,\,
+#> \sigma^2)`
+#> matrix: `\mathbf{mpg} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} \sim
+#> \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2))`
+#> dimension: `\mathbb{R}^n` (= `\mathbb{R}^{32}`)
+#> mu_linear_predictor
+#> index: `\mu_i = \beta_{0} + \beta_{1} \, \mathrm{wt}_i`
+#> matrix: `\boldsymbol{\mu} = \mathbf{X} \boldsymbol{\beta}`
+#> dimension: `\mathbb{R}^n` (= `\mathbb{R}^{32}`)
+#> mpg
+#> index: `\mathrm{mpg}_i`
+#> matrix: `\mathbf{mpg}`
+#> dimension: `\mathbb{R}^n` (= `\mathbb{R}^{32}`)
+#> parameter
+#> index: `\mu_i`
+#> matrix: `\boldsymbol{\mu}`
+#> dimension: `\mathbb{R}^n` (= `\mathbb{R}^{32}`)
+#> residual_sd
+#> index: `\sigma`
+#> matrix: `\boldsymbol{\sigma}`
+#> dimension: `scalar (constant across observations)` (= `scalar`)
+#> coefficient
+#> index: `\beta_{0}, \beta_{1}`
+#> matrix: `\boldsymbol{\beta}`
+#> dimension: `\mathbb{R}^{p_\mu}` (= `\mathbb{R}^{2}`)
+#> design_matrix
+#> index: `--`
+#> matrix: `\mathbf{X}`
+#> dimension: `\mathbb{R}^{n \times p_\mu}` (= `\mathbb{R}^{32 \times 2}`)
 ```
