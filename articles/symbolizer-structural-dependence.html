@@ -476,21 +476,21 @@ vector form is for the matrix algebra.</p>
 .sym-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .sym-skip { position: absolute; top: -100px; left: 0; padding: 0.4rem 0.7rem; background: #8a1f22; color: #fff; text-decoration: none; font-size: 0.85rem; z-index: 5; }
 .sym-skip:focus { top: 0; }</style>
-<div id="sym-mcmc-1781447405" class="sym-tabs">
-<a class="sym-skip" href="#sym-mcmc-1781447405-end">Skip three-views
+<div id="sym-mcmc-1781449154" class="sym-tabs">
+<a class="sym-skip" href="#sym-mcmc-1781449154-end">Skip three-views
 widget</a>
 <div class="sym-tablist" role="tablist" aria-label="Three views of the model">
-<button type="button" class="sym-tab sym-active" role="tab" id="sym-mcmc-1781447405-tab-idx" aria-controls="sym-mcmc-1781447405-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
+<button type="button" class="sym-tab sym-active" role="tab" id="sym-mcmc-1781449154-tab-idx" aria-controls="sym-mcmc-1781449154-panel-idx" aria-selected="true" tabindex="0" data-tab="idx">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>1. Index
 </button>
-<button type="button" class="sym-tab" role="tab" id="sym-mcmc-1781447405-tab-eq" aria-controls="sym-mcmc-1781447405-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
+<button type="button" class="sym-tab" role="tab" id="sym-mcmc-1781449154-tab-eq" aria-controls="sym-mcmc-1781449154-panel-eq" aria-selected="false" tabindex="-1" data-tab="eq">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>2. Matrix
 </button>
-<button type="button" class="sym-tab" role="tab" id="sym-mcmc-1781447405-tab-mat" aria-controls="sym-mcmc-1781447405-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
+<button type="button" class="sym-tab" role="tab" id="sym-mcmc-1781449154-tab-mat" aria-controls="sym-mcmc-1781449154-panel-mat" aria-selected="false" tabindex="-1" data-tab="mat">
 <span class="sym-tab-marker" aria-hidden="true" style="margin-right:0.35em">▸</span>3. Equations with data
 </button>
 </div>
-<div id="sym-mcmc-1781447405-panel-idx" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-mcmc-1781447405-tab-idx" data-panel="idx" tabindex="0">
+<div id="sym-mcmc-1781449154-panel-idx" class="sym-panel sym-active" role="tabpanel" aria-labelledby="sym-mcmc-1781449154-tab-idx" data-panel="idx" tabindex="0">
 <p class="sym-caption">
 What happens for each observation <em>i</em> – the per-individual
 reading.
@@ -574,7 +574,7 @@ Point estimates only; uncertainty not shown.
 </p>
 </div>
 </div>
-<div id="sym-mcmc-1781447405-panel-eq" class="sym-panel" role="tabpanel" aria-labelledby="sym-mcmc-1781447405-tab-eq" data-panel="eq" hidden="" tabindex="0">
+<div id="sym-mcmc-1781449154-panel-eq" class="sym-panel" role="tabpanel" aria-labelledby="sym-mcmc-1781449154-tab-eq" data-panel="eq" hidden="" tabindex="0">
 <p class="sym-caption">
 The same model in matrix form – the structural contract every textbook
 past chapter 4 switches to.
@@ -636,7 +636,7 @@ k_{species}}</span></span>
 </li>
 </ul></details>
 </div>
-<div id="sym-mcmc-1781447405-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-mcmc-1781447405-tab-mat" data-panel="mat" hidden="" tabindex="0">
+<div id="sym-mcmc-1781449154-panel-mat" class="sym-panel" role="tabpanel" aria-labelledby="sym-mcmc-1781449154-tab-mat" data-panel="mat" hidden="" tabindex="0">
 <p class="sym-caption">
 The same matrix equation, with your actual numbers stacked inside the
 brackets – what the computer multiplies. Showing first 5 and last 2 rows
@@ -742,9 +742,9 @@ full matrix is 116 × 116.
 </p>
 </div>
 </div>
-<span id="sym-mcmc-1781447405-end" tabindex="-1"></span>
+<span id="sym-mcmc-1781449154-end" tabindex="-1"></span>
 <script>(function() {
-  var root = document.getElementById("sym-mcmc-1781447405");
+  var root = document.getElementById("sym-mcmc-1781449154");
   if (!root) return;
   var tabs   = Array.prototype.slice.call(root.querySelectorAll("[role=\"tab\"]"));
   var panels = Array.prototype.slice.call(root.querySelectorAll("[role=\"tabpanel\"]"));
@@ -858,12 +858,12 @@ the underlying model.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/assumption_table.html">assumption_table</a></span><span class="op">(</span><span class="va">sym_brms</span><span class="op">)</span></span></code></pre></div>
 <div class="table-responsive" style="overflow-x:auto;">
-<table style="width:100%;" class="table">
+<table class="table">
 <colgroup>
-<col width="12%">
-<col width="29%">
-<col width="49%">
 <col width="8%">
+<col width="21%">
+<col width="63%">
+<col width="6%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">assumption</th>
@@ -906,41 +906,47 @@ depends on the unobserved response</td>
 <td align="left">phylo_random_effect</td>
 <td align="left"><span class="math inline">\mathbf{u}_p \sim
 \mathcal{N}(\mathbf{0}, \sigma_p^2 \mathbf{A})</span></td>
-<td align="left">Species-level random effect with covariance
-proportional to the phylogenetic correlation matrix A</td>
+<td align="left">Structured random effect with covariance proportional
+to the relatedness matrix A: phylogenetic correlation among species, or
+additive genetic relatedness among individuals from a pedigree – the
+same animal model (Hadfield &amp; Nakagawa 2010).</td>
 <td align="left">explicit</td>
 </tr>
 <tr class="even">
 <td align="left">phylo_A_positive_definite</td>
 <td align="left"><span class="math inline">\mathbf{A} \succ
 0</span></td>
-<td align="left">A is positive-definite <span class="math inline">k
-\times k</span> phylogenetic correlation matrix derived from a rooted
-tree under Brownian motion</td>
+<td align="left">A is a positive-definite <span class="math inline">k
+\times k</span> relatedness matrix – a phylogenetic correlation matrix
+from a rooted tree, or the additive genetic relationship matrix built
+from a pedigree.</td>
 <td align="left">follows from the formula</td>
 </tr>
 <tr class="odd">
 <td align="left">phylo_tips_only_representation</td>
 <td align="left"><span class="math inline">A_{ij} = T_{ij}/T</span></td>
-<td align="left">Tips-only <span class="math inline">k \times k</span>
-representation: A_{ij} is shared branch length between species i and j
-divided by total tree height (Hadfield 2010)</td>
+<td align="left">A_{ij} is the relatedness of i and j: shared branch
+length / tree height for a phylogeny (tips-only representation; Hadfield
+2010), or twice the coefficient of kinship for a pedigree.</td>
 <td align="left">follows from the formula</td>
 </tr>
 <tr class="even">
 <td align="left">phylo_brownian_motion</td>
 <td align="left"><span class="math inline">\mathrm{Var}(u_p) \propto
 \mathrm{time}</span></td>
-<td align="left">Brownian motion prior: phylogenetic variance
-accumulates linearly with branch length</td>
+<td align="left">Phylogenetic model: a Brownian-motion prior, variance
+accumulating with branch length (refit for OU / Pagel’s lambda if
+intended). A pedigree animal model instead assumes additive Mendelian
+inheritance through a correct pedigree.</td>
 <td align="left">your responsibility</td>
 </tr>
 <tr class="odd">
 <td align="left">phylo_ultrametric_tree</td>
 <td align="left">—</td>
-<td align="left">Tree is ultrametric – non-ultrametric trees still
-produce a valid A but break the strict Brownian-motion variance
-interpretation</td>
+<td align="left">Phylogenetic model: the tree is assumed ultrametric
+(non-ultrametric trees still give a valid A but break the strict
+Brownian-motion variance reading). Not applicable to a pedigree animal
+model.</td>
 <td align="left">your responsibility</td>
 </tr>
 </tbody>

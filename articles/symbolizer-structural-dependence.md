@@ -277,7 +277,7 @@ sym_mcmc$metadata$heritability           # h^2 derived automatically
 
 #### Three-views widget for the MCMCglmm fit
 
-[Skip three-views widget](#sym-mcmc-1781447405-end)
+[Skip three-views widget](#sym-mcmc-1781449154-end)
 
 ▸1. Index
 
@@ -504,11 +504,11 @@ assumption_table(sym_brms)
 | linear_predictor | \mu_i = \beta_0 + \sum_k \beta_k X\_{ki} | Expected Zr is a linear combination of the mean-model predictors | explicit |
 | independence_given_random_effects | \mathrm{Zr}\_i \perp \mathrm{Zr}\_j \mid X\\ \mathbf{u} \text{ for } i \ne j | Observations are conditionally independent given the predictors and the random effects | explicit |
 | no_missing_at_random | — | Observations are assumed not missing in a way that depends on the unobserved response | your responsibility |
-| phylo_random_effect | \mathbf{u}\_p \sim \mathcal{N}(\mathbf{0}, \sigma_p^2 \mathbf{A}) | Species-level random effect with covariance proportional to the phylogenetic correlation matrix A | explicit |
-| phylo_A_positive_definite | \mathbf{A} \succ 0 | A is positive-definite k \times k phylogenetic correlation matrix derived from a rooted tree under Brownian motion | follows from the formula |
-| phylo_tips_only_representation | A\_{ij} = T\_{ij}/T | Tips-only k \times k representation: A\_{ij} is shared branch length between species i and j divided by total tree height (Hadfield 2010) | follows from the formula |
-| phylo_brownian_motion | \mathrm{Var}(u_p) \propto \mathrm{time} | Brownian motion prior: phylogenetic variance accumulates linearly with branch length | your responsibility |
-| phylo_ultrametric_tree | — | Tree is ultrametric – non-ultrametric trees still produce a valid A but break the strict Brownian-motion variance interpretation | your responsibility |
+| phylo_random_effect | \mathbf{u}\_p \sim \mathcal{N}(\mathbf{0}, \sigma_p^2 \mathbf{A}) | Structured random effect with covariance proportional to the relatedness matrix A: phylogenetic correlation among species, or additive genetic relatedness among individuals from a pedigree – the same animal model (Hadfield & Nakagawa 2010). | explicit |
+| phylo_A_positive_definite | \mathbf{A} \succ 0 | A is a positive-definite k \times k relatedness matrix – a phylogenetic correlation matrix from a rooted tree, or the additive genetic relationship matrix built from a pedigree. | follows from the formula |
+| phylo_tips_only_representation | A\_{ij} = T\_{ij}/T | A\_{ij} is the relatedness of i and j: shared branch length / tree height for a phylogeny (tips-only representation; Hadfield 2010), or twice the coefficient of kinship for a pedigree. | follows from the formula |
+| phylo_brownian_motion | \mathrm{Var}(u_p) \propto \mathrm{time} | Phylogenetic model: a Brownian-motion prior, variance accumulating with branch length (refit for OU / Pagel’s lambda if intended). A pedigree animal model instead assumes additive Mendelian inheritance through a correct pedigree. | your responsibility |
+| phylo_ultrametric_tree | — | Phylogenetic model: the tree is assumed ultrametric (non-ultrametric trees still give a valid A but break the strict Brownian-motion variance reading). Not applicable to a pedigree animal model. | your responsibility |
 
 ### Face 3 (light): `phylolm::phylolm()` — the marginal PGLS form
 

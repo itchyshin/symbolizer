@@ -55,6 +55,22 @@
 
 ### Bug fixes
 
+- **Relatedness-structure prose now covers pedigree animal models, not
+  just phylogenies.** A pedigree (quantitative-genetics) animal model in
+  MCMCglmm / brms / drmTMB is the *same* model as a phylogenetic mixed
+  model — `A` is a relatedness matrix and
+  `\sigma_p^2/(\sigma_p^2+\sigma_e^2)` is heritability either way
+  (Hadfield & Nakagawa 2010). The `requires = phylo` assumption block
+  said “species / shared evolutionary history / branch length”
+  exclusively; it now reads `A` as the relatedness matrix (phylogenetic
+  correlation among species, *or* additive genetic relatedness among
+  individuals from a pedigree) and the heritability reading as
+  phylogenetic signal *or* narrow-sense `h^2`. The genuinely
+  tree-specific assumptions (Brownian motion, ultrametric tree) are
+  scoped to “phylogenetic model” with the pedigree analogue noted, and
+  the `phylolm` / PGLS block (always species-level comparative) is
+  unchanged.
+
 - **The Confidence-Eye glyph is now screen-reader accessible.** Each
   `role="img"` eye in
   [`as_html_factor_views()`](https://itchyshin.github.io/symbolizer/reference/as_html_factor_views.md)
