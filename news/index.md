@@ -139,6 +139,14 @@
   `y = X\hat\beta + Z\hat u + \hat\varepsilon` and closes.
   Fixed-effects-only fits are unchanged.
 
+- **A snake_case random-slope covariate no longer breaks the equation.**
+  A model with `(1 + body_size | g)` rendered the slope term as a raw
+  `body_size_i`, whose underscore silently turned into a subscript and
+  broke the math (while the matching fixed effect was correctly
+  escaped). The slope covariate now renders through the same
+  default-symbol path — `\mathrm{body\_size}_i` — and single-letter
+  predictors are unchanged.
+
 - **Documentation corrections.**
   [`symbolize.glm()`](https://itchyshin.github.io/symbolizer/reference/symbolize.glm.md)’s
   help wrongly said its confidence intervals are profile-likelihood and
