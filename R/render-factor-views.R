@@ -297,8 +297,19 @@ fv_eye_rows <- function(tbl, label_col, null_val = NA_real_) {
     ci_str <- if (is.finite(lo[i]) && is.finite(hi[i])) {
       paste0(" (", fmt(lo[i]), ", ", fmt(hi[i]), ")")
     } else ""
+    # Accessible name for the eye glyph: `role="img"` needs a <title> or screen
+    # readers announce an unlabelled graphic. Describes the estimate, the
+    # compatibility interval, and whether it clears the null line.
+    eye_title <- paste0(
+      fv_esc(labs[i]), ": estimate ", fmt(est[i]),
+      if (is.finite(lo[i]) && is.finite(hi[i])) {
+        paste0(", 95% compatibility interval ", fmt(lo[i]), " to ", fmt(hi[i]))
+      } else "",
+      if (isTRUE(excl[i])) ", interval excludes the null line" else ""
+    )
     svg <- paste0(
       "<svg class=\"fv-eye\" viewBox=\"0 0 ", W, " ", H, "\" preserveAspectRatio=\"none\" role=\"img\">",
+      "<title>", eye_title, "</title>",
       "<line x1=\"0\" y1=\"", mid, "\" x2=\"", W, "\" y2=\"", mid, "\" class=\"fv-axis\"/>",
       null_line,
       "<rect x=\"", round(x_lo, 1), "\" y=\"", mid - 6, "\" width=\"",
