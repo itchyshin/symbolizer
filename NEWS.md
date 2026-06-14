@@ -39,6 +39,16 @@
 
 ## Bug fixes
 
+* **Interaction prose no longer uses a causal frame.** The biological reading of
+  a Gaussian continuous-by-continuous / continuous-by-factor interaction said
+  "the effect of X on Y…" — a causal claim the package avoids elsewhere. It now
+  matches the associational convention used for main effects ("how much a unit
+  change in X shifts the expected Y").
+
+* **The glmmTMB random-effects capability note no longer under-claims.** Gaussian
+  random slopes `(1 + x | group)` render correctly, but the registry note listed
+  only random intercepts; it now records slopes too (matching the `lme4` note).
+
 * **A constant-scale Gaussian no longer claims heteroscedasticity in the matrix
   form.** The matrix view wrote the residual covariance as
   `\mathrm{diag}(\boldsymbol{\sigma}^2)` (a per-observation, vector variance)

@@ -57,7 +57,7 @@ gllvmTMB,student,*,Planned or reserved,,Student-t family.,symbolizer
 gllvmTMB,ordinal_probit,*,Planned or reserved,,Ordinal probit family.,symbolizer
 glmmTMB,gaussian,mu,First slice,0.7.0,Gaussian conditional submodel (identity link).,symbolizer
 glmmTMB,gaussian,sigma,First slice,0.7.0,"Distributional sigma submodel from `dispformula = ~ z` (log link).",symbolizer
-glmmTMB,gaussian,random_effects,First slice,0.7.0,"Random intercepts (1 | group) on the conditional submodel; nested / crossed / RE-on-sigma still planned.",symbolizer
+glmmTMB,gaussian,random_effects,First slice,0.7.0,"Random intercepts (1 | group) and slopes (1 + x | group) on the conditional submodel; nested / crossed / RE-on-sigma still planned.",symbolizer
 glmmTMB,gaussian,zi,Planned or reserved,,Zero-inflation submodel.,symbolizer
 glmmTMB,binomial,mu,First slice,0.11.0,Binomial / Bernoulli conditional submodel (logit link).,symbolizer
 glmmTMB,binomial,random_effects,First slice,0.11.0,"Random intercepts (1 | group) on the binomial conditional submodel.",symbolizer
