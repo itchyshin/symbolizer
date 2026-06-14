@@ -271,6 +271,13 @@ vc_gaussian_residual_var <- function(fit) {
   }
   s <- suppressWarnings(tryCatch(stats::sigma(fit), error = function(e) NULL))
   if (is.null(s) || length(s) == 0L || !all(is.finite(s))) {
+    # A non-finite scalar sigma usually means the residual SD is MODELLED, not
+    # that retrieval failed: glmmTMB::sigma() returns NA for a `dispformula`
+    # fit. Report that honestly so the result does not read as a bug.
+    if (vc_has_modelled_dispersion(fit)) {
+      return(list(value = NA_real_,
+                  reason = variance_reading("reason_location_scale")))
+    }
     return(list(value = NA_real_,
                 reason = "could not retrieve a residual SD from the fit."))
   }
@@ -282,6 +289,18 @@ vc_gaussian_residual_var <- function(fit) {
     return(list(value = as.numeric(s[[1L]])^2, reason = NA_character_))
   }
   list(value = NA_real_, reason = variance_reading("reason_location_scale"))
+}
+
+# TRUE when the fit models the residual SD with predictors, so there is no
+# single residual variance. glmmTMB's `dispformula = ~ z` is the case
+# stats::sigma() reports as a scalar NA; the per-observation location-scale case
+# (drmTMB, sigma() a vector) is handled by the vector branch above. Restricted
+# to glmmTMB so a plain lm/lmer (whose formula() ignores `component`) is not
+# misread as having a modelled dispersion.
+vc_has_modelled_dispersion <- function(fit) {
+  if (!inherits(fit, "glmmTMB")) return(FALSE)
+  df <- tryCatch(stats::formula(fit, component = "disp"), error = function(e) NULL)
+  !is.null(df) && length(all.vars(df)) > 0L
 }
 
 vc_link <- function(fit) {

@@ -27,6 +27,12 @@ test_that("symbolize.sdmTMB variance_components has spatial parameters", {
   expect_true(nrow(vc) >= 2L)
   expect_true(any(vc$kind == "spatial_random"))
   expect_true(any(vc$kind == "residual"))
+  # The Matern range is carried (a distance biologists need to read the field),
+  # with its estimate in sd_estimate but NA var_estimate (it is not a variance).
+  rng <- vc[vc$kind == "spatial_range", , drop = FALSE]
+  expect_equal(nrow(rng), 1L)
+  expect_true(is.finite(rng$sd_estimate[[1L]]))
+  expect_true(is.na(rng$var_estimate[[1L]]))
 })
 
 test_that("symbolize.sdmTMB random_effects has a site/intercept row", {

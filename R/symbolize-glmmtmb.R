@@ -565,15 +565,23 @@ glmm_build_variance_components <- function(fit, re_per_entry) {
       }
     }
   }
-  # Residual SD (Gaussian only -- sigma() reports it).
+  # Residual SD (Gaussian only). glmmTMB::sigma() returns a single constant only
+  # when the dispersion is NOT modelled; with a `dispformula = ~ z` it returns
+  # NA, because the residual SD then varies per observation. Add the row only
+  # when sigma is a finite constant, so a modelled-dispersion fit does not get a
+  # misleading `NA` Residual row (variance_partition()/icc() then report the
+  # residual as modelled, not as a retrieval failure).
   if (identical(fit$modelInfo$family$family, "gaussian")) {
-    rows[[length(rows) + 1L]] <- tibble::tibble(
-      parameter   = "residual",
-      group       = "residual",
-      term        = "Residual",
-      sd_estimate = as.numeric(glmmTMB::sigma(fit)),
-      var_estimate = as.numeric(glmmTMB::sigma(fit)) ^ 2
-    )
+    s <- tryCatch(as.numeric(glmmTMB::sigma(fit)), error = function(e) NA_real_)
+    if (length(s) == 1L && is.finite(s)) {
+      rows[[length(rows) + 1L]] <- tibble::tibble(
+        parameter   = "residual",
+        group       = "residual",
+        term        = "Residual",
+        sd_estimate = s,
+        var_estimate = s ^ 2
+      )
+    }
   }
   if (length(rows) == 0L) {
     return(tibble::tibble(
