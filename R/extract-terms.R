@@ -182,20 +182,30 @@ extract_terms <- function(formula, data, submodel,
       vars <- strsplit(variable, ":", fixed = TRUE)[[1L]]
       # contrast_level holds one entry per piece (e.g. "b:-" for g:x with g at
       # level b, x continuous). Render a factor piece as its contrast indicator
-      # `[g = b]` -- matching the main-effect factor form -- and a continuous /
-      # transformed piece as its symbol. Without this, a factor inside an
-      # interaction drew as a continuous variable and two distinct interaction
-      # coefficients rendered to identical LaTeX.
+      # `[g = b]` (matching the main-effect factor form), a transformed piece
+      # with its transform wrapper (`\mathrm{log}(x_i)`), and a plain continuous
+      # piece as its bare symbol. Without the factor branch a factor drew as a
+      # continuous variable; without the transform branch the transform was
+      # silently dropped, so `log(x):z` rendered as `x_i z_i`, contradicting the
+      # `\mathrm{log}(x_i)` of the corresponding main effect.
       levels_ <- if (!is.na(contrast_level) && nzchar(contrast_level)) {
         strsplit(contrast_level, ":", fixed = TRUE)[[1L]]
       } else {
         character(0L)
       }
+      # Per-piece transform functions ("log", "", ...). `transform` joins them
+      # with ":" and never carries a namespace "::", so a plain split is safe;
+      # pad the trailing empties that strsplit() drops so indices line up.
+      fns_ <- if (nzchar(transform)) strsplit(transform, ":", fixed = TRUE)[[1L]] else character(0L)
+      length(fns_) <- length(vars)
       latex_pieces <- vapply(seq_along(vars), function(k) {
         lv <- if (k <= length(levels_)) levels_[[k]] else "-"
+        fn <- if (k <= length(fns_) && !is.na(fns_[[k]])) fns_[[k]] else ""
         if (!is.na(lv) && nzchar(lv) && !identical(lv, "-")) {
           sprintf("[%s = \\mathrm{%s}]",
                   escape_latex_text(vars[[k]]), escape_latex_text(lv))
+        } else if (nzchar(fn)) {
+          sprintf("\\mathrm{%s}(%s)", fn, lookup_symbol(vars[[k]]))
         } else {
           lookup_symbol(vars[[k]])
         }

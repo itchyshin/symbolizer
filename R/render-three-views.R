@@ -627,7 +627,7 @@ pdf_three_views_matrix_block_latex <- function(x, head = 5L, tail = 2L,
 #   shape         -- "additive_gaussian" | "additive_log" | "generalized"
 #   link_label    -- LaTeX for the inverse-link operator (\exp, logistic, ...)
 #   family_label  -- LaTeX name of the distribution for the likelihood line
-worked_row_family_spec <- function(family) {
+worked_row_family_spec <- function(family, link = NULL) {
   fam <- tolower(as.character(family))
   list(
     shape = switch(fam,
@@ -635,14 +635,7 @@ worked_row_family_spec <- function(family) {
       student   = "additive_gaussian",
       lognormal = "additive_log",
       "generalized"),
-    link_label = switch(fam,
-      poisson  = "\\exp",
-      binomial = "\\mathrm{logistic}",
-      beta     = "\\mathrm{logistic}",
-      gamma    = "\\exp",
-      nbinom1  = "\\exp",
-      nbinom2  = "\\exp",
-      "\\mathrm{link}^{-1}"),
+    link_label = worked_row_link_label(fam, link),
     family_label = switch(fam,
       poisson  = "\\mathrm{Poisson}",
       binomial = "\\mathrm{Binomial}",
@@ -652,6 +645,33 @@ worked_row_family_spec <- function(family) {
       nbinom2  = "\\mathrm{NegBinom}_2",
       paste0("\\mathrm{", family, "}"))
   )
+}
+
+# Inverse-link operator for the Tab 3 worked row, shown as mu = f(eta). Keyed
+# off the actual LINK, not the family: Gamma defaults to the inverse link
+# (mu = 1/eta), not log, and binomial(probit) is the normal CDF Phi, not the
+# logistic -- deriving the label from the family name alone showed the wrong
+# back-transform (#5). Falls back to the legacy family-based guess only when no
+# link is threaded through (older callers / objects without a submodel link).
+worked_row_link_label <- function(fam, link = NULL) {
+  if (!is.null(link) && !is.na(link) && nzchar(link)) {
+    return(switch(tolower(as.character(link)),
+      log      = "\\exp",
+      logit    = "\\mathrm{logistic}",
+      probit   = "\\Phi",
+      cloglog  = "\\mathrm{cloglog}^{-1}",
+      inverse  = "1/",
+      identity = "\\mathrm{id}",
+      "\\mathrm{link}^{-1}"))
+  }
+  switch(fam,
+    poisson  = "\\exp",
+    binomial = "\\mathrm{logistic}",
+    beta     = "\\mathrm{logistic}",
+    gamma    = "\\exp",
+    nbinom1  = "\\exp",
+    nbinom2  = "\\exp",
+    "\\mathrm{link}^{-1}")
 }
 
 # Family-aware likelihood argument list, mirroring each family's Tab 1
@@ -705,7 +725,10 @@ pdf_three_views_worked_row <- function(x) {
   # The old code hardcoded the Gaussian-additive `y = Xb + eps = y` form
   # for every family -- wrong scale, arithmetically false, and at odds
   # with the PDF's own link-scale stacked block.
-  fam_spec <- worked_row_family_spec(x$model$family)
+  fam_spec <- worked_row_family_spec(
+    x$model$family,
+    link = tryCatch(x$submodels$link[[1L]], error = function(e) NULL)
+  )
   shape    <- fam_spec$shape
   eta_i    <- if (!is.null(ex$eta_hat)) ex$eta_hat[[i]] else mu_i
   resp1    <- sprintf("\\mathrm{%s}_1", resp_sym)
@@ -1403,7 +1426,9 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L,
   # Both anchor the matrix algebra immediately below: each matrix equation
   # is the corresponding worked row stacked n times.
   family_str <- if (!is.null(x$model$family)) as.character(x$model$family[[1L]]) else "gaussian"
-  worked_mu    <- three_views_worked_row(ex, resp_sym, family = family_str)
+  link_mu      <- tryCatch(x$submodels$link[[1L]], error = function(e) NULL)
+  worked_mu    <- three_views_worked_row(ex, resp_sym, family = family_str,
+                                         link = link_mu)
   worked_sigma <- three_views_worked_row_sigma(ex, family = family_str)
 
   # --- Block 3: structured covariance matrix (phylo / spatial / temporal) -
@@ -1638,7 +1663,7 @@ three_views_matrix_block <- function(x, head = 5L, tail = 2L,
 # with the actual numbers. Returns a `$$ ... $$` MathJax block, or NULL
 # if the model doesn't have enough structure to write a meaningful row.
 three_views_worked_row <- function(ex, resp_sym = "\\mathbf{y}",
-                                    family = "gaussian") {
+                                    family = "gaussian", link = NULL) {
   if (is.null(ex$y) || is.null(ex$X) || is.null(ex$beta) || is.null(ex$mu_hat))
     return(NULL)
   if (length(ex$y) < 1L || nrow(ex$X) < 1L) return(NULL)
@@ -1820,7 +1845,7 @@ three_views_worked_row <- function(ex, resp_sym = "\\mathbf{y}",
   # that every family fell through to "additive_gaussian" -- mixing
   # link-scale and response-scale quantities additively and emitting a
   # meaningless ε for Poisson / Beta.
-  fam_spec_wr <- worked_row_family_spec(family)
+  fam_spec_wr <- worked_row_family_spec(family, link)
   shape <- fam_spec_wr$shape
 
   # Fallback RE contribution. A fit WITH random effects whose per-tier
