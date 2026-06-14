@@ -1441,8 +1441,12 @@ drm_build_components <- function(submodels, terms_tbl, re_tbl, response_symbol,
       idx_terms <- vapply(seq_len(nrow(re_for_dpar)), function(i) {
         u_sym <- re_for_dpar$u_symbol_index[[i]]
         pred  <- re_for_dpar$predictor_factor[[i]]
+        # Render the slope covariate through the default-symbol machinery so a
+        # snake_case name escapes its underscore and wraps upright (matching the
+        # fixed effect): `\mathrm{body\_size}_i`, not a raw `body_size_i` whose
+        # `_` silently breaks the math. Single-letter names are unchanged.
         if (is.na(pred)) u_sym else
-          sprintf("%s \\, %s_i", u_sym, pred)
+          sprintf("%s \\, %s", u_sym, default_response_symbol(pred))
       }, character(1L))
       re_idx <- paste(idx_terms, collapse = " + ")
       rhs <- if (nzchar(rhs)) paste(rhs, "+", re_idx) else re_idx
