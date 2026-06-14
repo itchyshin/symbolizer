@@ -91,7 +91,8 @@ extract_terms <- function(formula, data, submodel,
   classify_term <- function(term_label, col_name) {
     if (col_name == "(Intercept)") {
       return(list(role = "intercept", variable = NA_character_,
-                  contrast_level = NA_character_, transform = ""))
+                  contrast_level = NA_character_, transform = "",
+                  basis = NA_character_))
     }
     # Split on the interaction `:` but NOT the namespace `::`, so a term such as
     # `splines::ns(x, 2)` stays one piece instead of mis-parsing as an
@@ -131,10 +132,21 @@ extract_terms <- function(formula, data, submodel,
 
     col_pieces <- strsplit(col_name, "(?<!:):(?!:)", perl = TRUE)[[1L]]
     levels_ <- character(length(pieces))
+    basis_  <- character(length(pieces))
     for (k in seq_along(pieces)) {
       var_k <- vars[k]
-      if (var_k %in% factor_vars && nchar(col_pieces[k]) > nchar(pieces[k])) {
-        levels_[k] <- substring(col_pieces[k], nchar(pieces[k]) + 1L)
+      extra <- if (nchar(col_pieces[k]) > nchar(pieces[k]) &&
+                   startsWith(col_pieces[k], pieces[k])) {
+        substring(col_pieces[k], nchar(pieces[k]) + 1L)
+      } else ""
+      if (var_k %in% factor_vars && nzchar(extra)) {
+        # trailing chars after the variable name are the factor level (e.g. "gb")
+        levels_[k] <- extra
+      } else if (nzchar(fns[k]) && nzchar(extra)) {
+        # for a multi-column basis (poly/ns/bs) the trailing chars after the
+        # call are the basis index ("poly(x, 2)1" -> "1"), so distinct basis
+        # columns render distinctly instead of collapsing to identical LaTeX.
+        basis_[k] <- extra
       }
     }
 
@@ -145,28 +157,34 @@ extract_terms <- function(formula, data, submodel,
         paste(ifelse(nzchar(levels_), levels_, "-"), collapse = ":")
       } else NA_character_
       transform <- if (any(nzchar(fns))) paste(fns, collapse = ":") else ""
+      basis <- if (any(nzchar(basis_))) {
+        paste(ifelse(nzchar(basis_), basis_, "-"), collapse = ":")
+      } else NA_character_
     } else if (nzchar(fns[1L])) {
       role <- "transformation"
       variable <- vars[1L]
       contrast_level <- NA_character_
       transform <- fns[1L]
+      basis <- if (nzchar(basis_[1L])) basis_[1L] else NA_character_
     } else if (vars[1L] %in% factor_vars) {
       role <- "factor_contrast"
       variable <- vars[1L]
       contrast_level <- if (nzchar(levels_[1L])) levels_[1L] else NA_character_
       transform <- ""
+      basis <- NA_character_
     } else {
       role <- "predictor"
       variable <- vars[1L]
       contrast_level <- NA_character_
       transform <- ""
+      basis <- NA_character_
     }
-    list(role = role, variable = variable,
-         contrast_level = contrast_level, transform = transform)
+    list(role = role, variable = variable, contrast_level = contrast_level,
+         transform = transform, basis = basis)
   }
 
   build_latex <- function(role, variable, contrast_level, transform,
-                          symbol, coef_symbol) {
+                          symbol, coef_symbol, basis = NA_character_) {
     if (role == "intercept") return(coef_symbol)
     if (role == "factor_contrast") {
       # variable + level are raw R data; escape every LaTeX-special character
@@ -198,14 +216,24 @@ extract_terms <- function(formula, data, submodel,
       # pad the trailing empties that strsplit() drops so indices line up.
       fns_ <- if (nzchar(transform)) strsplit(transform, ":", fixed = TRUE)[[1L]] else character(0L)
       length(fns_) <- length(vars)
+      # per-piece basis index ("1", "-", ...) for poly/ns/bs pieces, parallel to
+      # levels_; subscripts the transformed piece so poly(x,2):z renders
+      # \mathrm{poly}(x_i)_{1} z_i and ..._{2} z_i instead of identically.
+      basis_ <- if (!is.na(basis) && nzchar(basis)) {
+        strsplit(basis, ":", fixed = TRUE)[[1L]]
+      } else character(0L)
       latex_pieces <- vapply(seq_along(vars), function(k) {
         lv <- if (k <= length(levels_)) levels_[[k]] else "-"
         fn <- if (k <= length(fns_) && !is.na(fns_[[k]])) fns_[[k]] else ""
+        bs <- if (k <= length(basis_)) basis_[[k]] else "-"
         if (!is.na(lv) && nzchar(lv) && !identical(lv, "-")) {
           sprintf("[%s = \\mathrm{%s}]",
                   escape_latex_text(vars[[k]]), escape_latex_text(lv))
         } else if (nzchar(fn)) {
-          sprintf("\\mathrm{%s}(%s)", fn, lookup_symbol(vars[[k]]))
+          sub <- if (!is.na(bs) && nzchar(bs) && !identical(bs, "-")) {
+            sprintf("_{%s}", bs)
+          } else ""
+          sprintf("\\mathrm{%s}(%s)%s", fn, lookup_symbol(vars[[k]]), sub)
         } else {
           lookup_symbol(vars[[k]])
         }
@@ -215,8 +243,11 @@ extract_terms <- function(formula, data, submodel,
     }
     if (role == "transformation") {
       inner_sym <- lookup_symbol(variable)
-      return(sprintf("%s \\, \\mathrm{%s}(%s)",
-                     coef_symbol, transform, inner_sym))
+      # multi-column bases (poly/ns/bs) carry a basis index so their distinct
+      # coefficients render distinctly: \mathrm{poly}(x_i)_{1}, ..._{2}.
+      sub <- if (!is.na(basis) && nzchar(basis)) sprintf("_{%s}", basis) else ""
+      return(sprintf("%s \\, \\mathrm{%s}(%s)%s",
+                     coef_symbol, transform, inner_sym, sub))
     }
     paste0(coef_symbol, " \\, ", symbol)
   }
@@ -247,7 +278,7 @@ extract_terms <- function(formula, data, submodel,
     symbol <- if (is.na(info$variable)) NA_character_ else lookup_symbol(info$variable)
     latex_term <- build_latex(
       info$role, info$variable, info$contrast_level, info$transform,
-      symbol, coef_symbol
+      symbol, coef_symbol, info$basis
     )
     rows[[ci]] <- tibble::tibble(
       submodel = submodel,
