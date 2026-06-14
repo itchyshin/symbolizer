@@ -202,3 +202,30 @@ test_that("a transform inside an interaction keeps its wrapper in the LaTeX", {
   expect_true(any(grepl("mathrm\\{scale\\}\\(", fr$latex_term)))
   expect_true(any(grepl("[g = \\mathrm{b}]", fr$latex_term, fixed = TRUE)))
 })
+
+test_that("poly()/ns() basis columns render with distinct basis-index subscripts", {
+  d <- data.frame(y = rnorm(60), x = runif(60, 1, 5), z = rnorm(60),
+                  g = factor(rep(c("a", "b"), 30)))
+  # main effect: the two poly bases must render distinctly, not identically.
+  mp <- extract_terms(y ~ poly(x, 2), d, "mu")
+  pr <- mp[mp$role == "transformation", , drop = FALSE]
+  expect_equal(nrow(pr), 2L)
+  expect_match(pr$latex_term[[1L]], "mathrm\\{poly\\}\\(x_i\\)_\\{1\\}")
+  expect_match(pr$latex_term[[2L]], "mathrm\\{poly\\}\\(x_i\\)_\\{2\\}")
+  expect_equal(length(unique(pr$latex_term)), 2L)
+
+  # a single-column transform gets NO spurious basis subscript (the basis index
+  # follows the closing paren: `)_{...}`; the coefficient's own `\beta_{1}`
+  # subscript must not be mistaken for one).
+  ml <- extract_terms(y ~ log(x), d, "mu")
+  expect_false(grepl(")_{", ml$latex_term[[2L]], fixed = TRUE))
+
+  # inside an interaction the subscript lands on the basis piece, and a
+  # poly-by-factor term keeps BOTH the basis index and the contrast level.
+  ipf <- extract_terms(y ~ poly(x, 2):g, d, "mu")
+  ir  <- ipf[ipf$role == "interaction", , drop = FALSE]
+  expect_true(any(grepl("mathrm\\{poly\\}\\(x_i\\)_\\{1\\}", ir$latex_term)))
+  expect_true(any(grepl("mathrm\\{poly\\}\\(x_i\\)_\\{2\\}", ir$latex_term)))
+  expect_true(any(grepl("[g = \\mathrm{b}]", ir$latex_term, fixed = TRUE)))
+  expect_equal(length(unique(ir$latex_term)), nrow(ir))   # all distinct
+})
