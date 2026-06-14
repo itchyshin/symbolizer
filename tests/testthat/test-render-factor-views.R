@@ -38,6 +38,10 @@ test_that("Confidence-Eye rows carry a region, hollow point, and null line", {
   expect_match(html, "fv-pt")      # hollow point estimate
   expect_match(html, "fv-null")    # dashed null reference line
   expect_match(html, "class=\"fv-eye\"")
+  # each role="img" eye carries an accessible <title> (estimate + interval) so a
+  # screen reader does not announce an unlabelled graphic
+  expect_match(html, "<svg class=\"fv-eye\"[^>]*role=\"img\"><title>", perl = TRUE)
+  expect_match(html, "<title>[^<]*compatibility interval", perl = TRUE)
 })
 
 test_that("a continuous-by-continuous interaction shows no spurious 'install emmeans' note", {
