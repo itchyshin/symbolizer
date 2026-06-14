@@ -277,7 +277,7 @@ sym_mcmc$metadata$heritability           # h^2 derived automatically
 
 #### Three-views widget for the MCMCglmm fit
 
-[Skip three-views widget](#sym-mcmc-1781442864-end)
+[Skip three-views widget](#sym-mcmc-1781443550-end)
 
 ▸1. Index
 

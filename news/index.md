@@ -110,6 +110,17 @@
   `\beta\, \mathrm{log}(x_i)\, z_i`, and factor × transform combines the
   contrast indicator with the wrapper (`\mathrm{scale}(x_i)\,[g = b]`).
 
+- **[`poly()`](https://rdrr.io/r/stats/poly.html) / `ns()` / `bs()`
+  basis columns render distinctly.** The two columns of `poly(x, 2)`
+  (and spline bases) drew identical LaTeX, so distinct coefficients were
+  indistinguishable. Each basis column now carries its index as a
+  subscript — `\mathrm{poly}(x_i)_{1}`, `\mathrm{poly}(x_i)_{2}` — read
+  from the model-matrix column name, so even `poly(x, 2):g` keeps both
+  the basis index and the contrast level. Single-column transforms
+  (`log`, `scale`, `I`) are unchanged. (This is honest about orthogonal
+  bases — those columns are basis functions, not the raw powers `x`,
+  `x^2`.)
+
 - **The Tab 3 worked row shows the correct inverse-link.** The
   back-transform `\mu = f(\eta)` was hard-coded by family
   (`gamma → \exp`, `binomial → logistic`), so a
