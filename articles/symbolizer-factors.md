@@ -369,7 +369,7 @@ the `0`s and `1`s of the dummy column sit next to the continuous
 as_html_three_views(sym3)
 ```
 
-[Skip three-views widget](#sym-sym-1781442784-end)
+[Skip three-views widget](#sym-sym-1781442820-end)
 
 ▸1. Index
 
@@ -1292,7 +1292,7 @@ pairwise, interactions — with Confidence-Eye uncertainty bands.
 as_html_factor_views(sym2)
 ```
 
-[Skip factor-views widget](#symfv-symfv-1781442787-end)
+[Skip factor-views widget](#symfv-symfv-1781442823-end)
 
 ▸1. Coding scheme
 
