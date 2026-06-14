@@ -336,7 +336,7 @@ three-view widget:
 as_html_three_views(sym4)
 ```
 
-[Skip three-views widget](#sym-sym-1781444282-end)
+[Skip three-views widget](#sym-sym-1781446523-end)
 
 ▸1. Index
 

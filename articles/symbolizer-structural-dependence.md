@@ -277,7 +277,7 @@ sym_mcmc$metadata$heritability           # h^2 derived automatically
 
 #### Three-views widget for the MCMCglmm fit
 
-[Skip three-views widget](#sym-mcmc-1781444304-end)
+[Skip three-views widget](#sym-mcmc-1781446545-end)
 
 ▸1. Index
 
@@ -342,11 +342,10 @@ across-species variation remains after fixed-effect predictors are
 accounted for.
 
 \begin{aligned} \mathbf{zr} \mid \boldsymbol{\mu},\\ \boldsymbol{\sigma}
-& \sim \mathcal{N}(\boldsymbol{\mu},\\
-\mathrm{diag}(\boldsymbol{\sigma}^2)) \\ \boldsymbol{\mu} & = \mathbf{X}
-\boldsymbol{\beta} + \mathbf{u} \\ \mathbf{u}\_{species} & \sim
-\mathcal{N}(\mathbf{0},\\ \sigma\_{species}^2 \mathbf{A}\_{116 \times
-116}) \end{aligned}
+& \sim \mathcal{N}(\boldsymbol{\mu},\\ \sigma^2 \mathbf{I}\_n) \\
+\boldsymbol{\mu} & = \mathbf{X} \boldsymbol{\beta} + \mathbf{u} \\
+\mathbf{u}\_{species} & \sim \mathcal{N}(\mathbf{0},\\
+\sigma\_{species}^2 \mathbf{A}\_{116 \times 116}) \end{aligned}
 
 where:
 

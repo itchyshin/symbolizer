@@ -55,6 +55,30 @@
 
 ### Bug fixes
 
+- **A constant-scale Gaussian no longer claims heteroscedasticity in the
+  matrix form.** The matrix view wrote the residual covariance as
+  `\mathrm{diag}(\boldsymbol{\sigma}^2)` (a per-observation, vector
+  variance) even when the residual SD is constant. It now reads
+  `\sigma^2 \mathbf{I}_n` for constant scale, and keeps the
+  `\mathrm{diag}` form only when the SD is actually modelled (a scale
+  submodel or a `dispformula`).
+
+- **A glmmTMB `dispformula` no longer reports a residual-retrieval
+  failure.** With a modelled dispersion,
+  [`glmmTMB::sigma()`](https://rdrr.io/r/stats/sigma.html) returns `NA`
+  (the residual SD varies per observation). The variance-components
+  table no longer adds a misleading `NA` Residual row, and
+  [`icc()`](https://itchyshin.github.io/symbolizer/reference/icc.md) /
+  [`variance_partition()`](https://itchyshin.github.io/symbolizer/reference/variance_partition.md)
+  now say the residual SD is modelled (a location-scale model) instead
+  of “could not retrieve a residual”.
+
+- **`sdmTMB` variance components now carry the spatial range.** The
+  Matérn range (the distance at which spatial correlation decays to
+  ~0.13 — needed to read the spatial field) was dropped. It now appears
+  with its estimate; it is a distance, not a variance, so it carries no
+  `var_estimate` and is excluded from variance partitioning.
+
 - **[`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
   no longer crashes on a transformed predictor.** A model with `log(x)`,
   `poly(x, 2)`, `scale(x)`, `I(x^2)`, or `splines::ns(x, 2)` raised

@@ -114,7 +114,7 @@ explain(lm(mpg ~ wt, data = mtcars))
 #> 
 #> distribution
 #>   index:  \mathrm{mpg}_i \mid \mu_i,\, \sigma \sim \mathrm{Normal}(\mu_i,\, \sigma^2)
-#>   matrix: \mathbf{mpg} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2))
+#>   matrix: \mathbf{mpg} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} \sim \mathcal{N}(\boldsymbol{\mu},\, \sigma^2 \mathbf{I}_n)
 #> mu_linear_predictor
 #>   index:  \mu_i = \beta_{0} + \beta_{1} \, \mathrm{wt}_i
 #>   matrix: \boldsymbol{\mu} = \mathbf{X} \boldsymbol{\beta}
@@ -217,7 +217,7 @@ explain(lm(mpg ~ wt, data = mtcars))
 #> index: `\mathrm{mpg}_i \mid \mu_i,\, \sigma \sim \mathrm{Normal}(\mu_i,\,
 #> \sigma^2)`
 #> matrix: `\mathbf{mpg} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} \sim
-#> \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2))`
+#> \mathcal{N}(\boldsymbol{\mu},\, \sigma^2 \mathbf{I}_n)`
 #> dimension: `\mathbb{R}^n` (= `\mathbb{R}^{32}`)
 #> mu_linear_predictor
 #> index: `\mu_i = \beta_{0} + \beta_{1} \, \mathrm{wt}_i`

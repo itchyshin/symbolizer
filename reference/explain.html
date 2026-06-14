@@ -166,7 +166,7 @@ effects), <code>notation_bridge</code>.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">distribution</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   index:  \mathrm{mpg}_i \mid \mu_i,\, \sigma \sim \mathrm{Normal}(\mu_i,\, \sigma^2)</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   matrix: \mathbf{mpg} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} \sim \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2))</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   matrix: \mathbf{mpg} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} \sim \mathcal{N}(\boldsymbol{\mu},\, \sigma^2 \mathbf{I}_n)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">mu_linear_predictor</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   index:  \mu_i = \beta_{0} + \beta_{1} \, \mathrm{wt}_i</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   matrix: \boldsymbol{\mu} = \mathbf{X} \boldsymbol{\beta}</span>
@@ -269,7 +269,7 @@ effects), <code>notation_bridge</code>.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> index: `\mathrm{mpg}_i \mid \mu_i,\, \sigma \sim \mathrm{Normal}(\mu_i,\,</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> \sigma^2)`</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> matrix: `\mathbf{mpg} \mid \boldsymbol{\mu},\, \boldsymbol{\sigma} \sim</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> \mathcal{N}(\boldsymbol{\mu},\, \mathrm{diag}(\boldsymbol{\sigma}^2))`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> \mathcal{N}(\boldsymbol{\mu},\, \sigma^2 \mathbf{I}_n)`</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> dimension: `\mathbb{R}^n` (= `\mathbb{R}^{32}`)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">mu_linear_predictor</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> index: `\mu_i = \beta_{0} + \beta_{1} \, \mathrm{wt}_i`</span>

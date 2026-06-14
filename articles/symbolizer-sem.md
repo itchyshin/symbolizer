@@ -160,7 +160,7 @@ as_html_three_views(sym, id = "psem")
 
 ## Node: firesev
 
-[Skip three-views widget](#sym-psemfiresev-1781444295-end)
+[Skip three-views widget](#sym-psemfiresev-1781446537-end)
 
 ▸1. Index
 
@@ -195,9 +195,8 @@ Each observation is normally distributed around a mean that may shift
 with the predictors; the residual SD is constant across observations.
 
 \begin{aligned} \mathbf{f} \mid \boldsymbol{\mu},\\ \boldsymbol{\sigma}
-& \sim \mathcal{N}(\boldsymbol{\mu},\\
-\mathrm{diag}(\boldsymbol{\sigma}^2)) \\ \boldsymbol{\mu} & = \mathbf{X}
-\boldsymbol{\beta} \end{aligned}
+& \sim \mathcal{N}(\boldsymbol{\mu},\\ \sigma^2 \mathbf{I}\_n) \\
+\boldsymbol{\mu} & = \mathbf{X} \boldsymbol{\beta} \end{aligned}
 
 where:
 
@@ -254,7 +253,7 @@ response-equation rows from the worked row above.
 
 ## Node: cover
 
-[Skip three-views widget](#sym-psemcover-1781444295-end)
+[Skip three-views widget](#sym-psemcover-1781446537-end)
 
 ▸1. Index
 
@@ -289,9 +288,8 @@ Each observation is normally distributed around a mean that may shift
 with the predictors; the residual SD is constant across observations.
 
 \begin{aligned} \mathbf{c} \mid \boldsymbol{\mu},\\ \boldsymbol{\sigma}
-& \sim \mathcal{N}(\boldsymbol{\mu},\\
-\mathrm{diag}(\boldsymbol{\sigma}^2)) \\ \boldsymbol{\mu} & = \mathbf{X}
-\boldsymbol{\beta} \end{aligned}
+& \sim \mathcal{N}(\boldsymbol{\mu},\\ \sigma^2 \mathbf{I}\_n) \\
+\boldsymbol{\mu} & = \mathbf{X} \boldsymbol{\beta} \end{aligned}
 
 where:
 
@@ -348,7 +346,7 @@ response-equation rows from the worked row above.
 
 ## Node: rich
 
-[Skip three-views widget](#sym-psemrich-1781444295-end)
+[Skip three-views widget](#sym-psemrich-1781446537-end)
 
 ▸1. Index
 
@@ -386,9 +384,8 @@ Each observation is normally distributed around a mean that may shift
 with the predictors; the residual SD is constant across observations.
 
 \begin{aligned} \mathbf{r} \mid \boldsymbol{\mu},\\ \boldsymbol{\sigma}
-& \sim \mathcal{N}(\boldsymbol{\mu},\\
-\mathrm{diag}(\boldsymbol{\sigma}^2)) \\ \boldsymbol{\mu} & = \mathbf{X}
-\boldsymbol{\beta} \end{aligned}
+& \sim \mathcal{N}(\boldsymbol{\mu},\\ \sigma^2 \mathbf{I}\_n) \\
+\boldsymbol{\mu} & = \mathbf{X} \boldsymbol{\beta} \end{aligned}
 
 where:
 
