@@ -379,7 +379,7 @@ to the actual numeric arrays — with both the
 as_html_three_views(sym_re)
 ```
 
-[Skip three-views widget](#sym-sym-1781446495-end)
+[Skip three-views widget](#sym-sym-1781446988-end)
 
 ▸1. Index
 

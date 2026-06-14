@@ -369,7 +369,7 @@ the `0`s and `1`s of the dummy column sit next to the continuous
 as_html_three_views(sym3)
 ```
 
-[Skip three-views widget](#sym-sym-1781446502-end)
+[Skip three-views widget](#sym-sym-1781446994-end)
 
 ▸1. Index
 
@@ -600,7 +600,7 @@ parameter_interpretation(sym4, scale = "biological")
 | mu | (Intercept) | intercept | 30.9 | 28.3, 33.5 \* | Baseline body_mass in the reference condition |
 | mu | sex | factor_contrast_interaction | 3.04 | -0.801, 6.87 | Because sex interacts with another predictor, the male-vs-female difference in body_mass is not a single number: 3.04 is the difference when the interacting predictor = 0; see group_means() / group_slopes() for the marginal effect. |
 | mu | body_size | slope | 0.198 | 0.173, 0.223 \* | A unit change in body_size shifts the expected body_mass by 0.198 |
-| mu | sex:body_size | interaction_cont_factor | 0.0669 | 0.0303, 0.104 \* | The effect of body_size on body_mass differs by 0.0669 between male and female. Call `group_slopes(sym, continuous = "body_size")` to see each group’s slope on the response scale, with confidence intervals. |
+| mu | sex:body_size | interaction_cont_factor | 0.0669 | 0.0303, 0.104 \* | How much a unit change in body_size shifts the expected body_mass (its slope) differs by 0.0669 between male and female. Call `group_slopes(sym, continuous = "body_size")` to see each group’s slope on the response scale, with confidence intervals. |
 | sigma | (Intercept) | intercept | 1.11 | 0.979, 1.23 \* | Baseline level of unexplained individual variation in body_mass |
 
 *Rows marked `*` have a 95% confidence interval that excludes zero (CI
@@ -1292,7 +1292,7 @@ pairwise, interactions — with Confidence-Eye uncertainty bands.
 as_html_factor_views(sym2)
 ```
 
-[Skip factor-views widget](#symfv-symfv-1781446504-end)
+[Skip factor-views widget](#symfv-symfv-1781446996-end)
 
 ▸1. Coding scheme
 
