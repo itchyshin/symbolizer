@@ -106,3 +106,14 @@ test_that("print method renders a clean per-submodel summary (snapshot)", {
   sym <- symbolize(fit, symbols = c(body_mass = "W_i", temperature = "T_i"))
   expect_snapshot(print(parameter_interpretation(sym)))
 })
+
+test_that("gaussian interaction biological reading is associational, not causal", {
+  set.seed(1); n <- 80
+  d <- data.frame(y = rnorm(n), x = rnorm(n), z = rnorm(n))
+  ip <- parameter_interpretation(symbolize(lm(y ~ x * z, data = d)))
+  bio <- paste(ip$biological_reading, collapse = " ")
+  # the package's non-causal convention ("a unit change in X shifts the expected
+  # Y") -- never the causal "effect of X on Y" frame it forbids elsewhere.
+  expect_match(bio, "shifts the expected")
+  expect_false(grepl("effect of x on y", bio, ignore.case = TRUE))
+})
