@@ -332,7 +332,7 @@ sym_syndromes <- symbolize(
 
 ### Three views — syndromes
 
-[Skip three-views widget](#sym-syndromes-1781447007-end)
+[Skip three-views widget](#sym-syndromes-1781447375-end)
 
 ▸1. Index
 
@@ -558,7 +558,7 @@ sym_two_tier <- symbolize(
 
 ### Three views — two-tier
 
-[Skip three-views widget](#sym-twotier-1781447009-end)
+[Skip three-views widget](#sym-twotier-1781447376-end)
 
 ▸1. Index
 

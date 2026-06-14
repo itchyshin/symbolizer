@@ -55,6 +55,13 @@
 
 ### Bug fixes
 
+- **The Confidence-Eye glyph is now screen-reader accessible.** Each
+  `role="img"` eye in
+  [`as_html_factor_views()`](https://itchyshin.github.io/symbolizer/reference/as_html_factor_views.md)
+  carried no accessible name; it now has a `<title>` describing the
+  estimate and compatibility interval (e.g. “gear4 - gear5: estimate
+  3.15, 95% compatibility interval -1.97 to 8.28”).
+
 - **Interaction prose no longer uses a causal frame.** The biological
   reading of a Gaussian continuous-by-continuous / continuous-by-factor
   interaction said “the effect of X on Y…” — a causal claim the package
