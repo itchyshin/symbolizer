@@ -74,6 +74,19 @@
   interval came back `NA`. The interaction column name is now reconstructed
   (factor pieces become `variable + level`), so the coefficients are populated.
 
+* **A transform inside an interaction keeps its wrapper in the equation.** An
+  interaction such as `log(x):z` rendered as `\beta\, x_i z_i` — the `log`
+  silently dropped, contradicting the `\mathrm{log}(x_i)` of the main effect. It
+  now renders `\beta\, \mathrm{log}(x_i)\, z_i`, and factor × transform combines
+  the contrast indicator with the wrapper (`\mathrm{scale}(x_i)\,[g = b]`).
+
+* **The Tab 3 worked row shows the correct inverse-link.** The back-transform
+  `\mu = f(\eta)` was hard-coded by family (`gamma → \exp`, `binomial →
+  logistic`), so a `Gamma()` fit (default *inverse* link) and a
+  `binomial("probit")` fit displayed the wrong operator. It is now derived from
+  the actual link: inverse → `1/\eta`, probit → `\Phi`, cloglog and others
+  labelled honestly. Default-link models are unchanged.
+
 ## `symbolizer-sem` vignette: real data + team review
 
 * **The SEM vignette now uses real data.** The worked example was rebuilt

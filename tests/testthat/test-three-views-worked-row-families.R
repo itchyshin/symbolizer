@@ -342,3 +342,27 @@ test_that("sigma worked row does not emit duplicated `= -X = -X` for intercept-o
                               "`= X = X` redundancy:", paste(bad, collapse = "; ")))
   }
 })
+
+test_that("worked-row inverse-link operator follows the actual link, not the family", {
+  # The back-transform mu = f(eta) shown in Tab 3 is derived from the LINK, not
+  # the family name. Previously it was hard-coded by family (gamma -> exp,
+  # binomial -> logistic), so a non-default link showed the wrong operator.
+  set.seed(1); n <- 80
+  d <- data.frame(x = rnorm(n))
+  d$pos <- rgamma(n, shape = 2, rate = exp(-(0.5 + 0.3 * d$x)))
+  d$bin <- rbinom(n, 1, plogis(0.2 + 0.5 * d$x))
+
+  # Gamma defaults to the inverse link: mu = 1/eta, NOT exp(eta).
+  h_inv <- as_html_three_views(symbolize(glm(pos ~ x, Gamma("inverse"), d)))
+  expect_true(grepl("1/(\\hat\\eta_{1}", h_inv, fixed = TRUE))
+  expect_false(grepl("\\exp(\\hat\\eta_{1}", h_inv, fixed = TRUE))
+
+  # Gamma with an explicit log link still shows exp.
+  h_log <- as_html_three_views(symbolize(glm(pos ~ x, Gamma("log"), d)))
+  expect_true(grepl("\\exp(\\hat\\eta_{1}", h_log, fixed = TRUE))
+
+  # binomial(probit) is the normal CDF Phi, not the logistic.
+  h_prb <- as_html_three_views(symbolize(glm(bin ~ x, binomial("probit"), d)))
+  expect_true(grepl("\\Phi(\\hat\\eta_{1}", h_prb, fixed = TRUE))
+  expect_false(grepl("logistic}(\\hat\\eta_{1}", h_prb, fixed = TRUE))
+})

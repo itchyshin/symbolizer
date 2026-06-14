@@ -184,3 +184,21 @@ test_that("symbolize() handles transforms on glmmTMB and lme4 fits", {
   expect_s3_class(symbolize(lme4::lmer(y ~ log(x) + (1 | g), data = d)),
                   "symbolized_model")
 })
+
+test_that("a transform inside an interaction keeps its wrapper in the LaTeX", {
+  d <- data.frame(y = rnorm(40), x = runif(40, 1, 5), z = rnorm(40),
+                  g = factor(rep(c("a", "b"), 20)))
+  # continuous transform x continuous: log must survive, not collapse to x_i z_i
+  ix <- extract_terms(y ~ log(x):z, d, "mu")
+  ir <- ix[ix$role == "interaction", , drop = FALSE]
+  expect_match(ir$latex_term, "mathrm\\{log\\}\\(")
+  expect_match(ir$latex_term, "z_i")
+  # the main-effect rendering and the interaction rendering now agree
+  me <- extract_terms(y ~ log(x), d, "mu")
+  expect_match(me$latex_term[[2L]], "mathrm\\{log\\}\\(")
+  # transform x factor keeps both the wrapper and the contrast indicator
+  fx <- extract_terms(y ~ scale(x):g, d, "mu")
+  fr <- fx[fx$role == "interaction", , drop = FALSE]
+  expect_true(any(grepl("mathrm\\{scale\\}\\(", fr$latex_term)))
+  expect_true(any(grepl("[g = \\mathrm{b}]", fr$latex_term, fixed = TRUE)))
+})
