@@ -398,7 +398,7 @@ sym_phylo <- symbolize(
 
 #### Three views — phylogenetic multilevel
 
-[Skip three-views widget](#sym-phylomultilevel-1781442428-end)
+[Skip three-views widget](#sym-phylomultilevel-1781442777-end)
 
 ▸1. Index
 
@@ -665,7 +665,7 @@ sym_ls <- symbolize(fit_ls, context = "location-scale meta-analysis")
 
 #### Three views — location-scale
 
-[Skip three-views widget](#sym-locscalemeta-1781442429-end)
+[Skip three-views widget](#sym-locscalemeta-1781442777-end)
 
 ▸1. Index
 

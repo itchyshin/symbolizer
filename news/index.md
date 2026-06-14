@@ -76,6 +76,33 @@
   and the function-call parser accepts an optional `pkg::` prefix, so
   `splines::ns(x, 2)` renders exactly like an attached `ns(x, 2)`.
 
+- **[`explain_factors()`](https://itchyshin.github.io/symbolizer/reference/explain_factors.md)
+  now sees factors in a `phylolm` model.**
+  [`symbolize.phylolm()`](https://itchyshin.github.io/symbolizer/reference/symbolize.phylolm.md)
+  never populated the `factor_coding` field, so a PGLS model with a
+  categorical predictor reported “no factor predictors” and skipped the
+  non-default-coding warning. It is now wired like every other
+  extractor.
+
+- **[`group_means()`](https://itchyshin.github.io/symbolizer/reference/group_means.md)
+  no longer stars every positive-support response mean.** On a
+  back-transformed response scale (a rate, a probability, a positive
+  mean) the “excludes zero” flag was trivially true for every row — a
+  vacuous marker, since such a mean cannot be zero. It is now blanked
+  there and only reported where zero is an attainable null (the identity
+  / link scale);
+  [`group_slopes()`](https://itchyshin.github.io/symbolizer/reference/group_slopes.md)
+  and
+  [`group_contrasts()`](https://itchyshin.github.io/symbolizer/reference/group_contrasts.md)
+  are unchanged.
+
+- **`metafor` and `mgcv` no longer drop factor-involving interaction
+  coefficients.** A term such as `g:x` was matched against the raw
+  label, which never equals the model-matrix coefficient name `gb:x`, so
+  the estimate and interval came back `NA`. The interaction column name
+  is now reconstructed (factor pieces become `variable + level`), so the
+  coefficients are populated.
+
 ### `symbolizer-sem` vignette: real data + team review
 
 - **The SEM vignette now uses real data.** The worked example was
