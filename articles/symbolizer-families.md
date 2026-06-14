@@ -100,7 +100,7 @@ geometric mean by `exp(beta)`.
 as_html_three_views(sym, id = "lognormal")
 ```
 
-[Skip three-views widget](#sym-lognormal-1781379378-end)
+[Skip three-views widget](#sym-lognormal-1781396758-end)
 
 ▸1. Index
 
@@ -292,7 +292,7 @@ coefficient in the widget below.
 as_html_three_views(sym, id = "beta")
 ```
 
-[Skip three-views widget](#sym-beta-1781379379-end)
+[Skip three-views widget](#sym-beta-1781396759-end)
 
 ▸1. Index
 
@@ -483,7 +483,7 @@ multiplicative effect on the expected count.
 as_html_three_views(sym, id = "poisson")
 ```
 
-[Skip three-views widget](#sym-poisson-1781379380-end)
+[Skip three-views widget](#sym-poisson-1781396760-end)
 
 ▸1. Index
 
