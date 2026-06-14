@@ -53,6 +53,29 @@
   now records a templated `non_default_contrasts` row surfaced by
   [`warning_table()`](https://itchyshin.github.io/symbolizer/reference/warning_table.md).
 
+### Bug fixes
+
+- **[`symbolize()`](https://itchyshin.github.io/symbolizer/reference/symbolize.md)
+  no longer crashes on a transformed predictor.** A model with `log(x)`,
+  `poly(x, 2)`, `scale(x)`, `I(x^2)`, or `splines::ns(x, 2)` raised
+  `Error: object 'x' not found` for every fitted-object class, because
+  [`extract_terms()`](https://itchyshin.github.io/symbolizer/reference/extract_terms.md)
+  re-ran [`model.frame()`](https://rdrr.io/r/stats/model.frame.html) on
+  the formula against the model’s own frame — whose columns are already
+  the *evaluated* transform (`log(x)`), not the raw `x`. It now falls
+  back to the frame’s existing terms when that re-evaluation fails, so
+  transformed predictors are extracted and rendered correctly. (The unit
+  tests passed raw data and so never exercised this path; a fitted-model
+  integration test now covers it.)
+
+- **Namespaced transforms such as `splines::ns(x, 2)` are parsed
+  correctly.** The term splitter divided on every `:`, so
+  `splines::ns(...)` was mistaken for an interaction between `splines`
+  and `ns(...)` and emitted a literal `NA` plus a phantom
+  `\mathrm{splines}`. The split now ignores the `::` namespace operator,
+  and the function-call parser accepts an optional `pkg::` prefix, so
+  `splines::ns(x, 2)` renders exactly like an attached `ns(x, 2)`.
+
 ### `symbolizer-sem` vignette: real data + team review
 
 - **The SEM vignette now uses real data.** The worked example was
