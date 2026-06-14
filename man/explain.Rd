@@ -57,7 +57,8 @@ Use \code{\link[=summary]{summary()}} on an already-symbolize'd object to get th
 walkthrough without re-running \code{\link[=symbolize]{symbolize()}}.
 }
 \examples{
-# explain(symbolize(lm(mpg ~ wt, data = mtcars)))
+# `explain()` takes the fitted model directly -- it runs `symbolize()` for you.
+explain(lm(mpg ~ wt, data = mtcars))
 }
 \seealso{
 \code{\link[=model_card]{model_card()}} for the act-on-it bundle.
