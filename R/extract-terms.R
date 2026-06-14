@@ -312,3 +312,28 @@ escape_latex_text <- function(s) {
   }
   s
 }
+
+# Reconstruct the model.matrix column name for an interaction term row: each
+# factor piece becomes variable + level (e.g. "gb"), each continuous /
+# transformed piece keeps its label, joined by ":". This matches the names
+# metafor (`fit$beta`) and mgcv (`coefficients`) give interaction columns
+# (`gb:x`, `gb:hq`), so their estimate / CI slots are found instead of staying
+# silently NA. `term_label` carries the per-piece labels and `contrast_level`
+# the per-piece levels ("-" for a non-factor piece); both split on the
+# interaction ":" while preserving any namespace "::".
+#' @keywords internal
+mm_interaction_hit <- function(term_label, contrast_level) {
+  label_pieces <- strsplit(term_label, "(?<!:):(?!:)", perl = TRUE)[[1L]]
+  level_pieces <- if (!is.na(contrast_level) && nzchar(contrast_level)) {
+    strsplit(contrast_level, "(?<!:):(?!:)", perl = TRUE)[[1L]]
+  } else character(0L)
+  hits <- vapply(seq_along(label_pieces), function(k) {
+    lv <- if (k <= length(level_pieces)) level_pieces[[k]] else "-"
+    if (!is.na(lv) && nzchar(lv) && !identical(lv, "-")) {
+      paste0(label_pieces[[k]], lv)
+    } else {
+      label_pieces[[k]]
+    }
+  }, character(1L))
+  paste(hits, collapse = ":")
+}

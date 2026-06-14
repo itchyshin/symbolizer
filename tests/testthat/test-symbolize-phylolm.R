@@ -103,3 +103,16 @@ test_that("symbolize.phylolm variance_components has sigma2 row", {
               any(vc$group == "residual" | vc$group == "phylo"))
   expect_true(any(is.finite(vc$var_estimate)))
 })
+
+test_that("symbolize.phylolm populates factor_coding for a factor predictor", {
+  bundle <- fit_phylolm_factor()
+  sym <- symbolize(bundle$fit, data = bundle$data)
+  fc <- sym$factor_coding
+  expect_s3_class(fc, "data.frame")
+  expect_equal(fc$variable, "grp")
+  expect_equal(fc$reference_level, "high")     # treatment coding, level 1
+  expect_equal(fc$contrast_type, "treatment")
+  expect_true(fc$is_default_treatment)
+  # explain_factors() now sees the factor instead of reporting none.
+  expect_true(isTRUE(explain_factors(bundle$fit)$has_factors))
+})

@@ -64,3 +64,23 @@ test_that("no-intercept moderator formula injects no phantom intercept (MAJOR)",
   expect_equal(xn_est, as.numeric(fit$beta["xn", 1L]), tolerance = 1e-6)
   expect_true(all(is.finite(fe$estimate)))   # no NA-estimate phantom rows
 })
+
+test_that("factor-by-continuous interaction coefficients are populated, not NA", {
+  skip_if_not_installed("metafor")
+  set.seed(1L); k <- 80L
+  d <- data.frame(yi = rnorm(k), vi = runif(k, 0.05, 0.2),
+                  g = factor(rep(c("a", "b", "c"), length.out = k)),
+                  x = rnorm(k))
+  fit <- metafor::rma(yi = yi, vi = vi, mods = ~ g * x, data = d)
+
+  sym <- symbolize(fit)
+  ir <- sym$fixed_effects[sym$fixed_effects$role == "interaction", , drop = FALSE]
+  expect_equal(nrow(ir), 2L)                       # gb:x and gc:x
+  # Previously dropped to NA because the term label "g:x" never matched the
+  # model.matrix beta name "gb:x". Now reconstructed and matched.
+  expect_true(all(is.finite(ir$estimate)))
+  expect_true(all(is.finite(ir$confint_low) & is.finite(ir$confint_high)))
+  expect_equal(sort(ir$estimate),
+               sort(as.numeric(fit$beta[c("gb:x", "gc:x"), 1L])),
+               tolerance = 1e-6)
+})
