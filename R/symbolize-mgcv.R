@@ -254,6 +254,14 @@ symbolize.gam <- function(fit, symbols = NULL, units = NULL,
 # bam inherits from gam, so a default method-resolution would already
 # hit symbolize.gam. Adding the explicit method for clarity and so
 # class(fit)[1L] == "bam" prints correctly in errors.
+#
+# NOTE (2026-07-19): because symbolize.bam is a bare alias, the shared
+# implementation above always calls capability_check("gam", ...) (lines
+# ~90, ~94 in this file) -- never capability_check("bam", ...). The
+# registry's `bam,*,*` row in inst/extdata/capabilities.csv can therefore
+# never be consulted by the gate for any bam fit; it is dead/unreachable
+# documentation. See docs/design/capability-status.md for the full
+# writeup (also: no test in this repo fits a real mgcv::bam() object).
 #' @rdname symbolize.gam
 #' @export
 symbolize.bam <- symbolize.gam
