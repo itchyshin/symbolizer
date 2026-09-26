@@ -113,11 +113,11 @@
       print_full(result)
     Output
       # A tibble: 3 x 9
-        submodel term_label  variable role           contrast_level transform symbol coefficient_symbol latex_term                          
-        <chr>    <chr>       <chr>    <chr>          <chr>          <chr>     <chr>  <chr>              <chr>                               
-      1 mu       (Intercept) <NA>     intercept      <NA>           ""        <NA>   "\\beta_{0}"       "\\beta_{0}"                        
-      2 mu       poly(x, 2)  x        transformation <NA>           "poly"    X_i    "\\beta_{1}"       "\\beta_{1} \\, \\mathrm{poly}(X_i)"
-      3 mu       poly(x, 2)  x        transformation <NA>           "poly"    X_i    "\\beta_{2}"       "\\beta_{2} \\, \\mathrm{poly}(X_i)"
+        submodel term_label  variable role           contrast_level transform symbol coefficient_symbol latex_term                              
+        <chr>    <chr>       <chr>    <chr>          <chr>          <chr>     <chr>  <chr>              <chr>                                   
+      1 mu       (Intercept) <NA>     intercept      <NA>           ""        <NA>   "\\beta_{0}"       "\\beta_{0}"                            
+      2 mu       poly(x, 2)  x        transformation <NA>           "poly"    X_i    "\\beta_{1}"       "\\beta_{1} \\, \\mathrm{poly}(X_i)_{1}"
+      3 mu       poly(x, 2)  x        transformation <NA>           "poly"    X_i    "\\beta_{2}"       "\\beta_{2} \\, \\mathrm{poly}(X_i)_{2}"
 
 # one-sided formula on sigma submodel with gamma coefficients
 

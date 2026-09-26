@@ -205,7 +205,7 @@ test_that("group_means defaults to response scale on beta", {
   sex <- factor(rep(c("F", "M"), length.out = n))
   dat <- data.frame(y = rbeta(n, ifelse(sex == "F", 2, 5), 5), sex = sex)
   fit <- drmTMB::drmTMB(drmTMB::drm_formula(y ~ sex, sigma ~ 1),
-                        family = drmTMB::beta(), data = dat)
+                        family = drm_beta_family(), data = dat)
   sym <- symbolize(fit)
   gm <- group_means(sym)
   expect_true(all(gm$scale == "response"))
@@ -221,11 +221,10 @@ test_that("group_means lognormal back-transforms to the geometric-mean response"
   fit <- drmTMB::drmTMB(drmTMB::drm_formula(y ~ sex, sigma ~ 1),
                         family = drmTMB::lognormal(), data = dat)
   sym <- symbolize(fit)
-  gm <- group_means(sym)
-  expect_true(all(gm$scale == "response"))
-  # Geometric means: sex=F ~ exp(2) = 7.4, sex=M ~ exp(3) = 20.
-  expect_gt(gm$estimate[gm$sex == "M"], 10)
-  expect_lt(gm$estimate[gm$sex == "F"], 10)
+  # drmTMB routed lognormal out of its emmeans mu basis on 2026-07-03 (a response-scale lognormal mean is not
+  # exp(mu)), so group_means() now surfaces drmTMB's refusal instead of a geometric mean. This records current
+  # behaviour; whether symbolizer should compute lognormal group means itself is an owner decision.
+  expect_error(group_means(sym), "not implemented for \"lognormal\"")
 })
 
 test_that("group_means on Gaussian is unchanged by the scale argument", {
