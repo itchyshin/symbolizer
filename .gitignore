@@ -11,6 +11,7 @@
 docs/*
 !docs/dev-log/
 !docs/specs/
+!docs/design/
 pkgdown/*
 !pkgdown/favicon/
 !pkgdown/extra.css

@@ -1,5 +1,10 @@
-# Tests for the v0.14 mgcv::gam extractor (covers gam, bam, gamm$gam,
-# gamm4$gam).
+# Tests for the v0.14 mgcv::gam extractor. Covers only real mgcv::gam()
+# fits (Gaussian, s(x), smooths, Wald CIs, LaTeX rendering below). No test
+# in this file (or anywhere in tests/testthat/) fits a real mgcv::bam(),
+# gamm()$gam, or gamm4()$gam object -- `symbolize.bam` is a bare alias for
+# `symbolize.gam` (R/symbolize-mgcv.R) and is untested here; see
+# docs/design/capability-status.md for the registry/test-coverage gap
+# (2026-07-19).
 
 test_that("symbolize.gam builds a symbolized_model for a Gaussian gam with s(x)", {
   fit <- fit_gam_simple()
