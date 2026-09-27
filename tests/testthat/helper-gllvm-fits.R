@@ -22,7 +22,9 @@ fit_gllvm_basic <- function(seed = 1L) {
   )
   .glllvm_with_keywords(quote(
     gllvmTMB::gllvmTMB(
-      value ~ 0 + trait + latent(0 + trait | site, d = 1),
+      # unique = FALSE keeps this the loadings-only fit the tests assume: since gllvmTMB 0.2.0 an ordinary
+      # latent() also estimates a per-trait Psi by default.
+      value ~ 0 + trait + latent(0 + trait | site, d = 1, unique = FALSE),
       data   = sim$data,
       family = stats::gaussian(),
       trait  = "trait",

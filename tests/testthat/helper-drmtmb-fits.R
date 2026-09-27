@@ -145,7 +145,7 @@ fit_drm_beta <- function(seed = 20260524L, n = 80L) {
   )
   drmTMB::drmTMB(
     drmTMB::drm_formula(y ~ x, sigma ~ 1),
-    family = drmTMB::beta(),
+    family = drm_beta_family(),
     data   = dat
   )
 }
@@ -250,4 +250,12 @@ fit_drm_truncated_nbinom2_hu <- function(seed = 20260524L, n = 200L) {
     family = drmTMB::truncated_nbinom2(),
     data   = dat
   )
+}
+
+# drmTMB's Beta family constructor. drmTMB stopped exporting beta() on 2026-09-17 (it masked base::beta(); the
+# constructor is now beta_family(), with beta() kept only as an unexported, deprecated alias). CRAN's 0.7.0 predates
+# the rename and still exports beta(), so pick whichever this drmTMB exports.
+drm_beta_family <- function() {
+  if ("beta_family" %in% getNamespaceExports("drmTMB")) drmTMB::beta_family()
+  else getExportedValue("drmTMB", "beta")()
 }
