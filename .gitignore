@@ -1,6 +1,12 @@
 .Rhistory
 .RData
 .Ruserdata
+
+# covr / Codecov local artifacts (CI uploads cobertura.xml from the runner)
+cobertura.xml
+coverage.xml
+.coverage
+
 .Rproj.user/
 .DS_Store
 
