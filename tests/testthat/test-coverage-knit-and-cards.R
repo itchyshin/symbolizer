@@ -163,7 +163,14 @@ test_that("print model_card walks every bundle section on the console", {
 test_that("explain_factors print and knit_print surface means and contrasts", {
   skip_if_no_marg()
   skip_if_no_knit()
-  exf <- explain_factors(ef_fit())
+  set.seed(1L)
+  d <- data.frame(
+    y = rnorm(60),
+    site = factor(rep(c("A", "B", "C"), 20)),
+    sex = factor(rep(c("f", "m"), 30)),
+    bs = rnorm(60)
+  )
+  exf <- explain_factors(lm(y ~ site + sex * bs, data = d))
   out <- capture_walkthrough(print(exf))
   joined <- paste(out, collapse = " ")
   expect_match(joined, "Factors in your", fixed = TRUE)
