@@ -6,10 +6,11 @@ test_that("methods_text runs for glm/lm/glmmTMB/gllvmTMB/lmerMod template slots"
   testthat::skip_if_not_installed("gllvmTMB")
   testthat::skip_if_not_installed("lme4")
 
-  sym_lm <- symbolize(lm(mpg ~ wt + factor(cyl), data = mtcars))
+  sym_lm <- symbolize(lm(mpg ~ wt + cyl, data = transform(mtcars, cyl = factor(cyl))))
   mt_lm <- methods_text(sym_lm)
-  expect_match(mt_lm$text, "linear regression", ignore.case = TRUE)
-  expect_match(mt_lm$text, "mtcars", fixed = TRUE)
+  expect_match(mt_lm$text, "ordinary linear model", fixed = TRUE)
+  expect_match(mt_lm$text, "32 observations", fixed = TRUE)
+  expect_match(mt_lm$text, "mpg", fixed = TRUE)
   expect_false(grepl("[unfilled:", mt_lm$text, fixed = TRUE))
 
   sym_glm <- symbolize(glm(
@@ -106,7 +107,7 @@ test_that("simulate_recipe covers zi, nbinom2, beta, lognormal, and student path
   sym_ln <- symbolize(suppressWarnings(fit_drm_lognormal()))
   rec_ln <- simulate_recipe(sym_ln)
   expect_match(rec_ln$r_code, "rnorm", fixed = TRUE)
-  expect_match(rec_ln$pseudocode, "N(mu_i", fixed = TRUE)
+  expect_true(any(grepl("N\\(mu_i", rec_ln$pseudocode)))
 
   sym_st <- symbolize(fit_drm_student())
   rec_st <- simulate_recipe(sym_st)
@@ -135,5 +136,5 @@ test_that("simulate_recipe honors random-effect and sigma metadata", {
   rec <- simulate_recipe(sym, seed = 42L)
   expect_match(rec$r_code, "set.seed(42)", fixed = TRUE)
   expect_gt(rec$metadata$n_random_groups, 0L)
-  expect_match(rec$pseudocode, "random intercept", ignore.case = TRUE)
+  expect_match(paste(rec$pseudocode, collapse = " "), "group-level intercept", fixed = TRUE)
 })
