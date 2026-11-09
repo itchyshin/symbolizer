@@ -11,10 +11,11 @@ test_that("sdmTMB spatial fit three-views HTML surfaces biology and variance pan
                 grepl("spatial", html, ignore.case = TRUE))
 })
 
-test_that("sdmTMB symbolized model explains and model_card without error", {
+test_that("sdmTMB symbolized model model_card bundles accessors without error", {
   skip_if_not_installed("sdmTMB")
-  sym <- symbolize(fit_sdmtmb_gaussian_spatial())
-  expect_no_error(explain(sym))
+  fit <- fit_sdmtmb_gaussian_spatial()
+  sym <- symbolize(fit)
+  expect_no_error(explain(fit))
   card <- model_card(sym)
   expect_true(length(card$extraction_calls) == 0L)
   expect_s3_class(card, "symbolizer_model_card")
