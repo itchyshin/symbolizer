@@ -176,7 +176,8 @@ recipe_inv_link <- function(link) {
 recipe_re_sd <- function(x, group_var) {
   vc <- x$variance_components
   if (is.null(vc) || nrow(vc) == 0L) return(NA_real_)
-  hit <- vc[vc$group == group_var, , drop = FALSE]
+  grp_col <- if ("group_var" %in% names(vc)) "group_var" else "group"
+  hit <- vc[vc[[grp_col]] == group_var, , drop = FALSE]
   if (nrow(hit) >= 1L && !is.na(hit$sd_estimate[[1L]])) {
     as.numeric(hit$sd_estimate[[1L]])
   } else NA_real_
