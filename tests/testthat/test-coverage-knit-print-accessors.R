@@ -1,0 +1,76 @@
+# knit_print paths for marginal and variance accessors (R/knit-print.R).
+
+test_that("knit_print(group_means) emits a pipe table and Group means header", {
+  skip_if_not_installed("knitr")
+  skip_if_not_installed("emmeans")
+  d <- transform(mtcars, gear = factor(gear))
+  gm <- group_means(symbolize(lm(mpg ~ gear, data = d)))
+  out <- knitr::knit_print(gm)
+  txt <- as.character(out)
+  expect_s3_class(out, "knit_asis")
+  expect_match(txt, "Group means", fixed = TRUE)
+  expect_match(txt, "|", fixed = TRUE)
+  expect_match(txt, "gear", fixed = TRUE)
+})
+
+test_that("knit_print(group_slopes) names the continuous predictor in the header", {
+  skip_if_not_installed("knitr")
+  skip_if_not_installed("emmeans")
+  d <- transform(mtcars, gear = factor(gear))
+  sym <- symbolize(lm(mpg ~ wt * gear, data = d))
+  gs <- group_slopes(sym, continuous = "wt")
+  txt <- as.character(knitr::knit_print(gs))
+  expect_match(txt, "Group slopes for `wt`", fixed = TRUE)
+  expect_match(txt, "|", fixed = TRUE)
+})
+
+test_that("knit_print(variance_components) formats SD columns and omits tibble chrome", {
+  skip_if_not_installed("knitr")
+  skip_if_not_installed("drmTMB")
+  fit <- fit_drm_with_re()
+  sym <- symbolize(fit)
+  vc <- sym$variance_components
+  skip_if(is.null(vc) || nrow(vc) == 0L)
+  txt <- as.character(knitr::knit_print(vc))
+  expect_s3_class(knitr::knit_print(vc), "knit_asis")
+  expect_match(txt, "|", fixed = TRUE)
+  expect_false(grepl("A tibble", txt, fixed = TRUE))
+})
+
+test_that("knit_print(random_effects) renders mixed-model terms as HTML with pipes", {
+  skip_if_not_installed("knitr")
+  skip_if_not_installed("drmTMB")
+  fit <- fit_drm_with_re()
+  sym <- symbolize(fit)
+  skip_if(is.null(sym$random_effects) || nrow(sym$random_effects) == 0L)
+  txt <- as.character(knitr::knit_print(sym$random_effects))
+  expect_s3_class(knitr::knit_print(sym$random_effects), "knit_asis")
+  expect_match(txt, "<table", fixed = TRUE)
+  expect_match(txt, "<code>", fixed = TRUE)
+  expect_true(grepl("|", txt, fixed = TRUE))
+})
+
+test_that("knit_print(symbolizer_simulation_recipe) fences runnable R code", {
+  skip_if_not_installed("knitr")
+  fit <- fit_drm_location_scale()
+  sym <- symbolize(fit)
+  rec <- simulate_recipe(sym, seed = 11L)
+  txt <- as.character(knitr::knit_print(rec))
+  expect_s3_class(knitr::knit_print(rec), "knit_asis")
+  expect_match(txt, "**Pseudocode**", fixed = TRUE)
+  expect_match(txt, "```r", fixed = TRUE)
+  expect_match(txt, "set.seed(11)", fixed = TRUE)
+})
+
+test_that("knit_print(symbolizer_model_card) stitches sections and extraction table", {
+  skip_if_not_installed("knitr")
+  skip_if_not_installed("drmTMB")
+  fit <- fit_drm_location_scale()
+  sym <- symbolize(fit, context = "knit_print card regression")
+  txt <- as.character(knitr::knit_print(model_card(sym)))
+  expect_s3_class(knitr::knit_print(model_card(sym)), "knit_asis")
+  expect_match(txt, "Model card", fixed = TRUE)
+  expect_match(txt, "knit_print card regression", fixed = TRUE)
+  expect_match(txt, "drmTMB::fixef", fixed = TRUE)
+  expect_match(txt, "Residuals vs fitted", fixed = TRUE)
+})
