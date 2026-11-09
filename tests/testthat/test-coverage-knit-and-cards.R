@@ -137,6 +137,15 @@ test_that("knit_print explain includes factor coding and variance components", {
 
 # ---- print: model_card + explain ---------------------------------------------
 
+test_that("model_card print lists factor_coding lines when factors are present", {
+  skip_if_no_marg()
+  dat <- transform(mtcars, gear = factor(gear))
+  out <- capture_walkthrough(print(model_card(symbolize(lm(mpg ~ gear, data = dat)))))
+  joined <- paste(out, collapse = " ")
+  expect_match(joined, "Factor coding", fixed = TRUE)
+  expect_match(joined, "gear", fixed = TRUE)
+})
+
 test_that("print model_card walks every bundle section on the console", {
   skip_if_no_marg()
   fit <- fit_drm_with_re()
@@ -149,6 +158,20 @@ test_that("print model_card walks every bundle section on the console", {
   expect_match(joined, "Extraction calls", fixed = TRUE)
   expect_match(joined, "Recommended plots", fixed = TRUE)
   expect_match(joined, "Group means", fixed = TRUE)
+})
+
+test_that("explain_factors print and knit_print surface means and contrasts", {
+  skip_if_no_marg()
+  skip_if_no_knit()
+  exf <- explain_factors(ef_fit())
+  out <- capture_walkthrough(print(exf))
+  joined <- paste(out, collapse = " ")
+  expect_match(joined, "Factors in your", fixed = TRUE)
+  expect_match(joined, "site", fixed = TRUE)
+  kp <- as.character(knitr::knit_print(exf))
+  expect_match(kp, "Group means", fixed = TRUE)
+  expect_match(kp, "Pairwise contrasts", fixed = TRUE)
+  expect_match(kp, "Interactions", fixed = TRUE)
 })
 
 test_that("print explain surfaces factor coding and variance split sections", {
