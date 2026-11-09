@@ -1,5 +1,13 @@
 # symbolizer (development version)
 
+## CI
+
+* GitHub Actions now runs the existing testthat suite under `covr` on
+  pull requests and on `main`. Coverage XML is uploaded to Codecov via
+  GitHub OIDC from trusted `main` pushes only (no repository token).
+  Statuses are informational. `R-CMD-check` is unchanged. There is no
+  coverage badge until a processed default-branch report exists.
+
 ## Demystifying dummy / contrast coding (factors, multi-level, interactions)
 
 * **`explain_factors()`** is a new one-call explainer for the categorical

@@ -24,7 +24,14 @@ devtools::document()
 pkgdown::build_site()
 ```
 
-Prefer local checks over CI. The CI workflow runs Linux-only on PR and `workflow_dispatch`.
+Prefer local checks over CI. GitHub Actions runs Linux-only:
+
+- **R-CMD-check** on pull request and `workflow_dispatch` (unchanged).
+- **test-coverage** on pull requests and pushes to `main` that touch `R/`, `inst/`, `tests/`, `DESCRIPTION`, `NAMESPACE`, or the coverage workflows. It runs the existing testthat suite under `covr::package_coverage()` and prints `COVERAGE_PERCENT` in the job log. It does not upload.
+- **Upload main coverage** runs only after a successful `test-coverage` **push** to `main`, using GitHub OIDC (no `CODECOV_TOKEN`). A default-branch Codecov baseline therefore exists only after an owner-authorized merge plus that producer/upload pair.
+
+Coverage statuses in `codecov.yml` are informational; they do not replace `R-CMD-check`. There is no coverage badge until a processed default-branch report exists.
+
 
 ## Reporting issues
 

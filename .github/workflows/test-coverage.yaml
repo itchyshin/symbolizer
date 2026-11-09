@@ -1,0 +1,114 @@
+# Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
+# and the authorized Codecov OIDC split (coverage producer here; trusted
+# main-only upload in codecov-upload.yaml).
+#
+# This job runs the existing testthat suite under covr. It never requests
+# id-token, never reads CODECOV_TOKEN, and never calls codecov/*.
+# Pull requests therefore never obtain upload credentials.
+#
+# SHA distinction (do not conflate these):
+# - github.event.pull_request.head.sha  = PR branch tip (Codecov report label)
+# - github.event.pull_request.base.sha  = base branch tip at scheduling
+# - github.sha / this checkout          = GitHub's synthetic merge commit
+#   of head into base (what pull_request jobs actually test)
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'R/**'
+      - 'inst/**'
+      - 'tests/**'
+      - 'DESCRIPTION'
+      - 'NAMESPACE'
+      - '.github/workflows/test-coverage.yaml'
+      - '.github/workflows/codecov-upload.yaml'
+  pull_request:
+    paths:
+      - 'R/**'
+      - 'inst/**'
+      - 'tests/**'
+      - 'DESCRIPTION'
+      - 'NAMESPACE'
+      - '.github/workflows/test-coverage.yaml'
+      - '.github/workflows/codecov-upload.yaml'
+  workflow_dispatch:
+
+name: test-coverage
+
+permissions:
+  contents: read
+
+concurrency:
+  group: test-coverage-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-coverage:
+    runs-on: ubuntu-latest
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Record checkout and GitHub event SHAs
+        run: |
+          echo "event_name=${{ github.event_name }}"
+          echo "ref=${{ github.ref }}"
+          echo "github_sha_checked_out=${{ github.sha }}"
+          echo "head_sha=${{ github.event.pull_request.head.sha }}"
+          echo "base_sha=${{ github.event.pull_request.base.sha }}"
+          echo "head_ref=${{ github.event.pull_request.head.ref }}"
+          echo "base_ref=${{ github.event.pull_request.base.ref }}"
+          echo "git_rev_parse_HEAD=$(git rev-parse HEAD)"
+          git log -1 --oneline
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: release
+          use-public-rspm: true
+
+      # needs: coverage installs Suggests as well as covr/xml2, so
+      # skip_if_not_installed() gates in the existing suite actually run.
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::covr, any::xml2
+          needs: coverage
+
+      - name: Test coverage
+        run: |
+          cov <- covr::package_coverage(
+            quiet = FALSE,
+            clean = FALSE,
+            install_path = file.path(normalizePath(Sys.getenv("RUNNER_TEMP"), winslash = "/"), "package")
+          )
+          print(cov)
+          pct <- round(covr::percent_coverage(cov), 2)
+          cat(sprintf("COVERAGE_PERCENT=%s\n", pct))
+          covr::to_cobertura(cov)
+        shell: Rscript {0}
+
+      # Only trusted main-branch pushes publish the coverage artifact.
+      # Pull requests run tests but never obtain upload credentials.
+      - name: Save coverage report for trusted upload
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: main-coverage
+          path: cobertura.xml
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Show testthat output
+        if: always()
+        run: |
+          find '${{ runner.temp }}/package' -name 'testthat.Rout*' -exec cat '{}' \; || true
+        shell: bash
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-test-failures
+          path: ${{ runner.temp }}/package
