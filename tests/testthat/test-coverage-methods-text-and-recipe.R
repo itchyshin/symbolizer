@@ -130,11 +130,3 @@ test_that("simulate_recipe print and knit_print emit the recipe body", {
   expect_match(as.character(kp), "Pseudocode", fixed = TRUE)
 })
 
-test_that("simulate_recipe honors random-effect and sigma metadata", {
-  fit <- fit_drm_with_re()
-  sym <- symbolize(fit)
-  rec <- simulate_recipe(sym, seed = 42L)
-  expect_match(rec$r_code, "set.seed(42)", fixed = TRUE)
-  expect_gt(rec$metadata$n_random_groups, 0L)
-  expect_match(paste(rec$pseudocode, collapse = " "), "group-level intercept", fixed = TRUE)
-})

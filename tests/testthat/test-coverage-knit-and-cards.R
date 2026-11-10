@@ -66,12 +66,16 @@ test_that("knit_print group_contrasts formats binomial odds-ratio contrasts", {
 test_that("knit_print random_effects and variance_components render tables", {
   skip_if_no_knit()
   sym <- symbolize(fit_drm_with_re())
-  re <- knitr::knit_print(sym$random_effects)
-  vc <- knitr::knit_print(sym$variance_components)
-  expect_s3_class(re, "knit_asis")
-  expect_s3_class(vc, "knit_asis")
-  expect_match(as.character(re), "<code>", fixed = TRUE)
-  expect_match(as.character(vc), "|", fixed = TRUE)
+  re_txt <- as.character(knitr::knit_print(sym$random_effects))
+  vc_txt <- as.character(knitr::knit_print(sym$variance_components))
+  expect_s3_class(knitr::knit_print(sym$random_effects), "knit_asis")
+  expect_s3_class(knitr::knit_print(sym$variance_components), "knit_asis")
+  expect_match(re_txt, "(1 | group)", fixed = FALSE)
+  expect_match(re_txt, "<code>", fixed = TRUE)
+  expect_false(grepl("\\|", re_txt, fixed = TRUE))
+  expect_match(vc_txt, "group", fixed = TRUE)
+  expect_match(vc_txt, "sd_estimate", fixed = TRUE)
+  expect_true(is.finite(sym$variance_components$sd_estimate[[1L]]))
 })
 
 test_that("knit_print parameter_interpretation adds a single-method CI footer", {
